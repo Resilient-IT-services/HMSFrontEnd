@@ -23,7 +23,7 @@ export default function LoginPage() {
           <div className="relative z-10 text-white p-16 flex flex-col justify-between">
 
             <div className="flex items-center gap-2 text-lg font-semibold">
-              🏥 Clinical Sanctuary
+               Clinical Sanctuary
             </div>
 
             <div>
