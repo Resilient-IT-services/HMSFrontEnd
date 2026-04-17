@@ -47,12 +47,27 @@ export interface PatientResponse {
   createdAt: string;
 }
 
-export interface CreatePatientRequest {
-  fullName: string;
-  gender?: 'MALE' | 'FEMALE' | 'OTHER';
-  dob?: string;
-  phone?: string;
+// Hospital types
+export interface HospitalResponse {
+  id: number;
+  name: string;
+  code: string;
   address?: string;
+  status: string;
+  createdAt: string;
+}
+
+export interface CreateHospitalRequest {
+  name: string;
+  code: string;
+  address?: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  password?: string;
+  role: Role;
+  hospitalId: number;
 }
 
 // Appointment types

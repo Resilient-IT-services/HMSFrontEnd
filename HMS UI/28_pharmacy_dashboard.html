@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PharmaCentral - Pharmacy Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3 lg:px-10">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white">
+<span class="material-symbols-outlined">health_and_safety</span>
+</div>
+<div>
+<h2 class="text-xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white">PharmaCentral</h2>
+<p class="text-xs text-slate-500 dark:text-slate-400">License: #PHA-2024-MH</p>
+</div>
+</div>
+<div class="flex flex-1 items-center justify-end gap-4 lg:gap-8">
+<div class="hidden md:flex flex-1 max-w-md relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 pl-10 pr-4 py-2 text-sm focus:border-primary focus:ring-primary dark:text-white" placeholder="Search medications, prescriptions..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-10 w-10 overflow-hidden rounded-full border-2 border-primary/20 bg-slate-200" data-alt="Pharmacist professional profile picture">
+<img alt="Profile" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuAzYNcByHgdxbR5fdReF-mPMGO9Tw8JHpet0HZ0nM6jLS02mpjt5kmzBpuPGjEciqYlZUSGGobiGDRJN0WN6s4RCrjz3XHgaTpLBBOQwUhvPHlUao7NhMZVFB1MqRy4zonBE9lMF_Z1MZXNjVe7huTx8UsO1ZdHu3H3l-HdvgJF_gVm2RuU6fSHkVVIlvqJ7r_LDJHfRs2lBKsGZRYxBzrEnvY--3XBWB_38oUr_rn_qR3bmUlaa2andnMl1lbMRuNntjXxu6zHIq"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark p-4 gap-2">
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 rounded-xl bg-primary text-white px-4 py-3 font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                        Dashboard
+                    </a>
+<a class="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+                        Inventory
+                    </a>
+<a class="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">prescriptions</span>
+                        Prescriptions
+                        <span class="ml-auto rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary font-bold">24</span>
+</a>
+<a class="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+                        Sales Reports
+                    </a>
+<a class="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">group</span>
+                        Customers
+                    </a>
+<div class="my-4 border-t border-slate-100 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 rounded-xl px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/10 hover:text-primary transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">help</span>
+                        Support
+                    </a>
+</nav>
+<div class="mt-auto rounded-2xl bg-primary/5 p-4 border border-primary/10">
+<p class="text-sm font-semibold text-primary mb-1">Upgrade Pro</p>
+<p class="text-xs text-slate-500 mb-3">Get advanced analytics and automated restock alerts.</p>
+<button class="w-full rounded-lg bg-primary py-2 text-xs font-bold text-white shadow-sm hover:shadow-primary/30">Learn More</button>
+</div>
+</aside>
+<!-- Main Dashboard Area -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-6 lg:p-10">
+<div class="mb-8 flex flex-wrap items-end justify-between gap-4">
+<div>
+<h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Dashboard Overview</h1>
+<p class="text-slate-500 dark:text-slate-400">Real-time pharmacy metrics for City Central Branch</p>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2.5 text-sm font-semibold hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-lg">calendar_today</span>
+                            Today, Oct 24
+                        </button>
+<button class="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90">
+<span class="material-symbols-outlined text-lg">add</span>
+                            New Prescription
+                        </button>
+</div>
+</div>
+<!-- Metrics Grid -->
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-10">
+<div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50 p-6 transition-all hover:border-primary/30">
+<div class="flex items-start justify-between mb-4">
+<div class="rounded-xl bg-blue-100 dark:bg-blue-900/30 p-2 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<span class="text-xs font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full">+12%</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Prescriptions</p>
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">24</h3>
+</div>
+<div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50 p-6 transition-all hover:border-primary/30">
+<div class="flex items-start justify-between mb-4">
+<div class="rounded-xl bg-emerald-100 dark:bg-emerald-900/30 p-2 text-emerald-600 dark:text-emerald-400">
+<span class="material-symbols-outlined">task_alt</span>
+</div>
+<span class="text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-900/20 px-2 py-1 rounded-full">-5%</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Filled Today</p>
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">142</h3>
+</div>
+<div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50 p-6 transition-all hover:border-primary/30">
+<div class="flex items-start justify-between mb-4">
+<div class="rounded-xl bg-amber-100 dark:bg-amber-900/30 p-2 text-amber-600 dark:text-amber-400">
+<span class="material-symbols-outlined">warning</span>
+</div>
+<span class="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-full">8 Critical</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Low Stock Alerts</p>
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">12</h3>
+</div>
+<div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50 p-6 transition-all hover:border-primary/30">
+<div class="flex items-start justify-between mb-4">
+<div class="rounded-xl bg-primary/10 p-2 text-primary">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-xs font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded-full">+18%</span>
+</div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400">Daily Sales</p>
+<h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">₹45,280</h3>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+<!-- Medication Finder -->
+<div class="lg:col-span-2 space-y-8">
+<section class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="mb-6 flex items-center justify-between">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Medication Finder</h2>
+<button class="text-sm font-semibold text-primary">Advanced Search</button>
+</div>
+<div class="mb-6 relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 py-3.5 pl-12 pr-4 focus:ring-primary dark:text-white" placeholder="Search by name, generic, or brand..." type="text"/>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="border-b border-slate-100 dark:border-slate-800">
+<th class="pb-4 font-semibold text-slate-500 text-sm">Medication Name</th>
+<th class="pb-4 font-semibold text-slate-500 text-sm">In Stock</th>
+<th class="pb-4 font-semibold text-slate-500 text-sm">Price</th>
+<th class="pb-4 font-semibold text-slate-500 text-sm">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr>
+<td class="py-4">
+<p class="font-bold dark:text-white">Paracetamol 500mg</p>
+<p class="text-xs text-slate-400">Crocin / Panadol</p>
+</td>
+<td class="py-4">
+<span class="rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">1,240 Units</span>
+</td>
+<td class="py-4 font-medium">₹12.50</td>
+<td class="py-4">
+<button class="text-primary hover:underline text-sm font-bold">Add to Order</button>
+</td>
+</tr>
+<tr>
+<td class="py-4">
+<p class="font-bold dark:text-white">Amoxicillin 250mg</p>
+<p class="text-xs text-slate-400">Generic Antibiotic</p>
+</td>
+<td class="py-4">
+<span class="rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-1 text-xs font-bold text-amber-600 dark:text-amber-400">42 Units</span>
+</td>
+<td class="py-4 font-medium">₹85.00</td>
+<td class="py-4">
+<button class="text-primary hover:underline text-sm font-bold">Add to Order</button>
+</td>
+</tr>
+<tr>
+<td class="py-4">
+<p class="font-bold dark:text-white">Metformin 500mg</p>
+<p class="text-xs text-slate-400">Glycomet</p>
+</td>
+<td class="py-4">
+<span class="rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2 py-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">850 Units</span>
+</td>
+<td class="py-4 font-medium">₹45.00</td>
+<td class="py-4">
+<button class="text-primary hover:underline text-sm font-bold">Add to Order</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- Recent Orders -->
+<section class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6">Recent Activity</h2>
+<div class="space-y-6">
+<div class="flex items-center gap-4 border-l-2 border-primary pl-4">
+<div class="flex-1">
+<p class="text-sm font-bold dark:text-white">Order #RX-92843 Filled</p>
+<p class="text-xs text-slate-500">Patient: Amit Sharma • 3 items • ₹1,240</p>
+</div>
+<span class="text-xs text-slate-400">12 mins ago</span>
+</div>
+<div class="flex items-center gap-4 border-l-2 border-slate-200 dark:border-slate-700 pl-4">
+<div class="flex-1">
+<p class="text-sm font-bold dark:text-white">Inventory Restock: Insulin Glargine</p>
+<p class="text-xs text-slate-500">Supplier: Pharmalink Logistics • 100 units</p>
+</div>
+<span class="text-xs text-slate-400">45 mins ago</span>
+</div>
+<div class="flex items-center gap-4 border-l-2 border-slate-200 dark:border-slate-700 pl-4">
+<div class="flex-1">
+<p class="text-sm font-bold dark:text-white">New Prescription Received</p>
+<p class="text-xs text-slate-500">Dr. Sunita Reddy • Digital Signature Verified</p>
+</div>
+<span class="text-xs text-slate-400">1 hour ago</span>
+</div>
+</div>
+</section>
+</div>
+<!-- Side Panels -->
+<div class="space-y-8">
+<!-- Quick Sales Chart -->
+<section class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Weekly Sales Trend</h2>
+<div class="h-48 w-full flex items-end gap-2 px-2">
+<div class="h-[40%] flex-1 rounded-t-lg bg-primary/20 hover:bg-primary transition-all"></div>
+<div class="h-[65%] flex-1 rounded-t-lg bg-primary/20 hover:bg-primary transition-all"></div>
+<div class="h-[55%] flex-1 rounded-t-lg bg-primary/20 hover:bg-primary transition-all"></div>
+<div class="h-[80%] flex-1 rounded-t-lg bg-primary/20 hover:bg-primary transition-all"></div>
+<div class="h-[70%] flex-1 rounded-t-lg bg-primary/20 hover:bg-primary transition-all"></div>
+<div class="h-[95%] flex-1 rounded-t-lg bg-primary hover:bg-primary transition-all"></div>
+<div class="h-[85%] flex-1 rounded-t-lg bg-primary/20 hover:bg-primary transition-all"></div>
+</div>
+<div class="mt-4 flex justify-between px-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<span>Mon</span>
+<span>Tue</span>
+<span>Wed</span>
+<span>Thu</span>
+<span>Fri</span>
+<span>Sat</span>
+<span>Sun</span>
+</div>
+</section>
+<!-- Expiring Soon -->
+<section class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Expiring Soon</h2>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-bold dark:text-white">Ibuprofen 400mg</p>
+<p class="text-xs text-red-500 font-medium">Expires: 15 Nov 2024</p>
+</div>
+<span class="text-xs font-bold text-slate-400">150 units</span>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<p class="text-sm font-bold dark:text-white">Cetirizine Syrup</p>
+<p class="text-xs text-red-500 font-medium">Expires: 28 Nov 2024</p>
+</div>
+<span class="text-xs font-bold text-slate-400">12 units</span>
+</div>
+<button class="w-full mt-2 rounded-xl border border-primary text-primary py-2 text-sm font-bold hover:bg-primary hover:text-white transition-all">Resolve Alerts</button>
+</div>
+</section>
+<!-- Top Suppliers -->
+<section class="rounded-2xl bg-white dark:bg-slate-800/50 p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+<h2 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Primary Suppliers</h2>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold dark:text-white">Apex Pharma Ltd.</p>
+<p class="text-xs text-slate-400">Lead time: 24 hrs</p>
+</div>
+<span class="material-symbols-outlined text-emerald-500 text-lg">verified</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">local_shipping</span>
+</div>
+<div class="flex-1">
+<p class="text-sm font-bold dark:text-white">MediGlobal Dist.</p>
+<p class="text-xs text-slate-400">Lead time: 48 hrs</p>
+</div>
+<span class="material-symbols-outlined text-emerald-500 text-lg">verified</span>
+</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

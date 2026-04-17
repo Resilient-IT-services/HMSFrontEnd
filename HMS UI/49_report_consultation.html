@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Consultation Analytics Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full border-b border-primary/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-3">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="bg-primary p-2 rounded-lg text-white">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Consultation Analytics</h2>
+</div>
+<div class="flex flex-1 justify-center max-w-md mx-8">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-primary/50 transition-all outline-none text-sm" placeholder="Search reports or doctors..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white dark:border-background-dark"></span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<div class="flex items-center gap-3 pl-2">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold">Admin Panel</p>
+<p class="text-[10px] text-slate-500">HMS Superuser</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary/30 overflow-hidden">
+<img alt="User Profile" data-alt="Professional profile headshot of a hospital administrator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxewOHLtVCeSFN8Z7ajLfobDVTwEBlTyicB46Cp0JW1AreAGMVOyQOocIcLJC8-fW71S57VN-CSiyhVoof2Dqd2VTvgRBi8hOPl3V9a9tuGpAC5EkOjE4YyAlgsFgUDe5RCvMa66WRbS5wGXupu5-2EhM0oz005mqyRLOfMMmUazGF5GbXbse9Ufhn_uuQKpZOxjHsuydP3sR5p3G7lUnK_DEZsghDJ4m_VDiiWU_R1gtUXmi19fzjoqHHd9go0lAk5GgEEgBXIQ1E"/>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex max-w-7xl mx-auto min-h-[calc(100vh-73px)]">
+<!-- Sidebar Navigation -->
+<aside class="w-64 border-r border-primary/10 p-6 hidden lg:flex flex-col gap-6">
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-sm font-medium">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-sm font-medium">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-primary/10 text-primary rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined !fill-1">assessment</span>
+<span class="text-sm font-bold">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-primary/5 rounded-xl transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-primary/5 rounded-2xl border border-primary/10">
+<p class="text-xs font-bold text-primary uppercase tracking-wider mb-2">System Status</p>
+<div class="flex items-center gap-2 mb-3">
+<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+<span class="text-[10px] font-medium opacity-70">Server: Optimized</span>
+</div>
+<button class="w-full py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-lg shadow-primary/20">Download Logs</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 p-6 lg:p-8 overflow-y-auto">
+<!-- Filters & Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<div>
+<h1 class="text-2xl font-bold mb-1">Consultation Report</h1>
+<p class="text-sm text-slate-500">Monthly Performance Overview - October 2023</p>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="relative">
+<select class="appearance-none pl-4 pr-10 py-2 bg-white dark:bg-slate-800 border border-primary/10 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/50 outline-none">
+<option>All Departments</option>
+<option>Cardiology</option>
+<option>Neurology</option>
+<option>Pediatrics</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">expand_more</span>
+</div>
+<div class="relative">
+<select class="appearance-none pl-4 pr-10 py-2 bg-white dark:bg-slate-800 border border-primary/10 rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/50 outline-none">
+<option>Time: Monthly</option>
+<option>Daily</option>
+<option>Weekly</option>
+<option>Yearly</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">calendar_month</span>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-md shadow-primary/20 hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export PDF
+                    </button>
+</div>
+</div>
+<!-- Summary Cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-lg">
+<span class="material-symbols-outlined">groups</span>
+</div>
+<span class="text-xs font-bold text-emerald-500 flex items-center gap-1">+12% <span class="material-symbols-outlined text-[14px]">trending_up</span></span>
+</div>
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Consultations</p>
+<h3 class="text-2xl font-bold">1,284</h3>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-lg">
+<span class="material-symbols-outlined">payments</span>
+</div>
+<span class="text-xs font-bold text-emerald-500 flex items-center gap-1">+8.4% <span class="material-symbols-outlined text-[14px]">trending_up</span></span>
+</div>
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Revenue</p>
+<h3 class="text-2xl font-bold">₹12,45,000</h3>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-lg">
+<span class="material-symbols-outlined">avg_pace</span>
+</div>
+<span class="text-xs font-bold text-rose-500 flex items-center gap-1">-2% <span class="material-symbols-outlined text-[14px]">trending_down</span></span>
+</div>
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Avg. Wait Time</p>
+<h3 class="text-2xl font-bold">18 Min</h3>
+</div>
+<div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary/10 text-primary rounded-lg">
+<span class="material-symbols-outlined">medical_services</span>
+</div>
+<span class="text-xs font-bold text-emerald-500 flex items-center gap-1">+5% <span class="material-symbols-outlined text-[14px]">trending_up</span></span>
+</div>
+<p class="text-slate-500 text-xs font-semibold uppercase tracking-wider">Active Consultants</p>
+<h3 class="text-2xl font-bold">42</h3>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+<!-- Bar Chart: Consultations by Dept -->
+<div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-primary/5">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-bold">Consultations by Department</h4>
+<span class="material-symbols-outlined text-slate-400 cursor-pointer">more_vert</span>
+</div>
+<div class="space-y-6">
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium">
+<span>Cardiology</span>
+<span>450 Cases</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium">
+<span>Neurology</span>
+<span>310 Cases</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary/70 h-full w-[60%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium">
+<span>Pediatrics</span>
+<span>280 Cases</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary/50 h-full w-[52%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-xs font-medium">
+<span>Orthopedics</span>
+<span>244 Cases</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary/30 h-full w-[45%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bar Chart: Revenue Trends -->
+<div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-primary/5">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-bold">Weekly Revenue Breakdown</h4>
+<div class="flex gap-2">
+<div class="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-400">
+<span class="w-2 h-2 rounded-full bg-primary"></span> OPD
+                            </div>
+<div class="flex items-center gap-1 text-[10px] uppercase font-bold text-slate-400">
+<span class="w-2 h-2 rounded-full bg-primary/40"></span> IPD
+                            </div>
+</div>
+</div>
+<div class="flex items-end justify-between h-48 pt-4">
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 flex flex-col justify-end gap-1 h-32">
+<div class="bg-primary/40 h-[30%] rounded-t-sm"></div>
+<div class="bg-primary h-[70%] rounded-b-sm"></div>
+</div>
+<span class="text-[10px] font-bold">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 flex flex-col justify-end gap-1 h-36">
+<div class="bg-primary/40 h-[20%] rounded-t-sm"></div>
+<div class="bg-primary h-[80%] rounded-b-sm"></div>
+</div>
+<span class="text-[10px] font-bold">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 flex flex-col justify-end gap-1 h-40">
+<div class="bg-primary/40 h-[40%] rounded-t-sm"></div>
+<div class="bg-primary h-[60%] rounded-b-sm"></div>
+</div>
+<span class="text-[10px] font-bold">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 flex flex-col justify-end gap-1 h-28">
+<div class="bg-primary/40 h-[25%] rounded-t-sm"></div>
+<div class="bg-primary h-[75%] rounded-b-sm"></div>
+</div>
+<span class="text-[10px] font-bold">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 flex flex-col justify-end gap-1 h-44">
+<div class="bg-primary/40 h-[15%] rounded-t-sm"></div>
+<div class="bg-primary h-[85%] rounded-b-sm"></div>
+</div>
+<span class="text-[10px] font-bold">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-8 flex flex-col justify-end gap-1 h-24">
+<div class="bg-primary/40 h-[40%] rounded-t-sm"></div>
+<div class="bg-primary h-[60%] rounded-b-sm"></div>
+</div>
+<span class="text-[10px] font-bold">Sat</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Consultant Wise Report Table -->
+<div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-primary/5 overflow-hidden">
+<div class="p-6 border-b border-primary/5 flex items-center justify-between">
+<h4 class="font-bold">Consultant Performance Detail</h4>
+<div class="flex items-center gap-2 text-primary font-bold text-sm cursor-pointer hover:underline">
+                        View All Consultants
+                        <span class="material-symbols-outlined text-[18px]">arrow_right_alt</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-primary/5 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+<tr>
+<th class="px-6 py-4">Consultant Name</th>
+<th class="px-6 py-4">Department</th>
+<th class="px-6 py-4 text-center">Consultations</th>
+<th class="px-6 py-4">Revenue (₹)</th>
+<th class="px-6 py-4">Satisfaction</th>
+<th class="px-6 py-4 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-primary/5">
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden">
+<img alt="Dr. Sharma" data-alt="Headshot of a male doctor in lab coat" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXOcXzP-qNTiI2oqDyaoUHKUF0hY37U_RQ6weiVRxixBniQ-qamln0Mqy5f0E6kqP05qY2esMnvS0dod0npmCZeOvIZez0wuNGq1V-PY_wPJK6U9p85JtH9e9X0Mb3a_cYMk7U2vaq07-fwdGjHpeDh-aoQ26bD0D0u5kDCatip5TMTYT19-xBlM689EB-WK3S7zVUIAcp9ymM0abAlSISSJcQfFKK3He03hA-ZxVvdERINyAgJUXyG3rnqjgyb21MMhr7px7X8mSu"/>
+</div>
+<div>
+<p class="text-sm font-bold">Dr. Rajesh Sharma</p>
+<p class="text-[10px] text-slate-500">ID: HMS-D021</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 rounded-md text-[10px] font-bold">CARDIOLOGY</span>
+</td>
+<td class="px-6 py-4 text-center text-sm font-semibold">142</td>
+<td class="px-6 py-4 text-sm font-bold">₹2,13,000</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[16px] fill-1">star</span>
+<span class="text-xs font-bold">4.8</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-primary/10 p-1 rounded transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden">
+<img alt="Dr. Priya" data-alt="Headshot of a female doctor with stethoscope" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAQ2e0ckYBn-f8rJESqPoJ_pd75OBOpwGydRgMoVYkHalRGAIjAeJy_w5qG5eaM7sXDd4cDRLMXemKvX9caih9x2kljyf2p3WRmQHU6xdGn3sqGBdCbsouvzXHCOnFjsDZ7ttjmZ9S8nhThShKA-_HsNyqQVNjCAXy3BiVDRdEuSyw7BHy2ood_kgP2Pc-SyUpdMo8WPL9hWTfYVoNbN4JW5jgXTxanQrKfVwT0lS4cU8p9tjrZhil3LJPt69mDuzCvCARFfP2GSsMQ"/>
+</div>
+<div>
+<p class="text-sm font-bold">Dr. Priya Verma</p>
+<p class="text-[10px] text-slate-500">ID: HMS-D045</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 rounded-md text-[10px] font-bold">NEUROLOGY</span>
+</td>
+<td class="px-6 py-4 text-center text-sm font-semibold">98</td>
+<td class="px-6 py-4 text-sm font-bold">₹1,71,500</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[16px] fill-1">star</span>
+<span class="text-xs font-bold">4.9</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-primary/10 p-1 rounded transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden">
+<img alt="Dr. Amit" data-alt="Headshot of a senior male doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLJGIoKePL4PHrgdbZfSQMlhN0TyhwzyXaAhygw5vs6Czf1PpGakpGEv3S0fRaIGpaPnyrOLstzatcQzzZiwTgXoN8Nml7gtbSazui04jfBWTDo8MrVTXwWjbMO--G0Q2dwLis-yvglSO0pBeaAYKHiquweVeLNvEpR0da7WUecUOhvGOHvAyNIcej2Ad3mk9Lf2dsR6zc9KrSC07wCods9EMiWKmKUuVX1soO-ZplyqefIPp0F4O45RObzare1c1yEBFEUfyZBGvo"/>
+</div>
+<div>
+<p class="text-sm font-bold">Dr. Amit Kumar</p>
+<p class="text-[10px] text-slate-500">ID: HMS-D012</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-md text-[10px] font-bold">PEDIATRICS</span>
+</td>
+<td class="px-6 py-4 text-center text-sm font-semibold">126</td>
+<td class="px-6 py-4 text-sm font-bold">₹1,13,400</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[16px] fill-1">star</span>
+<span class="text-xs font-bold">4.7</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-primary/10 p-1 rounded transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-primary/5 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 overflow-hidden">
+<img alt="Dr. Sneha" data-alt="Headshot of a smiling female doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaOhIwVkY1HoIwpIOfIiWibiMNt_vv_b4RzfgRP0To_L-M5xuxzXgadbyyMFs_VDoJ21_1ztSA_2EoeOaVXho2MXrIJjjFmOh9s1l4YaX3HbNofqajM8RMZvcIhbwKmV-EDUcAR6HS-I11vbBavpNzyuhvs06snaW2DWhxQzh8YDlAIo6zU9Eleblips3q4bq-Fc_mzogicHz9zWRXltqOyoL4bkXxYQYEICNkuS69woSTT_epgHFty5qXL81s-OGDc4QO6fJGVUdj"/>
+</div>
+<div>
+<p class="text-sm font-bold">Dr. Sneha Patil</p>
+<p class="text-[10px] text-slate-500">ID: HMS-D088</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 rounded-md text-[10px] font-bold">ORTHOPEDICS</span>
+</td>
+<td class="px-6 py-4 text-center text-sm font-semibold">84</td>
+<td class="px-6 py-4 text-sm font-bold">₹1,47,000</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-1 text-amber-500">
+<span class="material-symbols-outlined text-[16px] fill-1">star</span>
+<span class="text-xs font-bold">4.5</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:bg-primary/10 p-1 rounded transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between border-t border-primary/5">
+<p class="text-xs text-slate-500">Showing 4 of 42 consultants</p>
+<div class="flex gap-2">
+<button class="p-2 border border-primary/10 rounded-lg hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="p-2 border border-primary/10 rounded-lg bg-primary text-white font-bold text-xs px-4">1</button>
+<button class="p-2 border border-primary/10 rounded-lg hover:bg-white transition-colors text-xs px-4">2</button>
+<button class="p-2 border border-primary/10 rounded-lg hover:bg-white transition-colors text-xs px-4">3</button>
+<button class="p-2 border border-primary/10 rounded-lg hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

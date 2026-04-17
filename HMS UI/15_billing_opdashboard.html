@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056b2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>15_Billing_OPDashboard</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex h-auto min-screen w-full flex-col">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 lg:px-10">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 bg-primary/10 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary">receipt_long</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">MedBill OS</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-64 !h-10">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full bg-slate-100 dark:bg-slate-800 border-none">
+<div class="text-slate-500 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:outline-0 focus:ring-0 h-full placeholder:text-slate-500 px-4 text-sm font-normal" placeholder="Search patient or invoice ID..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-4">
+<div class="flex gap-2">
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex size-10 cursor-pointer items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAr3JC-j-5nD4JAxnqdCC0yYQEFmDlkm1lFCDf6LzjTsxuS4O7J86nYpYAUsg6qOygyF5kaqdtPpjuCME2L875-dO19VDsKrO81L_cwEV7aiyZJ91mR_zajqVi4FDQwkxj4iy35J5_BFVM1kUQmjPD03ErUHcA53dtGYM8dQHYfsFcmZhz-xZdcpyfNesYNcWgQtBYKIqtQlts7rt5lrds2gCpvw71gHvOBbN2wd7U6ArtV9JcWmTnZeTrFOzFxSbExOFRHnYEFlE0L");'></div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shrink-0">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">dashboard</span>
+<p class="text-sm font-medium">Dashboard</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<p class="text-sm font-medium">Patients</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">payments</span>
+<p class="text-sm font-semibold">Billing</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">lab_research</span>
+<p class="text-sm font-medium">Lab Orders</p>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">medication</span>
+<p class="text-sm font-medium">Pharmacy</p>
+</div>
+<div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-center gap-3 px-3 py-2 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-sm font-medium">Settings</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-6 lg:p-8">
+<div class="max-w-6xl mx-auto space-y-6">
+<!-- Header Section -->
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div>
+<h1 class="text-2xl font-bold tracking-tight">Outpatient Billing</h1>
+<p class="text-slate-500 text-sm">Create and manage patient invoices for outpatient services.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 transition-colors">Drafts</button>
+<button class="px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">add</span> New Invoice
+                                </button>
+</div>
+</div>
+<!-- Patient Selection & Search -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+<div class="xl:col-span-2 space-y-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">person_search</span>
+                                        Patient Lookup
+                                    </h3>
+<div class="flex gap-4">
+<div class="flex-1 relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg focus:ring-primary focus:border-primary text-sm" placeholder="Enter patient name, ID, or phone number..." type="text"/>
+</div>
+<button class="px-6 py-3 bg-primary/10 text-primary font-semibold rounded-lg hover:bg-primary/20 transition-colors">Search</button>
+</div>
+<!-- Selected Patient Info (Sample) -->
+<div class="mt-6 p-4 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-between border border-dashed border-slate-300 dark:border-slate-600">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">JD</div>
+<div>
+<p class="font-bold">John Doe</p>
+<p class="text-xs text-slate-500">ID: #OP-99812 • Male • 34 Years</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-xs uppercase tracking-wider font-bold text-slate-400">Insurance</p>
+<p class="text-sm font-medium">BlueShield Gold (Active)</p>
+</div>
+</div>
+</div>
+<!-- Service Selection -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<div class="flex justify-between items-center mb-6">
+<h3 class="text-lg font-semibold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">add_shopping_cart</span>
+                                            Add Services
+                                        </h3>
+<div class="flex border border-slate-200 dark:border-slate-700 rounded-lg p-1 bg-slate-50 dark:bg-slate-800">
+<button class="px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-700 rounded shadow-sm">Standard</button>
+<button class="px-3 py-1.5 text-xs font-bold text-slate-500">Custom</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+<div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-primary cursor-pointer transition-all group">
+<span class="material-symbols-outlined text-primary mb-2">medical_services</span>
+<h4 class="font-bold text-sm">Consultation</h4>
+<p class="text-xs text-slate-500">General or Specialist</p>
+</div>
+<div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-primary cursor-pointer transition-all">
+<span class="material-symbols-outlined text-primary mb-2">science</span>
+<h4 class="font-bold text-sm">Lab Tests</h4>
+<p class="text-xs text-slate-500">Diagnostics &amp; Bloodwork</p>
+</div>
+<div class="p-4 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-primary cursor-pointer transition-all">
+<span class="material-symbols-outlined text-primary mb-2">vaccines</span>
+<h4 class="font-bold text-sm">Pharmacy</h4>
+<p class="text-xs text-slate-500">Medications &amp; Supplies</p>
+</div>
+</div>
+<!-- Service Items List -->
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-slate-500 border-b border-slate-100 dark:border-slate-800">
+<th class="pb-3 font-semibold text-xs uppercase">Description</th>
+<th class="pb-3 font-semibold text-xs uppercase w-20">Qty</th>
+<th class="pb-3 font-semibold text-xs uppercase text-right w-32">Unit Price</th>
+<th class="pb-3 font-semibold text-xs uppercase text-right w-32">Total</th>
+<th class="pb-3 w-10"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50 dark:divide-slate-800">
+<tr>
+<td class="py-4">
+<p class="font-medium text-sm">General Consultation - Dr. Sarah Smith</p>
+<p class="text-xs text-slate-400">Code: CONSULT-01</p>
+</td>
+<td class="py-4 text-sm">1</td>
+<td class="py-4 text-sm text-right">₹ 120.00</td>
+<td class="py-4 text-sm font-bold text-right">₹ 120.00</td>
+<td class="py-4 text-right">
+<button class="text-slate-400 hover:text-red-500"><span class="material-symbols-outlined text-lg">close</span></button>
+</td>
+</tr>
+<tr>
+<td class="py-4">
+<p class="font-medium text-sm">Complete Blood Count (CBC)</p>
+<p class="text-xs text-slate-400">Code: LAB-442</p>
+</td>
+<td class="py-4 text-sm">1</td>
+<td class="py-4 text-sm text-right">₹ 45.00</td>
+<td class="py-4 text-sm font-bold text-right">₹ 45.00</td>
+<td class="py-4 text-right">
+<button class="text-slate-400 hover:text-red-500"><span class="material-symbols-outlined text-lg">close</span></button>
+</td>
+</tr>
+<tr>
+<td class="py-4">
+<p class="font-medium text-sm">Amoxicillin 500mg (15 Capsules)</p>
+<p class="text-xs text-slate-400">Code: PHAR-920</p>
+</td>
+<td class="py-4 text-sm">1</td>
+<td class="py-4 text-sm text-right">₹ 12.50</td>
+<td class="py-4 text-sm font-bold text-right">₹ 12.50</td>
+<td class="py-4 text-right">
+<button class="text-slate-400 hover:text-red-500"><span class="material-symbols-outlined text-lg">close</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<button class="mt-4 flex items-center gap-2 text-primary text-sm font-bold hover:underline">
+<span class="material-symbols-outlined text-sm">add_circle</span> Add another item
+                                    </button>
+</div>
+</div>
+<!-- Right Sidebar: Billing Summary -->
+<div class="space-y-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="bg-slate-50 dark:bg-slate-800 px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+<h3 class="text-lg font-bold">Billing Summary</h3>
+</div>
+<div class="p-6 space-y-4">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Subtotal</span>
+<span class="font-medium">₹ 177.50</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Insurance Coverage (80%)</span>
+<span class="font-medium text-green-600">-₹ 142.00</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500">Tax (0%)</span>
+<span class="font-medium">₹ 0.00</span>
+</div>
+<hr class="border-slate-100 dark:border-slate-800"/>
+<div class="flex justify-between items-center py-2">
+<span class="text-lg font-bold">Total Due</span>
+<span class="text-2xl font-black text-primary">₹ 35.50</span>
+</div>
+<div class="pt-4 space-y-3">
+<p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Payment Method</p>
+<div class="grid grid-cols-2 gap-2">
+<button class="py-2 px-3 border-2 border-primary bg-primary/5 rounded-lg text-sm font-bold text-primary flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">credit_card</span> Card
+                                                </button>
+<button class="py-2 px-3 border-2 border-slate-200 dark:border-slate-700 rounded-lg text-sm font-bold text-slate-600 dark:text-slate-400 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">payments</span> Cash
+                                                </button>
+</div>
+</div>
+<button class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 mt-4">
+                                            Finalize &amp; Collect Payment
+                                        </button>
+<button class="w-full text-slate-500 py-2 text-sm font-semibold hover:text-slate-700 transition-colors">
+                                            Save Draft for Later
+                                        </button>
+</div>
+</div>
+<!-- Recent Pending Charges Sidebar Widget -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="font-bold text-sm mb-4 uppercase tracking-widest text-slate-400">Pending Approvals</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<div class="size-2 rounded-full bg-orange-500"></div>
+<div class="flex-1">
+<p class="text-sm font-bold">Alice Cooper</p>
+<p class="text-xs text-slate-500">Lab Approval • 12m ago</p>
+</div>
+<p class="text-sm font-medium">₹ 89.00</p>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-2 rounded-full bg-orange-500"></div>
+<div class="flex-1">
+<p class="text-sm font-bold">Bob Marley</p>
+<p class="text-xs text-slate-500">Pharmacy • 45m ago</p>
+</div>
+<p class="text-sm font-medium">₹ 12.00</p>
+</div>
+</div>
+<button class="w-full mt-4 text-center text-xs font-bold text-primary">View All Queued Charges</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</div>
+</body></html>

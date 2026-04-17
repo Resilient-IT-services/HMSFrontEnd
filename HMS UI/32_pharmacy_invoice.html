@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Pharmacy Invoice - City General Hospital</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        @media print {
+            .no-print { display: none; }
+            body { background-color: white !important; }
+            .print-container { width: 100% !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-4 md:px-20 lg:px-40 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col max-w-[960px] flex-1 print-container">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-700 px-4 py-6">
+<div class="flex items-center gap-4">
+<div class="size-10 flex items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">medical_services</span>
+</div>
+<div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight">Pharmacy Invoice</h2>
+<p class="text-slate-500 dark:text-slate-400 text-xs">Invoice #INV-2023-8842</p>
+</div>
+</div>
+<div class="flex gap-2 no-print">
+<button class="flex items-center justify-center rounded-xl h-10 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 gap-2 text-sm font-bold px-4 hover:bg-slate-300 transition-colors" onclick="window.print()">
+<span class="material-symbols-outlined text-[20px]">print</span>
+<span>Print</span>
+</button>
+<button class="flex items-center justify-center rounded-xl h-10 bg-primary text-white gap-2 text-sm font-bold px-4 hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>PDF</span>
+</button>
+</div>
+</header>
+<div class="flex p-4 mt-6 @container">
+<div class="flex w-full flex-col gap-6 @[520px]:flex-row @[520px]:justify-between items-start">
+<div class="flex gap-6">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-xl min-h-24 w-24 bg-primary/10 flex items-center justify-center overflow-hidden" data-alt="Modern hospital building exterior glass facade" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDAx2JE4W3gnOCO__E2H-FS2te_BsFCNKl21F8twVT1BSt7koCzeLw2VJ_hgD414BvNj6IVKoMM_LcsR4gPKjxJwzmgyy8fIJQxVtPihvInUA69VzGnyIDN9pB8LLJPnc4LczjjjcNlVCA3QsI45QrNEqGBm450PKgURgFvrPJT51jDNQsOK38NtBVSvAKVdUA8y21bQ-KGv3MLD_pzSjClPS2nvQk0l-OS6nVuLTued2zIWFR3mT_hdAxzmbh21jR9lKQEFi1EqDGO");'>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-[22px] font-bold leading-tight">City General Hospital Pharmacy</p>
+<p class="text-slate-500 dark:text-slate-400 text-base">123 Healthcare Blvd, Medical District</p>
+<p class="text-slate-500 dark:text-slate-400 text-base">Mumbai, Maharashtra - 400001</p>
+<p class="text-primary text-sm font-semibold mt-1">GSTIN: 27AAACH0000A1Z5</p>
+</div>
+</div>
+<div class="text-left @[520px]:text-right flex flex-col gap-1">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider inline-block self-start @[520px]:self-end">Paid</span>
+<p class="text-slate-500 dark:text-slate-400 text-sm mt-2">Date: Oct 24, 2023</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Due Date: Paid on Receipt</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 px-4 py-8">
+<div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+<h3 class="text-primary text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">person</span>
+                                Patient Details
+                            </h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Name</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold">John Doe</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Patient ID</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm font-mono">PID-998234</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Age/Gender</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm">34Y / Male</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Prescribing Doctor</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm">Dr. Sarah Williams</span>
+</div>
+</div>
+</div>
+<div class="bg-slate-100 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+<h3 class="text-primary text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">receipt_long</span>
+                                Billing Info
+                            </h3>
+<div class="space-y-3">
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Invoice Number</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm font-mono">#INV-2023-8842</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Payment Mode</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm">Credit Card (**** 4242)</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Transaction ID</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm font-mono">TXN-00918231</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500 dark:text-slate-400 text-sm">Counter No</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm">Pharmacy Counter 04</span>
+</div>
+</div>
+</div>
+</div>
+<div class="px-4 py-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined">medication</span>
+                            Prescribed Items
+                        </h2>
+<div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-100 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700">
+<th class="px-4 py-3 text-slate-900 dark:text-slate-100 text-sm font-bold">Item Name &amp; Batch</th>
+<th class="px-4 py-3 text-slate-900 dark:text-slate-100 text-sm font-bold text-center">Qty</th>
+<th class="px-4 py-3 text-slate-900 dark:text-slate-100 text-sm font-bold text-right">Unit Price</th>
+<th class="px-4 py-3 text-slate-900 dark:text-slate-100 text-sm font-bold text-center">Tax %</th>
+<th class="px-4 py-3 text-slate-900 dark:text-slate-100 text-sm font-bold text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+<tr>
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold">Amoxicillin 500mg (Cap)</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs">Batch: AMX-2204 | Exp: 05/2025</span>
+</div>
+</td>
+<td class="px-4 py-4 text-center text-sm">20</td>
+<td class="px-4 py-4 text-right text-sm">₹ 12.00</td>
+<td class="px-4 py-4 text-center text-sm">12%</td>
+<td class="px-4 py-4 text-right text-sm font-medium">₹ 240.00</td>
+</tr>
+<tr>
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold">Paracetamol 650mg (Tab)</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs">Batch: PCM-1123 | Exp: 12/2026</span>
+</div>
+</td>
+<td class="px-4 py-4 text-center text-sm">15</td>
+<td class="px-4 py-4 text-right text-sm">₹ 2.50</td>
+<td class="px-4 py-4 text-center text-sm">5%</td>
+<td class="px-4 py-4 text-right text-sm font-medium">₹ 37.50</td>
+</tr>
+<tr>
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold">Cough Syrup (100ml)</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs">Batch: CS-9821 | Exp: 09/2024</span>
+</div>
+</td>
+<td class="px-4 py-4 text-center text-sm">2</td>
+<td class="px-4 py-4 text-right text-sm">₹ 145.00</td>
+<td class="px-4 py-4 text-center text-sm">18%</td>
+<td class="px-4 py-4 text-right text-sm font-medium">₹ 290.00</td>
+</tr>
+<tr>
+<td class="px-4 py-4">
+<div class="flex flex-col">
+<span class="text-slate-900 dark:text-slate-100 text-sm font-semibold">Vitamin C Supplements (Tab)</span>
+<span class="text-slate-500 dark:text-slate-400 text-xs">Batch: VIT-4401 | Exp: 01/2026</span>
+</div>
+</td>
+<td class="px-4 py-4 text-center text-sm">30</td>
+<td class="px-4 py-4 text-right text-sm">₹ 5.00</td>
+<td class="px-4 py-4 text-center text-sm">12%</td>
+<td class="px-4 py-4 text-right text-sm font-medium">₹ 150.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="flex justify-end p-4">
+<div class="w-full md:w-80 space-y-3 bg-slate-100 dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">Subtotal</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">₹ 717.50</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">CGST (6%)</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">₹ 43.05</span>
+</div>
+<div class="flex justify-between text-sm">
+<span class="text-slate-500 dark:text-slate-400">SGST (6%)</span>
+<span class="text-slate-900 dark:text-slate-100 font-medium">₹ 43.05</span>
+</div>
+<div class="flex justify-between text-sm border-b border-slate-300 dark:border-slate-600 pb-3">
+<span class="text-slate-500 dark:text-slate-400">Discount (10%)</span>
+<span class="text-emerald-600 dark:text-emerald-400 font-medium">- ₹ 71.75</span>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="text-slate-900 dark:text-slate-100 font-bold text-lg">Total Payable</span>
+<span class="text-primary font-bold text-2xl tracking-tighter">₹ 731.85</span>
+</div>
+<p class="text-[10px] text-slate-500 dark:text-slate-400 italic text-right">Includes GST as applicable under Indian Law</p>
+</div>
+</div>
+<div class="px-4 py-10 mt-6 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div>
+<h4 class="text-slate-900 dark:text-slate-100 text-sm font-bold mb-2">Terms &amp; Conditions:</h4>
+<ul class="text-xs text-slate-500 dark:text-slate-400 list-disc list-inside space-y-1">
+<li>Medicines once sold cannot be returned or exchanged.</li>
+<li>Please check the expiry date and batch number before leaving.</li>
+<li>Original invoice is required for any billing queries.</li>
+<li>Storage: Keep medicines in a cool, dry place.</li>
+</ul>
+</div>
+<div class="flex flex-col items-center justify-end md:items-end">
+<div class="w-48 border-b border-slate-400 dark:border-slate-600 pb-1 mb-2">
+<img alt="Authorized Signatory Signature" class="h-10 opacity-60 dark:invert grayscale" data-alt="Stylized digital signature of a pharmacist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBEjSvM8H3lWZwIGLnYwBmEfPXBZT85Lg2UkhGZmjZ9gWJqedhzsUX2MF3v_goMkQs6C3vZM1y3STcMEpdh-UNCD3nYN-h4_eOh-Ax_GTBxZlAB1spSV5Zl23hbcHaWdBvxWmlwoBqnWoERLX_Qgk9ZYTEjveeTcNi9Rv0O9ckqBqdJm-mrYQn2twGB3TQiotDgvXUDtI6-ie4peMbNif44j-CdYlw8sgOhKv-dgcAWpObwej3NCJH96IIYWSeIvUPVLyAeGoKYL4p_"/>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-xs font-bold">Authorized Signatory</p>
+<p class="text-slate-500 dark:text-slate-400 text-[10px]">Pharmacist Reg: #MAH-12993</p>
+</div>
+</div>
+<footer class="mt-auto px-4 py-8 text-center text-slate-400 dark:text-slate-500 text-xs border-t border-slate-200 dark:border-slate-700 no-print">
+<p>Thank you for choosing City General Hospital Pharmacy.</p>
+<p class="mt-1">Support: help@citygeneral.hospital | Emergency: 102</p>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</body></html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>08_Patient_Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056b2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl">local_hospital</span>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">MedCore HMS</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-64">
+<div class="flex w-full items-stretch rounded-lg bg-slate-100 dark:bg-slate-800 h-10 border border-transparent focus-within:border-primary/50 transition-all">
+<div class="text-slate-500 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="w-full bg-transparent border-none focus:ring-0 text-sm placeholder:text-slate-500" placeholder="Search patients, doctors, or records..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<button class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-sm font-semibold">Dr. Sarah Smith</p>
+<p class="text-xs text-slate-500">Chief Resident</p>
+</div>
+<div class="size-10 rounded-full bg-primary/20 border-2 border-primary overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Profile photo of a professional doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_eLJOjkUQdLuzO1IY22GEyryzfnQ3TIBu9q22jmF6X-Nq5Ju2keK2OIdr-MK--afo-g5s3D_Aq0pff7eNAieXFoczlBaF_GdcJOpiTeqm6rWD70JrGbY30O8NPGl-2BR8_6rRL_ekjhBQ8d7Y2OjHMY7DXdHc5Ca-97pzKGikgnQRXX3GjHgR2ovDlW42u-sFW2y5LAml1jrsuq6vmIRTbj22zhyS7XbHAg3SAGKKJv9CQGZZszyiBCI6aXcu7u2y3Gvf6PVq5-sB"/>
+</div>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hidden lg:flex flex-col p-4 gap-6">
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">grid_view</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-primary/10 text-primary rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="text-sm font-medium">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-sm font-medium">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-sm font-medium">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-sm font-medium">Inventory</span>
+</a>
+</nav>
+<div class="mt-auto">
+<div class="bg-slate-100 dark:bg-slate-800 rounded-xl p-4">
+<p class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">System Status</p>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+<p class="text-sm font-medium">All systems normal</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-6">
+<div class="max-w-6xl mx-auto space-y-6">
+<!-- Patient Header Card -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+<div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div class="flex items-center gap-6">
+<div class="relative">
+<div class="size-24 md:size-32 rounded-2xl bg-slate-200 dark:bg-slate-800 overflow-hidden border-4 border-white dark:border-slate-800 shadow-md">
+<img class="w-full h-full object-cover" data-alt="Portrait photo of patient John Doe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnbLqIydMwaaAKKYcRhdRT8SPrUcfb4H4kRXN8ocUi3MTjSyq3xZcL8XiOZUZeGNbJ06SawRx3wsICxwxgs23Shu5c3gUJ-y6JWMNwwRpiBzaGZfuubuiHVFP3Ra_Q56eLz23RRkRiR_MRJGLr1zqSoctauiOk9p1WLusyuJmsCUqSYJKEWpP1HZq7-pN9JdT10tBLQP5llJXzYxDGbKEWpjyy3fTWr816q9J5LojCT_6a6h4Grcbm20itaEOPzr37THzDcwmYZS62"/>
+</div>
+<div class="absolute -bottom-2 -right-2 bg-green-500 border-4 border-white dark:border-slate-900 size-8 rounded-full flex items-center justify-center" title="Active Patient">
+<span class="material-symbols-outlined text-white text-xs">check</span>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-3">
+<h1 class="text-2xl md:text-3xl font-bold text-slate-900 dark:text-white">John Doe</h1>
+<span class="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">Male</span>
+</div>
+<p class="text-slate-500 font-medium">Patient ID: <span class="text-primary font-bold">#HMS-98234</span></p>
+<div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">cake</span> 12/05/1985 (38y)</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">location_on</span> New York, USA</span>
+</div>
+</div>
+</div>
+<div class="flex flex-row md:flex-col gap-3">
+<button class="flex-1 min-w-[140px] px-4 py-2.5 bg-primary text-white rounded-lg font-bold text-sm hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">event</span> Schedule Visit
+                            </button>
+<button class="flex-1 min-w-[140px] px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white rounded-lg font-bold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg">edit</span> Edit Profile
+                            </button>
+</div>
+</div>
+<!-- Vitals Summary Strip -->
+<div class="border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30 px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center">
+<span class="material-symbols-outlined">favorite</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Heart Rate</p>
+<p class="text-lg font-bold">72 <span class="text-xs font-normal text-slate-400">bpm</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined">blood_pressure</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Blood Pressure</p>
+<p class="text-lg font-bold">120/80 <span class="text-xs font-normal text-slate-400">mmHg</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-600 flex items-center justify-center">
+<span class="material-symbols-outlined">air</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Oxygen (SpO2)</p>
+<p class="text-lg font-bold">98% <span class="text-xs font-normal text-slate-400">Normal</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined">thermostat</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Body Temp</p>
+<p class="text-lg font-bold">98.6 <span class="text-xs font-normal text-slate-400">°F</span></p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tabs Navigation -->
+<div class="border-b border-slate-200 dark:border-slate-800">
+<nav class="flex gap-8 px-2 overflow-x-auto no-scrollbar">
+<a class="border-b-2 border-primary text-primary py-4 px-1 text-sm font-bold whitespace-nowrap" href="#">Overview</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 py-4 px-1 text-sm font-semibold whitespace-nowrap transition-all" href="#">Personal Details</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 py-4 px-1 text-sm font-semibold whitespace-nowrap transition-all" href="#">Insurance</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 py-4 px-1 text-sm font-semibold whitespace-nowrap transition-all" href="#">Visit History</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 py-4 px-1 text-sm font-semibold whitespace-nowrap transition-all" href="#">Prescriptions</a>
+</nav>
+</div>
+<!-- Main Content Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Details -->
+<div class="lg:col-span-2 space-y-6">
+<!-- Demographics Card -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-lg font-bold">Patient Information</h3>
+<button class="text-primary text-sm font-semibold flex items-center gap-1 hover:underline">
+<span class="material-symbols-outlined text-base">edit_note</span> Edit Info
+                                </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
+<div class="space-y-1">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Full Name</p>
+<p class="text-sm font-medium">John Alexander Doe</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Phone Number</p>
+<p class="text-sm font-medium">+1 (555) 982-3412</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Email Address</p>
+<p class="text-sm font-medium">john.doe@example.com</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Marital Status</p>
+<p class="text-sm font-medium">Married</p>
+</div>
+<div class="space-y-1 md:col-span-2">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Home Address</p>
+<p class="text-sm font-medium">123 Health Ave, Suite 400, New York, NY 10001</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Emergency Contact</p>
+<p class="text-sm font-medium">Jane Doe (Spouse) - +1 (555) 982-3413</p>
+</div>
+<div class="space-y-1">
+<p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Blood Type</p>
+<p class="text-sm font-bold text-red-600">O Positive (O+)</p>
+</div>
+</div>
+</div>
+<!-- Recent Visits Card -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="text-lg font-bold mb-6">Recent Medical History</h3>
+<div class="space-y-0">
+<div class="flex gap-4 pb-6 relative">
+<div class="absolute left-[19px] top-10 bottom-0 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-xl">medical_services</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-bold">Annual Physical Examination</h4>
+<span class="text-xs text-slate-500 font-medium">Oct 12, 2023</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">Regular checkup. Vital signs stable. Patient advised on vitamin D deficiency.</p>
+<div class="flex gap-2 pt-2">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase">Checkup</span>
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase">General Medicine</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4 pb-6 relative">
+<div class="absolute left-[19px] top-10 bottom-0 w-px bg-slate-200 dark:bg-slate-800"></div>
+<div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-xl">science</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-bold">Blood Work Analysis</h4>
+<span class="text-xs text-slate-500 font-medium">Sep 28, 2023</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">Comprehensive metabolic panel and lipid profile. All markers within normal range.</p>
+<div class="flex gap-2 pt-2">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase">Laboratory</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4">
+<div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 z-10">
+<span class="material-symbols-outlined text-xl">pill</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between items-start">
+<h4 class="text-sm font-bold">Flu Vaccination</h4>
+<span class="text-xs text-slate-500 font-medium">Sep 15, 2023</span>
+</div>
+<p class="text-sm text-slate-600 dark:text-slate-400">Annual quadrivalent influenza vaccine administered. No immediate adverse reaction.</p>
+<div class="flex gap-2 pt-2">
+<span class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase">Immunization</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-6 py-2.5 text-sm font-bold text-slate-500 hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-800 transition-all">
+                                View Full Medical Record History
+                            </button>
+</div>
+</div>
+<!-- Right Column: Physician & Sidebar Info -->
+<div class="space-y-6">
+<!-- Primary Physician Card -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6 text-center">
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Primary Physician</h3>
+<div class="flex flex-col items-center">
+<div class="size-20 rounded-full ring-4 ring-primary/20 p-1 mb-4">
+<img class="w-full h-full object-cover rounded-full" data-alt="Portrait of Doctor Gregory House" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASixBk-BMior0RfNvDh9XWuTT2damnbTvHmLLqKbe_yj3_CsO7XK3MNATRMJBifcFPc2QEm6GFPQ_hoBlwUimzaY4eLrClfd4J_0kn1bUt1QQiRZEVvbxYqe_4c8KDxAcZqWcJvPihqio-gvA_mJOXboiQU-0NxuiCkN3dORl4ovZgNvrul08kVyNE2ozb__EA7THWJhSwRtUZBp5YpsgU--3pfLSuROQZZ3cqw-hnq_XRE1PbRzFa6wl80IpJiTG4p2Q8GOm64rrQ"/>
+</div>
+<h4 class="text-lg font-bold">Dr. Gregory House</h4>
+<p class="text-sm text-slate-500 mb-6">Diagnostic Medicine Specialist</p>
+<div class="flex gap-2 w-full">
+<button class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+<button class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">call</span>
+</button>
+<button class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">mail</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Current Status & Alerts -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Clinical Alerts</h3>
+<div class="space-y-3">
+<div class="p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-red-500 text-lg">warning</span>
+<div>
+<p class="text-xs font-bold text-red-800 dark:text-red-400 uppercase">Allergies</p>
+<p class="text-sm font-medium text-red-700 dark:text-red-300">Penicillin, Peanuts</p>
+</div>
+</div>
+<div class="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-orange-500 text-lg">emergency</span>
+<div>
+<p class="text-xs font-bold text-orange-800 dark:text-orange-400 uppercase">Condition</p>
+<p class="text-sm font-medium text-orange-700 dark:text-orange-300">Type 2 Diabetes (Managed)</p>
+</div>
+</div>
+<div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-blue-500 text-lg">info</span>
+<div>
+<p class="text-xs font-bold text-blue-800 dark:text-blue-400 uppercase">Notice</p>
+<p class="text-sm font-medium text-blue-700 dark:text-blue-300">Organ Donor</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Upcoming Appointments -->
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 p-6">
+<h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Upcoming</h3>
+<div class="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 text-center">
+<div class="flex items-center justify-center mb-2">
+<span class="material-symbols-outlined text-primary text-3xl">event_available</span>
+</div>
+<h4 class="text-sm font-bold">Follow-up Consultation</h4>
+<p class="text-xs text-slate-500 mb-3">Nov 24, 2023 at 09:30 AM</p>
+<button class="w-full py-2 bg-white dark:bg-slate-900 text-primary text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 hover:shadow-sm transition-all">
+                                    Reschedule
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>

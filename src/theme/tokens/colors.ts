@@ -1,22 +1,28 @@
 export const colorTokens = {
-  primary: '#1E3A8A',
-  primaryHover: '#1D4ED8',
-  primaryLight: '#DBEAFE',
+  primary: '#ec5b13',
+  primaryHover: '#d44d0f',
+  primaryLight: '#fde9df',
 
-  background: '#F8FAFC',
+  background: '#f8f6f6',
   surface: '#FFFFFF',
 
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
+  textPrimary: '#0f172a',
+  textSecondary: '#64748b',
 
-  border: '#E5E7EB',
+  border: '#e2e8f0',
 
-  success: '#10B981',
-  successLight: '#D1FAE5',
-  error: '#EF4444',
-  errorLight: '#FEE2E2',
-  warning: '#F59E0B',
-  warningLight: '#FEF3C7',
-  info: '#8B5CF6',
-  infoLight: '#EDE9FE',
+  success: '#10b981',
+  successLight: '#d1fae5',
+  error: '#ef4444',
+  errorLight: '#fee2e2',
+  warning: '#f59e0b',
+  warningLight: '#fef3c7',
+  info: '#8b5cf6',
+  infoLight: '#ede9fe',
+  
+  // Slate palette for more control
+  slate200: '#e2e8f0',
+  slate800: '#1e293b',
+  slate500: '#64748b',
+  slate900: '#0f172a',
 };

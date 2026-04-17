@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>11_Reception_AppointmentBooking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056b2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-10 py-3">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">medical_services</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">HMS Booking</h2>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<nav class="hidden md:flex items-center gap-9">
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Appointments</a>
+<a class="text-slate-700 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Patients</a>
+</nav>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col md:flex-row gap-6 p-6 max-w-[1440px] mx-auto w-full">
+<aside class="w-full md:w-80 flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+<h3 class="text-lg font-bold mb-4">Book New Appointment</h3>
+<form class="flex flex-col gap-4">
+<div>
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Search Patient</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary" placeholder="Name or Patient ID" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Department</label>
+<select class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary">
+<option>Cardiology</option>
+<option>Neurology</option>
+<option>Pediatrics</option>
+<option>Orthopedics</option>
+<option>General Medicine</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Select Doctor</label>
+<select class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary">
+<option>Dr. Sarah Jenkins</option>
+<option>Dr. Michael Chen</option>
+<option>Dr. Robert Wilson</option>
+</select>
+</div>
+<div>
+<label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Preferred Date</label>
+<input class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary" type="date"/>
+</div>
+<div class="pt-2">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-2.5 rounded-lg transition-all flex items-center justify-center gap-2" type="submit">
+<span class="material-symbols-outlined text-sm">event_available</span>
+                                    Book Appointment
+                                </button>
+</div>
+</form>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 mb-4">
+<div class="size-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Female doctor headshot in professional attire" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7toOLQiB5FcWaCNidAC2dLiUbtEgbsHbkkquF17xE3ub7qe_JkPoxbnpmQhjcILfNwD4ncHQRPNkEY8dhSYuU8_RRhwkjVLZk2pmykTSGL5lIspfeR2BX20wn6woJszfHKwg0vDJBgoki9AfVKS5hYd78jlqpv9UOBUpgjjyuN2hixuHj8afu8Pfnpn7SjAOXGAeF2tzUGq7BePjSuIUacUT7w2_n-zgQFLRqkDtkpjODwYoV4fQoIBs48d9HlOU_0oXKruBWHsXM"/>
+</div>
+<div>
+<h4 class="font-bold text-sm">Dr. Sarah Jenkins</h4>
+<p class="text-xs text-slate-500">Senior Cardiologist</p>
+</div>
+</div>
+<div class="space-y-2 text-xs">
+<div class="flex justify-between">
+<span class="text-slate-500">Availability</span>
+<span class="text-green-600 font-medium">Available Today</span>
+</div>
+<div class="flex justify-between">
+<span class="text-slate-500">Experience</span>
+<span class="text-slate-700 dark:text-slate-300">12+ Years</span>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 flex flex-col gap-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-full overflow-hidden">
+<div class="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap justify-between items-center gap-4">
+<div class="flex items-center gap-4">
+<h2 class="text-xl font-bold tracking-tight">Doctor Availability</h2>
+<div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+<button class="px-4 py-1.5 text-xs font-semibold rounded-md bg-white dark:bg-slate-700 shadow-sm text-primary">Calendar</button>
+<button class="px-4 py-1.5 text-xs font-semibold rounded-md text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">List View</button>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<span class="font-bold px-2">October 2023</span>
+<button class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-auto">
+<div class="min-w-[600px]">
+<div class="grid grid-cols-7 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Sun</div>
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Mon</div>
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Tue</div>
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Wed</div>
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Thu</div>
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Fri</div>
+<div class="py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Sat</div>
+</div>
+<div class="grid grid-cols-7 border-slate-200 dark:border-slate-800">
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">24</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">25</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">26</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">27</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">28</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">29</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 opacity-30">30</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">1</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">2</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">3</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">4</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 bg-primary/5">
+<div class="font-bold mb-2">5</div>
+<div class="space-y-1">
+<div class="text-[10px] px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium truncate">10:00 AM - Available</div>
+<div class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-medium truncate">02:30 PM - Booked</div>
+</div>
+</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">6</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">7</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">8</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">9</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2 bg-primary/5 ring-2 ring-primary ring-inset">
+<div class="flex justify-between items-start mb-2">
+<span class="font-bold">10</span>
+<span class="text-[10px] bg-primary text-white px-1 rounded">Today</span>
+</div>
+<div class="space-y-1">
+<div class="text-[10px] px-1.5 py-0.5 rounded bg-primary/20 text-primary font-bold truncate">Select Slot</div>
+<div class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-medium truncate">03:00 PM - Booked</div>
+</div>
+</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">11</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">12</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">13</div>
+<div class="h-32 border-r border-b border-slate-100 dark:border-slate-800 p-2">14</div>
+</div>
+</div>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800">
+<h4 class="text-sm font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">schedule</span>
+                                Available Time Slots (Oct 10, 2023)
+                            </h4>
+<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+<button class="py-2 px-3 border border-primary bg-primary text-white rounded-lg text-sm font-medium transition-colors">
+                                    09:00 AM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    09:30 AM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    10:00 AM
+                                </button>
+<button class="py-2 px-3 border border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed rounded-lg text-sm font-medium" disabled="">
+                                    10:30 AM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    11:00 AM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    11:30 AM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    01:30 PM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    02:00 PM
+                                </button>
+<button class="py-2 px-3 border border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed rounded-lg text-sm font-medium" disabled="">
+                                    02:30 PM
+                                </button>
+<button class="py-2 px-3 border border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed rounded-lg text-sm font-medium" disabled="">
+                                    03:00 PM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    03:30 PM
+                                </button>
+<button class="py-2 px-3 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-primary hover:text-primary rounded-lg text-sm font-medium transition-colors">
+                                    04:00 PM
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="p-8 mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+<div class="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-2 text-slate-500 text-sm">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>HMS Secure Booking Protocol v2.4</span>
+</div>
+<div class="flex gap-6 text-sm text-slate-500">
+<a class="hover:text-primary transition-colors" href="#">Support</a>
+<a class="hover:text-primary transition-colors" href="#">Documentation</a>
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+</div>
+<div class="text-xs text-slate-400">
+                        © 2023 Health Management Systems Inc. All rights reserved.
+                    </div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>
