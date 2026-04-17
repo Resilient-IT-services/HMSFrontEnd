@@ -2,13 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import { Eye, EyeOff } from "lucide-react";
-import axios from "axios";
-import api from "@/lib/axios";
-
-type LoginErrorResponse = {
-  message?: string;
-  error?: string;
-};
 
 export default function LoginPage() {
   const [show, setShow] = useState(false);
@@ -34,20 +27,29 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/api/auth/login", {
-        username: trimmedUsername,
-        password: trimmedPassword,
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          username: trimmedUsername,
+          password: trimmedPassword,
+        }),
       });
 
-      console.log("Login success:", response.data);
-    } catch (error) {
-      if (axios.isAxiosError<LoginErrorResponse>(error)) {
-        const backendMessage =
-          error.response?.data?.message || error.response?.data?.error;
-        setErrorMessage(backendMessage || "Invalid username or password");
-      } else {
-        setErrorMessage("Invalid username or password");
+      const data = await response.json();
+
+      if (!response.ok) {
+        const message = data?.message || data?.error || "Invalid username or password";
+        setErrorMessage(message);
+        return;
       }
+
+      console.log("Login success:", data);
+    } catch {
+      setErrorMessage("Invalid username or password");
     } finally {
       setIsLoading(false);
     }
@@ -140,7 +142,7 @@ export default function LoginPage() {
               disabled={isLoading}
               className="w-full rounded-lg bg-blue-700 py-3 text-white transition hover:bg-blue-800 disabled:opacity-50"
             >
-              {isLoading ? "Logging in..." : "Login ->"}
+              {isLoading ? "Logging in..." : "Login"}
             </button>
           </form>
         </div>

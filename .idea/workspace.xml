@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page" />
+    <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/app/Login/page.tsx" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,12 +27,22 @@
     &quot;assignee&quot;: &quot;NishantThe-Developer&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Resilient-IT-services/HMSFrontEnd.git&quot;,
-    &quot;accountId&quot;: &quot;44dd9e20-7c61-48ce-8d1c-e353ebedebde&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Resilient-IT-services/HMSFrontEnd.git",
+    "accountId": "44dd9e20-7c61-48ce-8d1c-e353ebedebde"
+  },
+  "recentNewPullRequestHead": {
+    "server": {
+      "useHttp": false,
+      "host": "github.com",
+      "port": null,
+      "suffix": null
+    },
+    "owner": "Resilient-IT-services",
+    "repository": "HMSFrontEnd"
   }
-}</component>
+}]]></component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
   &quot;isMigrated&quot;: true
@@ -50,7 +63,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "US__001__F",
+    "git-widget-placeholder": "#1 on US__001__F",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "junie.onboarding.icon.badge.shown": "true",
@@ -107,7 +120,7 @@
       <workItem from="1776064278636" duration="2746000" />
       <workItem from="1776319376653" duration="509000" />
       <workItem from="1776319940996" duration="1940000" />
-      <workItem from="1776328938914" duration="12122000" />
+      <workItem from="1776328938914" duration="14483000" />
     </task>
     <task id="LOCAL-00001" summary="login page">
       <option name="closed" value="true" />
@@ -141,7 +154,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776401835571</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="login page">
+      <option name="closed" value="true" />
+      <created>1776402032618</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1776402032618</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
