@@ -17,7 +17,7 @@ export default function AdminDashboardPage() {
   return (
     <main className="p-8">
       <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-      <p className="mt-2 text-slate-700">Welcome, {user?.email ?? "Unknown user"}</p>
+      <p className="mt-2 text-slate-700">Welcome, {user?.username ?? user?.email ?? "Unknown user"}</p>
       <p className="text-slate-700">Role: {user?.role ? formatRole(user.role) : "Unknown"}</p>
       <button
         onClick={handleLogout}
@@ -28,3 +28,4 @@ export default function AdminDashboardPage() {
     </main>
   );
 }
+

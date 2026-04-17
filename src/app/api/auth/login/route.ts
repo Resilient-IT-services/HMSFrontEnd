@@ -1,40 +1,32 @@
 import { NextResponse } from "next/server";
-import type { JwtPayload, LoginRequest, UserRole } from "@/types/auth";
+import type { LoginRequest } from "@/types/auth";
 import { AUTH_COOKIE_NAME } from "@/utils/constants";
 
-interface MockUser {
-  id: number;
-  email: string;
-  password: string;
-  role: UserRole;
+interface BackendErrorResponse {
+  message?: string;
 }
 
-const MOCK_USERS: MockUser[] = [
-  { id: 1, email: "admin@hms.com", password: "admin123", role: "ADMIN" },
-  { id: 2, email: "doctor@hms.com", password: "doctor123", role: "DOCTOR" },
-  { id: 3, email: "reception@hms.com", password: "reception123", role: "RECEPTION" },
-];
-
-function encodeBase64Url(input: string): string {
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(input);
-  let binary = "";
-
-  bytes.forEach((byte) => {
-    binary += String.fromCharCode(byte);
-  });
-
-  return btoa(binary)
-    .replace(/=/g, "")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_");
+interface BackendLoginSuccessResponse {
+  token?: string;
+  accessToken?: string;
+  jwt?: string;
 }
 
-function createMockJwt(payload: JwtPayload): string {
-  const header = { alg: "none", typ: "JWT" };
-  return `${encodeBase64Url(JSON.stringify(header))}.${encodeBase64Url(
-    JSON.stringify(payload),
-  )}.`;
+function getBackendLoginUrl(): string {
+  if (process.env.BACKEND_LOGIN_URL) {
+    return process.env.BACKEND_LOGIN_URL;
+  }
+
+  const baseUrl = process.env.BACKEND_BASE_URL ?? "http://localhost:8081";
+  const path = process.env.BACKEND_LOGIN_PATH ?? "/api/auth/login";
+  return new URL(path, baseUrl).toString();
+}
+
+function getTokenFromResponse(data: BackendLoginSuccessResponse): string | null {
+  if (typeof data.token === "string" && data.token.trim()) return data.token;
+  if (typeof data.accessToken === "string" && data.accessToken.trim()) return data.accessToken;
+  if (typeof data.jwt === "string" && data.jwt.trim()) return data.jwt;
+  return null;
 }
 
 export async function POST(request: Request) {
@@ -48,33 +40,64 @@ export async function POST(request: Request) {
   }
 
   try {
-    const emailInput = typeof body.email === "string" ? body.email : "";
+    const usernameInput = typeof body.username === "string" ? body.username : "";
     const passwordInput = typeof body.password === "string" ? body.password : "";
-    const email = emailInput.trim().toLowerCase();
+    const username = usernameInput.trim();
     const password = passwordInput;
 
-    if (!email || !password) {
-      return NextResponse.json({ message: "Email and password are required" }, { status: 400 });
+    if (!username || !password) {
+      return NextResponse.json({ message: "Username and password are required" }, { status: 400 });
     }
 
-    const matchedUser = MOCK_USERS.find(
-      (user) => user.email === email && user.password === password,
-    );
+    const backendUrl = getBackendLoginUrl();
+    let backendResponse: Response;
 
-    if (!matchedUser) {
-      return NextResponse.json({ message: "Invalid email or password" }, { status: 401 });
+    try {
+      backendResponse = await fetch(backendUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        cache: "no-store",
+        body: JSON.stringify({ username, password }),
+      });
+    } catch (error) {
+      console.error("POST /api/auth/login - backend unreachable", error);
+      return NextResponse.json({ message: "Backend service is unreachable" }, { status: 502 });
     }
 
-    const now = Math.floor(Date.now() / 1000);
-    const payload: JwtPayload = {
-      id: matchedUser.id,
-      email: matchedUser.email,
-      role: matchedUser.role,
-      iat: now,
-      exp: now + 60 * 60,
-    };
+    let backendPayload: unknown;
+    const contentType = backendResponse.headers.get("content-type") ?? "";
 
-    const token = createMockJwt(payload);
+    try {
+      backendPayload = contentType.includes("application/json")
+        ? await backendResponse.json()
+        : { message: await backendResponse.text() };
+    } catch {
+      backendPayload = { message: "Invalid backend response" };
+    }
+
+    if (!backendResponse.ok) {
+      const message =
+        typeof backendPayload === "object" &&
+        backendPayload !== null &&
+        "message" in backendPayload &&
+        typeof (backendPayload as BackendErrorResponse).message === "string"
+          ? (backendPayload as BackendErrorResponse).message
+          : "Login failed";
+
+      return NextResponse.json({ message }, { status: backendResponse.status });
+    }
+
+    const token =
+      typeof backendPayload === "object" && backendPayload !== null
+        ? getTokenFromResponse(backendPayload as BackendLoginSuccessResponse)
+        : null;
+
+    if (!token) {
+      return NextResponse.json({ message: "Backend login response missing token" }, { status: 502 });
+    }
 
     const response = NextResponse.json({ token }, { status: 200 });
     response.cookies.set({

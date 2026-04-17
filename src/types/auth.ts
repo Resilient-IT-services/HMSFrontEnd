@@ -2,14 +2,15 @@ export type UserRole = "ADMIN" | "DOCTOR" | "RECEPTION";
 
 export interface JwtPayload {
   id: number;
-  email: string;
+  email?: string;
+  username?: string;
   role: UserRole;
   iat?: number;
   exp?: number;
 }
 
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 

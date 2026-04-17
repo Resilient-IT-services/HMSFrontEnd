@@ -22,7 +22,8 @@ export function decodeToken(token: string): JwtPayload | null {
     const payloadJson = binaryToUtf8(atob(normalizeBase64Url(payloadBase64Url)));
     const payload = JSON.parse(payloadJson) as JwtPayload;
 
-    if (!payload?.role || !payload?.email || typeof payload?.id !== "number") {
+    const hasIdentity = Boolean(payload?.email || payload?.username);
+    if (!payload?.role || !hasIdentity || typeof payload?.id !== "number") {
       return null;
     }
 
