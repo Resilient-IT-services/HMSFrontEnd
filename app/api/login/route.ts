@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     return response;
   } catch {
     return NextResponse.json(
-      { message: "Backend login service is unavailable" },
+      { message: "Backend service unavailable" },
       { status: 502 },
     );
   }
