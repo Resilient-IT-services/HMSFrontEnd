@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
+import StoreProvider from "@/state/StoreProvider";
 
 export const metadata: Metadata = {
   title: "HMS Frontend",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="antialiased">
+        <StoreProvider>{children}</StoreProvider>
+      </body>
     </html>
   );
 }

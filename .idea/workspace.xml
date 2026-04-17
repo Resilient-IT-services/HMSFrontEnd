@@ -5,7 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page">
+      <change afterPath="$PROJECT_DIR$/ApiDoc.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/services/apiClient.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/AGENTS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev.err.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev.out.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/axios.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/middleware.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/next.config.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/admin/dashboard/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/admin/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api-client.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/auth.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/authService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/authService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/types/auth.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/constants.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +80,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager&quot;: &quot;true&quot;,
@@ -69,7 +91,7 @@
     &quot;js.debugger.nextJs.config.created.client&quot;: &quot;true&quot;,
     &quot;js.debugger.nextJs.config.created.server&quot;: &quot;true&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/Nisha/IdeaProjects/hms-frontend/app/Login&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Code/HMSFrontEnd/src/store&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -77,12 +99,14 @@
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
     &quot;npm.Next.js: server-side.executor&quot;: &quot;Run&quot;,
     &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Nisha\\IdeaProjects\\hms-frontend\\node_modules\\typescript\\lib&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Code\\HMSFrontEnd\\node_modules\\typescript\\lib&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Code\HMSFrontEnd\src\store" />
+      <recent name="C:\Code\HMSFrontEnd\src\services" />
       <recent name="C:\Users\Nisha\IdeaProjects\hms-frontend\app\Login" />
     </key>
   </component>

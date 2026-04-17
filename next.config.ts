@@ -2,15 +2,23 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   async rewrites() {
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8081';
     return [
       {
-        source: "/api/auth/login",
-        destination: "http://localhost:8081/api/auth/login",
+        // Standard API calls
+        source: '/api/:path*',
+        destination: `${apiBaseUrl}/api/:path*`,
       },
       {
-        source: "/api/auth/logout",
-        destination: "http://localhost:8081/api/auth/logout",
+        // Spring Security OAuth endpoints
+        source: '/oauth2/:path*',
+        destination: `${apiBaseUrl}/oauth2/:path*`,
       },
+      {
+        // Spring Security Login endpoints (if used)
+        source: '/login/oauth2/:path*',
+        destination: `${apiBaseUrl}/login/oauth2/:path*`,
+      }
     ];
   },
 };
