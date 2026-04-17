@@ -12,12 +12,16 @@ interface BackendLoginSuccessResponse {
   jwt?: string;
 }
 
-function getBackendLoginUrl(): string {
+function getBackendLoginUrl(): string | null {
   if (process.env.BACKEND_LOGIN_URL) {
     return process.env.BACKEND_LOGIN_URL;
   }
 
-  const baseUrl = process.env.BACKEND_BASE_URL ?? "http://localhost:8081";
+  const baseUrl = process.env.BACKEND_BASE_URL;
+  if (!baseUrl) {
+    return null;
+  }
+
   const path = process.env.BACKEND_LOGIN_PATH ?? "/api/auth/login";
   return new URL(path, baseUrl).toString();
 }
@@ -50,6 +54,13 @@ export async function POST(request: Request) {
     }
 
     const backendUrl = getBackendLoginUrl();
+    if (!backendUrl) {
+      return NextResponse.json(
+        { message: "Backend auth endpoint is not configured" },
+        { status: 500 },
+      );
+    }
+
     let backendResponse: Response;
 
     try {

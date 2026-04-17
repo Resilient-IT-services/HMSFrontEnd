@@ -4,7 +4,7 @@ export function formatRole(role: UserRole): string {
   const mapping: Record<UserRole, string> = {
     ADMIN: "Admin",
     DOCTOR: "Doctor",
-    RECEPTION: "Reception",
+    RECEPTIONIST: "Receptionist",
   };
 
   return mapping[role];

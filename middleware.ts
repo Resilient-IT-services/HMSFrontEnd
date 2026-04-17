@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { decodeToken } from "@/lib/jwt";
+import { decodeToken } from "@/lib/auth";
 import { AUTH_COOKIE_NAME } from "@/utils/constants";
-import { getRequiredRoleForPath } from "@/utils/helpers";
+import { PROTECTED_ROUTE_PREFIXES, ROLE_TO_DASHBOARD } from "@/utils/constants";
+
+function getRequiredRoleForPath(pathname: string) {
+  const entry = Object.entries(PROTECTED_ROUTE_PREFIXES).find(([prefix]) =>
+    pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+
+  return entry?.[1] ?? null;
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -30,7 +38,8 @@ export function middleware(request: NextRequest) {
   }
 
   if (payload.role !== requiredRole) {
-    return NextResponse.redirect(new URL("/unauthorized", request.url));
+    const redirectUrl = ROLE_TO_DASHBOARD[payload.role] ?? "/unauthorized";
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
   }
 
   return NextResponse.next();
