@@ -37,9 +37,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isAuthenticated && pathname !== '/login') {
         router.push('/login');
       } else if (isAuthenticated && pathname === '/login') {
-        // Redirect to their role-based dashboard
-        if (user?.role) {
-          router.push(`/${user.role.toLowerCase()}/dashboard`);
+        // Redirect to their primary role-based dashboard
+        if (user?.roles && user.roles.length > 0) {
+          router.push(`/${user.roles[0].toLowerCase()}/dashboard`);
         }
       }
     }

@@ -20,7 +20,9 @@ const SuperAdminDashboard = () => {
   const [newHospital, setNewHospital] = useState({ name: '', code: '', address: '' });
   
   const [showUserForm, setShowUserForm] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', password: '', role: 'ADMIN' as Role, hospitalId: 0 });
+  const [newUser, setNewUser] = useState({ username: '', password: '', roles: [] as Role[], hospitalId: 0 });
+
+  const roleOptions: Role[] = ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE', 'SUPER_ADMIN'];
 
   const fetchData = async () => {
     setLoading(true);
@@ -64,16 +66,29 @@ const SuperAdminDashboard = () => {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newUser.roles.length === 0) {
+      alert('Please select at least one role');
+      return;
+    }
     try {
       const response = await apiClient.post<ApiResponse<UserResponse>>('/users', newUser);
       if (response.data.success) {
         setShowUserForm(false);
-        setNewUser({ username: '', password: '', role: 'ADMIN', hospitalId: 0 });
+        setNewUser({ username: '', password: '', roles: [], hospitalId: 0 });
         fetchData();
       }
     } catch (error) {
       console.error('Failed to create user', error);
     }
+  };
+
+  const handleRoleToggle = (role: Role) => {
+    setNewUser(prev => ({
+      ...prev,
+      roles: prev.roles.includes(role) 
+        ? prev.roles.filter(r => r !== role)
+        : [...prev.roles, role]
+    }));
   };
 
   const hospitalColumns = [
@@ -126,11 +141,15 @@ const SuperAdminDashboard = () => {
       )
     },
     { 
-      header: 'Role', 
+      header: 'Roles', 
       accessor: (row: UserResponse) => (
-        <span className="px-2 py-1 text-[10px] font-bold rounded bg-[var(--primary-light)] text-[var(--primary)] uppercase">
-          {row.role}
-        </span>
+        <div className="flex flex-wrap gap-1">
+          {row.roles?.map(role => (
+            <span key={role} className="px-2 py-0.5 text-[10px] font-bold rounded bg-[var(--primary-light)] text-[var(--primary)] uppercase">
+              {role}
+            </span>
+          ))}
+        </div>
       )
     },
     { 
@@ -146,7 +165,7 @@ const SuperAdminDashboard = () => {
     { header: 'Created', accessor: (row: UserResponse) => new Date(row.createdAt).toLocaleDateString() },
     {
       header: 'Action',
-      accessor: (row: UserResponse) => (
+      accessor: (addrow: UserResponse) => (
         <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all">
           <span className="material-symbols-outlined text-xl">edit</span>
         </button>
@@ -318,18 +337,20 @@ const SuperAdminDashboard = () => {
               required
             />
           </FormField>
-          <FormField label="System Role" required>
-            <select 
-              className="form-input"
-              value={newUser.role}
-              onChange={(e) => setNewUser({...newUser, role: e.target.value as Role})}
-            >
-              <option value="ADMIN">Admin</option>
-              <option value="DOCTOR">Doctor</option>
-              <option value="PHARMACIST">Pharmacist</option>
-              <option value="RECEPTIONIST">Receptionist</option>
-              <option value="SUPER_ADMIN">Super Admin</option>
-            </select>
+          <FormField label="System Roles" required>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {roleOptions.map(role => (
+                <label key={role} className="flex items-center gap-2 p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={newUser.roles.includes(role)}
+                    onChange={() => handleRoleToggle(role)}
+                    className="accent-[var(--primary)]"
+                  />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">{role}</span>
+                </label>
+              ))}
+            </div>
           </FormField>
           <div className="pt-4 flex gap-3">
             <button type="button" onClick={() => setShowUserForm(false)} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>

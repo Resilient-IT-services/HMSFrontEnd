@@ -25,7 +25,7 @@ const LoginPage = () => {
       const response = await authService.login(username, password);
       if (response.success && response.data) {
         dispatch(setUser(response.data));
-        router.push(`/${response.data.role.toLowerCase()}/dashboard`);
+        router.push(`/${response.data.roles[0].toLowerCase()}/dashboard`);
       } else {
         setLocalError(response.message || 'Login failed');
       }

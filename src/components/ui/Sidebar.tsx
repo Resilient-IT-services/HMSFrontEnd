@@ -24,7 +24,7 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: 'dashboard', href: `/${user?.role?.toLowerCase()}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
+    { name: 'Dashboard', icon: 'dashboard', href: `/${user?.roles?.[0]?.toLowerCase()}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
     { name: 'Patients', icon: 'group', href: '/reception/patients', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
     { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
     { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN'] },
@@ -34,7 +34,7 @@ const Sidebar = () => {
   ];
 
   const filteredMenuItems = menuItems.filter(item => 
-    user?.role && item.roles.includes(user.role)
+    user?.roles && user.roles.some(role => item.roles.includes(role))
   );
 
   return (

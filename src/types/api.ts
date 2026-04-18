@@ -25,13 +25,13 @@ export interface UserProfile {
   userId: number;
   hospitalId: number;
   username: string;
-  role: Role;
+  roles: Role[];
 }
 
 export interface UserResponse {
   id: number;
   username: string;
-  role: Role;
+  roles: Role[];
   active: boolean;
   createdAt: string;
 }
@@ -66,7 +66,7 @@ export interface CreateHospitalRequest {
 export interface CreateUserRequest {
   username: string;
   password?: string;
-  role: Role;
+  roles: Role[];
   hospitalId: number;
 }
 
