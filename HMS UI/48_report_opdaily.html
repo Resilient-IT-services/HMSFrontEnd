@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>OP Daily Report - Hospital Management System</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 lg:px-10">
+<div class="flex items-center gap-4">
+<div class="text-primary">
+<span class="material-symbols-outlined text-3xl">local_hospital</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">HMS Core</h2>
+</div>
+<div class="hidden lg:flex flex-1 justify-center gap-8">
+<nav class="flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Patients</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">OPD</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Reports</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-all">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border border-primary/30">
+<img alt="Doctor Profile" class="w-full h-full object-cover" data-alt="Professional profile photo of a male doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqiIGd9vX6OE_-wfG0uLO9W82UCIExnIsmtOU00V55g2lVYTVdYFRTCq5mWa8bfMGNAaLhuuzgV-ZKDpHC5xVK0DXSq7CQKOZn5zjwZCnK5gH-3UFctNfgoqyEropltjb1apqxhotTpeCePqqrI8D2zIfr3r2vuW4V2-gZxpFBS-90kJ7QzDWdMaVUfFurHbK4LKF6ccoWms_xfmfJrQyezpyKO3Vdap-EjLyXnLmY1Qg3FGciQ8b4_Q0TTlZHxh-nvLmoQqWMqyeg"/>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 lg:px-10 py-8 max-w-7xl mx-auto w-full">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white">OP Daily Report</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1">Detailed daily outpatient statistics and revenue analysis for your facility.</p>
+</div>
+<div class="flex flex-wrap items-center gap-3">
+<div class="relative">
+<input class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-sm focus:ring-primary focus:border-primary outline-none w-64 pr-10" type="text" value="Oct 01, 2023 - Oct 31, 2023"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-slate-400 text-xl pointer-events-none">calendar_today</span>
+</div>
+<button class="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-primary/90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-sm">filter_alt</span>
+                        Filter
+                    </button>
+<div class="flex border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden">
+<button class="bg-white dark:bg-slate-900 px-3 py-2 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+<span class="material-symbols-outlined text-xl">description</span>
+</button>
+<button class="bg-white dark:bg-slate-900 px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+<span class="material-symbols-outlined text-xl">table_view</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Key Metrics Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Total Patients</span>
+<div class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg">
+<span class="material-symbols-outlined">group</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold">1,284</h3>
+<span class="text-green-600 dark:text-green-400 text-sm font-bold flex items-center mb-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> 12%
+                        </span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">New Patients</span>
+<div class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-lg">
+<span class="material-symbols-outlined">person_add</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold">752</h3>
+<span class="text-green-600 dark:text-green-400 text-sm font-bold flex items-center mb-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> 8%
+                        </span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Follow-ups</span>
+<div class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-2 rounded-lg">
+<span class="material-symbols-outlined">event_repeat</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold">532</h3>
+<span class="text-red-600 dark:text-red-400 text-sm font-bold flex items-center mb-1">
+<span class="material-symbols-outlined text-sm">trending_down</span> 3%
+                        </span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 rounded-xl shadow-sm">
+<div class="flex items-center justify-between mb-3">
+<span class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase tracking-wider">Total Revenue</span>
+<div class="bg-primary/10 text-primary p-2 rounded-lg">
+<span class="material-symbols-outlined">payments</span>
+</div>
+</div>
+<div class="flex items-end gap-2">
+<h3 class="text-2xl font-bold">₹ 4,28,500</h3>
+<span class="text-green-600 dark:text-green-400 text-sm font-bold flex items-center mb-1">
+<span class="material-symbols-outlined text-sm">trending_up</span> 18%
+                        </span>
+</div>
+</div>
+</div>
+<!-- Main Data Table Container -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<h3 class="font-bold text-lg">Daily Visit Summary</h3>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-bold transition-all border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                            PDF
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-bold transition-all border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-lg">grid_on</span>
+                            Excel
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50">
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800">Date</th>
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-center">New Reg</th>
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-center">Follow-up</th>
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-center">Total OPD</th>
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-right">Consultation Fee</th>
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-right">Misc Revenue</th>
+<th class="px-6 py-4 text-sm font-bold text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-right">Total (₹)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all">
+<td class="px-6 py-4 text-sm font-medium">Oct 05, 2023</td>
+<td class="px-6 py-4 text-sm text-center">28</td>
+<td class="px-6 py-4 text-sm text-center">14</td>
+<td class="px-6 py-4 text-sm text-center font-bold">42</td>
+<td class="px-6 py-4 text-sm text-right">₹ 12,600</td>
+<td class="px-6 py-4 text-sm text-right">₹ 2,450</td>
+<td class="px-6 py-4 text-sm text-right font-bold text-primary">₹ 15,050</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all">
+<td class="px-6 py-4 text-sm font-medium">Oct 04, 2023</td>
+<td class="px-6 py-4 text-sm text-center">31</td>
+<td class="px-6 py-4 text-sm text-center">12</td>
+<td class="px-6 py-4 text-sm text-center font-bold">43</td>
+<td class="px-6 py-4 text-sm text-right">₹ 13,200</td>
+<td class="px-6 py-4 text-sm text-right">₹ 1,850</td>
+<td class="px-6 py-4 text-sm text-right font-bold text-primary">₹ 15,050</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all">
+<td class="px-6 py-4 text-sm font-medium">Oct 03, 2023</td>
+<td class="px-6 py-4 text-sm text-center">22</td>
+<td class="px-6 py-4 text-sm text-center">18</td>
+<td class="px-6 py-4 text-sm text-center font-bold">40</td>
+<td class="px-6 py-4 text-sm text-right">₹ 10,800</td>
+<td class="px-6 py-4 text-sm text-right">₹ 3,100</td>
+<td class="px-6 py-4 text-sm text-right font-bold text-primary">₹ 13,900</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all">
+<td class="px-6 py-4 text-sm font-medium">Oct 02, 2023</td>
+<td class="px-6 py-4 text-sm text-center">15</td>
+<td class="px-6 py-4 text-sm text-center">10</td>
+<td class="px-6 py-4 text-sm text-center font-bold">25</td>
+<td class="px-6 py-4 text-sm text-right">₹ 6,500</td>
+<td class="px-6 py-4 text-sm text-right">₹ 900</td>
+<td class="px-6 py-4 text-sm text-right font-bold text-primary">₹ 7,400</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-all border-b border-slate-200 dark:border-slate-800">
+<td class="px-6 py-4 text-sm font-medium">Oct 01, 2023</td>
+<td class="px-6 py-4 text-sm text-center">24</td>
+<td class="px-6 py-4 text-sm text-center">20</td>
+<td class="px-6 py-4 text-sm text-center font-bold">44</td>
+<td class="px-6 py-4 text-sm text-right">₹ 14,400</td>
+<td class="px-6 py-4 text-sm text-right">₹ 2,100</td>
+<td class="px-6 py-4 text-sm text-right font-bold text-primary">₹ 16,500</td>
+</tr>
+</tbody>
+<tfoot>
+<tr class="bg-slate-100 dark:bg-slate-800 font-bold">
+<td class="px-6 py-4 text-sm uppercase">Grand Total</td>
+<td class="px-6 py-4 text-sm text-center">120</td>
+<td class="px-6 py-4 text-sm text-center">74</td>
+<td class="px-6 py-4 text-sm text-center">194</td>
+<td class="px-6 py-4 text-sm text-right">₹ 57,500</td>
+<td class="px-6 py-4 text-sm text-right">₹ 10,400</td>
+<td class="px-6 py-4 text-sm text-right text-primary">₹ 67,900</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/30 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
+<p class="text-xs text-slate-500 dark:text-slate-400">Showing entries for the last 5 days. Filter to view full history.</p>
+<div class="flex items-center gap-1">
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</button>
+<span class="text-xs font-bold px-3 py-1 bg-primary text-white rounded">1</span>
+<button class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-700">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Department Wise Summary Chart Mockup (Visual Component) -->
+<div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+<h3 class="font-bold text-lg mb-6">Patient Flow Trend</h3>
+<div class="h-64 flex items-end justify-between gap-2 px-4">
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[40%] relative group">
+<div class="w-full bg-primary rounded-t h-[70%] transition-all"></div>
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[10px] px-2 py-1 rounded hidden group-hover:block">New: 28</div>
+</div>
+<span class="text-[10px] text-slate-400">Mon</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[65%] relative group">
+<div class="w-full bg-primary rounded-t h-[60%] transition-all"></div>
+</div>
+<span class="text-[10px] text-slate-400">Tue</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[85%] relative group">
+<div class="w-full bg-primary rounded-t h-[75%] transition-all"></div>
+</div>
+<span class="text-[10px] text-slate-400">Wed</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[55%] relative group">
+<div class="w-full bg-primary rounded-t h-[40%] transition-all"></div>
+</div>
+<span class="text-[10px] text-slate-400">Thu</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[70%] relative group">
+<div class="w-full bg-primary rounded-t h-[80%] transition-all"></div>
+</div>
+<span class="text-[10px] text-slate-400">Fri</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[30%] relative group">
+<div class="w-full bg-primary rounded-t h-[40%] transition-all"></div>
+</div>
+<span class="text-[10px] text-slate-400">Sat</span>
+</div>
+<div class="flex flex-col items-center gap-2 w-full">
+<div class="w-full bg-primary/20 rounded-t h-[15%] relative group">
+<div class="w-full bg-primary rounded-t h-[20%] transition-all"></div>
+</div>
+<span class="text-[10px] text-slate-400">Sun</span>
+</div>
+</div>
+<div class="flex items-center justify-center gap-6 mt-6">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-xs text-slate-500">New Patients</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary/20"></span>
+<span class="text-xs text-slate-500">Follow-up</span>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm">
+<h3 class="font-bold text-lg mb-6">Department Share</h3>
+<div class="space-y-4">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-sm">
+<span class="text-slate-600 dark:text-slate-300">General Medicine</span>
+<span class="font-bold">42%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 42%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-sm">
+<span class="text-slate-600 dark:text-slate-300">Pediatrics</span>
+<span class="font-bold">28%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+<div class="bg-primary/70 h-full rounded-full" style="width: 28%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-sm">
+<span class="text-slate-600 dark:text-slate-300">Orthopedics</span>
+<span class="font-bold">15%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+<div class="bg-primary/50 h-full rounded-full" style="width: 15%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-sm">
+<span class="text-slate-600 dark:text-slate-300">Cardiology</span>
+<span class="font-bold">10%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+<div class="bg-primary/30 h-full rounded-full" style="width: 10%;"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-sm">
+<span class="text-slate-600 dark:text-slate-300">Others</span>
+<span class="font-bold">5%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+<div class="bg-primary/10 h-full rounded-full" style="width: 5%;"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-6 px-10 text-center">
+<p class="text-slate-500 text-xs font-medium">© 2023 HMS Core Solutions. All rights reserved. Version 4.8.2-OPD-REPORT</p>
+</footer>
+</div>
+</body></html>

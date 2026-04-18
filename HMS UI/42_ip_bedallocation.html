@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hospital Management System - Bed Allocation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-40 flex w-full items-center justify-between border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-background-dark px-6 py-3">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl">local_hospital</span>
+<h2 class="text-xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100">MedCore HMS</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-64 !h-10">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full bg-slate-100 dark:bg-slate-800">
+<div class="text-slate-500 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="w-full border-none bg-transparent focus:ring-0 px-4 pl-2 text-sm" placeholder="Search Patients or Beds..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-bold">Dr. Sarah Jenkins</p>
+<p class="text-[10px] text-slate-500">Ward Administrator</p>
+</div>
+<img class="h-10 w-10 rounded-full border-2 border-primary/20 object-cover" data-alt="Profile picture of female doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC804p8PaGUtlg3eNycIWoxEvyK5nLmfjevt1Gygele8FJKv4e21I7uKYe79LlYbWc8EmpCwM8rJAVFEyEmqAXGJGrGu0pXrLVZY42JJUO5habUOJYm3vMNqEdW1M50Qh2FTGoPQUjDieVAyzsrWRQPAu8L0H0-fwIHB1s3XaaWTTe5xjCzcLwJpTtv_TNFJ9PIjbT5JlgYGGB0X4tR31OG_IHwf8Lwb2uJAEy8cekZYYA6hj6uSsbKhJctlH_kDxTnF1IoS5ehc0OJ"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1">
+<!-- Sidebar -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 bg-white dark:border-slate-800 dark:bg-background-dark p-4 gap-2">
+<div class="mb-4 px-3 py-2">
+<h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Main Menu</h3>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">patient_list</span>
+<span class="text-sm font-medium">IP Management</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20" href="#">
+<span class="material-symbols-outlined">bed</span>
+<span class="text-sm font-medium">Bed Allocation</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">clinical_notes</span>
+<span class="text-sm font-medium">Patient Records</span>
+</a>
+<div class="mt-8 mb-4 px-3 py-2 border-t border-slate-100 dark:border-slate-800 pt-6">
+<h3 class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Settings</h3>
+</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-primary/5 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Ward Settings</span>
+</a>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-6">
+<!-- Header Actions -->
+<div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+<div>
+<h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">Ward 42: Intensive Care</h1>
+<p class="text-slate-500 dark:text-slate-400">Real-time bed occupancy and clinical status</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+<span class="material-symbols-outlined text-lg">filter_list</span>
+                            Filter Ward
+                        </button>
+<button class="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+                            Allocate New Bed
+                        </button>
+</div>
+</div>
+<!-- Legend / Status Cards -->
+<div class="mb-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100 text-green-600">
+<span class="material-symbols-outlined">check_circle</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Available</p>
+<p class="text-xl font-bold">12</p>
+</div>
+</div>
+<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 text-red-600">
+<span class="material-symbols-outlined">person</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Occupied</p>
+<p class="text-xl font-bold">28</p>
+</div>
+</div>
+<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-100 text-yellow-600">
+<span class="material-symbols-outlined">engineering</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Maintenance</p>
+<p class="text-xl font-bold">05</p>
+</div>
+</div>
+<div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+<span class="material-symbols-outlined">calendar_today</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 uppercase font-bold tracking-wider">Reserved</p>
+<p class="text-xl font-bold">03</p>
+</div>
+</div>
+</div>
+<!-- Bed Grid Layout -->
+<div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-background-dark/50">
+<div class="mb-6 flex items-center justify-between">
+<h2 class="text-lg font-bold">Floor Map: Section A</h2>
+<div class="flex gap-2">
+<span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-300">East Wing</span>
+<span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-300">Beds: 42-A1 to 42-C4</span>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+<!-- Bed - Occupied -->
+<div class="relative group">
+<div class="cursor-pointer rounded-2xl border-2 border-red-500 bg-red-50/50 p-4 transition-all hover:shadow-lg dark:bg-red-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-red-500">bed</span>
+<span class="text-xs font-bold text-red-600 uppercase">Occupied</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-A1</h4>
+<p class="text-xs text-slate-500">Patient: John Doe</p>
+</div>
+</div>
+<!-- Patient Details Tooltip/Popup -->
+<div class="invisible absolute left-1/2 top-full z-50 mt-2 w-64 -translate-x-1/2 rounded-xl bg-white p-4 shadow-2xl border border-slate-200 group-hover:visible dark:bg-slate-800 dark:border-slate-700">
+<div class="mb-3 flex items-center gap-3">
+<div class="h-10 w-10 rounded-full bg-slate-200 overflow-hidden">
+<img data-alt="Patient profile placeholder" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcIRe4-nkxatilbbf1mmKPZ_bPdQqmZwB48j1sIGlMsV7ZICNN43ZBuP_Unobm43hQ9egg_QP5NE15jlRlRm9G8jYwotmzHbIqz0vjZhpkCVdLfgxFtmPCM96Oemy2o8_uf1o9jblJNT4qYSq2yDRttaK4jRfXX5UelAZ-PgYTAG8DlE5xm3jneaNM0U-m4FV6Sw_jh2upeR_qa3eJpOWKQtvvkpd_FUVa-23g-BNPwT2AbrDtTtD6d9CAXnGylT3nlJCsiet4J-sU"/>
+</div>
+<div>
+<h5 class="text-sm font-bold">John Doe (45Y, M)</h5>
+<p class="text-[10px] text-slate-500">ID: #PT-88219</p>
+</div>
+</div>
+<div class="space-y-1 text-xs">
+<div class="flex justify-between"><span class="text-slate-500">Admitted:</span> <span>Oct 12, 09:15 AM</span></div>
+<div class="flex justify-between"><span class="text-slate-500">Condition:</span> <span class="text-red-500 font-bold">Critical</span></div>
+<div class="flex justify-between"><span class="text-slate-500">Physician:</span> <span>Dr. Smith</span></div>
+</div>
+<button class="mt-4 w-full rounded-lg bg-primary/10 py-2 text-xs font-bold text-primary hover:bg-primary hover:text-white transition-colors">View Records</button>
+</div>
+</div>
+<!-- Bed - Available -->
+<div class="cursor-pointer rounded-2xl border-2 border-green-500 bg-green-50/50 p-4 transition-all hover:shadow-lg dark:bg-green-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-green-500">bed</span>
+<span class="text-xs font-bold text-green-600 uppercase">Available</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-A2</h4>
+<p class="text-xs text-slate-500">Sanitized &amp; Ready</p>
+</div>
+</div>
+<!-- Bed - Reserved -->
+<div class="cursor-pointer rounded-2xl border-2 border-blue-500 bg-blue-50/50 p-4 transition-all hover:shadow-lg dark:bg-blue-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-blue-500">bed</span>
+<span class="text-xs font-bold text-blue-600 uppercase">Reserved</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-A3</h4>
+<p class="text-xs text-slate-500">Arrival: 14:00 PM</p>
+</div>
+</div>
+<!-- Bed - Maintenance -->
+<div class="cursor-pointer rounded-2xl border-2 border-yellow-500 bg-yellow-50/50 p-4 transition-all hover:shadow-lg dark:bg-yellow-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-yellow-500">engineering</span>
+<span class="text-xs font-bold text-yellow-600 uppercase">Maintenance</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-A4</h4>
+<p class="text-xs text-slate-500">Repairing Oxygen Port</p>
+</div>
+</div>
+<!-- More beds generated in grid -->
+<div class="cursor-pointer rounded-2xl border border-slate-200 bg-white p-4 transition-all hover:shadow-lg border-red-500 bg-red-50/50 dark:bg-red-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-red-500">bed</span>
+<span class="text-xs font-bold text-red-600 uppercase">Occupied</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-B1</h4>
+<p class="text-xs text-slate-500">Patient: Sarah Parker</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-green-500 bg-green-50/50 p-4 transition-all hover:shadow-lg dark:bg-green-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-green-500">bed</span>
+<span class="text-xs font-bold text-green-600 uppercase">Available</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-B2</h4>
+<p class="text-xs text-slate-500">Sanitized &amp; Ready</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-green-500 bg-green-50/50 p-4 transition-all hover:shadow-lg dark:bg-green-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-green-500">bed</span>
+<span class="text-xs font-bold text-green-600 uppercase">Available</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-B3</h4>
+<p class="text-xs text-slate-500">Sanitized &amp; Ready</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-red-500 bg-red-50/50 p-4 transition-all hover:shadow-lg dark:bg-red-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-red-500">bed</span>
+<span class="text-xs font-bold text-red-600 uppercase">Occupied</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-B4</h4>
+<p class="text-xs text-slate-500">Patient: Mike Ross</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-green-500 bg-green-50/50 p-4 transition-all hover:shadow-lg dark:bg-green-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-green-500">bed</span>
+<span class="text-xs font-bold text-green-600 uppercase">Available</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-C1</h4>
+<p class="text-xs text-slate-500">Sanitized &amp; Ready</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-green-500 bg-green-50/50 p-4 transition-all hover:shadow-lg dark:bg-green-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-green-500">bed</span>
+<span class="text-xs font-bold text-green-600 uppercase">Available</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-C2</h4>
+<p class="text-xs text-slate-500">Sanitized &amp; Ready</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-yellow-500 bg-yellow-50/50 p-4 transition-all hover:shadow-lg dark:bg-yellow-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-yellow-500">engineering</span>
+<span class="text-xs font-bold text-yellow-600 uppercase">Maintenance</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-C3</h4>
+<p class="text-xs text-slate-500">Electronic Calib.</p>
+</div>
+</div>
+<div class="cursor-pointer rounded-2xl border-2 border-red-500 bg-red-50/50 p-4 transition-all hover:shadow-lg dark:bg-red-950/20">
+<div class="flex items-start justify-between">
+<span class="material-symbols-outlined text-4xl text-red-500">bed</span>
+<span class="text-xs font-bold text-red-600 uppercase">Occupied</span>
+</div>
+<div class="mt-4">
+<h4 class="text-sm font-black text-slate-800 dark:text-slate-200">Bed 42-C4</h4>
+<p class="text-xs text-slate-500">Patient: Elena Ray</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Allocate Bed Modal (Overlaid Simulation) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4 hidden">
+<div class="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-background-dark">
+<div class="flex items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
+<h3 class="text-xl font-bold">New Bed Allocation</h3>
+<button class="text-slate-400 hover:text-slate-600">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<form class="p-6 space-y-4">
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Bed Selection</label>
+<input class="w-full rounded-lg border-slate-200 bg-slate-50 text-sm focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800" readonly="" type="text" value="Bed 42-A2"/>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Admission Date</label>
+<input class="w-full rounded-lg border-slate-200 text-sm focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800" type="date"/>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Search Patient Name/ID</label>
+<div class="relative">
+<input class="w-full rounded-lg border-slate-200 text-sm focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800" placeholder="Start typing name..." type="text"/>
+<span class="material-symbols-outlined absolute right-3 top-2 text-slate-400">search</span>
+</div>
+</div>
+<div class="space-y-1">
+<label class="text-xs font-bold text-slate-500 uppercase">Priority Level</label>
+<select class="w-full rounded-lg border-slate-200 text-sm focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800">
+<option>Routine Admission</option>
+<option>Urgent - Emergency</option>
+<option>High Priority - Transfer</option>
+</select>
+</div>
+<div class="pt-4 flex gap-3">
+<button class="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700" type="button">Cancel</button>
+<button class="flex-1 rounded-xl bg-primary py-3 text-sm font-bold text-white shadow-lg shadow-primary/30 hover:bg-primary/90" type="submit">Confirm Allocation</button>
+</div>
+</form>
+</div>
+</div>
+</div>
+</body></html>

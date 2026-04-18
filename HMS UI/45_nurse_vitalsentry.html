@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Nurse Vitals Entry - HMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .chart-grid {
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px), linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex flex-col h-screen">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="bg-primary p-1.5 rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl">clinical_notes</span>
+</div>
+<div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">Vitals Entry</h2>
+<p class="text-xs text-slate-500 dark:text-slate-400">Hospital Management System</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="hidden md:flex flex-col items-end mr-2">
+<span class="text-sm font-semibold">Nurse Joy Richards</span>
+<span class="text-xs text-slate-500">General Ward • Shift A</span>
+</div>
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden border border-primary/30">
+<img alt="Nurse Profile" class="h-full w-full object-cover" data-alt="Professional nurse profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8UaOMlcaNUPOCsbxb2pX1RMvn2ijbIurTmeVeSY5PJOj66AXV8wgQH_T-uXa2e-hmGxupLrLkGFg1H1vCSeWBaz4bxPOgerqhzKiaOXMTAZXq4bdotXR7A0SndyYbv_gE1mPMYBJv0H7k5JC_ToR8kJcK_ImmBC7zu0jyE9VFQQqKghLTlwo9w-MVxxJ-AmWQNRwheCGjnO3T1JxtjpWR4Yc_kFYdax8ULt1kVIgbW2FkmqyEFojcHK6xsrlJDimTEBizLXFYVb3H"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="hidden lg:flex w-64 flex-col border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 gap-2">
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">person_search</span>
+<span class="font-medium">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/20" href="#">
+<span class="material-symbols-outlined">vital_signs</span>
+<span class="font-medium">Vitals Entry</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-medium">Schedule</span>
+</a>
+<div class="my-4 border-t border-slate-100 dark:border-slate-800"></div>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto p-4 md:p-8">
+<div class="max-w-5xl mx-auto space-y-6">
+<!-- Patient Selection Header -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<div class="h-16 w-16 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-4xl">person</span>
+</div>
+<div>
+<h3 class="text-xl font-bold">John Doe</h3>
+<p class="text-slate-500 text-sm flex items-center gap-2">
+<span class="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">ID: #8821-XP</span>
+<span>•</span>
+<span>Ward 4B, Bed 12</span>
+</p>
+</div>
+</div>
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-lg">swap_horiz</span>
+                            Switch Patient
+                        </button>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Left Column: Entry Form -->
+<div class="lg:col-span-2 space-y-6">
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-primary">edit_note</span>
+<h4 class="font-bold text-lg">Current Vitals Record</h4>
+</div>
+<form class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+<!-- Temp -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Temperature (°F)</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="98.6" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">thermostat</span>
+</div>
+</div>
+<!-- BP -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Blood Pressure (mmHg)</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="120/80" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">monitor_heart</span>
+</div>
+</div>
+<!-- Pulse -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Pulse (BPM)</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="72" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">favorite</span>
+</div>
+</div>
+<!-- SPO2 -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">SPO2 (%)</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="98" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">air</span>
+</div>
+</div>
+<!-- Resp Rate -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Respiratory Rate (BPM)</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="16" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">pulmonology</span>
+</div>
+</div>
+<!-- Weight -->
+<div class="space-y-1.5">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Weight (kg)</label>
+<div class="relative">
+<input class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="75.5" type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xl">scale</span>
+</div>
+</div>
+<!-- Notes -->
+<div class="md:col-span-2 space-y-1.5 mt-2">
+<label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Clinical Notes</label>
+<textarea class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all resize-none" placeholder="Enter any observations or concerns..." rows="3"></textarea>
+</div>
+<div class="md:col-span-2 flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 mt-4">
+<button class="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" type="button">
+                                            Clear Form
+                                        </button>
+<button class="bg-primary text-white px-10 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all active:scale-95" type="submit">
+                                            Save Vitals
+                                        </button>
+</div>
+</form>
+</div>
+<!-- Historical Trend Chart -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm overflow-hidden">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">show_chart</span>
+<h4 class="font-bold text-lg">Vital Trends (72h)</h4>
+</div>
+<div class="flex gap-2">
+<select class="text-xs font-semibold bg-slate-100 dark:bg-slate-800 border-none rounded-lg focus:ring-primary py-1">
+<option>Heart Rate</option>
+<option>Blood Pressure</option>
+<option>Temperature</option>
+</select>
+</div>
+</div>
+<div class="h-64 relative w-full chart-grid rounded-lg border border-slate-100 dark:border-slate-800 flex items-end px-4 pb-8">
+<!-- Simplified Line Chart Visualization -->
+<svg class="w-full h-full overflow-visible" viewbox="0 0 400 100">
+<path d="M 0 60 L 50 55 L 100 70 L 150 40 L 200 45 L 250 30 L 300 50 L 350 45 L 400 40" fill="none" stroke="#ec5b13" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"></path>
+<circle cx="0" cy="60" fill="#ec5b13" r="3"></circle>
+<circle cx="50" cy="55" fill="#ec5b13" r="3"></circle>
+<circle cx="100" cy="70" fill="#ec5b13" r="3"></circle>
+<circle cx="150" cy="40" fill="#ec5b13" r="3"></circle>
+<circle cx="200" cy="45" fill="#ec5b13" r="3"></circle>
+<circle cx="250" cy="30" fill="#ec5b13" r="3"></circle>
+<circle cx="300" cy="50" fill="#ec5b13" r="3"></circle>
+<circle cx="350" cy="45" fill="#ec5b13" r="3"></circle>
+<circle cx="400" cy="40" fill="#ec5b13" r="3"></circle>
+</svg>
+<div class="absolute bottom-0 left-0 w-full flex justify-between px-4 py-2 text-[10px] text-slate-400 font-medium">
+<span>3 Days Ago</span>
+<span>Yesterday</span>
+<span>Now</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Summary & Logs -->
+<div class="space-y-6">
+<!-- Quick Summary Cards -->
+<div class="bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/20 p-5">
+<h5 class="text-sm font-bold text-primary mb-4 uppercase tracking-wider">Last Recorded (2h ago)</h5>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm">
+<p class="text-[10px] font-bold text-slate-500 uppercase">Temp</p>
+<p class="text-lg font-bold">98.4°F</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm">
+<p class="text-[10px] font-bold text-slate-500 uppercase">BP</p>
+<p class="text-lg font-bold">118/76</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm">
+<p class="text-[10px] font-bold text-slate-500 uppercase">Pulse</p>
+<p class="text-lg font-bold">68 BPM</p>
+</div>
+<div class="bg-white dark:bg-slate-800 p-3 rounded-lg shadow-sm border-l-4 border-red-500">
+<p class="text-[10px] font-bold text-slate-500 uppercase">SPO2</p>
+<p class="text-lg font-bold text-red-600">92%</p>
+</div>
+</div>
+</div>
+<!-- Historical Logs List -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-bold">Recent History</h4>
+<a class="text-primary text-xs font-bold hover:underline" href="#">View All</a>
+</div>
+<div class="space-y-4">
+<div class="flex items-start gap-3 pb-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
+<div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
+<span class="material-symbols-outlined text-sm">history</span>
+</div>
+<div>
+<p class="text-xs font-bold">Oct 24, 2023 - 08:30 AM</p>
+<p class="text-xs text-slate-500 mt-1">Recorded by Nurse Joy R.</p>
+<p class="text-[11px] font-medium text-slate-600 dark:text-slate-400 mt-1">Temp: 98.4 | BP: 120/80 | Pulse: 72</p>
+</div>
+</div>
+<div class="flex items-start gap-3 pb-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
+<div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
+<span class="material-symbols-outlined text-sm">history</span>
+</div>
+<div>
+<p class="text-xs font-bold">Oct 23, 2023 - 11:45 PM</p>
+<p class="text-xs text-slate-500 mt-1">Recorded by Nurse Mike S.</p>
+<p class="text-[11px] font-medium text-slate-600 dark:text-slate-400 mt-1">Temp: 99.1 | BP: 130/85 | Pulse: 80</p>
+</div>
+</div>
+<div class="flex items-start gap-3 pb-4 border-b border-slate-100 dark:border-slate-800 last:border-0">
+<div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 shrink-0">
+<span class="material-symbols-outlined text-sm">history</span>
+</div>
+<div>
+<p class="text-xs font-bold">Oct 23, 2023 - 04:00 PM</p>
+<p class="text-xs text-slate-500 mt-1">Recorded by Nurse Joy R.</p>
+<p class="text-[11px] font-medium text-slate-600 dark:text-slate-400 mt-1">Temp: 98.6 | BP: 115/75 | Pulse: 70</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Alert Banner -->
+<div class="bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800 p-4 flex gap-3">
+<span class="material-symbols-outlined text-amber-600 dark:text-amber-400">warning</span>
+<div>
+<p class="text-xs font-bold text-amber-800 dark:text-amber-300">Observation Note</p>
+<p class="text-[11px] text-amber-700 dark:text-amber-400 mt-1">Patient SPO2 has shown a downward trend over the last 12 hours. Monitor closely.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
