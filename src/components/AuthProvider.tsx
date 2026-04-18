@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setUser, setLoading, setError, setActiveRole } from '@/state/authSlice';
+import { setUser, setLoading, setError, setActiveRole, setSuperMode } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname, useRouter } from 'next/navigation';
 import { Role } from '@/types/api';
@@ -45,12 +45,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Logic for authenticated users
       const isSuperUser = user?.roles.includes('SUPER_ADMIN');
 
-      // 1. Super User in Super Mode
-      if (isSuperUser && isSuperMode) {
-        if (pathname !== '/super_admin/dashboard') {
-          router.push('/super_admin/dashboard');
+      // 1. Super User Flow
+      if (isSuperUser) {
+        // If they are ONLY Super Admin, force Super Mode
+        if (user?.roles.length === 1 && !isSuperMode) {
+          dispatch(setSuperMode(true));
+          return;
         }
-        return;
+
+        // If in Super Mode, go to Super Admin Dashboard
+        if (isSuperMode) {
+          if (pathname !== '/super_admin/dashboard') {
+            router.push('/super_admin/dashboard');
+          }
+          return;
+        }
       }
 
       // 2. Hospital Selection Flow
@@ -67,6 +76,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else if (!isSuperUser) {
            // No hospitals and not super admin? 
            if (pathname !== '/unauthorized') router.push('/unauthorized');
+        } else {
+           // Super user with no hospitals and not in super mode? 
+           // Should probably be in super mode
+           dispatch(setSuperMode(true));
         }
         return;
       }

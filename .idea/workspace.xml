@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/AuthProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AuthProvider.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,7 +68,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "#1 on US__001__F",
+    "git-widget-placeholder": "#2 on US__001__F",
     "js.debugger.nextJs.config.created.client": "true",
     "js.debugger.nextJs.config.created.server": "true",
     "junie.onboarding.icon.badge.shown": "true",
@@ -134,7 +135,7 @@
       <workItem from="1776319940996" duration="1940000" />
       <workItem from="1776328938914" duration="25257000" />
       <workItem from="1776447655368" duration="6624000" />
-      <workItem from="1776463824892" duration="12003000" />
+      <workItem from="1776463824892" duration="15518000" />
     </task>
     <task id="LOCAL-00001" summary="login page">
       <option name="closed" value="true" />
@@ -304,7 +305,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776496352720</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="login page">
+      <option name="closed" value="true" />
+      <created>1776509665701</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1776509665701</updated>
+    </task>
+    <task id="LOCAL-00023" summary="login page">
+      <option name="closed" value="true" />
+      <created>1776511854020</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1776511854020</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,7 +339,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/login/page.tsx</url>
-          <line>32</line>
+          <line>38</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="1" />
         </line-breakpoint>
