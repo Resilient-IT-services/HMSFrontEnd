@@ -7,7 +7,7 @@ import { Table } from '@/components/ui/Table';
 import { FormField } from '@/components/ui/FormField';
 import { Modal } from '@/components/ui/Modal';
 import apiClient from '@/services/apiClient';
-import { ApiResponse, HospitalResponse, UserResponse, Role } from '@/types/api';
+import { ApiResponse, HospitalResponse, UserResponse, Role, CreateUserRequest } from '@/types/api';
 
 const SuperAdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<'hospitals' | 'users'>('hospitals');
@@ -20,7 +20,16 @@ const SuperAdminDashboard = () => {
   const [newHospital, setNewHospital] = useState({ name: '', code: '', address: '' });
   
   const [showUserForm, setShowUserForm] = useState(false);
-  const [newUser, setNewUser] = useState({ username: '', password: '', roles: [] as Role[], hospitalId: 0 });
+  const [newUser, setNewUser] = useState<CreateUserRequest & { hospital_id?: number }>({ 
+    username: '', 
+    password: '', 
+    roles: [] as Role[],
+    fullName: '',
+    gender: 'MALE',
+    dob: '',
+    phone: '',
+    hospital_id: 0
+  });
 
   const roleOptions: Role[] = ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE', 'SUPER_ADMIN'];
 
@@ -71,10 +80,42 @@ const SuperAdminDashboard = () => {
       return;
     }
     try {
-      const response = await apiClient.post<ApiResponse<UserResponse>>('/users', newUser);
-      if (response.data.success) {
+      // Step 1: Create User
+      const { hospital_id, ...createRequest } = newUser;
+      const response = await apiClient.post<ApiResponse<UserResponse>>('/users', createRequest);
+      
+      if (response.data.success && hospital_id) {
+        // Step 2: Allocate to Hospital
+        await apiClient.post(`/users/allocate`, {
+          user_id: response.data.data?.id,
+          hospital_id: hospital_id,
+          roles: newUser.roles
+        });
+        
         setShowUserForm(false);
-        setNewUser({ username: '', password: '', roles: [], hospitalId: 0 });
+        setNewUser({ 
+          username: '', 
+          password: '', 
+          roles: [], 
+          fullName: '',
+          gender: 'MALE',
+          dob: '',
+          phone: '',
+          hospital_id: 0
+        });
+        fetchData();
+      } else if (response.data.success) {
+        setShowUserForm(false);
+        setNewUser({ 
+          username: '', 
+          password: '', 
+          roles: [], 
+          fullName: '',
+          gender: 'MALE',
+          dob: '',
+          phone: '',
+          hospital_id: 0
+        });
         fetchData();
       }
     } catch (error) {
@@ -308,8 +349,8 @@ const SuperAdminDashboard = () => {
           <FormField label="Assign Hospital" required>
             <select 
               className="form-input"
-              value={newUser.hospitalId}
-              onChange={(e) => setNewUser({...newUser, hospitalId: parseInt(e.target.value)})}
+              value={newUser.hospital_id}
+              onChange={(e) => setNewUser({...newUser, hospital_id: parseInt(e.target.value)})}
               required
             >
               <option value="">Select a Hospital</option>
@@ -318,6 +359,38 @@ const SuperAdminDashboard = () => {
               ))}
             </select>
           </FormField>
+          <FormField label="Full Name" required>
+            <input 
+              className="form-input" 
+              value={newUser.fullName}
+              onChange={(e) => setNewUser({...newUser, fullName: e.target.value})}
+              placeholder="e.g. John Doe"
+              required
+            />
+          </FormField>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Gender" required>
+              <select 
+                className="form-input" 
+                value={newUser.gender}
+                onChange={(e) => setNewUser({...newUser, gender: e.target.value as any})}
+                required
+              >
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </FormField>
+            <FormField label="Date of Birth" required>
+              <input 
+                type="date"
+                className="form-input" 
+                value={newUser.dob}
+                onChange={(e) => setNewUser({...newUser, dob: e.target.value})}
+                required
+              />
+            </FormField>
+          </div>
           <FormField label="Username" required>
             <input 
               className="form-input" 

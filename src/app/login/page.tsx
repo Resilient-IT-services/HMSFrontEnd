@@ -22,15 +22,21 @@ const LoginPage = () => {
     setLocalError(null);
 
     try {
-      const response = await authService.login(username, password);
-      if (response.success && response.data) {
-        dispatch(setUser(response.data));
-        router.push(`/${response.data.roles[0].toLowerCase()}/dashboard`);
+      const loginResponse = await authService.login(username, password);
+      if (loginResponse.success) {
+        // Fetch user profile after login sets cookie
+        const meResponse = await authService.me();
+        if (meResponse.success && meResponse.data) {
+          dispatch(setUser(meResponse.data));
+          // AuthProvider will now handle redirection based on roles/hospitals
+        } else {
+          setLocalError('Failed to fetch user profile');
+        }
       } else {
-        setLocalError(response.message || 'Login failed');
+        setLocalError(loginResponse.error?.message || 'Login failed');
       }
     } catch (err: any) {
-      setLocalError(err.response?.data?.message || 'Invalid credentials');
+      setLocalError(err.response?.data?.error?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
     }

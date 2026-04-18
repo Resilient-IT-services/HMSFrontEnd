@@ -7,7 +7,7 @@ import { Table } from '@/components/ui/Table';
 import { FormField } from '@/components/ui/FormField';
 import { Modal } from '@/components/ui/Modal';
 import apiClient from '@/services/apiClient';
-import { ApiResponse, UserResponse, Role } from '@/types/api';
+import { ApiResponse, UserResponse, Role, CreateUserRequest } from '@/types/api';
 import { UserPlus, Search, Edit2, Trash2 } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
@@ -19,11 +19,14 @@ const UserManagement = () => {
   const [showUserForm, setShowUserForm] = useState(false);
   const currentUser = useSelector((state: RootState) => state.auth.user);
   
-  const [newUser, setNewUser] = useState({ 
+  const [newUser, setNewUser] = useState<CreateUserRequest>({ 
     username: '', 
     password: '', 
-    roles: [] as Role[], 
-    hospitalId: currentUser?.hospitalId || 0 
+    roles: [] as Role[],
+    fullName: '',
+    gender: 'MALE',
+    dob: '',
+    phone: ''
   });
 
   const fetchUsers = async () => {
@@ -58,7 +61,10 @@ const UserManagement = () => {
           username: '', 
           password: '', 
           roles: [], 
-          hospitalId: currentUser?.hospitalId || 0 
+          fullName: '',
+          gender: 'MALE',
+          dob: '',
+          phone: ''
         });
         fetchUsers();
       }
@@ -157,6 +163,46 @@ const UserManagement = () => {
         title="Create New User"
       >
         <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+          <FormField label="Full Name" required>
+            <input 
+              className="form-input" 
+              value={newUser.fullName}
+              onChange={(e) => setNewUser({...newUser, fullName: e.target.value})}
+              placeholder="e.g. John Doe"
+              required
+            />
+          </FormField>
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Gender" required>
+              <select 
+                className="form-input" 
+                value={newUser.gender}
+                onChange={(e) => setNewUser({...newUser, gender: e.target.value as any})}
+                required
+              >
+                <option value="MALE">Male</option>
+                <option value="FEMALE">Female</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </FormField>
+            <FormField label="Date of Birth" required>
+              <input 
+                type="date"
+                className="form-input" 
+                value={newUser.dob}
+                onChange={(e) => setNewUser({...newUser, dob: e.target.value})}
+                required
+              />
+            </FormField>
+          </div>
+          <FormField label="Phone Number">
+            <input 
+              className="form-input" 
+              value={newUser.phone}
+              onChange={(e) => setNewUser({...newUser, phone: e.target.value})}
+              placeholder="e.g. +91 9876543210"
+            />
+          </FormField>
           <FormField label="Username" required>
             <input 
               className="form-input" 
