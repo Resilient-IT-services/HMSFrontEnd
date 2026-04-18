@@ -20,7 +20,7 @@ const SuperAdminDashboard = () => {
   const [newHospital, setNewHospital] = useState({ name: '', code: '', address: '' });
   
   const [showUserForm, setShowUserForm] = useState(false);
-  const [newUser, setNewUser] = useState<CreateUserRequest & { hospital_id?: number }>({ 
+  const [newUser, setNewUser] = useState<CreateUserRequest & { hospitalId?: number }>({
     username: '', 
     password: '', 
     roles: [] as Role[],
@@ -28,7 +28,7 @@ const SuperAdminDashboard = () => {
     gender: 'MALE',
     dob: '',
     phone: '',
-    hospital_id: 0
+    hospitalId: 0
   });
 
   const roleOptions: Role[] = ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE', 'SUPER_ADMIN'];
@@ -81,17 +81,8 @@ const SuperAdminDashboard = () => {
     }
     try {
       // Step 1: Create User
-      const { hospital_id, ...createRequest } = newUser;
-      const response = await apiClient.post<ApiResponse<UserResponse>>('/users', createRequest);
-      
-      if (response.data.success && hospital_id) {
-        // Step 2: Allocate to Hospital
-        await apiClient.post(`/users/allocate`, {
-          user_id: response.data.data?.id,
-          hospital_id: hospital_id,
-          roles: newUser.roles
-        });
-        
+      const response = await apiClient.post<ApiResponse<UserResponse>>('/users', newUser);
+      if (response.data.success) {
         setShowUserForm(false);
         setNewUser({ 
           username: '', 
@@ -101,20 +92,7 @@ const SuperAdminDashboard = () => {
           gender: 'MALE',
           dob: '',
           phone: '',
-          hospital_id: 0
-        });
-        fetchData();
-      } else if (response.data.success) {
-        setShowUserForm(false);
-        setNewUser({ 
-          username: '', 
-          password: '', 
-          roles: [], 
-          fullName: '',
-          gender: 'MALE',
-          dob: '',
-          phone: '',
-          hospital_id: 0
+          hospitalId: 0
         });
         fetchData();
       }
@@ -349,8 +327,8 @@ const SuperAdminDashboard = () => {
           <FormField label="Assign Hospital" required>
             <select 
               className="form-input"
-              value={newUser.hospital_id}
-              onChange={(e) => setNewUser({...newUser, hospital_id: parseInt(e.target.value)})}
+              value={newUser.hospitalId}
+              onChange={(e) => setNewUser({...newUser, hospitalId: parseInt(e.target.value)})}
               required
             >
               <option value="">Select a Hospital</option>

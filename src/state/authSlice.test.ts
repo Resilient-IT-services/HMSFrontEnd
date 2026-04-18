@@ -4,12 +4,12 @@ import { UserProfileResponse } from '@/types/api';
 
 describe('authSlice', () => {
   const mockUser: UserProfileResponse = {
-    user_id: 1,
-    hospital_id: 101,
+    userId: 1,
+    hospitalId: 101,
     username: 'testuser',
     roles: ['DOCTOR', 'ADMIN'],
     hospitals: [
-      { hospital_id: 101, hospital_name: 'Hospital A', hospital_code: 'HA', roles: ['DOCTOR'] }
+      { hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR'] }
     ]
   };
 

@@ -31,8 +31,8 @@ const SelectHospitalPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {user?.hospitals.map((h) => (
             <div 
-              key={h.hospital_id}
-              onClick={() => handleSelect(h.hospital_id)}
+              key={h.hospitalId}
+              onClick={() => handleSelect(h.hospitalId)}
               className="cursor-pointer group"
             >
               <Card className="hover:border-[var(--primary)] transition-all h-full">
@@ -40,8 +40,8 @@ const SelectHospitalPage = () => {
                   <div className="w-16 h-16 rounded-2xl bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center mb-4 group-hover:bg-[var(--primary)] group-hover:text-white transition-all">
                     <span className="material-symbols-outlined text-3xl">apartment</span>
                   </div>
-                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">{h.hospital_name}</h3>
-                  <p className="text-xs font-bold text-[var(--primary)] uppercase tracking-widest">{h.hospital_code}</p>
+                  <h3 className="text-lg font-bold text-[var(--text-primary)] mb-1">{h.hospitalName}</h3>
+                  <p className="text-xs font-bold text-[var(--primary)] uppercase tracking-widest">{h.hospitalCode}</p>
                   <div className="mt-4 flex flex-wrap justify-center gap-1">
                     {h.roles.map(r => (
                       <span key={r} className="px-2 py-0.5 bg-[var(--background)] text-[var(--text-secondary)] text-[10px] font-bold rounded">

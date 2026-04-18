@@ -22,15 +22,15 @@ export interface PageResponse<T> {
 
 // User types
 export interface HospitalMembershipResponse {
-  hospital_id: number;
-  hospital_name: string;
-  hospital_code: string;
+  hospitalId: number;
+  hospitalName: string;
+  hospitalCode: string;
   roles: Role[];
 }
 
 export interface UserProfileResponse {
-  user_id: number;
-  hospital_id: number | null;
+  userId: number;
+  hospitalId: number | null;
   username: string;
   roles: Role[];
   hospitals: HospitalMembershipResponse[];
@@ -42,7 +42,7 @@ export interface LoginRequest {
 }
 
 export interface SelectHospitalRequest {
-  hospital_id: number;
+  hospitalId: number;
 }
 
 export interface UserResponse {

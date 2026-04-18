@@ -21,7 +21,7 @@ export const authService = {
   },
 
   async selectHospital(hospitalId: number): Promise<ApiResponse<UserProfileResponse>> {
-    const request: SelectHospitalRequest = { hospital_id: hospitalId };
+    const request: SelectHospitalRequest = { hospitalId };
     const response = await apiClient.post<ApiResponse<UserProfileResponse>>('/auth/select-hospital', request);
     return response.data;
   },

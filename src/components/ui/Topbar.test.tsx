@@ -22,11 +22,11 @@ const createMockStore = (initialState?: any) => {
 describe('Topbar', () => {
   const mockUser = {
     username: 'john_doe',
-    hospital_id: 101,
+    hospitalId: 101,
     roles: ['DOCTOR', 'ADMIN'],
     hospitals: [
-      { hospital_id: 101, hospital_name: 'City Clinic', hospital_code: 'CC', roles: ['DOCTOR'] },
-      { hospital_id: 102, hospital_name: 'Metro Hospital', hospital_code: 'MH', roles: ['ADMIN'] }
+      { hospitalId: 101, hospitalName: 'City Clinic', hospitalCode: 'CC', roles: ['DOCTOR'] },
+      { hospitalId: 102, hospitalName: 'Metro Hospital', hospitalCode: 'MH', roles: ['ADMIN'] }
     ]
   };
 
@@ -61,7 +61,7 @@ describe('Topbar', () => {
 
   it('handles hospital switch', async () => {
     const store = createMockStore({ user: mockUser, activeRole: 'DOCTOR' });
-    (authService.selectHospital as any).mockResolvedValue({ success: true, data: { ...mockUser, hospital_id: 102 } });
+    (authService.selectHospital as any).mockResolvedValue({ success: true, data: { ...mockUser, hospitalId: 102 } });
 
     render(
       <Provider store={store}>

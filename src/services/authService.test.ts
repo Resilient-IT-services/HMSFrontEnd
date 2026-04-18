@@ -20,7 +20,7 @@ describe('authService', () => {
   });
 
   it('me should call /auth/me', async () => {
-    const mockRes = { data: { success: true, data: { user_id: 1 } } };
+    const mockRes = { data: { success: true, data: { userId: 1 } } };
     (apiClient.get as any).mockResolvedValue(mockRes);
 
     const result = await authService.me();
@@ -42,7 +42,7 @@ describe('authService', () => {
     (apiClient.post as any).mockResolvedValue(mockRes);
 
     const result = await authService.selectHospital(101);
-    expect(apiClient.post).toHaveBeenCalledWith('/auth/select-hospital', { hospital_id: 101 });
+    expect(apiClient.post).toHaveBeenCalledWith('/auth/select-hospital', { hospitalId: 101 });
     expect(result).toEqual(mockRes.data);
   });
 });

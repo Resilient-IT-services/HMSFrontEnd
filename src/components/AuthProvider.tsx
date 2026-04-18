@@ -63,14 +63,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       // 2. Hospital Selection Flow
-      if (!user?.hospital_id) {
+      if (!user?.hospitalId) {
         if (user?.hospitals && user.hospitals.length > 1) {
           if (pathname !== '/select-hospital') {
             router.push('/select-hospital');
           }
         } else if (user?.hospitals && user.hospitals.length === 1) {
           // Auto select if only one
-          authService.selectHospital(user.hospitals[0].hospital_id).then(res => {
+          authService.selectHospital(user.hospitals[0].hospitalId).then(res => {
             if (res.success && res.data) dispatch(setUser(res.data));
           });
         } else if (!isSuperUser) {

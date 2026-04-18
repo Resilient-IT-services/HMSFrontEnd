@@ -19,7 +19,7 @@ vi.mock('@/components/ui/MainLayout', () => ({
 
 const createMockStore = () => configureStore({ 
   reducer: { auth: authReducer },
-  preloadedState: { auth: { user: { hospital_id: 1 } } as any }
+  preloadedState: { auth: { user: { hospitalId: 1 } } as any }
 });
 
 describe('UserManagement', () => {

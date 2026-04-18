@@ -42,7 +42,7 @@ describe('LoginPage', () => {
     (authService.login as any).mockResolvedValue({ success: true });
     (authService.me as any).mockResolvedValue({ 
       success: true, 
-      data: { user_id: 1, roles: ['DOCTOR'], hospitals: [{ hospital_id: 101 }] } 
+      data: { userId: 1, roles: ['DOCTOR'], hospitals: [{ hospitalId: 101 }] } 
     });
 
     render(

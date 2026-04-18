@@ -19,11 +19,16 @@
   --color-info-light: var(--info-light);
 
   --spacing-xs: 4px;
-  --spacing-sm: 8px;
-  --spacing-md: 12px;
-  --spacing-lg: 16px;
-  --spacing-xl: 24px;
-  --spacing-xxl: 32px;
+  --spacing-sm-gap: 8px;
+  --spacing-md-gap: 12px;
+  --spacing-lg-gap: 16px;
+  --spacing-xl-gap: 24px;
+  --spacing-xxl-gap: 32px;
+
+  --width-md: 28rem;
+  --width-lg: 32rem;
+  --width-xl: 36rem;
+  --width-2xl: 42rem;
 
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;

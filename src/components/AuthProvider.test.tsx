@@ -65,10 +65,10 @@ describe('AuthProvider', () => {
 
   it('redirects to dashboard if authenticated and on login page', async () => {
     const mockUser = {
-      user_id: 1,
-      hospital_id: 101,
+      userId: 1,
+      hospitalId: 101,
       roles: ['DOCTOR'],
-      hospitals: [{ hospital_id: 101, roles: ['DOCTOR'] }]
+      hospitals: [{ hospitalId: 101, roles: ['DOCTOR'] }]
     };
     (authService.me as any).mockResolvedValue({ success: true, data: mockUser });
     (usePathname as any).mockReturnValue('/login');

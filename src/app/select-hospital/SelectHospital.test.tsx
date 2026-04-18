@@ -14,7 +14,7 @@ const createMockStore = () => configureStore({
     auth: {
       user: {
         hospitals: [
-          { hospital_id: 1, hospital_name: 'Hospital 1', hospital_code: 'H1', roles: [] }
+          { hospitalId: 1, hospitalName: 'Hospital 1', hospitalCode: 'H1', roles: [] }
         ]
       }
     } as any

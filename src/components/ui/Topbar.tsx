@@ -49,7 +49,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
     setIsProfileOpen(false);
   };
 
-  const currentHospitalName = user?.hospitals.find(h => h.hospital_id === user.hospital_id)?.hospital_name || 'System Level';
+  const currentHospitalName = user?.hospitals.find(h => h.hospitalId === user.hospitalId)?.hospitalName || 'System Level';
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-3 lg:px-10">
@@ -132,16 +132,16 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
                     <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Hospital</p>
                     {user.hospitals.map(h => (
                       <button
-                        key={h.hospital_id}
-                        onClick={() => handleHospitalSwitch(h.hospital_id)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${user.hospital_id === h.hospital_id ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]'}`}
+                        key={h.hospitalId}
+                        onClick={() => handleHospitalSwitch(h.hospitalId)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${user.hospitalId === h.hospitalId ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]'}`}
                       >
                         <span className="material-symbols-outlined text-xl">apartment</span>
                         <div className="text-left">
-                          <p className="text-sm font-bold leading-none">{h.hospital_name}</p>
-                          <p className="text-[10px] text-[var(--text-secondary)] mt-1">{h.hospital_code}</p>
+                          <p className="text-sm font-bold leading-none">{h.hospitalName}</p>
+                          <p className="text-[10px] text-[var(--text-secondary)] mt-1">{h.hospitalCode}</p>
                         </div>
-                        {user.hospital_id === h.hospital_id && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
+                        {user.hospitalId === h.hospitalId && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
                       </button>
                     ))}
                   </div>
