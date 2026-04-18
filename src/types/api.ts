@@ -21,17 +21,34 @@ export interface PageResponse<T> {
 }
 
 // User types
-export interface UserProfile {
-  userId: number;
+export interface HospitalMembershipResponse {
   hospitalId: number;
+  hospitalName: string;
+  hospitalCode: string;
+  roles: Role[];
+}
+
+export interface UserProfileResponse {
+  userId: number;
+  hospitalId: number | null;
   username: string;
-  role: Role;
+  roles: Role[];
+  hospitals: HospitalMembershipResponse[];
+}
+
+export interface LoginRequest {
+  username: string;
+  password?: string;
+}
+
+export interface SelectHospitalRequest {
+  hospitalId: number;
 }
 
 export interface UserResponse {
   id: number;
   username: string;
-  role: Role;
+  roles: Role[];
   active: boolean;
   createdAt: string;
 }
@@ -66,8 +83,11 @@ export interface CreateHospitalRequest {
 export interface CreateUserRequest {
   username: string;
   password?: string;
-  role: Role;
-  hospitalId: number;
+  roles: Role[];
+  fullName: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  dob: string;
+  phone?: string;
 }
 
 // Appointment types

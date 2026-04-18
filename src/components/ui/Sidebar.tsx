@@ -11,7 +11,7 @@ import { authService } from '@/services/authService';
 const Sidebar = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const user = useSelector((state: RootState) => state.auth.user);
+  const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = async () => {
     try {
@@ -23,18 +23,32 @@ const Sidebar = () => {
     }
   };
 
+  const rolePathMap: Record<string, string> = {
+    'RECEPTIONIST': 'reception',
+    'DOCTOR': 'doctor',
+    'PHARMACIST': 'pharmacy',
+    'ADMIN': 'admin',
+    'SUPER_ADMIN': 'super_admin',
+    'NURSE': 'nurse'
+  };
+
+  // If in super mode, we act as super admin regardless of activeRole
+  const effectiveRole = isSuperMode ? 'SUPER_ADMIN' : activeRole;
+  const dashboardPath = effectiveRole ? (rolePathMap[effectiveRole] || effectiveRole.toLowerCase()) : 'unauthorized';
+
   const menuItems = [
-    { name: 'Dashboard', icon: 'dashboard', href: `/${user?.role?.toLowerCase()}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
-    { name: 'Patients', icon: 'group', href: '/reception/patients', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
-    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN'] },
-    { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
+    { name: 'Dashboard', icon: 'dashboard', href: `/${dashboardPath}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] },
+    { name: 'Patients', icon: 'group', href: '/reception/patients', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN', 'SUPER_ADMIN'] },
+    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN', 'SUPER_ADMIN'] },
+    { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
+    { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
     { name: 'User Management', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },
+    { name: 'Hospitals', icon: 'apartment', href: '/super_admin/hospitals', roles: ['SUPER_ADMIN'] },
     { name: 'Settings', icon: 'settings', href: '/settings', roles: ['ADMIN', 'SUPER_ADMIN'] },
   ];
 
   const filteredMenuItems = menuItems.filter(item => 
-    user?.role && item.roles.includes(user.role)
+    effectiveRole && item.roles.includes(effectiveRole)
   );
 
   return (

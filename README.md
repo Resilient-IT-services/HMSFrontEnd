@@ -10,7 +10,7 @@ This is a **role-driven operational system**, not a generic CRUD application. Th
 
 All frontend behavior is strictly aligned with backend contracts defined in:
 ```
-/apidoc.json
+{backendURL}/v3/api-docs
 ```
 
 ---
@@ -264,7 +264,7 @@ if (user.role !== 'DOCTOR') {
 
 ## Source
 ```
-/apidoc.json
+{backendURL}/v3/api-docs
 ```
 
 ## Rules
@@ -419,7 +419,7 @@ npm run dev
 
 When fixing issues, follow this order:
 
-1. Check `apidoc.json`
+1. Check `{backendURL}/v3/api-docs` for apidocs
 2. Verify service layer
 3. Check module placement
 4. Ensure cookie is sent
