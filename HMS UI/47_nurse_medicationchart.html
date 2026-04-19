@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>47_Nurse_MedicationChart</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .status-missed { color: #dc2626; }
+        .status-given { color: #16a34a; }
+        input[type="checkbox"]:checked { background-color: #ec5b13; border-color: #ec5b13; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 lg:px-10">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-6 flex items-center justify-center">
+<span class="material-symbols-outlined text-2xl">medical_services</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">Medication Administration</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Patients</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">MAR Chart</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Inventory</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 items-center">
+<label class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-xl h-full bg-slate-100 dark:bg-slate-800">
+<div class="text-slate-500 flex items-center justify-center pl-4 rounded-l-xl">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-transparent focus:outline-0 focus:ring-0 placeholder:text-slate-500 px-4 text-base font-normal" placeholder="Find medication..." value=""/>
+</div>
+</label>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">notifications</span>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-slate-200 dark:border-slate-700" data-alt="Nurse profile avatar thumbnail" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDM_qjEC5T2fT-6H7zmPrvL16Z8zg8lbaxTUGkAG6-EJVtkrB-dZ3Yd00bfAYLPDAK0iDM0kgfoEiKi6UJPHF6hX4ir1fLOmNpTWPyv-tOFQ2i_cZkOdjK5wR7U8mqnwl_PeOom3zYza_ncSFUlubKrc9g4RyMeqBtz6w8PKaP6obryFgkt27YXMzqHvL7GW5lt-tQE6VMM-f8BumWh5c1SO_HdXCVQL6ZnxI-iZ2TNRv06YZZY8yQXnF7R56reaC4mLI169EHNYJJo");'></div>
+</div>
+</div>
+</header>
+<main class="flex flex-1 flex-col lg:flex-row">
+<aside class="w-full lg:w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 space-y-6">
+<div class="flex items-center gap-4">
+<div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">person</span>
+</div>
+<div>
+<h3 class="font-bold text-lg">Johnathan Doe</h3>
+<p class="text-slate-500 text-sm">Room 402-B | Floor 4</p>
+</div>
+</div>
+<div class="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 p-4 rounded-xl">
+<div class="flex items-center gap-2 text-red-600 dark:text-red-400 mb-1">
+<span class="material-symbols-outlined text-sm">warning</span>
+<span class="text-xs font-bold uppercase tracking-wider">Critical Allergies</span>
+</div>
+<p class="text-red-700 dark:text-red-300 font-semibold">Penicillin, Latex, NSAIDs</p>
+</div>
+<div class="space-y-3">
+<p class="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">Patient Vitals</p>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<span class="text-[10px] text-slate-500 uppercase block">BP</span>
+<span class="font-bold">120/80</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+<span class="text-[10px] text-slate-500 uppercase block">Pulse</span>
+<span class="font-bold">72 bpm</span>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-slate-100 dark:border-slate-800">
+<button class="w-full bg-primary text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+<span class="material-symbols-outlined">add</span>
+                            New Order
+                        </button>
+</div>
+</aside>
+<div class="flex-1 p-4 lg:p-8 bg-background-light dark:bg-background-dark overflow-auto">
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Daily Medication Chart</h1>
+<p class="text-slate-500">October 24, 2023 — Shift: Day (07:00 - 19:00)</p>
+</div>
+<div class="flex gap-2 bg-white dark:bg-slate-900 p-1 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
+<button class="px-4 py-2 bg-primary text-white rounded-lg font-medium text-sm">Active</button>
+<button class="px-4 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-medium text-sm transition-colors">PRN</button>
+<button class="px-4 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg font-medium text-sm transition-colors">Stat</button>
+</div>
+</div>
+<div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500 p-4 rounded-r-xl mb-6 flex items-start gap-4">
+<span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 mt-1">error</span>
+<div class="flex-1">
+<h4 class="text-yellow-800 dark:text-yellow-200 font-bold text-sm">Missed Dose Alert</h4>
+<p class="text-yellow-700 dark:text-yellow-300 text-sm">Lisinopril 10mg was not administered during the Morning slot (08:00). Please document reason or administer if appropriate.</p>
+</div>
+<button class="text-yellow-800 dark:text-yellow-200 text-sm font-bold underline">Acknowledge</button>
+</div>
+<div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+<div class="overflow-x-auto @container">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+<th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider">Medication Details</th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-center">Morning<br/><span class="text-[10px] normal-case font-normal">(08:00)</span></th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-center">Noon<br/><span class="text-[10px] normal-case font-normal">(12:00)</span></th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-center">Evening<br/><span class="text-[10px] normal-case font-normal">(18:00)</span></th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-center">Night<br/><span class="text-[10px] normal-case font-normal">(22:00)</span></th>
+<th class="px-6 py-4 text-xs font-bold uppercase text-slate-500 tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="font-bold text-slate-900 dark:text-slate-100">Aspirin EC 81mg</div>
+<div class="text-xs text-slate-500">Route: Oral | Frequency: Once Daily</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-green-500 fill-1">check_circle</span>
+<span class="text-[10px] text-green-600 font-bold uppercase">Given</span>
+<span class="text-[9px] text-slate-400 italic">08:05 - RM</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center opacity-30 cursor-not-allowed">
+<span class="text-xs text-slate-400">—</span>
+</td>
+<td class="px-6 py-5 text-center opacity-30 cursor-not-allowed">
+<span class="text-xs text-slate-400">—</span>
+</td>
+<td class="px-6 py-5 text-center opacity-30 cursor-not-allowed">
+<span class="text-xs text-slate-400">—</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-400">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors bg-red-50/30 dark:bg-red-900/10">
+<td class="px-6 py-5 border-l-4 border-red-500">
+<div class="font-bold text-slate-900 dark:text-slate-100">Lisinopril 10mg</div>
+<div class="text-xs text-slate-500">Route: Oral | Frequency: Daily</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-red-500">error</span>
+<span class="text-[10px] text-red-600 font-bold uppercase">Missed</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<input class="size-5 rounded border-slate-300 dark:border-slate-700 bg-transparent text-primary focus:ring-primary/20 opacity-30" disabled="" type="checkbox"/>
+</td>
+<td class="px-6 py-5 text-center">
+<input class="size-5 rounded border-slate-300 dark:border-slate-700 bg-transparent text-primary focus:ring-primary/20 opacity-30" disabled="" type="checkbox"/>
+</td>
+<td class="px-6 py-5 text-center">
+<input class="size-5 rounded border-slate-300 dark:border-slate-700 bg-transparent text-primary focus:ring-primary/20 opacity-30" disabled="" type="checkbox"/>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-lg hover:bg-primary/20 transition-colors">Action</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="font-bold text-slate-900 dark:text-slate-100">Metformin HCL 500mg</div>
+<div class="text-xs text-slate-500">Route: Oral | Frequency: BID (Twice Daily)</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-green-500 fill-1">check_circle</span>
+<span class="text-[10px] text-green-600 font-bold uppercase">Given</span>
+<span class="text-[9px] text-slate-400 italic">08:12 - RM</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center opacity-30 cursor-not-allowed">
+<span class="text-xs text-slate-400">—</span>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-2 group">
+<input class="size-6 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-primary focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+<span class="text-[9px] font-bold text-slate-400 group-hover:text-primary uppercase tracking-tighter">Due</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center opacity-30 cursor-not-allowed">
+<span class="text-xs text-slate-400">—</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-400">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="font-bold text-slate-900 dark:text-slate-100">Furosemide 20mg</div>
+<div class="text-xs text-slate-500">Route: IV | Frequency: Q6H</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-green-500 fill-1">check_circle</span>
+<span class="text-[10px] text-green-600 font-bold uppercase">Given</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-green-500 fill-1">check_circle</span>
+<span class="text-[10px] text-green-600 font-bold uppercase">Given</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-2 group">
+<input class="size-6 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-primary focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+<span class="text-[9px] font-bold text-slate-400 group-hover:text-primary uppercase tracking-tighter">Due</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-2 opacity-50">
+<input class="size-6 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-primary focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+<span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Scheduled</span>
+</div>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-400">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+<td class="px-6 py-5">
+<div class="font-bold text-slate-900 dark:text-slate-100">Insulin Aspart</div>
+<div class="text-xs text-slate-500">Route: SubQ | Frequency: TID with meals</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-green-500 fill-1">check_circle</span>
+<span class="text-[10px] text-green-600 font-bold uppercase text-center">Given<br/>6 Units</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-green-500 fill-1">check_circle</span>
+<span class="text-[10px] text-green-600 font-bold uppercase text-center">Given<br/>4 Units</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center">
+<div class="flex flex-col items-center gap-2 group">
+<input class="size-6 rounded border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-primary focus:ring-primary/20 cursor-pointer" type="checkbox"/>
+<span class="text-[9px] font-bold text-slate-400 group-hover:text-primary uppercase tracking-tighter">Scale</span>
+</div>
+</td>
+<td class="px-6 py-5 text-center opacity-30 cursor-not-allowed">
+<span class="text-xs text-slate-400">—</span>
+</td>
+<td class="px-6 py-5 text-right">
+<button class="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg text-slate-400">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800">
+<h5 class="font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">history</span>
+                                Recent Activity
+                            </h5>
+<ul class="space-y-4">
+<li class="flex gap-3">
+<div class="size-2 rounded-full bg-green-500 mt-1.5 shrink-0"></div>
+<div>
+<p class="text-sm font-medium">Metformin administered</p>
+<p class="text-[10px] text-slate-400">By Nurse Rose Miller at 12:45 PM</p>
+</div>
+</li>
+<li class="flex gap-3">
+<div class="size-2 rounded-full bg-primary mt-1.5 shrink-0"></div>
+<div>
+<p class="text-sm font-medium">New Order: Morphine PRN</p>
+<p class="text-[10px] text-slate-400">By Dr. Sarah Chen at 11:30 AM</p>
+</div>
+</li>
+<li class="flex gap-3">
+<div class="size-2 rounded-full bg-slate-300 mt-1.5 shrink-0"></div>
+<div>
+<p class="text-sm font-medium">Shift handover complete</p>
+<p class="text-[10px] text-slate-400">At 07:00 AM</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 lg:col-span-2">
+<h5 class="font-bold mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-xl">assignment_late</span>
+                                Nurse Notes for MAR
+                            </h5>
+<textarea class="w-full h-32 bg-slate-50 dark:bg-slate-800 border-none rounded-xl focus:ring-1 focus:ring-primary p-4 text-sm resize-none placeholder:text-slate-400" placeholder="Enter clinical observations or administration notes here..."></textarea>
+<div class="flex justify-end mt-4">
+<button class="px-6 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg font-bold text-sm hover:opacity-80 transition-all">Save Note</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+<div class="flex items-center gap-4 text-xs text-slate-500">
+<span class="flex items-center gap-1"><span class="size-2 rounded-full bg-green-500"></span> System Online</span>
+<span class="hidden sm:inline">|</span>
+<span>Last Sync: 13:02 PM</span>
+</div>
+<div class="flex gap-4">
+<button class="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">print</span> Print Chart
+                    </button>
+<button class="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">share</span> Export Data
+                    </button>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

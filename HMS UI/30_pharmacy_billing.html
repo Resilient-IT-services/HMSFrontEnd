@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PharmaPOS - Pharmacy Billing System</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ec5b13",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#221610",
+                    },
+                    fontFamily: {
+                        "display": ["Public Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Public Sans', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="flex h-screen flex-col overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark/50 px-6 py-3 shrink-0">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl">medical_services</span>
+<h2 class="text-xl font-bold leading-tight tracking-tight text-slate-900 dark:text-white">PharmaPOS</h2>
+</div>
+<div class="hidden md:flex items-center gap-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span>City Central Pharmacy - Station POS-01</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="h-10 w-64 rounded-xl border-none bg-slate-100 dark:bg-slate-800 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50" placeholder="Global search..." type="text"/>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary border border-primary/30 overflow-hidden">
+<img alt="Pharmacist Profile" class="h-full w-full object-cover" data-alt="Pharmacist avatar portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaOvL8qMxtQsA-UpZBQBz0uz2R9RGjw4rKfBlMCSqWIl7IwZ3r13HRRM3oSPqBjPTVKtLiQSIj6pmQ2IhsL_ZHcisee6JZ3NRa9EectymwHIA61y_92W5at9DLZojddW0A_aJriVSZCG4rVfsq7B1qh5s85q10IYmqBbFRf_WmxNTfkrz4DbtJQFLXbCynw74hKbK1uqj-9f3QVBOoGopoXI0GrFh36cj0ZXq_HUrT51wJ89gawYAw592PBKc8xgDvZ3YP-zGADYXp"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden">
+<!-- Sidebar -->
+<aside class="w-64 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-background-dark/30 p-4 hidden lg:flex flex-col gap-2">
+<div class="mb-4 px-2">
+<p class="text-xs font-bold uppercase tracking-wider text-slate-400">Main Menu</p>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-medium">Billing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-medium">Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-medium">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="font-medium">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-medium">Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-primary/5 rounded-2xl border border-primary/10">
+<p class="text-xs font-semibold text-primary mb-1">Stock Alert</p>
+<p class="text-[11px] text-slate-500">Paracetamol 500mg is running low (12 units left).</p>
+</div>
+</aside>
+<!-- Main Billing Area -->
+<main class="flex-1 flex flex-col md:flex-row gap-6 p-6 overflow-hidden">
+<!-- Left Column: Patient & Item Selection -->
+<div class="flex-1 flex flex-col gap-6 overflow-y-auto">
+<!-- Patient Lookup Section -->
+<section class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold">Patient Information</h3>
+<button class="text-primary text-sm font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-lg">person_add</span>
+                                New Patient
+                            </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="relative">
+<label class="text-xs font-bold text-slate-400 mb-1 block uppercase">Search Patient</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">person_search</span>
+<input class="w-full h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-10 focus:ring-primary focus:border-primary" placeholder="Name or phone number..." type="text"/>
+</div>
+</div>
+<div class="flex flex-col justify-end">
+<div class="bg-primary/5 rounded-xl p-3 border border-dashed border-primary/30 flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-xs">RJ</div>
+<div>
+<p class="text-sm font-bold">Rahul Jayaseelan</p>
+<p class="text-xs text-slate-500">+91 98765 43210</p>
+</div>
+<button class="ml-auto text-slate-400 hover:text-red-500">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Medicine List Selection -->
+<section class="flex-1 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col overflow-hidden">
+<div class="flex items-center justify-between mb-4 shrink-0">
+<h3 class="text-lg font-bold">Itemized Medicine List</h3>
+<div class="relative w-72">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">medication</span>
+<input class="w-full h-10 rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-10 focus:ring-primary focus:border-primary text-sm" placeholder="Add medicine by name..." type="text"/>
+</div>
+</div>
+<div class="overflow-x-auto flex-1">
+<table class="w-full text-left border-collapse">
+<thead class="sticky top-0 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+<tr>
+<th class="py-3 px-4 text-xs font-bold text-slate-400 uppercase">Medicine Name</th>
+<th class="py-3 px-4 text-xs font-bold text-slate-400 uppercase">Batch</th>
+<th class="py-3 px-4 text-xs font-bold text-slate-400 uppercase">Qty</th>
+<th class="py-3 px-4 text-xs font-bold text-slate-400 uppercase">Unit (₹)</th>
+<th class="py-3 px-4 text-xs font-bold text-slate-400 uppercase text-right">Total (₹)</th>
+<th class="py-3 px-4"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-50 dark:divide-slate-800/50">
+<tr>
+<td class="py-4 px-4">
+<p class="font-bold text-sm">Amoxicillin 500mg</p>
+<p class="text-xs text-slate-500">Strip of 10 Caps</p>
+</td>
+<td class="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">AX-2204</td>
+<td class="py-4 px-4">
+<div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg w-24">
+<button class="px-2 text-slate-400">-</button>
+<input class="w-full border-none bg-transparent text-center text-sm p-1 focus:ring-0" type="text" value="2"/>
+<button class="px-2 text-slate-400">+</button>
+</div>
+</td>
+<td class="py-4 px-4 text-sm">₹ 85.00</td>
+<td class="py-4 px-4 text-sm font-bold text-right">₹ 170.00</td>
+<td class="py-4 px-4 text-right">
+<button class="text-slate-300 hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+</td>
+</tr>
+<tr>
+<td class="py-4 px-4">
+<p class="font-bold text-sm">Cetirizine 10mg</p>
+<p class="text-xs text-slate-500">Strip of 15 Tabs</p>
+</td>
+<td class="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">CT-1192</td>
+<td class="py-4 px-4">
+<div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg w-24">
+<button class="px-2 text-slate-400">-</button>
+<input class="w-full border-none bg-transparent text-center text-sm p-1 focus:ring-0" type="text" value="1"/>
+<button class="px-2 text-slate-400">+</button>
+</div>
+</td>
+<td class="py-4 px-4 text-sm">₹ 42.50</td>
+<td class="py-4 px-4 text-sm font-bold text-right">₹ 42.50</td>
+<td class="py-4 px-4 text-right">
+<button class="text-slate-300 hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+</td>
+</tr>
+<tr>
+<td class="py-4 px-4">
+<p class="font-bold text-sm">Paracetamol 650mg (Dolo)</p>
+<p class="text-xs text-slate-500">Strip of 15 Tabs</p>
+</td>
+<td class="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">DL-9901</td>
+<td class="py-4 px-4">
+<div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-lg w-24">
+<button class="px-2 text-slate-400">-</button>
+<input class="w-full border-none bg-transparent text-center text-sm p-1 focus:ring-0" type="text" value="3"/>
+<button class="px-2 text-slate-400">+</button>
+</div>
+</td>
+<td class="py-4 px-4 text-sm">₹ 30.00</td>
+<td class="py-4 px-4 text-sm font-bold text-right">₹ 90.00</td>
+<td class="py-4 px-4 text-right">
+<button class="text-slate-300 hover:text-red-500"><span class="material-symbols-outlined">delete</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</div>
+<!-- Right Column: Summary & Billing -->
+<div class="w-full md:w-96 flex flex-col gap-6 overflow-y-auto">
+<section class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
+<h3 class="text-lg font-bold mb-6">Payment Summary</h3>
+<div class="space-y-3 mb-6">
+<div class="flex justify-between text-slate-600 dark:text-slate-400 text-sm">
+<span>Subtotal</span>
+<span class="font-medium">₹ 302.50</span>
+</div>
+<div class="flex justify-between text-slate-600 dark:text-slate-400 text-sm">
+<span>GST (12%)</span>
+<span class="font-medium">₹ 36.30</span>
+</div>
+<div class="flex flex-col gap-2 pt-2">
+<label class="text-xs font-bold text-slate-400 uppercase">Discount Options</label>
+<div class="flex gap-2">
+<button class="flex-1 py-2 px-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800">5% OFF</button>
+<button class="flex-1 py-2 px-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800">10% OFF</button>
+<button class="flex-1 py-2 px-1 rounded-lg border border-primary bg-primary/10 text-primary text-xs font-bold">Manual</button>
+</div>
+<div class="relative mt-1">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₹</span>
+<input class="w-full h-9 rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 pl-7 text-sm focus:ring-primary focus:border-primary" placeholder="Custom discount..." type="text"/>
+</div>
+</div>
+</div>
+<div class="border-t border-dashed border-slate-200 dark:border-slate-700 pt-4 mb-8">
+<div class="flex justify-between items-center">
+<span class="text-lg font-bold">Total Amount</span>
+<span class="text-2xl font-black text-primary">₹ 338.80</span>
+</div>
+</div>
+<div class="space-y-3">
+<p class="text-xs font-bold text-slate-400 uppercase">Payment Method</p>
+<div class="grid grid-cols-2 gap-3">
+<label class="cursor-pointer">
+<input checked="" class="sr-only peer" name="payment" type="radio"/>
+<div class="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-slate-100 dark:border-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<span class="material-symbols-outlined mb-1">payments</span>
+<span class="text-xs font-bold">Cash</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="sr-only peer" name="payment" type="radio"/>
+<div class="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-slate-100 dark:border-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<span class="material-symbols-outlined mb-1">qr_code_2</span>
+<span class="text-xs font-bold">UPI / Card</span>
+</div>
+</label>
+</div>
+</div>
+<button class="mt-8 w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-xl shadow-primary/30 hover:bg-primary/90 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">description</span>
+                            Generate Invoice
+                        </button>
+<div class="mt-4 flex items-center gap-2 justify-center text-xs text-slate-400">
+<span class="material-symbols-outlined text-sm">print</span>
+<span>Auto-print receipt on generation</span>
+</div>
+</section>
+<!-- Recent Invoices Sidebar Mini -->
+<section class="bg-white/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+<h4 class="text-xs font-bold text-slate-400 uppercase mb-3">Recent Sales</h4>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-sm">
+<div>
+<p class="font-bold">#INV-9821</p>
+<p class="text-[10px] text-slate-500">2 mins ago • Cash</p>
+</div>
+<span class="font-bold">₹ 1,240</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div>
+<p class="font-bold">#INV-9820</p>
+<p class="text-[10px] text-slate-500">15 mins ago • UPI</p>
+</div>
+<span class="font-bold">₹ 450</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</div>
+</body></html>

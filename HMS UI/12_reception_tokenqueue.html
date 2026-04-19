@@ -1,0 +1,224 @@
+<html lang="en"><head>
+<title>12_Reception_TokenQueue</title><meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056b2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Header -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 lg:px-10 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary rounded-lg text-white">
+<span class="material-symbols-outlined text-2xl">local_hospital</span>
+</div>
+<div class="flex flex-col">
+<h2 class="text-slate-900 dark:text-white text-xl font-black leading-tight tracking-tight uppercase">City General Hospital</h2>
+<p class="text-xs font-bold text-primary tracking-widest uppercase">Central Queue Management</p>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex flex-col items-end">
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium" id="current-date">October 24, 2023</p>
+<p class="text-slate-900 dark:text-white text-xl font-bold" id="current-time">10:45 AM</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">notifications_active</span>
+</button>
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+</header>
+<main class="flex-1 p-6 lg:p-10">
+<!-- Hero Announcement Section -->
+<div class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4 border-l-4 border-primary pl-6">
+<div>
+<h1 class="text-slate-900 dark:text-white text-5xl font-black leading-tight tracking-tighter">Live Token Status</h1>
+<p class="text-slate-500 dark:text-slate-400 text-lg font-medium">Please proceed to the designated counter when your token is called.</p>
+</div>
+<div class="bg-primary/10 text-primary px-4 py-2 rounded-lg font-bold flex items-center gap-2">
+<span class="relative flex h-3 w-3">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+</span>
+                    SYSTEM LIVE
+                </div>
+</div>
+<!-- Primary Queue Display -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- OPD Department -->
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<div class="bg-primary p-6 flex justify-between items-center">
+<div class="flex items-center gap-3 text-white">
+<span class="material-symbols-outlined text-3xl">medical_services</span>
+<h3 class="text-xl font-bold uppercase tracking-wider">Outpatient (OPD)</h3>
+</div>
+<span class="bg-white/20 text-white px-3 py-1 rounded text-xs font-bold uppercase">Counter 01-04</span>
+</div>
+<div class="p-8 flex flex-col items-center justify-center border-b border-slate-100 dark:border-slate-800">
+<p class="text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-widest mb-2">Now Serving</p>
+<div class="text-8xl font-black text-primary tracking-tighter">A-245</div>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-900/50">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-500 dark:text-slate-400 font-bold uppercase text-xs">Waiting List</span>
+<span class="text-primary font-bold text-xs uppercase">12 in queue</span>
+</div>
+<div class="flex gap-4 justify-between">
+<div class="flex flex-col flex-1 items-center bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Next</span>
+<span class="text-2xl font-black text-slate-700 dark:text-slate-200">A-246</span>
+</div>
+<div class="flex flex-col flex-1 items-center bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Followed By</span>
+<span class="text-2xl font-black text-slate-400 dark:text-slate-500">A-247</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Pharmacy Department -->
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<div class="bg-emerald-600 p-6 flex justify-between items-center">
+<div class="flex items-center gap-3 text-white">
+<span class="material-symbols-outlined text-3xl">medication</span>
+<h3 class="text-xl font-bold uppercase tracking-wider">Pharmacy</h3>
+</div>
+<span class="bg-white/20 text-white px-3 py-1 rounded text-xs font-bold uppercase">Counter 05-06</span>
+</div>
+<div class="p-8 flex flex-col items-center justify-center border-b border-slate-100 dark:border-slate-800">
+<p class="text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-widest mb-2">Now Serving</p>
+<div class="text-8xl font-black text-emerald-600 tracking-tighter">P-089</div>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-900/50">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-500 dark:text-slate-400 font-bold uppercase text-xs">Waiting List</span>
+<span class="text-emerald-600 font-bold text-xs uppercase">8 in queue</span>
+</div>
+<div class="flex gap-4 justify-between">
+<div class="flex flex-col flex-1 items-center bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Next</span>
+<span class="text-2xl font-black text-slate-700 dark:text-slate-200">P-090</span>
+</div>
+<div class="flex flex-col flex-1 items-center bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Followed By</span>
+<span class="text-2xl font-black text-slate-400 dark:text-slate-500">P-091</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Laboratory Department -->
+<div class="flex flex-col bg-white dark:bg-slate-900 rounded-xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-800">
+<div class="bg-indigo-600 p-6 flex justify-between items-center">
+<div class="flex items-center gap-3 text-white">
+<span class="material-symbols-outlined text-3xl">biotech</span>
+<h3 class="text-xl font-bold uppercase tracking-wider">Laboratory</h3>
+</div>
+<span class="bg-white/20 text-white px-3 py-1 rounded text-xs font-bold uppercase">Counter 07</span>
+</div>
+<div class="p-8 flex flex-col items-center justify-center border-b border-slate-100 dark:border-slate-800">
+<p class="text-slate-400 dark:text-slate-500 text-sm font-bold uppercase tracking-widest mb-2">Now Serving</p>
+<div class="text-8xl font-black text-indigo-600 tracking-tighter">L-112</div>
+</div>
+<div class="p-6 bg-slate-50 dark:bg-slate-900/50">
+<div class="flex justify-between items-center mb-4">
+<span class="text-slate-500 dark:text-slate-400 font-bold uppercase text-xs">Waiting List</span>
+<span class="text-indigo-600 font-bold text-xs uppercase">5 in queue</span>
+</div>
+<div class="flex gap-4 justify-between">
+<div class="flex flex-col flex-1 items-center bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Next</span>
+<span class="text-2xl font-black text-slate-700 dark:text-slate-200">L-113</span>
+</div>
+<div class="flex flex-col flex-1 items-center bg-white dark:bg-slate-800 p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+<span class="text-[10px] text-slate-400 font-bold uppercase">Followed By</span>
+<span class="text-2xl font-black text-slate-400 dark:text-slate-500">L-114</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Information Panel -->
+<div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
+<div class="bg-primary/5 rounded-xl p-8 flex gap-6 items-start border border-primary/10">
+<div class="p-4 bg-primary text-white rounded-xl">
+<span class="material-symbols-outlined text-4xl">info</span>
+</div>
+<div>
+<h4 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Wait Time Estimates</h4>
+<div class="grid grid-cols-3 gap-4">
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase">OPD</p>
+<p class="text-lg font-bold text-primary">~25 min</p>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase">Pharmacy</p>
+<p class="text-lg font-bold text-emerald-600">~10 min</p>
+</div>
+<div>
+<p class="text-xs font-bold text-slate-500 uppercase">Lab</p>
+<p class="text-lg font-bold text-indigo-600">~15 min</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-900 rounded-xl p-6 overflow-hidden relative group">
+<div class="relative z-10 flex h-full items-center justify-between">
+<div class="text-white">
+<h4 class="text-xl font-bold mb-1">Health Tip of the Day</h4>
+<p class="text-slate-400 max-w-xs">Stay hydrated. Drinking enough water daily is crucial for your body's overall function.</p>
+</div>
+<div class="text-slate-700">
+<span class="material-symbols-outlined text-8xl opacity-30">water_drop</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Ticker -->
+<footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-6 overflow-hidden">
+<div class="flex items-center gap-6 whitespace-nowrap animate-marquee">
+<div class="flex items-center gap-2 text-primary font-bold">
+<span class="material-symbols-outlined">campaign</span>
+<span>ANNOUNCEMENT:</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 font-medium">
+                    Dr. Sarah Jenkins is now available in Cabin 12. • Please keep your token receipts ready for verification. • Free Wi-Fi is available for patients in the waiting area: SSID: 'Hospital_Guest'. • Use the 'CityCare' App to track your queue status remotely. • Wear your masks properly at all times.
+                </p>
+</div>
+</footer>
+</div>
+<!-- Background Decoration -->
+<div class="fixed top-0 right-0 -z-10 w-1/3 h-1/2 bg-gradient-to-bl from-primary/5 to-transparent blur-3xl rounded-full"></div>
+<div class="fixed bottom-0 left-0 -z-10 w-1/4 h-1/3 bg-gradient-to-tr from-emerald-600/5 to-transparent blur-3xl rounded-full"></div>
+</body></html>

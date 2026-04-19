@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056b2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-3 lg:px-20">
+<div class="flex items-center gap-4">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">medical_services</span>
+</div>
+<div>
+<h2 class="text-lg font-bold leading-tight tracking-tight">Prescription Builder</h2>
+<p class="text-xs text-slate-500">v2.4.0</p>
+</div>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Patients</a>
+<a class="text-sm font-medium hover:text-primary transition-colors border-b-2 border-primary pb-1" href="#">New Prescription</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Inventory</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-10 w-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden border-2 border-primary/20">
+<img class="h-full w-full object-cover" data-alt="Portrait of a professional doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYjfgDzIKajN1B6idtUmIHRb9E-UegIIrAyMG5jHFJondKBj2Y468Y9peC36rmzmys9PKvFaeW7ByysZWPP2me28wy82Qtpj9A5aevyW45YKD9HV62IMVmk0PXrENrHumSEDV7k2rnmtHV_F5LHo6jWfov2dlKq4WLPpKCmKoegtnv2XK1pDXYyt6QqPSL8q6QO_Hg2a0F43AWx8q7G1pOqqnXiOQFSeMuzCeV-nwGSm5qjEE_pMkcMHCurpFXLRnTDBXvQu9cZMOH"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 px-4 py-8 lg:px-20">
+<div class="mx-auto max-w-7xl">
+<!-- Patient Info Bar -->
+<div class="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-xl bg-white dark:bg-slate-900 p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-4">
+<div class="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">person</span>
+</div>
+<div>
+<h1 class="text-2xl font-bold">John Doe</h1>
+<div class="flex items-center gap-3 text-sm text-slate-500">
+<span>Age: 45</span>
+<span class="h-1 w-1 rounded-full bg-slate-300"></span>
+<span>Gender: Male</span>
+<span class="h-1 w-1 rounded-full bg-slate-300"></span>
+<span>ID: #PX-98432</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<div class="text-right">
+<p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Last Visit</p>
+<p class="text-sm font-medium">Oct 12, 2023</p>
+</div>
+<div class="h-10 w-px bg-slate-200 dark:bg-slate-800 mx-2"></div>
+<div class="text-right">
+<p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Vitals</p>
+<p class="text-sm font-medium text-green-600">Stable</p>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-12">
+<!-- Builder Section -->
+<div class="lg:col-span-7 space-y-6">
+<section class="rounded-xl bg-white dark:bg-slate-900 p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+<h2 class="mb-6 text-lg font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">add_circle</span>
+                                Search &amp; Add Medicine
+                            </h2>
+<div class="space-y-4">
+<!-- Search Input -->
+<div>
+<label class="mb-2 block text-sm font-medium">Medicine Name or Formula</label>
+<div class="relative group">
+<div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full rounded-lg border-slate-200 bg-slate-50 py-3 pl-12 pr-4 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="e.g. Amoxicillin, Paracetamol..." type="text"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Dosage -->
+<div>
+<label class="mb-2 block text-sm font-medium">Dosage</label>
+<select class="block w-full rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+<option>Select dosage</option>
+<option>250 mg</option>
+<option>500 mg</option>
+<option>650 mg</option>
+<option>1000 mg</option>
+</select>
+</div>
+<!-- Route -->
+<div>
+<label class="mb-2 block text-sm font-medium">Route</label>
+<select class="block w-full rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+<option>Oral</option>
+<option>Intravenous</option>
+<option>Topical</option>
+<option>Inhalation</option>
+</select>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<!-- Frequency -->
+<div>
+<label class="mb-2 block text-sm font-medium">Frequency</label>
+<select class="block w-full rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+<option>Once daily (OD)</option>
+<option>Twice daily (BD)</option>
+<option>Three times daily (TDS)</option>
+<option>Four times daily (QDS)</option>
+<option>As needed (PRN)</option>
+</select>
+</div>
+<!-- Duration -->
+<div>
+<label class="mb-2 block text-sm font-medium">Duration</label>
+<div class="flex gap-2">
+<input class="block w-2/3 rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Value" type="number"/>
+<select class="block w-1/3 rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+<option>Days</option>
+<option>Weeks</option>
+<option>Months</option>
+</select>
+</div>
+</div>
+</div>
+<!-- Instructions -->
+<div>
+<label class="mb-2 block text-sm font-medium">Special Instructions</label>
+<textarea class="block w-full rounded-lg border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-primary focus:ring-primary dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="e.g. Take after meals, avoid dairy..." rows="2"></textarea>
+</div>
+<button class="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+<span class="material-symbols-outlined">add</span>
+                                    Add to Prescription
+                                </button>
+</div>
+</section>
+<!-- Added Medicines List -->
+<section class="rounded-xl bg-white dark:bg-slate-900 p-6 shadow-sm border border-slate-200 dark:border-slate-800">
+<h2 class="mb-4 text-lg font-bold">Currently Added</h2>
+<div class="space-y-4">
+<!-- Medicine Item -->
+<div class="group flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+<div class="flex items-center gap-4">
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">pill</span>
+</div>
+<div>
+<h4 class="font-bold">Amoxicillin 500mg</h4>
+<p class="text-sm text-slate-500">Twice daily (BD) - 7 Days</p>
+</div>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+<div class="group flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+<div class="flex items-center gap-4">
+<div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">medication</span>
+</div>
+<div>
+<h4 class="font-bold">Paracetamol 650mg</h4>
+<p class="text-sm text-slate-500">As needed (PRN) - Max 3/day</p>
+</div>
+</div>
+<button class="flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-xl">delete</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+<!-- Preview Section -->
+<div class="lg:col-span-5">
+<div class="sticky top-24 rounded-xl bg-white dark:bg-slate-900 shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+<!-- Preview Header -->
+<div class="bg-primary px-6 py-4 text-white flex justify-between items-center">
+<span class="text-sm font-bold uppercase tracking-widest">Prescription Preview</span>
+<span class="material-symbols-outlined">visibility</span>
+</div>
+<!-- Digital Prescription Body -->
+<div class="p-8 space-y-8 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px]">
+<!-- Letterhead -->
+<div class="flex justify-between items-start border-b border-slate-200 dark:border-slate-800 pb-6">
+<div>
+<h3 class="text-xl font-black text-primary">Dr. Sarah Mitchell</h3>
+<p class="text-xs font-semibold text-slate-500">MD, Internal Medicine • Registration #12345-A</p>
+<p class="text-[10px] text-slate-400 mt-1">St. Mary's General Hospital, Suite 402</p>
+</div>
+<div class="text-right">
+<p class="text-sm font-bold">Date: Oct 25, 2023</p>
+<p class="text-xs text-slate-500">Ref: PRE-889102</p>
+</div>
+</div>
+<!-- Patient Details -->
+<div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-lg flex justify-between">
+<div class="space-y-1">
+<p class="text-[10px] uppercase text-slate-400 font-bold">Patient Name</p>
+<p class="text-sm font-bold">John Doe</p>
+</div>
+<div class="space-y-1 text-right">
+<p class="text-[10px] uppercase text-slate-400 font-bold">Age / Gender</p>
+<p class="text-sm font-bold">45Y / Male</p>
+</div>
+</div>
+<!-- Rx Symbol -->
+<div class="text-4xl font-serif text-primary opacity-50 italic">Rx</div>
+<!-- List -->
+<div class="space-y-6">
+<div class="relative pl-6">
+<div class="absolute left-0 top-1 h-2 w-2 rounded-full bg-primary"></div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-base">Amoxicillin (500mg)</h4>
+<p class="text-xs text-slate-500 mt-1">Sig: 1 Tab Twice daily (After Meals)</p>
+<p class="text-xs font-medium text-slate-400">Duration: 7 Days</p>
+</div>
+<div class="text-xs font-bold text-slate-400">Qty: 14</div>
+</div>
+</div>
+<div class="relative pl-6">
+<div class="absolute left-0 top-1 h-2 w-2 rounded-full bg-primary"></div>
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-bold text-base">Paracetamol (650mg)</h4>
+<p class="text-xs text-slate-500 mt-1">Sig: 1 Tab As needed for pain (PRN)</p>
+<p class="text-xs font-medium text-slate-400">Max: 3 tablets per day</p>
+</div>
+<div class="text-xs font-bold text-slate-400">Qty: 10</div>
+</div>
+</div>
+</div>
+<!-- Signature Area -->
+<div class="pt-12 flex flex-col items-end">
+<div class="w-48 border-b-2 border-slate-300 dark:border-slate-700 h-12 relative">
+<img class="h-10 w-auto opacity-70 mix-blend-multiply dark:invert" data-alt="Digital signature of a doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwXBK9TuGiyAIqyTrnFlkJsXC27cW8pvFXdHJfM5e2BvG0Yc_GnjXYwthWw9XsSUlPM-mmB-gsLvwGZBEmnjDAwuVDMZZV51ngE_98BJNYPBlZ521f4oCeJaPwWOqYe6ijoqitxUm_6Fc7VgobKPXZbUOl9Ags6t6hzNCa-O__YTO_AZeqPJyDnkb_-DbUW9Ur4--nUrEgDOpTwPM01oeb90Bj-FAAUBsj_7-PwVx8hzWRM9R5mMIE8GELrGar5_6uEhRoAWpXUURn"/>
+</div>
+<p class="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">Digital Signature</p>
+</div>
+</div>
+<!-- Actions -->
+<div class="bg-slate-50 dark:bg-slate-800 p-6 flex gap-3">
+<button class="flex-1 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 py-2.5 text-sm font-bold shadow-sm hover:bg-slate-100 transition-colors">
+                                    Save Draft
+                                </button>
+<button class="flex-1 rounded-lg bg-primary py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">print</span>
+                                    Finalize &amp; Print
+                                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Bar for Mobile Actions -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 flex gap-4">
+<button class="flex-1 rounded-lg bg-primary py-4 font-bold text-white">Finalize Prescription</button>
+</div>
+</div>
+</body></html>

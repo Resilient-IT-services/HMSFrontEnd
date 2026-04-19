@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>10_Patient_Timeline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0056b2",
+                        "background-light": "#f5f7f8",
+                        "background-dark": "#0f1923",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<header class="flex items-center justify-between border-b border-primary/10 bg-white dark:bg-slate-900 px-6 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-9 bg-primary flex items-center justify-center rounded-lg text-white">
+<span class="material-symbols-outlined">health_and_safety</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">HMS Portal</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Overview</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary pb-1" href="#">Patient Records</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Inventory</a>
+<a class="text-slate-600 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors" href="#">Staff</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="w-64 bg-slate-100 dark:bg-slate-800 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/50" placeholder="Search patient or record ID" type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-slate-500 hover:bg-slate-100 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-primary/10 p-1 rounded-full border border-primary/20">
+<img alt="Profile" class="size-8 rounded-full" data-alt="Portrait of a male doctor avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFHmyT39a8wdJevH4pMt-3oIqcGK2BpjX15MeC91mjp8KidAEBb06YD5-c8Q0S_1WSxrE2sR_wmmt59ABV9gUWI6IeoHj7kuPxY_aMpO7MxSyc8-W3jwGvVLU99acoI4t9jqf9EixraV_fEOZXPOjZMezo5fjvhub9iR5Nsy4VIXcmFCmePMkhZojdaAa6hrMM2VnJdGbpVuRYZYAtyHs4kOdjjXDts7c-8HQLA3DNLThUPeA9vmYJphrcYY-hs5iVARGMHor51mVt"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<aside class="w-64 border-r border-primary/10 bg-white dark:bg-slate-900 hidden lg:flex flex-col p-4 gap-6">
+<div class="space-y-1">
+<p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Main Navigation</p>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-sm font-bold">Patients</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-sm font-medium">Appointments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined">medical_services</span>
+<span class="text-sm font-medium">Prescriptions</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined">lab_research</span>
+<span class="text-sm font-medium">Laboratory</span>
+</a>
+</div>
+<div class="mt-auto space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-sm font-medium">Logout</span>
+</a>
+</div>
+</aside>
+<div class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark p-6">
+<div class="max-w-5xl mx-auto">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+<div>
+<div class="flex items-center gap-2 text-primary font-semibold text-sm mb-1">
+<span class="material-symbols-outlined text-base">arrow_back</span>
+<span>Back to Patient List</span>
+</div>
+<h1 class="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Johnathan Smith</h1>
+<p class="text-slate-500 font-medium">Patient ID: #HMS-98234 • Male • 42 years • AB+ Blood Group</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm font-semibold hover:bg-slate-50">
+<span class="material-symbols-outlined text-lg">print</span> Print Record
+                            </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-semibold hover:bg-primary/90 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-lg">add</span> New Entry
+                            </button>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-primary/10 shadow-sm overflow-hidden mb-6">
+<div class="flex border-b border-slate-100 dark:border-slate-800 overflow-x-auto no-scrollbar">
+<button class="px-6 py-4 text-primary font-bold border-b-2 border-primary whitespace-nowrap">Full Timeline</button>
+<button class="px-6 py-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold whitespace-nowrap">Consultations</button>
+<button class="px-6 py-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold whitespace-nowrap">Lab Results</button>
+<button class="px-6 py-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold whitespace-nowrap">Prescriptions</button>
+<button class="px-6 py-4 text-slate-500 hover:text-slate-700 dark:text-slate-400 font-semibold whitespace-nowrap">Vitals History</button>
+</div>
+<div class="p-8">
+<div class="relative">
+<div class="absolute left-6 top-0 bottom-0 w-0.5 bg-slate-100 dark:bg-slate-800"></div>
+<div class="space-y-10 relative">
+<div class="flex gap-6 group">
+<div class="relative z-10 size-12 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 text-blue-600 rounded-full border-4 border-white dark:border-slate-900 shadow-sm">
+<span class="material-symbols-outlined">stethoscope</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Cardiology Consultation</h3>
+<span class="text-sm font-medium text-slate-400">Oct 24, 2023 · 10:30 AM</span>
+</div>
+<p class="text-slate-500 mb-3 leading-relaxed">Regular follow-up for hypertension management. Patient reports minor chest tightness during intense physical activity.</p>
+<div class="flex flex-wrap gap-4 items-center">
+<div class="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-100 dark:border-slate-700">
+<span class="size-2 rounded-full bg-blue-500"></span>
+<span>Dr. Michael Ross</span>
+</div>
+<span class="text-xs font-bold text-primary uppercase tracking-widest cursor-pointer hover:underline">View Notes</span>
+</div>
+</div>
+</div>
+<div class="flex gap-6 group">
+<div class="relative z-10 size-12 flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-full border-4 border-white dark:border-slate-900 shadow-sm">
+<span class="material-symbols-outlined">science</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Comprehensive Metabolic Panel</h3>
+<span class="text-sm font-medium text-slate-400">Oct 22, 2023 · 09:00 AM</span>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800 rounded-xl p-4 border border-slate-100 dark:border-slate-700 mb-3">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase">Glucose</p>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">92 mg/dL <span class="text-[10px] text-green-500 font-normal ml-1">Normal</span></p>
+</div>
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase">Creatinine</p>
+<p class="text-sm font-bold text-slate-700 dark:text-slate-300">1.1 mg/dL <span class="text-[10px] text-green-500 font-normal ml-1">Normal</span></p>
+</div>
+<div>
+<p class="text-[10px] font-bold text-slate-400 uppercase">Cholesterol</p>
+<p class="text-sm font-bold text-amber-600">210 mg/dL <span class="text-[10px] font-normal ml-1">Slightly High</span></p>
+</div>
+</div>
+</div>
+<button class="flex items-center gap-2 text-xs font-bold text-primary uppercase tracking-widest">
+<span class="material-symbols-outlined text-base">download</span> Download PDF Report
+                                            </button>
+</div>
+</div>
+<div class="flex gap-6 group">
+<div class="relative z-10 size-12 flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-600 rounded-full border-4 border-white dark:border-slate-900 shadow-sm">
+<span class="material-symbols-outlined">medication</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">New Prescription Issued</h3>
+<span class="text-sm font-medium text-slate-400">Oct 22, 2023 · 11:15 AM</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-4 bg-primary/5 dark:bg-primary/10 p-3 rounded-lg border border-primary/20">
+<span class="material-symbols-outlined text-primary">pill</span>
+<div>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">Lisinopril 10mg</p>
+<p class="text-xs text-slate-500">Take 1 tablet daily in the morning • 30 days supply</p>
+</div>
+<div class="ml-auto">
+<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase">Active</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-6 group">
+<div class="relative z-10 size-12 flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 text-purple-600 rounded-full border-4 border-white dark:border-slate-900 shadow-sm">
+<span class="material-symbols-outlined">radiology</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">X-Ray Imaging - Chest</h3>
+<span class="text-sm font-medium text-slate-400">Oct 20, 2023 · 02:45 PM</span>
+</div>
+<p class="text-slate-500 mb-4 leading-relaxed">PA and Lateral views. Normal cardiomediastinal silhouette. Lungs are clear. No evidence of pleural effusion or pneumothorax.</p>
+<div class="flex gap-3">
+<div class="relative group/img cursor-pointer">
+<div class="w-24 h-24 rounded-lg bg-slate-200 overflow-hidden border border-slate-300 dark:border-slate-700">
+<div class="w-full h-full bg-slate-900 flex items-center justify-center opacity-80 group-hover/img:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white/50 text-4xl">broken_image</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity rounded-lg">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+<div class="relative group/img cursor-pointer">
+<div class="w-24 h-24 rounded-lg bg-slate-200 overflow-hidden border border-slate-300 dark:border-slate-700">
+<div class="w-full h-full bg-slate-900 flex items-center justify-center opacity-80 group-hover/img:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-white/50 text-4xl">broken_image</span>
+</div>
+</div>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity rounded-lg">
+<span class="material-symbols-outlined text-white">zoom_in</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-6 group">
+<div class="relative z-10 size-12 flex items-center justify-center bg-slate-50 dark:bg-slate-800 text-slate-600 rounded-full border-4 border-white dark:border-slate-900 shadow-sm">
+<span class="material-symbols-outlined">assignment</span>
+</div>
+<div class="flex-1 pt-1">
+<div class="flex items-center justify-between mb-1">
+<h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">Initial Intake &amp; Vitals</h3>
+<span class="text-sm font-medium text-slate-400">Oct 20, 2023 · 08:30 AM</span>
+</div>
+<p class="text-slate-500 mb-3 leading-relaxed">Patient admitted for annual physical. Initial vitals recorded by Nurse Sarah Miller.</p>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<div class="px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">BP</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">142/90 <span class="text-amber-500 text-[10px]">↑</span></p>
+</div>
+<div class="px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Heart Rate</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">78 bpm</p>
+</div>
+<div class="px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">SpO2</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">98%</p>
+</div>
+<div class="px-3 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700">
+<p class="text-[10px] font-bold text-slate-400 uppercase">Temp</p>
+<p class="text-sm font-bold text-slate-800 dark:text-slate-200">98.6°F</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800/50 p-6 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+<button class="flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-full text-sm font-bold text-slate-600 dark:text-slate-300 shadow-sm hover:shadow transition-all">
+                                Load Previous History <span class="material-symbols-outlined">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
