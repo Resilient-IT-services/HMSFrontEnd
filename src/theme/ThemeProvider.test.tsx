@@ -15,7 +15,6 @@ describe('ThemeProvider', () => {
   it('applies basic CSS variables to document', () => {
     render(<ThemeProvider>Content</ThemeProvider>);
     // The ThemeProvider should have called applyTheme which sets CSS vars on documentElement
-    const style = window.getComputedStyle(document.documentElement);
     // Checking if some primary var is set (might be empty in jsdom but should exist)
     expect(document.documentElement.style.getPropertyValue('--primary')).toBeDefined();
   });

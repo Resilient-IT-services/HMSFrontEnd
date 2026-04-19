@@ -11,14 +11,14 @@ interface AuthState {
 }
 
 const getInitialSuperMode = () => {
-  if (typeof window !== 'undefined') {
+  if (globalThis.window !== undefined) {
     return localStorage.getItem('isSuperMode') === 'true';
   }
   return false;
 };
 
 const getInitialActiveRole = () => {
-  if (typeof window !== 'undefined') {
+  if (globalThis.window !== undefined) {
     return localStorage.getItem('activeRole') as Role | null;
   }
   return null;
@@ -47,30 +47,30 @@ const authSlice = createSlice({
       const isSuperUser = action.payload?.roles.includes('SUPER_ADMIN');
       if (!isSuperUser) {
         state.isSuperMode = false;
-        if (typeof window !== 'undefined') localStorage.removeItem('isSuperMode');
+        if (globalThis.window !== undefined) localStorage.removeItem('isSuperMode');
       }
 
       // If active role is not in current roles, reset it
       if (state.activeRole && action.payload && !action.payload.roles.includes(state.activeRole)) {
         state.activeRole = null;
-        if (typeof window !== 'undefined') localStorage.removeItem('activeRole');
+        if (globalThis.window !== undefined) localStorage.removeItem('activeRole');
       }
       
       // Auto-set active role if only one exists
       if (action.payload && action.payload.roles.length === 1 && !state.activeRole) {
         state.activeRole = action.payload.roles[0];
-        if (typeof window !== 'undefined') localStorage.setItem('activeRole', state.activeRole);
+        if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
       }
     },
     setSuperMode: (state, action: PayloadAction<boolean>) => {
       state.isSuperMode = action.payload;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         localStorage.setItem('isSuperMode', String(action.payload));
       }
     },
     setActiveRole: (state, action: PayloadAction<Role | null>) => {
       state.activeRole = action.payload;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         if (action.payload) localStorage.setItem('activeRole', action.payload);
         else localStorage.removeItem('activeRole');
       }
@@ -88,7 +88,7 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.error = null;
       state.activeRole = null;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('isSuperMode');
       }

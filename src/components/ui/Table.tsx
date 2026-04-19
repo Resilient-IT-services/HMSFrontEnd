@@ -29,35 +29,35 @@ export const Table = <T,>({ columns, data, onRowClick, isLoading }: TableProps<T
           </tr>
         </thead>
         <tbody className="bg-[var(--surface)] divide-y divide-[var(--border)]">
-          {isLoading ? (
+          {isLoading && (
             <tr>
               <td colSpan={columns.length} className="px-6 py-4 text-center">
                 Loading...
               </td>
             </tr>
-          ) : data.length === 0 ? (
+          )}
+          {!isLoading && data.length === 0 && (
             <tr>
               <td colSpan={columns.length} className="px-6 py-4 text-center">
                 No data available
               </td>
             </tr>
-          ) : (
-            data.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                onClick={() => onRowClick?.(row)}
-                className={onRowClick ? 'cursor-pointer hover:bg-[var(--background)]' : ''}
-              >
-                {columns.map((column, colIndex) => (
-                  <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                    {typeof column.accessor === 'function'
-                      ? column.accessor(row)
-                      : (row[column.accessor] as React.ReactNode)}
-                  </td>
-                ))}
-              </tr>
-            ))
           )}
+          {!isLoading && data.length > 0 && data.map((row, rowIndex) => (
+            <tr
+              key={rowIndex}
+              onClick={() => onRowClick?.(row)}
+              className={onRowClick ? 'cursor-pointer hover:bg-[var(--background)]' : ''}
+            >
+              {columns.map((column, colIndex) => (
+                <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
+                  {typeof column.accessor === 'function'
+                    ? column.accessor(row)
+                    : (row[column.accessor] as React.ReactNode)}
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

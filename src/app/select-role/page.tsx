@@ -7,24 +7,31 @@ import { setActiveRole } from '@/state/authSlice';
 import { Card } from '@/components/ui/Card';
 import { Role } from '@/types/api';
 
+const getRoleIcon = (role: Role) => {
+  switch (role) {
+    case 'DOCTOR': { return 'medical_services';
+    }
+    case 'NURSE': { return 'vital_signs';
+    }
+    case 'PHARMACIST': { return 'prescriptions';
+    }
+    case 'RECEPTIONIST': { return 'person_search';
+    }
+    case 'ADMIN': { return 'admin_panel_settings';
+    }
+    case 'SUPER_ADMIN': { return 'shield_person';
+    }
+    default: { return 'person';
+    }
+  }
+};
+
 const SelectRolePage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
 
   const handleSelect = (role: Role) => {
     dispatch(setActiveRole(role));
-  };
-
-  const getRoleIcon = (role: Role) => {
-    switch (role) {
-      case 'DOCTOR': return 'medical_services';
-      case 'NURSE': return 'vital_signs';
-      case 'PHARMACIST': return 'prescriptions';
-      case 'RECEPTIONIST': return 'person_search';
-      case 'ADMIN': return 'admin_panel_settings';
-      case 'SUPER_ADMIN': return 'shield_person';
-      default: return 'person';
-    }
   };
 
   return (

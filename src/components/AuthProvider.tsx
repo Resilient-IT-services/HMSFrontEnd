@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { setUser, setLoading, setError, setActiveRole, setSuperMode } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname, useRouter } from 'next/navigation';
-import { Role } from '@/types/api';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
@@ -24,7 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           dispatch(setUser(null));
         }
-      } catch (error) {
+      } catch {
         dispatch(setError('Failed to authenticate'));
         dispatch(setUser(null));
       }
@@ -33,86 +32,105 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     checkAuth();
   }, [dispatch]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        if (pathname !== '/login') {
-          router.push('/login');
-        }
-        return;
-      }
-
-      // Logic for authenticated users
-      const isSuperUser = user?.roles.includes('SUPER_ADMIN');
-
-      // 1. Super User Flow
-      if (isSuperUser) {
-        // If they are ONLY Super Admin, force Super Mode
-        if (user?.roles.length === 1 && !isSuperMode) {
-          dispatch(setSuperMode(true));
-          return;
-        }
-
-        // If in Super Mode, go to Super Admin Dashboard
-        if (isSuperMode) {
-          if (pathname !== '/super_admin/dashboard') {
-            router.push('/super_admin/dashboard');
-          }
-          return;
-        }
-      }
-
-      // 2. Hospital Selection Flow
-      if (!user?.hospitalId) {
-        if (user?.hospitals && user.hospitals.length > 1) {
-          if (pathname !== '/select-hospital') {
-            router.push('/select-hospital');
-          }
-        } else if (user?.hospitals && user.hospitals.length === 1) {
-          // Auto select if only one
-          authService.selectHospital(user.hospitals[0].hospitalId).then(res => {
-            if (res.success && res.data) dispatch(setUser(res.data));
-          });
-        } else if (!isSuperUser) {
-           // No hospitals and not super admin? 
-           if (pathname !== '/unauthorized') router.push('/unauthorized');
-        } else {
-           // Super user with no hospitals and not in super mode? 
-           // Should probably be in super mode
-           dispatch(setSuperMode(true));
-        }
-        return;
-      }
-
-      // 3. Role Selection Flow
-      if (!activeRole) {
-        if (user.roles && user.roles.length > 1) {
-          if (pathname !== '/select-role') {
-            router.push('/select-role');
-          }
-        } else if (user.roles && user.roles.length === 1) {
-          dispatch(setActiveRole(user.roles[0]));
-        } else {
-           if (pathname !== '/unauthorized') router.push('/unauthorized');
-        }
-        return;
-      }
-
-      // 4. Final Dashboard Redirection
-      if (pathname === '/login' || pathname === '/select-hospital' || pathname === '/select-role') {
-        const rolePathMap: Record<string, string> = {
-          'RECEPTIONIST': 'reception',
-          'DOCTOR': 'doctor',
-          'PHARMACIST': 'pharmacy',
-          'ADMIN': 'admin',
-          'SUPER_ADMIN': 'super_admin',
-          'NURSE': 'nurse'
-        };
-        const path = rolePathMap[activeRole] || activeRole.toLowerCase();
-        router.push(`/${path}/dashboard`);
-      }
+  const handleUnauthenticated = useCallback(() => {
+    if (pathname !== '/login') {
+      router.push('/login');
     }
-  }, [isLoading, isAuthenticated, pathname, router, user, isSuperMode, activeRole, dispatch]);
+  }, [pathname, router]);
+
+  const handleSuperUserFlow = useCallback((roles: string[]) => {
+    if (roles.length === 1 && !isSuperMode) {
+      dispatch(setSuperMode(true));
+      return true;
+    }
+
+    if (isSuperMode) {
+      if (pathname !== '/super_admin/dashboard') {
+        router.push('/super_admin/dashboard');
+      }
+      return true;
+    }
+    return false;
+  }, [dispatch, isSuperMode, pathname, router]);
+
+  const handleHospitalSelection = useCallback((roles: string[]) => {
+    if (user?.hospitals && user.hospitals.length > 1) {
+      if (pathname !== '/select-hospital') {
+        router.push('/select-hospital');
+      }
+    } else if (user?.hospitals && user.hospitals.length === 1) {
+      authService.selectHospital(user.hospitals[0].hospitalId).then(res => {
+        if (res.success && res.data) dispatch(setUser(res.data));
+      });
+    } else if (roles.includes('SUPER_ADMIN')) {
+      dispatch(setSuperMode(true));
+    } else if (pathname !== '/unauthorized') {
+      router.push('/unauthorized');
+    }
+  }, [dispatch, pathname, router, user]);
+
+  const handleRoleSelection = useCallback((roles: string[]) => {
+    if (roles.length > 1) {
+      if (pathname !== '/select-role') {
+        router.push('/select-role');
+      }
+    } else if (roles.length === 1) {
+      dispatch(setActiveRole(roles[0]));
+    } else if (pathname !== '/unauthorized') {
+      router.push('/unauthorized');
+    }
+  }, [dispatch, pathname, router]);
+
+  const handleAuthenticatedRedirect = useCallback(() => {
+    if (pathname === '/login' || pathname === '/select-hospital' || pathname === '/select-role') {
+      const rolePathMap: Record<string, string> = {
+        'RECEPTIONIST': 'reception',
+        'DOCTOR': 'doctor',
+        'PHARMACIST': 'pharmacy',
+        'ADMIN': 'admin',
+        'SUPER_ADMIN': 'super_admin',
+        'NURSE': 'nurse'
+      };
+      const path = rolePathMap[activeRole!] || activeRole!.toLowerCase();
+      router.push(`/${path}/dashboard`);
+    }
+  }, [activeRole, pathname, router]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
+      handleUnauthenticated();
+      return;
+    }
+
+    const roles = user?.roles || [];
+    const isSuperUser = roles.includes('SUPER_ADMIN');
+
+    if (isSuperUser && handleSuperUserFlow(roles)) return;
+
+    if (!user?.hospitalId) {
+      handleHospitalSelection(roles);
+      return;
+    }
+
+    if (!activeRole) {
+      handleRoleSelection(roles);
+      return;
+    }
+
+    handleAuthenticatedRedirect();
+  }, [
+    isLoading,
+    isAuthenticated,
+    user,
+    activeRole,
+    handleUnauthenticated,
+    handleSuperUserFlow,
+    handleHospitalSelection,
+    handleRoleSelection,
+    handleAuthenticatedRedirect
+  ]);
 
   if (isLoading) {
     return (

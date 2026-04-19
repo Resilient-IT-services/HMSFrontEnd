@@ -10,33 +10,15 @@ import { ApiResponse, AppointmentResponse } from '@/types/api';
 const ReceptionDashboard = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    totalPatients: 0,
-    todayAppointments: 0,
-    pendingConsultations: 0,
-  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
         const appointmentsRes = await apiClient.get<ApiResponse<{ content: AppointmentResponse[] }>>('/appointments?size=10');
-        const patientsRes = await apiClient.get<ApiResponse<{ totalElements: number }>>('/patients?size=1');
         
         if (appointmentsRes.data.success) {
           setAppointments(appointmentsRes.data.data?.content || []);
-          setStats(prev => ({
-            ...prev,
-            todayAppointments: appointmentsRes.data.data?.content.length || 0,
-            pendingConsultations: appointmentsRes.data.data?.content.filter(a => a.status === 'SCHEDULED').length || 0,
-          }));
-        }
-
-        if (patientsRes.data.success) {
-          setStats(prev => ({
-            ...prev,
-            totalPatients: patientsRes.data.data?.totalElements || 0,
-          }));
         }
       } catch (error) {
         console.error('Failed to fetch dashboard data', error);
@@ -64,19 +46,24 @@ const ReceptionDashboard = () => {
     { header: 'Time', accessor: (row: AppointmentResponse) => new Date(row.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
     { 
       header: 'Status', 
-      accessor: (row: AppointmentResponse) => (
-        <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${
-          row.status === 'COMPLETED' ? 'bg-[var(--success-light)] text-[var(--success)]' :
-          row.status === 'CANCELLED' ? 'bg-[var(--error-light)] text-[var(--error)]' :
-          'bg-[var(--warning-light)] text-[var(--warning)]'
-        }`}>
-          {row.status}
-        </span>
-      )
+      accessor: (row: AppointmentResponse) => {
+        let statusClass = 'bg-[var(--warning-light)] text-[var(--warning)]';
+        if (row.status === 'COMPLETED') {
+          statusClass = 'bg-[var(--success-light)] text-[var(--success)]';
+        } else if (row.status === 'CANCELLED') {
+          statusClass = 'bg-[var(--error-light)] text-[var(--error)]';
+        }
+
+        return (
+          <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${statusClass}`}>
+            {row.status}
+          </span>
+        );
+      }
     },
     {
       header: 'Action',
-      accessor: (row: AppointmentResponse) => (
+      accessor: () => (
         <button className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors">
           <span className="material-symbols-outlined text-xl">open_in_new</span>
         </button>

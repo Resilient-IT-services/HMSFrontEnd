@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUser, setError } from '@/state/authSlice';
+import { setUser } from '@/state/authSlice';
 import { authService } from '@/services/authService';
-import { useRouter } from 'next/navigation';
 
 const LoginPage = () => {
   const [username, setUsername] = useState('');
@@ -14,7 +13,6 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   
   const dispatch = useDispatch();
-  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +33,8 @@ const LoginPage = () => {
       } else {
         setLocalError(loginResponse.error?.message || 'Login failed');
       }
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: { message?: string } } } };
       setLocalError(err.response?.data?.error?.message || 'Invalid credentials');
     } finally {
       setLoading(false);

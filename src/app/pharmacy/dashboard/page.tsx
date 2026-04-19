@@ -22,17 +22,19 @@ const PharmacyDashboard = () => {
         if (response.data.success) {
           const content = response.data.data?.content || [];
           setPrescriptions(content);
+          const pendingCount = content.filter(p => p.status === 'PENDING').length;
           setStats(prev => ({
             ...prev,
-            pendingBills: content.filter(p => p.status === 'PENDING').length,
+            pendingBills: pendingCount,
           }));
         }
 
         const stockRes = await apiClient.get<ApiResponse<{ totalElements: number }>>('/pharmacy/stock?lowStock=true');
         if (stockRes.data.success) {
+          const lowStockCount = stockRes.data.data?.totalElements || 0;
           setStats(prev => ({
             ...prev,
-            lowStock: stockRes.data.data?.totalElements || 0,
+            lowStock: lowStockCount,
           }));
         }
       } catch (error) {

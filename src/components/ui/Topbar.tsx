@@ -51,6 +51,8 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
 
   const currentHospitalName = user?.hospitals.find(h => h.hospitalId === user.hospitalId)?.hospitalName || 'System Level';
 
+  const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
+
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-3 lg:px-10">
       <div className="flex items-center gap-4">
@@ -58,7 +60,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
           <span className="material-symbols-outlined">health_and_safety</span>
         </div>
         <div>
-          <h2 className="text-xl font-bold leading-tight tracking-tight text-[var(--text-primary)]">HMS System</h2>
+          <h2 className="text-xl font-bold leading-tight tracking-tight text-[var(--text-primary)]">{title || 'HMS System'}</h2>
           <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider">{currentHospitalName}</p>
         </div>
       </div>
@@ -80,7 +82,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
               <div className="text-left hidden sm:block">
                 <p className="text-sm font-bold text-[var(--text-primary)] leading-none">{user?.username}</p>
                 <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase mt-1 tracking-wider">
-                  {isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role')}
+                  {roleLabel}
                 </p>
               </div>
               <span className={`material-symbols-outlined text-[var(--text-secondary)] transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}>expand_more</span>
@@ -112,19 +114,28 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
 
                 <div className="px-2 py-1">
                   <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
-                  {user?.roles.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => (
-                    <button
-                      key={role}
-                      onClick={() => handleRoleSwitch(role)}
-                      className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${activeRole === role ? 'text-[var(--primary)] bg-[var(--primary-light)]/50' : 'text-[var(--text-primary)]'}`}
-                    >
-                      <span className="material-symbols-outlined text-xl">
-                        {role === 'DOCTOR' ? 'medical_services' : role === 'ADMIN' ? 'admin_panel_settings' : 'person'}
-                      </span>
-                      <span className="text-sm font-bold">{role}</span>
-                      {activeRole === role && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
-                    </button>
-                  ))}
+                    {user?.roles.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => {
+                      let roleIcon = 'person';
+                      if (role === 'DOCTOR') {
+                        roleIcon = 'medical_services';
+                      } else if (role === 'ADMIN') {
+                        roleIcon = 'admin_panel_settings';
+                      }
+
+                      return (
+                        <button
+                          key={role}
+                          onClick={() => handleRoleSwitch(role)}
+                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${activeRole === role ? 'text-[var(--primary)] bg-[var(--primary-light)]/50' : 'text-[var(--text-primary)]'}`}
+                        >
+                          <span className="material-symbols-outlined text-xl">
+                            {roleIcon}
+                          </span>
+                          <span className="text-sm font-bold">{role}</span>
+                          {activeRole === role && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
+                        </button>
+                      );
+                    })}
                 </div>
 
                 {user?.hospitals && user.hospitals.length > 1 && (

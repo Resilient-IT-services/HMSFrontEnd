@@ -9,15 +9,12 @@ import { Modal } from '@/components/ui/Modal';
 import apiClient from '@/services/apiClient';
 import { ApiResponse, UserResponse, Role, CreateUserRequest } from '@/types/api';
 import { UserPlus, Search, Edit2, Trash2 } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/state/store';
 
 const UserManagement = () => {
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserForm, setShowUserForm] = useState(false);
-  const currentUser = useSelector((state: RootState) => state.auth.user);
   
   const [newUser, setNewUser] = useState<CreateUserRequest>({ 
     username: '', 
@@ -115,7 +112,7 @@ const UserManagement = () => {
     },
     {
       header: 'Actions',
-      accessor: (row: UserResponse) => (
+      accessor: () => (
         <div className="flex space-x-2">
           <button className="p-2 text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg transition-colors">
             <Edit2 className="h-4 w-4" />
@@ -177,7 +174,7 @@ const UserManagement = () => {
               <select 
                 className="form-input" 
                 value={newUser.gender}
-                onChange={(e) => setNewUser({...newUser, gender: e.target.value as any})}
+                onChange={(e) => setNewUser({...newUser, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER'})}
                 required
               >
                 <option value="MALE">Male</option>

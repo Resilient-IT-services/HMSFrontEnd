@@ -11,13 +11,13 @@ import { authService } from '@/services/authService';
 const Sidebar = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
+  const { isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = async () => {
     try {
       await authService.logout();
       dispatch(logout());
-      window.location.href = '/login';
+      globalThis.location.href = '/login';
     } catch (error) {
       console.error('Logout failed', error);
     }

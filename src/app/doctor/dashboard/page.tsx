@@ -93,32 +93,32 @@ const DoctorDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)]">
-                  {loading ? (
+                  {loading && (
                     <tr><td colSpan={5} className="px-6 py-8 text-center text-[var(--text-secondary)]">Loading queue...</td></tr>
-                  ) : queue.length === 0 ? (
-                    <tr><td colSpan={5} className="px-6 py-8 text-center text-[var(--text-secondary)]">No patients in queue</td></tr>
-                  ) : (
-                    queue.map((row) => (
-                      <tr key={row.id} className="hover:bg-[var(--background)] transition-colors">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)]">
-                              <span className="material-symbols-outlined text-sm">person</span>
-                            </div>
-                            <span className="text-sm font-semibold text-[var(--text-primary)]">{row.patientName}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">#Q-{row.id}</td>
-                        <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">12 mins</td>
-                        <td className="px-6 py-4">
-                          <span className="px-2 py-1 text-[10px] font-bold rounded bg-[var(--warning-light)] text-[var(--warning)] uppercase">Waiting</span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="btn-primary text-xs py-1.5 px-3">Call Patient</button>
-                        </td>
-                      </tr>
-                    ))
                   )}
+                  {!loading && queue.length === 0 && (
+                    <tr><td colSpan={5} className="px-6 py-8 text-center text-[var(--text-secondary)]">No patients in queue</td></tr>
+                  )}
+                  {!loading && queue.length > 0 && queue.map((row) => (
+                    <tr key={row.id} className="hover:bg-[var(--background)] transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)]">
+                            <span className="material-symbols-outlined text-sm">person</span>
+                          </div>
+                          <span className="text-sm font-semibold text-[var(--text-primary)]">{row.patientName}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">#Q-{row.id}</td>
+                      <td className="px-6 py-4 text-sm text-[var(--text-secondary)]">12 mins</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-1 text-[10px] font-bold rounded bg-[var(--warning-light)] text-[var(--warning)] uppercase">Waiting</span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="btn-primary text-xs py-1.5 px-3">Call Patient</button>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

@@ -33,7 +33,7 @@ const SuperAdminDashboard = () => {
 
   const roleOptions: Role[] = ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE', 'SUPER_ADMIN'];
 
-  const fetchData = async () => {
+  const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
       // Always fetch hospitals because we need them for user assignment
@@ -53,11 +53,11 @@ const SuperAdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab]);
 
   useEffect(() => {
     fetchData();
-  }, [activeTab]);
+  }, [fetchData]);
 
   const handleCreateHospital = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,13 +126,14 @@ const SuperAdminDashboard = () => {
     { header: 'Address', accessor: (row: HospitalResponse) => row.address || 'N/A' },
     { 
       header: 'Status', 
-      accessor: (row: HospitalResponse) => (
-        <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${
-          row.status === 'ACTIVE' ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-slate-100 text-slate-500'
-        }`}>
-          {row.status || 'ACTIVE'}
-        </span>
-      )
+      accessor: (row: HospitalResponse) => {
+        const statusClass = row.status === 'ACTIVE' ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-slate-100 text-slate-500';
+        return (
+          <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${statusClass}`}>
+            {row.status || 'ACTIVE'}
+          </span>
+        );
+      }
     },
     {
       header: 'Action',
@@ -184,7 +185,7 @@ const SuperAdminDashboard = () => {
     { header: 'Created', accessor: (row: UserResponse) => new Date(row.createdAt).toLocaleDateString() },
     {
       header: 'Action',
-      accessor: (addrow: UserResponse) => (
+      accessor: () => (
         <button className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all">
           <span className="material-symbols-outlined text-xl">edit</span>
         </button>
@@ -219,7 +220,9 @@ const SuperAdminDashboard = () => {
             </span>
           </div>
           <p className="text-[var(--text-secondary)] text-sm font-medium">Total System Users</p>
-          <h3 className="text-2xl font-bold text-[var(--text-primary)]">{users.length > 0 ? users.length : (loading ? '...' : hospitals.length * 5)}</h3>
+          <h3 className="text-2xl font-bold text-[var(--text-primary)]">
+            {loading ? '...' : (users.length || hospitals.length * 5)}
+          </h3>
         </div>
 
         <div className="bg-[var(--surface)] p-6 rounded-xl border border-[var(--border)] shadow-sm">
@@ -328,7 +331,7 @@ const SuperAdminDashboard = () => {
             <select 
               className="form-input"
               value={newUser.hospitalId}
-              onChange={(e) => setNewUser({...newUser, hospitalId: parseInt(e.target.value)})}
+              onChange={(e) => setNewUser({...newUser, hospitalId: Number.parseInt(e.target.value)})}
               required
             >
               <option value="">Select a Hospital</option>
@@ -351,7 +354,7 @@ const SuperAdminDashboard = () => {
               <select 
                 className="form-input" 
                 value={newUser.gender}
-                onChange={(e) => setNewUser({...newUser, gender: e.target.value as any})}
+                onChange={(e) => setNewUser({...newUser, gender: e.target.value as 'MALE' | 'FEMALE' | 'OTHER'})}
                 required
               >
                 <option value="MALE">Male</option>

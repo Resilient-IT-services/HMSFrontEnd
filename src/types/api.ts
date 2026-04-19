@@ -3,7 +3,7 @@ export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST'
 export interface ApiError {
   code?: string;
   message: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface ApiResponse<T> {
@@ -54,10 +54,12 @@ export interface UserResponse {
 }
 
 // Patient types
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+
 export interface PatientResponse {
   id: number;
   fullName: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  gender: Gender;
   dob: string;
   phone: string;
   address: string;
@@ -85,7 +87,7 @@ export interface CreateUserRequest {
   password?: string;
   roles: Role[];
   fullName: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  gender: Gender;
   dob: string;
   phone?: string;
 }
