@@ -1,5 +1,5 @@
-import { RoleDashboard } from "@/components/role-dashboard";
+import { redirect } from 'next/navigation';
 
 export default function ReceptionPage() {
-  return <RoleDashboard title="Reception Dashboard" />;
+  redirect('/reception/dashboard');
 }

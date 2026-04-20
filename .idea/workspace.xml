@@ -5,97 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page">
-      <change afterPath="$PROJECT_DIR$/.husky/pre-commit" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/admin/users/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/admin/users/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/doctor/dashboard/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/doctor/dashboard/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/doctor/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/doctor/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/layout.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/login/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/login/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/pharmacy/dashboard/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/pharmacy/dashboard/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/reception/dashboard/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/reception/dashboard/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/select-hospital/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/select-hospital/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/select-role/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/select-role/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/super_admin/dashboard/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/super_admin/dashboard/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/unauthorized/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/app/unauthorized/page.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/base.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/block-navigation.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/AuthProvider.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/Card.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/FormField.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/MainLayout.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/Modal.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/Sidebar.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/Table.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/Topbar.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/components/ui/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/coverage-final.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/favicon.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/prettify.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/prettify.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/services/apiClient.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/services/authService.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/services/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/sort-arrow-sprite.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/sorter.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/state/StoreProvider.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/state/authSlice.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/state/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/state/store.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/ThemeProvider.tsx.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/cssVars.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/themes/dark.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/themes/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/themes/index.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/themes/light.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/colors.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/index.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/index.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/radius.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/shadows.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/spacing.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/theme/tokens/typography.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/types/api.ts.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/coverage/types/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/eslint.config.mjs" beforeDir="false" afterPath="$PROJECT_DIR$/eslint.config.mjs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/admin/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/admin/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/doctor/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/doctor/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/doctor/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/doctor/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/login/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/login/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/pharmacy/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/pharmacy/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/reception/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/reception/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/select-role/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/select-role/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/super_admin/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/super_admin/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/AuthProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AuthProvider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/Modal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Modal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Sidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/Table.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Table.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/reception/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/reception/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/ui/Topbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Topbar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/apiClient.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/apiClient.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/state/authSlice.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/authSlice.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/setup.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/setup.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/theme/ThemeProvider.test.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/theme/ThemeProvider.test.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/theme/cssVars.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/theme/cssVars.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/vitest.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vitest.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

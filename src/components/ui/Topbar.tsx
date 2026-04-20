@@ -157,6 +157,24 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
                     ))}
                   </div>
                 )}
+
+                <div className="p-2 border-t border-[var(--border)] mt-1">
+                  <button
+                    onClick={async () => {
+                      try {
+                        await authService.logout();
+                        dispatch(logout());
+                        globalThis.location.href = '/login';
+                      } catch (error) {
+                        console.error('Logout failed', error);
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--error-light)] text-[var(--error)]"
+                  >
+                    <span className="material-symbols-outlined">logout</span>
+                    <span className="text-sm font-bold">Logout</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -167,3 +185,4 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
 };
 
 export default Topbar;
+
