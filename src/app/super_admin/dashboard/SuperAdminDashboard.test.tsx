@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SuperAdminDashboard from './page';
 import apiClient from '@/services/apiClient';
@@ -15,7 +15,12 @@ vi.mock('@/services/apiClient', () => ({
 
 // Mock MainLayout to avoid complexity
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children }: any) => <div data-testid="main-layout">{children}</div>
+  default: ({ children, title }: any) => (
+    <div data-testid="main-layout">
+      <h1>{title}</h1>
+      {children}
+    </div>
+  )
 }));
 
 const createMockStore = () => configureStore({ reducer: { auth: authReducer } });
@@ -25,9 +30,15 @@ describe('SuperAdminDashboard', () => {
     vi.clearAllMocks();
   });
 
-  it('renders and fetches hospitals', async () => {
-    (apiClient.get as any).mockResolvedValue({
-      data: { success: true, data: [{ id: 1, name: 'Hospital A', code: 'HA' }] }
+  it('renders stats and welcome message', async () => {
+    (apiClient.get as any).mockImplementation((url: string) => {
+      if (url === '/hospitals') {
+        return Promise.resolve({ data: { success: true, data: [{ id: 1, name: 'Hospital A', code: 'HA' }] } });
+      }
+      if (url === '/users') {
+        return Promise.resolve({ data: { success: true, data: [{ id: 1, username: 'user1' }] } });
+      }
+      return Promise.reject(new Error('not found'));
     });
 
     render(
@@ -36,58 +47,25 @@ describe('SuperAdminDashboard', () => {
       </Provider>
     );
 
-    expect(screen.getAllByText('Registered Hospitals').length).toBeGreaterThan(0);
-    await waitFor(() => {
-      expect(screen.getByText('Hospital A')).toBeInTheDocument();
-    });
-  });
-
-  it('switches to users tab', async () => {
-    (apiClient.get as any).mockResolvedValue({
-      data: { success: true, data: [] }
-    });
-
-    render(
-      <Provider store={createMockStore()}>
-        <SuperAdminDashboard />
-      </Provider>
-    );
-
-    fireEvent.click(screen.getByText('Global User Directory'));
+    expect(screen.getByText('System Administration')).toBeInTheDocument();
+    expect(screen.getByText('Welcome, Super Administrator')).toBeInTheDocument();
     
     await waitFor(() => {
-      expect(screen.getByText('All System Users')).toBeInTheDocument();
+      // Check for stats counts
+      // Since '1' might appear twice (one for hospital, one for user), we use getAllByText
+      const countElements = screen.getAllByText('1');
+      expect(countElements.length).toBeGreaterThanOrEqual(2);
     });
   });
 
-  it('opens hospital creation modal', () => {
+  it('renders navigation links', () => {
     render(
       <Provider store={createMockStore()}>
         <SuperAdminDashboard />
       </Provider>
     );
 
-    fireEvent.click(screen.getByText('Register Hospital'));
-    expect(screen.getByText('Register New Hospital')).toBeInTheDocument();
-  });
-
-  it('handles role toggle in user form', async () => {
-    render(
-      <Provider store={createMockStore()}>
-        <SuperAdminDashboard />
-      </Provider>
-    );
-
-    // Must switch to users tab first to see the button
-    fireEvent.click(screen.getByText('Global User Directory'));
-    
-    await waitFor(() => {
-      expect(screen.getByText('Create System User')).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Create System User'));
-    const doctorCheckbox = screen.getByLabelText('DOCTOR');
-    fireEvent.click(doctorCheckbox);
-    expect(doctorCheckbox).toBeChecked();
+    expect(screen.getByText('Manage Hospitals')).toHaveAttribute('href', '/super_admin/hospitals');
+    expect(screen.getByText('Manage Users')).toHaveAttribute('href', '/admin/users');
   });
 });

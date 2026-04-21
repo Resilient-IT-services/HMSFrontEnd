@@ -26,7 +26,10 @@ describe('authSlice', () => {
 
   it('should handle setUser', () => {
     const state = authReducer(undefined, setUser(mockUser));
-    expect(state.user).toEqual(mockUser);
+    expect(state.user).toEqual({
+      ...mockUser,
+      roles: ['DOCTOR', 'ADMIN']
+    });
     expect(state.isAuthenticated).toBe(true);
   });
 
