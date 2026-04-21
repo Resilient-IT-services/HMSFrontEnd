@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FormField } from '@/components/ui/FormField';
 import apiClient from '@/services/apiClient';
@@ -19,39 +19,25 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
   onSuccess,
   user,
 }) => {
-  const [formData, setFormData] = useState({
-    fullName: '',
-    gender: 'MALE' as 'MALE' | 'FEMALE' | 'OTHER',
-    dob: '',
-    phone: '',
-    active: true,
-    specialization: '',
-    department: ''
-  });
-
-  useEffect(() => {
-    if (user) {
-      // Find specialization and department from memberships if any
-      let spec = '';
-      let dept = '';
-      if (user.memberships) {
-        for (const m of user.memberships) {
-          if (m.specialization) spec = m.specialization;
-          if (m.department) dept = m.department;
-        }
-      }
-
-      setFormData({
-        fullName: user.fullName || '',
-        gender: (user.gender as any) || 'MALE',
-        dob: user.dob ? user.dob.toString() : '',
-        phone: user.phone || '',
-        active: user.active,
-        specialization: spec,
-        department: dept
-      });
+  // Extract specialization and department from memberships
+  let initialSpec = '';
+  let initialDept = '';
+  if (user?.memberships) {
+    for (const m of user.memberships) {
+      if (m.specialization) initialSpec = m.specialization;
+      if (m.department) initialDept = m.department;
     }
-  }, [user]);
+  }
+
+  const [formData, setFormData] = useState({
+    fullName: user?.fullName || '',
+    gender: (user?.gender || 'MALE') as 'MALE' | 'FEMALE' | 'OTHER',
+    dob: user?.dob ? user.dob.toString() : '',
+    phone: user?.phone || '',
+    active: user?.active ?? true,
+    specialization: initialSpec,
+    department: initialDept
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

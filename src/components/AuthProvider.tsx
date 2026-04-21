@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else if (roles.length === 1) {
       if (activeRole === roles[0]) return;
-      dispatch(setActiveRole(roles[0]));
+      dispatch(setActiveRole(roles[0] as any));
     } else if (pathname !== '/unauthorized') {
       router.push('/unauthorized');
     }

@@ -89,7 +89,7 @@ const TodayAppointmentsPage = () => {
         </div>
       )
     },
-    { header: 'Doctor', accessor: 'doctorName' },
+    { header: 'Doctor', accessor: (row: AppointmentResponse) => row.doctorName },
     { 
       header: 'Status', 
       accessor: (row: AppointmentResponse) => (

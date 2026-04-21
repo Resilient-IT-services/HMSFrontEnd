@@ -79,7 +79,7 @@ const DoctorsPage = () => {
     },
     { 
       header: 'Contact', 
-      accessor: 'phone' 
+      accessor: (row: DoctorResponse) => row.phone 
     },
     { 
       header: 'Availability', 
