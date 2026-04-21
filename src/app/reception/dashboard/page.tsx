@@ -1,24 +1,33 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
 import { Table } from '@/components/ui/Table';
 import apiClient from '@/services/apiClient';
 import { ApiResponse, AppointmentResponse } from '@/types/api';
+import { UserPlus, CalendarPlus, ListOrdered, ChevronRight } from 'lucide-react';
 
 const ReceptionDashboard = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [totalPatients, setTotalPatients] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const appointmentsRes = await apiClient.get<ApiResponse<{ content: AppointmentResponse[] }>>('/appointments?size=10');
+        const [appointmentsRes, patientsRes] = await Promise.all([
+          apiClient.get<ApiResponse<{ content: AppointmentResponse[] }>>('/appointments?size=10'),
+          apiClient.get<ApiResponse<{ totalElements: number }>>('/patients?size=1')
+        ]);
         
         if (appointmentsRes.data.success) {
           setAppointments(appointmentsRes.data.data?.content || []);
+        }
+        if (patientsRes.data.success) {
+          setTotalPatients(patientsRes.data.data?.totalElements || 0);
         }
       } catch (error) {
         console.error('Failed to fetch dashboard data', error);
@@ -63,10 +72,10 @@ const ReceptionDashboard = () => {
     },
     {
       header: 'Action',
-      accessor: () => (
-        <button className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors">
+      accessor: (row: AppointmentResponse) => (
+        <Link href={`/reception/patients/${row.patientId}`} className="text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors">
           <span className="material-symbols-outlined text-xl">open_in_new</span>
-        </button>
+        </Link>
       )
     }
   ];
@@ -75,9 +84,13 @@ const ReceptionDashboard = () => {
     <MainLayout title="Reception Dashboard">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <Card title="1,284" subtitle="Total Patients" icon="groups" />
-        <Card title="42" subtitle="Today's Appointments" icon="event_available" />
-        <Card title="15" subtitle="Pending Triage" icon="vital_signs" />
+        <Card title={loading ? '...' : totalPatients.toLocaleString()} subtitle="Total Patients" icon="groups" />
+        <Link href="/reception/appointments" className="block transition-transform hover:scale-[1.02]">
+          <Card title={loading ? '...' : appointments.length.toString()} subtitle="Today's Appointments" icon="event_available" />
+        </Link>
+        <Link href="/reception/queue" className="block transition-transform hover:scale-[1.02]">
+          <Card title={loading ? '...' : appointments.filter(a => a.status === 'CHECKED_IN').length.toString()} subtitle="Live Queue" icon="list_alt" />
+        </Link>
         <Card title="₹12,450" subtitle="Today's Revenue" icon="payments" />
       </div>
 
@@ -89,6 +102,40 @@ const ReceptionDashboard = () => {
         </div>
 
         <div className="space-y-8">
+          <Card title="Quick Actions">
+             <div className="flex flex-col gap-3 mt-4">
+                <Link href="/reception/patients" className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] hover:bg-[var(--primary-light)] transition-all group">
+                   <div className="flex items-center gap-3">
+                      <div className="p-2 bg-[var(--primary-light)] rounded-lg text-[var(--primary)] group-hover:bg-[var(--primary)] group-hover:text-white transition-colors">
+                        <UserPlus className="size-4" />
+                      </div>
+                      <span className="text-sm font-bold text-[var(--text-primary)]">New Registration</span>
+                   </div>
+                   <ChevronRight className="size-4 text-[var(--text-secondary)]" />
+                </Link>
+
+                <Link href="/reception/appointments/create" className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] hover:bg-[var(--primary-light)] transition-all group">
+                   <div className="flex items-center gap-3">
+                      <div className="p-2 bg-[var(--info-light)] rounded-lg text-[var(--info)] group-hover:bg-[var(--info)] group-hover:text-white transition-colors">
+                        <CalendarPlus className="size-4" />
+                      </div>
+                      <span className="text-sm font-bold text-[var(--text-primary)]">Schedule Appointment</span>
+                   </div>
+                   <ChevronRight className="size-4 text-[var(--text-secondary)]" />
+                </Link>
+
+                <Link href="/reception/queue" className="flex items-center justify-between p-3 rounded-xl border border-[var(--border)] hover:bg-[var(--primary-light)] transition-all group">
+                   <div className="flex items-center gap-3">
+                      <div className="p-2 bg-[var(--success-light)] rounded-lg text-[var(--success)] group-hover:bg-[var(--success)] group-hover:text-white transition-colors">
+                        <ListOrdered className="size-4" />
+                      </div>
+                      <span className="text-sm font-bold text-[var(--text-primary)]">Live Queue</span>
+                   </div>
+                   <ChevronRight className="size-4 text-[var(--text-secondary)]" />
+                </Link>
+             </div>
+          </Card>
+
           <Card title="Recent Activity" icon="history">
             <div className="space-y-6 mt-4">
               <div className="flex gap-4">
@@ -113,16 +160,6 @@ const ReceptionDashboard = () => {
               </div>
             </div>
           </Card>
-          
-          <Card title="Weekly Trend" icon="analytics">
-            <div className="flex items-end justify-between h-32 px-4 gap-2 mt-4">
-              <div className="h-[40%] flex-1 rounded-t-lg bg-[var(--primary)]/20 hover:bg-[var(--primary)] transition-all"></div>
-              <div className="h-[65%] flex-1 rounded-t-lg bg-[var(--primary)]/20 hover:bg-[var(--primary)] transition-all"></div>
-              <div className="h-[55%] flex-1 rounded-t-lg bg-[var(--primary)]/20 hover:bg-[var(--primary)] transition-all"></div>
-              <div className="h-[80%] flex-1 rounded-t-lg bg-[var(--primary)]/20 hover:bg-[var(--primary)] transition-all"></div>
-              <div className="h-[95%] flex-1 rounded-t-lg bg-[var(--primary)] transition-all"></div>
-            </div>
-          </Card>
         </div>
       </div>
     </MainLayout>
@@ -130,3 +167,4 @@ const ReceptionDashboard = () => {
 };
 
 export default ReceptionDashboard;
+

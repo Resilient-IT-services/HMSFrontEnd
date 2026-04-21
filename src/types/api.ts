@@ -99,8 +99,16 @@ export interface CreateUserRequest {
   phone?: string;
 }
 
+export interface CreatePatientRequest {
+  fullName: string;
+  gender: Gender;
+  dob: string;
+  phone: string;
+  address: string;
+}
+
 // Appointment types
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED';
+export type AppointmentStatus = 'SCHEDULED' | 'CONFIRMED' | 'CHECKED_IN' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED';
 
 export interface AppointmentResponse {
   id: number;
@@ -108,6 +116,7 @@ export interface AppointmentResponse {
   patientName: string;
   doctorId: number;
   doctorName: string;
+  doctorSpecialization?: string;
   appointmentTime: string;
   status: AppointmentStatus;
   notes?: string;
@@ -121,6 +130,11 @@ export interface CreateAppointmentRequest {
   notes?: string;
 }
 
+export interface UpdateAppointmentStatusRequest {
+  status: AppointmentStatus;
+  notes?: string;
+}
+
 // Doctor types
 export interface DoctorResponse {
   id: number;
@@ -129,6 +143,7 @@ export interface DoctorResponse {
   dob: string;
   phone: string;
   specialization: string;
+  department?: string;
   createdAt: string;
 }
 
