@@ -9,10 +9,11 @@ interface TableProps<T> {
   columns: Column<T>[];
   data: T[];
   onRowClick?: (row: T) => void;
+  onRowDoubleClick?: (row: T) => void;
   isLoading?: boolean;
 }
 
-export const Table = <T,>({ columns, data, onRowClick, isLoading }: TableProps<T>) => {
+export const Table = <T,>({ columns, data, onRowClick, onRowDoubleClick, isLoading }: TableProps<T>) => {
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-[var(--border)]">
@@ -47,7 +48,8 @@ export const Table = <T,>({ columns, data, onRowClick, isLoading }: TableProps<T
             <tr
               key={rowIndex}
               onClick={() => onRowClick?.(row)}
-              className={onRowClick ? 'cursor-pointer hover:bg-[var(--background)]' : ''}
+              onDoubleClick={() => onRowDoubleClick?.(row)}
+              className={onRowClick || onRowDoubleClick ? 'cursor-pointer hover:bg-[var(--background)]' : ''}
             >
               {columns.map((column, colIndex) => (
                 <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">

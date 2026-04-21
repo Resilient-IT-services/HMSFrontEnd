@@ -10,7 +10,7 @@ import { Badge, MapPin, Phone, Info } from 'lucide-react';
 interface PatientRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (patient?: PatientResponse) => void;
 }
 
 export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> = ({
@@ -26,16 +26,72 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
     address: ''
   });
   const [loading, setLoading] = useState(false);
+  const [age, setAge] = useState<number | null>(null);
+
+  const calculateAge = (dob: string) => {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const handleDOBChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData({ ...formData, dob: value });
+    setAge(calculateAge(value));
+  };
+
+  const parseFlexibleDate = (input: string) => {
+    // Remove non-numeric characters
+    const clean = input.replace(/\D/g, '');
+    let day, month, year;
+
+    if (clean.length === 6) {
+      day = clean.slice(0, 2);
+      month = clean.slice(2, 4);
+      year = clean.slice(4, 6);
+      const currentYear = new Date().getFullYear() % 100;
+      year = parseInt(year) > currentYear ? `19${year}` : `20${year}`;
+    } else if (clean.length === 8) {
+      day = clean.slice(0, 2);
+      month = clean.slice(2, 4);
+      year = clean.slice(4, 8);
+    } else {
+      return null;
+    }
+
+    const d = parseInt(day);
+    const m = parseInt(month);
+    const y = parseInt(year);
+    if (d > 0 && d <= 31 && m > 0 && m <= 12 && y > 1900 && y <= new Date().getFullYear()) {
+      return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    }
+    return null;
+  };
+
+  const handleDOBBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const parsed = parseFlexibleDate(e.target.value);
+    if (parsed) {
+      setFormData({ ...formData, dob: parsed });
+      setAge(calculateAge(parsed));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
       const res = await patientService.create(formData);
-      if (res.success) {
-        onSuccess();
+      if (res.success && res.data) {
+        onSuccess(res.data);
         onClose();
         setFormData({ fullName: '', gender: 'MALE', dob: '', phone: '', address: '' });
+        setAge(null);
       }
     } catch (error) {
       console.error('Registration failed', error);
@@ -77,13 +133,22 @@ export const PatientRegistrationModal: React.FC<PatientRegistrationModalProps> =
                 </select>
              </FormField>
              <FormField label="Date of Birth" required>
-                <input 
-                  type="date"
-                  className="form-input" 
-                  value={formData.dob}
-                  onChange={(e) => setFormData({...formData, dob: e.target.value})}
-                  required
-                />
+                <div className="relative">
+                  <input 
+                    type="text"
+                    className="form-input pr-16" 
+                    value={formData.dob}
+                    onChange={handleDOBChange}
+                    onBlur={handleDOBBlur}
+                    placeholder="DDMMYYYY or YYYY-MM-DD"
+                    required
+                  />
+                  {age !== null && (
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black bg-[var(--primary-light)] text-[var(--primary)] px-2 py-1 rounded">
+                      {age} YRS
+                    </span>
+                  )}
+                </div>
              </FormField>
            </div>
 

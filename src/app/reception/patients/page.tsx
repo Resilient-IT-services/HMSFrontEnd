@@ -8,10 +8,12 @@ import { patientService } from '@/services/patientService';
 import { PatientResponse, ApiResponse, PageResponse } from '@/types/api';
 import { Search, UserPlus } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PatientRegistrationModal } from '@/components/reception/PatientRegistrationModal';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const PatientsPage = () => {
+  const router = useRouter();
   const [patients, setPatients] = useState<PatientResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,7 +47,6 @@ const PatientsPage = () => {
   }, [debouncedSearchTerm]);
 
   const columns = [
-// ... existing columns ...
     { 
       header: 'Patient ID', 
       accessor: (row: PatientResponse) => (
@@ -89,7 +90,7 @@ const PatientsPage = () => {
     {
       header: 'Actions',
       accessor: (row: PatientResponse) => (
-        <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2 items-center">
           <Link href={`/reception/patients/${row.id}`} className="text-xs font-bold text-[var(--primary)] hover:underline">View Profile</Link>
           <Link 
             href={`/reception/appointments/create?patientId=${row.id}`}
@@ -138,7 +139,12 @@ const PatientsPage = () => {
         </div>
 
         <Card>
-          <Table columns={columns} data={patients} isLoading={loading} />
+          <Table 
+            columns={columns} 
+            data={patients} 
+            isLoading={loading} 
+            onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
+          />
           
           <div className="bg-[var(--background)] border-t border-[var(--border)] px-6 py-4 flex items-center justify-between mt-4">
             <p className="text-xs text-[var(--text-secondary)] font-medium">

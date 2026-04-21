@@ -23,6 +23,13 @@ vi.mock('@/components/ui/MainLayout', () => ({
   )
 }));
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn()
+  })
+}));
+
 // Mock PatientRegistrationModal
 vi.mock('@/components/reception/PatientRegistrationModal', () => ({
   PatientRegistrationModal: ({ isOpen, onClose, onSuccess }: any) => (

@@ -7,7 +7,7 @@ import { Table } from '@/components/ui/Table';
 import { doctorService } from '@/services/doctorService';
 import { appointmentService } from '@/services/appointmentService';
 import { DoctorResponse, AppointmentResponse } from '@/types/api';
-import { Search, Calendar, Clock, Filter, Stethoscope } from 'lucide-react';
+import { Search, Calendar, Clock, Filter, Stethoscope, UserPlus, Eye } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import Link from 'next/link';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -81,32 +81,32 @@ const DoctorsPage = () => {
       header: 'Contact', 
       accessor: (row: DoctorResponse) => row.phone 
     },
-    { 
-      header: 'Availability', 
-      accessor: () => (
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-[var(--success-light)] text-[var(--success)] text-[10px] font-black uppercase">
-          <div className="size-1.5 rounded-full bg-[var(--success)] animate-pulse"></div>
-          Available
-        </span>
-      )
-    },
     {
       header: 'Actions',
       accessor: (row: DoctorResponse) => (
-        <button 
-          onClick={() => viewSchedule(row)}
-          className="px-4 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-xs font-bold text-[var(--primary)] hover:bg-[var(--primary-light)] transition-all flex items-center gap-2"
-        >
-          <Calendar className="size-3" />
-          View Schedule
-        </button>
+        <div className="flex justify-end gap-2 items-center">
+          <button 
+            onClick={() => viewSchedule(row)}
+            className="p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
+            title="View Schedule"
+          >
+            <Eye className="size-4" />
+          </button>
+          <Link 
+            href={`/reception/appointments/create?doctorId=${row.id}`}
+            className="p-2 bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all"
+            title="Book Appointment"
+          >
+            <UserPlus className="size-4" />
+          </Link>
+        </div>
       )
     }
   ];
 
   return (
     <MainLayout title="Medical Staff">
-      <div className="space-y-6">
+      <div className="space-y-6 overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
            <Card className="md:col-span-3">
               <div className="flex flex-col lg:flex-row gap-4 mb-6">
@@ -120,41 +120,46 @@ const DoctorsPage = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <button className="px-6 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl flex items-center gap-2 font-bold text-[var(--text-secondary)] hover:border-[var(--primary)] transition-all">
+                <button className="px-6 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl flex items-center gap-2 font-bold text-[var(--text-secondary)] hover:border-[var(--primary)] transition-all no-scrollbar">
                    <Filter className="size-4" />
                    All Departments
                 </button>
               </div>
 
-              <Table columns={columns} data={doctors} isLoading={loading} />
+              <Table 
+                columns={columns} 
+                data={doctors} 
+                isLoading={loading} 
+                onRowDoubleClick={(row) => viewSchedule(row)}
+              />
            </Card>
 
-           <div className="space-y-6">
-              <Card>
-                 <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)] mb-4 opacity-50 text-center">Duty Overview</h3>
-                 <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--success-light)]/30 border border-[var(--success)]/10">
-                       <span className="text-xs font-bold text-[var(--success)] uppercase">On Duty</span>
-                       <span className="text-xl font-black text-[var(--text-primary)]">{doctors.length}</span>
+           <div className="space-y-6 lg:ml-auto lg:w-[70%]">
+              <Card className="p-4">
+                 <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-4 opacity-50 text-center">Duty Overview</h3>
+                 <div className="space-y-3">
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--success-light)]/30 border border-[var(--success)]/10">
+                       <span className="text-[10px] font-bold text-[var(--success)] uppercase">On Duty</span>
+                       <span className="text-lg font-black text-[var(--text-primary)]">{doctors.length}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--warning-light)]/30 border border-[var(--warning)]/10">
-                       <span className="text-xs font-bold text-[var(--warning)] uppercase">In Surgery</span>
-                       <span className="text-xl font-black text-[var(--text-primary)]">0</span>
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--warning-light)]/30 border border-[var(--warning)]/10">
+                       <span className="text-[10px] font-bold text-[var(--warning)] uppercase">In Surgery</span>
+                       <span className="text-lg font-black text-[var(--text-primary)]">0</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-xl bg-[var(--error-light)]/30 border border-[var(--error)]/10">
-                       <span className="text-xs font-bold text-[var(--error)] uppercase">Off Duty</span>
-                       <span className="text-xl font-black text-[var(--text-primary)]">0</span>
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--error-light)]/30 border border-[var(--error)]/10">
+                       <span className="text-[10px] font-bold text-[var(--error)] uppercase">Off Duty</span>
+                       <span className="text-lg font-black text-[var(--text-primary)]">0</span>
                     </div>
                  </div>
               </Card>
 
-              <Card className="bg-[var(--primary)] text-white overflow-hidden relative group">
+              <Card className="bg-[var(--primary)] text-white overflow-hidden relative group p-5">
                  <div className="relative z-10">
-                    <h4 className="text-lg font-black uppercase italic leading-tight mb-2">Staff Directory Update</h4>
-                    <p className="text-white/70 text-xs font-medium mb-4">Daily staff schedules are synced automatically from HRMS.</p>
-                    <button className="w-full py-2 bg-white/20 rounded-lg text-xs font-black uppercase hover:bg-white/30 transition-all">View Full Roster</button>
+                    <h4 className="text-base font-black uppercase italic leading-tight mb-2">Staff Roster</h4>
+                    <p className="text-white/70 text-[10px] font-medium mb-4">Daily staff schedules are synced from HRMS.</p>
+                    <button className="w-full py-2 bg-white/20 rounded-lg text-[10px] font-black uppercase hover:bg-white/30 transition-all">View Full</button>
                  </div>
-                 <Stethoscope className="absolute -right-4 -bottom-4 size-32 text-white/10 group-hover:scale-110 transition-transform duration-500" />
+                 <Stethoscope className="absolute -right-4 -bottom-4 size-24 text-white/10 group-hover:scale-110 transition-transform duration-500" />
               </Card>
            </div>
         </div>
@@ -174,7 +179,7 @@ const DoctorsPage = () => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Status</p>
-                <span className="text-xs font-bold text-green-600">AVAILABLE TODAY</span>
+                <span className="text-xs font-bold text-green-600 uppercase">Available Today</span>
               </div>
            </div>
 
@@ -183,7 +188,7 @@ const DoctorsPage = () => {
               {loadingSchedule ? (
                 <div className="py-10 text-center animate-pulse text-[var(--text-secondary)]">Fetching appointments...</div>
               ) : (
-                <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
                   {doctorAppointments.length === 0 ? (
                     <div className="py-10 text-center text-xs font-bold text-[var(--text-secondary)] uppercase border-2 border-dashed border-[var(--border)] rounded-xl">No booked appointments for today</div>
                   ) : (
@@ -209,7 +214,7 @@ const DoctorsPage = () => {
            </div>
 
            <div className="pt-4 flex gap-3">
-              <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-3 bg-[var(--background)] border border-[var(--border)] rounded-xl text-sm font-bold text-[var(--text-secondary)] hover:bg-slate-50 transition-all">Close Schedule</button>
+              <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-3 bg-[var(--background)] border border-[var(--border)] rounded-xl text-sm font-bold text-[var(--text-secondary)] hover:bg-slate-50 transition-all">Close</button>
               <Link 
                 href={`/reception/appointments/create?doctorId=${selectedDoctor?.id}`} 
                 className="flex-1 btn-primary flex items-center justify-center"

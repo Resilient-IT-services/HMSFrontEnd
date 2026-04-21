@@ -10,13 +10,15 @@ import { configureStore } from '@reduxjs/toolkit';
 // Mock the services
 vi.mock('@/services/appointmentService', () => ({
   appointmentService: {
-    create: vi.fn()
+    create: vi.fn(),
+    list: vi.fn().mockResolvedValue({ success: true, data: { content: [] } })
   }
 }));
 
 vi.mock('@/services/patientService', () => ({
   patientService: {
-    list: vi.fn()
+    list: vi.fn(),
+    get: vi.fn()
   }
 }));
 
@@ -47,7 +49,7 @@ vi.mock('next/navigation', () => ({
 }));
 
 const mockPatients = [
-  { id: 1, fullName: 'John Doe', phone: '1234567890' }
+  { id: 1, fullName: 'John Doe', phone: '1234567890', dob: '1990-01-01', gender: 'MALE' }
 ];
 
 const mockDoctors = [
@@ -59,16 +61,20 @@ describe('CreateAppointmentPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (doctorService.list as any).mockResolvedValue({
+      success: true,
+      data: { content: mockDoctors }
+    });
+    (appointmentService.list as any).mockResolvedValue({
+      success: true,
+      data: { content: [] }
+    });
   });
 
   it('renders correctly and fetches initial data', async () => {
     (patientService.list as any).mockResolvedValue({
       success: true,
       data: { content: mockPatients }
-    });
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
     });
 
     render(
@@ -85,6 +91,13 @@ describe('CreateAppointmentPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
+    });
+
+    // Type in doctor search box
+    const doctorInput = screen.getByPlaceholderText(/Search doctor/i);
+    fireEvent.change(doctorInput, { target: { value: 'Smith' } });
+
+    await waitFor(() => {
       expect(screen.getByText('Dr. Smith')).toBeInTheDocument();
     });
   });
@@ -94,10 +107,6 @@ describe('CreateAppointmentPage', () => {
       success: true,
       data: { content: mockPatients }
     });
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
-    });
     (appointmentService.create as any).mockResolvedValue({ success: true });
 
     render(
@@ -106,7 +115,7 @@ describe('CreateAppointmentPage', () => {
       </Provider>
     );
 
-    // Type in search box to show patient list
+    // Search and select patient
     const searchInput = screen.getByPlaceholderText(/Name or Patient ID/i);
     fireEvent.change(searchInput, { target: { value: 'John' } });
 
@@ -115,15 +124,21 @@ describe('CreateAppointmentPage', () => {
       fireEvent.click(patientButton);
     });
 
-    // Select doctor
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: '101' } });
+    // Search and select doctor
+    const doctorInput = screen.getByPlaceholderText(/Search doctor/i);
+    fireEvent.change(doctorInput, { target: { value: 'Smith' } });
+
+    await waitFor(() => {
+      const doctorButton = screen.getByText('Dr. Smith');
+      fireEvent.click(doctorButton);
+    });
     
     // Select a time slot
     const timeSlot = screen.getByText('09:00');
     fireEvent.click(timeSlot);
 
     // Click submit
-    const submitButton = screen.getByRole('button', { name: /Book Appointment/i });
+    const submitButton = screen.getByRole('button', { name: /BOOK APPOINTMENT/i });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
