@@ -48,7 +48,6 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
     }
     setIsProfileOpen(false);
   };
-
   const currentHospitalName = user?.hospitals.find(h => h.hospitalId === user.hospitalId)?.hospitalName || 'System Level';
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
@@ -163,7 +162,6 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
                     onClick={async () => {
                       try {
                         await authService.logout();
-                        dispatch(logout());
                         globalThis.location.href = '/login';
                       } catch (error) {
                         console.error('Logout failed', error);

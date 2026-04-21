@@ -32,8 +32,8 @@ export interface UserProfileResponse {
   userId: number;
   hospitalId: number | null;
   username: string;
-  roles: Role[];
   hospitals: HospitalMembershipResponse[];
+  roles: Role[]; // Computed on frontend
 }
 
 export interface LoginRequest {
@@ -45,12 +45,19 @@ export interface SelectHospitalRequest {
   hospitalId: number;
 }
 
+export interface AllocateRoleRequest {
+  userId: number;
+  hospitalId: number | null;
+  roles: Role[];
+}
+
 export interface UserResponse {
   id: number;
   username: string;
-  roles: Role[];
+  memberships: HospitalMembershipResponse[];
   active: boolean;
   createdAt: string;
+  roles: Role[]; // Computed on frontend
 }
 
 // Patient types

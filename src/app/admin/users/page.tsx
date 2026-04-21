@@ -7,42 +7,69 @@ import { Table } from '@/components/ui/Table';
 import { FormField } from '@/components/ui/FormField';
 import { Modal } from '@/components/ui/Modal';
 import apiClient from '@/services/apiClient';
-import { ApiResponse, UserResponse, Role, CreateUserRequest } from '@/types/api';
+import { ApiResponse, UserResponse, Role, CreateUserRequest, HospitalResponse } from '@/types/api';
 import { UserPlus, Search, Edit2, Trash2 } from 'lucide-react';
 
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
+
 const UserManagement = () => {
+  const { user: currentUser, isSuperMode } = useSelector((state: RootState) => state.auth);
   const [users, setUsers] = useState<UserResponse[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showUserForm, setShowUserForm] = useState(false);
   
-  const [newUser, setNewUser] = useState<CreateUserRequest>({ 
+  // Allocation state
+  const [showAllocationForm, setShowAllocationForm] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
+  const [allocation, setAllocation] = useState<{
+    hospitalId: number | null;
+    roles: Role[];
+  }>({ hospitalId: null, roles: [] });
+
+  const [newUser, setNewUser] = useState<CreateUserRequest & { hospitalId?: number | null }>({ 
     username: '', 
     password: '', 
     roles: [] as Role[],
     fullName: '',
     gender: 'MALE',
     dob: '',
-    phone: ''
+    phone: '',
+    hospitalId: currentUser?.hospitalId ?? null
   });
 
-  const fetchUsers = async () => {
+  const fetchData = React.useCallback(async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get<ApiResponse<UserResponse[]>>('/users');
-      if (response.data.success) {
-        setUsers(response.data.data || []);
+      
+      const userRes = await apiClient.get<ApiResponse<UserResponse[]>>('/users');
+      if (userRes.data.success) {
+        const usersWithRoles = (userRes.data.data || []).map(u => {
+          const allRoles = new Set<Role>();
+          u.memberships?.forEach(m => m.roles.forEach(r => allRoles.add(r)));
+          return { ...u, roles: Array.from(allRoles) };
+        });
+        setUsers(usersWithRoles);
+      }
+
+      if (isSuperMode) {
+        const hospRes = await apiClient.get<ApiResponse<HospitalResponse[]>>('/hospitals');
+        if (hospRes.data.success) {
+          setHospitals(hospRes.data.data || []);
+        }
       }
     } catch (error) {
-      console.error('Failed to fetch users', error);
+      console.error('Failed to fetch data', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [isSuperMode]);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchData();
+  }, [fetchData]);
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,12 +88,32 @@ const UserManagement = () => {
           fullName: '',
           gender: 'MALE',
           dob: '',
-          phone: ''
+          phone: '',
+          hospitalId: currentUser?.hospitalId ?? null
         });
-        fetchUsers();
+        fetchData();
       }
     } catch (error) {
       console.error('Failed to create user', error);
+    }
+  };
+
+  const handleAllocateRoles = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUser) return;
+
+    try {
+      const response = await apiClient.post<ApiResponse<UserResponse>>('/users/allocate', {
+        userId: selectedUser.id,
+        hospitalId: allocation.hospitalId,
+        roles: allocation.roles
+      });
+      if (response.data.success) {
+        setShowAllocationForm(false);
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to allocate roles', error);
     }
   };
 
@@ -79,7 +126,18 @@ const UserManagement = () => {
     }));
   };
 
-  const roleOptions: Role[] = ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE'];
+  const handleAllocationRoleToggle = (role: Role) => {
+    setAllocation(prev => ({
+      ...prev,
+      roles: prev.roles.includes(role) 
+        ? prev.roles.filter(r => r !== role)
+        : [...prev.roles, role]
+    }));
+  };
+
+  const roleOptions: Role[] = isSuperMode 
+    ? ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE', 'SUPER_ADMIN']
+    : ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE'];
 
   const filteredUsers = users.filter(user => 
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,13 +168,35 @@ const UserManagement = () => {
         </div>
       )
     },
+    { 
+      header: 'Status', 
+      accessor: (row: UserResponse) => (
+        <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${
+          row.active ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-[var(--error-light)] text-[var(--error)]'
+        }`}>
+          {row.active ? 'Active' : 'Inactive'}
+        </span>
+      )
+    },
     {
       header: 'Actions',
-      accessor: () => (
-        <div className="flex space-x-2">
+      accessor: (row: UserResponse) => (
+        <div className="flex space-x-2 items-center">
           <button className="p-2 text-[var(--primary)] hover:bg-[var(--primary-light)] rounded-lg transition-colors">
             <Edit2 className="h-4 w-4" />
           </button>
+          {isSuperMode && (
+            <button 
+              onClick={() => {
+                setSelectedUser(row);
+                setAllocation({ hospitalId: null, roles: [] });
+                setShowAllocationForm(true);
+              }}
+              className="px-3 py-1 rounded-lg text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white transition-all"
+            >
+              Allocate
+            </button>
+          )}
           <button className="p-2 text-[var(--error)] hover:bg-[var(--error-light)] rounded-lg transition-colors">
             <Trash2 className="h-4 w-4" />
           </button>
@@ -160,6 +240,21 @@ const UserManagement = () => {
         title="Create New User"
       >
         <form onSubmit={handleCreateUser} className="p-6 space-y-4">
+          {isSuperMode && (
+            <FormField label="Assign Hospital" required>
+              <select 
+                className="form-input"
+                value={newUser.hospitalId || ''}
+                onChange={(e) => setNewUser({...newUser, hospitalId: e.target.value ? Number.parseInt(e.target.value) : null})}
+                required={!newUser.roles.includes('SUPER_ADMIN')}
+              >
+                <option value="">System Level (Global)</option>
+                {hospitals.map(h => (
+                  <option key={h.id} value={h.id}>{h.name} ({h.code})</option>
+                ))}
+              </select>
+            </FormField>
+          )}
           <FormField label="Full Name" required>
             <input 
               className="form-input" 
@@ -237,6 +332,62 @@ const UserManagement = () => {
           <div className="pt-4 flex gap-3">
             <button type="button" onClick={() => setShowUserForm(false)} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>
             <button type="submit" className="flex-1 btn-primary">Create User</button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Allocation Modal */}
+      <Modal 
+        isOpen={showAllocationForm} 
+        onClose={() => setShowAllocationForm(false)} 
+        title={`Allocate Roles: ${selectedUser?.username}`}
+      >
+        <form onSubmit={handleAllocateRoles} className="p-6 space-y-4">
+          <FormField label="Target Hospital" required>
+            <select 
+              className="form-input"
+              value={allocation.hospitalId || ''}
+              onChange={(e) => {
+                const val = e.target.value;
+                const hospId = val === '' ? null : Number.parseInt(val);
+                
+                // Pre-fill existing roles if any
+                const existing = selectedUser?.memberships?.find(m => m.hospitalId === hospId);
+                setAllocation({ 
+                  hospitalId: hospId, 
+                  roles: existing ? existing.roles : [] 
+                });
+              }}
+            >
+              <option value="">System Level (Global)</option>
+              {hospitals.map(h => (
+                <option key={h.id} value={h.id}>{h.name} ({h.code})</option>
+              ))}
+            </select>
+          </FormField>
+
+          <FormField label="Assigned Roles" required>
+            <p className="text-[10px] text-[var(--text-secondary)] mb-2 uppercase font-bold tracking-wider">
+              Select roles for {allocation.hospitalId ? 'this hospital' : 'system level'}
+            </p>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {roleOptions.map(role => (
+                <label key={role} className="flex items-center gap-2 p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer transition-colors">
+                  <input 
+                    type="checkbox" 
+                    checked={allocation.roles.includes(role)}
+                    onChange={() => handleAllocationRoleToggle(role)}
+                    className="accent-[var(--primary)]"
+                  />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">{role}</span>
+                </label>
+              ))}
+            </div>
+          </FormField>
+
+          <div className="pt-4 flex gap-3">
+            <button type="button" onClick={() => setShowAllocationForm(false)} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>
+            <button type="submit" className="flex-1 btn-primary">Save Allocation</button>
           </div>
         </form>
       </Modal>

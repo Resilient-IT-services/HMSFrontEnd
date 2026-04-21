@@ -45,10 +45,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (isSuperMode) {
-      if (pathname !== '/super_admin/dashboard') {
+      // Only redirect to dashboard if we are at a "gate" page
+      if (pathname === '/login' || pathname === '/' || pathname === '/select-role') {
         router.push('/super_admin/dashboard');
+        return true;
       }
-      return true;
+      // Allow navigation to other pages if we are already in super mode
+      return false;
     }
     return false;
   }, [dispatch, isSuperMode, pathname, router]);
@@ -59,7 +62,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         router.push('/select-hospital');
       }
     } else if (user?.hospitals && user.hospitals.length === 1) {
-      authService.selectHospital(user.hospitals[0].hospitalId).then(res => {
+      const targetHospitalId = user.hospitals[0].hospitalId;
+      // Prevent loop if hospitalId is already what we want
+      if (user.hospitalId === targetHospitalId) {
+        // If we have a hospitalId (or it's intended null) but no activeRole, let role selection handle it
+        return;
+      }
+      authService.selectHospital(targetHospitalId).then(res => {
         if (res.success && res.data) dispatch(setUser(res.data));
       });
     } else if (roles.includes('SUPER_ADMIN')) {
@@ -75,11 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         router.push('/select-role');
       }
     } else if (roles.length === 1) {
+      if (activeRole === roles[0]) return;
       dispatch(setActiveRole(roles[0]));
     } else if (pathname !== '/unauthorized') {
       router.push('/unauthorized');
     }
-  }, [dispatch, pathname, router]);
+  }, [activeRole, dispatch, pathname, router]);
 
   const handleAuthenticatedRedirect = useCallback(() => {
     if (pathname === '/login' || pathname === '/select-hospital' || pathname === '/select-role') {
@@ -108,6 +118,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isSuperUser = roles.includes('SUPER_ADMIN');
 
     if (isSuperUser && handleSuperUserFlow(roles)) return;
+    
+    // If we are in super mode, we don't need hospitalId or activeRole
+    if (isSuperMode) return;
 
     if (!user?.hospitalId) {
       handleHospitalSelection(roles);

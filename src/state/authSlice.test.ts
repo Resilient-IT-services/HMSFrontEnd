@@ -7,9 +7,8 @@ describe('authSlice', () => {
     userId: 1,
     hospitalId: 101,
     username: 'testuser',
-    roles: ['DOCTOR', 'ADMIN'],
     hospitals: [
-      { hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR'] }
+      { hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR', 'ADMIN'] }
     ]
   };
 
@@ -67,8 +66,11 @@ describe('authSlice', () => {
     expect(localStorage.getItem('isSuperMode')).toBe(null);
   });
 
-  it('should auto-set activeRole if user has only one role', () => {
-    const singleRoleUser = { ...mockUser, roles: ['RECEPTIONIST'] as any };
+  it('should auto-set activeRole if user has only one effective role', () => {
+    const singleRoleUser: UserProfileResponse = { 
+      ...mockUser, 
+      hospitals: [{ hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['RECEPTIONIST'] }] 
+    };
     const state = authReducer(undefined, setUser(singleRoleUser));
     expect(state.activeRole).toBe('RECEPTIONIST');
     expect(localStorage.getItem('activeRole')).toBe('RECEPTIONIST');
@@ -76,8 +78,15 @@ describe('authSlice', () => {
 
   it('should disable superMode if non-super-admin user is set', () => {
     const state = authReducer(
-      { ...undefined as any, isSuperMode: true }, 
-      setUser(mockUser) // mockUser has DOCTOR, ADMIN, but not SUPER_ADMIN
+      { 
+        user: null,
+        isAuthenticated: false,
+        isLoading: true,
+        error: null,
+        isSuperMode: true,
+        activeRole: null 
+      }, 
+      setUser(mockUser) // mockUser has DOCTOR, ADMIN, but not SUPER_ADMIN in its hospitals
     );
     expect(state.isSuperMode).toBe(false);
   });
