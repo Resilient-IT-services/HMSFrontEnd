@@ -15,13 +15,14 @@ const AppointmentBookingPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialDoctorId = searchParams.get('doctorId');
+  const initialPatientId = searchParams.get('patientId');
 
   const [patients, setPatients] = useState<PatientResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    patientId: '',
+    patientId: initialPatientId || '',
     doctorId: initialDoctorId || '',
     date: new Date().toISOString().split('T')[0],
     time: '',
@@ -38,7 +39,13 @@ const AppointmentBookingPage = () => {
         patientService.list(0, 50),
         doctorService.list(0, 100)
       ]);
-      if (patRes.success && patRes.data) setPatients(patRes.data.content);
+      if (patRes.success && patRes.data) {
+        setPatients(patRes.data.content);
+        if (initialPatientId) {
+          const patient = patRes.data.content.find(p => p.id === Number(initialPatientId));
+          if (patient) setSearchPatient(patient.fullName);
+        }
+      }
       if (docRes.success && docRes.data) {
         setDoctors(docRes.data.content);
         if (initialDoctorId) {
@@ -50,7 +57,7 @@ const AppointmentBookingPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [initialDoctorId]);
+  }, [initialDoctorId, initialPatientId]);
 
 
   useEffect(() => {
@@ -97,8 +104,8 @@ const AppointmentBookingPage = () => {
 
   return (
     <MainLayout title="Book Appointment">
-      <main className="flex-1 flex flex-col md:flex-row gap-6 p-6 max-w-[1440px] mx-auto w-full">
-        <aside className="w-full md:w-80 flex flex-col gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <aside className="w-full lg:w-80 flex flex-col gap-6">
           <div className="bg-[var(--surface)] p-6 rounded-xl shadow-sm border border-[var(--border)]">
             <h3 className="text-lg font-bold mb-4 text-[var(--text-primary)]">Book New Appointment</h3>
             <form onSubmit={handleBooking} className="flex flex-col gap-4">
@@ -234,7 +241,7 @@ const AppointmentBookingPage = () => {
             </div>
           </Card>
         </div>
-      </main>
+      </div>
     </MainLayout>
   );
 };

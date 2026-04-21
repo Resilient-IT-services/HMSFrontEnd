@@ -131,10 +131,9 @@ const TodayAppointmentsPage = () => {
 
   return (
     <MainLayout title="Today's Appointments">
-      <div className="p-8 space-y-6 overflow-y-auto">
+      <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <h1 className="text-[var(--text-primary)] text-3xl font-black tracking-tight">Daily Schedule</h1>
             <p className="text-[var(--text-secondary)] font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
           </div>
           <div className="flex flex-wrap gap-3">

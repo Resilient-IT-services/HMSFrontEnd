@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
 import { PatientResponse, AppointmentResponse } from '@/types/api';
+import Link from 'next/link';
 import { 
   Cake, 
   MapPin, 
@@ -64,7 +65,7 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
 
   return (
     <MainLayout title={`Profile: ${patient.fullName}`}>
-      <div className="max-w-6xl mx-auto space-y-6 p-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Patient Header Card */}
         <div className="bg-[var(--surface)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
           <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -94,9 +95,12 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
               </div>
             </div>
             <div className="flex flex-row md:flex-col gap-3">
-              <button className="flex-1 min-w-[140px] px-4 py-2.5 bg-[var(--primary)] text-white rounded-lg font-bold text-sm hover:bg-[var(--primary-hover)] transition-all flex items-center justify-center gap-2">
+              <Link 
+                href={`/reception/appointments/create?patientId=${patient.id}`}
+                className="flex-1 min-w-[140px] px-4 py-2.5 bg-[var(--primary)] text-white rounded-lg font-bold text-sm hover:bg-[var(--primary-hover)] transition-all flex items-center justify-center gap-2"
+              >
                 <CalendarDays className="size-5" /> Schedule Visit
-              </button>
+              </Link>
               <button className="flex-1 min-w-[140px] px-4 py-2.5 bg-[var(--background)] text-[var(--text-primary)] rounded-lg font-bold text-sm border border-[var(--border)] hover:bg-[var(--primary-light)] transition-all flex items-center justify-center gap-2">
                 <Edit className="size-5" /> Edit Profile
               </button>

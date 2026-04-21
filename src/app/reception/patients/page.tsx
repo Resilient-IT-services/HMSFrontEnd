@@ -89,7 +89,12 @@ const PatientsPage = () => {
       accessor: (row: PatientResponse) => (
         <div className="flex justify-end gap-2">
           <Link href={`/reception/patients/${row.id}`} className="text-xs font-bold text-[var(--primary)] hover:underline">View Profile</Link>
-          <button className="text-xs font-bold text-[var(--text-secondary)] bg-[var(--background)] px-3 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all">Book Appt</button>
+          <Link 
+            href={`/reception/appointments/create?patientId=${row.id}`}
+            className="text-xs font-bold text-[var(--text-secondary)] bg-[var(--background)] px-3 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
+          >
+            Book Appt
+          </Link>
         </div>
       )
     }
@@ -97,12 +102,7 @@ const PatientsPage = () => {
 
   return (
     <MainLayout title="Patient Directory">
-      <div className="p-8 space-y-6 overflow-y-auto">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight">Patient Directory</h2>
-          <p className="text-[var(--text-secondary)]">Manage and view records for registered patients.</p>
-        </div>
-
+      <div className="space-y-6">
         <div className="bg-[var(--surface)] p-6 rounded-xl border border-[var(--border)] shadow-sm space-y-4">
           <div className="flex flex-col lg:flex-row gap-4">
             <div className="flex-1 relative">

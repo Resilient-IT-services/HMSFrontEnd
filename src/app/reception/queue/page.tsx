@@ -39,13 +39,9 @@ const TokenQueuePage = () => {
 
   return (
     <MainLayout title="Live Token Status">
-      <main className="flex-1 p-6 lg:p-10 mx-auto max-w-[1440px]">
-        {/* Hero Announcement Section */}
-        <div className="mb-10 flex flex-col md:flex-row justify-between items-end gap-4 border-l-4 border-[var(--primary)] pl-6">
-          <div>
-            <h1 className="text-[var(--text-primary)] text-5xl font-black leading-tight tracking-tighter uppercase">Live Token Status</h1>
-            <p className="text-[var(--text-secondary)] text-lg font-medium">Please proceed to the designated counter when your token is called.</p>
-          </div>
+      <div className="space-y-10">
+        {/* Header Indicator */}
+        <div className="flex justify-end">
           <div className="bg-[var(--primary-light)] text-[var(--primary)] px-4 py-2 rounded-lg font-bold flex items-center gap-2">
             <span className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--primary)] opacity-75"></span>
@@ -165,7 +161,7 @@ const TokenQueuePage = () => {
             </div>
           </div>
         </div>
-      </main>
+      </div>
     </MainLayout>
   );
 };

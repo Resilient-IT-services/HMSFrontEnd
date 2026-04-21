@@ -109,13 +109,8 @@ const DoctorsPage = () => {
   ];
 
   return (
-    <MainLayout title="Hospital Doctors">
-      <div className="p-8 space-y-6 overflow-y-auto">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-3xl font-black text-[var(--text-primary)] tracking-tight uppercase italic">Medical Staff</h2>
-          <p className="text-[var(--text-secondary)] font-medium">Manage and view schedules for hospital doctors across departments.</p>
-        </div>
-
+    <MainLayout title="Medical Staff">
+      <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
            <Card className="md:col-span-3">
               <div className="flex flex-col lg:flex-row gap-4 mb-6">
