@@ -22,6 +22,12 @@ vi.mock('next/link', () => ({
   default: ({ children, href }: any) => <a href={href}>{children}</a>
 }));
 
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn()
+  })
+}));
+
 vi.mock('@/components/ui/MainLayout', () => ({
   default: ({ children, title }: any) => (
     <div data-testid="main-layout">
