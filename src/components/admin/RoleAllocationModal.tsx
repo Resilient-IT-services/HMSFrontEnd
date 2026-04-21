@@ -26,14 +26,19 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
   const [allocation, setAllocation] = useState<{
     hospitalId: number | null;
     roles: Role[];
+    specialization: string;
+    department: string;
   }>(() => {
     if (selectedUser?.memberships && selectedUser.memberships.length > 0) {
+      const membership = selectedUser.memberships[0];
       return {
-        hospitalId: selectedUser.memberships[0].hospitalId,
-        roles: selectedUser.memberships[0].roles
+        hospitalId: membership.hospitalId,
+        roles: membership.roles,
+        specialization: membership.specialization || '',
+        department: membership.department || ''
       };
     }
-    return { hospitalId: null, roles: [] };
+    return { hospitalId: null, roles: [], specialization: '', department: '' };
   });
 
   const handleAllocateRoles = async (e: React.FormEvent) => {
@@ -44,7 +49,9 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
       const response = await apiClient.post<ApiResponse<UserResponse>>('/users/allocate', {
         userId: selectedUser.id,
         hospitalId: allocation.hospitalId,
-        roles: allocation.roles
+        roles: allocation.roles,
+        specialization: allocation.specialization,
+        department: allocation.department
       });
       if (response.data.success) {
         onSuccess();
@@ -87,7 +94,9 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
               const existing = selectedUser?.memberships?.find(m => m.hospitalId === hospId);
               setAllocation({
                 hospitalId: hospId,
-                roles: existing ? existing.roles : []
+                roles: existing ? existing.roles : [],
+                specialization: existing?.specialization || '',
+                department: existing?.department || ''
               });
             }}
           >
@@ -150,6 +159,42 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
             </p>
           )}
         </FormField>
+
+        {allocation.roles.includes('DOCTOR') && (
+          <div className="p-4 bg-[var(--primary-light)]/30 rounded-xl border border-[var(--primary)]/20 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <h4 className="text-xs font-black text-[var(--primary)] uppercase tracking-widest flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">stethoscope</span>
+              Doctor Details
+            </h4>
+            <FormField label="Specialization" required>
+              <input
+                className="form-input"
+                value={allocation.specialization}
+                onChange={(e) => setAllocation({ ...allocation, specialization: e.target.value })}
+                placeholder="e.g. Cardiology, Pediatrics"
+                required={allocation.roles.includes('DOCTOR')}
+              />
+            </FormField>
+          </div>
+        )}
+
+        {allocation.roles.includes('NURSE') && (
+          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">medical_services</span>
+              Nurse Details
+            </h4>
+            <FormField label="Department" required>
+              <input
+                className="form-input"
+                value={allocation.department}
+                onChange={(e) => setAllocation({ ...allocation, department: e.target.value })}
+                placeholder="e.g. General Ward, ICU"
+                required={allocation.roles.includes('NURSE')}
+              />
+            </FormField>
+          </div>
+        )}
 
         <div className="pt-4 flex gap-3">
           <button type="button" onClick={onClose} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>

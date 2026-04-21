@@ -9,6 +9,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { DoctorResponse, AppointmentResponse } from '@/types/api';
 import { Search, Calendar, Clock, Filter, Stethoscope } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import Link from 'next/link';
 
 const DoctorsPage = () => {
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);

@@ -33,7 +33,9 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
     gender: 'MALE',
     dob: '',
     phone: '',
-    hospitalId: currentUserHospitalId ?? null
+    hospitalId: currentUserHospitalId ?? null,
+    specialization: '',
+    department: ''
   });
 
   const handleCreateUser = async (e: React.FormEvent) => {
@@ -168,6 +170,43 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
             ))}
           </div>
         </FormField>
+
+        {newUser.roles.includes('DOCTOR') && (
+          <div className="p-4 bg-[var(--primary-light)]/30 rounded-xl border border-[var(--primary)]/20 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <h4 className="text-xs font-black text-[var(--primary)] uppercase tracking-widest flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">stethoscope</span>
+              Doctor Details
+            </h4>
+            <FormField label="Specialization" required>
+              <input
+                className="form-input"
+                value={newUser.specialization}
+                onChange={(e) => setNewUser({ ...newUser, specialization: e.target.value })}
+                placeholder="e.g. Cardiology, Pediatrics"
+                required={newUser.roles.includes('DOCTOR')}
+              />
+            </FormField>
+          </div>
+        )}
+
+        {newUser.roles.includes('NURSE') && (
+          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-4 animate-in fade-in slide-in-from-top-2">
+            <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">medical_services</span>
+              Nurse Details
+            </h4>
+            <FormField label="Department" required>
+              <input
+                className="form-input"
+                value={newUser.department}
+                onChange={(e) => setNewUser({ ...newUser, department: e.target.value })}
+                placeholder="e.g. General Ward, ICU"
+                required={newUser.roles.includes('NURSE')}
+              />
+            </FormField>
+          </div>
+        )}
+
         <div className="pt-4 flex gap-3">
           <button type="button" onClick={onClose} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>
           <button type="submit" className="flex-1 btn-primary">Create User</button>

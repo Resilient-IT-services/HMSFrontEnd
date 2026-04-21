@@ -26,6 +26,8 @@ export interface HospitalMembershipResponse {
   hospitalName: string;
   hospitalCode: string;
   roles: Role[];
+  specialization?: string;
+  department?: string;
 }
 
 export interface UserProfileResponse {
@@ -49,6 +51,8 @@ export interface AllocateRoleRequest {
   userId: number;
   hospitalId: number | null;
   roles: Role[];
+  specialization?: string;
+  department?: string;
 }
 
 export interface UserResponse {
@@ -97,6 +101,8 @@ export interface CreateUserRequest {
   gender: Gender;
   dob: string;
   phone?: string;
+  specialization?: string;
+  department?: string;
 }
 
 export interface CreatePatientRequest {
