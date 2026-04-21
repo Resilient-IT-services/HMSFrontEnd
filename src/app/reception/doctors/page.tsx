@@ -10,11 +10,13 @@ import { DoctorResponse, AppointmentResponse } from '@/types/api';
 import { Search, Calendar, Clock, Filter, Stethoscope } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import Link from 'next/link';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const DoctorsPage = () => {
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorResponse | null>(null);
   const [doctorAppointments, setDoctorAppointments] = useState<AppointmentResponse[]>([]);
   const [loadingSchedule, setLoadingLoadingSchedule] = useState(false);
@@ -22,7 +24,7 @@ const DoctorsPage = () => {
   const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await doctorService.list(0, 100);
+      const res = await doctorService.list(0, 100, debouncedSearchTerm);
       if (res.success && res.data) {
         setDoctors(res.data.content);
       }
@@ -31,7 +33,7 @@ const DoctorsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
     fetchDoctors();
@@ -53,12 +55,6 @@ const DoctorsPage = () => {
       setLoadingLoadingSchedule(false);
     }
   };
-
-  const filteredDoctors = doctors.filter(d => 
-    d.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (d.department && d.department.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
 
   const columns = [
     { 
@@ -130,7 +126,7 @@ const DoctorsPage = () => {
                 </button>
               </div>
 
-              <Table columns={columns} data={filteredDoctors} isLoading={loading} />
+              <Table columns={columns} data={doctors} isLoading={loading} />
            </Card>
 
            <div className="space-y-6">
@@ -183,7 +179,7 @@ const DoctorsPage = () => {
            </div>
 
            <div className="space-y-3">
-              <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Today's Slots</h4>
+              <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Today&apos;s Slots</h4>
               {loadingSchedule ? (
                 <div className="py-10 text-center animate-pulse text-[var(--text-secondary)]">Fetching appointments...</div>
               ) : (

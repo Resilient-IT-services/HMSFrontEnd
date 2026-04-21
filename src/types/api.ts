@@ -58,8 +58,13 @@ export interface AllocateRoleRequest {
 export interface UserResponse {
   id: number;
   username: string;
+  fullName?: string;
+  gender?: Gender;
+  dob?: string;
+  phone?: string;
   memberships: HospitalMembershipResponse[];
   active: boolean;
+  deleted: boolean;
   createdAt: string;
   roles: Role[]; // Computed on frontend
 }

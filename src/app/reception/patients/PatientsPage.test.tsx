@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import PatientsPage from './page';
 import { patientService } from '@/services/patientService';
@@ -89,7 +89,8 @@ describe('PatientsPage', () => {
     });
   });
 
-  it('filters patients based on search term', async () => {
+  it('triggers server-side search when search term changes', async () => {
+    vi.useFakeTimers();
     (patientService.list as any).mockResolvedValue({
       success: true,
       data: {
@@ -107,15 +108,19 @@ describe('PatientsPage', () => {
       </Provider>
     );
 
-    await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
-
     const searchInput = screen.getByPlaceholderText(/Search by Name/i);
     fireEvent.change(searchInput, { target: { value: 'Jane' } });
 
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    // Should not call list immediately due to debounce
+    expect(patientService.list).not.toHaveBeenCalledWith(0, 20, 'Jane');
+
+    // Fast-forward debounce time
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+
+    expect(patientService.list).toHaveBeenCalledWith(0, 20, 'Jane');
+    vi.useRealTimers();
   });
 
   it('opens registration modal when clicking add button', async () => {

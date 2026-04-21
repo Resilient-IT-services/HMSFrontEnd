@@ -2,9 +2,9 @@ import apiClient from './apiClient';
 import { ApiResponse, PageResponse, AppointmentResponse, CreateAppointmentRequest, UpdateAppointmentStatusRequest } from '@/types/api';
 
 export const appointmentService = {
-  async list(page = 0, size = 20): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
+  async list(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<AppointmentResponse>>>('/appointments', {
-      params: { page, size }
+      params: { page, size, search }
     });
     return response.data;
   },

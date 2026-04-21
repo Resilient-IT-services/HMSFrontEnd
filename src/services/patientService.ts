@@ -2,9 +2,9 @@ import apiClient from './apiClient';
 import { ApiResponse, PageResponse, PatientResponse, CreatePatientRequest } from '@/types/api';
 
 export const patientService = {
-  async list(page = 0, size = 20): Promise<ApiResponse<PageResponse<PatientResponse>>> {
+  async list(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<PatientResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<PatientResponse>>>('/patients', {
-      params: { page, size }
+      params: { page, size, search }
     });
     return response.data;
   },

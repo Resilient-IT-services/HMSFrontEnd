@@ -7,8 +7,9 @@ import { Table } from '@/components/ui/Table';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentResponse, DoctorResponse, AppointmentStatus } from '@/types/api';
-import { Plus, Filter } from 'lucide-react';
+import { Plus, Filter, Search } from 'lucide-react';
 import Link from 'next/link';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const TodayAppointmentsPage = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
@@ -16,12 +17,14 @@ const TodayAppointmentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [doctorFilter, setDoctorFilter] = useState<number | 'All'>('All');
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [aptRes, doctorRes] = await Promise.all([
-        appointmentService.list(0, 100),
+        appointmentService.list(0, 100, debouncedSearchTerm),
         doctorService.list(0, 100)
       ]);
 
@@ -36,7 +39,7 @@ const TodayAppointmentsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [debouncedSearchTerm]);
 
   useEffect(() => {
     fetchData();
@@ -153,6 +156,20 @@ const TodayAppointmentsPage = () => {
 
         {/* Filters */}
         <div className="flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
+            <div className="flex-1 relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
+                <Search className="size-5" />
+              </span>
+              <input 
+                className="w-full pl-12 pr-4 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl focus:ring-2 focus:ring-[var(--primary)] outline-none transition-all" 
+                placeholder="Search by Patient or Doctor Name..." 
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             {['All', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED'].map(s => (
               <button 

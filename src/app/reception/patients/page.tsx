@@ -9,11 +9,13 @@ import { PatientResponse, ApiResponse, PageResponse } from '@/types/api';
 import { Search, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { PatientRegistrationModal } from '@/components/reception/PatientRegistrationModal';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const PatientsPage = () => {
   const [patients, setPatients] = useState<PatientResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [showRegModal, setShowRegModal] = useState(false);
@@ -21,7 +23,7 @@ const PatientsPage = () => {
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await patientService.list(page, 20);
+      const response = await patientService.list(page, 20, debouncedSearchTerm);
       if (response.success && response.data) {
         setPatients(response.data.content);
         setTotalElements(response.data.totalElements);
@@ -31,19 +33,19 @@ const PatientsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, debouncedSearchTerm]);
 
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
 
-  const filteredPatients = patients.filter(p => 
-    p.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.phone.includes(searchTerm) ||
-    p.id.toString().includes(searchTerm)
-  );
+  // Reset page when search term changes
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearchTerm]);
 
   const columns = [
+// ... existing columns ...
     { 
       header: 'Patient ID', 
       accessor: (row: PatientResponse) => (
@@ -136,11 +138,11 @@ const PatientsPage = () => {
         </div>
 
         <Card>
-          <Table columns={columns} data={filteredPatients} isLoading={loading} />
+          <Table columns={columns} data={patients} isLoading={loading} />
           
           <div className="bg-[var(--background)] border-t border-[var(--border)] px-6 py-4 flex items-center justify-between mt-4">
             <p className="text-xs text-[var(--text-secondary)] font-medium">
-              Showing {filteredPatients.length} of {totalElements} patients
+              Showing {patients.length} of {totalElements} patients
             </p>
             <div className="flex gap-2">
               <button 
@@ -153,7 +155,7 @@ const PatientsPage = () => {
               <button className="px-3 py-1 bg-[var(--primary)] text-white rounded text-xs font-bold">{page + 1}</button>
               <button 
                 onClick={() => setPage(p => p + 1)}
-                disabled={filteredPatients.length < 20}
+                disabled={patients.length < 20}
                 className="px-3 py-1 border border-[var(--border)] rounded text-xs font-bold disabled:opacity-50"
               >
                 Next

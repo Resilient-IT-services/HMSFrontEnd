@@ -13,6 +13,7 @@ export default function HospitalsPage() {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHospitalForm, setShowHospitalForm] = useState(false);
+  const [editingHospital, setEditingHospital] = useState<HospitalResponse | null>(null);
   const [newHospital, setNewHospital] = useState({ name: '', code: '', address: '' });
 
   const fetchData = async () => {
@@ -36,18 +37,39 @@ export default function HospitalsPage() {
   const handleCreateHospital = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await apiClient.post<ApiResponse<HospitalResponse>>('/hospitals', newHospital);
-      if (response.data.success) {
-        setShowHospitalForm(false);
-        setNewHospital({ name: '', code: '', address: '' });
-        fetchData();
+      if (editingHospital) {
+        const response = await apiClient.put<ApiResponse<HospitalResponse>>(`/hospitals/${editingHospital.id}`, newHospital);
+        if (response.data.success) {
+          setShowHospitalForm(false);
+          setEditingHospital(null);
+          setNewHospital({ name: '', code: '', address: '' });
+          fetchData();
+        }
+      } else {
+        const response = await apiClient.post<ApiResponse<HospitalResponse>>('/hospitals', newHospital);
+        if (response.data.success) {
+          setShowHospitalForm(false);
+          setNewHospital({ name: '', code: '', address: '' });
+          fetchData();
+        }
       }
     } catch (error) {
-      console.error('Failed to create hospital', error);
+      console.error('Failed to save hospital', error);
     }
   };
 
+  const handleEditClick = (hospital: HospitalResponse) => {
+    setEditingHospital(hospital);
+    setNewHospital({
+      name: hospital.name,
+      code: hospital.code,
+      address: hospital.address || ''
+    });
+    setShowHospitalForm(true);
+  };
+
   const hospitalColumns = [
+    // ...
     { 
       header: 'Hospital Name', 
       accessor: (row: HospitalResponse) => (
@@ -76,7 +98,7 @@ export default function HospitalsPage() {
       header: 'Action',
       accessor: (row: HospitalResponse) => (
         <button 
-          onClick={() => alert(`Configuring settings for ${row.name}`)}
+          onClick={() => handleEditClick(row)}
           className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
         >
           <span className="material-symbols-outlined text-xl">settings</span>
@@ -90,7 +112,11 @@ export default function HospitalsPage() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-[var(--text-primary)]">Registered Hospitals</h2>
         <button 
-          onClick={() => setShowHospitalForm(true)}
+          onClick={() => {
+            setEditingHospital(null);
+            setNewHospital({ name: '', code: '', address: '' });
+            setShowHospitalForm(true);
+          }}
           className="btn-primary flex items-center gap-2"
         >
           <span className="material-symbols-outlined text-lg">add</span>
@@ -109,7 +135,7 @@ export default function HospitalsPage() {
       <Modal 
         isOpen={showHospitalForm} 
         onClose={() => setShowHospitalForm(false)} 
-        title="Register New Hospital"
+        title={editingHospital ? "Edit Hospital" : "Register New Hospital"}
       >
         <form onSubmit={handleCreateHospital} className="p-6 space-y-4">
           <FormField label="Hospital Name" required>
@@ -139,8 +165,16 @@ export default function HospitalsPage() {
             />
           </FormField>
           <div className="pt-4 flex gap-3">
-            <button type="button" onClick={() => setShowHospitalForm(false)} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>
-            <button type="submit" className="flex-1 btn-primary">Register</button>
+            <button 
+              type="button" 
+              onClick={() => setShowHospitalForm(false)} 
+              className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="flex-1 btn-primary">
+              {editingHospital ? "Update" : "Register"}
+            </button>
           </div>
         </form>
       </Modal>
