@@ -39,6 +39,7 @@ const Sidebar = () => {
   const menuItems = [
     { name: 'Dashboard', icon: 'dashboard', href: `/${dashboardPath}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] },
     { name: 'Patients', icon: 'group', href: '/reception/patients', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
+    { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
     { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
     { name: 'Token Queue', icon: 'queue', href: '/reception/queue', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
     { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN'] },

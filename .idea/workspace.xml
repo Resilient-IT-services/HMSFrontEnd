@@ -5,12 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/reception/appointments/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/reception/appointments/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/reception/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/reception/dashboard/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/reception/patients/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/reception/patients/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Sidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/reception/queue/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/reception/queue/page.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -143,7 +138,7 @@
       <workItem from="1776515374987" duration="5516000" />
       <workItem from="1776578501579" duration="4593000" />
       <workItem from="1776733485733" duration="264000" />
-      <workItem from="1776733802767" duration="7595000" />
+      <workItem from="1776733802767" duration="7889000" />
     </task>
     <task id="LOCAL-00001" summary="login page">
       <option name="closed" value="true" />
@@ -377,7 +372,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776739856389</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="login page">
+      <option name="closed" value="true" />
+      <created>1776744532314</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1776744532314</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

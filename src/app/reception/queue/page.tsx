@@ -5,7 +5,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
 import { appointmentService } from '@/services/appointmentService';
 import { AppointmentResponse } from '@/types/api';
-import { Stethoscope, Pill, Microscope, Info, WaterDrop } from 'lucide-react';
+import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
 
 const TokenQueuePage = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
@@ -161,7 +161,7 @@ const TokenQueuePage = () => {
               <p className="text-slate-400 max-w-xs text-sm font-medium">Stay hydrated. Drinking enough water daily is crucial for your body's overall function.</p>
             </div>
             <div className="text-slate-700 opacity-20 transform translate-x-4">
-              <WaterDrop className="size-24" />
+              <Droplets className="size-24" />
             </div>
           </div>
         </div>

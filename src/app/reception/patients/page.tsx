@@ -8,6 +8,7 @@ import { patientService } from '@/services/patientService';
 import { PatientResponse, ApiResponse, PageResponse } from '@/types/api';
 import { Search, UserPlus } from 'lucide-react';
 import Link from 'next/link';
+import { PatientRegistrationModal } from '@/components/reception/PatientRegistrationModal';
 
 const PatientsPage = () => {
   const [patients, setPatients] = useState<PatientResponse[]>([]);
@@ -15,6 +16,7 @@ const PatientsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
+  const [showRegModal, setShowRegModal] = useState(false);
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -122,7 +124,11 @@ const PatientsPage = () => {
                 <option>Out-Patient</option>
                 <option>Discharged</option>
               </select>
-              <button className="bg-[var(--primary-light)] text-[var(--primary)] p-3 rounded-xl hover:bg-[var(--primary)] hover:text-white transition-colors">
+              <button 
+                onClick={() => setShowRegModal(true)}
+                className="bg-[var(--primary-light)] text-[var(--primary)] p-3 rounded-xl hover:bg-[var(--primary)] hover:text-white transition-colors"
+                title="Add New Patient"
+              >
                 <UserPlus className="size-5" />
               </button>
             </div>
@@ -187,6 +193,12 @@ const PatientsPage = () => {
           </div>
         </div>
       </div>
+
+      <PatientRegistrationModal 
+        isOpen={showRegModal} 
+        onClose={() => setShowRegModal(false)} 
+        onSuccess={fetchPatients}
+      />
     </MainLayout>
   );
 };

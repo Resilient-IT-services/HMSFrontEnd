@@ -7,7 +7,7 @@ import { Table } from '@/components/ui/Table';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentResponse, DoctorResponse, AppointmentStatus } from '@/types/api';
-import { Search, CalendarDays, Plus, Filter, CheckCircle2, Clock, Check } from 'lucide-react';
+import { Plus, Filter } from 'lucide-react';
 import Link from 'next/link';
 
 const TodayAppointmentsPage = () => {
@@ -131,8 +131,8 @@ const TodayAppointmentsPage = () => {
 
   return (
     <MainLayout title="Today's Appointments">
-      <div className="layout-content-container flex flex-col w-full max-w-[1200px] px-4 md:px-10 py-8 mx-auto">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+      <div className="p-8 space-y-6 overflow-y-auto">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-[var(--text-primary)] text-3xl font-black tracking-tight">Daily Schedule</h1>
             <p className="text-[var(--text-secondary)] font-medium">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
@@ -153,7 +153,7 @@ const TodayAppointmentsPage = () => {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-col gap-4">
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
             {['All', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED'].map(s => (
               <button 

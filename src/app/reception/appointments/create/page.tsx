@@ -9,17 +9,20 @@ import { doctorService } from '@/services/doctorService';
 import { appointmentService } from '@/services/appointmentService';
 import { PatientResponse, DoctorResponse, CreateAppointmentRequest } from '@/types/api';
 import { Search, Calendar, User, UserRound, Clock } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const AppointmentBookingPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialDoctorId = searchParams.get('doctorId');
+
   const [patients, setPatients] = useState<PatientResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [formData, setFormData] = useState({
     patientId: '',
-    doctorId: '',
+    doctorId: initialDoctorId || '',
     date: new Date().toISOString().split('T')[0],
     time: '',
     notes: ''
@@ -33,13 +36,18 @@ const AppointmentBookingPage = () => {
       setLoading(true);
       const [patRes, docRes] = await Promise.all([
         patientService.list(0, 50),
-        doctorService.list(0, 50)
+        doctorService.list(0, 100)
       ]);
       if (patRes.success && patRes.data) setPatients(patRes.data.content);
-      if (docRes.success && docRes.data) setDoctors(docRes.data.content);
+      if (docRes.success && docRes.data) {
+        setDoctors(docRes.data.content);
+        if (initialDoctorId) {
+          setSelectedDoctor(docRes.data.content.find(d => d.id === Number(initialDoctorId)) || null);
+        }
+      }
     } catch (error) {
-      console.error('Failed to fetch data', error);
-    } finally {
+... (rest of fetchData) ...
+  }, [initialDoctorId]);
       setLoading(false);
     }
   }, []);
