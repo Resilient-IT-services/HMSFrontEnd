@@ -99,7 +99,11 @@ export default function HospitalsPage() {
       </div>
 
       <Card>
-        <Table columns={hospitalColumns} data={hospitals} isLoading={loading} />
+        <Table 
+          columns={hospitalColumns} 
+          data={hospitals} 
+          isLoading={loading} 
+        />
       </Card>
 
       <Modal 

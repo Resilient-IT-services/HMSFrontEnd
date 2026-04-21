@@ -48,7 +48,9 @@ const SuperAdminDashboard = () => {
             </span>
           </div>
           <p className="text-[var(--text-secondary)] text-sm font-medium">Registered Hospitals</p>
-          <h3 className="text-2xl font-bold text-[var(--text-primary)]">{hospitals.length}</h3>
+          <h3 className="text-2xl font-bold text-[var(--text-primary)]">
+            {hospitals.length}
+          </h3>
         </div>
         
         <div className="bg-[var(--surface)] p-6 rounded-xl border border-[var(--border)] shadow-sm">

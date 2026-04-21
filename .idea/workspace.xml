@@ -5,25 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f5451457-3342-4c6e-b7ed-fe859bf3e13a" name="Changes" comment="login page">
-      <change beforePath="$PROJECT_DIR$/.husky/pre-commit" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/HMSFrontEnd.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/easycode.ignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/hms-frontend.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/admin/users/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/admin/users/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/globals.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/super_admin/dashboard/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/super_admin/dashboard/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/super_admin/hospitals/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/super_admin/hospitals/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/AuthProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/AuthProvider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/Sidebar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Sidebar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/ui/Topbar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/Topbar.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/state/authSlice.test.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/authSlice.test.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/state/authSlice.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/state/authSlice.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/api.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/RoleAllocationModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/RoleAllocationModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/admin/UserCreationModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/admin/UserCreationModal.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -156,7 +142,7 @@
       <workItem from="1776515374987" duration="5516000" />
       <workItem from="1776578501579" duration="4593000" />
       <workItem from="1776733485733" duration="264000" />
-      <workItem from="1776733802767" duration="3984000" />
+      <workItem from="1776733802767" duration="5006000" />
     </task>
     <task id="LOCAL-00001" summary="login page">
       <option name="closed" value="true" />
@@ -358,7 +344,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776691584400</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="login page">
+      <option name="closed" value="true" />
+      <created>1776738339897</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1776738339897</updated>
+    </task>
+    <task id="LOCAL-00027" summary="login page">
+      <option name="closed" value="true" />
+      <created>1776738549816</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1776738549816</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -386,13 +388,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/admin/users/page.tsx</url>
-          <line>45</line>
+          <line>30</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="javascript">
           <url>file://$PROJECT_DIR$/src/app/admin/users/page.tsx</url>
-          <line>70</line>
+          <line>61</line>
           <properties lambdaOrdinal="-1" />
           <option name="timeStamp" value="4" />
         </line-breakpoint>

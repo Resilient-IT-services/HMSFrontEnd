@@ -69,21 +69,31 @@ export const UserCreationModal: React.FC<UserCreationModalProps> = ({
       title="Create New User"
     >
       <form onSubmit={handleCreateUser} className="p-6 space-y-4">
-        {isSuperMode && (
+        {isSuperMode && !newUser.roles.includes('SUPER_ADMIN') && (
           <FormField label="Assign Hospital" required>
             <select
               className="form-input"
               value={newUser.hospitalId || ''}
               onChange={(e) => setNewUser({ ...newUser, hospitalId: e.target.value ? Number.parseInt(e.target.value) : null })}
-              required={!newUser.roles.includes('SUPER_ADMIN')}
+              required
             >
-              <option value="">System Level (Global)</option>
+              <option value="">Select a Hospital</option>
               {hospitals.map(h => (
                 <option key={h.id} value={h.id}>{h.name} ({h.code})</option>
               ))}
             </select>
           </FormField>
         )}
+
+        {isSuperMode && newUser.roles.includes('SUPER_ADMIN') && (
+          <div className="p-3 bg-[var(--primary-light)] rounded-lg border border-[var(--primary)] mb-4">
+            <p className="text-xs font-bold text-[var(--primary)] flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">info</span>
+              Super Admins are granted Global Access by default.
+            </p>
+          </div>
+        )}
+
         <FormField label="Full Name" required>
           <input
             className="form-input"
