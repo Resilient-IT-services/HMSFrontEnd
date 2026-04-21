@@ -10,7 +10,6 @@ import Link from 'next/link';
 import { 
   Cake, 
   MapPin, 
-  Event, 
   Edit, 
   Heart, 
   Activity, 

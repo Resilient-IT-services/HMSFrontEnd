@@ -12,7 +12,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
-
+  const publicRoutes = ['/login', '/privacy', '/terms','/forgot-password'];
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -33,7 +33,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [dispatch]);
 
   const handleUnauthenticated = useCallback(() => {
-    if (pathname !== '/login') {
+    const publicRoutes = ['/login', '/privacy','/terms','/forgot-password'];
+
+    if (!publicRoutes.includes(pathname)) {
       router.push('/login');
     }
   }, [pathname, router]);
@@ -85,7 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else if (roles.length === 1) {
       if (activeRole === roles[0]) return;
-      dispatch(setActiveRole(roles[0]));
+      dispatch(setActiveRole(roles[0] as any));
     } else if (pathname !== '/unauthorized') {
       router.push('/unauthorized');
     }
@@ -110,7 +112,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isLoading) return;
 
     if (!isAuthenticated) {
-      handleUnauthenticated();
+      if (!publicRoutes.includes(pathname)) {
+        handleUnauthenticated();
+      }
       return;
     }
 

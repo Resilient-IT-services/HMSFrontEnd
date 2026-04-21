@@ -4,14 +4,14 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUser } from '@/state/authSlice';
 import { authService } from '@/services/authService';
-
+import HelpDeskModal from '@/components/HelpDeskModal';
 const LoginPage = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  
+  const [isHelpOpen, setIsHelpOpen] = useState(false);
   const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,8 +62,11 @@ const LoginPage = () => {
             <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">HMS System</h2>
           </div>
           <div className="flex items-center gap-4">
-            <a className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors" href="#">System Status</a>
-            <button className="flex items-center justify-center rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all shadow-sm">
+
+            <button
+                onClick={() => setIsHelpOpen(true)}
+                className="flex items-center justify-center rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all shadow-sm"
+            >
               Help Desk
             </button>
           </div>
@@ -115,7 +118,7 @@ const LoginPage = () => {
                     <label className="text-sm font-semibold text-[var(--text-primary)]" htmlFor="password">
                       Password
                     </label>
-                    <a className="text-xs font-bold text-[var(--primary)] hover:underline" href="#">Forgot Password?</a>
+                    <a className="text-xs font-bold text-[var(--primary)] hover:underline" href="/forgot-password">Forgot Password?</a>
                   </div>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-xl">lock</span>
@@ -162,7 +165,10 @@ const LoginPage = () => {
                   )}
                 </button>
               </form>
-
+              <HelpDeskModal
+                  isOpen={isHelpOpen}
+                  onClose={() => setIsHelpOpen(false)}
+              />
               {/* Footer Info */}
               <div className="mt-8 pt-6 border-t border-[var(--border)] text-center">
                 <p className="text-xs text-[var(--text-secondary)] uppercase tracking-widest font-bold mb-4">Authorized Access Only</p>
@@ -183,13 +189,11 @@ const LoginPage = () => {
           {/* Language/Links Footer */}
           <div className="mt-8 flex justify-between items-center px-2">
             <div className="flex gap-4">
-              <a className="text-xs text-[var(--text-secondary)] hover:text-[var(--primary)]" href="#">Privacy Policy</a>
-              <a className="text-xs text-[var(--text-secondary)] hover:text-[var(--primary)]" href="#">Terms of Service</a>
+              <a className="text-xs text-[var(--text-secondary)] hover:text-[var(--primary)]" href="/privacy">Privacy Policy</a>
             </div>
-            <div className="flex items-center gap-1 text-xs text-[var(--text-secondary)] cursor-pointer hover:text-[var(--primary)]">
-              <span className="material-symbols-outlined text-sm">language</span>
-              English (US)
-            </div>
+            <a href="/terms" className="text-xs text-[var(--text-secondary)] hover:text-[var(--primary)]">
+              Terms of Service
+            </a>
           </div>
         </div>
       </main>

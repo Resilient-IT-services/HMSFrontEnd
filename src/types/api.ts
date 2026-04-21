@@ -182,6 +182,7 @@ export interface PrescriptionResponse {
   doctorId: number;
   doctorName: string;
   items: PrescriptionItemResponse[];
+  status: string;
   createdAt: string;
 }
 
