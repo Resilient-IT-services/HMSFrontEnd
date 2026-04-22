@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const TodayAppointmentsPage = () => {
+  const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
   const [loading, setLoading] = useState(true);

@@ -7,6 +7,7 @@ describe('authSlice', () => {
     userId: 1,
     hospitalId: 101,
     username: 'testuser',
+    roles: ['DOCTOR', 'ADMIN'], // ✅ YE LINE ADD KAR
     hospitals: [
       { hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR', 'ADMIN'] }
     ]

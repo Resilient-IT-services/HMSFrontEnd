@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FormField } from '@/components/ui/FormField';
 import { patientService } from '@/services/patientService';
-import { CreatePatientRequest, Gender } from '@/types/api';
-import { Badge, MapPin, Phone, Info } from 'lucide-react';
+import { CreatePatientRequest, Gender,PatientResponse } from '@/types/api';
+import {  MapPin, Phone } from 'lucide-react';
 
 interface PatientRegistrationModalProps {
   isOpen: boolean;
