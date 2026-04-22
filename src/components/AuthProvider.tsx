@@ -12,29 +12,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
+
   const publicRoutes = ['/login', '/privacy', '/terms','/forgot-password'];
+
+  // ✅ FIXED AUTH CHECK
   useEffect(() => {
+
+    // 🚀 PUBLIC ROUTES ME AUTH CHECK MAT KAR
+    if (publicRoutes.includes(pathname)) {
+      dispatch(setLoading(false));
+      return;
+    }
+
     const checkAuth = async () => {
       try {
         dispatch(setLoading(true));
         const response = await authService.me();
+
         if (response.success && response.data) {
           dispatch(setUser(response.data));
         } else {
           dispatch(setUser(null));
         }
+
       } catch {
-        dispatch(setError('Failed to authenticate'));
-        dispatch(setUser(null));
+        dispatch(setUser(null)); // ❌ error remove
+      } finally {
+        dispatch(setLoading(false)); // ✅ important
       }
     };
 
     checkAuth();
-  }, [dispatch]);
+  }, [dispatch, pathname]);
 
   const handleUnauthenticated = useCallback(() => {
-    const publicRoutes = ['/login', '/privacy','/terms','/forgot-password'];
-
     if (!publicRoutes.includes(pathname)) {
       router.push('/login');
     }
@@ -47,12 +58,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     if (isSuperMode) {
-      // Only redirect to dashboard if we are at a "gate" page
       if (pathname === '/login' || pathname === '/' || pathname === '/select-role') {
         router.push('/super_admin/dashboard');
         return true;
       }
-      // Allow navigation to other pages if we are already in super mode
       return false;
     }
     return false;
@@ -65,14 +74,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else if (user?.hospitals && user.hospitals.length === 1) {
       const targetHospitalId = user.hospitals[0].hospitalId;
-      // Prevent loop if hospitalId is already what we want
+
       if (user.hospitalId === targetHospitalId) {
-        // If we have a hospitalId (or it's intended null) but no activeRole, let role selection handle it
         return;
       }
+
       authService.selectHospital(targetHospitalId).then(res => {
         if (res.success && res.data) dispatch(setUser(res.data));
       });
+
     } else if (roles.includes('SUPER_ADMIN')) {
       dispatch(setSuperMode(true));
     } else if (pathname !== '/unauthorized') {
@@ -103,6 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         'SUPER_ADMIN': 'super_admin',
         'NURSE': 'nurse'
       };
+
       const path = rolePathMap[activeRole!] || activeRole!.toLowerCase();
       router.push(`/${path}/dashboard`);
     }
@@ -122,8 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const isSuperUser = roles.includes('SUPER_ADMIN');
 
     if (isSuperUser && handleSuperUserFlow(roles)) return;
-    
-    // If we are in super mode, we don't need hospitalId or activeRole
+
     if (isSuperMode) return;
 
     if (!user?.hospitalId) {
@@ -151,9 +161,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[var(--background)]">
-        <div data-testid="loader" className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)]"></div>
-      </div>
+        <div className="flex items-center justify-center h-screen bg-[var(--background)]">
+          <div data-testid="loader" className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--primary)]"></div>
+        </div>
     );
   }
 
