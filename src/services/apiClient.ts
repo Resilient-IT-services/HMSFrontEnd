@@ -10,20 +10,31 @@ const apiClient = axios.create({
   },
 });
 
-apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
-    return response;
-  },
-  (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Dispatched from here to keep state in sync
-      store.dispatch(logout());
-      if (globalThis.window !== undefined && globalThis.location.pathname !== '/login') {
-        globalThis.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+
+  return config;
+});
+
+
+apiClient.interceptors.response.use(
+    (response: AxiosResponse) => {
+      return response;
+    },
+    (error: AxiosError) => {
+      if (error.response?.status === 401) {
+        store.dispatch(logout());
+        if (globalThis.window !== undefined && globalThis.location.pathname !== '/login') {
+          globalThis.location.href = '/login';
+        }
+      }
+      return Promise.reject(error);
+    }
 );
 
 export default apiClient;

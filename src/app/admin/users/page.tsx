@@ -23,7 +23,7 @@ const UserManagement = () => {
   const [showDeleted, setShowDeleted] = useState(false);
   const [showUserForm, setShowUserForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
-  
+
   // Allocation state
   const [showAllocationForm, setShowAllocationForm] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null);
@@ -32,7 +32,7 @@ const UserManagement = () => {
     // ... fetchData implementation ...
     try {
       setLoading(true);
-      
+
       const userRes = await apiClient.get<ApiResponse<UserResponse[]>>(`/users?includeDeleted=${showDeleted}`);
       if (userRes.data.success) {
         const usersWithRoles = (userRes.data.data || []).map(u => {
@@ -77,18 +77,18 @@ const UserManagement = () => {
     }
   };
 
-  const roleOptions: Role[] = isSuperMode 
+  const roleOptions: Role[] = isSuperMode
     ? ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE', 'SUPER_ADMIN']
     : ['ADMIN', 'DOCTOR', 'PHARMACIST', 'RECEPTIONIST', 'NURSE'];
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.roles?.some(role => role.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const columns = [
-    { 
-      header: 'Username', 
+    {
+      header: 'Username',
       accessor: (row: UserResponse) => (
         <div className={`flex items-center gap-3 ${row.deleted ? 'opacity-50' : ''}`}>
           <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
@@ -101,8 +101,8 @@ const UserManagement = () => {
         </div>
       )
     },
-    { 
-      header: 'Roles', 
+    {
+      header: 'Roles',
       accessor: (row: UserResponse) => (
         <div className="flex flex-wrap gap-1">
           {row.roles?.map(role => (
@@ -113,8 +113,8 @@ const UserManagement = () => {
         </div>
       )
     },
-    { 
-      header: 'Status', 
+    {
+      header: 'Status',
       accessor: (row: UserResponse) => (
         <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${
           row.active ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-[var(--error-light)] text-[var(--error)]'
@@ -127,7 +127,7 @@ const UserManagement = () => {
       header: 'Actions',
       accessor: (row: UserResponse) => (
         <div className="flex space-x-2 items-center">
-          <button 
+          <button
             onClick={() => {
               setSelectedUser(row);
               setShowEditForm(true);
@@ -137,7 +137,7 @@ const UserManagement = () => {
             <Edit2 className="h-4 w-4" />
           </button>
           {isSuperMode && !row.deleted && (
-            <button 
+            <button
               onClick={() => {
                 setSelectedUser(row);
                 setShowAllocationForm(true);
@@ -147,14 +147,7 @@ const UserManagement = () => {
               Allocate
             </button>
           )}
-          {!row.deleted && (
-            <button 
-              onClick={() => handleDelete(row.id)}
-              className="p-2 text-[var(--error)] hover:bg-[var(--error-light)] rounded-lg transition-colors"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          )}
+
         </div>
       )
     }
@@ -166,28 +159,22 @@ const UserManagement = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 space-y-4 md:space-y-0">
           <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
             <div className="relative w-full md:w-64">
-              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-[var(--text-secondary)]" />
-              </span>
+
+              {/* ICON */}
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)] pointer-events-none" />
+
+              {/* INPUT */}
               <input
-                type="text"
-                className="form-input pl-10"
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                  type="text"
+                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={showDeleted} 
-                onChange={(e) => setShowDeleted(e.target.checked)}
-                className="accent-[var(--primary)]"
-              />
-              <span className="text-sm text-[var(--text-secondary)]">Show Deleted Users</span>
-            </label>
+
           </div>
-          <button 
+          <button
             onClick={() => setShowUserForm(true)}
             className="btn-primary flex items-center"
           >
