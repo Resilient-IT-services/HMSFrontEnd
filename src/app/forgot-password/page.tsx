@@ -1,121 +1,131 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
+import { Mail, Lock, ShieldCheck } from "lucide-react";
+import HelpDeskModal from '@/components/HelpDeskModal';
 
-const ForgotPassword = () => {
+import React, {useState} from "react";
+
+export default function ForgotPasswordPage() {
     const router = useRouter();
-    const [email, setEmail] = useState('');
-    const [submitted, setSubmitted] = useState(false);
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setSubmitted(true);
-    };
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[var(--background)] px-4">
+        <div className="min-h-screen bg-[#f3f4f6] flex flex-col justify-between">
 
-            {/* BIG CARD */}
-            <div
-                className="w-full max-w-lg p-10 rounded-2xl bg-[var(--surface)] border border-[var(--border)]"
-                style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.08)" }}
-            >
+            {/* Header */}
+            <header className="relative z-10 w-full border-b border-[var(--primary)]/10 bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-                {/* ICON */}
-                <div className="flex justify-center mb-6">
-                    <div className="w-14 h-14 rounded-xl bg-[var(--primary)] text-white flex items-center justify-center shadow-lg">
-            <span className="material-symbols-outlined text-2xl">
-              lock_reset
-            </span>
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
+                            <span className="material-symbols-outlined text-2xl">medical_services</span>
+                        </div>
+                        <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">
+                            HMS System
+                        </h2>
                     </div>
+
+                    <button
+                        onClick={() => setIsHelpOpen(true)}
+                        className="rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all"
+                    >
+                        Help Desk
+                    </button>
+
                 </div>
+            </header>
+            <div className="w-full bg-yellow-50 border-b border-yellow-200 text-center py-2 text-sm text-yellow-700">
+                🚧 This page is currently under development. Some features may not work as expected.
+            </div>
+            {/* Center */}
+            <div className="flex justify-center items-center flex-1 px-4">
 
-                {/* TITLE */}
-                <div className="text-center mb-6">
-                    <h2 className="text-2xl font-bold" style={{ color: "var(--primary)" }}>
-                        Reset Your Password
-                    </h2>
+                <div className="w-full max-w-md bg-white rounded-xl shadow-md overflow-hidden">
 
-                    <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-                        Enter your email to receive reset instructions
-                    </p>
-                </div>
+                    {/* Top border */}
+                    <div className="h-1.5 bg-orange-600"></div>
 
-                {!submitted ? (
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="px-8 py-10 text-center">
 
-                        {/* EMAIL */}
-                        <div>
-                            <label className="form-label">Email Address</label>
+                        {/* Icon */}
+                        <div className="flex justify-center mb-4 text-orange-600">
+                            <Lock size={28} />
+                        </div>
 
-                            <div className="relative mt-2">
+                        {/* Title */}
+                        <h2 className="text-xl font-semibold text-gray-800">
+                            Forgot Password?
+                        </h2>
 
-                                {/* ICON */}
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-xl">
-                  mail
-                </span>
+                        {/* Subtitle */}
+                        <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                            Enter your verified email address and we will send you instructions
+                            to reset your password.
+                        </p>
 
-                                {/* INPUT */}
+                        {/* Input */}
+                        <div className="text-left mt-6">
+                            <label className="text-sm font-medium text-gray-700">
+                                Email Address
+                            </label>
+
+                            <div className="mt-2 flex items-center bg-gray-100 rounded-lg px-3 py-2">
+                                <Mail size={16} className="text-gray-400 mr-2" />
                                 <input
                                     type="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your email"
-                                    className="w-full pl-12 pr-4 py-4 rounded-lg border border-[var(--border)] bg-[var(--background)] text-[var(--text-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+                                    placeholder="dr.smith@hms-system.com"
+                                    className="bg-transparent outline-none text-sm w-full text-gray-600"
                                 />
                             </div>
                         </div>
 
-                        {/* BUTTON */}
-                        <button
-                            type="submit"
-                            className="w-full py-4 text-sm font-bold text-white rounded-lg bg-[var(--primary)] hover:bg-[var(--primary-hover)] transition-all flex items-center justify-center gap-2 shadow-lg"
-                        >
-                            Send Reset Link
-                            <span className="material-symbols-outlined">
-                send
-              </span>
+                        {/* Button */}
+                        <button className="w-full mt-6 bg-orange-700 hover:bg-orange-800 text-white py-3 rounded-lg font-semibold flex items-center justify-center gap-2 shadow-md transition">
+                            Reset Password →
                         </button>
 
-                    </form>
-                ) : (
-                    <div className="text-center space-y-4">
+                        {/* Back */}
+                        <div className="mt-4">
+                            <button
+                                onClick={() => router.push("/login")}
+                                className="text-orange-600 text-sm flex items-center justify-center gap-1 hover:underline"
+                            >
+                                ← Back to Login
+                            </button>
+                        </div>
 
-                        <div className="text-4xl">📩</div>
+                        {/* Divider */}
+                        <div className="border-t mt-6 pt-4 flex justify-between text-xs text-gray-500">
 
-                        <p className="text-base font-semibold" style={{ color: "var(--success)" }}>
-                            Reset link sent successfully
-                        </p>
+                            <div className="flex items-center gap-1">
+                                <ShieldCheck size={14} />
+                                HIPAA Compliant
+                            </div>
 
-                        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                            Check your email inbox
-                        </p>
+                            <div className="flex items-center gap-1">
+                                🔒 256-bit Encryption
+                            </div>
 
+                        </div>
                     </div>
-                )}
-
-                {/* BACK */}
-                <div className="text-center mt-6">
-                    <button
-                        onClick={() => router.push('/login')}
-                        className="text-sm font-medium hover:underline"
-                        style={{ color: "var(--primary)" }}
-                    >
-                        ← Back to Login
-                    </button>
                 </div>
-
             </div>
 
-            {/* FOOTER */}
-            <div className="absolute bottom-9 text-xs text-[var(--text-secondary)] text-center w-full">
-              This feature is under development. More functionality coming soon.
+            {/* Bottom Text */}
+            <div className="text-center text-sm text-gray-500 mb-6">
+                Need immediate assistance?{" "}
+                <span className="text-orange-600 cursor-pointer font-medium">
+          Contact HMS Support
+        </span>
             </div>
 
+
+            <HelpDeskModal
+                isOpen={isHelpOpen}
+                onClose={() => setIsHelpOpen(false)}
+            />
         </div>
-    );
-};
 
-export default ForgotPassword;
+    );
+}
