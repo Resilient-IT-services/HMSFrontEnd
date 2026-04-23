@@ -108,6 +108,8 @@ export interface CreateUserRequest {
   phone?: string;
   specialization?: string;
   department?: string;
+  consultationFee?: number;
+  followUpDays?: number;
 }
 
 export interface CreatePatientRequest {

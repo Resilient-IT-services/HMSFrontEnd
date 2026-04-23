@@ -32,7 +32,7 @@ export const UserCreationModal = ({
   const [errors, setErrors] = useState<any>({});
   const [apiError, setApiError] = useState('');
 
-  // 🔥 VALIDATION FUNCTION
+
   const validate = () => {
     const err: any = {};
 
@@ -72,7 +72,7 @@ export const UserCreationModal = ({
     return Object.keys(err).length === 0;
   };
 
-  // 🔥 SUBMIT
+
   const handleCreateUser = async (e: any) => {
     e.preventDefault();
 
@@ -84,6 +84,25 @@ export const UserCreationModal = ({
       const res = await apiClient.post('/users', newUser);
 
       if (res.data.success) {
+
+        const createdUser = res.data.data;
+
+
+        console.log("ROLES:", newUser.roles);
+
+        if (newUser.roles.includes('DOCTOR')) {
+          console.log("DOCTOR BLOCK ENTERED ");
+
+          await apiClient.post('/doctors', {
+            userId: createdUser.id,
+            specialization: newUser.specialization,
+            consultationFee: newUser.consultationFee,
+            followUpDays: newUser.followUpDays
+          });
+
+          console.log("DOCTOR API CALLED ");
+        }
+
         onSuccess();
         onClose();
       }
@@ -196,13 +215,51 @@ export const UserCreationModal = ({
 
           {/* DOCTOR */}
           {newUser.roles.includes('DOCTOR') && (
-              <FormField label="Specialization" required>
-                <input className="form-input"
-                       value={newUser.specialization}
-                       onChange={(e) => handleChange('specialization', e.target.value)}
-                />
-                {errors.specialization && <p className="text-red-500 text-xs">{errors.specialization}</p>}
-              </FormField>
+              <div className="p-4 bg-[var(--primary-light)]/30 rounded-xl border border-[var(--primary)]/20 space-y-4">
+
+                <h4 className="text-xs font-bold">Doctor Details</h4>
+
+                {/* Specialization */}
+                <FormField label="Specialization" required>
+                  <input
+                      className="form-input"
+                      value={newUser.specialization}
+                      onChange={(e) =>
+                          setNewUser({ ...newUser, specialization: e.target.value })
+                      }
+                      required
+                  />
+                </FormField>
+
+
+                <FormField label="Consultation Fee" required>
+                  <input
+                      type="number"
+                      className="form-input"
+                      value={newUser.consultationFee ?? ''}
+                      onChange={(e) =>
+                          setNewUser({ ...newUser, consultationFee: Number(e.target.value) })
+                      }
+                      placeholder="e.g. 500"
+                      required
+                  />
+                </FormField>
+
+
+                <FormField label="Follow-up Days" required>
+                  <input
+                      type="number"
+                      className="form-input"
+                      value={newUser.followUpDays ?? ''}
+                      onChange={(e) =>
+                          setNewUser({ ...newUser, followUpDays: Number(e.target.value) })
+                      }
+                      placeholder="e.g. 7"
+                      required
+                  />
+                </FormField>
+
+              </div>
           )}
 
           {/* NURSE */}
