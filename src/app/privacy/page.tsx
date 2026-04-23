@@ -1,161 +1,168 @@
+
 'use client';
 
-import React from 'react';
-import {useRouter} from 'next/navigation';
+import React, { useState } from 'react';
+import { Shield, Database, ArrowRightLeft, CheckCircle, Lock, Key, Eye } from 'lucide-react';
+import HelpDeskModal from '@/components/HelpDeskModal';
+import { useRouter } from 'next/navigation';
 
-const PrivacyPolicy = () => {
+export default function PrivacyPolicy() {
     const router = useRouter();
 
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
+
     return (
-        <div className="min-h-screen flex flex-col">
+        <>
+            {/* ✅ CUSTOM HEADER */}
+            <header className="relative z-10 w-full border-b border-[var(--primary)]/10 bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-            {/* HEADER */}
-            <div
-                style={{
-                    background: "var(--surface)",
-                    borderBottom: "1px solid var(--border)"
-                }}
-                className="py-8 px-6 text-center"
-            >
-                <h1
-                    style={{color: "var(--primary)"}}
-                    className="text-3xl font-bold"
-                >
-                    Privacy Policy
-                </h1>
-
-                <p
-                    className="text-sm mt-2"
-                    style={{color: "var(--text-secondary)"}}
-                >
-                    Last updated: 2026
-                </p>
-            </div>
-
-            {/* CONTENT */}
-            <div className="flex-1 flex justify-center px-4 py-10">
-                <div style={{maxWidth: "42rem", width: "100%"}}>
-
-                    <div className="card space-y-8">
-
-                        {/* Section 1 */}
-                        <section>
-                            <h2
-                                style={{color: "var(--primary)"}}
-                                className="text-lg font-semibold mb-2"
-                            >
-                                1. Information We Collect
-                            </h2>
-                            <p style={{color: "var(--text-secondary)"}}>
-                                We collect personal information such as your name, email, and
-                                login credentials to provide secure access to the HMS system.
-                            </p>
-                        </section>
-
-                        {/* Section 2 */}
-                        <section>
-                            <h2
-                                style={{color: "var(--primary)"}}
-                                className="text-lg font-semibold mb-2"
-                            >
-                                2. How We Use Your Data
-                            </h2>
-                            <p style={{color: "var(--text-secondary)"}}>
-                                Your data is used to manage hospital operations, authenticate
-                                users, and improve system performance and security.
-                            </p>
-                        </section>
-
-                        {/* Section 3 */}
-                        <section>
-                            <h2
-                                style={{color: "var(--primary)"}}
-                                className="text-lg font-semibold mb-2"
-                            >
-                                3. Data Protection
-                            </h2>
-                            <p style={{color: "var(--text-secondary)"}}>
-                                We use industry-standard encryption and security measures to
-                                protect your information from unauthorized access.
-                            </p>
-                        </section>
-
-                        {/* Section 4 */}
-                        <section>
-                            <h2
-                                style={{color: "var(--primary)"}}
-                                className="text-lg font-semibold mb-2"
-                            >
-                                4. Sharing of Information
-                            </h2>
-                            <p style={{color: "var(--text-secondary)"}}>
-                                We do not sell or share your personal data with third parties
-                                except when required by law or for system functionality.
-                            </p>
-                        </section>
-
-                        {/* Section 5 */}
-                        <section>
-                            <h2
-                                style={{color: "var(--primary)"}}
-                                className="text-lg font-semibold mb-2"
-                            >
-                                5. Your Rights
-                            </h2>
-                            <p style={{color: "var(--text-secondary)"}}>
-                                You have the right to access, update, or delete your personal
-                                data by contacting our support team.
-                            </p>
-                        </section>
-
-                        {/* CONTACT BOX */}
-                        <div className="card" style={{background: "var(--background)"}}>
-                            <h2
-                                style={{color: "var(--primary)"}}
-                                className="text-md font-semibold mb-3"
-                            >
-                                Contact Us
-                            </h2>
-
-                            <p
-                                style={{color: "var(--text-secondary)"}}
-                                className="text-sm"
-                            >
-                                📧 support@hms.com
-                            </p>
-
-                            <p
-                                style={{color: "var(--text-secondary)"}}
-                                className="text-sm"
-                            >
-                                📞 +91 9876543210
-                            </p>
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
+                            <span className="material-symbols-outlined text-2xl">medical_services</span>
                         </div>
-                        <div className="flex justify-start pt-4">
-                            <button
-                                onClick={() => router.push('/login')}
-                                className="flex items-center gap-2 font-semibold hover:underline transition-all hover:-translate-x-1"
-                                style={{color: "var(--primary)"}}
-                            >
-    <span className="material-symbols-outlined text-base">
-      arrow_back
-    </span>
-                                Back to Login
-                            </button>
+                        <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">
+                            HMS System
+                        </h2>
+                    </div>
+
+                    <button
+                        onClick={() => setIsHelpOpen(true)}
+                        className="rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all"
+                    >
+                        Help Desk
+                    </button>
+
+                </div>
+            </header>
+
+            {/* ✅ MAIN UI */}
+            <div className="min-h-screen bg-[var(--background)] py-10 px-4">
+
+                <div className="max-w-4xl mx-auto">
+
+                    {/* TITLE */}
+                    <div className="mb-6">
+                        <p className="text-sm text-[var(--primary)] font-semibold flex items-center gap-2">
+                            <Shield size={16} /> LEGAL DOCUMENT
+                        </p>
+
+                        <h1 className="text-4xl font-bold mt-2 text-[var(--text-primary)]">
+                            Privacy Policy
+                        </h1>
+
+                        <p className="text-[var(--text-secondary)] mt-2">
+                            {/*Last Updated: October 24, 2024*/}
+                        </p>
+
+                        <div className="flex gap-3 mt-3">
+              <span className="px-3 py-1 text-sm bg-[var(--surface)] rounded-full">
+                HIPAA Compliant
+              </span>
+                            <span className="px-3 py-1 text-sm bg-[var(--surface)] rounded-full">
+                252-bit Encryption
+              </span>
+                        </div>
+                    </div>
+
+                    {/* CARD */}
+                    <div className="bg-[var(--surface)] rounded-xl shadow-md overflow-hidden border border-[var(--primary)]/10">
+
+                        {/* NOTICE */}
+                        <div className="bg-[var(--primary)]/10 p-6 text-[var(--text-secondary)]">
+                            At HMS System, we recognize the critical importance of privacy in healthcare.
+                        </div>
+
+                        <div className="p-6 space-y-8">
+
+                            {/* DATA */}
+                            <section>
+                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-3 text-[var(--text-primary)]">
+                                    <Database className="text-[var(--primary)]" /> Data Collection
+                                </h2>
+
+                                <ul className="space-y-2 text-[var(--text-secondary)]">
+                                    <li>• Professional Credentials</li>
+                                    <li>• Patient Demographics</li>
+                                    <li>• Technical Telemetry</li>
+                                </ul>
+                            </section>
+
+                            {/* USE */}
+                            <section>
+                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-3 text-[var(--text-primary)]">
+                                    <ArrowRightLeft className="text-[var(--primary)]" /> Use of Information
+                                </h2>
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    {["Care Coordination","Regulatory Compliance","Audit Trails","System Integrity"]
+                                        .map((item, i) => (
+                                            <div key={i} className="bg-[var(--background)] p-4 rounded-lg text-sm">
+                                                {item}
+                                            </div>
+                                        ))}
+                                </div>
+                            </section>
+
+                            {/* HIPAA */}
+                            <section className="border-l-4 border-[var(--primary)] bg-[var(--background)] p-5 rounded-lg">
+                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-3 text-[var(--text-primary)]">
+                                    <CheckCircle className="text-[var(--primary)]" /> HIPAA Compliance
+                                </h2>
+
+                                <ul className="space-y-2 text-[var(--text-secondary)]">
+                                    <li>✔ Privacy Rule</li>
+                                    <li>✔ Security Rule</li>
+                                    <li>✔ Breach Notification</li>
+                                </ul>
+                            </section>
+
+                            {/* SECURITY */}
+                            <section>
+                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-4 text-[var(--text-primary)]">
+                                    <Lock className="text-[var(--primary)]" /> Security Measures
+                                </h2>
+
+                                <div className="space-y-4">
+                                    <div className="flex gap-3">
+                                        <Key className="text-[var(--text-secondary)]" />
+                                        <p>Encryption</p>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Shield className="text-[var(--text-secondary)]" />
+                                        <p>MFA</p>
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Eye className="text-[var(--text-secondary)]" />
+                                        <p>Zero Knowledge</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* BUTTONS */}
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={() => router.push('login')}
+                                    className="bg-[var(--primary)] text-white px-5 py-2 rounded-lg hover:bg-[var(--primary-hover)]">
+                                    Go to login
+                                </button>
+
+                                <button
+
+                                    className="border border-[var(--primary)]/20 px-5 py-2 rounded-lg hover:bg-[var(--background)]">
+                                    Download PDF
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </div>
-
-            {/* FOOTER */}
-            <footer
-                className="text-center py-6 text-sm"
-                style={{color: "var(--text-secondary)"}}
-            >
-                © 2026 HMS System. All rights reserved.
-            </footer>
-        </div>
+            <HelpDeskModal
+                isOpen={isHelpOpen}
+                onClose={() => setIsHelpOpen(false)}
+            />   </>
     );
-};
-
-export default PrivacyPolicy;
+}

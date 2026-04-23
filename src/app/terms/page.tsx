@@ -1,154 +1,182 @@
-'use client';
-
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
+import HelpDeskModal from '@/components/HelpDeskModal';
 import { useRouter } from 'next/navigation';
 
-const TermsOfService = () => {
+
+export default function TermsPage() {
+
     const router = useRouter();
 
+    const [isHelpOpen, setIsHelpOpen] = useState(false);
     return (
-        <div className="min-h-screen flex flex-col bg-[var(--background)]">
+        <div className="min-h-screen bg-[#f5f6f8] text-gray-800">
+            <header className="relative z-10 w-full border-b border-[var(--primary)]/10 bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-4">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
 
-            {/* HEADER */}
-            <div
-                className="py-6 text-center"
-                style={{
-                    background: "var(--surface)",
-                    borderBottom: "1px solid var(--border)"
-                }}
-            >
-                <h1
-                    className="text-xl font-semibold"
-                    style={{ color: "#d44d0f" }}
-                >
-                    Terms of Service
-                </h1>
+                    <div className="flex items-center gap-3">
+                        <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
+                            <span className="material-symbols-outlined text-2xl">medical_services</span>
+                        </div>
+                        <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">
+                            HMS System
+                        </h2>
+                    </div>
 
-                <p
-                    className="text-sm mt-1"
-                    style={{ color: "var(--text-secondary)" }}
-                >
-                    Last updated: 2026
-                </p>
-            </div>
+                    <div className="flex items-center gap-3">
 
-            {/* CONTENT */}
-            <div className="flex-1 flex justify-center px-6 py-6">
-                <div style={{ maxWidth: "64rem", width: "100%" }}>
-
-                    <div
-                        className="card space-y-6"
-                        style={{ boxShadow: "0 8px 25px rgba(0,0,0,0.05)" }}
-                    >
-
-                        {/* SECTION */}
-                        {[
-                            {
-                                title: "1. Acceptance of Terms",
-                                text: "By accessing and using the HMS system, you agree to comply with these Terms of Service and all applicable laws and regulations."
-                            },
-                            {
-                                title: "2. User Responsibilities",
-                                text: "Users are responsible for maintaining the confidentiality of their login credentials and ensuring proper use of the system."
-                            },
-                            {
-                                title: "3. System Usage",
-                                text: "The system must be used only for authorized healthcare operations. Any misuse may lead to account suspension or termination."
-                            },
-                            {
-                                title: "4. Data Security",
-                                text: "We implement strict security measures, but users must also follow best practices to protect sensitive data."
-                            },
-                            {
-                                title: "5. Account Termination",
-                                text: "We reserve the right to suspend or terminate access if these terms are violated or suspicious activity is detected."
-                            },
-                            {
-                                title: "6. Changes to Terms",
-                                text: "These terms may be updated from time to time. Continued use of the system indicates acceptance of updated terms."
-                            },
-                            {
-                                title: "7. Limitation of Liability",
-                                text: "HMS is not liable for any indirect, incidental, or consequential damages arising from the use of the system."
-                            },
-                            {
-                                title: "8. Compliance",
-                                text: "Users must comply with all applicable healthcare regulations and data protection laws while using the system."
-                            }
-                        ].map((item, i) => (
-                            <section
-                                key={i}
-                                className="pb-3 border-b border-[var(--border)] last:border-none"
-                            >
-                                <h2
-                                    className="text-base font-semibold mb-1"
-                                    style={{ color: "#d44d0f" }}
-                                >
-                                    {item.title}
-                                </h2>
-
-                                <p
-                                    className="text-sm leading-relaxed"
-                                    style={{ color: "var(--text-secondary)" }}
-                                >
-                                    {item.text}
-                                </p>
-                            </section>
-                        ))}
-
-                        {/* CONTACT BOX */}
-                        <div
-                            className="card"
-                            style={{
-                                background: "var(--background)",
-                                border: "1px solid var(--border)",
-                                boxShadow: "none"
-                            }}
+                        {/* 🔙 Back to Login Button */}
+                        <button
+                            onClick={() => router.push("/login")}
+                            className="border border-[var(--primary)] text-[var(--primary)] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--primary)] hover:text-white transition-all"
                         >
-                            <h2
-                                className="text-sm font-semibold mb-2"
-                                style={{ color: "#d44d0f" }}
-                            >
-                                Contact Us
-                            </h2>
+                            ← Back to Login
+                        </button>
 
-                            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                                📧 support@hms.com
-                            </p>
-
-                            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                                📞 +91 9876543210
-                            </p>
-                        </div>
-
-                        {/* BACK BUTTON */}
-                        <div className="flex justify-start pt-2">
-                            <button
-                                onClick={() => router.push('/login')}
-                                className="flex items-center gap-2 text-sm font-medium hover:opacity-80 transition"
-                                style={{ color: "#d44d0f" }}
-                            >
-                <span className="material-symbols-outlined text-base">
-                  arrow_back
-                </span>
-                                Back to Login
-                            </button>
-                        </div>
+                        {/* Help Desk */}
+                        <button
+                            onClick={() => setIsHelpOpen(true)}
+                            className="rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all"
+                        >
+                            Help Desk
+                        </button>
 
                     </div>
+
                 </div>
-            </div>
+            </header>
 
-            {/* FOOTER */}
-            <footer
-                className="text-center py-4 text-xs"
-                style={{ color: "var(--text-secondary)" }}
-            >
-                © 2026 HMS System. All rights reserved.
-            </footer>
+            {/* Main */}
+            <main className="max-w-4xl mx-auto py-10 px-4 space-y-6">
+                {/* Top Card */}
+                <div className="rounded-lg overflow-hidden shadow-sm border bg-white">
+                    <div className="bg-gradient-to-r from-orange-700 to-orange-500 text-white p-6">
+                        <h1 className="text-2xl font-semibold">Terms of Service</h1>
+                        <p className="text-xs mt-1">
+                            EFFECTIVE DATE: OCTOBER 24, 2024
+                        </p>
+                        <p className="mt-4 text-sm">
+                            Please read these terms carefully before using the HMS System.
+                            This agreement governs your access to and use of our clinical
+                            management services.
+                        </p>
+                    </div>
 
+                    <div className="flex justify-between items-center p-4 text-sm">
+                        <div className="flex gap-3">
+              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
+                HIPAA Compliant
+              </span>
+                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs">
+                256-bit Encryption
+              </span>
+                        </div>
+                        <span className="text-gray-400 text-xs">Version 4.2.0</span>
+                    </div>
+                </div>
+
+                {/* Section Component */}
+                {sections.map((sec, i) => (
+                    <div
+                        key={i}
+                        className="bg-white border rounded-lg p-6 shadow-sm"
+                    >
+                        <h2 className="font-semibold text-lg mb-3">
+                            {i + 1} &nbsp; {sec.title}
+                        </h2>
+                        <div className="text-sm text-gray-600 space-y-2">
+                            {sec.content}
+                        </div>
+                    </div>
+                ))}
+
+                {/* Highlight Card */}
+                <div className="bg-white border rounded-lg p-8 text-center shadow-sm">
+                    <div className="text-orange-600 text-xl mb-2">✔</div>
+                    <h3 className="font-semibold text-lg">
+                        Patient Privacy is Our Priority
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-2">
+                        Our systems are audited quarterly to ensure 100% compliance
+                        with international healthcare data standards.
+                    </p>
+                </div>
+
+                {/* PDF Card */}
+                <div className="bg-white border rounded-lg p-4 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p className="font-medium text-sm">Need a physical copy?</p>
+                        <p className="text-xs text-gray-500">
+                            Download the PDF version of these Terms for your records.
+                        </p>
+                    </div>
+                    <button className="border border-orange-600 text-orange-600 px-4 py-2 rounded-md text-sm hover:bg-orange-50">
+                        Download PDF ↓
+                    </button>
+                </div>
+            </main>
+
+
+            <HelpDeskModal
+                isOpen={isHelpOpen}
+                onClose={() => setIsHelpOpen(false)}
+            />
         </div>
-    );
-};
 
-export default TermsOfService;
+    );
+}
+
+const sections = [
+    {
+        title: "Acceptance of Terms",
+        content: (
+            <>
+                <p>
+                    By accessing or using the HMS System ("Service"), you agree to be
+                    bound by these Terms of Service and all applicable laws.
+                </p>
+                <p>
+                    The materials contained in this Service are protected by
+                    applicable copyright and trademark law.
+                </p>
+            </>
+        ),
+    },
+    {
+        title: "User Responsibilities",
+        content: (
+            <ul className="list-disc ml-5 space-y-1">
+                <li>Maintain confidentiality of login credentials.</li>
+                <li>Report security breaches immediately.</li>
+                <li>Do not reverse engineer or misuse system.</li>
+                <li>Use only for intended clinical purposes.</li>
+            </ul>
+        ),
+    },
+    {
+        title: "Limitation of Liability",
+        content: (
+            <>
+                <p>
+                    HMS System shall not be liable for any damages including loss of
+                    data or profit.
+                </p>
+                <p>
+                    Clinical decisions remain responsibility of practitioners.
+                </p>
+            </>
+        ),
+    },
+    {
+        title: "Governing Law",
+        content: (
+            <>
+                <p>
+                    These terms are governed by applicable laws and disputes will be
+                    resolved through arbitration.
+                </p>
+
+            </>
+        ),
+    },
+];
