@@ -25,7 +25,7 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         Support Center
                     </h2>
                     <p className="text-sm opacity-90 mt-1">
-                        We're here to help you 24/7
+                        We are here to help you 24/7
                     </p>
                 </div>
 
@@ -40,7 +40,7 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {/* Body */}
                 <div className="p-6 space-y-5">
 
-                    {!showForm ? (
+                    { !showForm ? (
                         <>
                             {/* Contact Cards */}
                             <div className="grid gap-4">
@@ -64,13 +64,13 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
                             </div>
 
                             {/* Button */}
-                            <button
-                                onClick={() => setShowForm(true)}
-                                className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary)]/20 transition"
-                            >
-                                <span className="material-symbols-outlined">confirmation_number</span>
-                                Raise a Ticket
-                            </button>
+                            {/*<button*/}
+                            {/*    onClick={() => setShowForm(true)}*/}
+                            {/*    className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary)]/20 transition"*/}
+                            {/*>*/}
+                            {/*    <span className="material-symbols-outlined">confirmation_number</span>*/}
+                            {/*    Raise a Ticket*/}
+                            {/*</button>*/}
                         </>
                     ) : (
                         <>

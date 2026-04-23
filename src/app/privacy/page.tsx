@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -8,15 +7,16 @@ import { useRouter } from 'next/navigation';
 
 export default function PrivacyPolicy() {
     const router = useRouter();
-
     const [isHelpOpen, setIsHelpOpen] = useState(false);
 
     return (
-        <>
-            {/* ✅ CUSTOM HEADER */}
+        <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+
+            {/* ✅ HEADER (TERMS STYLE) */}
             <header className="relative z-10 w-full border-b border-[var(--primary)]/10 bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-4">
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
 
+                    {/* LEFT */}
                     <div className="flex items-center gap-3">
                         <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
                             <span className="material-symbols-outlined text-2xl">medical_services</span>
@@ -26,143 +26,131 @@ export default function PrivacyPolicy() {
                         </h2>
                     </div>
 
-                    <button
-                        onClick={() => setIsHelpOpen(true)}
-                        className="rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all"
-                    >
-                        Help Desk
-                    </button>
+                    {/* RIGHT (LIKE TERMS) */}
+                    <div className="flex items-center gap-3">
 
+                        {/* 🔙 Back to Login */}
+                        <button
+                            onClick={() => router.push("/login")}
+                            className="border border-[var(--primary)] text-[var(--primary)] px-4 py-2 rounded-lg text-sm font-medium hover:bg-[var(--primary)] hover:text-white transition-all"
+                        >
+                            ← Back to Login
+                        </button>
+
+                        {/* Help Desk */}
+                        <button
+                            onClick={() => setIsHelpOpen(true)}
+                            className="rounded-lg bg-[var(--primary)] px-5 py-2 text-sm font-bold text-white hover:bg-[var(--primary-hover)] transition-all"
+                        >
+                            Help Desk
+                        </button>
+
+                    </div>
                 </div>
             </header>
 
-            {/* ✅ MAIN UI */}
-            <div className="min-h-screen bg-[var(--background)] py-10 px-4">
+            {/* MAIN */}
+            <main className="max-w-4xl mx-auto py-10 px-4 space-y-6">
 
-                <div className="max-w-4xl mx-auto">
-
-                    {/* TITLE */}
-                    <div className="mb-6">
-                        <p className="text-sm text-[var(--primary)] font-semibold flex items-center gap-2">
-                            <Shield size={16} /> LEGAL DOCUMENT
+                {/* TOP CARD */}
+                <div className="rounded-lg overflow-hidden shadow-sm border bg-[var(--surface)]">
+                    <div className="bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] text-white p-6">
+                        <h1 className="text-2xl font-semibold">Privacy Policy</h1>
+                        <p className="text-xs mt-1">
+                            LAST UPDATED: OCTOBER 24, 2024
                         </p>
-
-                        <h1 className="text-4xl font-bold mt-2 text-[var(--text-primary)]">
-                            Privacy Policy
-                        </h1>
-
-                        <p className="text-[var(--text-secondary)] mt-2">
-                            {/*Last Updated: October 24, 2024*/}
+                        <p className="mt-4 text-sm">
+                            We are committed to protecting patient data and ensuring secure healthcare operations.
                         </p>
-
-                        <div className="flex gap-3 mt-3">
-              <span className="px-3 py-1 text-sm bg-[var(--surface)] rounded-full">
-                HIPAA Compliant
-              </span>
-                            <span className="px-3 py-1 text-sm bg-[var(--surface)] rounded-full">
-                252-bit Encryption
-              </span>
-                        </div>
                     </div>
 
-                    {/* CARD */}
-                    <div className="bg-[var(--surface)] rounded-xl shadow-md overflow-hidden border border-[var(--primary)]/10">
-
-                        {/* NOTICE */}
-                        <div className="bg-[var(--primary)]/10 p-6 text-[var(--text-secondary)]">
-                            At HMS System, we recognize the critical importance of privacy in healthcare.
+                    <div className="flex justify-between items-center p-4 text-sm">
+                        <div className="flex gap-3">
+                            <span className="bg-[var(--background)] text-[var(--text-primary)] px-3 py-1 rounded-full text-xs">
+                                HIPAA Compliant
+                            </span>
+                            <span className="bg-[var(--background)] text-[var(--text-primary)] px-3 py-1 rounded-full text-xs">
+                                256-bit Encryption
+                            </span>
                         </div>
-
-                        <div className="p-6 space-y-8">
-
-                            {/* DATA */}
-                            <section>
-                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-3 text-[var(--text-primary)]">
-                                    <Database className="text-[var(--primary)]" /> Data Collection
-                                </h2>
-
-                                <ul className="space-y-2 text-[var(--text-secondary)]">
-                                    <li>• Professional Credentials</li>
-                                    <li>• Patient Demographics</li>
-                                    <li>• Technical Telemetry</li>
-                                </ul>
-                            </section>
-
-                            {/* USE */}
-                            <section>
-                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-3 text-[var(--text-primary)]">
-                                    <ArrowRightLeft className="text-[var(--primary)]" /> Use of Information
-                                </h2>
-
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    {["Care Coordination","Regulatory Compliance","Audit Trails","System Integrity"]
-                                        .map((item, i) => (
-                                            <div key={i} className="bg-[var(--background)] p-4 rounded-lg text-sm">
-                                                {item}
-                                            </div>
-                                        ))}
-                                </div>
-                            </section>
-
-                            {/* HIPAA */}
-                            <section className="border-l-4 border-[var(--primary)] bg-[var(--background)] p-5 rounded-lg">
-                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-3 text-[var(--text-primary)]">
-                                    <CheckCircle className="text-[var(--primary)]" /> HIPAA Compliance
-                                </h2>
-
-                                <ul className="space-y-2 text-[var(--text-secondary)]">
-                                    <li>✔ Privacy Rule</li>
-                                    <li>✔ Security Rule</li>
-                                    <li>✔ Breach Notification</li>
-                                </ul>
-                            </section>
-
-                            {/* SECURITY */}
-                            <section>
-                                <h2 className="text-xl font-semibold flex items-center gap-2 mb-4 text-[var(--text-primary)]">
-                                    <Lock className="text-[var(--primary)]" /> Security Measures
-                                </h2>
-
-                                <div className="space-y-4">
-                                    <div className="flex gap-3">
-                                        <Key className="text-[var(--text-secondary)]" />
-                                        <p>Encryption</p>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <Shield className="text-[var(--text-secondary)]" />
-                                        <p>MFA</p>
-                                    </div>
-
-                                    <div className="flex gap-3">
-                                        <Eye className="text-[var(--text-secondary)]" />
-                                        <p>Zero Knowledge</p>
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* BUTTONS */}
-                            <div className="flex gap-3 pt-4">
-                                <button
-                                    onClick={() => router.push('login')}
-                                    className="bg-[var(--primary)] text-white px-5 py-2 rounded-lg hover:bg-[var(--primary-hover)]">
-                                    Go to login
-                                </button>
-
-                                <button
-
-                                    className="border border-[var(--primary)]/20 px-5 py-2 rounded-lg hover:bg-[var(--background)]">
-                                    Download PDF
-                                </button>
-                            </div>
-
-                        </div>
+                        <span className="text-[var(--text-secondary)] text-xs">Version 1.0.0</span>
                     </div>
                 </div>
-            </div>
+
+                {/* DATA */}
+                <div className="bg-[var(--surface)] border rounded-lg p-6 shadow-sm">
+                    <h2 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                        <Database className="text-[var(--primary)]" /> Data Collection
+                    </h2>
+                    <ul className="text-sm text-[var(--text-secondary)] space-y-1">
+                        <li>• Professional Credentials</li>
+                        <li>• Patient Demographics</li>
+                        <li>• Technical Telemetry</li>
+                    </ul>
+                </div>
+
+                {/* USE */}
+                <div className="bg-[var(--surface)] border rounded-lg p-6 shadow-sm">
+                    <h2 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                        <ArrowRightLeft className="text-[var(--primary)]" /> Use of Information
+                    </h2>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                        {["Care Coordination","Regulatory Compliance","Audit Trails","System Integrity"]
+                            .map((item, i) => (
+                                <div key={i} className="bg-[var(--background)] p-4 rounded-lg text-sm">
+                                    {item}
+                                </div>
+                            ))}
+                    </div>
+                </div>
+
+                {/* HIPAA */}
+                <div className="bg-[var(--surface)] border rounded-lg p-6 shadow-sm">
+                    <h2 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                        <CheckCircle className="text-[var(--primary)]" /> HIPAA Compliance
+                    </h2>
+
+                    <ul className="text-sm text-[var(--text-secondary)] space-y-1">
+                        <li>✔ Privacy Rule</li>
+                        <li>✔ Security Rule</li>
+                        <li>✔ Breach Notification</li>
+                    </ul>
+                </div>
+
+                {/* SECURITY */}
+                <div className="bg-[var(--surface)] border rounded-lg p-6 shadow-sm">
+                    <h2 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                        <Lock className="text-[var(--primary)]" /> Security Measures
+                    </h2>
+
+                    <div className="space-y-3 text-sm text-[var(--text-secondary)]">
+                        <div className="flex gap-3"><Key /> Encryption</div>
+                        <div className="flex gap-3"><Shield /> MFA</div>
+                        <div className="flex gap-3"><Eye /> Zero Knowledge</div>
+                    </div>
+                </div>
+
+                {/* ✅ BUTTONS (TERMS STYLE DOWNLOAD) */}
+                <div className="bg-[var(--surface)] border rounded-lg p-4 flex justify-between items-center shadow-sm">
+                    <div>
+                        <p className="font-medium text-sm">Need a physical copy?</p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                            Download the PDF version of this Privacy Policy.
+                        </p>
+                    </div>
+
+                    <button className="border border-[var(--primary)] text-[var(--primary)] px-4 py-2 rounded-md text-sm hover:bg-[var(--background)]">
+                        Download PDF ↓
+                    </button>
+                </div>
+
+            </main>
+
             <HelpDeskModal
                 isOpen={isHelpOpen}
                 onClose={() => setIsHelpOpen(false)}
-            />   </>
+            />
+        </div>
     );
 }
