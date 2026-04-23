@@ -5,7 +5,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
 import { Table } from '@/components/ui/Table';
 import { patientService } from '@/services/patientService';
-import { PatientResponse, ApiResponse, PageResponse } from '@/types/api';
+import { PatientResponse, } from '@/types/api';
 import { Search, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -96,7 +96,7 @@ const PatientsPage = () => {
             href={`/reception/appointments/create?patientId=${row.id}`}
             className="text-xs font-bold text-[var(--text-secondary)] bg-[var(--background)] px-3 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
           >
-            Book Appt
+            Book Appointment
           </Link>
         </div>
       )
