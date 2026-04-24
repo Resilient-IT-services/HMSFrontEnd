@@ -1,0 +1,412 @@
+<html class="light" lang="en"><head></head><body class="bg-background font-body-md text-on-background">```html
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VitalSync | Edit User</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "outline": "#8d7167",
+                        "surface-bright": "#f9f9ff",
+                        "primary-fixed-dim": "#ffb59a",
+                        "surface-container-highest": "#e2e2e8",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-primary-fixed": "#380d00",
+                        "error-container": "#ffdad6",
+                        "surface": "#f9f9ff",
+                        "tertiary-fixed": "#e1e3e5",
+                        "surface-container-low": "#f3f3f9",
+                        "outline-variant": "#e2bfb3",
+                        "surface-variant": "#e2e2e8",
+                        "secondary-fixed": "#d8e3fb",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-background": "#191c20",
+                        "inverse-primary": "#ffb59a",
+                        "secondary-container": "#d8e3fb",
+                        "on-secondary-container": "#5a6579",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary": "#545f73",
+                        "on-surface": "#191c20",
+                        "surface-dim": "#d9dadf",
+                        "primary-container": "#ff6b2b",
+                        "inverse-on-surface": "#f0f0f6",
+                        "surface-container-high": "#e7e8ee",
+                        "on-primary-container": "#5c1c00",
+                        "on-error-container": "#93000a",
+                        "on-primary": "#ffffff",
+                        "on-secondary-fixed": "#111c2d",
+                        "primary": "#a83900",
+                        "tertiary": "#5c5f61",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container": "#ededf3",
+                        "error": "#ba1a1a",
+                        "background": "#f9f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#979a9c",
+                        "on-tertiary-container": "#2f3234",
+                        "on-surface-variant": "#594138",
+                        "surface-tint": "#a83900",
+                        "primary-fixed": "#ffdbce",
+                        "inverse-surface": "#2e3035"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "component-gap": "16px",
+                        "base": "8px",
+                        "section-gap": "24px",
+                        "margin-page": "40px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "headline-md": ["Manrope"],
+                        "label-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "headline-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-tab {
+            border-bottom: 2px solid #ff6b2b;
+            color: #a83900;
+        }
+    </style>
+<!-- Sidebar (Shared Component) -->
+<aside class="h-screen w-64 border-r fixed left-0 top-0 bg-white border-gray-200 flex flex-col py-6 px-4 gap-2 z-50">
+<div class="flex items-center gap-3 px-2 mb-8">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined" data-icon="health_and_safety" style='font-variation-settings: "FILL" 1;'>health_and_safety</span>
+</div>
+<div>
+<h1 class="text-lg font-bold text-gray-900 leading-tight">VitalSync Admin</h1>
+<p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Enterprise HMS</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 bg-orange-50 text-orange-600 rounded-lg transition-transform translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="badge" style='font-variation-settings: "FILL" 1;'>badge</span>
+<span class="font-label-md">Staff Management</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="font-label-md">Facilities</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+<span class="font-label-md">Health Analytics</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span class="font-label-md">Inventory Control</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-transform hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+<span class="font-label-md">System Logs</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-gray-100 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="contact_support">contact_support</span>
+<span class="font-label-md">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-error hover:bg-error-container/20 rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span class="font-label-md">Logout</span>
+</a>
+</div>
+</aside>
+<main class="ml-64 min-h-screen">
+<!-- Top Nav Bar (Shared Component) -->
+<header class="flex justify-between items-center h-16 px-6 sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-gray-50 rounded-full text-gray-500">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<span class="font-headline-sm text-gray-900">Edit User Profile</span>
+<span class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">ID: VSYNC-8829-X</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-full px-3 py-1.5">
+<span class="material-symbols-outlined text-gray-400 text-[20px]" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-body-sm w-48" placeholder="Search records..." type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2 text-gray-500 hover:bg-gray-100 rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-orange-200">
+<img class="w-full h-full object-cover" data-alt="Professional portrait of a healthcare administrator in a clinical office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6pvQAxks6SpOdvRAnhOLarNhELhx5F6qh2LwMaX_D3AU6-ezInoNFJzGDPms_1ctiWjzclplxbGwMmDgHMVjjHosCF4S5Bw3J0cC-ZLcI-v1kYo6vUwUq3sIyWtOxGnHLDyFkx-JgMYZ5H2XdqvdgUvmTgmEdYfyIz-IU_lCh_A9OU14-6OuzTjSRVaI0AZ6kJYh3KystrsK9YO7qqTWuP_Jvo6EH06YMCSsHv9u6uptSsQiyDmmtBN4Triz9fXYNL6xNPaoeonJc"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Page Header Section -->
+<section class="px-gutter py-base mt-6">
+<div class="bg-white border border-gray-200 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div class="flex items-center gap-6">
+<div class="relative">
+<img class="w-20 h-20 rounded-2xl object-cover border-4 border-orange-50 shadow-sm" data-alt="Close up portrait of a senior male doctor with professional medical uniform and approachable expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsqAaEghzxfcsP389BHWqgVfxzvj0cvcF6kZUw94tzc7CzU1unM5JDTuw5ovvNnmMNWW-ISlAVBM4K0osbaF2nJuvKGVs8qTHd12C5vj2UoizSdn23AfFECTqfvv6bU29cUeSBResXe1eSi0_pOMiU__IHKdU3eUi5s3xKaxCy4RqMDjVlKY-qIQ5OOOOeh1ORIR_8wYvhIXoS4Xg-8cHxsj8lopLhNtBfHVXziSLLxPpHWkcMh2hJkuxKeQ-5dIvil9qlwJ0l7sQy"/>
+<div class="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-4 border-white"></div>
+</div>
+<div>
+<h2 class="font-headline-xl text-on-surface">Dr. Jonathan Aris</h2>
+<div class="flex items-center gap-3 mt-1">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">
+                                Senior Consultant
+                            </span>
+<span class="text-body-sm text-gray-500">•</span>
+<span class="text-body-sm text-gray-500">Joined Oct 2021</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex items-center bg-gray-100 p-1 rounded-lg">
+<button class="px-4 py-1.5 text-label-sm rounded-md bg-white shadow-sm text-on-surface">Active</button>
+<button class="px-4 py-1.5 text-label-sm text-gray-500 hover:text-on-surface transition-colors">Inactive</button>
+</div>
+<button class="bg-primary-container text-white px-6 py-2.5 rounded-lg font-label-md flex items-center gap-2 hover:opacity-90 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[20px]" data-icon="save" style='font-variation-settings: "FILL" 1;'>save</span>
+                        Save Changes
+                    </button>
+</div>
+</div>
+</section>
+<!-- Main Content with Tabs -->
+<section class="px-gutter pb-margin-page">
+<div class="bg-white border border-gray-200 rounded-xl overflow-hidden">
+<!-- Tab Headers -->
+<div class="flex border-b border-gray-100 bg-gray-50/50">
+<button class="px-8 py-4 font-label-md active-tab flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="person">person</span>
+                        Personal Info
+                    </button>
+<button class="px-8 py-4 font-label-md text-gray-500 hover:text-on-surface hover:bg-gray-50 flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="badge">badge</span>
+                        Profile Information
+                    </button>
+<button class="px-8 py-4 font-label-md text-gray-500 hover:text-on-surface hover:bg-gray-50 flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" data-icon="description">description</span>
+                        Contracts
+                    </button>
+</div>
+<!-- Content Sections -->
+<div class="p-container-padding space-y-12">
+<!-- Global Identity -->
+<div>
+<div class="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+<h3 class="font-headline-sm text-on-surface">Global Identity</h3>
+<span class="material-symbols-outlined text-gray-400 text-sm cursor-help" data-icon="info" title="Core identity information used across all hospital modules. Updating this will reflect on medical records and payroll.">info</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+<div class="flex flex-col gap-1.5">
+<label class="text-label-sm text-gray-700">Full Name</label>
+<input class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary/20 transition-all font-body-md" type="text" value="Jonathan Aris"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-label-sm text-gray-700">Primary Phone</label>
+<input class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary/20 transition-all font-body-md" type="tel" value="+1 (555) 012-3456"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-label-sm text-gray-700">Email Address</label>
+<input class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary/20 transition-all font-body-md" type="email" value="j.aris@vitalsync.health"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-label-sm text-gray-700">Date of Birth</label>
+<input class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary/20 transition-all font-body-md" type="date" value="1978-05-14"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-label-sm text-gray-700">Gender Identity</label>
+<select class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary/20 transition-all font-body-md">
+<option selected="">Male</option>
+<option>Female</option>
+<option>Non-binary</option>
+<option>Prefer not to say</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="text-label-sm text-gray-700">Nationality</label>
+<input class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary/20 transition-all font-body-md" type="text" value="British"/>
+</div>
+</div>
+</div>
+<!-- Profile Information -->
+<div>
+<div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-on-surface">Profile Information</h3>
+<span class="material-symbols-outlined text-gray-400 text-sm cursor-help" data-icon="info" title="Manage professional roles and clinical access levels for this user.">info</span>
+</div>
+<button class="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-label-md hover:bg-gray-50 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="add">add</span>
+                        Add Profile
+                    </button>
+</div>
+<div class="overflow-hidden border border-gray-100 rounded-lg w-full">
+<table class="w-full text-left border-collapse">
+<thead class="bg-gray-50">
+<tr>
+<th class="px-6 py-3 text-label-sm text-gray-500">Profile Type</th>
+<th class="px-6 py-3 text-label-sm text-gray-500">Status</th>
+<th class="px-6 py-3 text-label-sm text-gray-500 text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-gray-50">
+<tr class="hover:bg-gray-50/50">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-orange-500" data-icon="stethoscope">stethoscope</span>
+<span class="font-body-md font-medium">Doctor (Cardiology)</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-50 text-green-700">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                            Complete
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-label-md">Edit</button>
+</td>
+</tr>
+<tr class="hover:bg-gray-50/50">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-blue-500" data-icon="medical_services">medical_services</span>
+<span class="font-body-md font-medium">Lab Technician</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-orange-50 text-orange-700">
+<span class="w-1.5 h-1.5 rounded-full bg-orange-500"></span>
+                                            Draft
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:underline font-label-md">Complete</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Hospital Contracts -->
+<div>
+<div class="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-on-surface">Hospital Contracts</h3>
+<span class="material-symbols-outlined text-gray-400 text-sm cursor-help" data-icon="info" title="Commercial agreements across the VitalSync network facilities.">info</span>
+</div>
+<button class="flex items-center justify-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-label-md hover:bg-gray-50 transition-colors">
+<span class="material-symbols-outlined text-[20px]" data-icon="post_add">post_add</span>
+                        Add Contract
+                    </button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Contract Card 1 -->
+<div class="p-5 border border-gray-200 rounded-xl hover:border-orange-200 hover:shadow-sm transition-all group bg-white">
+<div class="flex justify-between items-start mb-4">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-gray-400" data-icon="location_city">location_city</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-on-surface">St. Mary's General Hospital</h4>
+<p class="text-body-sm text-gray-500">Senior Registrar • Cardiology Dept.</p>
+</div>
+</div>
+<span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded uppercase tracking-wider shrink-0">Active</span>
+</div>
+<div class="grid grid-cols-3 gap-4 py-3 border-y border-gray-50">
+<div>
+<p class="text-[10px] uppercase font-bold text-gray-400">Consultation Fee</p>
+<p class="font-body-md font-semibold">$120.00 / hr</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-gray-400">Payout Type</p>
+<p class="font-body-md font-semibold">Monthly Wire</p>
+</div>
+<div>
+<p class="text-[10px] uppercase font-bold text-gray-400">Schedule</p>
+<p class="font-body-md font-semibold">M, W, F</p>
+</div>
+</div>
+<div class="flex justify-end gap-4 mt-4">
+<button class="text-label-sm text-gray-500 hover:text-on-surface">View PDF</button>
+<button class="text-label-sm text-primary font-semibold">Modify Details</button>
+</div>
+</div>
+<!-- Contract Card 2 (Pending) -->
+<div class="p-5 border border-dashed border-gray-300 rounded-xl opacity-75 bg-gray-50/30">
+<div class="flex justify-between items-start">
+<div class="flex gap-4">
+<div class="w-12 h-12 rounded-lg bg-white flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-gray-300" data-icon="apartment">apartment</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-gray-400">Metropolis Wellness Clinic</h4>
+<p class="text-body-sm text-gray-400">Pending Authorization</p>
+</div>
+</div>
+<button class="text-label-sm text-orange-600 font-semibold border border-orange-200 px-3 py-1 rounded-md bg-white shrink-0">Resume Draft</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Action Bar (Contextual) -->
+<div class="fixed bottom-0 right-0 left-64 bg-white/95 backdrop-blur-md border-t border-gray-200 px-gutter py-4 flex justify-between items-center z-40">
+<div class="flex items-center gap-2 text-body-sm text-gray-500">
+<span class="material-symbols-outlined text-[16px] text-green-500" data-icon="cloud_done" style='font-variation-settings: "FILL" 1;'>cloud_done</span>
+            Last autosaved 2 minutes ago
+        </div>
+<div class="flex gap-3 px-gutter">
+<button class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-label-md hover:bg-gray-50 transition-colors">Discard</button>
+<button class="bg-primary-container text-white px-8 py-2 rounded-lg font-label-md shadow-sm shadow-orange-200 hover:opacity-90 active:scale-95 transition-all">Save Changes</button>
+</div>
+</div>
+```</body></html>

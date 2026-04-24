@@ -22,7 +22,7 @@ export interface PageResponse<T> {
 
 // User types
 export interface HospitalMembershipResponse {
-  hospitalId: number;
+  hospitalId: string;
   hospitalName: string;
   hospitalCode: string;
   roles: Role[];
@@ -31,9 +31,11 @@ export interface HospitalMembershipResponse {
 }
 
 export interface UserProfileResponse {
-  userId: number;
-  hospitalId: number | null;
+  userId: string;
+  hospitalId: string | null;
   username: string;
+  email?: string;
+  superuser: boolean;
   hospitals: HospitalMembershipResponse[];
   roles: Role[]; // Computed on frontend
 }
@@ -44,19 +46,19 @@ export interface LoginRequest {
 }
 
 export interface SelectHospitalRequest {
-  hospitalId: number;
+  hospitalId: string;
 }
 
 export interface AllocateRoleRequest {
-  userId: number;
-  hospitalId: number | null;
+  userId: string;
+  hospitalId: string | null;
   roles: Role[];
   specialization?: string;
   department?: string;
 }
 
 export interface UserResponse {
-  id: number;
+  id: string;
   username: string;
   fullName?: string;
   gender?: Gender;
@@ -73,7 +75,7 @@ export interface UserResponse {
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
 export interface PatientResponse {
-  id: number;
+  id: string;
   fullName: string;
   gender: Gender;
   dob: string;
@@ -84,7 +86,7 @@ export interface PatientResponse {
 
 // Hospital types
 export interface HospitalResponse {
-  id: number;
+  id: string;
   name: string;
   code: string;
   address?: string;

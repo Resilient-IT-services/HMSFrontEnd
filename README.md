@@ -7,10 +7,13 @@ This is a **role-driven operational system**, not a generic CRUD application. Th
 - Reception
 - Doctor
 - Pharmacy
+- Nurse
+- SuperAdmin
+- Admin
 
 All frontend behavior is strictly aligned with backend contracts defined in:
 ```
-{backendURL}/v3/api-docs
+api-docs.json
 ```
 
 ---
@@ -26,6 +29,8 @@ We design based on **who is doing what**.
 | Receptionist | Manage patients + appointments |
 | Doctor | Consultation + prescription |
 | Pharmacy | Billing + stock |
+Admin manages hospitals assigned to him
+Super admin can manage everything
 
 👉 Every UI must map to a **real-world action**.
 
@@ -40,8 +45,8 @@ We design based on **who is doing what**.
 
 ## 3. No Business Logic in UI
 Frontend must NEVER:
-- Calculate billing
-- Apply discounts
+- Calculate billing [to show ON UI its OK]
+- Apply discounts []
 - Validate medical logic
 
 Backend is the **source of truth for all decisions**.
@@ -101,11 +106,7 @@ Register patient → create appointment → manage status
     - Completed
 
 ### UI Screens
-- Patient Search Screen
-- Patient Registration Form
-- Appointment Creation Screen
-- Appointment List (with actions)
-
+defined in module_ui folder for Roles
 ### Key Rules
 - No duplicate patient creation
 - Status updates must reflect backend state

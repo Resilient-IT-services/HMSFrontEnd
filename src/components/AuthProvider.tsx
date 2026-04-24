@@ -52,17 +52,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [pathname, router]);
 
   const handleSuperUserFlow = useCallback((roles: string[]) => {
-    if (roles.length === 1 && !isSuperMode) {
+    const isSuperUser = roles.includes('SUPER_ADMIN');
+    if (!isSuperUser) return false;
+
+    if (!isSuperMode) {
       dispatch(setSuperMode(true));
       return true;
     }
 
-    if (isSuperMode) {
-      if (pathname === '/login' || pathname === '/' || pathname === '/select-role') {
-        router.push('/super_admin/dashboard');
-        return true;
-      }
-      return false;
+    if (pathname === '/login' || pathname === '/' || pathname === '/select-role' || pathname === '/select-hospital') {
+      router.push('/super_admin/dashboard');
+      return true;
     }
     return false;
   }, [dispatch, isSuperMode, pathname, router]);
@@ -84,6 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
     } else if (roles.includes('SUPER_ADMIN')) {
+      // Super admins don't necessarily need a hospitalId
       dispatch(setSuperMode(true));
     } else if (pathname !== '/unauthorized') {
       router.push('/unauthorized');

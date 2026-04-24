@@ -50,11 +50,27 @@ const authSlice = createSlice({
 
       // Compute effective roles for the current hospital context
       const effectiveRolesSet = new Set<Role>();
+      
+      // If superuser is true, they have SUPER_ADMIN role globally
+      if (action.payload.superuser) {
+        effectiveRolesSet.add('SUPER_ADMIN');
+      }
+
+      // Add global roles (where hospitalId is null) from hospitals array if any
       action.payload.hospitals.forEach(h => {
-        if (h.hospitalId === null || h.hospitalId === action.payload?.hospitalId) {
+        if (h.hospitalId === null) {
           h.roles.forEach(r => effectiveRolesSet.add(r));
         }
       });
+
+      // Add hospital-specific roles
+      if (action.payload.hospitalId) {
+        const currentHosp = action.payload.hospitals.find(h => h.hospitalId === action.payload?.hospitalId);
+        if (currentHosp) {
+          currentHosp.roles.forEach(r => effectiveRolesSet.add(r));
+        }
+      }
+
       const rolesArray = Array.from(effectiveRolesSet);
 
       // Attach roles to the user object for convenience in components

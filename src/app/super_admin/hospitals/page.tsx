@@ -1,30 +1,23 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
-import { Card } from '@/components/ui/Card';
-import { Table } from '@/components/ui/Table';
-import { FormField } from '@/components/ui/FormField';
-import { Modal } from '@/components/ui/Modal';
-import apiClient from '@/services/apiClient';
-import { ApiResponse, HospitalResponse } from '@/types/api';
+import { hospitalService } from '@/services/hospitalService';
+import { HospitalResponse } from '@/types/api';
 
 export default function HospitalsPage() {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showHospitalForm, setShowHospitalForm] = useState(false);
-  const [editingHospital, setEditingHospital] = useState<HospitalResponse | null>(null);
-  const [newHospital, setNewHospital] = useState({ name: '', code: '', address: '' });
-
-  // ✅ NEW STATE
-  const [isDeactivated, setIsDeactivated] = useState(false);
+  const router = useRouter();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const hospitalRes = await apiClient.get<ApiResponse<HospitalResponse[]>>('/hospitals');
-      if (hospitalRes.data.success) {
-        setHospitals(hospitalRes.data.data || []);
+      const res = await hospitalService.list();
+      if (res.success) {
+        setHospitals(res.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch hospitals', error);
@@ -37,194 +30,186 @@ export default function HospitalsPage() {
     fetchData();
   }, []);
 
-  const handleCreateHospital = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        ...newHospital,
-        status: isDeactivated ? 'INACTIVE' : 'ACTIVE' // ✅ NEW
-      };
-
-      if (editingHospital) {
-        const response = await apiClient.put<ApiResponse<HospitalResponse>>(
-            `/hospitals/${editingHospital.id}`,
-            payload
-        );
-        if (response.data.success) {
-          setShowHospitalForm(false);
-          setEditingHospital(null);
-          setNewHospital({ name: '', code: '', address: '' });
-          setIsDeactivated(false); // ✅ NEW
-          fetchData();
-        }
-      } else {
-        const response = await apiClient.post<ApiResponse<HospitalResponse>>(
-            '/hospitals',
-            payload
-        );
-        if (response.data.success) {
-          setShowHospitalForm(false);
-          setNewHospital({ name: '', code: '', address: '' });
-          setIsDeactivated(false); // ✅ NEW
-          fetchData();
-        }
-      }
-    } catch (error) {
-      console.error('Failed to save hospital', error);
-    }
-  };
-
-  const handleEditClick = (hospital: HospitalResponse) => {
-    setEditingHospital(hospital);
-    setNewHospital({
-      name: hospital.name,
-      code: hospital.code,
-      address: hospital.address || ''
-    });
-
-    // ✅ NEW
-    setIsDeactivated(hospital.status === 'INACTIVE');
-
-    setShowHospitalForm(true);
-  };
-
-  const hospitalColumns = [
-    {
-      header: 'Hospital Name',
-      accessor: (row: HospitalResponse) => (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)]">
-              <span className="material-symbols-outlined text-sm">apartment</span>
-            </div>
-            <span className="font-semibold">{row.name}</span>
-          </div>
-      )
-    },
-    {
-      header: 'Code',
-      accessor: (row: HospitalResponse) => (
-          <code className="bg-[var(--background)] px-2 py-1 rounded text-xs">
-            {row.code}
-          </code>
-      )
-    },
-    { header: 'Address', accessor: (row: HospitalResponse) => row.address || 'N/A' },
-    {
-      header: 'Status',
-      accessor: (row: HospitalResponse) => {
-        const statusClass =
-            row.status === 'ACTIVE'
-                ? 'bg-[var(--success-light)] text-[var(--success)]'
-                : 'bg-slate-100 text-slate-500';
-        return (
-            <span className={`px-2 py-1 text-[10px] font-bold rounded uppercase ${statusClass}`}>
-            {row.status || 'ACTIVE'}
-          </span>
-        );
-      }
-    },
-    {
-      header: 'Action',
-      accessor: (row: HospitalResponse) => (
-          <button
-              onClick={() => handleEditClick(row)}
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
-          >
-            <span className="material-symbols-outlined text-xl">settings</span>
-          </button>
-      )
-    }
-  ];
-
   return (
-      <MainLayout title="Hospitals">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-[var(--text-primary)]">
-            Registered Hospitals
-          </h2>
-          <button
-              onClick={() => {
-                setEditingHospital(null);
-                setNewHospital({ name: '', code: '', address: '' });
-                setIsDeactivated(false); // ✅ NEW
-                setShowHospitalForm(true);
-              }}
-              className="btn-primary flex items-center gap-2"
+    <MainLayout title="Hospital Management">
+      <div className="max-w-7xl mx-auto">
+        {/* Page Header Actions */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-[30px] font-bold text-[var(--text-primary)] leading-tight">Hospital Network</h2>
+            <p className="text-[14px] text-[var(--text-secondary)]">Manage and monitor all healthcare facilities within the VitalSync ecosystem.</p>
+          </div>
+          <Link 
+            href="/super_admin/hospitals/create"
+            className="bg-[var(--primary)] hover:opacity-90 text-white font-bold px-6 py-3 rounded-lg shadow-sm transition-all flex items-center gap-2"
           >
-            <span className="material-symbols-outlined text-lg">add</span>
-            Register Hospital
-          </button>
+            <span className="material-symbols-outlined">add</span>
+            Add Hospital
+          </Link>
         </div>
 
-        <Card>
-          <Table columns={hospitalColumns} data={hospitals} isLoading={loading} />
-        </Card>
-
-        <Modal
-            isOpen={showHospitalForm}
-            onClose={() => setShowHospitalForm(false)}
-            title={editingHospital ? 'Edit Hospital' : 'Register New Hospital'}
-        >
-          <form onSubmit={handleCreateHospital} className="p-6 space-y-4">
-            <FormField label="Hospital Name" required>
-              <input
-                  className="form-input"
-                  value={newHospital.name}
-                  onChange={(e) =>
-                      setNewHospital({ ...newHospital, name: e.target.value })
-                  }
-                  required
-              />
-            </FormField>
-
-            <FormField label="Hospital Code" required>
-              <input
-                  className="form-input"
-                  value={newHospital.code}
-                  onChange={(e) =>
-                      setNewHospital({ ...newHospital, code: e.target.value })
-                  }
-                  required
-              />
-            </FormField>
-
-            <FormField label="Full Address">
-            <textarea
-                className="form-input min-h-[100px]"
-                value={newHospital.address}
-                onChange={(e) =>
-                    setNewHospital({ ...newHospital, address: e.target.value })
-                }
-            />
-            </FormField>
-
-            {/* ✅ NEW CHECKBOX */}
-            <FormField label="Deactivate Hospital">
-              <div className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={isDeactivated}
-                    onChange={(e) => setIsDeactivated(e.target.checked)}
-                />
-                <span className="text-sm">Mark as Deactivated</span>
-              </div>
-            </FormField>
-
-            <div className="pt-4 flex gap-3">
-              <button
-                  type="button"
-                  onClick={() => setShowHospitalForm(false)}
-                  className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)]"
-              >
-                Cancel
-              </button>
-
-              <button type="submit" className="flex-1 btn-primary">
-                {editingHospital ? 'Update' : 'Register'}
-              </button>
+        {/* Stats Overview (Bento Style) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="p-2 bg-orange-50 text-orange-600 rounded-lg">
+                <span className="material-symbols-outlined">local_hospital</span>
+              </span>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+2 this month</span>
             </div>
-          </form>
-        </Modal>
-      </MainLayout>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Hospitals</p>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">{hospitals.length}</h3>
+          </div>
+          <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                <span className="material-symbols-outlined">person</span>
+              </span>
+            </div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Users</p>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">1,482</h3>
+          </div>
+          <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="p-2 bg-green-50 text-green-600 rounded-lg">
+                <span className="material-symbols-outlined">check_circle</span>
+              </span>
+            </div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Operational Rate</p>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">98.4%</h3>
+          </div>
+          <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <span className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                <span className="material-symbols-outlined">analytics</span>
+              </span>
+            </div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Avg. Patient Load</p>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">82%</h3>
+          </div>
+        </div>
+
+        {/* Hospital Table Container */}
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+            <div className="flex gap-2">
+              <button className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-md shadow-sm">All</button>
+              <button className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:bg-white hover:border-gray-200 rounded-md">Active</button>
+              <button className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:bg-white hover:border-gray-200 rounded-md">Maintenance</button>
+            </div>
+            <button className="text-gray-500 hover:text-gray-700">
+              <span className="material-symbols-outlined text-lg">filter_list</span>
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-white">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Hospital Name</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Location</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Status</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">Total Users</th>
+                  <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {loading ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500">Loading hospitals...</td>
+                  </tr>
+                ) : hospitals.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-10 text-center text-gray-500">No hospitals found.</td>
+                  </tr>
+                ) : hospitals.map((row) => (
+                  <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-600 font-bold">
+                          {row.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="font-bold text-[var(--text-primary)]">{row.name}</div>
+                          <div className="text-xs text-gray-500">ID: {row.code}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-700">{row.address || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                        row.status === 'ACTIVE' 
+                          ? 'bg-green-50 text-green-700 border-green-100' 
+                          : 'bg-amber-50 text-amber-700 border-amber-100'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${row.status === 'ACTIVE' ? 'bg-green-600' : 'bg-amber-500'}`}></span>
+                        {row.status === 'ACTIVE' ? 'Active' : 'Maintenance'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-24 bg-gray-100 rounded-full h-1.5">
+                          <div className="bg-[var(--primary)] h-1.5 rounded-full" style={{ width: '45%' }}></div>
+                        </div>
+                        <span className="text-xs font-medium text-gray-700">128</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button className="p-2 text-gray-400 hover:text-[var(--primary)] transition-colors" title="View Users">
+                          <span className="material-symbols-outlined text-lg">visibility</span>
+                        </button>
+                        <button 
+                          onClick={() => router.push(`/super_admin/hospitals/${row.id}`)}
+                          className="p-2 text-gray-400 hover:text-[var(--primary)] transition-colors" 
+                          title="Edit"
+                        >
+                          <span className="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Pagination Footer */}
+          <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
+            <p className="text-xs text-gray-500 font-bold">Showing 1 to {hospitals.length} of {hospitals.length} hospitals</p>
+            <div className="flex gap-2">
+              <button className="px-3 py-1 text-xs font-bold border border-gray-200 rounded bg-white text-gray-400 cursor-not-allowed">Previous</button>
+              <button className="px-3 py-1 text-xs font-bold border border-gray-200 rounded bg-white hover:bg-gray-50 transition-colors">Next</button>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Card / Information Banner */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="relative overflow-hidden rounded-xl bg-[var(--primary)] text-white p-8 h-48 flex flex-col justify-end">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+              <span className="material-symbols-outlined text-[120px]">health_and_safety</span>
+            </div>
+            <h4 className="text-xl font-bold mb-2">Hospital Network Expansion</h4>
+            <p className="text-sm opacity-90 max-w-sm mb-4">Adding new facilities requires verification of medical licenses and local compliance standards.</p>
+            <a className="inline-flex items-center text-xs font-bold uppercase tracking-widest hover:underline" href="#">
+              View Documentation <span className="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
+            </a>
+          </div>
+          <div className="bg-white border border-gray-200 p-8 rounded-xl flex items-center gap-6">
+            <img 
+              alt="Hospital Entrance" 
+              className="w-32 h-32 rounded-lg object-cover shadow-sm" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRyE_sDhFWi_725ww6E2HsHRm2ZLcvF-o1ACpNpzzrFoCpBBfXws3gMfXsHH8bwG8z5BV_sFVFL4uZ2Gl8TMgQDkexi6ntlouCr9QASKoMHBJGefw64PKMCONwrIkOkNvyeHecby2GBiYRIi7tkgzHtKcxJE49AqSv-15uGsF8BszNHThKVbzUtYfmnZPj22jsw9l4EgMzkmzrVzqhWiBsbYr1upFyimdEq5eAAxRhNggkCcEhfm3ouLTU1BXnHvDpsFeFejhOxnU"
+            />
+            <div>
+              <h4 className="text-lg font-bold mb-1 text-[var(--text-primary)]">Onboarding Support</h4>
+              <p className="text-sm text-gray-500 mb-4">Need help setting up a new hospital branch? Our support team is available 24/7 for administrative guidance.</p>
+              <button className="text-[var(--primary)] text-xs font-bold uppercase tracking-widest hover:opacity-80 transition-colors">Contact Support</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </MainLayout>
   );
 }
