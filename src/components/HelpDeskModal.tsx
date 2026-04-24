@@ -71,6 +71,23 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
                             {/*    <span className="material-symbols-outlined">confirmation_number</span>*/}
                             {/*    Raise a Ticket*/}
                             {/*</button>*/}
+                            <div className="mt-2 p-5 rounded-2xl bg-[var(--background)] border border-[var(--border)] space-y-3">
+
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-[var(--primary)]">schedule</span>
+                                    <p className="text-sm text-[var(--text-secondary)]">
+                                        Available: <span className="font-medium text-[var(--text-primary)]">24/7 Support</span>
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-[var(--primary)]">bolt</span>
+                                    <p className="text-sm text-[var(--text-secondary)]">
+                                        Response Time: <span className="font-medium text-[var(--text-primary)]">10-15 mins</span>
+                                    </p>
+                                </div>
+
+                            </div>
                         </>
                     ) : (
                         <>
