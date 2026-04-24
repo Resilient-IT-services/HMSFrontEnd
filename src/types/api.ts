@@ -126,6 +126,8 @@ export interface HospitalMembershipResponse {
   hospitalName?: string;
   hospitalCode?: string;
   roles: Role[];
+  specialization?: string;
+  department?: string; // Denormalized for convenience in some endpoints
 }
 
 export interface UserResponse {
@@ -189,6 +191,14 @@ export interface PatientResponse {
   phone: string;
   address: string;
   createdAt: string;
+}
+
+export interface CreatePatientRequest {
+  fullName: string;
+  gender: Gender;
+  dob: string;
+  phone: string;
+  address: string;
 }
 
 // Hospital types

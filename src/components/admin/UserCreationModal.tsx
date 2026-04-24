@@ -30,6 +30,8 @@ export const UserCreationModal = ({
     password: '',
     roles: [],
     fullName: '',
+    email: '',
+    superuser: false,
     gender: 'MALE',
     dob: '',
     phone: '',

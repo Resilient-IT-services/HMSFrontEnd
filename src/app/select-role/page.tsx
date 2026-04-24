@@ -41,8 +41,9 @@ const SelectRolePage = () => {
         <p className="text-[var(--text-secondary)] mb-8 text-center">You have multiple roles assigned to this hospital</p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {user?.roles.map((role) => (
-            <div 
+          {(user?.roles || []).map((role) => (
+            <div
+ 
               key={role}
               onClick={() => handleSelect(role)}
               className="cursor-pointer group"

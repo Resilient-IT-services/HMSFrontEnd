@@ -96,7 +96,7 @@ const UserManagement = () => {
                 <span className="material-symbols-outlined">medical_services</span>
               </div>
             </div>
-            <p className="text-headline-md mt-2">{users.filter(u => u.roles.includes('DOCTOR')).length}</p>
+            <p className="text-headline-md mt-2">{users.filter(u => u.roles?.includes('DOCTOR')).length}</p>
             <p className="text-body-sm text-secondary mt-1">Active Medical Staff</p>
           </div>
           <div className="bg-white border border-outline-variant p-5 rounded-xl">

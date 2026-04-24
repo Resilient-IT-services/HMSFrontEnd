@@ -15,7 +15,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isSuperUser = user?.roles.includes('SUPER_ADMIN');
+  const isSuperUser = user?.roles?.includes('SUPER_ADMIN');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,7 +48,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
     }
     setIsProfileOpen(false);
   };
-  const currentHospitalName = user?.hospitals.find(h => h.hospitalId === user.hospitalId)?.hospitalName || 'System Level';
+  const currentHospitalName = user?.memberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
 
@@ -65,7 +65,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
       </div>
 
       <div className="flex items-center gap-4 px-6">
-        {user?.hospitals && user.hospitals.length > 1 && (
+        {user?.memberships && user.memberships.length > 1 && (
           <button 
             onClick={() => setIsProfileOpen(true)}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
@@ -115,7 +115,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
 
                 <div className="px-2 py-1">
                   <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
-                    {user?.roles.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => {
+                    {user?.roles?.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => {
                       let roleIcon = 'person';
                       if (role === 'DOCTOR') {
                         roleIcon = 'medical_services';
@@ -139,21 +139,21 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
                     })}
                 </div>
 
-                {user?.hospitals && user.hospitals.length > 1 && (
+                {user?.memberships && user.memberships.length > 1 && (
                   <div className="px-2 py-1 border-t border-[var(--border)] mt-1">
                     <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Hospital</p>
-                    {user.hospitals.map(h => (
+                    {user.memberships.map(h => (
                       <button
                         key={h.hospitalId}
                         onClick={() => handleHospitalSwitch(h.hospitalId)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${user.hospitalId === h.hospitalId ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]'}`}
+                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${user.currentHospitalId === h.hospitalId ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]'}`}
                       >
                         <span className="material-symbols-outlined text-xl">apartment</span>
                         <div className="text-left">
                           <p className="text-sm font-bold leading-none">{h.hospitalName}</p>
                           <p className="text-[10px] text-[var(--text-secondary)] mt-1">{h.hospitalCode}</p>
                         </div>
-                        {user.hospitalId === h.hospitalId && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
+                        {user.currentHospitalId === h.hospitalId && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
                       </button>
                     ))}
                   </div>
