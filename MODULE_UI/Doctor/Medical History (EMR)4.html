@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#2f3234",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3035",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container-highest": "#e2e2e8",
+                        "surface-container-high": "#e7e8ee",
+                        "on-surface-variant": "#594138",
+                        "surface": "#f9f9ff",
+                        "primary": "#a83900",
+                        "inverse-on-surface": "#f0f0f6",
+                        "on-primary-container": "#5c1c00",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#e2bfb3",
+                        "inverse-primary": "#ffb59a",
+                        "surface-dim": "#d9dadf",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e2e2e8",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#ffdbce",
+                        "on-background": "#191c20",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "error": "#ba1a1a",
+                        "surface-container": "#ededf3",
+                        "primary-container": "#ff6b2b",
+                        "surface-tint": "#a83900",
+                        "secondary": "#545f73",
+                        "on-surface": "#191c20",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#d8e3fb",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "primary-fixed-dim": "#ffb59a",
+                        "outline": "#8d7167",
+                        "on-secondary-fixed": "#111c2d",
+                        "on-secondary-container": "#5a6579",
+                        "on-primary-fixed": "#380d00",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "tertiary-fixed": "#e1e3e5",
+                        "tertiary-container": "#979a9c",
+                        "surface-container-low": "#f3f3f9",
+                        "secondary-fixed": "#d8e3fb",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#5c5f61",
+                        "background": "#f9f9ff",
+                        "surface-bright": "#f9f9ff",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "32px",
+                        "section-gap": "24px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "margin-page": "40px",
+                        "component-gap": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Manrope"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #f9f9ff;
+            color: #191c20;
+        }
+    </style>
+</head>
+<body class="antialiased">
+<!-- Top Navigation -->
+<header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center px-6 py-2 w-full sticky top-0 z-50 font-manrope text-sm font-medium">
+<div class="flex items-center gap-6">
+<span class="text-xl font-bold text-gray-900 dark:text-white">MedNexus</span>
+<nav class="hidden md:flex items-center gap-4">
+<a class="text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors px-3 py-1 rounded" href="#">Overview</a>
+<a class="text-orange-600 font-semibold px-3 py-1 rounded" href="#">History</a>
+<a class="text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors px-3 py-1 rounded" href="#">Schedule</a>
+</nav>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-gray-200">
+<img class="h-full w-full object-cover" data-alt="professional portrait of a confident male doctor in medical scrubs against a soft clinical background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlYP7yxyegHoyFAaq9IMoR4VPxoUnqYJKDMR5ImxI0wL4Xu111L-JJZfsRmFfJ9x6spcXtkh8jaaii2x__Kx9CIY3_nHHMTsyO5YLx7YRnjJxrpiUCCouUwb-_i4IgXSWDGySL5lu3k5HzlYSjWqv_ua7M7uT2UGhoberlpcy9ci6P0dyKH5oicOAmQBgoXXqeOkwh5cL1lXeMU34Ib2WmLl-rOIGkQG2fa_Ad6HRuuMJxpN2f0HO-h0T5UbLsEbyGq2UoGgV8raw"/>
+</div>
+</div>
+</header>
+<div class="flex min-h-[calc(100vh-53px)]">
+<!-- Side Navigation Bar -->
+<aside class="bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 h-screen w-64 fixed left-0 top-0 pt-16 z-40 hidden md:block">
+<div class="flex flex-col h-full py-4 font-manrope text-sm">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3 mb-1">
+<div class="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-600">medical_services</span>
+</div>
+<div>
+<p class="text-lg font-black text-orange-600 leading-tight">MedNexus Pro</p>
+<p class="text-xs text-gray-500">General Surgery</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Patient Queue</span>
+</a>
+<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">stethoscope</span>
+<span>Consultation</span>
+</a>
+<a class="bg-orange-50 dark:bg-orange-950/30 text-orange-600 font-bold border-r-4 border-orange-600 px-4 py-3 flex items-center gap-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">history_edu</span>
+<span>History</span>
+</a>
+<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">description</span>
+<span>Prescriptions</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-gray-100 pt-4 px-4 space-y-1">
+<button class="w-full bg-orange-600 text-white font-semibold py-3 rounded-xl mb-4 hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200">
+                        Emergencies
+                    </button>
+<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span>Settings</span>
+</a>
+<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 md:ml-64 bg-background">
+<div class="h-full flex flex-col">
+<!-- Secondary Header -->
+<div class="px-8 py-6 flex items-center justify-between border-b border-gray-100 bg-white">
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-gray-50 rounded-full border border-gray-200 flex items-center justify-center transition-all active:scale-95">
+<span class="material-symbols-outlined text-gray-600">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline-md text-headline-md text-on-surface">Patient Medical History</h1>
+<p class="font-body-sm text-body-sm text-gray-500">Case ID: #MED-99201 • Sarah Jenkins</p>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-white border border-outline-variant text-on-surface font-label-md text-label-md rounded-lg hover:bg-gray-50 transition-colors">
+<span class="material-symbols-outlined text-sm">print</span>
+                            Print EMR
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md text-label-md rounded-lg hover:bg-orange-700 transition-colors">
+                            Return to Consultation
+                        </button>
+</div>
+</div>
+<!-- Dual Pane Layout -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Left Pane: Timeline -->
+<div class="w-1/3 border-r border-gray-200 bg-surface-container-low overflow-y-auto">
+<div class="p-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-6">Visit Timeline</h3>
+<div class="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-200">
+<!-- Timeline Item: Selected -->
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-primary border-4 border-white shadow-sm z-10"></div>
+<div class="p-4 bg-white border-2 border-primary rounded-xl shadow-sm transition-all transform hover:-translate-y-0.5">
+<div class="flex justify-between items-start mb-1">
+<p class="font-label-md text-label-md text-primary">Oct 24, 2023</p>
+<span class="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase rounded">Selected</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface">Post-Op Checkup</p>
+<p class="font-body-sm text-body-sm text-gray-500">Dr. Michael Chen • Surgery Dept.</p>
+</div>
+</div>
+<!-- Timeline Item -->
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-gray-300 border-4 border-white shadow-sm z-10 transition-colors group-hover:bg-primary/50"></div>
+<div class="p-4 bg-white border border-outline-variant rounded-xl transition-all hover:shadow-md hover:border-primary/30">
+<p class="font-label-md text-label-md text-gray-500">Aug 12, 2023</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">Appendectomy</p>
+<p class="font-body-sm text-body-sm text-gray-500">Dr. Michael Chen • Hospital</p>
+</div>
+</div>
+<!-- Timeline Item -->
+<div class="relative pl-8 group cursor-pointer">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-gray-300 border-4 border-white shadow-sm z-10 transition-colors group-hover:bg-primary/50"></div>
+<div class="p-4 bg-white border border-outline-variant rounded-xl transition-all hover:shadow-md hover:border-primary/30">
+<p class="font-label-md text-label-md text-gray-500">Jul 30, 2023</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">ER Admission</p>
+<p class="font-body-sm text-body-sm text-gray-500">Dr. Sarah Lopez • Emergency</p>
+</div>
+</div>
+<!-- Timeline Item -->
+<div class="relative pl-8 group cursor-pointer opacity-70">
+<div class="absolute left-0 top-1 w-6 h-6 rounded-full bg-gray-300 border-4 border-white shadow-sm z-10"></div>
+<div class="p-4 bg-white border border-outline-variant rounded-xl">
+<p class="font-label-md text-label-md text-gray-500">Mar 15, 2023</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">Annual Physical</p>
+<p class="font-body-sm text-body-sm text-gray-500">Dr. James Wilson • Clinic</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Pane: Visit Detail -->
+<div class="flex-1 bg-white overflow-y-auto">
+<div class="max-w-4xl mx-auto p-8">
+<!-- Visit Summary Card -->
+<div class="mb-10 bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden">
+<div class="bg-gray-50 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">event_note</span>
+<h2 class="font-headline-md text-headline-md text-on-surface">Visit Summary: Oct 24, 2023</h2>
+</div>
+<span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">FINALIZED</span>
+</div>
+<div class="p-6 grid grid-cols-3 gap-8">
+<div>
+<p class="text-gray-500 font-label-sm text-label-sm mb-1">CHIEF COMPLAINT</p>
+<p class="font-body-lg text-body-lg text-on-surface">Slight tenderness at incision site; follow-up after appendectomy.</p>
+</div>
+<div>
+<p class="text-gray-500 font-label-sm text-label-sm mb-1">VITALS</p>
+<p class="font-body-lg text-body-lg text-on-surface">BP: 120/80 • HR: 72 • Temp: 98.6°F</p>
+</div>
+<div>
+<p class="text-gray-500 font-label-sm text-label-sm mb-1">DURATION</p>
+<p class="font-body-lg text-body-lg text-on-surface">25 minutes</p>
+</div>
+</div>
+</div>
+<!-- Detailed Sections: Bento Style -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Diagnosis Card -->
+<div class="col-span-12 md:col-span-7 bg-white border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-orange-600">clinical_notes</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Diagnosis &amp; Notes</h3>
+</div>
+<div class="space-y-4">
+<div class="p-3 bg-gray-50 rounded-lg border-l-4 border-primary">
+<p class="font-label-sm text-label-sm text-gray-500 mb-1">ICD-10 CODES</p>
+<p class="font-headline-sm text-headline-sm text-on-surface">Z48.812 (Encounter for aftercare following surgery)</p>
+</div>
+<p class="font-body-md text-body-md text-gray-700 leading-relaxed">
+                                            Patient reports significant improvement in overall pain levels since discharge. Incision site is healing well with no signs of erythema or exudate. Sutures are intact. Patient has resumed light walking but remains restricted from heavy lifting (&gt;10 lbs). 
+                                            <br/><br/>
+                                            Plan: Continue current pain management as needed. Return in 2 weeks for suture removal and final clearance for full activity.
+                                        </p>
+</div>
+</div>
+<!-- Prescription Card -->
+<div class="col-span-12 md:col-span-5 bg-surface-container-low border border-outline-variant rounded-xl p-6">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-orange-600">medication</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Prescriptions</h3>
+</div>
+<div class="space-y-4">
+<div class="bg-white p-4 rounded-lg border border-outline-variant shadow-sm">
+<p class="font-headline-sm text-headline-sm text-on-surface">Ibuprofen 400mg</p>
+<p class="font-body-sm text-body-sm text-gray-500 mb-2">1 tablet every 6 hours as needed</p>
+<div class="flex justify-between items-center text-xs">
+<span class="bg-gray-100 px-2 py-0.5 rounded">Qty: 30</span>
+<span class="text-orange-600 font-bold">REFILLS: 0</span>
+</div>
+</div>
+<div class="bg-white p-4 rounded-lg border border-outline-variant shadow-sm">
+<p class="font-headline-sm text-headline-sm text-on-surface">Mupirocin Ointment</p>
+<p class="font-body-sm text-body-sm text-gray-500 mb-2">Apply to dressing once daily</p>
+<div class="flex justify-between items-center text-xs">
+<span class="bg-gray-100 px-2 py-0.5 rounded">Qty: 1 tube</span>
+<span class="text-orange-600 font-bold">REFILLS: 1</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Lab Results / Attachments -->
+<div class="col-span-12 bg-white border border-outline-variant rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-orange-600">attachment</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Attachments &amp; Imaging</h3>
+</div>
+<button class="text-primary font-label-md text-label-md hover:underline">View All</button>
+</div>
+<div class="flex flex-wrap gap-4">
+<div class="flex items-center gap-3 p-3 border border-outline-variant rounded-lg hover:bg-gray-50 cursor-pointer transition-colors w-full sm:w-auto">
+<div class="w-10 h-10 bg-orange-50 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-600">image</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface leading-tight">Post-Op_XRay_1024.jpg</p>
+<p class="text-[10px] text-gray-500">Radiology • 4.2 MB</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 border border-outline-variant rounded-lg hover:bg-gray-50 cursor-pointer transition-colors w-full sm:w-auto">
+<div class="w-10 h-10 bg-blue-50 rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-600">description</span>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface leading-tight">Blood_Panel_Results.pdf</p>
+<p class="text-[10px] text-gray-500">Hematology • 1.1 MB</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

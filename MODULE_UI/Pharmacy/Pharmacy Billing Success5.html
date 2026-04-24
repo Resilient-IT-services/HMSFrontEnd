@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-dim": "#d9dadf",
+                        "primary-fixed-dim": "#ffb59a",
+                        "primary-container": "#ff6b2b",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#e7e8ee",
+                        "surface-container": "#ededf3",
+                        "on-tertiary-container": "#2f3234",
+                        "inverse-on-surface": "#f0f0f6",
+                        "on-primary-fixed": "#380d00",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "tertiary": "#5c5f61",
+                        "tertiary-container": "#979a9c",
+                        "on-secondary-container": "#5a6579",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-primary-container": "#5c1c00",
+                        "on-secondary-fixed": "#111c2d",
+                        "background": "#f9f9ff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffdbce",
+                        "on-background": "#191c20",
+                        "surface-variant": "#e2e2e8",
+                        "surface-tint": "#a83900",
+                        "surface-container-low": "#f3f3f9",
+                        "on-surface": "#191c20",
+                        "outline": "#8d7167",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e2e2e8",
+                        "secondary": "#545f73",
+                        "inverse-surface": "#2e3035",
+                        "secondary-fixed": "#d8e3fb",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "tertiary-fixed": "#e1e3e5",
+                        "on-surface-variant": "#594138",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59a",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "outline-variant": "#e2bfb3",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#a83900",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "secondary-container": "#d8e3fb",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#444749"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "40px",
+                        "component-gap": "16px",
+                        "section-gap": "24px",
+                        "gutter": "24px",
+                        "container-padding": "32px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "headline-sm": ["Manrope"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Manrope"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md">
+<aside class="fixed left-0 top-0 h-screen w-64 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950 flex flex-col py-6">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-bold text-orange-600 dark:text-orange-400 font-headline-xl">VitalSync Pharmacy</h1>
+<p class="text-gray-500 font-label-sm">Clinical Admin</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors font-manrope text-sm font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors font-manrope text-sm font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Inventory</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors font-manrope text-sm font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined">medication_liquid</span>
+<span>Dispense</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30 border-r-4 border-orange-600 font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">receipt_long</span>
+<span>Billing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors font-manrope text-sm font-medium rounded-lg" href="#">
+<span class="material-symbols-outlined">warning</span>
+<span>Low Stock</span>
+</a>
+</nav>
+<div class="mt-auto px-6 pt-6 border-t border-gray-100 flex items-center gap-3">
+<img alt="Pharmacist Profile" class="w-10 h-10 rounded-full object-cover" data-alt="Close up portrait of a professional female pharmacist in clinical white coat in a modern pharmacy setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBspcFNToyAXHDdhMyP--WFBFaMtL8dKV4QneECmjgM-LWG0dRB4lgAzil5A_eBJvtgT0DvFhWuom-Oj9E1epz1nIBRPyLhEEI0NvHHa9-QC29zhQX8taNMfXe5Xt72UQCgNRYmBSGbmZnziKkfx2M-Ls5mucx3nvcY8Reu-HZ9EoTFpOMCy0t0IQYXnJ8mpK01zZc82zxW2RJTNUCSYB64tFztOXyyK4W_wm6uD_IqSgZlnwwkCAoFy5frRLMnJFOZeWENnR7_6oo"/>
+<div>
+<p class="font-label-md text-on-surface">Dr. Sarah Chen</p>
+<p class="text-body-sm text-gray-500">Chief Pharmacist</p>
+</div>
+</div>
+</aside>
+<header class="fixed top-0 left-64 right-0 h-16 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 shadow-sm z-10">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-primary-container" placeholder="Search transactions, patients..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-gray-500 hover:text-orange-500 transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-orange-600 rounded-full"></span>
+</button>
+<button class="p-2 text-gray-500 hover:text-orange-500 transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<div class="h-8 w-[1px] bg-gray-200 mx-2"></div>
+<p class="font-headline-sm text-orange-600">Pharmacy Control</p>
+</div>
+</header>
+<main class="ml-64 pt-24 pb-12 px-margin-page min-h-screen">
+<div class="max-w-3xl mx-auto">
+<div class="text-center mb-section-gap">
+<div class="inline-flex items-center justify-center w-20 h-20 bg-green-50 rounded-full mb-6">
+<span class="material-symbols-outlined text-green-600 text-5xl" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h2 class="font-headline-xl text-on-surface mb-2">Dispensed Successfully</h2>
+<p class="font-body-lg text-tertiary">The transaction has been processed and recorded in the clinical system.</p>
+</div>
+<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-section-gap">
+<div class="bg-surface-container-lowest border-b border-gray-100 px-container-padding py-6 flex justify-between items-center">
+<div>
+<p class="font-label-sm text-tertiary uppercase tracking-wider mb-1">Receipt Number</p>
+<h3 class="font-headline-md text-on-surface">B-2024-501</h3>
+</div>
+<div class="text-right">
+<p class="font-label-sm text-tertiary uppercase tracking-wider mb-1">Date &amp; Time</p>
+<p class="font-body-md text-on-surface">Oct 24, 2024 • 14:32 PM</p>
+</div>
+</div>
+<div class="px-container-padding py-container-padding space-y-section-gap">
+<div>
+<p class="font-label-sm text-tertiary uppercase tracking-wider mb-3">Patient Information</p>
+<div class="flex items-center gap-4 bg-surface-container-low p-4 rounded-lg">
+<div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-600">person</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-on-surface">Alexander Thompson</h4>
+<p class="text-body-sm text-tertiary">Patient ID: PAT-9921 • Age: 42 • Male</p>
+</div>
+</div>
+</div>
+<div>
+<p class="font-label-sm text-tertiary uppercase tracking-wider mb-3">Dispensed Items</p>
+<div class="space-y-4">
+<div class="flex justify-between items-center py-2 border-b border-gray-50">
+<div class="flex-1">
+<p class="font-label-md text-on-surface">Amoxicillin 500mg</p>
+<p class="text-body-sm text-tertiary">Capsules • 21 units</p>
+</div>
+<p class="font-label-md text-on-surface">$45.00</p>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-gray-50">
+<div class="flex-1">
+<p class="font-label-md text-on-surface">Lisinopril 10mg</p>
+<p class="text-body-sm text-tertiary">Tablets • 30 units</p>
+</div>
+<p class="font-label-md text-on-surface">$32.50</p>
+</div>
+<div class="flex justify-between items-center py-2 border-b border-gray-50">
+<div class="flex-1">
+<p class="font-label-md text-on-surface">Metformin 500mg ER</p>
+<p class="text-body-sm text-tertiary">Extended Release • 60 units</p>
+</div>
+<p class="font-label-md text-on-surface">$48.00</p>
+</div>
+</div>
+</div>
+<div class="pt-4 mt-6">
+<div class="flex justify-between items-center mb-2">
+<p class="text-body-md text-tertiary">Subtotal</p>
+<p class="font-label-md text-on-surface">$125.50</p>
+</div>
+<div class="flex justify-between items-center mb-6">
+<p class="text-body-md text-tertiary">Insurance Coverage (Applied)</p>
+<p class="font-label-md text-green-600">-$0.00</p>
+</div>
+<div class="bg-orange-50 -mx-container-padding px-container-padding py-4 flex justify-between items-center">
+<p class="font-headline-sm text-orange-900">Total Paid</p>
+<p class="font-headline-xl text-primary-container">$125.50</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center gap-6">
+<div class="flex items-center gap-4 w-full">
+<button class="flex-1 bg-primary-container text-white py-4 px-6 rounded-xl font-headline-sm flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md">
+<span class="material-symbols-outlined">print</span>
+                        Print Receipt
+                    </button>
+<button class="flex-1 bg-white border border-gray-200 text-on-surface py-4 px-6 rounded-xl font-headline-sm flex items-center justify-center gap-2 hover:bg-gray-50 transition-all">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+                        Download PDF
+                    </button>
+</div>
+<a class="font-label-md text-tertiary hover:text-primary-container transition-colors flex items-center gap-2 group" href="#">
+<span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+                    Back to Dashboard
+                </a>
+</div>
+</div>
+</main>
+<div class="fixed bottom-margin-page right-margin-page">
+<button class="w-14 h-14 bg-primary-container text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-2xl">add</span>
+</button>
+</div>
+</body></html>

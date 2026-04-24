@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Medicine Master Inventory | VitalSync Pharmacy</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-dim": "#d9dadf",
+                        "primary-fixed-dim": "#ffb59a",
+                        "primary-container": "#ff6b2b",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#e7e8ee",
+                        "surface-container": "#ededf3",
+                        "on-tertiary-container": "#2f3234",
+                        "inverse-on-surface": "#f0f0f6",
+                        "on-primary-fixed": "#380d00",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "tertiary": "#5c5f61",
+                        "tertiary-container": "#979a9c",
+                        "on-secondary-container": "#5a6579",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-primary-container": "#5c1c00",
+                        "on-secondary-fixed": "#111c2d",
+                        "background": "#f9f9ff",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#ffdbce",
+                        "on-background": "#191c20",
+                        "surface-variant": "#e2e2e8",
+                        "surface-tint": "#a83900",
+                        "surface-container-low": "#f3f3f9",
+                        "on-surface": "#191c20",
+                        "outline": "#8d7167",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e2e2e8",
+                        "secondary": "#545f73",
+                        "inverse-surface": "#2e3035",
+                        "secondary-fixed": "#d8e3fb",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "tertiary-fixed": "#e1e3e5",
+                        "on-surface-variant": "#594138",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb59a",
+                        "surface-bright": "#f9f9ff",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "outline-variant": "#e2bfb3",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#a83900",
+                        "on-secondary": "#ffffff",
+                        "surface": "#f9f9ff",
+                        "secondary-container": "#d8e3fb",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#444749"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "40px",
+                        "component-gap": "16px",
+                        "section-gap": "24px",
+                        "gutter": "24px",
+                        "container-padding": "32px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Inter"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "headline-sm": ["Manrope"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Manrope"],
+                        "body-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .bg-glass {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background">
+<!-- SideNavBar -->
+<aside class="fixed left-0 h-screen w-64 border-r border-gray-200 bg-white flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-bold text-orange-600 font-headline-md">VitalSync Pharmacy</h1>
+<p class="text-xs text-tertiary font-body-sm mt-1 uppercase tracking-wider">Clinical Admin</p>
+</div>
+<nav class="flex-1 space-y-1 px-3">
+<a class="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 transition-colors rounded-lg font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center px-3 py-3 text-orange-600 bg-orange-50 border-r-4 border-orange-600 transition-all duration-200 rounded-lg font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="inventory_2">inventory_2</span>
+                Inventory
+            </a>
+<a class="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 transition-colors rounded-lg font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="medication_liquid">medication_liquid</span>
+                Dispense
+            </a>
+<a class="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 transition-colors rounded-lg font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="receipt_long">receipt_long</span>
+                Billing
+            </a>
+<a class="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 transition-colors rounded-lg font-manrope text-sm font-medium" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="warning">warning</span>
+                Low Stock
+            </a>
+</nav>
+<div class="px-6 mt-auto pt-6 border-t border-gray-100 flex items-center gap-3">
+<img alt="Pharmacist Profile" class="w-10 h-10 rounded-full object-cover" data-alt="Close-up portrait of a professional female pharmacist in a clinical setting, wearing a white lab coat and smiling warmly" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxaw5oE4ngI5JENOBfdZkEVClTe5cufsMRICJaRSY63KU1qPH_vrswW9HPCcBCnJNxvya0P7sRkRq11gyWqw9MoiGGqke8m6RrvpPSF2glmTGzV8r-E0K-iUqtIoH7GlGSZuW7iRKvE84suEnhJEBwq3y2T-INI1fZvXaOCA1yrdDrjHFWE2-6dYQJvjkgZdRbWE5-xuvQm_kGMrrrwODmdcN95A9seuMPA-a7BE21miBorbNNQu1D0jXpWSRUWF_5zxBvrm5qo9s"/>
+<div>
+<p class="text-sm font-bold text-on-surface">Dr. Sarah Miller</p>
+<p class="text-xs text-tertiary">Senior Pharmacist</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="ml-64 min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="flex items-center justify-between px-6 h-16 bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm border-b border-gray-200">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-tertiary">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-body-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Search medicine, batch number, or category..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-tertiary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-tertiary hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</button>
+<div class="h-8 w-[1px] bg-gray-200 mx-2"></div>
+<span class="text-sm font-bold text-orange-600 font-headline-sm">Pharmacy Control</span>
+</div>
+</header>
+<!-- Main Page Content -->
+<main class="p-8 max-w-7xl mx-auto w-full">
+<!-- Page Header Actions -->
+<div class="flex items-end justify-between mb-8">
+<div>
+<h2 class="font-headline-xl text-on-surface">Medicine Master Inventory</h2>
+<p class="text-tertiary mt-1 font-body-lg">Manage clinical stock levels, batch expiries, and unit pricing.</p>
+</div>
+<button class="flex items-center gap-2 px-6 py-3 bg-primary-container text-white rounded-xl font-label-md shadow-lg shadow-primary-container/20 hover:scale-[0.98] transition-all active:scale-95">
+<span class="material-symbols-outlined">add</span>
+                    Add Medicine
+                </button>
+</div>
+<!-- Dashboard Quick Stats (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+<div class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-orange-50 text-orange-600 rounded-lg">
+<span class="material-symbols-outlined">inventory</span>
+</span>
+<span class="text-xs font-bold text-orange-600">+12 New</span>
+</div>
+<p class="text-tertiary font-label-sm">Total Medicines</p>
+<h3 class="text-2xl font-bold font-headline-md">1,284</h3>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-red-50 text-error rounded-lg">
+<span class="material-symbols-outlined">production_quantity_limits</span>
+</span>
+</div>
+<p class="text-tertiary font-label-sm">Out of Stock</p>
+<h3 class="text-2xl font-bold font-headline-md text-error">18</h3>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-amber-50 text-amber-600 rounded-lg">
+<span class="material-symbols-outlined">event_busy</span>
+</span>
+</div>
+<p class="text-tertiary font-label-sm">Near Expiry (30d)</p>
+<h3 class="text-2xl font-bold font-headline-md text-amber-600">42</h3>
+</div>
+<div class="bg-white p-6 rounded-2xl border border-outline-variant shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-blue-50 text-blue-600 rounded-lg">
+<span class="material-symbols-outlined">payments</span>
+</span>
+</div>
+<p class="text-tertiary font-label-sm">Total Value</p>
+<h3 class="text-2xl font-bold font-headline-md">$142,480</h3>
+</div>
+</div>
+<!-- Advanced Filter Bar -->
+<div class="bg-white p-4 rounded-2xl border border-outline-variant shadow-sm mb-6 flex flex-wrap gap-4 items-center">
+<div class="flex-1 min-w-[200px]">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-tertiary text-sm">filter_list</span>
+<select class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-xl text-body-md outline-none appearance-none">
+<option>All Statuses</option>
+<option>In Stock</option>
+<option>Low Stock</option>
+<option>Out of Stock</option>
+</select>
+</div>
+</div>
+<div class="flex-1 min-w-[200px]">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-tertiary text-sm">category</span>
+<select class="w-full pl-10 pr-4 py-2 bg-surface-container-low border-none rounded-xl text-body-md outline-none appearance-none">
+<option>All Categories</option>
+<option>Antibiotics</option>
+<option>Analgesics</option>
+<option>Antivirals</option>
+</select>
+</div>
+</div>
+<div class="h-8 w-[1px] bg-gray-200 hidden md:block"></div>
+<button class="px-4 py-2 text-tertiary hover:bg-gray-50 rounded-xl font-label-md flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">export_notes</span>
+                    Export CSV
+                </button>
+</div>
+<!-- Inventory Table Container -->
+<div class="bg-white rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-6 py-4 font-label-md text-tertiary">Medicine Name</th>
+<th class="px-6 py-4 font-label-md text-tertiary">Batch</th>
+<th class="px-6 py-4 font-label-md text-tertiary">Expiry</th>
+<th class="px-6 py-4 font-label-md text-tertiary">Price (Unit)</th>
+<th class="px-6 py-4 font-label-md text-tertiary">Stock Quantity</th>
+<th class="px-6 py-4 font-label-md text-tertiary text-center">Active Status</th>
+<th class="px-6 py-4 font-label-md text-tertiary text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-orange-100 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined text-sm">pill</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Amoxicillin 500mg</p>
+<p class="text-xs text-tertiary">Capsule • 10x10 Strips</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-body-md font-mono text-secondary">AMX-2023-014</td>
+<td class="px-6 py-4 text-body-md text-on-surface">12 Oct 2025</td>
+<td class="px-6 py-4 text-body-md font-medium">$12.50</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-body-md font-bold">450 Units</span>
+<div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+<div class="w-[70%] h-full bg-orange-600 rounded-full"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-center">
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-tertiary hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 2 (Near Expiry) -->
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-orange-100 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined text-sm">pill</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Lisinopril 10mg</p>
+<p class="text-xs text-tertiary">Tablet • 30 Pack</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-body-md font-mono text-secondary">LIS-B92-X0</td>
+<td class="px-6 py-4">
+<div class="inline-flex items-center gap-1 px-2 py-1 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold">
+<span class="material-symbols-outlined text-xs">alarm</span>
+                                    15 Aug 2024
+                                </div>
+</td>
+<td class="px-6 py-4 text-body-md font-medium">$8.20</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-body-md font-bold">120 Units</span>
+<div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+<div class="w-[30%] h-full bg-orange-400 rounded-full"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-center">
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-tertiary hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 3 (Out of Stock) -->
+<tr class="hover:bg-gray-50 transition-colors bg-red-50/20">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-red-100 flex items-center justify-center text-error">
+<span class="material-symbols-outlined text-sm">pill</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Metformin 850mg</p>
+<p class="text-xs text-tertiary">Tablet • 100 Pack</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-body-md font-mono text-secondary">MET-2023-991</td>
+<td class="px-6 py-4 text-body-md text-on-surface">30 Nov 2026</td>
+<td class="px-6 py-4 text-body-md font-medium">$14.00</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2 text-error">
+<span class="text-body-md font-bold">0 Units</span>
+<div class="w-16 h-1.5 bg-red-100 rounded-full overflow-hidden">
+<div class="w-[0%] h-full bg-error rounded-full"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-center">
+<div class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-tertiary hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-gray-50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-orange-100 flex items-center justify-center text-orange-600">
+<span class="material-symbols-outlined text-sm">vaccines</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Insulin Glargine</p>
+<p class="text-xs text-tertiary">Injectable • 3ml Pen</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-body-md font-mono text-secondary">INS-SYR-004</td>
+<td class="px-6 py-4 text-body-md text-on-surface">19 Jan 2025</td>
+<td class="px-6 py-4 text-body-md font-medium">$45.00</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="text-body-md font-bold">64 Units</span>
+<div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+<div class="w-[20%] h-full bg-orange-600 rounded-full"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex justify-center">
+<div class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-600"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-tertiary hover:text-primary"><span class="material-symbols-outlined">more_vert</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="flex items-center justify-between px-6 py-4 bg-white border-t border-outline-variant">
+<p class="text-body-sm text-tertiary">Showing 1 to 10 of 1,284 medicines</p>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-gray-50 text-tertiary">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="px-3 py-1.5 rounded-lg bg-orange-600 text-white font-bold">1</button>
+<button class="px-3 py-1.5 rounded-lg hover:bg-gray-50 text-on-surface">2</button>
+<button class="px-3 py-1.5 rounded-lg hover:bg-gray-50 text-on-surface">3</button>
+<button class="px-3 py-1.5 rounded-lg border border-outline-variant hover:bg-gray-50 text-tertiary">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

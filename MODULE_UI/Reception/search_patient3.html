@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Patient Search - MediCore Health HMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#2f3234",
+                        "on-secondary-container": "#5a6579",
+                        "surface-container": "#ededf3",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-background": "#191c20",
+                        "inverse-surface": "#2e3035",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#d8e3fb",
+                        "surface-container-high": "#e7e8ee",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#594138",
+                        "primary-container": "#ff6b2b",
+                        "on-secondary-fixed": "#111c2d",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#979a9c",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "surface-tint": "#a83900",
+                        "background": "#f9f9ff",
+                        "surface-dim": "#d9dadf",
+                        "surface-bright": "#f9f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f0f0f6",
+                        "surface-container-low": "#f3f3f9",
+                        "primary-fixed-dim": "#ffb59a",
+                        "surface-variant": "#e2e2e8",
+                        "on-tertiary-fixed": "#191c1e",
+                        "secondary": "#545f73",
+                        "surface-container-highest": "#e2e2e8",
+                        "primary": "#a83900",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "outline-variant": "#e2bfb3",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-primary-container": "#5c1c00",
+                        "tertiary": "#5c5f61",
+                        "tertiary-fixed": "#e1e3e5",
+                        "surface": "#f9f9ff",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#ffdbce",
+                        "outline": "#8d7167",
+                        "on-surface": "#191c20",
+                        "inverse-primary": "#ffb59a",
+                        "secondary-container": "#d8e3fb",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "on-primary-fixed": "#380d00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "section-gap": "24px",
+                        "gutter": "24px",
+                        "margin-page": "40px",
+                        "component-gap": "16px",
+                        "container-padding": "32px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Manrope"],
+                        "headline-xl": ["Manrope"],
+                        "label-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .active-sidebar-item {
+            background-color: #fff7ed; /* bg-orange-50 */
+            color: #ea580c; /* text-orange-600 */
+            font-weight: 700;
+            border-right: 4px solid #ea580c;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen flex">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 space-y-2 bg-slate-50 border-r border-slate-200 w-64 flex-shrink-0 font-manrope text-sm z-50">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-black text-slate-900">HMS Portal</h1>
+<p class="text-xs text-slate-500">Reception Desk</p>
+</div>
+<nav class="flex-1 px-3 space-y-1">
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="person_add">person_add</span>
+<span>Patient Registration</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg bg-orange-50 text-orange-600 font-bold border-r-4 border-orange-600 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="search">search</span>
+<span>Search Patient</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="medical_services">medical_services</span>
+<span>Create OP Visit</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="event">event</span>
+<span>Appointments</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="payments">payments</span>
+<span>Billing</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="medication">medication</span>
+<span>Pharmacy</span>
+</a>
+<a class="flex items-center px-3 py-2.5 rounded-lg text-slate-500 hover:bg-white hover:text-slate-900 transition-all" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="assessment">assessment</span>
+<span>Reports</span>
+</a>
+</nav>
+<div class="px-6 pt-4 border-t border-slate-200">
+<div class="flex items-center space-x-3">
+<img alt="Receptionist Profile" class="w-10 h-10 rounded-full border border-slate-200" data-alt="professional hospital receptionist portrait in medical environment bright soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5ceq7HtmHprMVTymcWIFybJwu5pFDIbPX_8yeXfr-w29mSj8Sa4-JVxmWns-Chx4KClapkOGkDla0rj_2TjxnEjROYCNXtRUx9RWnyngNYYaNAVA0f-JZOe8rc7sewaWR2MxwWddsFDKSd_Jel6YlrhU5Z29uCWqwcgPeGW41n7rmou9cXhf-uNQz44FbyBN0GZ5jaEDoEcET_bMJ8d5nExLj5DHA_3ms7lkKHIuN2ykzFHedWva1YSGO88d3JgupkqvOaP5frss"/>
+<div>
+<p class="text-xs font-bold text-slate-900">Sarah Jenkins</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-wider">Level 2 Staff</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 flex flex-col min-w-0">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center px-6 py-3 w-full sticky top-0 bg-white/80 backdrop-blur-md shadow-sm z-40 border-b border-slate-200">
+<div class="flex items-center space-x-4">
+<h2 class="text-lg font-bold tracking-tight text-slate-900 font-manrope">MediCore Health</h2>
+<div class="h-6 w-px bg-slate-200"></div>
+<nav class="flex space-x-6">
+<span class="text-orange-600 font-semibold text-body-md font-body-md">Search Center</span>
+<span class="text-slate-600 hover:text-orange-600 cursor-pointer transition-colors text-body-md font-body-md">Quick Admit</span>
+</nav>
+</div>
+<div class="flex items-center space-x-4">
+<button class="p-2 text-slate-600 hover:bg-slate-50 rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:bg-slate-50 rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="p-margin-page flex-1 max-w-7xl mx-auto w-full">
+<!-- Search Header Section -->
+<div class="mb-section-gap">
+<h3 class="text-headline-xl font-headline-xl text-on-background mb-base">Search Patient</h3>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl">Access centralized patient records. Use UPIN for direct matching or name/phone for broad searches.</p>
+</div>
+<!-- Bento Search Grid -->
+<div class="grid grid-cols-12 gap-gutter mb-section-gap">
+<!-- Main Search Bar -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest border border-outline-variant p-container-padding rounded-xl shadow-sm">
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline" data-icon="search">search</span>
+</div>
+<input class="block w-full pl-12 pr-4 py-5 bg-surface-container-low border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all text-body-lg font-body-lg placeholder-outline" placeholder="Search by UPIN / Name / Phone" type="text"/>
+<div class="absolute inset-y-0 right-4 flex items-center">
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:bg-surface-tint active:scale-95 transition-all">
+                                Search Database
+                            </button>
+</div>
+</div>
+<div class="mt-base flex flex-wrap gap-2">
+<span class="text-label-sm font-label-sm text-on-surface-variant uppercase py-1">Recent:</span>
+<button class="text-label-sm font-label-sm px-3 py-1 bg-surface-container rounded-full text-secondary hover:bg-secondary-container transition-colors">UPIN-88219</button>
+<button class="text-label-sm font-label-sm px-3 py-1 bg-surface-container rounded-full text-secondary hover:bg-secondary-container transition-colors">Robert Wilson</button>
+<button class="text-label-sm font-label-sm px-3 py-1 bg-surface-container rounded-full text-secondary hover:bg-secondary-container transition-colors">9920011223</button>
+</div>
+</div>
+<!-- Stats/Status Card -->
+<div class="col-span-12 lg:col-span-4 flex flex-col space-y-gutter">
+<div class="bg-primary-container p-gutter rounded-xl shadow-sm relative overflow-hidden flex-1">
+<div class="relative z-10">
+<p class="text-on-primary-fixed text-label-sm font-label-sm uppercase tracking-wider mb-2">Patients Registered Today</p>
+<h4 class="text-headline-xl font-headline-xl text-on-primary-fixed">124</h4>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-20">
+<span class="material-symbols-outlined text-[120px]" data-icon="diversity_3">diversity_3</span>
+</div>
+</div>
+<div class="bg-surface-container-highest p-gutter rounded-xl shadow-sm flex items-center justify-between">
+<div>
+<p class="text-on-surface-variant text-label-sm font-label-sm">System Load</p>
+<p class="text-headline-sm font-headline-sm text-on-surface">Optimal Speed</p>
+</div>
+<div class="w-12 h-12 bg-on-primary rounded-full flex items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Real-time Results Table Section -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden">
+<div class="px-container-padding py-section-gap border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+<div class="flex items-center space-x-3">
+<div class="w-2 h-8 bg-primary rounded-full"></div>
+<h4 class="text-headline-sm font-headline-sm text-on-surface">Search Results (4 Results Found)</h4>
+</div>
+<div class="flex items-center space-x-2">
+<button class="flex items-center px-3 py-1.5 border border-outline-variant rounded-lg text-label-md font-label-md text-secondary hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="filter_list">filter_list</span>
+                            Filter
+                        </button>
+<button class="flex items-center px-3 py-1.5 border border-outline-variant rounded-lg text-label-md font-label-md text-secondary hover:bg-white transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="download">download</span>
+                            Export
+                        </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-6 py-4 text-label-sm font-label-sm text-on-surface-variant uppercase">Patient Name</th>
+<th class="px-6 py-4 text-label-sm font-label-sm text-on-surface-variant uppercase">UPIN</th>
+<th class="px-6 py-4 text-label-sm font-label-sm text-on-surface-variant uppercase">Age / Gender</th>
+<th class="px-6 py-4 text-label-sm font-label-sm text-on-surface-variant uppercase">Phone Number</th>
+<th class="px-6 py-4 text-label-sm font-label-sm text-on-surface-variant uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="group hover:bg-orange-50/50 transition-colors cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-secondary-fixed text-on-secondary-fixed font-bold rounded-full flex items-center justify-center mr-3">AM</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">Amanda Miller</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Last visit: 2 days ago</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface font-mono">UPIN-44512</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed-variant">
+                                        28 / Female
+                                    </span>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface">+1 (555) 012-3456</td>
+<td class="px-6 py-5 text-right space-x-2">
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm text-primary hover:bg-primary-fixed rounded transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="visibility">visibility</span> View
+                                    </button>
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm bg-primary text-on-primary rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="add_circle">add_circle</span> Create Visit
+                                    </button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="group hover:bg-orange-50/50 transition-colors cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-primary-fixed text-on-primary-fixed font-bold rounded-full flex items-center justify-center mr-3">RW</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">Robert Wilson</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Last visit: Oct 12, 2023</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface font-mono">UPIN-88219</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed-variant">
+                                        52 / Male
+                                    </span>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface">+1 (555) 987-6543</td>
+<td class="px-6 py-5 text-right space-x-2">
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm text-primary hover:bg-primary-fixed rounded transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="visibility">visibility</span> View
+                                    </button>
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm bg-primary text-on-primary rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="add_circle">add_circle</span> Create Visit
+                                    </button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="group hover:bg-orange-50/50 transition-colors cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-secondary-container text-on-secondary-container font-bold rounded-full flex items-center justify-center mr-3">SC</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">Sarah Connor</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">New Patient</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface font-mono">UPIN-10992</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed-variant">
+                                        34 / Female
+                                    </span>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface">+1 (555) 234-5678</td>
+<td class="px-6 py-5 text-right space-x-2">
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm text-primary hover:bg-primary-fixed rounded transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="visibility">visibility</span> View
+                                    </button>
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm bg-primary text-on-primary rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="add_circle">add_circle</span> Create Visit
+                                    </button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="group hover:bg-orange-50/50 transition-colors cursor-pointer">
+<td class="px-6 py-5">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-outline-variant text-on-surface-variant font-bold rounded-full flex items-center justify-center mr-3">JD</div>
+<div>
+<p class="text-body-md font-bold text-on-surface">John Doe</p>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Last visit: 6 months ago</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface font-mono">UPIN-22341</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-label-sm font-label-sm bg-tertiary-fixed text-on-tertiary-fixed-variant">
+                                        41 / Male
+                                    </span>
+</td>
+<td class="px-6 py-5 text-body-md font-body-md text-on-surface">+1 (555) 443-1122</td>
+<td class="px-6 py-5 text-right space-x-2">
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm text-primary hover:bg-primary-fixed rounded transition-colors">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="visibility">visibility</span> View
+                                    </button>
+<button class="inline-flex items-center px-3 py-1.5 text-label-sm font-label-sm bg-primary text-on-primary rounded-lg shadow-sm hover:shadow-md transition-all active:scale-95">
+<span class="material-symbols-outlined text-[18px] mr-1" data-icon="add_circle">add_circle</span> Create Visit
+                                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="px-container-padding py-4 bg-surface-container-low/30 border-t border-outline-variant flex items-center justify-between">
+<p class="text-body-sm font-body-sm text-on-surface-variant">Showing 1-4 of 4 results</p>
+<div class="flex space-x-1">
+<button class="p-2 border border-outline-variant rounded hover:bg-white disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="px-3 py-1 bg-primary text-on-primary rounded font-label-sm text-label-sm">1</button>
+<button class="p-2 border border-outline-variant rounded hover:bg-white">
+<span class="material-symbols-outlined text-sm" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Footer Quick Links (Bottom Bento) -->
+<div class="mt-section-gap grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="bg-white p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all flex items-start space-x-4">
+<div class="bg-primary-fixed p-3 rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</div>
+<div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface">View History</h5>
+<p class="text-body-sm text-on-surface-variant">Access logs of previous patient interactions and search queries.</p>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all flex items-start space-x-4">
+<div class="bg-secondary-fixed p-3 rounded-lg text-secondary">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+</div>
+<div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface">Search Guide</h5>
+<p class="text-body-sm text-on-surface-variant">Need help? Learn advanced search operators and shortcuts.</p>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl border border-outline-variant hover:shadow-md transition-all flex items-start space-x-4">
+<div class="bg-tertiary-fixed p-3 rounded-lg text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined" data-icon="report">report</span>
+</div>
+<div>
+<h5 class="font-headline-sm text-headline-sm text-on-surface">Data Correction</h5>
+<p class="text-body-sm text-on-surface-variant">Report mismatched patient profiles or duplicate UPINs.</p>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB - Restricted to Dashboard/Search, Hidden on Profile -->
+<div class="fixed bottom-margin-page right-margin-page">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-3xl" data-icon="add">add</span>
+</button>
+</div>
+</body></html>
