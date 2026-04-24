@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hospital Management | MedCore HMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#5a413a",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary-fixed-variant": "#872000",
+                        "primary-container": "#d34011",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-container": "#d5e3fc",
+                        "surface-tint": "#b12d00",
+                        "primary": "#ad2c00",
+                        "on-primary": "#ffffff",
+                        "on-surface": "#191c1e",
+                        "secondary-fixed": "#d5e3fc",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "surface-bright": "#f7f9fb",
+                        "inverse-primary": "#ffb5a0",
+                        "on-primary-fixed": "#3b0900",
+                        "surface": "#f7f9fb",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#fffbff",
+                        "surface-container": "#eceef0",
+                        "on-background": "#191c1e",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "outline": "#8f7068",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-fixed": "#dae2fd",
+                        "error": "#ba1a1a",
+                        "tertiary-container": "#6c748b",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "background": "#f7f9fb",
+                        "tertiary": "#545c72",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#e3beb5",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#515f74",
+                        "surface-dim": "#d8dadc",
+                        "on-tertiary-container": "#fefcff",
+                        "on-secondary-container": "#57657a",
+                        "primary-fixed": "#ffdbd1",
+                        "on-tertiary-fixed": "#131b2e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack_md": "20px",
+                        "margin_canvas": "32px",
+                        "stack_sm": "12px",
+                        "base": "8px",
+                        "sidebar_width": "280px",
+                        "topbar_height": "72px",
+                        "gutter": "24px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Manrope"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "h2": ["Manrope"],
+                        "h1": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "h2": ["22px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                        "h1": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar Shell -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 space-y-2 bg-white dark:bg-slate-900 h-screen w-64 border-r border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] z-50">
+<div class="flex items-center gap-3 px-4 py-6 mb-4">
+<div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined" data-icon="health_and_safety">health_and_safety</span>
+</div>
+<div>
+<h2 class="text-lg font-bold text-slate-900 dark:text-white leading-none">MedCore HMS</h2>
+<p class="text-[10px] uppercase tracking-wider text-slate-500 font-bold mt-1">Admin Console</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-manrope text-sm font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 rounded-lg px-4 py-3 border-l-4 border-orange-700 Active: scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="apartment">apartment</span>
+<span class="font-manrope text-sm font-medium">Hospital Management</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-manrope text-sm font-medium">User Management</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-manrope text-sm font-medium">Doctor Fees</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope text-sm font-medium">System Settings</span>
+</a>
+</nav>
+<div class="mt-auto p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl">
+<div class="flex items-center gap-3">
+<img class="w-10 h-10 rounded-full object-cover border-2 border-white" data-alt="Portrait of a medical professional administrator with a confident smile in a modern clinic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArExPGw2hYEj0Bq6BTyU1nn6uzJb9Jpq-D7_PamnrZB_ip48CnY9Yd-engWx2D-kOs9HMKePLJqDDLQTXgAAQmVgYR-udcqqpnSK8alALfGdpibp9QCYpu2Lo6w9pNVVFFNLnnolmsc4kRdOBxzhVwozR0lHtwMol5cq_NDPPSyX6cNO9Vek1-g6OZW9Hd5X2cRuRyQbz70EOjLVhaMvXMuUCowRsJnTnsLAcRf-KKpJb4lZkv_aGQocnkCrikXEmmptsiumgPnsMq"/>
+<div class="overflow-hidden">
+<p class="text-xs font-bold truncate">Dr. Sarah Jenkins</p>
+<p class="text-[10px] text-slate-500 truncate">Super Admin</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen flex flex-col">
+<!-- TopNavBar Shell -->
+<header class="flex justify-between items-center h-16 px-6 w-full sticky top-0 bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-500 font-manrope text-sm antialiased z-40 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center gap-4 flex-1">
+<div class="relative max-w-md w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-orange-500 text-sm" placeholder="Search facilities, staff, or records..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700"></div>
+<div class="flex items-center gap-3">
+<span class="text-slate-900 dark:text-white font-bold tracking-tight">MedCore HMS</span>
+</div>
+</div>
+</header>
+<!-- Form Canvas -->
+<div class="p-8 max-w-7xl mx-auto w-full">
+<!-- Header Section -->
+<div class="flex justify-between items-end mb-8">
+<div>
+<nav class="flex items-center gap-2 text-slate-500 text-sm mb-2">
+<a class="hover:text-primary" href="#">Hospital Management</a>
+<span class="material-symbols-outlined text-xs" data-icon="chevron_right">chevron_right</span>
+<span class="text-slate-900 font-medium">Edit Facility</span>
+</nav>
+<h1 class="font-h1 text-h1 text-on-background">City General Medical Center</h1>
+<p class="text-slate-500 mt-1">Update hospital information, contact details, and facility status.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-all">Cancel</button>
+<button class="px-6 py-2.5 rounded-lg bg-primary text-white font-semibold text-sm shadow-md shadow-primary/20 hover:bg-primary-container transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="save">save</span>
+                        Save Changes
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column: Form Sections -->
+<div class="col-span-12 lg:col-span-8 space-y-8">
+<!-- Basic Info Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<h3 class="font-h2 text-h2 text-on-background">Basic Information</h3>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-stack_md">
+<div class="md:col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Hospital Name</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md transition-all" type="text" value="City General Medical Center"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Facility Type</label>
+<select class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md">
+<option>General Hospital</option>
+<option>Specialized Clinic</option>
+<option>Diagnostic Center</option>
+<option>Urgent Care</option>
+</select>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">License Number</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="text" value="HOSP-992-001"/>
+</div>
+<div class="md:col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Short Description</label>
+<textarea class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" rows="3">Primary multi-specialty care facility serving the downtown metropolitan area with 24/7 emergency services.</textarea>
+</div>
+</div>
+</div>
+<!-- Contact Details Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="contact_support">contact_support</span>
+<h3 class="font-h2 text-h2 text-on-background">Contact Information</h3>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-stack_md">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Primary Phone</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="tel" value="+1 (555) 123-4567"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Emergency Hotline</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="tel" value="+1 (555) 911-0000"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Email Address</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="email" value="info@citygeneral.med"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Website</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="url" value="www.citygeneral.med"/>
+</div>
+</div>
+</div>
+<!-- Address Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<h3 class="font-h2 text-h2 text-on-background">Physical Address</h3>
+</div>
+<div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-stack_md">
+<div class="md:col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Street Address</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="text" value="742 Evergreen Terrace, Medical District"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">City</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="text" value="Springfield"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">State / Province</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="text" value="Illinois"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Postal Code</label>
+<input class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md" type="text" value="62704"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Country</label>
+<select class="w-full rounded-lg border-slate-200 focus:border-primary focus:ring-primary-container text-body-md">
+<option>United States</option>
+<option>Canada</option>
+<option>United Kingdom</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Sidebar Cards -->
+<div class="col-span-12 lg:col-span-4 space-y-gutter">
+<!-- Facility Status Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="settings_input_component">settings_input_component</span>
+<h3 class="font-h2 text-h2 text-on-background">Facility Status</h3>
+</div>
+</div>
+<div class="p-6 space-y-6">
+<div class="flex items-center justify-between">
+<div>
+<p class="font-bold text-body-lg">Active Status</p>
+<p class="text-label-sm text-slate-500">Enable or disable system access</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="space-y-4">
+<p class="font-bold text-body-lg">Current Utilization</p>
+<div class="space-y-2">
+<div class="flex justify-between text-label-sm">
+<span>Bed Occupancy</span>
+<span class="font-bold">84%</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-2">
+<div class="bg-orange-500 h-2 rounded-full" style="width: 84%"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-label-sm">
+<span>Staff Availability</span>
+<span class="font-bold">92%</span>
+</div>
+<div class="w-full bg-slate-100 rounded-full h-2">
+<div class="bg-green-500 h-2 rounded-full" style="width: 92%"></div>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-slate-100">
+<div class="bg-slate-50 rounded-lg p-4 flex items-start gap-3">
+<span class="material-symbols-outlined text-blue-500 mt-0.5" data-icon="help">help</span>
+<p class="text-label-sm text-slate-600 italic">Disabling this facility will restrict all staff logins and hide it from patient-facing search results.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Location Preview Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="map">map</span>
+<h3 class="font-h2 text-h2 text-on-background">Location Preview</h3>
+</div>
+<div class="p-6">
+<div class="relative h-48 rounded-xl bg-slate-100 overflow-hidden mb-4">
+<div class="absolute inset-0 bg-cover bg-center opacity-80" data-alt="Stylized map graphic of Springfield Illinois with medical facility pinpoint icons in soft teal and orange colors" data-location="Springfield, Illinois" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAereSNvWbI-z9-oDrLfwLVI3jEE6yNOmuXxPcFZoMwF-iIR7X4rOtwdiw-AqZvJqTw5BBSC5d2Cm1oibo8Furz8O76_LF_G_U_A_7f2ZYX10tv_Fak2hGXjFXp5RuwJS5ojuoNeT_fcJ6gbykRI28ybDE-4OE_zDeB5V7QkCoF3E8G7-856Kz_PgPtRpczCKw4Nu4gfCP_ZZV9_j7YDwR0vd1oHJ3FIVsIRJN1_9jZhOgVJW8436lx-UElbfCHLDLmJLm2mT7jzpoG')"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-white p-2 rounded-full shadow-lg border-4 border-primary/20">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="location_on" data-weight="fill">location_on</span>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-2 text-label-sm text-slate-600">
+<span class="material-symbols-outlined text-sm" data-icon="explore">explore</span>
+<span>Lat: 39.7817° N, Long: 89.6501° W</span>
+</div>
+<button class="w-full py-2.5 bg-secondary-container text-on-secondary-container font-semibold rounded-lg text-sm hover:opacity-90 transition-opacity">
+                                    Update Coordinates
+                                </button>
+</div>
+</div>
+</div>
+<!-- Hospital Brand Assets Card -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100">
+<h3 class="font-h2 text-h2 text-on-background">Branding Assets</h3>
+</div>
+<div class="p-6">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<img class="w-20 h-20 rounded-xl object-cover border border-slate-200" data-alt="Modern geometric medical logo featuring a stylized blue cross and clean typography on a white background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCspaXn_7rTgwxRngZDNKckUJoWtRs0s62k_RFU0b4-8ewdYTEVAHFTJ7pMUCQ7g7oEiHfcViDZHhBgvvJC3nD9UOdZL9gmk2Ylr49224leJ9rpNpT757POZu4SN0EsAcPvo8t19FUdthR5ziwaHF5ZxN5orlDnc4zdBG-T0d7O8mSmq0BMS_dexSrfNedxnC2OzOr1JnYGGXXpZLoDoAO6e8RmLnt_O8B8wEP4keIzzSenVnP3Zq7ZAkV4ZsEO9upDmsIotZDTs2jw"/>
+<button class="absolute inset-0 bg-black/40 text-white rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+<div class="flex-1">
+<p class="font-bold text-body-md">Facility Logo</p>
+<p class="text-label-sm text-slate-500">Max size 2MB. Format: SVG, PNG, or JPG.</p>
+<button class="mt-2 text-primary font-bold text-xs uppercase tracking-wider hover:underline">Change Logo</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Actions Mobile -->
+<div class="mt-8 pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 lg:hidden">
+<p class="text-label-sm text-slate-400 italic">Last edited by Admin on Oct 24, 2023</p>
+<div class="flex gap-3 w-full md:w-auto">
+<button class="flex-1 md:flex-none px-6 py-3 rounded-lg border border-slate-200 text-slate-600 font-semibold text-sm bg-white">Cancel</button>
+<button class="flex-1 md:flex-none px-6 py-3 rounded-lg bg-primary text-white font-semibold text-sm shadow-md">Save Record</button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

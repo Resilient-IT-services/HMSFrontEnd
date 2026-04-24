@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create User Modal - MedCore HMS</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-fixed": "#dae2fd",
+                      "on-surface-variant": "#5a413a",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#ffb5a0",
+                      "on-primary": "#ffffff",
+                      "surface-bright": "#f7f9fb",
+                      "on-secondary-fixed-variant": "#3a485b",
+                      "inverse-surface": "#2d3133",
+                      "secondary-fixed": "#d5e3fc",
+                      "tertiary-fixed-dim": "#bec6e0",
+                      "on-tertiary-fixed-variant": "#3f465c",
+                      "surface": "#f7f9fb",
+                      "secondary-container": "#d5e3fc",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "outline-variant": "#e3beb5",
+                      "primary": "#ad2c00",
+                      "on-secondary": "#ffffff",
+                      "surface-container-high": "#e6e8ea",
+                      "on-primary-fixed": "#3b0900",
+                      "surface-container": "#eceef0",
+                      "on-tertiary-container": "#fefcff",
+                      "inverse-on-surface": "#eff1f3",
+                      "secondary-fixed-dim": "#b9c7df",
+                      "tertiary-container": "#6c748b",
+                      "on-secondary-container": "#57657a",
+                      "on-primary-fixed-variant": "#872000",
+                      "on-primary-container": "#fffbff",
+                      "tertiary": "#545c72",
+                      "on-tertiary-fixed": "#131b2e",
+                      "surface-dim": "#d8dadc",
+                      "primary-fixed-dim": "#ffb5a0",
+                      "primary-container": "#d34011",
+                      "on-error-container": "#93000a",
+                      "surface-container-low": "#f2f4f6",
+                      "outline": "#8f7068",
+                      "on-surface": "#191c1e",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#e0e3e5",
+                      "secondary": "#515f74",
+                      "on-secondary-fixed": "#0d1c2e",
+                      "background": "#f7f9fb",
+                      "error": "#ba1a1a",
+                      "on-background": "#191c1e",
+                      "primary-fixed": "#ffdbd1",
+                      "surface-variant": "#e0e3e5",
+                      "surface-tint": "#b12d00"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "stack_md": "20px",
+                      "base": "8px",
+                      "margin_canvas": "32px",
+                      "topbar_height": "72px",
+                      "sidebar_width": "280px",
+                      "stack_sm": "12px"
+              },
+              "fontFamily": {
+                      "h1": ["Manrope"],
+                      "body-md": ["Inter"],
+                      "display-lg": ["Manrope"],
+                      "body-lg": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "h2": ["Manrope"]
+              },
+              "fontSize": {
+                      "h1": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "display-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                      "h2": ["22px", {"lineHeight": "1.4", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+      </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface">
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-slate-200 bg-white shadow-sm flex flex-col py-6">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-bold text-slate-900 font-h1">MedCore Health</h1>
+<p class="text-xs text-slate-500 font-medium">Hospital Admin</p>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors font-medium">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span>Dashboard</span>
+</div>
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors font-medium">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span>Patients</span>
+</div>
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors font-medium">
+<span class="material-symbols-outlined" data-icon="event">event</span>
+<span>Appointments</span>
+</div>
+<div class="bg-orange-50 text-orange-700 border-r-4 border-orange-600 px-4 py-3 flex items-center gap-3 font-semibold">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+<span>User Management</span>
+</div>
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors font-medium">
+<span class="material-symbols-outlined" data-icon="inventory_2">inventory_2</span>
+<span>Inventory</span>
+</div>
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors font-medium">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span>Reports</span>
+</div>
+</nav>
+<div class="px-4 mt-auto space-y-1 pt-6 border-t border-slate-100">
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</div>
+<div class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</div>
+</div>
+</aside>
+<header class="fixed top-0 right-0 left-64 h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md z-30 flex items-center justify-between px-8">
+<div class="flex items-center gap-4 bg-slate-100 rounded-lg px-3 py-2 w-96">
+<span class="material-symbols-outlined text-slate-400" data-icon="search">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-full" placeholder="Search patients, doctors..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<span class="text-sm font-medium text-slate-600">City General Hospital</span>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-600 cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-slate-600 cursor-pointer" data-icon="help_outline">help_outline</span>
+<div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden ml-2">
+<img class="w-full h-full object-cover" data-alt="professional portrait of a senior hospital administrator in a clean modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJBVxMW90qkNkYP5MRHl5TUfylKnkbag_P-SsDwtyYso1cVhj0b-iQQqF6PfrYvb4Jt17b_hojkdw8q21UVw7UIHSDSNxc9AovdPsN3JkXTe620cyXPaAnEzn5KXl2jmWgFc3uJ6A3oYjiBWI_jpKM9Vv_k0yVqgIfCE0TtbczLY1-IkdOAFT6wXAZJRAOAyotw29COzFLrJe0dLsGMSBvjip2z3sEFg-OTz7YlsIGry3PaoKg2Ijxck_eE9fHwU2d1Q9JBmaQyouJ"/>
+</div>
+</div>
+</div>
+</header>
+<main class="ml-64 pt-24 px-margin_canvas pb-12 bg-surface">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="font-h1 text-h1 text-on-surface">User Management</h2>
+<p class="text-body-md text-slate-500">Manage hospital staff access and roles</p>
+</div>
+<button class="bg-primary text-white px-6 py-2.5 rounded-lg font-medium flex items-center gap-2 hover:bg-primary-container transition-all active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                Add Patient
+            </button>
+</div>
+<div class="grid grid-cols-12 gap-gutter">
+<div class="col-span-12 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+<span class="font-semibold text-slate-700">Staff List</span>
+<span class="text-xs text-slate-400">Showing 1-10 of 42 employees</span>
+</div>
+<table class="w-full text-left">
+<thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4 font-semibold">User</th>
+<th class="px-6 py-4 font-semibold">Role</th>
+<th class="px-6 py-4 font-semibold">Department</th>
+<th class="px-6 py-4 font-semibold">Status</th>
+<th class="px-6 py-4 font-semibold">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<tr class="hover:bg-slate-50/50 transition-colors h-[56px]">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-lg" data-icon="person">person</span>
+</div>
+<div>
+<div class="text-sm font-medium text-slate-900">Dr. Sarah Jenkins</div>
+<div class="text-xs text-slate-500">sarah.j@medcore.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4"><span class="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold uppercase">Doctor</span></td>
+<td class="px-6 py-4 text-sm text-slate-600">Cardiology</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full bg-green-50 text-green-600 text-[11px] font-bold uppercase">Active</span></td>
+<td class="px-6 py-4"><span class="material-symbols-outlined text-slate-400 cursor-pointer" data-icon="more_vert">more_vert</span></td>
+</tr>
+<tr class="bg-slate-50/30 hover:bg-slate-50 transition-colors h-[56px]">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-lg" data-icon="person">person</span>
+</div>
+<div>
+<div class="text-sm font-medium text-slate-900">Marcus Thorne</div>
+<div class="text-xs text-slate-500">m.thorne@medcore.com</div>
+</div>
+</div>
+</td>
+<td class="px-6 py-4"><span class="px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-semibold uppercase">Admin</span></td>
+<td class="px-6 py-4 text-sm text-slate-600">Operations</td>
+<td class="px-6 py-4"><span class="px-2.5 py-1 rounded-full bg-green-50 text-green-600 text-[11px] font-bold uppercase">Active</span></td>
+<td class="px-6 py-4"><span class="material-symbols-outlined text-slate-400 cursor-pointer" data-icon="more_vert">more_vert</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</main>
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+<div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[921px]">
+<header class="bg-primary px-8 py-6 flex justify-between items-center">
+<div>
+<h2 class="text-white font-h1 text-h2">Create New User</h2>
+<p class="text-white/80 text-sm font-body-md mt-1">Fill in the details to register a new staff member</p>
+</div>
+<button class="text-white/80 hover:text-white transition-colors">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+</header>
+<div class="flex-1 overflow-y-auto px-8 py-6 scrollbar-hide">
+<form class="space-y-10">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 font-label-sm">Section 1: BASIC INFO</h3>
+</div>
+<div class="grid grid-cols-2 gap-stack_md">
+<div class="col-span-2">
+<label class="block text-slate-700 font-medium mb-1.5 font-label-sm">Assign Hospital</label>
+<select class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm">
+<option>City General Hospital</option>
+<option>St. Mary's Clinic</option>
+<option>Westside Medical Center</option>
+</select>
+</div>
+<div class="col-span-1">
+<label class="block text-slate-700 font-medium mb-1.5 font-label-sm">Full Name</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="John Doe" type="text"/>
+</div>
+<div class="col-span-1">
+<label class="block text-slate-700 font-medium mb-1.5 font-label-sm">Username</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="johndoe88" type="text"/>
+</div>
+<div class="col-span-1">
+<label class="block text-slate-700 font-medium mb-1.5 font-label-sm">Password</label>
+<div class="relative">
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="••••••••" type="password"/>
+<span class="material-symbols-outlined absolute right-3 top-2.5 text-slate-400 cursor-pointer" data-icon="visibility">visibility</span>
+</div>
+</div>
+<div class="col-span-1">
+<label class="block text-slate-700 font-medium mb-1.5 font-label-sm">Date of Birth</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" type="date"/>
+</div>
+<div class="col-span-2">
+<label class="block text-slate-700 font-medium mb-1.5 font-label-sm">Phone Number</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="+1 (555) 000-0000" type="tel"/>
+</div>
+</div>
+</div>
+<div>
+<div class="flex items-center gap-2 mb-4">
+<div class="w-1 h-5 bg-primary rounded-full"></div>
+<h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 font-label-sm">Section 2: ROLES</h3>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+<input class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600">ADMIN</span>
+</label>
+<label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+<input checked="" class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600">DOCTOR</span>
+</label>
+<label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+<input class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600">PHARMACIST</span>
+</label>
+<label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+<input class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600">RECEPTIONIST</span>
+</label>
+<label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+<input class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600">NURSE</span>
+</label>
+<label class="flex items-center gap-3 p-3 border border-slate-100 rounded-lg cursor-pointer hover:bg-slate-50 transition-colors">
+<input class="w-4 h-4 rounded text-primary border-slate-300 focus:ring-primary/20" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600">SUPER ADMIN</span>
+</label>
+</div>
+</div>
+<div class="space-y-8 pb-4">
+<div class="p-6 bg-slate-50 rounded-xl border border-slate-200">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="medical_services">medical_services</span>
+<h4 class="font-bold text-slate-800 text-sm">DOCTOR DETAILS</h4>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="col-span-2">
+<label class="block text-slate-600 font-medium mb-1.5 text-xs">Specialization</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="e.g. Cardiology, Neurology" type="text"/>
+</div>
+<div>
+<label class="block text-slate-600 font-medium mb-1.5 text-xs">Consultation Fee ($)</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="150" type="number"/>
+</div>
+<div>
+<label class="block text-slate-600 font-medium mb-1.5 text-xs">Follow-up Days</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 focus:border-primary focus:ring-primary/20 text-sm" placeholder="7" type="number"/>
+</div>
+</div>
+</div>
+<div class="p-6 bg-slate-50/50 rounded-xl border border-slate-200 opacity-60">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-slate-400" data-icon="desk">desk</span>
+<h4 class="font-bold text-slate-500 text-sm uppercase">Receptionist Details</h4>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div>
+<label class="block text-slate-400 font-medium mb-1.5 text-xs">Department</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 bg-slate-100 text-sm" disabled="" type="text"/>
+</div>
+<div>
+<label class="block text-slate-400 font-medium mb-1.5 text-xs">Shift Timing</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 bg-slate-100 text-sm" disabled="" type="text"/>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-6">
+<div class="p-6 bg-slate-50/50 rounded-xl border border-slate-200 opacity-60">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-slate-400" data-icon="security">security</span>
+<h4 class="font-bold text-slate-500 text-sm uppercase">Admin Access</h4>
+</div>
+<label class="block text-slate-400 font-medium mb-1.5 text-xs">Access Level</label>
+<select class="w-full border-slate-200 rounded-lg py-2.5 bg-slate-100 text-sm" disabled="">
+<option>Select Level</option>
+</select>
+</div>
+<div class="p-6 bg-slate-50/50 rounded-xl border border-slate-200 opacity-60">
+<div class="flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-slate-400" data-icon="medication">medication</span>
+<h4 class="font-bold text-slate-500 text-sm uppercase">Pharmacist</h4>
+</div>
+<label class="block text-slate-400 font-medium mb-1.5 text-xs">License Number</label>
+<input class="w-full border-slate-200 rounded-lg py-2.5 bg-slate-100 text-sm" disabled="" type="text"/>
+</div>
+</div>
+</div>
+</form>
+</div>
+<footer class="border-t border-slate-100 px-8 py-6 bg-slate-50 flex justify-end gap-4">
+<button class="px-6 py-2.5 border border-slate-300 text-slate-600 rounded-lg font-semibold text-sm hover:bg-slate-100 transition-all active:scale-95">
+                    Cancel
+                </button>
+<button class="px-8 py-2.5 bg-primary text-white rounded-lg font-semibold text-sm hover:bg-primary-container transition-all active:scale-95 shadow-lg shadow-primary/20">
+                    Create User
+                </button>
+</footer>
+</div>
+</div>
+</body></html>
