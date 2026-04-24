@@ -215,12 +215,24 @@ const UserManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button 
-                        onClick={() => router.push(`/admin/users/${row.id}`)}
-                        className="p-2 text-secondary hover:text-primary transition-colors"
-                      >
-                        <span className="material-symbols-outlined">more_vert</span>
-                      </button>
+                      <div className="flex justify-end items-center gap-2">
+                        {isSuperMode && (
+                          <button 
+                            onClick={() => router.push(`/admin/users/${row.id}/contracts/add`)}
+                            title="Add Hospital Contract"
+                            className="p-2 text-primary hover:bg-orange-50 rounded-lg transition-colors"
+                          >
+                            <span className="material-symbols-outlined">add_business</span>
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => router.push(`/admin/users/${row.id}`)}
+                          title="Edit User"
+                          className="p-2 text-secondary hover:text-primary transition-colors"
+                        >
+                          <span className="material-symbols-outlined">edit</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

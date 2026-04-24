@@ -107,6 +107,15 @@ body {
   @apply w-full px-4 py-2.5 bg-white border border-[#D0D5DD] rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-md;
 }
 
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
+
 .btn-primary {
   @apply bg-primary-container text-on-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-label-md shadow-sm hover:opacity-90 transition-all active:scale-95;
 }
