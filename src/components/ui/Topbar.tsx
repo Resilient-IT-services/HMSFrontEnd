@@ -53,16 +53,18 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
 
   return (
-    <header className="bg-white flex justify-between items-center h-16 px-6 w-full sticky top-0 z-40 border-b border-gray-200 shadow-sm font-manrope antialiased">
-      <div className="flex items-center gap-6">
-        <h1 className="text-xl font-extrabold tracking-tight text-gray-900">VitalSync HMS</h1>
-        <div className="hidden md:flex items-center relative">
+    <header className="bg-white flex justify-between items-center h-16 w-full sticky top-0 z-40 border-b border-gray-200 shadow-sm font-manrope antialiased">
+      <div className="flex items-center">
+        <div className="w-64 px-6">
+          <h1 className="text-xl font-extrabold tracking-tight text-gray-900">VitalSync HMS</h1>
+        </div>
+        <div className="hidden md:flex items-center relative ml-4">
           <span className="material-symbols-outlined absolute left-3 text-gray-400 text-lg">search</span>
           <input className="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary-container outline-none" placeholder="Search across hospital..." type="text"/>
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 px-6">
         {user?.hospitals && user.hospitals.length > 1 && (
           <button 
             onClick={() => setIsProfileOpen(true)}
