@@ -68,14 +68,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [dispatch, isSuperMode, pathname, router]);
 
   const handleHospitalSelection = useCallback((roles: string[]) => {
-    if (user?.hospitals && user.hospitals.length > 1) {
+    if (user?.memberships && user.memberships.length > 1) {
       if (pathname !== '/select-hospital') {
         router.push('/select-hospital');
       }
-    } else if (user?.hospitals && user.hospitals.length === 1) {
-      const targetHospitalId = user.hospitals[0].hospitalId;
+    } else if (user?.memberships && user.memberships.length === 1) {
+      const targetHospitalId = user.memberships[0].hospitalId;
 
-      if (user.hospitalId === targetHospitalId) {
+      if (user.currentHospitalId === targetHospitalId) {
         return;
       }
 
@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (isSuperMode) return;
 
-    if (!user?.hospitalId) {
+    if (!user?.currentHospitalId) {
       handleHospitalSelection(roles);
       return;
     }

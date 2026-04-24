@@ -56,18 +56,18 @@ const authSlice = createSlice({
         effectiveRolesSet.add('SUPER_ADMIN');
       }
 
-      // Add global roles (where hospitalId is null) from hospitals array if any
-      action.payload.hospitals.forEach(h => {
-        if (h.hospitalId === null) {
-          h.roles.forEach(r => effectiveRolesSet.add(r));
+      // Add global roles (where hospitalId is null) from memberships array if any
+      action.payload.memberships.forEach(h => {
+        if (!h.hospitalId) {
+          h.roles.forEach(r => effectiveRolesSet.add(r as Role));
         }
       });
 
       // Add hospital-specific roles
-      if (action.payload.hospitalId) {
-        const currentHosp = action.payload.hospitals.find(h => h.hospitalId === action.payload?.hospitalId);
+      if (action.payload.currentHospitalId) {
+        const currentHosp = action.payload.memberships.find(h => h.hospitalId === action.payload?.currentHospitalId);
         if (currentHosp) {
-          currentHosp.roles.forEach(r => effectiveRolesSet.add(r));
+          currentHosp.roles.forEach(r => effectiveRolesSet.add(r as Role));
         }
       }
 

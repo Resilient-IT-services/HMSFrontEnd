@@ -29,7 +29,7 @@ const SelectHospitalPage = () => {
         <p className="text-[var(--text-secondary)] mb-8 text-center">Please choose a facility to continue</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {user?.hospitals.map((h) => (
+          {user?.memberships.map((h) => (
             <div 
               key={h.hospitalId}
               onClick={() => handleSelect(h.hospitalId)}

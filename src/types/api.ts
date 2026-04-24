@@ -20,57 +20,162 @@ export interface PageResponse<T> {
   totalPages: number;
 }
 
-// User types
+// Global User Info Types
+export interface Qualification {
+  degree: string;
+  institution: string;
+  year: number;
+  specialization: string;
+}
+
+export interface EducationInfo {
+  qualifications: Qualification[];
+}
+
+export interface LanguageFluency {
+  language: string;
+  proficiency: 'NATIVE' | 'FLUENT' | 'CONVERSATIONAL' | 'BASIC';
+}
+
+export interface LanguagesSpoken {
+  fluencies: LanguageFluency[];
+}
+
+export interface DoctorInfo {
+  specialization: string;
+  education: EducationInfo;
+  bio: string;
+  licenseNumber: string;
+}
+
+export interface NurseInfo {
+  department: string;
+  nursingLicenseNo: string;
+  certificationLevel: string;
+}
+
+export interface PharmacistInfo {
+  pciRegNo: string;
+  qualification: string;
+}
+
+export interface LabTechInfo {
+  specialty: string;
+  licenseNo: string;
+}
+
+export interface ReceptionistInfo {
+  languagesSpoken: LanguagesSpoken;
+  insuranceSpecialist: boolean;
+}
+
+// Role Specific Details for Memberships
+export interface DoctorRoleDetails {
+  consultationFee: number;
+  followUpDays: number;
+  commissionType: 'PERCENTAGE' | 'FLAT';
+  commissionValue: number;
+  visitingConsultant: boolean;
+  updatedAt: string;
+}
+
+export interface NurseRoleDetails {
+  floorLocation: string;
+  shiftType: 'DAY' | 'NIGHT' | 'ROTATIONAL';
+  updatedAt: string;
+}
+
+export interface AdminRoleDetails {
+  officeLocation: string;
+  departmentHead: boolean;
+  updatedAt: string;
+}
+
+export interface PharmacistRoleDetails {
+  counterLocation: string;
+  pharmacyWing: string;
+  updatedAt: string;
+}
+
+export interface ReceptionistRoleDetails {
+  deskLocation: string;
+  emergencyContactNumber: string;
+  updatedAt: string;
+}
+
+export interface RoleAssignmentDTO {
+  assignmentId: string;
+  roleCode: string;
+  departmentName: string;
+  active: boolean;
+  doctorDetails?: DoctorRoleDetails;
+  nurseDetails?: NurseRoleDetails;
+  adminDetails?: AdminRoleDetails;
+  pharmacistDetails?: PharmacistRoleDetails;
+  receptionistDetails?: ReceptionistRoleDetails;
+}
+
+export interface DetailedHospitalMembershipDTO {
+  hospitalId: string;
+  hospitalName?: string;
+  roleAssignments: RoleAssignmentDTO[];
+}
+
 export interface HospitalMembershipResponse {
   hospitalId: string;
-  hospitalName: string;
-  hospitalCode: string;
+  hospitalName?: string;
+  hospitalCode?: string;
   roles: Role[];
-  specialization?: string;
-  department?: string;
-}
-
-export interface UserProfileResponse {
-  userId: string;
-  hospitalId: string | null;
-  username: string;
-  email?: string;
-  superuser: boolean;
-  hospitals: HospitalMembershipResponse[];
-  roles: Role[]; // Computed on frontend
-}
-
-export interface LoginRequest {
-  username: string;
-  password?: string;
-}
-
-export interface SelectHospitalRequest {
-  hospitalId: string;
-}
-
-export interface AllocateRoleRequest {
-  userId: string;
-  hospitalId: string | null;
-  roles: Role[];
-  specialization?: string;
-  department?: string;
 }
 
 export interface UserResponse {
   id: string;
   username: string;
-  email?: string;
-  fullName?: string;
-  gender?: Gender;
-  dob?: string;
-  phone?: string;
-  memberships: HospitalMembershipResponse[];
-  superuser: boolean;
+  email: string;
+  fullName: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  dob: string;
+  phone: string;
   active: boolean;
   deleted: boolean;
+  superuser: boolean;
   createdAt: string;
-  roles: Role[]; // Computed on frontend
+  memberships: HospitalMembershipResponse[];
+  doctorInfo?: DoctorInfo;
+  nurseInfo?: NurseInfo;
+  pharmacistInfo?: PharmacistInfo;
+  labTechInfo?: LabTechInfo;
+  receptionistInfo?: ReceptionistInfo;
+  detailedMemberships: DetailedHospitalMembershipDTO[];
+  roles?: Role[]; // Computed on frontend
+}
+
+export type UserFullProfileDTO = UserResponse;
+
+// Re-use same structure for Profile Response (used in /me)
+export interface UserProfileResponse extends UserResponse {
+  // Frontend computed fields if any
+  currentHospitalId?: string | null;
+  activeRole?: Role | null;
+}
+
+export interface UserRequestDTO {
+  username: string;
+  email: string;
+  password?: string;
+  fullName: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  dob: string;
+  phone: string;
+  superuser: boolean;
+  active?: boolean;
+  memberships?: HospitalMembershipResponse[];
+  doctorInfo?: DoctorInfo;
+  nurseInfo?: NurseInfo;
+  pharmacistInfo?: PharmacistInfo;
+  labTechInfo?: LabTechInfo;
+  receptionistInfo?: ReceptionistInfo;
+  detailedMemberships?: DetailedHospitalMembershipDTO[];
 }
 
 // Patient types
@@ -102,72 +207,13 @@ export interface CreateHospitalRequest {
   address?: string;
 }
 
-export interface DoctorInfo {
-  specialization: string;
-  department: string;
-  consultationFee: number;
-  followUpDays: number;
-  licenseNumber?: string;
-}
-
-export interface NurseInfo {
-  department: string;
-  licenseNumber?: string;
-}
-
-export interface PharmacistInfo {
-  licenseNumber?: string;
-}
-
-export interface LabTechInfo {
-  specialization?: string;
-}
-
-export interface ReceptionistInfo {
-  deskNumber?: string;
-}
-
-export interface DetailedHospitalMembershipDTO {
-  hospitalId: string;
-  roles: Role[];
-  department?: string;
-  hourlyRate?: number;
-  schedule?: string;
-  status?: string;
-}
-
-export interface UserRequestDTO {
+export interface LoginRequest {
   username: string;
-  email?: string;
   password?: string;
-  fullName: string;
-  gender: 'MALE' | 'FEMALE' | 'OTHER';
-  dob: string;
-  phone?: string;
-  superuser?: boolean;
-  doctorInfo?: DoctorInfo;
-  nurseInfo?: NurseInfo;
-  pharmacistInfo?: PharmacistInfo;
-  labTechInfo?: LabTechInfo;
-  receptionistInfo?: ReceptionistInfo;
-  detailedMemberships?: DetailedHospitalMembershipDTO[];
 }
 
-export interface UserFullProfileDTO extends UserResponse {
-  doctorInfo?: DoctorInfo;
-  nurseInfo?: NurseInfo;
-  pharmacistInfo?: PharmacistInfo;
-  labTechInfo?: LabTechInfo;
-  receptionistInfo?: ReceptionistInfo;
-  detailedMemberships?: DetailedHospitalMembershipDTO[];
-}
-
-export interface CreatePatientRequest {
-  fullName: string;
-  gender: Gender;
-  dob: string;
-  phone: string;
-  address: string;
+export interface SelectHospitalRequest {
+  hospitalId: string;
 }
 
 // Appointment types

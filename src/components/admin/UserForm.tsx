@@ -25,7 +25,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     gender: (initialData?.gender as any) || 'MALE',
     password: '',
     superuser: initialData?.superuser || false,
-    detailedMemberships: initialData?.detailedMemberships || []
+    detailedMemberships: initialData?.detailedMemberships || [],
+    doctorInfo: initialData?.doctorInfo,
+    nurseInfo: initialData?.nurseInfo,
+    pharmacistInfo: initialData?.pharmacistInfo,
+    labTechInfo: initialData?.labTechInfo,
+    receptionistInfo: initialData?.receptionistInfo,
   });
 
   useEffect(() => {
@@ -209,46 +214,144 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
             )}
 
             {activeTab === 'profile' && (
-              <div className="space-y-6 font-body-md">
-                <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                  <h3 className="font-headline-sm text-[var(--on-surface)]">Global Profiles</h3>
-                  <button type="button" className="text-[var(--primary)] font-bold text-sm hover:underline font-label-md">Add Profile</button>
+              <div className="space-y-8">
+                {/* Global Role Profiles Selector (Simple logic to toggle info sections) */}
+                <div className="bg-[var(--primary-light)]/20 p-6 rounded-2xl border border-[var(--primary-light)]">
+                  <h3 className="font-headline-sm text-[var(--on-surface)] mb-4">Detailed Role Profiles</h3>
+                  <p className="text-sm text-[var(--on-surface-variant)] mb-6">Enable specific role data structures for this user. These fields are global across all hospital memberships.</p>
+                  
+                  <div className="flex flex-wrap gap-4">
+                    {['DOCTOR', 'NURSE', 'PHARMACIST', 'RECEPTIONIST'].map(role => (
+                      <button
+                        key={role}
+                        type="button"
+                        onClick={() => {
+                          const infoKey = `${role.toLowerCase()}Info` as keyof UserRequestDTO;
+                          if (formData[infoKey]) {
+                            setFormData({ ...formData, [infoKey]: undefined });
+                          } else {
+                            // Initialize with default structure
+                            if (role === 'DOCTOR') setFormData({...formData, doctorInfo: { specialization: '', education: { qualifications: [] }, bio: '', licenseNumber: '' }});
+                            if (role === 'NURSE') setFormData({...formData, nurseInfo: { department: '', nursingLicenseNo: '', certificationLevel: 'RN' }});
+                            if (role === 'PHARMACIST') setFormData({...formData, pharmacistInfo: { pciRegNo: '', qualification: '' }});
+                            if (role === 'RECEPTIONIST') setFormData({...formData, receptionistInfo: { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false }});
+                          }
+                        }}
+                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${
+                          formData[`${role.toLowerCase()}Info` as keyof UserRequestDTO] 
+                            ? 'bg-[var(--primary)] text-white border-[var(--primary)]' 
+                            : 'bg-white text-slate-500 border-slate-200 hover:border-[var(--primary)]'
+                        }`}
+                      >
+                        {role} PROFILE
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="border border-gray-100 rounded-xl overflow-hidden">
-                  <table className="w-full text-left border-collapse">
-                    <thead className="bg-slate-50/50">
-                      <tr>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase font-label-sm">Profile Type</th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase font-label-sm">Status</th>
-                        <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase font-label-sm text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 font-body-md">
-                      <tr className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-5">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-orange-50 text-[var(--primary)] flex items-center justify-center">
-                              <span className="material-symbols-outlined">stethoscope</span>
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm">Staff Member</p>
-                              <p className="text-[11px] text-gray-500">Global system access</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-5">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-[12px] font-bold border border-green-100 uppercase font-label-sm">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                            Complete
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-right">
-                          <button type="button" className="text-[var(--primary)] hover:underline font-bold text-sm font-label-md">Edit</button>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+
+                {/* Doctor Info Section */}
+                {formData.doctorInfo && (
+                  <div className="bg-white border border-gray-200 rounded-xl p-8 space-y-6">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                      <div className="w-10 h-10 rounded-full bg-orange-50 text-[var(--primary)] flex items-center justify-center">
+                        <span className="material-symbols-outlined">stethoscope</span>
+                      </div>
+                      <h3 className="font-headline-sm text-[var(--on-surface)]">Doctor Profile Details</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">Specialization</label>
+                        <input 
+                          className="form-input font-body-md" 
+                          type="text" 
+                          value={formData.doctorInfo.specialization}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } 
+                          })}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">License Number</label>
+                        <input 
+                          className="form-input font-body-md" 
+                          type="text" 
+                          value={formData.doctorInfo.licenseNumber}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } 
+                          })}
+                        />
+                      </div>
+                      <div className="md:col-span-2 flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">Professional Bio</label>
+                        <textarea 
+                          className="form-input font-body-md min-h-[100px]" 
+                          value={formData.doctorInfo.bio}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            doctorInfo: { ...formData.doctorInfo!, bio: e.target.value } 
+                          })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Nurse Info Section */}
+                {formData.nurseInfo && (
+                  <div className="bg-white border border-gray-200 rounded-xl p-8 space-y-6">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <span className="material-symbols-outlined">medical_services</span>
+                      </div>
+                      <h3 className="font-headline-sm text-[var(--on-surface)]">Nurse Profile Details</h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">Primary Department</label>
+                        <input 
+                          className="form-input font-body-md" 
+                          type="text" 
+                          value={formData.nurseInfo.department}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            nurseInfo: { ...formData.nurseInfo!, department: e.target.value } 
+                          })}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">Nursing License No</label>
+                        <input 
+                          className="form-input font-body-md" 
+                          type="text" 
+                          value={formData.nurseInfo.nursingLicenseNo}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } 
+                          })}
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">Certification Level</label>
+                        <select 
+                          className="form-input font-body-md"
+                          value={formData.nurseInfo.certificationLevel}
+                          onChange={(e) => setFormData({ 
+                            ...formData, 
+                            nurseInfo: { ...formData.nurseInfo!, certificationLevel: e.target.value } 
+                          })}
+                        >
+                          <option value="RN">Registered Nurse (RN)</option>
+                          <option value="LPN">Licensed Practical Nurse (LPN)</option>
+                          <option value="NP">Nurse Practitioner (NP)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -269,25 +372,48 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                               <span className="material-symbols-outlined text-gray-400">location_city</span>
                             </div>
                             <div>
-                              <h4 className="font-bold text-sm">{hosp?.name || 'Unknown Hospital'}</h4>
-                              <p className="text-[12px] text-gray-500">{m.roles.join(', ')} • {m.department || 'No Dept'}</p>
+                              <h4 className="font-bold text-sm">{m.hospitalName || hosp?.name || 'Unknown Hospital'}</h4>
+                              <p className="text-[11px] text-gray-500">
+                                {m.roleAssignments.map(ra => ra.roleCode).join(', ')}
+                              </p>
                             </div>
                           </div>
                           <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-1 rounded uppercase font-label-sm">Active</span>
                         </div>
-                        <div className="grid grid-cols-3 gap-4 py-3 border-y border-gray-50">
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-gray-400 font-label-sm">Rate</p>
-                            <p className="font-bold text-sm">${m.hourlyRate || 0} / hr</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-gray-400 font-label-sm">Status</p>
-                            <p className="font-bold text-sm">{m.status || 'ACTIVE'}</p>
-                          </div>
-                          <div>
-                            <p className="text-[10px] uppercase font-bold text-gray-400 font-label-sm">Schedule</p>
-                            <p className="font-bold text-sm">{m.schedule || 'N/A'}</p>
-                          </div>
+                        
+                        <div className="space-y-3">
+                          {m.roleAssignments.map((ra, raIdx) => (
+                            <div key={raIdx} className="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest">{ra.roleCode}</span>
+                                <span className="text-[10px] font-medium text-slate-500">{ra.departmentName}</span>
+                              </div>
+                              {ra.doctorDetails && (
+                                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                  <div>
+                                    <span className="text-slate-400 uppercase">Fee:</span>
+                                    <span className="ml-1 font-bold">${ra.doctorDetails.consultationFee}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-400 uppercase">Follow-up:</span>
+                                    <span className="ml-1 font-bold">{ra.doctorDetails.followUpDays} days</span>
+                                  </div>
+                                </div>
+                              )}
+                              {ra.nurseDetails && (
+                                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                                  <div>
+                                    <span className="text-slate-400 uppercase">Floor:</span>
+                                    <span className="ml-1 font-bold">{ra.nurseDetails.floorLocation}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-slate-400 uppercase">Shift:</span>
+                                    <span className="ml-1 font-bold">{ra.nurseDetails.shiftType}</span>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     );
