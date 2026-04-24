@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MedCore HMS Admin Dashboard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Fonts: Manrope & Inter -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#5a413a",
+                    "surface-container-low": "#f2f4f6",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#3a485b",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#e0e3e5",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-primary-fixed-variant": "#872000",
+                    "primary-container": "#d34011",
+                    "surface-container-high": "#e6e8ea",
+                    "secondary-container": "#d5e3fc",
+                    "surface-tint": "#b12d00",
+                    "primary": "#ad2c00",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#191c1e",
+                    "secondary-fixed": "#d5e3fc",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "surface-bright": "#f7f9fb",
+                    "inverse-primary": "#ffb5a0",
+                    "on-primary-fixed": "#3b0900",
+                    "surface": "#f7f9fb",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-error-container": "#93000a",
+                    "on-primary-container": "#fffbff",
+                    "surface-container": "#eceef0",
+                    "on-background": "#191c1e",
+                    "on-secondary-fixed": "#0d1c2e",
+                    "outline": "#8f7068",
+                    "inverse-surface": "#2d3133",
+                    "tertiary-fixed": "#dae2fd",
+                    "error": "#ba1a1a",
+                    "tertiary-container": "#6c748b",
+                    "secondary-fixed-dim": "#b9c7df",
+                    "background": "#f7f9fb",
+                    "tertiary": "#545c72",
+                    "primary-fixed-dim": "#ffb5a0",
+                    "error-container": "#ffdad6",
+                    "outline-variant": "#e3beb5",
+                    "on-secondary": "#ffffff",
+                    "secondary": "#515f74",
+                    "surface-dim": "#d8dadc",
+                    "on-tertiary-container": "#fefcff",
+                    "on-secondary-container": "#57657a",
+                    "primary-fixed": "#ffdbd1",
+                    "on-tertiary-fixed": "#131b2e"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack_md": "20px",
+                    "margin_canvas": "32px",
+                    "stack_sm": "12px",
+                    "base": "8px",
+                    "sidebar_width": "280px",
+                    "topbar_height": "72px",
+                    "gutter": "24px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Manrope"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "h2": ["Manrope"],
+                    "h1": ["Manrope"]
+            },
+            "fontSize": {
+                    "display-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                    "h2": ["22px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "h1": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full flex flex-col p-4 space-y-2 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] w-64 z-50">
+<div class="flex items-center gap-3 px-4 py-6 mb-4">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white shadow-lg">
+<span class="material-symbols-outlined" data-icon="apartment">apartment</span>
+</div>
+<div>
+<h2 class="text-lg font-bold text-slate-900 dark:text-white leading-none">MedCore HMS</h2>
+<p class="text-xs text-slate-500 font-medium mt-1">Admin Console</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Dashboard Active -->
+<a class="flex items-center gap-3 bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400 rounded-lg px-4 py-3 border-l-4 border-orange-700 hover:scale-[0.98] transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-manrope text-sm font-bold">Dashboard</span>
+</a>
+<!-- Inactive States -->
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="apartment">apartment</span>
+<span class="font-manrope text-sm font-medium">Hospital Management</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-manrope text-sm font-medium">User Management</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="font-manrope text-sm font-medium">Doctor Fees</span>
+</a>
+<a class="flex items-center gap-3 text-slate-600 dark:text-slate-400 px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all hover:scale-[0.98]" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-manrope text-sm font-medium">System Settings</span>
+</a>
+</nav>
+<div class="pt-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 px-4 py-2">
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border-2 border-slate-200" data-alt="Close-up portrait of a professional female doctor in white lab coat with stethoscope, professional clinical studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7DmZ7E-ilCxnMIdkqDpeCtbMZ-sjLyEEGAWdXfKRkj83HZRtn5x_0eQf-KRVT_nE9oOZGJ1fCJzpNwOS6Z2wKdnAypLnRgHXzbu5v_6VToGLvDoGmpqn0dj59LQyaskXYZi-j-l6HkjtZGtD7QEC2v-mrcO1tbao_heRAcJLAFg2oDiJ4hC-7rjCxFFNp8D29-1SKdN37z5QOxaGlLyLdF9FN030OL2JLmi0A6T9qGwT7pbU_khNAhSLRSsU2yczJQ2-eLghWllB-"/>
+<div class="overflow-hidden">
+<p class="text-sm font-bold text-slate-900 dark:text-white truncate">Dr. Sarah Jenkins</p>
+<p class="text-[10px] text-slate-500 font-medium">Head Administrator</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Content Area -->
+<main class="ml-64 flex-1 flex flex-col">
+<!-- TopNavBar -->
+<header class="flex justify-between items-center h-16 px-6 w-full sticky top-0 bg-white dark:bg-slate-900 text-orange-700 dark:text-orange-500 font-manrope text-sm antialiased z-40 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" data-icon="search">search</span>
+<input class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-orange-500 transition-all placeholder-slate-400" placeholder="Search patients, records, or departments..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4 ml-6">
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full border-2 border-white"></span>
+</button>
+<button class="p-2 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+</button>
+<div class="h-8 w-[1px] bg-slate-200 dark:bg-slate-700 mx-2"></div>
+<button class="flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 rounded-lg transition-colors">
+<div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center overflow-hidden">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="professional medical staff profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRIqv2bqybUUt9nj7C1BVtyCGf0bwvyjYu9-TT1R4YsMrjLNVRe-F0m_dcVlVLt_LOEwFKnmAPFVqEDwzVZiTuNZQStCDN5ldZV_NIMTYrxfu0htcqzPcui3uEJ_RoQVmnnuq6loNkdVzUf9xOIJ9hj8JCfOfx0_1N8KmWCS8VRgiw9-5f3k7PcyU2RpF3eUl3GdMyrHtcle0Ii4Ml6ysbAbba0iy5WU8FIqGJjKtkPK8AXArF8_RW7KewUUdBvW3ladkC-_1GuSfN"/>
+</div>
+<span class="material-symbols-outlined text-slate-400" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="p-8 space-y-8 max-w-[1600px] mx-auto w-full">
+<!-- Welcome Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="font-h1 text-h1 text-on-background">Admin Overview</h1>
+<p class="font-body-lg text-body-lg text-secondary mt-1">Real-time health indicators and administrative network status.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-medium text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm" data-icon="calendar_today">calendar_today</span>
+                        Last 30 Days
+                    </button>
+<button class="px-4 py-2 bg-primary text-white rounded-lg font-medium text-sm flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+                        Onboard Hospital
+                    </button>
+</div>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Card 1 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-orange-700 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="apartment">apartment</span>
+</div>
+<span class="flex items-center text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="trending_up">trending_up</span>
+                            +12%
+                        </span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Total Hospitals</p>
+<h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">128</h3>
+</div>
+<!-- Card 2 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="group">group</span>
+</div>
+<span class="flex items-center text-emerald-600 text-xs font-bold bg-emerald-50 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-xs mr-1" data-icon="trending_up">trending_up</span>
+                            +5.4%
+                        </span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Platform Users</p>
+<h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">14,208</h3>
+</div>
+<!-- Card 3 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="bolt">bolt</span>
+</div>
+<div class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+</div>
+<p class="text-slate-500 text-sm font-medium">Active Now</p>
+<h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">1,894</h3>
+</div>
+<!-- Card 4 -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-4">
+<div class="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="medical_services">medical_services</span>
+</div>
+<span class="flex items-center text-slate-400 text-xs font-bold bg-slate-50 px-2 py-1 rounded">
+                            Stable
+                        </span>
+</div>
+<p class="text-slate-500 text-sm font-medium">Certified Doctors</p>
+<h3 class="text-3xl font-extrabold text-slate-900 dark:text-white mt-1">4,520</h3>
+</div>
+</div>
+<!-- Bento Layout Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Main Table Area -->
+<div class="lg:col-span-8 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)] overflow-hidden">
+<div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<h2 class="font-h2 text-h2 text-on-background">Network Activity</h2>
+<button class="text-primary text-sm font-bold hover:underline">View All Records</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
+<th class="px-6 py-4">Hospital Entity</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4">Daily Users</th>
+<th class="px-6 py-4 text-right">Revenue (MTD)</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-orange-100 flex-shrink-0 flex items-center justify-center text-orange-700 font-bold">SM</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">St. Mary's General</p>
+<p class="text-xs text-slate-400">California, USA</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-tighter">Fully Integrated</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<p class="text-sm font-medium text-slate-700">1,240</p>
+<div class="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full w-[85%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-bold text-slate-900">$142,000</td>
+</tr>
+<tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-blue-100 flex-shrink-0 flex items-center justify-center text-blue-700 font-bold">CH</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">City Health Clinic</p>
+<p class="text-xs text-slate-400">London, UK</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 uppercase tracking-tighter">Syncing</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<p class="text-sm font-medium text-slate-700">890</p>
+<div class="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full w-[60%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-bold text-slate-900">$58,200</td>
+</tr>
+<tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-purple-100 flex-shrink-0 flex items-center justify-center text-purple-700 font-bold">NV</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">North Valley Rehab</p>
+<p class="text-xs text-slate-400">Texas, USA</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-orange-100 text-orange-700 uppercase tracking-tighter">Maintenance</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<p class="text-sm font-medium text-slate-700">450</p>
+<div class="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
+<div class="bg-orange-400 h-full w-[30%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-bold text-slate-900">$29,100</td>
+</tr>
+<tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-700 font-bold">EM</div>
+<div>
+<p class="text-sm font-bold text-slate-900 dark:text-white">East Metropolitan</p>
+<p class="text-xs text-slate-400">Toronto, CA</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700 uppercase tracking-tighter">Fully Integrated</span>
+</td>
+<td class="px-6 py-5">
+<div class="flex flex-col gap-1">
+<p class="text-sm font-medium text-slate-700">2,100</p>
+<div class="w-24 h-1 bg-slate-100 rounded-full overflow-hidden">
+<div class="bg-emerald-500 h-full w-[95%]"></div>
+</div>
+</div>
+</td>
+<td class="px-6 py-5 text-right font-bold text-slate-900">$215,400</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Side Actions & Metrics -->
+<div class="lg:col-span-4 space-y-6">
+<!-- Quick Actions -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)]">
+<h2 class="font-h2 text-h2 text-on-background mb-4">Quick Actions</h2>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-primary/30 hover:bg-orange-50 transition-all group">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary mb-2" data-icon="add_business">add_business</span>
+<span class="text-xs font-bold text-slate-600">New Branch</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-primary/30 hover:bg-orange-50 transition-all group">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary mb-2" data-icon="person_add">person_add</span>
+<span class="text-xs font-bold text-slate-600">Hire Admin</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-primary/30 hover:bg-orange-50 transition-all group">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary mb-2" data-icon="analytics">analytics</span>
+<span class="text-xs font-bold text-slate-600">Audit Logs</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-primary/30 hover:bg-orange-50 transition-all group">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-primary mb-2" data-icon="cloud_download">cloud_download</span>
+<span class="text-xs font-bold text-slate-600">Backups</span>
+</button>
+</div>
+</div>
+<!-- System Health Card -->
+<div class="bg-primary-container p-6 rounded-xl shadow-lg relative overflow-hidden group">
+<!-- Decorative background texture -->
+<div class="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent"></div>
+<div class="relative z-10 text-white">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-h2 text-h2 leading-none">System Integrity</h3>
+<span class="material-symbols-outlined" data-icon="verified_user">verified_user</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs font-bold mb-1 opacity-90 uppercase">Server Load</div>
+<div class="h-1.5 bg-white/20 rounded-full">
+<div class="h-full bg-white rounded-full w-[42%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs font-bold mb-1 opacity-90 uppercase">DB Latency</div>
+<div class="h-1.5 bg-white/20 rounded-full">
+<div class="h-full bg-white rounded-full w-[12%]"></div>
+</div>
+</div>
+</div>
+<p class="mt-6 text-[11px] leading-relaxed opacity-80">All clusters are performing within optimal parameters. No outages reported in the last 72 hours.</p>
+</div>
+</div>
+<!-- Recent Support Tickets -->
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-[0px_4px_20px_rgba(0,0,0,0.05)]">
+<h2 class="font-h2 text-h2 text-on-background mb-4">Urgent Support</h2>
+<div class="space-y-4">
+<div class="flex gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
+<div class="w-1 bg-error rounded-full"></div>
+<div>
+<p class="text-xs font-bold text-slate-900">API Gateway Timeout</p>
+<p class="text-[10px] text-slate-500">St. Mary's Dept • 2m ago</p>
+</div>
+</div>
+<div class="flex gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors cursor-pointer">
+<div class="w-1 bg-orange-400 rounded-full"></div>
+<div>
+<p class="text-xs font-bold text-slate-900">New License Verification</p>
+<p class="text-[10px] text-slate-500">Dr. Aris Thorne • 15m ago</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer/Compliance Note -->
+<footer class="pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-xs font-medium">
+<p>© 2024 MedCore HMS. All medical records encrypted via AES-256-GCM.</p>
+<div class="flex gap-6">
+<a class="hover:text-primary transition-colors" href="#">Compliance Shield</a>
+<a class="hover:text-primary transition-colors" href="#">Privacy Architecture</a>
+<a class="hover:text-primary transition-colors" href="#">Vulnerability Report</a>
+</div>
+</footer>
+</div>
+</main>
+<!-- Contextual FAB (Suppressed as per rules for dashboard high focus, but shown here for layout demonstration if required. In this specific HMS admin dashboard, usually a "Global Search" or "Urgent Alert" FAB is used). Rules say render only if alignment perfect. We'll skip for this clean dashboard refactor. -->
+</body></html>

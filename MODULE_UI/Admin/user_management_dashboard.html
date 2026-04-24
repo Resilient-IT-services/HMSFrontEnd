@@ -1,0 +1,442 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed": "#dae2fd",
+                        "on-surface-variant": "#5a413a",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#ffb5a0",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f7f9fb",
+                        "on-secondary-fixed-variant": "#3a485b",
+                        "inverse-surface": "#2d3133",
+                        "secondary-fixed": "#d5e3fc",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "surface": "#f7f9fb",
+                        "secondary-container": "#d5e3fc",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "outline-variant": "#e3beb5",
+                        "primary": "#ad2c00",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "on-primary-fixed": "#3b0900",
+                        "surface-container": "#eceef0",
+                        "on-tertiary-container": "#fefcff",
+                        "inverse-on-surface": "#eff1f3",
+                        "secondary-fixed-dim": "#b9c7df",
+                        "tertiary-container": "#6c748b",
+                        "on-secondary-container": "#57657a",
+                        "on-primary-fixed-variant": "#872000",
+                        "on-primary-container": "#fffbff",
+                        "tertiary": "#545c72",
+                        "on-tertiary-fixed": "#131b2e",
+                        "surface-dim": "#d8dadc",
+                        "primary-fixed-dim": "#ffb5a0",
+                        "primary-container": "#d34011",
+                        "on-error-container": "#93000a",
+                        "surface-container-low": "#f2f4f6",
+                        "outline": "#8f7068",
+                        "on-surface": "#191c1e",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#e0e3e5",
+                        "secondary": "#515f74",
+                        "on-secondary-fixed": "#0d1c2e",
+                        "background": "#f7f9fb",
+                        "error": "#ba1a1a",
+                        "on-background": "#191c1e",
+                        "primary-fixed": "#ffdbd1",
+                        "surface-variant": "#e0e3e5",
+                        "surface-tint": "#b12d00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "stack_md": "20px",
+                        "base": "8px",
+                        "margin_canvas": "32px",
+                        "topbar_height": "72px",
+                        "sidebar_width": "280px",
+                        "stack_sm": "12px"
+                    },
+                    "fontFamily": {
+                        "h1": ["Manrope"],
+                        "body-md": ["Inter"],
+                        "display-lg": ["Manrope"],
+                        "body-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "h2": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "h1": ["28px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "display-lg": ["36px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1.4", "letterSpacing": "0.02em", "fontWeight": "500"}],
+                        "h2": ["22px", {"lineHeight": "1.4", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="text-on-background bg-background">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 border-r border-slate-200 bg-white shadow-sm flex flex-col py-6 font-manrope text-sm font-medium">
+<div class="px-6 mb-8">
+<h1 class="text-xl font-bold text-slate-900" style="">MedCore Health</h1>
+<p class="text-xs text-slate-500" style="">Hospital Admin</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors active:scale-95 duration-150" href="#" style="">
+<span class="material-symbols-outlined" data-icon="dashboard" style="">dashboard</span>
+                Dashboard
+            </a>
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors active:scale-95 duration-150" href="#" style="">
+<span class="material-symbols-outlined" data-icon="person" style="">person</span>
+                Patients
+            </a>
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors active:scale-95 duration-150" href="#" style="">
+<span class="material-symbols-outlined" data-icon="event" style="">event</span>
+                Appointments
+            </a>
+<a class="bg-orange-50 text-orange-700 border-r-4 border-orange-600 font-semibold px-4 py-3 flex items-center gap-3 transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="manage_accounts" style="">manage_accounts</span>
+                User Management
+            </a>
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors active:scale-95 duration-150" href="#" style="">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="">inventory_2</span>
+                Inventory
+            </a>
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors active:scale-95 duration-150" href="#" style="">
+<span class="material-symbols-outlined" data-icon="analytics" style="">analytics</span>
+                Reports
+            </a>
+</nav>
+<div class="px-4 mt-auto space-y-1">
+<div class="mb-4 px-2">
+<button class="w-full bg-primary text-white py-3 rounded-xl font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 duration-150" style="">
+<span class="material-symbols-outlined" data-icon="add" style="">add</span><br></button>
+</div>
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="settings" style="">settings</span>
+                Settings
+            </a>
+<a class="text-slate-500 px-4 py-3 flex items-center gap-3 hover:bg-slate-50 transition-colors" href="#" style="">
+<span class="material-symbols-outlined" data-icon="logout" style="">logout</span>
+                Logout
+            </a>
+</div>
+</aside>
+<!-- TopNavBar -->
+<header class="fixed top-0 right-0 left-64 h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md z-40 flex items-center justify-between px-8 w-full">
+<div class="flex items-center gap-4 flex-1">
+<span class="text-lg font-extrabold tracking-tight text-slate-900 font-manrope" style="">MedCore HMS</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-600">
+<span class="material-symbols-outlined cursor-pointer hover:text-orange-600" data-icon="notifications" style="">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-orange-600" data-icon="help_outline" style="">help_outline</span>
+</div>
+<div class="h-8 w-[1px] bg-slate-200"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-sm font-semibold text-slate-900" style="">Dr. Sarah Smith</p>
+<p class="text-xs text-slate-500" style="">City General Hospital</p>
+</div>
+<img alt="Admin User Avatar" class="w-10 h-10 rounded-full border-2 border-orange-100 object-cover" data-alt="portrait of a professional female doctor in white coat with friendly smile in medical office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACoc_rf3HJna-vBZhLz46I7RmVEUC-AAjIYpb_ykPZJ_ACpM9XmEnvvUdTm9zT90EqktyBdFblyFVlYU4vUEnQJBUysaVDprSfAWjde0eSTD29QwAldhLTdxiYwXOxs2VxQRx7hsjF7Z7nlE4jT9zeKJI6oaQkB0Q4RZcSUeusmJmh6QWD4IE2c4yYh29bcWQydqQmQyqqk7K8AuvA3uRDqR8YGjRTUFsgCHGb9mPsSVJLyc0ZucrUNoUnOzBBLl30_2XuUxOLQWo7" style="">
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="ml-64 mt-16 p-margin_canvas bg-surface min-h-[calc(100vh-64px)]">
+<!-- Dashboard Header -->
+<div class="flex justify-between items-center mb-8">
+<div>
+<h2 class="font-h1 text-h1 text-slate-900" style="">USER MANAGEMENT</h2>
+<p class="font-body-md text-slate-500 mt-1" style="">Manage hospital staff credentials and access levels</p>
+</div>
+<button class="bg-primary text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:bg-primary-container transition-all shadow-md shadow-primary/10 active:scale-95" style="">
+<span class="material-symbols-outlined" data-icon="person_add" style="">person_add</span>
+                Create User
+            </button>
+</div>
+<!-- Controls Row -->
+<div class="flex items-center justify-between mb-6 gap-4">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" data-icon="search" style="">search</span>
+<input class="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none bg-white font-body-md" placeholder="Search by name, email, or role..." type="text">
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors font-medium" style="">
+<span class="material-symbols-outlined text-xl" data-icon="filter_list" style="">filter_list</span>
+                    Filters
+                </button>
+<button class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors font-medium" style="">
+<span class="material-symbols-outlined text-xl" data-icon="file_download" style="">file_download</span>
+                    Export
+                </button>
+</div>
+</div>
+<!-- Table Container -->
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-slate-50/50 border-b border-slate-200">
+<th class="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm" style="">Username</th>
+<th class="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm" style="">Roles</th>
+<th class="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm" style="">Last Login</th>
+<th class="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm" style="">Status</th>
+<th class="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm text-right" style="">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4" style="">
+<div class="flex items-center gap-3">
+<img alt="User" class="w-10 h-10 rounded-full object-cover" data-alt="portrait of a professional doctor wearing glasses and stethoscope in a clinical hallway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDP5gwbsPdp8qWRZkumQpx6HvlPA9tNdWMu1AQ0U3XEdbyFwulqXxNyOhGh6qIe1h4otmyHURS309M4290tCZfluD07QFk2q7kXST9v0SeAuYYdkeg-k31FehPWOCjq5OSQFRELPcmrPvFbjFQ7K35p25-CNOexfAGTuEds2mKKBC-ge4O_lm-6UptHQvHQqkFZFlqMzuILAaNUNL-Htxz-jO1xxOMnNCHrbhRT8VmZEmo5bgIz7uw8KPL6tWIwjwTpXRFtZ63UZqZ" style="">
+<div>
+<p class="font-semibold text-slate-900 font-body-md" style="">dr_john_smith</p>
+<p class="text-xs text-slate-500" style="">john.smith@medcore.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4" style="">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 uppercase tracking-wider" style="">DOCTOR</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600" style="">2 hours ago</td>
+<td class="px-6 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600" style="">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Active
+                            </span>
+</td>
+<td class="px-6 py-4 text-right" style="">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-orange-600 transition-colors" style="">
+<span class="material-symbols-outlined" data-icon="edit" style="">edit</span>
+</button>
+<button class="px-4 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors" style="">Allocate</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4" style="">
+<div class="flex items-center gap-3">
+<img alt="User" class="w-10 h-10 rounded-full object-cover" data-alt="professional woman in modern business attire in a bright office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFV9N8fDpbg8pf1Fu4AxKXCsfmO8eM5R1NLBajPW679BMdoA2PwIY595Scd8rTlcgi0qwNgeDLYqXTnyqqV-NjW3RyvxzZYk2jvtjxIL-2623pzl1fI7TDzRmYkoXPeNNUvmgbNV-YoGAJJ9Q9Olt-jqqjHPyZnZ209lY_qioRH_5V2TM8QLZhHlCZ-lz5N5kLusuh3Ij5aAJly2olys4RqKQQbeqZYw5ODXIOShtNZnHfjFhgjoL4BmflizbpggnYbCAAfBYJ5FxV" style="">
+<div>
+<p class="font-semibold text-slate-900 font-body-md" style="">admin_carla</p>
+<p class="text-xs text-slate-500" style="">c.valdez@medcore.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4" style="">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 uppercase tracking-wider" style="">ADMIN</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600" style="">10 mins ago</td>
+<td class="px-6 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600" style="">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Active
+                            </span>
+</td>
+<td class="px-6 py-4 text-right" style="">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-orange-600 transition-colors" style="">
+<span class="material-symbols-outlined" data-icon="edit" style="">edit</span>
+</button>
+<button class="px-4 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors" style="">Allocate</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4" style="">
+<div class="flex items-center gap-3">
+<img alt="User" class="w-10 h-10 rounded-full object-cover" data-alt="male pharmacist in a clinical pharmacy setting wearing a lab coat" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjGzuBXoStnPiYulUv-Ceoz2AgHwwfk-PxhMZwAeSe-frpwvvCq-USlYunTgmWuH1aMKcVBdNz9Wpta2AFbpgaZKVWrfkOHYMxmfWXKPJnUDu7M1TKCWZ9jpYTCs1WhTggsDlWvgqYI0ZOJP4VV9ROXkqZ7IDnK66b3h1yZBXKy0u2suzEczZ5lG4IZu36FnBhT3IVQp-g_OsCJNDrQPmfXs9jqExNbG_A14atc-VcW6oUGQilT5yTVlE15zBXmdBgSCCVlyrzhNB2" style="">
+<div>
+<p class="font-semibold text-slate-900 font-body-md" style="">ph_marcus</p>
+<p class="text-xs text-slate-500" style="">m.wong@medcore.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4" style="">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 uppercase tracking-wider" style="">PHARMACIST</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600" style="">Yesterday</td>
+<td class="px-6 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs font-medium text-slate-400" style="">
+<span class="w-2 h-2 rounded-full bg-slate-300"></span>
+                                Inactive
+                            </span>
+</td>
+<td class="px-6 py-4 text-right" style="">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-orange-600 transition-colors" style="">
+<span class="material-symbols-outlined" data-icon="edit" style="">edit</span>
+</button>
+<button class="px-4 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors" style="">Allocate</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4" style="">
+<div class="flex items-center gap-3">
+<img alt="User" class="w-10 h-10 rounded-full object-cover" data-alt="friendly hospital receptionist in a modern medical lobby environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnWGZcJ5OrHB64bAKEmOV19fUORXlH1oSWG7_yH1Vt_AZyRXvtWJCDOJKvebua4mhVkF2stb1mALGgdo7srHE2v-ZL-aC4c9Td9AaMeL-w11d4a9VlynMWnm1kaMrbPZi7NKOWbHkuIaNLW1OPdJoGdrAejPc_9iFNzv6wY0Q3ksLaQd3yoN1ZtnCNB5I5nvMopMZoXu1ZHGdmnV54odG1yssHfvUkYS-DrWKtYwrcykndoYSGzLEc0fM-LGdwF-Vut-jv9xabOPZd" style="">
+<div>
+<p class="font-semibold text-slate-900 font-body-md" style="">frontdesk_lisa</p>
+<p class="text-xs text-slate-500" style="">l.white@medcore.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4" style="">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 uppercase tracking-wider" style="">RECEPTIONIST</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600" style="">4 hours ago</td>
+<td class="px-6 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600" style="">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Active
+                            </span>
+</td>
+<td class="px-6 py-4 text-right" style="">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-orange-600 transition-colors" style="">
+<span class="material-symbols-outlined" data-icon="edit" style="">edit</span>
+</button>
+<button class="px-4 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors" style="">Allocate</button>
+</div>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-slate-50/50 transition-colors">
+<td class="px-6 py-4" style="">
+<div class="flex items-center gap-3">
+<img alt="User" class="w-10 h-10 rounded-full object-cover" data-alt="male nurse in blue scrubs preparing medical equipment in a bright hospital room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDA1o-yZWirS5RckDU2DvEVXUsAJ0j6FovF20DdIw-8j6NmDdNsJcCzQhxdcK8M66yVGUHpK9H69SDQ3WhOdNxizZAPQhE4sgf3edpYZxN6_HggMAq4bcL0n9oR6fpU8Bzp4__oQBH25Utf-WdlmaL0XeOdpKUKn2Ffu3P2IYbYM-DUqMwNrD-XFwS9nWCZw0Y65Y9ZjtlMkbZcXtOFs9eSuQurZsRsSkYcR7iz6gZFa6FUQ50J58E_1aBKNHmLOjHy-LPwxDba2QPD" style="">
+<div>
+<p class="font-semibold text-slate-900 font-body-md" style="">nurse_david</p>
+<p class="text-xs text-slate-500" style="">d.miller@medcore.com</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4" style="">
+<span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-700 uppercase tracking-wider" style="">NURSE</span>
+</td>
+<td class="px-6 py-4 text-sm text-slate-600" style="">3 days ago</td>
+<td class="px-6 py-4" style="">
+<span class="flex items-center gap-1.5 text-xs font-medium text-emerald-600" style="">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                Active
+                            </span>
+</td>
+<td class="px-6 py-4 text-right" style="">
+<div class="flex items-center justify-end gap-2">
+<button class="p-2 text-slate-400 hover:text-orange-600 transition-colors" style="">
+<span class="material-symbols-outlined" data-icon="edit" style="">edit</span>
+</button>
+<button class="px-4 py-1.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors" style="">Allocate</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
+<p class="text-sm text-slate-500" style="">Showing 1 to 5 of 42 users</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 rounded border border-slate-200 text-slate-400 bg-white cursor-not-allowed" style="">
+<span class="material-symbols-outlined text-base" data-icon="chevron_left" style="">chevron_left</span>
+</button>
+<button class="px-3 py-1 rounded border border-slate-200 text-slate-600 bg-white hover:bg-slate-50" style="">1</button>
+<button class="px-3 py-1 rounded border border-orange-200 text-orange-600 bg-orange-50 font-semibold" style="">2</button>
+<button class="px-3 py-1 rounded border border-slate-200 text-slate-600 bg-white hover:bg-slate-50" style="">3</button>
+<button class="px-3 py-1 rounded border border-slate-200 text-slate-600 bg-white hover:bg-slate-50" style="">
+<span class="material-symbols-outlined text-base" data-icon="chevron_right" style="">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Role Analytics Bento Grid Section -->
+<div class="mt-8 grid grid-cols-12 gap-6">
+<div class="col-span-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+<h3 class="font-h2 text-h2 text-slate-900 mb-6" style="">User Permissions Matrix</h3>
+<div class="space-y-4">
+<div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-red-500" data-icon="security" style="">security</span>
+<span class="font-semibold text-slate-700" style="">Full System Access</span>
+</div>
+<div class="flex -space-x-2">
+<img alt="User" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="avatar of female administrator" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh6234YpRJvzH7VO6ZZVz5SYnjHW4fIRinpCT3ulfooBX2VN3kSQkklYZUvJm0IU14zp8gzf04Z7cuowsMcTc4fQPA_IUY6LbwlJN_XknhyTma3V_x3iKpvwjmYC2opYEm6ufVhJA9CL4nzA7ObLNP3A8KazN7WmNSGteNuiAmKqBTzvVv5O8hBupGozVX-8pRhskrer1uFh0NMqNvw7pQW-Dj6rG81BL6BYBYoXITh8fryneBb65w148HHzG0zRC6gk4OfZQE4xsc" style="">
+<div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600" style="">+2</div>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 bg-slate-50 rounded-lg">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-orange-500" data-icon="clinical_notes" style="">clinical_notes</span>
+<span class="font-semibold text-slate-700" style="">Patient Records Edit</span>
+</div>
+<div class="flex -space-x-2">
+<img alt="User" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="avatar of male doctor" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBg46fwUOTOmdVCdv2COQmPa7UAhc1QNdmpxlAL5zdyRMhXEPPnXzdnw6XnjCKyKfGBwTcHDqrm5qKyYz7r9WEGhDimpmcxWGqbhhv5FMGD2bH4eWohQ4wvLn0eGKdGCAx6lF-0m3fb4ibwKTOGKSdP2xfHGLshYm18osP_VBzqd0JFrFcjiC13y3eh2-xg25WwdMcfKYP0kxGRfLFbI3ZfhDd_1pvA_v4YpMmQW5Zj40I9Wt-H8EfeSk6fteYWRpoUOSgm_HBjn4fp" style="">
+<img alt="User" class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="avatar of male nurse" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMoW3SeVF6a16hm2OQg4JriAmdmCxRiO1RiAzOKGZqvc7VFH4QJ6KnVRgzdKad5x4PiF8tXJMkjneGymcRvPOGfJfUIhDMe-JE_2w-v34K0ObNdv_bWfap_79uNcZIy6zjIFK9f39kHNdfUMMwy1Zd8x0yMNG2dRhNMfDbA1hA3sNrAljD7xU0o6a9utEp7TTKoZt8k2URj3s043HhptwzyZiVfRLUMxB1VEe0zFfBI6Xk2-8SvywM4xb0ePHJmwaiyeWred85DzsH" style="">
+<div class="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-xs font-medium text-slate-600" style="">+14</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-span-4 bg-primary text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-h2 text-h2 mb-2" style="">Staff Distribution</h3>
+<p class="text-sm opacity-90 mb-6" style="">Overview of role assignments across the hospital wing.</p>
+<div class="space-y-4">
+<div class="flex justify-between items-center text-sm">
+<span class="" style="">Clinical Staff</span>
+<span class="font-bold" style="">64%</span>
+</div>
+<div class="w-full h-2 bg-white/20 rounded-full">
+<div class="w-[64%] h-full bg-white rounded-full"></div>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="" style="">Administrative</span>
+<span class="font-bold" style="">22%</span>
+</div>
+<div class="w-full h-2 bg-white/20 rounded-full">
+<div class="w-[22%] h-full bg-white rounded-full"></div>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="" style="">Technical/Inventory</span>
+<span class="font-bold" style="">14%</span>
+</div>
+<div class="w-full h-2 bg-white/20 rounded-full">
+<div class="w-[14%] h-full bg-white rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Decorative element -->
+<span class="material-symbols-outlined absolute -right-4 -bottom-4 text-white opacity-10 text-[120px]" data-icon="groups" style="">groups</span>
+</div>
+</div>
+</main>
+</body></html>
