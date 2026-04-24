@@ -36,8 +36,8 @@ export default function HospitalsPage() {
         {/* Page Header Actions */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-[30px] font-bold text-[var(--text-primary)] leading-tight">Hospital Network</h2>
-            <p className="text-[14px] text-[var(--text-secondary)]">Manage and monitor all healthcare facilities within the VitalSync ecosystem.</p>
+            <h2 className="font-headline-xl text-[var(--on-surface)]">Hospital Network</h2>
+            <p className="font-body-md text-[var(--on-surface-variant)]">Manage and monitor all healthcare facilities within the VitalSync ecosystem.</p>
           </div>
           <Link 
             href="/super_admin/hospitals/create"
@@ -58,7 +58,7 @@ export default function HospitalsPage() {
               <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">+2 this month</span>
             </div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Hospitals</p>
-            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">{hospitals.length}</h3>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--on-surface)]">{hospitals.length}</h3>
           </div>
           <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -67,7 +67,7 @@ export default function HospitalsPage() {
               </span>
             </div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Users</p>
-            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">1,482</h3>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--on-surface)]">1,482</h3>
           </div>
           <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -76,7 +76,7 @@ export default function HospitalsPage() {
               </span>
             </div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Operational Rate</p>
-            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">98.4%</h3>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--on-surface)]">98.4%</h3>
           </div>
           <div className="bg-white border border-gray-100 p-6 rounded-xl shadow-sm">
             <div className="flex items-center justify-between mb-4">
@@ -85,7 +85,7 @@ export default function HospitalsPage() {
               </span>
             </div>
             <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Avg. Patient Load</p>
-            <h3 className="text-2xl font-bold mt-1 text-[var(--text-primary)]">82%</h3>
+            <h3 className="text-2xl font-bold mt-1 text-[var(--on-surface)]">82%</h3>
           </div>
         </div>
 

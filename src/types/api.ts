@@ -100,18 +100,64 @@ export interface CreateHospitalRequest {
   address?: string;
 }
 
-export interface CreateUserRequest {
-  username: string;
-  password?: string;
+export interface DoctorInfo {
+  specialization: string;
+  department: string;
+  consultationFee: number;
+  followUpDays: number;
+  licenseNumber?: string;
+}
+
+export interface NurseInfo {
+  department: string;
+  licenseNumber?: string;
+}
+
+export interface PharmacistInfo {
+  licenseNumber?: string;
+}
+
+export interface LabTechInfo {
+  specialization?: string;
+}
+
+export interface ReceptionistInfo {
+  deskNumber?: string;
+}
+
+export interface DetailedHospitalMembershipDTO {
+  hospitalId: string;
   roles: Role[];
+  department?: string;
+  hourlyRate?: number;
+  schedule?: string;
+  status?: string;
+}
+
+export interface UserRequestDTO {
+  username: string;
+  email?: string;
+  password?: string;
   fullName: string;
-  gender: Gender;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
   dob: string;
   phone?: string;
-  specialization?: string;
-  department?: string;
-  consultationFee?: number;
-  followUpDays?: number;
+  superuser?: boolean;
+  doctorInfo?: DoctorInfo;
+  nurseInfo?: NurseInfo;
+  pharmacistInfo?: PharmacistInfo;
+  labTechInfo?: LabTechInfo;
+  receptionistInfo?: ReceptionistInfo;
+  detailedMemberships?: DetailedHospitalMembershipDTO[];
+}
+
+export interface UserFullProfileDTO extends UserResponse {
+  doctorInfo?: DoctorInfo;
+  nurseInfo?: NurseInfo;
+  pharmacistInfo?: PharmacistInfo;
+  labTechInfo?: LabTechInfo;
+  receptionistInfo?: ReceptionistInfo;
+  detailedMemberships?: DetailedHospitalMembershipDTO[];
 }
 
 export interface CreatePatientRequest {

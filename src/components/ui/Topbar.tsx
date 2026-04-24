@@ -53,38 +53,47 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
 
   return (
-    <header className="sticky top-0 z-50 flex items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] bg-opacity-80 backdrop-blur-md px-6 py-3 lg:px-10">
-      <div className="flex items-center gap-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--primary)] text-white">
-          <span className="material-symbols-outlined">health_and_safety</span>
-        </div>
-        <div>
-          <h2 className="text-xl font-bold leading-tight tracking-tight text-[var(--text-primary)]">{title || 'HMS System'}</h2>
-          <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase tracking-wider">{currentHospitalName}</p>
+    <header className="bg-white flex justify-between items-center h-16 px-6 w-full sticky top-0 z-40 border-b border-gray-200 shadow-sm font-manrope antialiased">
+      <div className="flex items-center gap-6">
+        <h1 className="text-xl font-extrabold tracking-tight text-gray-900 md:hidden">VitalSync HMS</h1>
+        <div className="hidden md:flex items-center relative">
+          <span className="material-symbols-outlined absolute left-3 text-gray-400 text-lg">search</span>
+          <input className="bg-slate-50 border-none rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-orange-200 outline-none" placeholder="Search across hospital..." type="text"/>
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-4 lg:gap-8">
+      <div className="flex items-center gap-4">
+        {user?.hospitals && user.hospitals.length > 1 && (
+          <button 
+            onClick={() => setIsProfileOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <span className="material-symbols-outlined text-lg">domain</span>
+            <span>{currentHospitalName}</span>
+          </button>
+        )}
+        
+        <div className="h-6 w-px bg-gray-200"></div>
+
         <div className="flex items-center gap-2">
-          <button className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--background)] text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-colors">
+          <button className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500">
             <span className="material-symbols-outlined">notifications</span>
           </button>
           
           <div className="relative ml-2" ref={dropdownRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-3 hover:bg-[var(--background)] p-1.5 pr-3 rounded-xl transition-all"
+              className="flex items-center gap-3 hover:bg-gray-50 p-1 rounded-lg transition-all"
             >
-              <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-[var(--primary-light)] bg-[var(--background)] flex items-center justify-center">
-                 <span className="material-symbols-outlined text-[var(--text-secondary)]">person</span>
+              <div className="h-8 w-8 rounded-full overflow-hidden border border-orange-200 bg-slate-100 flex items-center justify-center">
+                 <span className="material-symbols-outlined text-gray-500">account_circle</span>
               </div>
               <div className="text-left hidden sm:block">
-                <p className="text-sm font-bold text-[var(--text-primary)] leading-none">{user?.username}</p>
-                <p className="text-[10px] text-[var(--text-secondary)] font-bold uppercase mt-1 tracking-wider">
+                <p className="text-xs font-bold text-gray-900 leading-none">{user?.username}</p>
+                <p className="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-wider">
                   {roleLabel}
                 </p>
               </div>
-              <span className={`material-symbols-outlined text-[var(--text-secondary)] transition-transform ${isProfileOpen ? 'rotate-180' : ''}`}>expand_more</span>
             </button>
 
             {isProfileOpen && (

@@ -71,23 +71,23 @@ export default function EditHospitalPage({ params }: { params: Promise<{ id: str
                 className="flex items-center gap-2 text-slate-500 mb-2 cursor-pointer hover:text-[var(--primary)] transition-colors"
               >
                 <span className="material-symbols-outlined text-sm">arrow_back</span>
-                <span className="text-[12px] font-bold uppercase tracking-wider">Hospital Directory</span>
+                <span className="font-label-sm uppercase">Hospital Directory</span>
               </div>
-              <h2 className="text-[30px] font-bold text-[var(--text-primary)] leading-tight">Configure Hospital Facility</h2>
-              <p className="text-[14px] text-[var(--text-secondary)] mt-1">Manage registration details and operational settings for {formData.name}.</p>
+              <h2 className="font-headline-xl text-[var(--on-surface)]">Configure Hospital Facility</h2>
+              <p className="font-body-md text-[var(--on-surface-variant)] mt-1">Manage registration details and operational settings for {formData.name}.</p>
             </div>
             <div className="flex gap-3">
               <button 
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-2.5 border border-gray-300 bg-white text-[var(--text-primary)] font-bold rounded-lg hover:bg-slate-50 transition-all"
+                className="px-6 py-2.5 border border-gray-300 bg-white text-[var(--on-surface)] font-bold rounded-lg hover:bg-slate-50 transition-all font-label-md"
               >
                 Discard Changes
               </button>
               <button 
                 type="submit"
                 disabled={saving}
-                className="px-6 py-2.5 bg-[var(--primary)] text-white font-bold rounded-lg shadow-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50"
+                className="btn-primary"
               >
                 {saving ? 'Saving...' : 'Save Facility Profile'}
               </button>
@@ -99,7 +99,7 @@ export default function EditHospitalPage({ params }: { params: Promise<{ id: str
               {/* Basic Information */}
               <section className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                 <div className="p-6 border-b border-gray-100 bg-slate-50/50">
-                  <h3 className="font-bold text-lg text-[var(--text-primary)] flex items-center gap-2">
+                  <h3 className="font-headline-sm text-[var(--on-surface)] flex items-center gap-2">
                     <span className="material-symbols-outlined text-[var(--primary)]">info</span>
                     Basic Information
                   </h3>
@@ -107,9 +107,9 @@ export default function EditHospitalPage({ params }: { params: Promise<{ id: str
                 <div className="p-8 space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="col-span-2">
-                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Hospital Name</label>
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Hospital Name</label>
                       <input 
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all"
+                        className="form-input font-body-md"
                         type="text" 
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -117,9 +117,9 @@ export default function EditHospitalPage({ params }: { params: Promise<{ id: str
                       />
                     </div>
                     <div>
-                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Hospital Code</label>
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Hospital Code</label>
                       <input 
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all"
+                        className="form-input font-body-md"
                         type="text" 
                         value={formData.code}
                         onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -127,9 +127,9 @@ export default function EditHospitalPage({ params }: { params: Promise<{ id: str
                       />
                     </div>
                     <div>
-                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Registration Number</label>
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Registration Number</label>
                       <input 
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] transition-all"
+                        className="form-input font-body-md"
                         type="text" 
                         defaultValue="REG-2023-884920"
                       />

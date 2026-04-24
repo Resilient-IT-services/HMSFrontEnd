@@ -54,32 +54,46 @@ const Sidebar = () => {
   );
 
   return (
-    <aside className="hidden lg:flex w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] p-4 gap-2 h-screen">
-      <nav className="flex flex-col gap-1">
+    <aside className="hidden lg:flex w-64 flex-col border-r border-gray-200 bg-white p-4 gap-2 h-screen sticky top-0">
+      <div className="mb-8 px-2">
+        <h1 className="text-lg font-extrabold text-gray-900 leading-tight">VitalSync HMS</h1>
+        <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Admin Console</p>
+      </div>
+
+      <div className="px-2 mb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Main Menu</p>
+      </div>
+
+      <nav className="flex-1 space-y-1">
         {filteredMenuItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 font-manrope text-sm font-medium ${
                 isActive
-                  ? 'bg-[var(--primary)] text-white'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)]'
+                  ? 'bg-orange-50 text-orange-600'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             >
-              <span className="material-symbols-outlined">{item.icon}</span>
+              <span className={`material-symbols-outlined ${isActive ? 'active-state' : ''}`} style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                {item.icon}
+              </span>
               {item.name}
             </Link>
           );
         })}
       </nav>
       
-      <div className="mt-auto flex flex-col gap-1">
-        <div className="my-4 border-t border-[var(--border)]"></div>
+      <div className="mt-auto flex flex-col gap-1 pt-4 border-t border-gray-100">
+        <a className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium cursor-pointer">
+          <span className="material-symbols-outlined">help</span>
+          Support
+        </a>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-[var(--text-secondary)] hover:bg-[var(--error-light)] hover:text-[var(--error)] transition-colors font-medium w-full text-left"
+          className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium w-full text-left"
         >
           <span className="material-symbols-outlined">logout</span>
           Logout
