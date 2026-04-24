@@ -136,7 +136,7 @@ const AppointmentBookingPage = () => {
 
         if (selectedPatient) {
           const hasDup = res.data.content.some(a => 
-            a.patientId === selectedPatient.id && 
+            a.patientId === Number(selectedPatient.id) && 
             a.doctorId === Number(formData.doctorId) && 
             a.appointmentTime.startsWith(formData.date) &&
             a.status !== 'CANCELLED'

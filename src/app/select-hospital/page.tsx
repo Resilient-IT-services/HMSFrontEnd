@@ -11,7 +11,7 @@ const SelectHospitalPage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const handleSelect = async (hospitalId: number) => {
+  const handleSelect = async (hospitalId: string) => {
     try {
       const response = await authService.selectHospital(hospitalId);
       if (response.success && response.data) {

@@ -24,7 +24,7 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
   roleOptions,
 }) => {
   const [allocation, setAllocation] = useState<{
-    hospitalId: number | null;
+    hospitalId: string | null;
     roles: Role[];
     specialization: string;
     department: string;
@@ -71,7 +71,7 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
     }));
   };
 
-  const hasAccess = (hospId: number | null) => {
+  const hasAccess = (hospId: string | null) => {
     return selectedUser?.memberships?.some(m => m.hospitalId === hospId);
   };
 
@@ -88,7 +88,7 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
             value={allocation.hospitalId === null ? 'GLOBAL' : allocation.hospitalId}
             onChange={(e) => {
               const val = e.target.value;
-              const hospId = val === 'GLOBAL' ? null : Number.parseInt(val);
+              const hospId = val === 'GLOBAL' ? null : val;
 
               // Pre-fill existing roles if any
               const existing = selectedUser?.memberships?.find(m => m.hospitalId === hospId);

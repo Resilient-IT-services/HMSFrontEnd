@@ -13,11 +13,11 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children, title, headerActions, hideTitle }) => {
   return (
-    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-slate-50/30">
+    <div className="min-h-screen bg-surface">
       <Topbar title={title} />
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex min-h-[calc(100vh-64px)]">
         <Sidebar />
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 lg:p-10 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-gutter max-w-7xl mx-auto w-full">
           {children}
         </main>
       </div>

@@ -27,7 +27,7 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleHospitalSwitch = async (hospitalId: number) => {
+  const handleHospitalSwitch = async (hospitalId: string) => {
     const res = await authService.selectHospital(hospitalId);
     if (res.success && res.data) {
       dispatch(setUser(res.data));
@@ -55,10 +55,10 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
   return (
     <header className="bg-white flex justify-between items-center h-16 px-6 w-full sticky top-0 z-40 border-b border-gray-200 shadow-sm font-manrope antialiased">
       <div className="flex items-center gap-6">
-        <h1 className="text-xl font-extrabold tracking-tight text-gray-900 md:hidden">VitalSync HMS</h1>
+        <h1 className="text-xl font-extrabold tracking-tight text-gray-900">VitalSync HMS</h1>
         <div className="hidden md:flex items-center relative">
           <span className="material-symbols-outlined absolute left-3 text-gray-400 text-lg">search</span>
-          <input className="bg-slate-50 border-none rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-orange-200 outline-none" placeholder="Search across hospital..." type="text"/>
+          <input className="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary-container outline-none" placeholder="Search across hospital..." type="text"/>
         </div>
       </div>
 
@@ -69,32 +69,23 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <span className="material-symbols-outlined text-lg">domain</span>
-            <span>{currentHospitalName}</span>
+            <span>Hospital Switcher</span>
           </button>
         )}
         
         <div className="h-6 w-px bg-gray-200"></div>
 
-        <div className="flex items-center gap-2">
-          <button className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500">
-            <span className="material-symbols-outlined">notifications</span>
+        <button className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500">
+          <span className="material-symbols-outlined">notifications</span>
+        </button>
+        
+        <div className="relative" ref={dropdownRef}>
+          <button 
+            onClick={() => setIsProfileOpen(!isProfileOpen)}
+            className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500"
+          >
+            <span className="material-symbols-outlined text-2xl">account_circle</span>
           </button>
-          
-          <div className="relative ml-2" ref={dropdownRef}>
-            <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-3 hover:bg-gray-50 p-1 rounded-lg transition-all"
-            >
-              <div className="h-8 w-8 rounded-full overflow-hidden border border-orange-200 bg-slate-100 flex items-center justify-center">
-                 <span className="material-symbols-outlined text-gray-500">account_circle</span>
-              </div>
-              <div className="text-left hidden sm:block">
-                <p className="text-xs font-bold text-gray-900 leading-none">{user?.username}</p>
-                <p className="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-wider">
-                  {roleLabel}
-                </p>
-              </div>
-            </button>
 
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-72 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -186,7 +177,6 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
             )}
           </div>
         </div>
-      </div>
     </header>
   );
 };

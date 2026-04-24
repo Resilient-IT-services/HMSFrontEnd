@@ -4,7 +4,16 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FormField } from '@/components/ui/FormField';
 import apiClient from '@/services/apiClient';
-import { ApiResponse, UserResponse, Role, CreateUserRequest, HospitalResponse } from '@/types/api';
+import { ApiResponse, UserResponse, Role, UserRequestDTO, HospitalResponse } from '@/types/api';
+
+interface CreateUserRequest extends UserRequestDTO {
+  roles: Role[];
+  hospitalId?: string | null;
+  specialization?: string;
+  department?: string;
+  consultationFee?: number;
+  followUpDays?: number;
+}
 
 export const UserCreationModal = ({
                                     isOpen,
@@ -16,7 +25,7 @@ export const UserCreationModal = ({
                                     roleOptions,
                                   }: any) => {
 
-  const [newUser, setNewUser] = useState<CreateUserRequest & { hospitalId?: number | null }>({
+  const [newUser, setNewUser] = useState<CreateUserRequest>({
     username: '',
     password: '',
     roles: [],
@@ -140,7 +149,7 @@ export const UserCreationModal = ({
                 <select
                     className={`form-input ${errors.hospitalId ? 'border-red-500' : ''}`}
                     value={newUser.hospitalId || ''}
-                    onChange={(e) => handleChange('hospitalId', e.target.value ? Number(e.target.value) : null)}
+                    onChange={(e) => handleChange('hospitalId', e.target.value || null)}
                 >
                   <option value="">Select a Hospital</option>
                   {hospitals.map((h: HospitalResponse) => (

@@ -1,190 +1,116 @@
 @import "tailwindcss";
 
-@keyframes gradientMove{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-
-.animate-gradient{
-  background-size:200% 200%;
-  animation:gradientMove 8s ease infinite;
-}
-
 @theme {
-  --color-primary: var(--primary);
-  --color-primary-hover: #ff6b2b;
-  --color-primary-light: #ffdbce;
-  --color-bg: var(--background);
-  --color-surface: var(--surface);
-  --text-primary: var(--on-surface);
-  --text-secondary: var(--on-surface-variant);
-  --border-color: var(--outline-variant);
-  --color-success: var(--success);
-  --color-success-light: #d1fae5;
-  --color-error: var(--error);
-  --color-error-light: var(--error-container);
-  --color-warning: #f59e0b;
-  --color-warning-light: #fef3c7;
-  --color-info: #8b5cf6;
-  --color-info-light: #ede9fe;
+  /* Exact Colors from HTML Template */
+  --color-surface-container-high: #e7e8ee;
+  --color-surface-bright: #f9f9ff;
+  --color-surface: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-primary: #a83900;
+  --color-on-primary-fixed-variant: #802a00;
+  --color-on-secondary-container: #5a6579;
+  --color-outline: #8d7167;
+  --color-on-surface-variant: #594138;
+  --color-surface-dim: #d9dadf;
+  --color-inverse-surface: #2e3035;
+  --color-tertiary: #5c5f61;
+  --color-on-secondary-fixed: #111c2d;
+  --color-on-error-container: #93000a;
+  --color-surface-container: #ededf3;
+  --color-primary-container: #ff6b2b;
+  --color-primary-fixed: #ffdbce;
+  --color-on-tertiary-fixed-variant: #444749;
+  --color-on-secondary: #ffffff;
+  --color-on-surface: #191c20;
+  --color-surface-container-highest: #e2e2e8;
+  --color-secondary-fixed-dim: #bcc7de;
+  --color-on-primary-container: #5c1c00;
+  --color-on-tertiary-fixed: #191c1e;
+  --color-tertiary-fixed-dim: #c4c7c9;
+  --color-secondary-fixed: #d8e3fb;
+  --color-inverse-on-surface: #f0f0f6;
+  --color-secondary-container: #d8e3fb;
+  --color-on-primary: #ffffff;
+  --color-outline-variant: #e2bfb3;
+  --color-on-secondary-fixed-variant: #3c475a;
+  --color-on-error: #ffffff;
+  --color-background: #f9f9ff;
+  --color-surface-variant: #e2e2e8;
+  --color-error: #ba1a1a;
+  --color-tertiary-fixed: #e1e3e5;
+  --color-tertiary-container: #979a9c;
+  --color-on-background: #191c20;
+  --color-on-tertiary: #ffffff;
+  --color-primary-fixed-dim: #ffb59a;
+  --color-on-tertiary-container: #2f3234;
+  --color-secondary: #545f73;
+  --color-surface-tint: #a83900;
+  --color-error-container: #ffdad6;
+  --color-surface-container-low: #f3f3f9;
+  --color-inverse-primary: #ffb59a;
+  --color-on-primary-fixed: #380d00;
 
-  --spacing-base: 8px;
+  /* Spacing from Template */
+  --spacing-component-gap: 16px;
   --spacing-gutter: 24px;
   --spacing-section-gap: 24px;
-  --spacing-component-gap: 16px;
   --spacing-margin-page: 40px;
   --spacing-container-padding: 32px;
+  --spacing-base: 8px;
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
-  --radius-full: 9999px;
+  /* Font Families */
+  --font-inter: "Inter", sans-serif;
+  --font-manrope: "Manrope", sans-serif;
 }
 
 :root {
-  /* Colors from DESIGN.md */
-  --surface: #f9f9ff;
-  --surface-dim: #d9dadf;
-  --surface-bright: #f9f9ff;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #f3f3f9;
-  --surface-container: #ededf3;
-  --surface-container-high: #e7e8ee;
-  --surface-container-highest: #e2e2e8;
+  color-scheme: light;
+  --primary: #a83900;
+  --primary-container: #ff6b2b;
+  --on-primary: #ffffff;
   --on-surface: #191c20;
   --on-surface-variant: #594138;
-  --inverse-surface: #2e3035;
-  --inverse-on-surface: #f0f0f6;
-  --outline: #8d7167;
   --outline-variant: #e2bfb3;
-  --surface-tint: #a83900;
-  --primary: #a83900;
-  --on-primary: #ffffff;
-  --primary-container: #ff6b2b;
-  --on-primary-container: #5c1c00;
-  --inverse-primary: #ffb59a;
-  --secondary: #545f73;
-  --on-secondary: #ffffff;
-  --secondary-container: #d8e3fb;
-  --on-secondary-container: #5a6579;
-  --tertiary: #5c5f61;
-  --on-tertiary: #ffffff;
-  --tertiary-container: #979a9c;
-  --on-tertiary-container: #2f3234;
-  --error: #ba1a1a;
-  --on-error: #ffffff;
-  --error-container: #ffdad6;
-  --on-error-container: #93000a;
-  --primary-fixed: #ffdbce;
-  --primary-fixed-dim: #ffb59a;
-  --on-primary-fixed: #380d00;
-  --on-primary-fixed-variant: #802a00;
-  --secondary-fixed: #d8e3fb;
-  --secondary-fixed-dim: #bcc7de;
-  --on-secondary-fixed: #111c2d;
-  --on-secondary-fixed-variant: #3c475a;
-  --tertiary-fixed: #e1e3e5;
-  --tertiary-fixed-dim: #c4c7c9;
-  --on-tertiary-fixed: #191c1e;
-  --on-tertiary-fixed-variant: #444749;
+  --surface: #f9f9ff;
   --background: #f9f9ff;
-  --on-background: #191c20;
-  --surface-variant: #e2e2e8;
-
-  /* Semantic helper aliases */
-  --success: #10b981;
-  --border: var(--outline-variant);
-  --text-primary: var(--on-surface);
-  --text-secondary: var(--on-surface-variant);
-  
-  color-scheme: light;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: var(--background);
-  color: var(--on-surface);
-  font-family: 'Inter', sans-serif;
+  @apply font-inter text-on-surface bg-surface antialiased;
 }
 
-/* Typography Classes */
-.font-headline-xl { font-family: 'Manrope', sans-serif; font-size: 30px; font-weight: 700; line-height: 38px; }
-.font-headline-md { font-family: 'Manrope', sans-serif; font-size: 20px; font-weight: 600; line-height: 28px; }
-.font-headline-sm { font-family: 'Manrope', sans-serif; font-size: 16px; font-weight: 600; line-height: 24px; }
-.font-body-lg { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400; line-height: 24px; }
-.font-body-md { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400; line-height: 20px; }
-.font-body-sm { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 400; line-height: 18px; }
-.font-label-md { font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; line-height: 20px; }
-.font-label-sm { font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 600; line-height: 16px; letter-spacing: 0.02em; }
-
-.card {
-  background: var(--surface-container-lowest);
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-lg);
-  padding: 1.5rem;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background: var(--primary-container);
-  color: var(--on-primary);
-  padding: 0.75rem 1.5rem;
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: var(--surface-container-lowest);
-  color: var(--on-surface);
-  padding: 0.75rem 1.5rem;
-  border: 1px solid var(--outline);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-.btn-secondary:hover {
-  background: var(--surface-container-low);
-  transform: translateY(-1px);
-}
-
-.form-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--on-surface-variant);
-  margin-bottom: 0.5rem;
-}
-
-.form-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--outline-variant);
-  border-radius: var(--radius-md);
-  background: var(--surface-container-lowest);
-  color: var(--on-surface);
-  font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: var(--primary-container);
-  box-shadow: 0 0 0 2px rgba(255, 107, 43, 0.2);
-}
+/* Typography Utility Classes exactly as per Template */
+@utility font-headline-xl { font-family: var(--font-manrope); font-size: 30px; font-weight: 700; line-height: 38px; }
+@utility text-headline-xl { font-family: var(--font-manrope); font-size: 30px; font-weight: 700; line-height: 38px; }
+@utility font-headline-md { font-family: var(--font-manrope); font-size: 20px; font-weight: 600; line-height: 28px; }
+@utility text-headline-md { font-family: var(--font-manrope); font-size: 20px; font-weight: 600; line-height: 28px; }
+@utility font-headline-sm { font-family: var(--font-manrope); font-size: 16px; font-weight: 600; line-height: 24px; }
+@utility text-headline-sm { font-family: var(--font-manrope); font-size: 16px; font-weight: 600; line-height: 24px; }
+@utility font-body-lg { font-family: var(--font-inter); font-size: 16px; font-weight: 400; line-height: 24px; }
+@utility text-body-lg { font-family: var(--font-inter); font-size: 16px; font-weight: 400; line-height: 24px; }
+@utility font-body-md { font-family: var(--font-inter); font-size: 14px; font-weight: 400; line-height: 20px; }
+@utility text-body-md { font-family: var(--font-inter); font-size: 14px; font-weight: 400; line-height: 20px; }
+@utility font-body-sm { font-family: var(--font-inter); font-size: 12px; font-weight: 400; line-height: 18px; }
+@utility text-body-sm { font-family: var(--font-inter); font-size: 12px; font-weight: 400; line-height: 18px; }
+@utility font-label-md { font-family: var(--font-inter); font-size: 14px; font-weight: 500; line-height: 20px; }
+@utility text-label-md { font-family: var(--font-inter); font-size: 14px; font-weight: 500; line-height: 20px; }
+@utility font-label-sm { font-family: var(--font-inter); font-size: 12px; font-weight: 600; line-height: 16px; letter-spacing: 0.02em; }
+@utility text-label-sm { font-family: var(--font-inter); font-size: 12px; font-weight: 600; line-height: 16px; letter-spacing: 0.02em; }
 
 .material-symbols-outlined {
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: middle;
+}
+
+/* Form Styles from Template */
+.form-input {
+  @apply w-full px-4 py-2.5 bg-white border border-[#D0D5DD] rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-md;
+}
+
+.btn-primary {
+  @apply bg-primary-container text-on-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-label-md shadow-sm hover:opacity-90 transition-all active:scale-95;
+}
+
+.btn-secondary {
+  @apply px-6 py-2.5 border border-[#D0D5DD] bg-white text-on-surface font-label-md rounded-lg hover:bg-slate-50 transition-all;
 }

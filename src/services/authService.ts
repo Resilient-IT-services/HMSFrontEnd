@@ -20,7 +20,7 @@ export const authService = {
     return response.data;
   },
 
-  async selectHospital(hospitalId: number): Promise<ApiResponse<UserProfileResponse>> {
+  async selectHospital(hospitalId: string): Promise<ApiResponse<UserProfileResponse>> {
     const request: SelectHospitalRequest = { hospitalId };
     const response = await apiClient.post<ApiResponse<UserProfileResponse>>('/auth/select-hospital', request);
     return response.data;

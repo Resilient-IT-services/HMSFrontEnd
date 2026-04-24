@@ -60,11 +60,13 @@ export interface AllocateRoleRequest {
 export interface UserResponse {
   id: string;
   username: string;
+  email?: string;
   fullName?: string;
   gender?: Gender;
   dob?: string;
   phone?: string;
   memberships: HospitalMembershipResponse[];
+  superuser: boolean;
   active: boolean;
   deleted: boolean;
   createdAt: string;
