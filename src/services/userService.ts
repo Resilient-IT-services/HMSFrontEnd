@@ -14,6 +14,11 @@ export const userService = {
     return response.data;
   },
 
+  async getFullProfile(id: string): Promise<ApiResponse<UserResponse>> {
+    const response = await apiClient.get<ApiResponse<UserResponse>>(`/users/${id}/full-profile`);
+    return response.data;
+  },
+
   async createUser(data: UserRequestDTO): Promise<ApiResponse<UserResponse>> {
     const response = await apiClient.post<ApiResponse<UserResponse>>('/users', data);
     return response.data;
@@ -22,6 +27,13 @@ export const userService = {
   async updateUser(id: string, data: Partial<UserRequestDTO>): Promise<ApiResponse<UserResponse>> {
     const response = await apiClient.put<ApiResponse<UserResponse>>(`/users/${id}`, data);
     return response.data;
+  },
+
+  async save(data: UserRequestDTO): Promise<ApiResponse<UserResponse>> {
+    if (data.id) {
+      return this.updateUser(data.id, data);
+    }
+    return this.createUser(data);
   },
 
   async deleteUser(id: string): Promise<ApiResponse<void>> {

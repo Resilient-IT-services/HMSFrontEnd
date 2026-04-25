@@ -26,14 +26,15 @@ const UserManagement = () => {
       if (userRes.success && userRes.data) {
         const usersWithRoles = (userRes.data.content || []).map(u => {
           const allRoles = new Set<Role>();
-          if (u.memberships) {
-            for (const m of u.memberships) {
-              for (const r of m.roles) {
-                allRoles.add(r);
+          if (u.detailedMemberships) {
+            for (const m of u.detailedMemberships) {
+              for (const ra of m.roleAssignments) {
+                allRoles.add(ra.roleCode as Role);
               }
             }
           }
-          return { ...u, roles: [...allRoles] };
+          if (u.superuser) allRoles.add('SUPER_ADMIN');
+          return { ...u, roles: Array.from(allRoles) };
         });
         setUsers(usersWithRoles);
         setTotalElements(userRes.data.totalElements);
@@ -166,10 +167,10 @@ const UserManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-body-md">
-                      {row.memberships?.[0]?.hospitalName || 'System'}
+                      {row.detailedMemberships?.[0]?.hospitalName || 'System'}
                     </td>
                     <td className="px-6 py-4 text-body-md">
-                      {row.memberships?.[0]?.department || 'General'}
+                      {row.detailedMemberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border ${

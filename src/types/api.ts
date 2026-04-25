@@ -153,6 +153,7 @@ export interface UserProfileResponse extends UserResponse {
 }
 
 export interface UserRequestDTO {
+  id?: string;
   username: string;
   email: string;
   password?: string;
@@ -162,7 +163,6 @@ export interface UserRequestDTO {
   phone: string;
   superuser: boolean;
   active?: boolean;
-  memberships?: HospitalMembershipResponse[];
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
@@ -185,6 +185,7 @@ export interface PatientResponse {
 }
 
 export interface CreatePatientRequest {
+  id?: string;
   fullName: string;
   gender: Gender;
   dob: string;
@@ -203,9 +204,11 @@ export interface HospitalResponse {
 }
 
 export interface CreateHospitalRequest {
+  id?: string;
   name: string;
   code: string;
   address?: string;
+  gstin?: string;
 }
 
 export interface LoginRequest {
@@ -221,10 +224,10 @@ export interface SelectHospitalRequest {
 export type AppointmentStatus = 'SCHEDULED' | 'CONFIRMED' | 'CHECKED_IN' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED';
 
 export interface AppointmentResponse {
-  id: number;
-  patientId: number;
+  id: string;
+  patientId: string;
   patientName: string;
-  doctorId: number;
+  doctorId: string;
   doctorName: string;
   doctorSpecialization?: string;
   appointmentTime: string;
@@ -234,8 +237,9 @@ export interface AppointmentResponse {
 }
 
 export interface CreateAppointmentRequest {
-  patientId: number;
-  doctorId: number;
+  id?: string;
+  patientId: string;
+  doctorId: string;
   appointmentTime: string;
   notes?: string;
 }
@@ -247,7 +251,7 @@ export interface UpdateAppointmentStatusRequest {
 
 // Doctor types
 export interface DoctorResponse {
-  id: number;
+  id: string;
   fullName: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
   dob: string;
@@ -259,7 +263,7 @@ export interface DoctorResponse {
 
 // Pharmacy types
 export interface MedicineResponse {
-  id: number;
+  id: string;
   name: string;
   composition?: string;
   manufacturer?: string;
@@ -267,18 +271,18 @@ export interface MedicineResponse {
 }
 
 export interface PrescriptionItemResponse {
-  id: number;
-  medicineId: number;
+  id: string;
+  medicineId: string;
   medicineName: string;
   dosage: string;
   duration: string;
 }
 
 export interface PrescriptionResponse {
-  id: number;
-  patientId: number;
+  id: string;
+  patientId: string;
   patientName: string;
-  doctorId: number;
+  doctorId: string;
   doctorName: string;
   items: PrescriptionItemResponse[];
   status: string;
@@ -287,7 +291,7 @@ export interface PrescriptionResponse {
 
 // Billing types
 export interface BillingItemResponse {
-  id: number;
+  id: string;
   itemName: string;
   amount: number;
   quantity: number;
@@ -295,8 +299,8 @@ export interface BillingItemResponse {
 }
 
 export interface BillingResponse {
-  id: number;
-  patientId: number;
+  id: string;
+  patientId: string;
   sourceType: 'OPD' | 'PHARMACY';
   status: 'DRAFT' | 'GENERATED';
   totalAmount: number;

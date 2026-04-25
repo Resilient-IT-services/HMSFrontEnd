@@ -14,12 +14,19 @@ export const hospitalService = {
     return response.data;
   },
 
-  async update(id: number, request: Partial<CreateHospitalRequest> & { status?: string }): Promise<ApiResponse<HospitalResponse>> {
+  async update(id: string, request: Partial<CreateHospitalRequest> & { status?: string }): Promise<ApiResponse<HospitalResponse>> {
     const response = await apiClient.put<ApiResponse<HospitalResponse>>(`/hospitals/${id}`, request);
     return response.data;
   },
 
-  async getById(id: number): Promise<ApiResponse<HospitalResponse>> {
+  async save(data: CreateHospitalRequest & { status?: string }): Promise<ApiResponse<HospitalResponse>> {
+    if (data.id) {
+      return this.update(data.id, data);
+    }
+    return this.create(data);
+  },
+
+  async getById(id: string): Promise<ApiResponse<HospitalResponse>> {
     const response = await apiClient.get<ApiResponse<HospitalResponse>>(`/hospitals/${id}`);
     return response.data;
   }

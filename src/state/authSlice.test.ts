@@ -5,7 +5,6 @@ import { UserProfileResponse } from '@/types/api';
 describe('authSlice', () => {
   const mockUser: UserProfileResponse = {
     id: "user-1",
-    userId: 1,
     username: 'testuser',
     fullName: 'Test User',
     email: 'test@example.com',
@@ -13,10 +12,21 @@ describe('authSlice', () => {
     dob: '1990-01-01',
     gender: 'MALE',
     active: true,
+    deleted: false,
+    superuser: false,
+    createdAt: new Date().toISOString(),
     roles: [],
-    currentHospitalId: "101",
-    memberships: [
-      { hospitalId: "101", hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR', 'ADMIN'] }
+    currentHospitalId: "hosp-1",
+    detailedMemberships: [
+      { 
+        hospitalId: "hosp-1", 
+        hospitalName: 'Hospital A', 
+        hospitalCode: 'HA', 
+        roleAssignments: [
+          { assignmentId: 'a1', roleCode: 'DOCTOR', departmentName: 'OPD', active: true },
+          { assignmentId: 'a2', roleCode: 'ADMIN', departmentName: 'Admin', active: true }
+        ] 
+      }
     ]
   };
 
@@ -78,7 +88,12 @@ describe('authSlice', () => {
   it('should auto-set activeRole if user has only one effective role', () => {
     const singleRoleUser: UserProfileResponse = { 
       ...mockUser, 
-      memberships: [{ hospitalId: "101", hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['RECEPTIONIST'] }] 
+      detailedMemberships: [{ 
+        hospitalId: "hosp-1", 
+        hospitalName: 'Hospital A', 
+        hospitalCode: 'HA', 
+        roleAssignments: [{ assignmentId: 'a1', roleCode: 'RECEPTIONIST', departmentName: 'Front', active: true }]
+      }] 
     };
     const state = authReducer(undefined, setUser(singleRoleUser));
     expect(state.activeRole).toBe('RECEPTIONIST');
@@ -95,7 +110,7 @@ describe('authSlice', () => {
         isSuperMode: true,
         activeRole: null 
       }, 
-      setUser(mockUser) // mockUser has DOCTOR, ADMIN, but not SUPER_ADMIN in its memberships
+      setUser(mockUser) 
     );
     expect(state.isSuperMode).toBe(false);
   });

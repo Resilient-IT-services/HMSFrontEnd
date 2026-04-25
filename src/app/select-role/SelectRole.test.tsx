@@ -5,25 +5,41 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/state/authSlice';
 
-const createMockStore = () => configureStore({
-  reducer: { auth: authReducer },
-  preloadedState: {
-    auth: {
-      user: { roles: ['DOCTOR'] }
-    } as any
-  }
-});
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
+
+const mockUser = {
+  id: 'user-1',
+  fullName: 'Test User',
+  roles: ['DOCTOR', 'ADMIN'],
+  detailedMemberships: [
+    { hospitalId: '1', hospitalName: 'Hospital One', hospitalCode: 'H1', roleAssignments: [] }
+  ],
+};
+
+const renderWithRedux = (initialState = {}) => {
+  const store = configureStore({
+    reducer: { auth: authReducer },
+    preloadedState: { auth: { user: mockUser, currentHospitalId: '1', ...initialState } },
+  });
+  return render(
+    <Provider store={store}>
+      <SelectRolePage />
+    </Provider>
+  );
+};
 
 describe('SelectRolePage', () => {
   it('renders and allows selection', () => {
-    render(
-      <Provider store={createMockStore()}>
-        <SelectRolePage />
-      </Provider>
-    );
-
-    expect(screen.getByText('DOCTOR')).toBeInTheDocument();
-    fireEvent.click(screen.getByText('DOCTOR'));
-    // activeRole should be updated in store
+    renderWithRedux();
+    
+    expect(screen.getByText('Doctor')).toBeInTheDocument();
+    expect(screen.getByText('Administrator')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByText('Doctor'));
   });
 });

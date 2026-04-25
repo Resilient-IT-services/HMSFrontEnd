@@ -3,8 +3,8 @@
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FormField } from '@/components/ui/FormField';
-import apiClient from '@/services/apiClient';
-import { ApiResponse, UserResponse, Role, HospitalResponse } from '@/types/api';
+import { userService } from '@/services/userService';
+import { ApiResponse, UserResponse, Role, HospitalResponse, DetailedHospitalMembershipDTO, RoleAssignmentDTO } from '@/types/api';
 
 interface RoleAllocationModalProps {
   isOpen: boolean;
@@ -26,34 +26,54 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
   const [allocation, setAllocation] = useState<{
     hospitalId: string | null;
     roles: Role[];
-    specialization: string;
     department: string;
   }>(() => {
-    if (selectedUser?.memberships && selectedUser.memberships.length > 0) {
-      const membership = selectedUser.memberships[0];
+    if (selectedUser?.detailedMemberships && selectedUser.detailedMemberships.length > 0) {
+      const membership = selectedUser.detailedMemberships[0];
       return {
         hospitalId: membership.hospitalId,
-        roles: membership.roles,
-        specialization: membership.specialization || '',
-        department: membership.department || ''
+        roles: membership.roleAssignments.map(ra => ra.roleCode as Role),
+        department: membership.roleAssignments[0]?.departmentName || ''
       };
     }
-    return { hospitalId: null, roles: [], specialization: '', department: '' };
+    return { hospitalId: '', roles: [], department: '' };
   });
 
   const handleAllocateRoles = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUser) return;
+    if (!selectedUser || !allocation.hospitalId) return;
 
     try {
-      const response = await apiClient.post<ApiResponse<UserResponse>>('/users/allocate', {
-        userId: selectedUser.id,
+      const roleAssignments: RoleAssignmentDTO[] = allocation.roles.map(role => ({
+        assignmentId: '', // Server will handle
+        roleCode: role,
+        departmentName: allocation.department || 'General',
+        active: true
+      }));
+
+      const newMembership: DetailedHospitalMembershipDTO = {
         hospitalId: allocation.hospitalId,
-        roles: allocation.roles,
-        specialization: allocation.specialization,
-        department: allocation.department
+        roleAssignments
+      };
+
+      // Merge or Update memberships
+      const existingMemberships = selectedUser.detailedMemberships || [];
+      const updatedMemberships = existingMemberships.some(m => m.hospitalId === allocation.hospitalId)
+        ? existingMemberships.map(m => m.hospitalId === allocation.hospitalId ? newMembership : m)
+        : [...existingMemberships, newMembership];
+
+      const response = await userService.updateUser(selectedUser.id, {
+        username: selectedUser.username,
+        email: selectedUser.email,
+        fullName: selectedUser.fullName,
+        gender: selectedUser.gender,
+        dob: selectedUser.dob,
+        phone: selectedUser.phone,
+        superuser: selectedUser.superuser,
+        detailedMemberships: updatedMemberships
       });
-      if (response.data.success) {
+
+      if (response.success) {
         onSuccess();
         onClose();
       }
@@ -71,8 +91,8 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
     }));
   };
 
-  const hasAccess = (hospId: string | null) => {
-    return selectedUser?.memberships?.some(m => m.hospitalId === hospId);
+  const hasAccess = (hospId: string) => {
+    return selectedUser?.detailedMemberships?.some(m => m.hospitalId === hospId);
   };
 
   return (
@@ -85,120 +105,73 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
         <FormField label="Target Context" required>
           <select
             className="form-input"
-            value={allocation.hospitalId === null ? 'GLOBAL' : allocation.hospitalId}
+            value={allocation.hospitalId || ''}
             onChange={(e) => {
-              const val = e.target.value;
-              const hospId = val === 'GLOBAL' ? null : val;
-
-              // Pre-fill existing roles if any
-              const existing = selectedUser?.memberships?.find(m => m.hospitalId === hospId);
+              const hospId = e.target.value;
+              const existing = selectedUser?.detailedMemberships?.find(m => m.hospitalId === hospId);
               setAllocation({
                 hospitalId: hospId,
-                roles: existing ? existing.roles : [],
-                specialization: existing?.specialization || '',
-                department: existing?.department || ''
+                roles: existing ? existing.roleAssignments.map(ra => ra.roleCode as Role) : [],
+                department: existing?.roleAssignments[0]?.departmentName || ''
               });
             }}
           >
-            <optgroup label="System Wide">
-              <option 
-                value="GLOBAL" 
-                style={{ backgroundColor: hasAccess(null) ? 'var(--success-light)' : 'transparent' }}
-              >
-                {hasAccess(null) ? '✓ ' : ''}System Level (Global)
+            <option value="" disabled>Select a Hospital</option>
+            {hospitals.map(h => (
+              <option key={h.id} value={h.id}>
+                {hasAccess(h.id) ? '✓ ' : ''}{h.name}
               </option>
-            </optgroup>
-            <optgroup label="Real Business Hospitals">
-              {hospitals.map(h => {
-                const active = hasAccess(h.id);
-                return (
-                  <option 
-                    key={h.id} 
-                    value={h.id}
-                    style={{ backgroundColor: active ? 'var(--success-light)' : 'transparent' }}
-                  >
-                    {active ? '✓ ' : ''}{h.name} ({h.code})
-                  </option>
-                );
-              })}
-            </optgroup>
+            ))}
           </select>
-          <p className="text-[10px] text-[var(--text-secondary)] mt-1">
-            <span className="inline-block w-2 h-2 rounded-full bg-[var(--success-light)] mr-1"></span>
-            Hospitals marked with ✓ already have assigned roles.
-          </p>
         </FormField>
 
-        <FormField label="Assigned Roles" required>
-          <p className="text-[10px] text-[var(--text-secondary)] mb-2 uppercase font-bold tracking-wider">
-            {allocation.hospitalId === null 
-              ? 'Select Global System Roles' 
-              : `Select roles for ${hospitals.find(h => h.id === allocation.hospitalId)?.name}`}
-          </p>
-          <div className="grid grid-cols-2 gap-2 mt-2">
-            {roleOptions
-              .filter(role => {
-                if (allocation.hospitalId === null) return role === 'SUPER_ADMIN';
-                return role !== 'SUPER_ADMIN';
-              })
-              .map(role => (
-                <label key={role} className="flex items-center gap-2 p-2 rounded-lg border border-[var(--border)] hover:bg-[var(--background)] cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={allocation.roles.includes(role)}
-                    onChange={() => handleAllocationRoleToggle(role)}
-                    className="accent-[var(--primary)]"
-                  />
-                  <span className="text-xs font-bold text-[var(--text-primary)]">{role}</span>
-                </label>
-              ))}
-          </div>
-          {allocation.hospitalId === null && (
-            <p className="text-[10px] text-[var(--info)] mt-2 italic">
-              Only Super Admin roles can be assigned at the System Level.
-            </p>
-          )}
+        <FormField label="Department" required>
+          <input
+            className="form-input"
+            value={allocation.department}
+            onChange={(e) => setAllocation(prev => ({ ...prev, department: e.target.value }))}
+            placeholder="e.g. Cardiology"
+          />
         </FormField>
 
-        {allocation.roles.includes('DOCTOR') && (
-          <div className="p-4 bg-[var(--primary-light)]/30 rounded-xl border border-[var(--primary)]/20 space-y-4 animate-in fade-in slide-in-from-top-2">
-            <h4 className="text-xs font-black text-[var(--primary)] uppercase tracking-widest flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">stethoscope</span>
-              Doctor Details
-            </h4>
-            <FormField label="Specialization" required>
-              <input
-                className="form-input"
-                value={allocation.specialization}
-                onChange={(e) => setAllocation({ ...allocation, specialization: e.target.value })}
-                placeholder="e.g. Cardiology, Pediatrics"
-                required={allocation.roles.includes('DOCTOR')}
-              />
-            </FormField>
+        <div className="space-y-2">
+          <p className="text-label-md font-label-md text-on-surface uppercase tracking-widest text-[11px] mb-3">Roles to Allocate</p>
+          <div className="grid grid-cols-2 gap-2">
+            {roleOptions.filter(r => r !== 'SUPER_ADMIN').map((role) => (
+              <button
+                key={role}
+                type="button"
+                onClick={() => handleAllocationRoleToggle(role)}
+                className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-left ${
+                  allocation.roles.includes(role)
+                    ? 'bg-primary-container text-on-primary border-primary'
+                    : 'bg-surface-bright text-secondary border-outline-variant hover:border-primary'
+                }`}
+              >
+                <span className="material-symbols-outlined text-lg">
+                  {allocation.roles.includes(role) ? 'check_circle' : 'circle'}
+                </span>
+                <span className="text-xs font-bold">{role}</span>
+              </button>
+            ))}
           </div>
-        )}
+        </div>
 
-        {allocation.roles.includes('NURSE') && (
-          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-4 animate-in fade-in slide-in-from-top-2">
-            <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">medical_services</span>
-              Nurse Details
-            </h4>
-            <FormField label="Department" required>
-              <input
-                className="form-input"
-                value={allocation.department}
-                onChange={(e) => setAllocation({ ...allocation, department: e.target.value })}
-                placeholder="e.g. General Ward, ICU"
-                required={allocation.roles.includes('NURSE')}
-              />
-            </FormField>
-          </div>
-        )}
-
-        <div className="pt-4 flex gap-3">
-          <button type="button" onClick={onClose} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>
-          <button type="submit" className="flex-1 btn-primary">Save Allocation</button>
+        <div className="flex justify-end gap-3 pt-6 border-t border-outline-variant">
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn-secondary"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn-primary"
+            disabled={!allocation.hospitalId || allocation.roles.length === 0}
+          >
+            Apply Allocation
+          </button>
         </div>
       </form>
     </Modal>

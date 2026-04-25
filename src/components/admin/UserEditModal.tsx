@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FormField } from '@/components/ui/FormField';
-import apiClient from '@/services/apiClient';
+import { userService } from '@/services/userService';
 import { ApiResponse, UserResponse } from '@/types/api';
 
 interface UserEditModalProps {
@@ -19,13 +19,12 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
   onSuccess,
   user,
 }) => {
-  // Extract specialization and department from memberships
-  let initialSpec = '';
+  // Extract department from detailedMemberships
   let initialDept = '';
-  if (user?.memberships) {
-    for (const m of user.memberships) {
-      if (m.specialization) initialSpec = m.specialization;
-      if (m.department) initialDept = m.department;
+  if (user?.detailedMemberships && user.detailedMemberships.length > 0) {
+    const membership = user.detailedMemberships[0];
+    if (membership.roleAssignments && membership.roleAssignments.length > 0) {
+      initialDept = membership.roleAssignments[0].departmentName;
     }
   }
 
@@ -36,7 +35,6 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     dob: user?.dob ? user.dob.toString() : '',
     phone: user?.phone || '',
     active: user?.active ?? true,
-    specialization: initialSpec,
     department: initialDept
   });
 
@@ -45,8 +43,13 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
     if (!user) return;
 
     try {
-      const response = await apiClient.put<ApiResponse<UserResponse>>(`/users/${user.id}`, formData);
-      if (response.data.success) {
+      const response = await userService.updateUser(user.id, {
+        ...formData,
+        username: user.username,
+        superuser: user.superuser,
+        detailedMemberships: user.detailedMemberships
+      });
+      if (response.success) {
         onSuccess();
         onClose();
       }
@@ -126,40 +129,6 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
             User Account Active
           </label>
         </div>
-
-        {(user?.roles?.includes('DOCTOR')) && (
-          <div className="p-4 bg-[var(--primary-light)]/30 rounded-xl border border-[var(--primary)]/20 space-y-4">
-            <h4 className="text-xs font-black text-[var(--primary)] uppercase tracking-widest flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">stethoscope</span>
-              Doctor Details
-            </h4>
-            <FormField label="Specialization">
-              <input
-                className="form-input"
-                value={formData.specialization}
-                onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                placeholder="e.g. Cardiology"
-              />
-            </FormField>
-          </div>
-        )}
-
-        {(user?.roles?.includes('NURSE')) && (
-          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 space-y-4">
-            <h4 className="text-xs font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
-              <span className="material-symbols-outlined text-sm">medical_services</span>
-              Nurse Details
-            </h4>
-            <FormField label="Department">
-              <input
-                className="form-input"
-                value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                placeholder="e.g. ICU"
-              />
-            </FormField>
-          </div>
-        )}
 
         <div className="pt-4 flex gap-3">
           <button type="button" onClick={onClose} className="flex-1 py-3 text-sm font-bold text-[var(--text-secondary)] hover:bg-[var(--background)] rounded-xl transition-all">Cancel</button>

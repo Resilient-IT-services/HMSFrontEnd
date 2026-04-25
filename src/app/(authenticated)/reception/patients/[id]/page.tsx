@@ -37,7 +37,7 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
     try {
       setLoading(true);
       const [patientRes, appointmentsRes] = await Promise.all([
-        patientService.get(Number.parseInt(id)),
+        patientService.get(id),
         appointmentService.list(0, 100) // Fetch all to filter for this patient
       ]);
 
@@ -46,7 +46,7 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
       }
 
       if (appointmentsRes.success && appointmentsRes.data) {
-        setAppointments(appointmentsRes.data.content.filter(a => a.patientId === Number.parseInt(id)));
+        setAppointments(appointmentsRes.data.content.filter(a => a.patientId === id));
       }
     } catch (error) {
       console.error('Failed to fetch patient data', error);

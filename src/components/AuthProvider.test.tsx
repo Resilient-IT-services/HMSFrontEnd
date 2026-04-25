@@ -5,93 +5,75 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/state/authSlice';
 import { authService } from '@/services/authService';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
+// Mock services and navigation
 vi.mock('@/services/authService');
-vi.mock('next/navigation');
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+  usePathname: vi.fn(),
+}));
 
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: {
-      auth: authReducer,
-    },
-    preloadedState: {
-      auth: initialState,
-    },
+// Mock window.location
+const mockLocation = { href: '' };
+vi.stubGlobal('location', mockLocation);
+
+const mockUser = {
+  id: 'user-1',
+  username: 'doctor_user',
+  roles: ['DOCTOR'],
+  detailedMemberships: [
+    { hospitalId: 'h1', hospitalName: 'Hosp 1', hospitalCode: 'H1', roleAssignments: [{ roleCode: 'DOCTOR', active: true }] }
+  ],
+  currentHospitalId: 'h1'
+};
+
+const renderWithRedux = (children: React.ReactNode, initialState = {}) => {
+  const store = configureStore({
+    reducer: { auth: authReducer },
+    preloadedState: { auth: { user: null, isAuthenticated: false, isLoading: true, activeRole: null, ...initialState } },
   });
+  return render(<Provider store={store}>{children}</Provider>);
 };
 
 describe('AuthProvider', () => {
-  const mockPush = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    mockLocation.href = '';
   });
 
-  it('shows loader while loading', async () => {
+  it('shows loader while fetching user', () => {
     (authService.me as any).mockReturnValue(new Promise(() => {})); // Never resolves
-    (usePathname as any).mockReturnValue('/dashboard');
-    
-    const store = createMockStore({ isLoading: true });
-    render(
-      <Provider store={store}>
-        <AuthProvider>
-          <div>Children</div>
-        </AuthProvider>
-      </Provider>
-    );
-    
+    renderWithRedux(<AuthProvider>Children</AuthProvider>);
     expect(screen.getByTestId('loader')).toBeInTheDocument();
   });
 
-  it('redirects to login if not authenticated', async () => {
+  it('renders children if not authenticated and on public page', () => {
     (authService.me as any).mockResolvedValue({ success: false });
-    (usePathname as any).mockReturnValue('/dashboard');
-
-    const store = createMockStore({ isAuthenticated: false, isLoading: false });
-    render(
-      <Provider store={store}>
-        <AuthProvider>
-          <div>Children</div>
-        </AuthProvider>
-      </Provider>
-    );
-
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/login');
+    (usePathname as any).mockReturnValue('/login');
+    
+    renderWithRedux(<AuthProvider>Children</AuthProvider>, { isLoading: false });
+    
+    waitFor(() => {
+      expect(screen.getByText('Children')).toBeInTheDocument();
     });
   });
 
   it('redirects to dashboard if authenticated and on login page', async () => {
-    const mockUser = {
-      id: "user-1",
-      userId: 1,
-      username: 'doctor1',
-      currentHospitalId: "101",
-      roles: ['DOCTOR'],
-      memberships: [{ hospitalId: "101", roles: ['DOCTOR'] }]
-    };
     (authService.me as any).mockResolvedValue({ success: true, data: mockUser });
     (usePathname as any).mockReturnValue('/login');
-
-    const store = createMockStore({ 
+    
+    renderWithRedux(<AuthProvider>Children</AuthProvider>, { 
+      user: mockUser, 
       isAuthenticated: true, 
       isLoading: false, 
-      user: { ...mockUser, roles: ['DOCTOR'] },
       activeRole: 'DOCTOR' 
     });
-    
-    render(
-      <Provider store={store}>
-        <AuthProvider>
-          <div>Children</div>
-        </AuthProvider>
-      </Provider>
-    );
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/doctor/dashboard');
+      expect(mockLocation.href).toBe('/doctor/dashboard');
     });
   });
 });

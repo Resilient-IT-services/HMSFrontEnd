@@ -3,8 +3,8 @@
 import React, { useEffect, useState, use } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import UserForm from '@/components/admin/UserForm';
-import apiClient from '@/services/apiClient';
-import { ApiResponse, UserFullProfileDTO } from '@/types/api';
+import { userService } from '@/services/userService';
+import { UserFullProfileDTO } from '@/types/api';
 
 export default function EditUserPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -15,9 +15,9 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
     const fetchUser = async () => {
       try {
         setLoading(true);
-        const res = await apiClient.get<ApiResponse<UserFullProfileDTO>>(`/users/${id}/full-profile`);
-        if (res.data.success && res.data.data) {
-          setUserData(res.data.data);
+        const res = await userService.getFullProfile(id);
+        if (res.success && res.data) {
+          setUserData(res.data);
         }
       } catch (error) {
         console.error('Failed to fetch user', error);

@@ -18,7 +18,7 @@ const TodayAppointmentsPage = () => {
   const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('All');
-  const [doctorFilter, setDoctorFilter] = useState<number | 'All'>('All');
+  const [doctorFilter, setDoctorFilter] = useState<string | 'All'>('All');
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   
@@ -53,7 +53,7 @@ const TodayAppointmentsPage = () => {
     newAppointmentRef.current?.focus();
   }, []);
 
-  const handleStatusUpdate = async (id: number, status: AppointmentStatus) => {
+  const handleStatusUpdate = async (id: string, status: AppointmentStatus) => {
     try {
       const res = await appointmentService.updateStatus(id, { status });
       if (res.success) {
@@ -182,7 +182,7 @@ const TodayAppointmentsPage = () => {
               <Filter className="size-3 text-[var(--text-secondary)]" />
               <select 
                 value={doctorFilter}
-                onChange={(e) => setDoctorFilter(e.target.value === 'All' ? 'All' : Number(e.target.value))}
+                onChange={(e) => setDoctorFilter(e.target.value)}
                 className="bg-transparent text-[10px] font-black uppercase text-[var(--text-secondary)] outline-none cursor-pointer"
               >
                 <option value="All">All Doctors</option>

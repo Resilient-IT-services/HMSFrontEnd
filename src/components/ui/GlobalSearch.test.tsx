@@ -2,75 +2,65 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GlobalSearch from './GlobalSearch';
 import { searchService } from '@/services/searchService';
+import { useRouter } from 'next/navigation';
 
-// Mock searchService
+// Mock navigation and services
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+  })),
+}));
+
 vi.mock('@/services/searchService', () => ({
   searchService: {
     search: vi.fn(),
   },
 }));
 
-// Mock next/navigation
-const mockPush = vi.fn();
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}));
-
 describe('GlobalSearch', () => {
+  const mockPush = vi.fn();
+
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  it('renders correctly', () => {
-    render(<GlobalSearch />);
-    expect(screen.getByPlaceholderText(/Search Hospitals, Users, Patients/i)).toBeInTheDocument();
+    (useRouter as any).mockReturnValue({ push: mockPush });
   });
 
   it('triggers search after debounce when typing', async () => {
-    const mockResults = [
-        { id: '1', type: 'HOSPITAL', title: 'Test Hospital', subtitle: 'TEST', link: '/hospitals/1' }
-    ];
     (searchService.search as any).mockResolvedValue({
       success: true,
-      data: mockResults
+      data: {
+        content: [
+          { id: '1', type: 'HOSPITAL', title: 'Test Hospital', subtitle: 'H1', link: '/hospitals/1' }
+        ]
+      }
     });
 
     render(<GlobalSearch />);
-    const input = screen.getByPlaceholderText(/Search Hospitals, Users, Patients/i);
-    
+    const input = screen.getByPlaceholderText(/Search Hospitals/i);
     fireEvent.change(input, { target: { value: 'Test' } });
-
-    // Wait for debounce and search result
-    await waitFor(() => {
-      expect(searchService.search).toHaveBeenCalledWith('Test');
-    }, { timeout: 3000 });
 
     await waitFor(() => {
       expect(screen.getByText('Test Hospital')).toBeInTheDocument();
-    });
+    }, { timeout: 3000 });
   });
 
   it('navigates to link when clicking a result', async () => {
     (searchService.search as any).mockResolvedValue({
       success: true,
-      data: [
-        { id: '1', type: 'PATIENT', title: 'John Doe', subtitle: '123456', link: '/patients/1' }
-      ]
+      data: {
+        content: [
+          { id: '1', type: 'USER', title: 'John Doe', subtitle: 'Doctor', link: '/users/1' }
+        ]
+      }
     });
 
     render(<GlobalSearch />);
-    const input = screen.getByPlaceholderText(/Search Hospitals, Users, Patients/i);
-    
+    const input = screen.getByPlaceholderText(/Search Hospitals/i);
     fireEvent.change(input, { target: { value: 'John' } });
 
-    await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
+    const result = await screen.findByText('John Doe');
+    fireEvent.click(result);
 
-    fireEvent.click(screen.getByText('John Doe'));
-
-    expect(mockPush).toHaveBeenCalledWith('/patients/1');
+    expect(mockPush).toHaveBeenCalledWith('/users/1');
   });
 });

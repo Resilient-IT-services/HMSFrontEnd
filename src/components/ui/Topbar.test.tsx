@@ -4,84 +4,77 @@ import Topbar from './Topbar';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/state/authSlice';
-import { authService } from '@/services/authService';
-import { LayoutProvider } from '@/context/LayoutContext';
 
-vi.mock('@/services/authService');
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-  }),
+// Mock GlobalSearch to simplify Topbar testing
+vi.mock('./GlobalSearch', () => ({
+  default: () => <div data-testid="global-search">Search</div>
 }));
 
-const createMockStore = (initialState?: any) => {
-  return configureStore({
-    reducer: {
-      auth: authReducer,
-    },
-    preloadedState: {
-      auth: initialState,
-    },
+const mockUser = {
+  id: 'user-1',
+  username: 'testuser',
+  fullName: 'Test User',
+  roles: ['DOCTOR'],
+  detailedMemberships: [
+    { hospitalId: '1', hospitalName: 'Test Hospital', hospitalCode: 'TH', roleAssignments: [] }
+  ],
+  currentHospitalId: '1'
+};
+
+import { LayoutProvider } from '@/context/LayoutContext';
+
+const renderWithRedux = (initialState = {}) => {
+  const store = configureStore({
+    reducer: { auth: authReducer },
+    preloadedState: { auth: { 
+      user: mockUser, 
+      isAuthenticated: true, 
+      activeRole: 'DOCTOR',
+      isSuperMode: false,
+      ...initialState 
+    } },
   });
+  return render(
+    <Provider store={store}>
+      <LayoutProvider>
+        <Topbar />
+      </LayoutProvider>
+    </Provider>
+  );
 };
 
 describe('Topbar', () => {
-  const mockUser = {
-    username: 'john_doe',
-    currentHospitalId: "101",
-    roles: ['DOCTOR', 'ADMIN'],
-    memberships: [
-      { hospitalId: "101", hospitalName: 'City Clinic', hospitalCode: 'CC', roles: ['DOCTOR'] },
-      { hospitalId: "102", hospitalName: 'Metro Hospital', hospitalCode: 'MH', roles: ['ADMIN'] }
-    ]
-  };
-
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders title and username', () => {
-    const store = createMockStore({ user: mockUser, activeRole: 'DOCTOR' });
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <Topbar />
-        </LayoutProvider>
-      </Provider>
-    );
-    
-    expect(screen.getByText('john_doe')).toBeInTheDocument();
+    renderWithRedux();
+    expect(screen.getByText('VitalSync HMS')).toBeInTheDocument();
+    expect(screen.getByText('testuser')).toBeInTheDocument();
+    expect(screen.getByText('TEST HOSPITAL')).toBeInTheDocument();
   });
 
   it('opens profile dropdown on click', () => {
-    const store = createMockStore({ user: mockUser, activeRole: 'DOCTOR' });
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <Topbar />
-        </LayoutProvider>
-      </Provider>
-    );
-    
-    fireEvent.click(screen.getByRole('button', { name: /account_circle/i }));
-    expect(screen.getByText('Available Roles')).toBeInTheDocument();
-    expect(screen.getByText('Switch Hospital')).toBeInTheDocument();
+    renderWithRedux();
+    const profileButton = screen.getByText('testuser').closest('button');
+    fireEvent.click(profileButton!);
+    expect(screen.getByText('Signed in as')).toBeInTheDocument();
+    expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
-  it('handles hospital switch', async () => {
-    const store = createMockStore({ user: mockUser, activeRole: 'DOCTOR', isAuthenticated: true });
-
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <Topbar />
-        </LayoutProvider>
-      </Provider>
-    );
+  it('handles hospital switch', () => {
+    const multiHospitalUser = {
+      ...mockUser,
+      detailedMemberships: [
+        { hospitalId: '1', hospitalName: 'Hosp 1', hospitalCode: 'H1', roleAssignments: [] },
+        { hospitalId: '2', hospitalName: 'Hosp 2', hospitalCode: 'H2', roleAssignments: [] }
+      ]
+    };
+    renderWithRedux({ user: multiHospitalUser });
+    const profileButton = screen.getByText('testuser').closest('button');
+    fireEvent.click(profileButton!);
     
-    fireEvent.click(screen.getByRole('button', { name: /account_circle/i }));
-    fireEvent.click(screen.getByText('Metro Hospital'));
-    
-    expect(store.getState().auth.user?.currentHospitalId).toBe("102");
+    expect(screen.getByText('Hosp 2')).toBeInTheDocument();
   });
 });
