@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setSuperMode, setActiveRole, setUser } from '@/state/authSlice';
+import { setSuperMode, setActiveRole, setUser, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { Role } from '@/types/api';
 import GlobalSearch from './GlobalSearch';
@@ -27,12 +27,9 @@ const Topbar: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleHospitalSwitch = async (hospitalId: string) => {
-    const res = await authService.selectHospital(hospitalId);
-    if (res.success && res.data) {
-      dispatch(setUser(res.data));
-      setIsProfileOpen(false);
-    }
+  const handleHospitalSwitch = (hospitalId: string) => {
+    dispatch(setCurrentHospitalId(hospitalId));
+    setIsProfileOpen(false);
   };
 
   const handleRoleSwitch = (role: Role) => {

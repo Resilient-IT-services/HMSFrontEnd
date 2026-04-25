@@ -3,23 +3,15 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { authService } from '@/services/authService';
-import { setUser } from '@/state/authSlice';
+import { setCurrentHospitalId } from '@/state/authSlice';
 import { Card } from '@/components/ui/Card';
 
 const SelectHospitalPage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
 
-  const handleSelect = async (hospitalId: string) => {
-    try {
-      const response = await authService.selectHospital(hospitalId);
-      if (response.success && response.data) {
-        dispatch(setUser(response.data));
-      }
-    } catch (error) {
-      console.error('Failed to select hospital', error);
-    }
+  const handleSelect = (hospitalId: string) => {
+    dispatch(setCurrentHospitalId(hospitalId));
   };
 
   return (

@@ -19,6 +19,12 @@ apiClient.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
 
+  const state = store.getState();
+  const hospitalId = state.auth.user?.currentHospitalId;
+  if (hospitalId) {
+    config.headers['X-Hospital-Id'] = hospitalId;
+  }
+
   return config;
 });
 

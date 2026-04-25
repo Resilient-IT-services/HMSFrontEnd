@@ -36,13 +36,4 @@ describe('authService', () => {
     expect(apiClient.post).toHaveBeenCalledWith('/auth/logout');
     expect(result).toEqual(mockRes.data);
   });
-
-  it('selectHospital should call /auth/select-hospital', async () => {
-    const mockRes = { data: { success: true } };
-    (apiClient.post as any).mockResolvedValue(mockRes);
-
-    const result = await authService.selectHospital(101);
-    expect(apiClient.post).toHaveBeenCalledWith('/auth/select-hospital', { hospitalId: 101 });
-    expect(result).toEqual(mockRes.data);
-  });
 });

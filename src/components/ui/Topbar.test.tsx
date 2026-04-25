@@ -8,6 +8,11 @@ import { authService } from '@/services/authService';
 import { LayoutProvider } from '@/context/LayoutContext';
 
 vi.mock('@/services/authService');
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+  }),
+}));
 
 const createMockStore = (initialState?: any) => {
   return configureStore({
@@ -64,8 +69,7 @@ describe('Topbar', () => {
   });
 
   it('handles hospital switch', async () => {
-    const store = createMockStore({ user: mockUser, activeRole: 'DOCTOR' });
-    (authService.selectHospital as any).mockResolvedValue({ success: true, data: { ...mockUser, currentHospitalId: "102" } });
+    const store = createMockStore({ user: mockUser, activeRole: 'DOCTOR', isAuthenticated: true });
 
     render(
       <Provider store={store}>
@@ -78,6 +82,6 @@ describe('Topbar', () => {
     fireEvent.click(screen.getByRole('button', { name: /account_circle/i }));
     fireEvent.click(screen.getByText('Metro Hospital'));
     
-    expect(authService.selectHospital).toHaveBeenCalledWith("102");
+    expect(store.getState().auth.user?.currentHospitalId).toBe("102");
   });
 });

@@ -23,16 +23,16 @@ const createMockStore = () => configureStore({
 
 describe('SelectHospitalPage', () => {
   it('renders and allows selection', async () => {
-    (authService.selectHospital as any).mockResolvedValue({ success: true, data: {} });
-
+    const store = createMockStore();
     render(
-      <Provider store={createMockStore()}>
+      <Provider store={store}>
         <SelectHospitalPage />
       </Provider>
     );
 
     expect(screen.getByText('Hospital 1')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Hospital 1'));
-    expect(authService.selectHospital).toHaveBeenCalledWith("101");
+    
+    expect(store.getState().auth.user?.currentHospitalId).toBe("101");
   });
 });

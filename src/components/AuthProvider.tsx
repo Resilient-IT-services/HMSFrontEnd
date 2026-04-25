@@ -3,7 +3,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setUser, setLoading, setError, setActiveRole, setSuperMode } from '@/state/authSlice';
+import { setUser, setLoading, setError, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -79,9 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
 
-      authService.selectHospital(targetHospitalId).then(res => {
-        if (res.success && res.data) dispatch(setUser(res.data));
-      });
+      dispatch(setCurrentHospitalId(targetHospitalId));
 
     } else if (roles.includes('SUPER_ADMIN')) {
       // Super admins don't necessarily need a hospitalId
