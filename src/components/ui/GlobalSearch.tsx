@@ -26,7 +26,7 @@ const GlobalSearch: React.FC = () => {
       try {
         const res = await searchService.search(debouncedQuery);
         if (res.success && res.data) {
-          setResults(res.data);
+          setResults(res.data.content || []);
           setIsOpen(true);
         }
       } catch (error) {

@@ -114,7 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
 
       const path = rolePathMap[activeRole!] || activeRole!.toLowerCase();
-      router.push(`/${path}/dashboard`);
+      const targetPath = `/${path}/dashboard`;
+      
+      if (pathname !== targetPath) {
+        router.push(targetPath);
+      }
     }
   }, [activeRole, pathname, router]);
 
