@@ -52,7 +52,7 @@ describe('Topbar', () => {
     renderWithRedux();
     expect(screen.getByText('VitalSync HMS')).toBeInTheDocument();
     expect(screen.getByText('testuser')).toBeInTheDocument();
-    expect(screen.getByText('TEST HOSPITAL')).toBeInTheDocument();
+    expect(screen.getByText('Test Hospital')).toBeInTheDocument();
   });
 
   it('opens profile dropdown on click', () => {
