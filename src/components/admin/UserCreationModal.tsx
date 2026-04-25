@@ -171,6 +171,16 @@ export const UserCreationModal = ({
             {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName}</p>}
           </FormField>
 
+          {/* EMAIL */}
+          <FormField label="Email">
+            <input className="form-input"
+                   type="email"
+                   value={newUser.email}
+                   onChange={(e) => handleChange('email', e.target.value)}
+                   placeholder="e.g. john.doe@example.com"
+            />
+          </FormField>
+
           {/* USERNAME */}
           <FormField label="Username" required>
             <input className="form-input"

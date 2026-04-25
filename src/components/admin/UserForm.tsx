@@ -64,18 +64,60 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   }, []);
 
   const validate = (): boolean => {
-    const errors: ValidationErrors = {};
-    if (!formData.fullName) errors.fullName = 'Full name is required';
-    if (!formData.username) errors.username = 'Username is required';
-    if (!isEdit && !formData.password) errors.password = 'Password is required';
+    // Basic info validation
+    if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
+    if (!formData.username?.trim()) errors.username = 'Username is required';
+    if (!isEdit && !formData.password?.trim()) errors.password = 'Password is required';
+    if (!formData.email?.trim()) errors.email = 'Email address is required';
+    if (!formData.phone?.trim()) errors.phone = 'Phone number is required';
     if (!formData.dob) errors.dob = 'Date of birth is required';
     
+    // Contract validation
+    if (!formData.detailedMemberships || formData.detailedMemberships.length === 0) {
+      errors.memberships = 'At least one hospital contract is required';
+    } else {
+      formData.detailedMemberships.forEach((m, idx) => {
+        if (!m.hospitalId) errors[`membership_${idx}_hospital`] = 'Hospital is required for all contracts';
+        if (!m.roleAssignments || m.roleAssignments.length === 0) {
+          errors[`membership_${idx}_roles`] = 'At least one role is required for all contracts';
+        } else {
+          m.roleAssignments.forEach((ra, raIdx) => {
+            if (ra.roleCode === 'DOCTOR') {
+              if (!ra.doctorDetails?.consultationFee) errors[`membership_${idx}_role_${raIdx}_fee`] = 'Fee is required';
+            }
+            if (ra.roleCode === 'NURSE') {
+              if (!ra.nurseDetails?.floorLocation) errors[`membership_${idx}_role_${raIdx}_floor`] = 'Floor is required';
+            }
+          });
+        }
+      });
+    }
+
     // Profile info validation based on active roles
     if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo?.specialization) {
       errors.specialization = 'Doctor specialization is required';
     }
+    if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo?.licenseNumber) {
+      errors.licenseNumber = 'Medical license number is required';
+    }
+    if (assignedRoles.includes('NURSE') && !formData.nurseInfo?.department) {
+      errors.nurseDept = 'Nurse department is required';
+    }
+    if (assignedRoles.includes('NURSE') && !formData.nurseInfo?.nursingLicenseNo) {
+      errors.nurseLicense = 'Nursing license number is required';
+    }
 
     setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      // Switch tab if error is in another tab
+      if (errors.fullName || errors.username || errors.password || errors.email || errors.phone || errors.dob) {
+        setActiveTab('personal');
+      } else if (errors.memberships || Object.keys(errors).some(k => k.startsWith('membership_'))) {
+        setActiveTab('contracts');
+      } else {
+        setActiveTab('profile');
+      }
+    }
     return Object.keys(errors).length === 0;
   };
 
@@ -113,6 +155,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   };
 
   const [isAddingContract, setIsAddingContract] = useState(false);
+  const [editingContractIndex, setEditingContractIndex] = useState<number | null>(null);
   const [newContract, setNewContract] = useState<DetailedHospitalMembershipDTO>({
     hospitalId: '',
     roleAssignments: []
@@ -144,11 +187,31 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     }
   };
 
+  const duplicateContract = (contract: DetailedHospitalMembershipDTO) => {
+    setNewContract({
+      ...contract,
+      hospitalId: '', // Reset hospital for the new copy
+      hospitalName: undefined
+    });
+    setEditingContractIndex(null);
+    setIsAddingContract(true);
+  };
+
   const confirmAddContract = () => {
     if (!newContract.hospitalId) {
       setValidationErrors({...validationErrors, newContractHospital: 'Hospital is required'});
       return;
     }
+    
+    // Check for duplicate hospital if creating new
+    if (editingContractIndex === null) {
+      const exists = formData.detailedMemberships?.some(m => String(m.hospitalId) === String(newContract.hospitalId));
+      if (exists) {
+        alert('User already has a contract with this hospital');
+        return;
+      }
+    }
+
     if (newContract.roleAssignments.length === 0) {
       alert('Select at least one role');
       return;
@@ -166,12 +229,20 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       }
     });
 
+    const updatedMemberships = [...(formData.detailedMemberships || [])];
+    if (editingContractIndex !== null) {
+      updatedMemberships[editingContractIndex] = { ...newContract, hospitalName: hosp?.name };
+    } else {
+      updatedMemberships.push({ ...newContract, hospitalName: hosp?.name });
+    }
+
     setFormData({
       ...formData,
       ...updatedInfo,
-      detailedMemberships: [...(formData.detailedMemberships || []), { ...newContract, hospitalName: hosp?.name }]
+      detailedMemberships: updatedMemberships
     });
     setIsAddingContract(false);
+    setEditingContractIndex(null);
     setNewContract({ hospitalId: '', roleAssignments: [] });
     setValidationErrors({});
   };
@@ -296,12 +367,14 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                       </div>
                     )}
                     <div className="flex flex-col gap-1.5">
-                      <label className="font-label-sm text-gray-700 uppercase">Email Address</label>
-                      <input className="form-input" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                      <label className="font-label-sm text-gray-700 uppercase">Email Address <span className="text-primary">*</span></label>
+                      <input className={`form-input ${validationErrors.email ? 'border-error' : ''}`} type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                      {renderFieldError('email')}
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <label className="font-label-sm text-gray-700 uppercase">Primary Phone</label>
-                      <input className="form-input" type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                      <label className="font-label-sm text-gray-700 uppercase">Primary Phone <span className="text-primary">*</span></label>
+                      <input className={`form-input ${validationErrors.phone ? 'border-error' : ''}`} type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                      {renderFieldError('phone')}
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Date of Birth <span className="text-primary">*</span></label>
@@ -320,6 +393,20 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                         <option value="FEMALE">Female</option>
                         <option value="OTHER">Other</option>
                       </select>
+                    </div>
+                    <div className="flex flex-col gap-1.5 md:col-span-2">
+                      <label className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                        <input 
+                          type="checkbox" 
+                          className="w-5 h-5 accent-primary"
+                          checked={formData.superuser}
+                          onChange={(e) => setFormData({ ...formData, superuser: e.target.checked })}
+                        />
+                        <div>
+                          <p className="font-bold text-sm text-on-surface">System Administrator Privileges</p>
+                          <p className="text-xs text-secondary">Grant this user full access to global system settings across all hospitals.</p>
+                        </div>
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -358,17 +445,38 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                                   </p>
                                 </div>
                               </div>
-                              <button 
-                                type="button"
-                                onClick={() => {
-                                  const updated = [...(formData.detailedMemberships || [])];
-                                  updated.splice(idx, 1);
-                                  setFormData({ ...formData, detailedMemberships: updated });
-                                }}
-                                className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                              >
-                                <span className="material-symbols-outlined text-lg">delete</span>
-                              </button>
+                              <div className="flex gap-2">
+                                <button 
+                                  type="button"
+                                  onClick={() => duplicateContract(m)}
+                                  title="Duplicate Contract to new hospital"
+                                  className="text-gray-400 hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+                                >
+                                  <span className="material-symbols-outlined text-lg">content_copy</span>
+                                </button>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    setNewContract(m);
+                                    setEditingContractIndex(idx);
+                                    setIsAddingContract(true);
+                                  }}
+                                  className="text-gray-400 hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
+                                >
+                                  <span className="material-symbols-outlined text-lg">edit</span>
+                                </button>
+                                <button 
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = [...(formData.detailedMemberships || [])];
+                                    updated.splice(idx, 1);
+                                    setFormData({ ...formData, detailedMemberships: updated });
+                                  }}
+                                  className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
+                                >
+                                  <span className="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                              </div>
                             </div>
                             <div className="space-y-2">
                               {m.roleAssignments.map((ra, raIdx) => (
@@ -415,9 +523,16 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                             className={`form-input pl-10 ${validationErrors.newContractHospital ? 'border-error ring-1 ring-error/20' : ''}`}
                             value={newContract.hospitalId}
                             onChange={(e) => setNewContract({ ...newContract, hospitalId: e.target.value })}
+                            disabled={editingContractIndex !== null}
                           >
                             <option value="">Select a hospital...</option>
-                            {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+                            {hospitals
+                              .filter(h => 
+                                editingContractIndex !== null || 
+                                !formData.detailedMemberships?.some(m => String(m.hospitalId) === String(h.id))
+                              )
+                              .map(h => <option key={h.id} value={h.id}>{h.name}</option>)
+                            }
                           </select>
                           <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">apartment</span>
                         </div>

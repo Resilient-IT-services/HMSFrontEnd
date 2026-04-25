@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { store } from '@/state/store';
 import { logout } from '@/state/authSlice';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 const apiClient = axios.create({
   baseURL: '/api/v1',
@@ -33,6 +34,11 @@ apiClient.interceptors.response.use(
           globalThis.location.href = '/login';
         }
       }
+
+      // Trigger global toast for any error
+      const message = (error.response?.data as any)?.message || error.message || 'An unexpected error occurred';
+      triggerGlobalToast(message, 'error');
+
       return Promise.reject(error);
     }
 );

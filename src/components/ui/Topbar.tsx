@@ -5,11 +5,10 @@ import { setSuperMode, setActiveRole, setUser } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { Role } from '@/types/api';
 
-interface TopbarProps {
-  title: string;
-}
+import { useLayout } from '@/context/LayoutContext';
 
-const Topbar: React.FC<TopbarProps> = ({ title }) => {
+const Topbar: React.FC = () => {
+  const { title, headerActions } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -62,9 +61,17 @@ const Topbar: React.FC<TopbarProps> = ({ title }) => {
           <span className="material-symbols-outlined absolute left-3 text-gray-400 text-lg">search</span>
           <input className="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary-container outline-none" placeholder="Search across hospital..." type="text"/>
         </div>
+        <div className="h-8 w-px bg-gray-200 mx-6"></div>
+        <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-xs font-black">{title}</h2>
       </div>
 
       <div className="flex items-center gap-4 px-6">
+        {headerActions && (
+          <div className="flex items-center gap-3">
+            {headerActions}
+            <div className="h-6 w-px bg-gray-200 mx-2"></div>
+          </div>
+        )}
         {user?.memberships && user.memberships.length > 1 && (
           <button 
             onClick={() => setIsProfileOpen(true)}

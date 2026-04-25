@@ -4,6 +4,9 @@ import StoreProvider from "@/state/StoreProvider";
 import { ThemeProvider } from "@/theme/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 
+import { ToastProvider } from "@/components/ui/Toast";
+import { LayoutProvider } from "@/context/LayoutContext";
+
 export const metadata: Metadata = {
   title: "HMS Frontend",
   description: "Hospital Management System frontend",
@@ -24,7 +27,11 @@ export default function RootLayout({
         <StoreProvider>
           <ThemeProvider>
             <AuthProvider>
-              {children}
+              <ToastProvider>
+                <LayoutProvider>
+                  {children}
+                </LayoutProvider>
+              </ToastProvider>
             </AuthProvider>
           </ThemeProvider>
         </StoreProvider>

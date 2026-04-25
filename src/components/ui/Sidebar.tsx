@@ -60,7 +60,9 @@ const Sidebar = () => {
       </div>
       <nav className="flex-1 space-y-1">
         {filteredMenuItems.map((item) => {
-          const isActive = pathname === item.href;
+          // Check if current path starts with item.href to keep it active for sub-routes
+          // e.g. /admin/users and /admin/users/create both should highlight "User Management"
+          const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.name}

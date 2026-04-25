@@ -31,6 +31,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
+    email: user?.email || '',
     gender: (user?.gender || 'MALE') as 'MALE' | 'FEMALE' | 'OTHER',
     dob: user?.dob ? user.dob.toString() : '',
     phone: user?.phone || '',
@@ -68,6 +69,16 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             placeholder="e.g. John Doe"
             required
+          />
+        </FormField>
+
+        <FormField label="Email Address">
+          <input
+            type="email"
+            className="form-input"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            placeholder="e.g. john.doe@example.com"
           />
         </FormField>
         
