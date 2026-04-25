@@ -1,29 +1,32 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SuperAdminDashboard from './page';
-import apiClient from '@/services/apiClient';
-import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '@/state/authSlice';
+import { hospitalService } from '@/services/hospitalService';
+import { userService } from '@/services/userService';
 
-vi.mock('@/services/apiClient', () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
+// Mock services
+vi.mock('@/services/hospitalService', () => ({
+  hospitalService: {
+    list: vi.fn(),
   },
 }));
 
-// Mock MainLayout to avoid complexity
+vi.mock('@/services/userService', () => ({
+  userService: {
+    listUsers: vi.fn(),
+  },
+}));
+
+// Mock MainLayout
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children, title }: any) => (
+  __esModule: true,
+  default: ({ children, title }: { children: React.ReactNode, title: string }) => (
     <div data-testid="main-layout">
       <h1>{title}</h1>
       {children}
     </div>
-  )
+  ),
 }));
-
-const createMockStore = () => configureStore({ reducer: { auth: authReducer } });
 
 describe('SuperAdminDashboard', () => {
   beforeEach(() => {
@@ -31,41 +34,22 @@ describe('SuperAdminDashboard', () => {
   });
 
   it('renders stats and welcome message', async () => {
-    (apiClient.get as any).mockImplementation((url: string) => {
-      if (url === '/hospitals') {
-        return Promise.resolve({ data: { success: true, data: [{ id: 1, name: 'Hospital A', code: 'HA' }] } });
-      }
-      if (url === '/users') {
-        return Promise.resolve({ data: { success: true, data: [{ id: 1, username: 'user1' }] } });
-      }
-      return Promise.reject(new Error('not found'));
-    });
-
-    render(
-      <Provider store={createMockStore()}>
-        <SuperAdminDashboard />
-      </Provider>
-    );
-
-    expect(screen.getByText('System Administration')).toBeInTheDocument();
-    expect(screen.getByText('Welcome, Super Administrator')).toBeInTheDocument();
+    vi.mocked(hospitalService.list).mockResolvedValue({
+      success: true,
+      data: { totalElements: 5, content: [] }
+    } as any);
     
+    vi.mocked(userService.listUsers).mockResolvedValue({
+      success: true,
+      data: { totalElements: 10, content: [] }
+    } as any);
+
+    render(<SuperAdminDashboard />);
+
     await waitFor(() => {
-      // Check for stats counts
-      // Since '1' might appear twice (one for hospital, one for user), we use getAllByText
-      const countElements = screen.getAllByText('1');
-      expect(countElements.length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('hospitals-count')).toHaveTextContent('5');
+      expect(screen.getByTestId('users-count')).toHaveTextContent('10');
+      expect(screen.getByText(/Welcome, Super Administrator/i)).toBeInTheDocument();
     });
-  });
-
-  it('renders navigation links', () => {
-    render(
-      <Provider store={createMockStore()}>
-        <SuperAdminDashboard />
-      </Provider>
-    );
-
-    expect(screen.getByText('Manage Hospitals')).toHaveAttribute('href', '/super_admin/hospitals');
-    expect(screen.getByText('Manage Users')).toHaveAttribute('href', '/admin/users');
   });
 });

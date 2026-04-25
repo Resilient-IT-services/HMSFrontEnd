@@ -4,8 +4,8 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
-import apiClient from '@/services/apiClient';
-import { ApiResponse, HospitalResponse, UserResponse } from '@/types/api';
+import { userService } from '@/services/userService';
+import { HospitalResponse, UserResponse } from '@/types/api';
 
 const SuperAdminDashboard = () => {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
@@ -15,14 +15,16 @@ const SuperAdminDashboard = () => {
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
-      const hospitalRes = await hospitalService.list();
+      const [hospitalRes, userRes] = await Promise.all([
+        hospitalService.list(),
+        userService.listUsers(0, 100)
+      ]);
+      
       if (hospitalRes.success && hospitalRes.data) {
         setHospitals(hospitalRes.data.content || []);
       }
-
-      const userRes = await apiClient.get<ApiResponse<UserResponse[]>>('/users');
-      if (userRes.data.success) {
-        setUsers(userRes.data.data || []);
+      if (userRes.success && userRes.data) {
+        setUsers(userRes.data.content || []);
       }
     } catch (error) {
       console.error('Failed to fetch data', error);
@@ -52,8 +54,8 @@ const SuperAdminDashboard = () => {
             <span className="text-green-600 text-xs font-bold bg-green-50 px-2 py-0.5 rounded-full">+2 this month</span>
           </div>
           <p className="text-[var(--on-surface-variant)] text-xs font-bold uppercase tracking-wider">Total Hospitals</p>
-          <h3 className="text-2xl font-bold text-[var(--on-surface)] mt-1">
-            {hospitals.length}
+          <h3 className="text-2xl font-bold text-[var(--on-surface)] mt-1" data-testid="hospitals-count">
+            {loading ? '...' : hospitals.length}
           </h3>
         </div>
         
@@ -64,7 +66,7 @@ const SuperAdminDashboard = () => {
             </div>
           </div>
           <p className="text-[var(--on-surface-variant)] text-xs font-bold uppercase tracking-wider">Active Users</p>
-          <h3 className="text-2xl font-bold text-[var(--on-surface)] mt-1">
+          <h3 className="text-2xl font-bold text-[var(--on-surface)] mt-1" data-testid="users-count">
             {loading ? '...' : users.length}
           </h3>
         </div>
