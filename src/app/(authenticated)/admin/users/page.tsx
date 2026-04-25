@@ -6,12 +6,9 @@ import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { userService } from '@/services/userService';
 import { UserResponse, Role } from '@/types/api';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/state/store';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const UserManagement = () => {
-  const { isSuperMode } = useSelector((state: RootState) => state.auth);
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,24 +77,6 @@ const UserManagement = () => {
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
             Create User
           </Link>
-        </div>
-
-        {/* Stats/Cards Section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white border border-outline-variant p-5 rounded-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-secondary font-label-sm uppercase tracking-wider">Total Users</span>
-              <div className="p-2 bg-surface-container-low rounded-lg text-primary">
-                <span className="material-symbols-outlined">person</span>
-              </div>
-            </div>
-            <p className="text-headline-md mt-2">{totalElements}</p>
-            <p className="text-body-sm text-green-600 mt-1 flex items-center gap-1">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
-              +12% this month
-            </p>
-          </div>
-          {/* ... other stats could be updated to be server-side or removed if not available from basic list ... */}
         </div>
 
         {/* Table Container */}
@@ -204,15 +183,6 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end items-center gap-2">
-                        {isSuperMode && (
-                          <button 
-                            onClick={() => router.push(`/admin/users/${row.id}/contracts/add`)}
-                            title="Add Hospital Contract"
-                            className="p-2 text-primary hover:bg-orange-50 rounded-lg transition-colors"
-                          >
-                            <span className="material-symbols-outlined">add_business</span>
-                          </button>
-                        )}
                         <button 
                           onClick={() => router.push(`/admin/users/${row.id}`)}
                           title="Edit User"

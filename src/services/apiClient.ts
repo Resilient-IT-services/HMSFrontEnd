@@ -36,7 +36,8 @@ apiClient.interceptors.response.use(
       }
 
       // Trigger global toast for any error
-      const message = (error.response?.data as any)?.message || error.message || 'An unexpected error occurred';
+      const apiData = error.response?.data as any;
+      const message = apiData?.error?.message || apiData?.message || error.message || 'An unexpected error occurred';
       triggerGlobalToast(message, 'error');
 
       return Promise.reject(error);

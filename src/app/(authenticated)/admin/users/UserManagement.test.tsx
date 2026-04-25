@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import UserManagement from './page';
 import { userService } from '@/services/userService';
@@ -83,36 +83,5 @@ describe('UserManagement', () => {
 
     const createBtn = screen.getByText(/Create User/i);
     expect(createBtn.closest('a')).toHaveAttribute('href', '/admin/users/create');
-  });
-
-  it('navigates to contract add page when clicking add business button', async () => {
-    (userService.listUsers as any).mockResolvedValue({
-      success: true,
-      data: {
-        content: [{ id: "1", username: 'user1', roles: ['DOCTOR'], memberships: [] }],
-        totalElements: 1
-      }
-    });
-
-    const store = configureStore({ 
-      reducer: { auth: authReducer },
-      preloadedState: { auth: { user: { hospitalId: "1" }, isSuperMode: true } as any }
-    });
-
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <UserManagement />
-        </LayoutProvider>
-      </Provider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('user1')).toBeInTheDocument();
-    });
-
-    const allocateBtn = screen.getByTitle(/Add Hospital Contract/i);
-    fireEvent.click(allocateBtn);
-    expect(mockPush).toHaveBeenCalledWith('/admin/users/1/contracts/add');
   });
 });
