@@ -16,8 +16,8 @@ const SuperAdminDashboard = () => {
     setLoading(true);
     try {
       const hospitalRes = await hospitalService.list();
-      if (hospitalRes.success) {
-        setHospitals(hospitalRes.data || []);
+      if (hospitalRes.success && hospitalRes.data) {
+        setHospitals(hospitalRes.data.content || []);
       }
 
       const userRes = await apiClient.get<ApiResponse<UserResponse[]>>('/users');

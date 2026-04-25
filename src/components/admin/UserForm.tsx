@@ -58,7 +58,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   useEffect(() => {
     const fetchHospitals = async () => {
       const res = await hospitalService.list();
-      if (res.success) setHospitals(res.data || []);
+      if (res.success && res.data) setHospitals(res.data.content || []);
     };
     fetchHospitals();
   }, []);
