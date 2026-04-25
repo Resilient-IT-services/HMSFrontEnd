@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { FormField } from '@/components/ui/FormField';
 import { userService } from '@/services/userService';
-import { ApiResponse, UserResponse, Role, HospitalResponse, DetailedHospitalMembershipDTO, RoleAssignmentDTO } from '@/types/api';
+import { ApiResponse, UserResponse, Role, HospitalResponse, HospitalMembershipDTO, RoleAssignmentDTO } from '@/types/api';
 
 interface RoleAllocationModalProps {
   isOpen: boolean;
@@ -28,8 +28,8 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
     roles: Role[];
     department: string;
   }>(() => {
-    if (selectedUser?.detailedMemberships && selectedUser.detailedMemberships.length > 0) {
-      const membership = selectedUser.detailedMemberships[0];
+    if (selectedUser?.memberships && selectedUser.memberships.length > 0) {
+      const membership = selectedUser.memberships[0];
       return {
         hospitalId: membership.hospitalId,
         roles: membership.roleAssignments.map(ra => ra.roleCode as Role),
@@ -51,13 +51,13 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
         active: true
       }));
 
-      const newMembership: DetailedHospitalMembershipDTO = {
+      const newMembership: HospitalMembershipDTO = {
         hospitalId: allocation.hospitalId,
         roleAssignments
       };
 
       // Merge or Update memberships
-      const existingMemberships = selectedUser.detailedMemberships || [];
+      const existingMemberships = selectedUser.memberships || [];
       const updatedMemberships = existingMemberships.some(m => m.hospitalId === allocation.hospitalId)
         ? existingMemberships.map(m => m.hospitalId === allocation.hospitalId ? newMembership : m)
         : [...existingMemberships, newMembership];
@@ -70,7 +70,7 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
         dob: selectedUser.dob,
         phone: selectedUser.phone,
         superuser: selectedUser.superuser,
-        detailedMemberships: updatedMemberships
+        memberships: updatedMemberships
       });
 
       if (response.success) {
@@ -92,7 +92,7 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
   };
 
   const hasAccess = (hospId: string) => {
-    return selectedUser?.detailedMemberships?.some(m => m.hospitalId === hospId);
+    return selectedUser?.memberships?.some(m => m.hospitalId === hospId);
   };
 
   return (
@@ -108,7 +108,7 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
             value={allocation.hospitalId || ''}
             onChange={(e) => {
               const hospId = e.target.value;
-              const existing = selectedUser?.detailedMemberships?.find(m => m.hospitalId === hospId);
+              const existing = selectedUser?.memberships?.find(m => m.hospitalId === hospId);
               setAllocation({
                 hospitalId: hospId,
                 roles: existing ? existing.roleAssignments.map(ra => ra.roleCode as Role) : [],

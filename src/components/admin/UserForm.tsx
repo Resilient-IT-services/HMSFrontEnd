@@ -7,7 +7,7 @@ import {
   UserFullProfileDTO, 
   HospitalResponse, 
   Role, 
-  DetailedHospitalMembershipDTO, 
+  HospitalMembershipDTO, 
   RoleAssignmentDTO 
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
@@ -38,7 +38,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     gender: (initialData?.gender as any) || 'MALE',
     password: '',
     superuser: initialData?.superuser || false,
-    detailedMemberships: initialData?.detailedMemberships || [],
+    memberships: initialData?.memberships || [],
     doctorInfo: initialData?.doctorInfo,
     nurseInfo: initialData?.nurseInfo,
     pharmacistInfo: initialData?.pharmacistInfo,
@@ -49,11 +49,11 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   // Derived Roles to automate Profile Information tab
   const assignedRoles = useMemo(() => {
     const roles = new Set<string>();
-    formData.detailedMemberships?.forEach(m => {
+    formData.memberships?.forEach(m => {
       m.roleAssignments.forEach(ra => roles.add(ra.roleCode));
     });
     return Array.from(roles);
-  }, [formData.detailedMemberships]);
+  }, [formData.memberships]);
 
   useEffect(() => {
     const fetchHospitals = async () => {
@@ -76,10 +76,10 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     
     // Contract validation - Optional for superusers
     if (!formData.superuser) {
-      if (!formData.detailedMemberships || formData.detailedMemberships.length === 0) {
+      if (!formData.memberships || formData.memberships.length === 0) {
         errors.memberships = 'At least one hospital contract is required for standard staff.';
       } else {
-        formData.detailedMemberships.forEach((m, idx) => {
+        formData.memberships.forEach((m, idx) => {
           if (!m.hospitalId) errors[`membership_${idx}_hospital`] = 'Hospital is required';
           if (!m.roleAssignments || m.roleAssignments.length === 0) {
             errors[`membership_${idx}_roles`] = 'At least one role is required';
@@ -150,7 +150,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
 
   const [isAddingContract, setIsAddingContract] = useState(false);
   const [editingContractIndex, setEditingContractIndex] = useState<number | null>(null);
-  const [newContract, setNewContract] = useState<DetailedHospitalMembershipDTO>({
+  const [newContract, setNewContract] = useState<HospitalMembershipDTO>({
     hospitalId: '',
     roleAssignments: []
   });
@@ -181,7 +181,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     }
   };
 
-  const duplicateContract = (contract: DetailedHospitalMembershipDTO) => {
+  const duplicateContract = (contract: HospitalMembershipDTO) => {
     setNewContract({
       ...contract,
       hospitalId: '', // Reset hospital for the new copy
@@ -199,7 +199,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     
     // Check for duplicate hospital if creating new
     if (editingContractIndex === null) {
-      const exists = formData.detailedMemberships?.some(m => String(m.hospitalId) === String(newContract.hospitalId));
+      const exists = formData.memberships?.some(m => String(m.hospitalId) === String(newContract.hospitalId));
       if (exists) {
         alert('User already has a contract with this hospital');
         return;
@@ -223,7 +223,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       }
     });
 
-    const updatedMemberships = [...(formData.detailedMemberships || [])];
+    const updatedMemberships = [...(formData.memberships || [])];
     if (editingContractIndex !== null) {
       updatedMemberships[editingContractIndex] = { ...newContract, hospitalName: hosp?.name };
     } else {
@@ -233,7 +233,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     setFormData({
       ...formData,
       ...updatedInfo,
-      detailedMemberships: updatedMemberships
+      memberships: updatedMemberships
     });
     setIsAddingContract(false);
     setEditingContractIndex(null);
@@ -429,7 +429,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                       </button>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {formData.detailedMemberships?.map((m, idx) => {
+                      {formData.memberships?.map((m, idx) => {
                         const hosp = hospitals.find(h => String(h.id) === String(m.hospitalId));
                         return (
                           <div key={idx} className="p-5 border border-gray-200 rounded-xl hover:border-primary-container transition-all bg-white font-body-md shadow-sm group">
@@ -468,9 +468,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                                 <button 
                                   type="button"
                                   onClick={() => {
-                                    const updated = [...(formData.detailedMemberships || [])];
+                                    const updated = [...(formData.memberships || [])];
                                     updated.splice(idx, 1);
-                                    setFormData({ ...formData, detailedMemberships: updated });
+                                    setFormData({ ...formData, memberships: updated });
                                   }}
                                   className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
                                 >
@@ -489,7 +489,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                           </div>
                         );
                       })}
-                      {(!formData.detailedMemberships || formData.detailedMemberships.length === 0) && (
+                      {(!formData.memberships || formData.memberships.length === 0) && (
                         <div className="md:col-span-2 py-12 text-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center gap-4">
                           <span className="material-symbols-outlined text-4xl text-gray-300">description</span>
                           <p className="text-gray-500 font-bold">No hospital contracts found.</p>
@@ -529,7 +529,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                             {hospitals
                               .filter(h => 
                                 editingContractIndex !== null || 
-                                !formData.detailedMemberships?.some(m => String(m.hospitalId) === String(h.id))
+                                !formData.memberships?.some(m => String(m.hospitalId) === String(h.id))
                               )
                               .map(h => <option key={h.id} value={h.id}>{h.name}</option>)
                             }

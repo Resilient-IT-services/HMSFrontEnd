@@ -8,13 +8,13 @@ import { hospitalService } from '@/services/hospitalService';
 import { 
   UserFullProfileDTO, 
   HospitalResponse, 
-  DetailedHospitalMembershipDTO,
+  HospitalMembershipDTO,
   RoleAssignmentDTO,
-  DoctorRoleDetails,
-  NurseRoleDetails,
-  AdminRoleDetails,
-  PharmacistRoleDetails,
-  ReceptionistRoleDetails
+  DoctorHospitalDetailsDTO,
+  NurseHospitalDetailsDTO,
+  AdminHospitalDetailsDTO,
+  PharmacistHospitalDetailsDTO,
+  ReceptionistHospitalDetailsDTO
 } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import { 
@@ -45,7 +45,7 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
   const [selectedRoles, setSelectedRoles] = useState<ContractRole[]>([]);
   
   // Role Details State
-  const [doctorDetails, setDoctorDetails] = useState<Partial<DoctorRoleDetails>>({
+  const [doctorDetails, setDoctorDetails] = useState<Partial<DoctorHospitalDetailsDTO>>({
     consultationFee: 0,
     commissionType: 'PERCENTAGE',
     commissionValue: 0,
@@ -53,22 +53,22 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
     followUpDays: 7
   });
   
-  const [nurseDetails, setNurseDetails] = useState<Partial<NurseRoleDetails>>({
+  const [nurseDetails, setNurseDetails] = useState<Partial<NurseHospitalDetailsDTO>>({
     floorLocation: '',
     shiftType: 'DAY'
   });
   
-  const [adminDetails, setAdminDetails] = useState<Partial<AdminRoleDetails>>({
+  const [adminDetails, setAdminDetails] = useState<Partial<AdminHospitalDetailsDTO>>({
     officeLocation: '',
     departmentHead: false
   });
   
-  const [pharmacistDetails, setPharmacistDetails] = useState<Partial<PharmacistRoleDetails>>({
+  const [pharmacistDetails, setPharmacistDetails] = useState<Partial<PharmacistHospitalDetailsDTO>>({
     counterLocation: '',
     pharmacyWing: ''
   });
 
-  const [receptionistDetails, setReceptionistDetails] = useState<Partial<ReceptionistRoleDetails>>({
+  const [receptionistDetails, setReceptionistDetails] = useState<Partial<ReceptionistHospitalDetailsDTO>>({
     deskLocation: '',
     emergencyContactNumber: ''
   });
@@ -124,19 +124,19 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
         roleCode: role,
         departmentName: 'General',
         active: true,
-        doctorDetails: role === 'DOCTOR' ? doctorDetails as DoctorRoleDetails : undefined,
-        nurseDetails: role === 'NURSE' ? nurseDetails as NurseRoleDetails : undefined,
-        adminDetails: role === 'ADMIN' ? adminDetails as AdminRoleDetails : undefined,
-        pharmacistDetails: role === 'PHARMACIST' ? pharmacistDetails as PharmacistRoleDetails : undefined,
-        receptionistDetails: role === 'RECEPTIONIST' ? receptionistDetails as ReceptionistRoleDetails : undefined
+        doctorDetails: role === 'DOCTOR' ? doctorDetails as DoctorHospitalDetailsDTO : undefined,
+        nurseDetails: role === 'NURSE' ? nurseDetails as NurseHospitalDetailsDTO : undefined,
+        adminDetails: role === 'ADMIN' ? adminDetails as AdminHospitalDetailsDTO : undefined,
+        pharmacistDetails: role === 'PHARMACIST' ? pharmacistDetails as PharmacistHospitalDetailsDTO : undefined,
+        receptionistDetails: role === 'RECEPTIONIST' ? receptionistDetails as ReceptionistHospitalDetailsDTO : undefined
       }));
 
-      const newMembership: DetailedHospitalMembershipDTO = {
+      const newMembership: HospitalMembershipDTO = {
         hospitalId: selectedHospitalId,
         roleAssignments
       };
 
-      const updatedMemberships = [...(userData?.detailedMemberships || []), newMembership];
+      const updatedMemberships = [...(userData?.memberships || []), newMembership];
 
       const res = await userService.updateUser(id, {
         fullName: userData?.fullName || '',
@@ -146,7 +146,7 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
         dob: userData?.dob || '',
         phone: userData?.phone || '',
         superuser: userData?.superuser || false,
-        detailedMemberships: updatedMemberships
+        memberships: updatedMemberships
       });
 
       if (res.success) {

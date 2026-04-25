@@ -17,7 +17,7 @@ describe('authSlice', () => {
     createdAt: new Date().toISOString(),
     roles: [],
     currentHospitalId: "hosp-1",
-    detailedMemberships: [
+    memberships: [
       { 
         hospitalId: "hosp-1", 
         hospitalName: 'Hospital A', 
@@ -88,7 +88,7 @@ describe('authSlice', () => {
   it('should auto-set activeRole if user has only one effective role', () => {
     const singleRoleUser: UserProfileResponse = { 
       ...mockUser, 
-      detailedMemberships: [{ 
+      memberships: [{ 
         hospitalId: "hosp-1", 
         hospitalName: 'Hospital A', 
         hospitalCode: 'HA', 

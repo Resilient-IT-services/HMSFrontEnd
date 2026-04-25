@@ -41,7 +41,7 @@ const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Rol
   }
 
   // Global/Detailed memberships processing
-  user.detailedMemberships.forEach(m => {
+  user.memberships.forEach(m => {
     // If no hospitalId filter or it matches, add roles
     if (!hospitalId || m.hospitalId === hospitalId) {
       m.roleAssignments.forEach(ra => {
@@ -76,8 +76,8 @@ const authSlice = createSlice({
         hospitalId = localStorage.getItem('currentHospitalId');
       }
 
-      // Validate restored hospitalId against detailedMemberships
-      if (hospitalId && !action.payload.detailedMemberships.some(m => m.hospitalId === hospitalId)) {
+      // Validate restored hospitalId against memberships
+      if (hospitalId && !action.payload.memberships.some(m => m.hospitalId === hospitalId)) {
         hospitalId = null;
         if (globalThis.window !== undefined) localStorage.removeItem('currentHospitalId');
       }

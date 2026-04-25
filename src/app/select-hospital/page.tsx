@@ -15,7 +15,7 @@ const SelectHospitalPage = () => {
     dispatch(setCurrentHospitalId(hospitalId));
   };
 
-  const filteredHospitals = user?.detailedMemberships.filter(h => 
+  const filteredHospitals = user?.memberships.filter(h => 
     (h.hospitalName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
     (h.hospitalCode?.toLowerCase() || '').includes(searchTerm.toLowerCase())
   ) || [];

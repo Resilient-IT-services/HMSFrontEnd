@@ -47,7 +47,7 @@ const Topbar: React.FC = () => {
     }
     setIsProfileOpen(false);
   };
-  const currentHospitalName = user?.detailedMemberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
+  const currentHospitalName = user?.memberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
 
@@ -143,10 +143,10 @@ const Topbar: React.FC = () => {
                     )}
                 </div>
 
-                {user?.detailedMemberships && user.detailedMemberships.length > 1 && (
+                {user?.memberships && user.memberships.length > 1 && (
                   <div className="px-2 py-1 border-t border-[var(--border)] mt-1">
                     <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Hospital</p>
-                    {user.detailedMemberships.map(h => (
+                    {user.memberships.map(h => (
                       <button
                         key={h.hospitalId}
                         onClick={() => handleHospitalSwitch(h.hospitalId)}

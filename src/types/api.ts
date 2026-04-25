@@ -28,22 +28,22 @@ export interface Qualification {
   specialization: string;
 }
 
-export interface EducationInfo {
+export interface DoctorEducation {
   qualifications: Qualification[];
 }
 
-export interface LanguageFluency {
+export interface LanguageEntry {
   language: string;
-  proficiency: 'NATIVE' | 'FLUENT' | 'CONVERSATIONAL' | 'BASIC';
+  proficiency: 'NATIVE' | 'FLUENT' | 'INTERMEDIATE' | 'BASIC';
 }
 
-export interface LanguagesSpoken {
-  fluencies: LanguageFluency[];
+export interface ReceptionistFluency {
+  fluencies: LanguageEntry[];
 }
 
 export interface DoctorInfo {
   specialization: string;
-  education: EducationInfo;
+  education: DoctorEducation;
   bio: string;
   licenseNumber: string;
 }
@@ -51,7 +51,7 @@ export interface DoctorInfo {
 export interface NurseInfo {
   department: string;
   nursingLicenseNo: string;
-  certificationLevel: string;
+  certificationLevel: 'RN' | 'LPN' | 'NP' | 'CNA';
 }
 
 export interface PharmacistInfo {
@@ -65,39 +65,39 @@ export interface LabTechInfo {
 }
 
 export interface ReceptionistInfo {
-  languagesSpoken: LanguagesSpoken;
+  languagesSpoken: ReceptionistFluency;
   insuranceSpecialist: boolean;
 }
 
 // Role Specific Details for Memberships
-export interface DoctorRoleDetails {
+export interface DoctorHospitalDetailsDTO {
   consultationFee: number;
   followUpDays: number;
-  commissionType: 'PERCENTAGE' | 'FLAT';
+  commissionType: 'PERCENTAGE' | 'FIXED';
   commissionValue: number;
   visitingConsultant: boolean;
   updatedAt: string;
 }
 
-export interface NurseRoleDetails {
+export interface NurseHospitalDetailsDTO {
   floorLocation: string;
   shiftType: 'DAY' | 'NIGHT' | 'ROTATIONAL';
   updatedAt: string;
 }
 
-export interface AdminRoleDetails {
+export interface AdminHospitalDetailsDTO {
   officeLocation: string;
   departmentHead: boolean;
   updatedAt: string;
 }
 
-export interface PharmacistRoleDetails {
+export interface PharmacistHospitalDetailsDTO {
   counterLocation: string;
   pharmacyWing: string;
   updatedAt: string;
 }
 
-export interface ReceptionistRoleDetails {
+export interface ReceptionistHospitalDetailsDTO {
   deskLocation: string;
   emergencyContactNumber: string;
   updatedAt: string;
@@ -105,17 +105,18 @@ export interface ReceptionistRoleDetails {
 
 export interface RoleAssignmentDTO {
   assignmentId: string;
+  hospitalId?: string;
   roleCode: string;
   departmentName: string;
   active: boolean;
-  doctorDetails?: DoctorRoleDetails;
-  nurseDetails?: NurseRoleDetails;
-  adminDetails?: AdminRoleDetails;
-  pharmacistDetails?: PharmacistRoleDetails;
-  receptionistDetails?: ReceptionistRoleDetails;
+  doctorDetails?: DoctorHospitalDetailsDTO;
+  nurseDetails?: NurseHospitalDetailsDTO;
+  adminDetails?: AdminHospitalDetailsDTO;
+  pharmacistDetails?: PharmacistHospitalDetailsDTO;
+  receptionistDetails?: ReceptionistHospitalDetailsDTO;
 }
 
-export interface DetailedHospitalMembershipDTO {
+export interface HospitalMembershipDTO {
   hospitalId: string;
   hospitalName?: string;
   hospitalCode?: string;
@@ -131,7 +132,7 @@ export interface UserResponse {
   dob: string;
   phone: string;
   active: boolean;
-  deleted: boolean;
+  deleted?: boolean;
   superuser: boolean;
   createdAt: string;
   doctorInfo?: DoctorInfo;
@@ -139,15 +140,13 @@ export interface UserResponse {
   pharmacistInfo?: PharmacistInfo;
   labTechInfo?: LabTechInfo;
   receptionistInfo?: ReceptionistInfo;
-  detailedMemberships: DetailedHospitalMembershipDTO[];
-  roles?: Role[]; // Computed on frontend
+  memberships: HospitalMembershipDTO[];
+  roles?: Role[]; // Computed on frontend for convenience
 }
 
 export type UserFullProfileDTO = UserResponse;
 
-// Re-use same structure for Profile Response (used in /me)
 export interface UserProfileResponse extends UserResponse {
-  // Frontend computed fields if any
   currentHospitalId?: string | null;
   activeRole?: Role | null;
 }
@@ -168,7 +167,7 @@ export interface UserRequestDTO {
   pharmacistInfo?: PharmacistInfo;
   labTechInfo?: LabTechInfo;
   receptionistInfo?: ReceptionistInfo;
-  detailedMemberships?: DetailedHospitalMembershipDTO[];
+  memberships?: HospitalMembershipDTO[];
 }
 
 // Patient types
@@ -177,6 +176,7 @@ export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 export interface PatientResponse {
   id: string;
   fullName: string;
+  patientCode?: string;
   gender: Gender;
   dob: string;
   phone: string;
@@ -194,12 +194,22 @@ export interface CreatePatientRequest {
 }
 
 // Hospital types
+export interface HospitalSettings {
+  configurations?: Record<string, any>;
+  timezone?: string;
+  currency?: string;
+  opdEnabled?: boolean;
+  pharmacyEnabled?: boolean;
+}
+
 export interface HospitalResponse {
   id: string;
   name: string;
   code: string;
   address?: string;
-  status: string;
+  gstin?: string;
+  status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'ONBOARDING';
+  settings?: HospitalSettings;
   createdAt: string;
 }
 
@@ -209,19 +219,12 @@ export interface CreateHospitalRequest {
   code: string;
   address?: string;
   gstin?: string;
-}
-
-export interface LoginRequest {
-  username: string;
-  password?: string;
-}
-
-export interface SelectHospitalRequest {
-  hospitalId: string;
+  status?: string;
+  settings?: HospitalSettings;
 }
 
 // Appointment types
-export type AppointmentStatus = 'SCHEDULED' | 'CONFIRMED' | 'CHECKED_IN' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED';
+export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED' | 'CONFIRMED' | 'CHECKED_IN';
 
 export interface AppointmentResponse {
   id: string;
@@ -246,7 +249,6 @@ export interface CreateAppointmentRequest {
 
 export interface UpdateAppointmentStatusRequest {
   status: AppointmentStatus;
-  notes?: string;
 }
 
 // Doctor types
@@ -261,7 +263,7 @@ export interface DoctorResponse {
   createdAt: string;
 }
 
-// Pharmacy types
+// Pharmacy types (Not fully documented in api-docs.json but needed by UI)
 export interface MedicineResponse {
   id: string;
   name: string;
@@ -305,5 +307,26 @@ export interface BillingResponse {
   status: 'DRAFT' | 'GENERATED';
   totalAmount: number;
   items: BillingItemResponse[];
+  createdAt: string;
+}
+
+export interface SearchResultDTO {
+  id: string;
+  type: string;
+  title: string;
+  subtitle: string;
+  link: string;
+}
+
+export interface AuditLogResponse {
+  id: string;
+  entityName: string;
+  entityId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'UPDATE_STATUS';
+  performedBy: string;
+  details?: {
+    before?: Record<string, any>;
+    after?: Record<string, any>;
+  };
   createdAt: string;
 }

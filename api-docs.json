@@ -32,7 +32,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserRequestDTO"
+                "$ref": "#/components/schemas/UserDetailsDTO"
               }
             }
           },
@@ -44,7 +44,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseUserFullProfileDTO"
+                  "$ref": "#/components/schemas/ApiResponseUserDetailsDTO"
                 }
               }
             }
@@ -81,10 +81,39 @@
         }
       }
     },
-    "/api/v1/hospitals/{id}": {
+    "/api/v1/patients/{id}": {
+      "get": {
+        "tags": [
+          "Patients"
+        ],
+        "operationId": "get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePatientDTO"
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
         "tags": [
-          "Hospitals"
+          "Patients"
         ],
         "operationId": "update_1",
         "parameters": [
@@ -102,7 +131,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateHospitalRequest"
+                "$ref": "#/components/schemas/PatientDTO"
               }
             }
           },
@@ -114,7 +143,147 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseHospitalResponse"
+                  "$ref": "#/components/schemas/ApiResponsePatientDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/hospitals/{id}": {
+      "get": {
+        "tags": [
+          "Hospitals"
+        ],
+        "operationId": "get_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseHospitalDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Hospitals"
+        ],
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HospitalDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseHospitalDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointments/{id}": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "operationId": "get_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Appointments"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppointmentDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
                 }
               }
             }
@@ -205,7 +374,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserRequestDTO"
+                "$ref": "#/components/schemas/UserDetailsDTO"
               }
             }
           },
@@ -217,7 +386,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseUserFullProfileDTO"
+                  "$ref": "#/components/schemas/ApiResponseUserDetailsDTO"
                 }
               }
             }
@@ -267,7 +436,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePageResponsePatientResponse"
+                  "$ref": "#/components/schemas/ApiResponsePageResponsePatientDTO"
                 }
               }
             }
@@ -283,7 +452,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreatePatientRequest"
+                "$ref": "#/components/schemas/PatientDTO"
               }
             }
           },
@@ -295,7 +464,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePatientResponse"
+                  "$ref": "#/components/schemas/ApiResponsePatientDTO"
                 }
               }
             }
@@ -353,7 +522,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePageResponseHospitalResponse"
+                  "$ref": "#/components/schemas/ApiResponsePageResponseHospitalDTO"
                 }
               }
             }
@@ -369,7 +538,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateHospitalRequest"
+                "$ref": "#/components/schemas/HospitalDTO"
               }
             }
           },
@@ -381,7 +550,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseHospitalResponse"
+                  "$ref": "#/components/schemas/ApiResponseHospitalDTO"
                 }
               }
             }
@@ -481,7 +650,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePageResponseAppointmentResponse"
+                  "$ref": "#/components/schemas/ApiResponsePageResponseAppointmentDTO"
                 }
               }
             }
@@ -497,7 +666,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAppointmentRequest"
+                "$ref": "#/components/schemas/AppointmentDTO"
               }
             }
           },
@@ -509,7 +678,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseAppointmentResponse"
+                  "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
                 }
               }
             }
@@ -550,7 +719,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseAppointmentResponse"
+                  "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
                 }
               }
             }
@@ -581,7 +750,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseUserFullProfileDTO"
+                  "$ref": "#/components/schemas/ApiResponseUserDetailsDTO"
                 }
               }
             }
@@ -639,50 +808,19 @@
         }
       }
     },
-    "/api/v1/patients/{id}": {
-      "get": {
-        "tags": [
-          "Patients"
-        ],
-        "operationId": "get",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePatientResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/auth/me": {
       "get": {
         "tags": [
           "Authentication"
         ],
-        "operationId": "getMyProfile",
+        "operationId": "me",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseUserFullProfileDTO"
+                  "$ref": "#/components/schemas/ApiResponseUserDetailsDTO"
                 }
               }
             }
@@ -750,60 +888,6 @@
           }
         }
       },
-      "DetailedHospitalMembershipDTO": {
-        "type": "object",
-        "properties": {
-          "hospitalId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "hospitalName": {
-            "type": "string"
-          },
-          "hospitalCode": {
-            "type": "string"
-          },
-          "roleAssignments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DetailedRoleAssignmentDTO"
-            }
-          }
-        }
-      },
-      "DetailedRoleAssignmentDTO": {
-        "type": "object",
-        "properties": {
-          "assignmentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "roleCode": {
-            "type": "string"
-          },
-          "departmentName": {
-            "type": "string"
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "doctorDetails": {
-            "$ref": "#/components/schemas/DoctorHospitalDetailsDTO"
-          },
-          "nurseDetails": {
-            "$ref": "#/components/schemas/NurseHospitalDetailsDTO"
-          },
-          "adminDetails": {
-            "$ref": "#/components/schemas/AdminHospitalDetailsDTO"
-          },
-          "pharmacistDetails": {
-            "$ref": "#/components/schemas/PharmacistHospitalDetailsDTO"
-          },
-          "receptionistDetails": {
-            "$ref": "#/components/schemas/ReceptionistHospitalDetailsDTO"
-          }
-        }
-      },
       "DoctorEducation": {
         "type": "object",
         "properties": {
@@ -858,6 +942,27 @@
           },
           "licenseNumber": {
             "type": "string"
+          }
+        }
+      },
+      "HospitalMembershipDTO": {
+        "type": "object",
+        "properties": {
+          "hospitalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hospitalName": {
+            "type": "string"
+          },
+          "hospitalCode": {
+            "type": "string"
+          },
+          "roleAssignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleAssignmentDTO"
+            }
           }
         }
       },
@@ -1010,7 +1115,44 @@
           }
         }
       },
-      "UserRequestDTO": {
+      "RoleAssignmentDTO": {
+        "type": "object",
+        "properties": {
+          "assignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hospitalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roleCode": {
+            "type": "string"
+          },
+          "departmentName": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "doctorDetails": {
+            "$ref": "#/components/schemas/DoctorHospitalDetailsDTO"
+          },
+          "nurseDetails": {
+            "$ref": "#/components/schemas/NurseHospitalDetailsDTO"
+          },
+          "adminDetails": {
+            "$ref": "#/components/schemas/AdminHospitalDetailsDTO"
+          },
+          "pharmacistDetails": {
+            "$ref": "#/components/schemas/PharmacistHospitalDetailsDTO"
+          },
+          "receptionistDetails": {
+            "$ref": "#/components/schemas/ReceptionistHospitalDetailsDTO"
+          }
+        }
+      },
+      "UserDetailsDTO": {
         "required": [
           "dob",
           "fullName",
@@ -1019,6 +1161,10 @@
         ],
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "username": {
             "type": "string"
           },
@@ -1046,8 +1192,15 @@
           "phone": {
             "type": "string"
           },
+          "active": {
+            "type": "boolean"
+          },
           "superuser": {
             "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           },
           "doctorInfo": {
             "$ref": "#/components/schemas/DoctorInfo"
@@ -1064,10 +1217,10 @@
           "receptionistInfo": {
             "$ref": "#/components/schemas/ReceptionistInfo"
           },
-          "detailedMemberships": {
+          "memberships": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/DetailedHospitalMembershipDTO"
+              "$ref": "#/components/schemas/HospitalMembershipDTO"
             }
           }
         }
@@ -1089,55 +1242,34 @@
           }
         }
       },
-      "ApiResponseUserFullProfileDTO": {
+      "ApiResponseUserDetailsDTO": {
         "type": "object",
         "properties": {
           "success": {
             "type": "boolean"
           },
           "data": {
-            "$ref": "#/components/schemas/UserFullProfileDTO"
+            "$ref": "#/components/schemas/UserDetailsDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
           }
         }
       },
-      "HospitalMembershipDTO": {
-        "type": "object",
-        "properties": {
-          "hospitalId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "specialization": {
-            "type": "string"
-          },
-          "departmentName": {
-            "type": "string"
-          }
-        }
-      },
-      "UserFullProfileDTO": {
+      "PatientDTO": {
+        "required": [
+          "fullName"
+        ],
         "type": "object",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid"
           },
-          "username": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
           "fullName": {
+            "type": "string"
+          },
+          "patientCode": {
             "type": "string"
           },
           "gender": {
@@ -1155,88 +1287,34 @@
           "phone": {
             "type": "string"
           },
-          "active": {
-            "type": "boolean"
-          },
-          "deleted": {
-            "type": "boolean"
-          },
-          "superuser": {
-            "type": "boolean"
+          "address": {
+            "type": "string"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time"
-          },
-          "memberships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/HospitalMembershipDTO"
-            }
-          },
-          "hospitalId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "doctorInfo": {
-            "$ref": "#/components/schemas/DoctorInfo"
-          },
-          "nurseInfo": {
-            "$ref": "#/components/schemas/NurseInfo"
-          },
-          "pharmacistInfo": {
-            "$ref": "#/components/schemas/PharmacistInfo"
-          },
-          "labTechInfo": {
-            "$ref": "#/components/schemas/LabTechInfo"
-          },
-          "receptionistInfo": {
-            "$ref": "#/components/schemas/ReceptionistInfo"
-          },
-          "detailedMemberships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DetailedHospitalMembershipDTO"
-            }
           }
         }
       },
-      "CreateHospitalRequest": {
-        "required": [
-          "code",
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "code": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "gstin": {
-            "type": "string"
-          }
-        }
-      },
-      "ApiResponseHospitalResponse": {
+      "ApiResponsePatientDTO": {
         "type": "object",
         "properties": {
           "success": {
             "type": "boolean"
           },
           "data": {
-            "$ref": "#/components/schemas/HospitalResponse"
+            "$ref": "#/components/schemas/PatientDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
           }
         }
       },
-      "HospitalResponse": {
+      "HospitalDTO": {
+        "required": [
+          "code",
+          "name"
+        ],
         "type": "object",
         "properties": {
           "id": {
@@ -1250,6 +1328,9 @@
             "type": "string"
           },
           "address": {
+            "type": "string"
+          },
+          "gstin": {
             "type": "string"
           },
           "status": {
@@ -1293,150 +1374,26 @@
           }
         }
       },
-      "CreatePatientRequest": {
-        "required": [
-          "fullName"
-        ],
-        "type": "object",
-        "properties": {
-          "fullName": {
-            "type": "string"
-          },
-          "gender": {
-            "type": "string",
-            "enum": [
-              "MALE",
-              "FEMALE",
-              "OTHER"
-            ]
-          },
-          "dob": {
-            "type": "string",
-            "format": "date"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          }
-        }
-      },
-      "ApiResponsePatientResponse": {
+      "ApiResponseHospitalDTO": {
         "type": "object",
         "properties": {
           "success": {
             "type": "boolean"
           },
           "data": {
-            "$ref": "#/components/schemas/PatientResponse"
+            "$ref": "#/components/schemas/HospitalDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
           }
         }
       },
-      "PatientResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fullName": {
-            "type": "string"
-          },
-          "patientCode": {
-            "type": "string"
-          },
-          "gender": {
-            "type": "string"
-          },
-          "dob": {
-            "type": "string",
-            "format": "date"
-          },
-          "phone": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "ApiResponseVoid": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "object"
-          },
-          "error": {
-            "$ref": "#/components/schemas/ApiError"
-          }
-        }
-      },
-      "LoginRequest": {
-        "required": [
-          "password",
-          "username"
-        ],
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "password": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateAppointmentRequest": {
+      "AppointmentDTO": {
         "required": [
           "appointmentTime",
           "doctorId",
           "patientId"
         ],
-        "type": "object",
-        "properties": {
-          "patientId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "doctorId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "appointmentTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "notes": {
-            "type": "string"
-          }
-        }
-      },
-      "ApiResponseAppointmentResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/AppointmentResponse"
-          },
-          "error": {
-            "$ref": "#/components/schemas/ApiError"
-          }
-        }
-      },
-      "AppointmentResponse": {
         "type": "object",
         "properties": {
           "id": {
@@ -1477,6 +1434,49 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseAppointmentDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AppointmentDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "ApiResponseVoid": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "object"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "LoginRequest": {
+        "required": [
+          "password",
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
           }
         }
       },
@@ -1653,27 +1653,27 @@
           }
         }
       },
-      "ApiResponsePageResponsePatientResponse": {
+      "ApiResponsePageResponsePatientDTO": {
         "type": "object",
         "properties": {
           "success": {
             "type": "boolean"
           },
           "data": {
-            "$ref": "#/components/schemas/PageResponsePatientResponse"
+            "$ref": "#/components/schemas/PageResponsePatientDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
           }
         }
       },
-      "PageResponsePatientResponse": {
+      "PageResponsePatientDTO": {
         "type": "object",
         "properties": {
           "content": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/PatientResponse"
+              "$ref": "#/components/schemas/PatientDTO"
             }
           },
           "page": {
@@ -1694,27 +1694,27 @@
           }
         }
       },
-      "ApiResponsePageResponseHospitalResponse": {
+      "ApiResponsePageResponseHospitalDTO": {
         "type": "object",
         "properties": {
           "success": {
             "type": "boolean"
           },
           "data": {
-            "$ref": "#/components/schemas/PageResponseHospitalResponse"
+            "$ref": "#/components/schemas/PageResponseHospitalDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
           }
         }
       },
-      "PageResponseHospitalResponse": {
+      "PageResponseHospitalDTO": {
         "type": "object",
         "properties": {
           "content": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/HospitalResponse"
+              "$ref": "#/components/schemas/HospitalDTO"
             }
           },
           "page": {
@@ -1831,27 +1831,27 @@
           }
         }
       },
-      "ApiResponsePageResponseAppointmentResponse": {
+      "ApiResponsePageResponseAppointmentDTO": {
         "type": "object",
         "properties": {
           "success": {
             "type": "boolean"
           },
           "data": {
-            "$ref": "#/components/schemas/PageResponseAppointmentResponse"
+            "$ref": "#/components/schemas/PageResponseAppointmentDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
           }
         }
       },
-      "PageResponseAppointmentResponse": {
+      "PageResponseAppointmentDTO": {
         "type": "object",
         "properties": {
           "content": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AppointmentResponse"
+              "$ref": "#/components/schemas/AppointmentDTO"
             }
           },
           "page": {

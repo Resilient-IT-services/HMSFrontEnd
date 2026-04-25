@@ -16,7 +16,7 @@ const mockUser = {
   id: 'user-1',
   fullName: 'Test User',
   roles: ['DOCTOR', 'ADMIN'],
-  detailedMemberships: [
+  memberships: [
     { hospitalId: '1', hospitalName: 'Hospital One', hospitalCode: 'H1', roleAssignments: [] }
   ],
 };

@@ -15,7 +15,7 @@ const mockUser = {
   username: 'testuser',
   fullName: 'Test User',
   roles: ['DOCTOR'],
-  detailedMemberships: [
+  memberships: [
     { hospitalId: '1', hospitalName: 'Test Hospital', hospitalCode: 'TH', roleAssignments: [] }
   ],
   currentHospitalId: '1'
@@ -66,7 +66,7 @@ describe('Topbar', () => {
   it('handles hospital switch', () => {
     const multiHospitalUser = {
       ...mockUser,
-      detailedMemberships: [
+      memberships: [
         { hospitalId: '1', hospitalName: 'Hosp 1', hospitalCode: 'H1', roleAssignments: [] },
         { hospitalId: '2', hospitalName: 'Hosp 2', hospitalCode: 'H2', roleAssignments: [] }
       ]

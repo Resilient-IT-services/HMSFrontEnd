@@ -8,7 +8,7 @@ import authReducer from '@/state/authSlice';
 const mockUser = {
   id: 'user-1',
   fullName: 'Test User',
-  detailedMemberships: [
+  memberships: [
     { hospitalId: '1', hospitalName: 'Hospital One', hospitalCode: 'H1', roleAssignments: [] },
     { hospitalId: '2', hospitalName: 'Hospital Two', hospitalCode: 'H2', roleAssignments: [] },
   ],

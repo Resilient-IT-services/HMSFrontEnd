@@ -48,8 +48,8 @@ const SelectRolePage = () => {
   const currentHospitalId = user?.currentHospitalId;
 
   // Fallback to the first membership if currentHospitalId is not set but they only have one hospital
-  const currentHospital = user?.detailedMemberships.find(m => m.hospitalId === currentHospitalId) 
-    || (user?.detailedMemberships.length === 1 ? user.detailedMemberships[0] : null);
+  const currentHospital = user?.memberships.find(m => m.hospitalId === currentHospitalId) 
+    || (user?.memberships.length === 1 ? user.memberships[0] : null);
 
   const handleSelect = (role: Role) => {
     dispatch(setActiveRole(role));
@@ -134,7 +134,7 @@ const SelectRolePage = () => {
             })}
           </div>
 
-          {user?.detailedMemberships && user.detailedMemberships.length > 1 && (
+          {user?.memberships && user.memberships.length > 1 && (
             <button 
               onClick={handleSwitchHospital}
               className="mt-base flex items-center gap-2 text-secondary font-label-md hover:text-primary transition-colors"

@@ -26,8 +26,8 @@ const UserManagement = () => {
       if (userRes.success && userRes.data) {
         const usersWithRoles = (userRes.data.content || []).map(u => {
           const allRoles = new Set<Role>();
-          if (u.detailedMemberships) {
-            for (const m of u.detailedMemberships) {
+          if (u.memberships) {
+            for (const m of u.memberships) {
               for (const ra of m.roleAssignments) {
                 allRoles.add(ra.roleCode as Role);
               }
@@ -167,10 +167,10 @@ const UserManagement = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-body-md">
-                      {row.detailedMemberships?.[0]?.hospitalName || 'System'}
+                      {row.memberships?.[0]?.hospitalName || 'System'}
                     </td>
                     <td className="px-6 py-4 text-body-md">
-                      {row.detailedMemberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}
+                      {row.memberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border ${

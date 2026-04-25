@@ -19,10 +19,10 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
   onSuccess,
   user,
 }) => {
-  // Extract department from detailedMemberships
+  // Extract department from memberships
   let initialDept = '';
-  if (user?.detailedMemberships && user.detailedMemberships.length > 0) {
-    const membership = user.detailedMemberships[0];
+  if (user?.memberships && user.memberships.length > 0) {
+    const membership = user.memberships[0];
     if (membership.roleAssignments && membership.roleAssignments.length > 0) {
       initialDept = membership.roleAssignments[0].departmentName;
     }
@@ -47,7 +47,7 @@ export const UserEditModal: React.FC<UserEditModalProps> = ({
         ...formData,
         username: user.username,
         superuser: user.superuser,
-        detailedMemberships: user.detailedMemberships
+        memberships: user.memberships
       });
       if (response.success) {
         onSuccess();
