@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Hospital Selection | VitalSync</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f3f3f9",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#e7e8ee",
+                      "on-secondary-container": "#5a6579",
+                      "surface-container-highest": "#e2e2e8",
+                      "on-tertiary-container": "#2f3234",
+                      "background": "#f9f9ff",
+                      "inverse-primary": "#ffb59a",
+                      "surface-bright": "#f9f9ff",
+                      "on-primary": "#ffffff",
+                      "primary": "#a83900",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#802a00",
+                      "on-primary-container": "#5c1c00",
+                      "on-surface-variant": "#594138",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#bcc7de",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#d8e3fb",
+                      "secondary": "#545f73",
+                      "inverse-on-surface": "#f0f0f6",
+                      "primary-fixed": "#ffdbce",
+                      "on-background": "#191c20",
+                      "surface-dim": "#d9dadf",
+                      "primary-fixed-dim": "#ffb59a",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "on-secondary-fixed": "#111c2d",
+                      "primary-container": "#ff6b2b",
+                      "inverse-surface": "#2e3035",
+                      "secondary-container": "#d8e3fb",
+                      "surface-tint": "#a83900",
+                      "on-secondary-fixed-variant": "#3c475a",
+                      "surface-container": "#ededf3",
+                      "surface-variant": "#e2e2e8",
+                      "outline-variant": "#e2bfb3",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-primary-fixed": "#380d00",
+                      "outline": "#8d7167",
+                      "tertiary-fixed": "#e1e3e5",
+                      "tertiary": "#5c5f61",
+                      "surface": "#f9f9ff",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "on-surface": "#191c20",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#979a9c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "base": "8px",
+                      "margin-page": "40px",
+                      "section-gap": "24px",
+                      "container-padding": "32px",
+                      "component-gap": "16px"
+              },
+              "fontFamily": {
+                      "label-md": ["Inter"],
+                      "headline-sm": ["Manrope"],
+                      "body-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-xl": ["Manrope"],
+                      "body-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-md": ["Manrope"]
+              },
+              "fontSize": {
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hospital-card:hover .arrow-icon {
+            transform: translateX(4px);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center px-8 py-4 w-full sticky top-0 z-50">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">pulse_alert</span>
+</div>
+<span class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white font-headline-xl">MedCore Management</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+</button>
+<button class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-1 flex items-center justify-center p-gutter">
+<div class="w-full max-w-4xl animate-in fade-in duration-700">
+<div class="text-center mb-10">
+<h1 class="font-headline-xl text-on-background mb-2">Welcome Back, Staff</h1>
+<p class="font-body-lg text-secondary">Please select the facility for your current session</p>
+</div>
+<div class="mb-8 relative group">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</div>
+<input class="w-full pl-12 pr-4 py-4 bg-white border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all shadow-sm font-body-md text-on-surface" placeholder="Search facilities by name, city, or specialty..." type="text"/>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-component-gap">
+<div class="hospital-card group bg-surface-container-lowest border border-outline-variant p-6 rounded-xl cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="hospital">local_hospital</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">St. Jude Medical Center</h3>
+<p class="font-body-sm text-secondary">Los Angeles, CA</p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-surface-container-high">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Active Node</span>
+<span class="arrow-icon material-symbols-outlined text-primary transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="hospital-card group bg-surface-container-lowest border border-outline-variant p-6 rounded-xl cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="emergency">emergency</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">Metro General Hospital</h3>
+<p class="font-body-sm text-secondary">Chicago, IL</p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-surface-container-high">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100">High Capacity</span>
+<span class="arrow-icon material-symbols-outlined text-primary transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="hospital-card group bg-surface-container-lowest border border-outline-variant p-6 rounded-xl cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="cardiology">cardiology</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">Northwest Cardiology</h3>
+<p class="font-body-sm text-secondary">Seattle, WA</p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-surface-container-high">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-high text-secondary border border-outline-variant">Specialized</span>
+<span class="arrow-icon material-symbols-outlined text-primary transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="hospital-card group bg-surface-container-lowest border border-outline-variant p-6 rounded-xl cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="pediatrics">pediatrics</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">Kids Care Institute</h3>
+<p class="font-body-sm text-secondary">Austin, TX</p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-surface-container-high">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">Operational</span>
+<span class="arrow-icon material-symbols-outlined text-primary transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="hospital-card group bg-surface-container-lowest border border-outline-variant p-6 rounded-xl cursor-pointer hover:border-primary transition-all duration-200 hover:shadow-md">
+<div class="flex flex-col gap-4">
+<div class="w-12 h-12 bg-surface-container-high rounded-lg flex items-center justify-center text-primary group-hover:bg-primary-container group-hover:text-white transition-colors">
+<span class="material-symbols-outlined text-3xl" data-icon="home_health">home_health</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-on-surface">Cedar Grove Rehab</h3>
+<p class="font-body-sm text-secondary">Phoenix, AZ</p>
+</div>
+<div class="flex items-center justify-between mt-2 pt-4 border-t border-surface-container-high">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-container-high text-secondary border border-outline-variant">Rehabilitation</span>
+<span class="arrow-icon material-symbols-outlined text-primary transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+<div class="group bg-surface-container p-6 rounded-xl border border-dashed border-outline-variant flex flex-col items-center justify-center text-center gap-2 hover:bg-surface-container-high transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-3xl text-secondary" data-icon="add_circle">add_circle</span>
+<h3 class="font-headline-sm text-on-surface">Request Facility Access</h3>
+<p class="font-body-sm text-secondary">Contact your administrator</p>
+</div>
+</div>
+<div class="mt-12 p-6 bg-surface-container-low rounded-xl border border-outline-variant flex items-start gap-4">
+<span class="material-symbols-outlined text-primary" data-icon="info">info</span>
+<div class="flex-1">
+<h4 class="font-label-md text-on-surface">Security Protocol Reminder</h4>
+<p class="font-body-sm text-secondary mt-1">Sessions are tracked per facility. Please ensure you are selecting the correct location to maintain clinical accuracy and data compliance standards. Your current IP is logged as verified hospital network.</p>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 flex justify-between items-center px-8 py-4 w-full">
+<span class="font-manrope text-xs text-gray-500">© 2024 MedCore Health Systems. Clinical Accuracy Priority.</span>
+<div class="flex gap-6">
+<a class="font-manrope text-xs text-gray-500 hover:text-gray-900 transition-colors underline-offset-4 hover:underline" href="#">Privacy Policy</a>
+<a class="font-manrope text-xs text-gray-500 hover:text-gray-900 transition-colors underline-offset-4 hover:underline" href="#">Support</a>
+<a class="font-manrope text-xs text-gray-500 hover:text-gray-900 transition-colors underline-offset-4 hover:underline" href="#">Security Standards</a>
+</div>
+</footer>
+</body></html>

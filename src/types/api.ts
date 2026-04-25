@@ -118,16 +118,8 @@ export interface RoleAssignmentDTO {
 export interface DetailedHospitalMembershipDTO {
   hospitalId: string;
   hospitalName?: string;
-  roleAssignments: RoleAssignmentDTO[];
-}
-
-export interface HospitalMembershipResponse {
-  hospitalId: string;
-  hospitalName?: string;
   hospitalCode?: string;
-  roles: Role[];
-  specialization?: string;
-  department?: string; // Denormalized for convenience in some endpoints
+  roleAssignments: RoleAssignmentDTO[];
 }
 
 export interface UserResponse {
@@ -142,7 +134,6 @@ export interface UserResponse {
   deleted: boolean;
   superuser: boolean;
   createdAt: string;
-  memberships: HospitalMembershipResponse[];
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;

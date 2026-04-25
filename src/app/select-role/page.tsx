@@ -3,20 +3,41 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setActiveRole } from '@/state/authSlice';
-import { Card } from '@/components/ui/Card';
+import { setActiveRole, setCurrentHospitalId } from '@/state/authSlice';
 import { Role } from '@/types/api';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-const getRoleIcon = (role: Role) => {
-  switch (role) {
-    case 'DOCTOR': return 'medical_services';
-    case 'NURSE': return 'vital_signs';
-    case 'PHARMACIST': return 'prescriptions';
-    case 'RECEPTIONIST': return 'person_search';
-    case 'ADMIN': return 'admin_panel_settings';
-    case 'SUPER_ADMIN': return 'shield_person';
-    default: return 'person';
+const roleDisplayData: Record<string, { icon: string, title: string, description: string }> = {
+  'DOCTOR': {
+    icon: 'stethoscope',
+    title: 'Doctor',
+    description: 'Patient diagnosis, prescriptions, and clinical rounds.'
+  },
+  'ADMIN': {
+    icon: 'admin_panel_settings',
+    title: 'Administrator',
+    description: 'Facility oversight, staffing schedules, and system logs.'
+  },
+  'RECEPTIONIST': {
+    icon: 'desk',
+    title: 'Receptionist',
+    description: 'Patient registration, appointment booking, and triage.'
+  },
+  'PHARMACIST': {
+    icon: 'prescriptions',
+    title: 'Pharmacist',
+    description: 'Medication dispensing, inventory management, and pharmaceutical care.'
+  },
+  'NURSE': {
+    icon: 'vital_signs',
+    title: 'Nurse',
+    description: 'Patient care, vitals monitoring, and treatment administration.'
+  },
+  'SUPER_ADMIN': {
+    icon: 'shield_person',
+    title: 'Super Admin',
+    description: 'System-wide configuration, multi-facility oversight, and security.'
   }
 };
 
@@ -24,11 +45,15 @@ const SelectRolePage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const user = useSelector((state: RootState) => state.auth.user);
+  const currentHospitalId = user?.currentHospitalId;
+
+  // Fallback to the first membership if currentHospitalId is not set but they only have one hospital
+  const currentHospital = user?.detailedMemberships.find(m => m.hospitalId === currentHospitalId) 
+    || (user?.detailedMemberships.length === 1 ? user.detailedMemberships[0] : null);
 
   const handleSelect = (role: Role) => {
     dispatch(setActiveRole(role));
     
-    // Explicitly redirect to avoid AuthProvider timing issues
     const rolePathMap: Record<string, string> = {
       'RECEPTIONIST': 'reception',
       'DOCTOR': 'doctor',
@@ -38,35 +63,101 @@ const SelectRolePage = () => {
       'NURSE': 'nurse'
     };
     const path = rolePathMap[role] || role.toLowerCase();
-    router.push(`/${path}/dashboard`);
+    const targetPath = `/${path}/dashboard`;
+    window.location.href = targetPath;
+  };
+
+  const handleSwitchHospital = () => {
+    dispatch(setCurrentHospitalId(null));
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] flex items-center justify-center p-6">
-      <div className="w-full max-w-4xl">
-        <h1 className="text-3xl font-black text-[var(--text-primary)] mb-2 text-center">Select Your Role</h1>
-        <p className="text-[var(--text-secondary)] mb-10 text-center">You have multiple roles assigned to this hospital</p>
-        
-        <div className="flex flex-wrap justify-center gap-6">
-          {(user?.roles || []).map((role) => (
-            <div
-              key={role}
-              onClick={() => handleSelect(role)}
-              className="cursor-pointer group w-full sm:w-64"
-            >
-              <Card className="hover:border-[var(--primary)] transition-all h-full hover:shadow-xl active:scale-95">
-                <div className="flex flex-col items-center text-center p-8">
-                  <div className="w-20 h-20 rounded-2xl bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center mb-4 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300">
-                    <span className="material-symbols-outlined text-4xl">{getRoleIcon(role)}</span>
-                  </div>
-                  <h3 className="text-lg font-black text-[var(--text-primary)] uppercase tracking-tight">{role}</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-2 font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">Select to Continue</p>
-                </div>
-              </Card>
-            </div>
-          ))}
+    <div className="bg-background font-body-md text-on-background min-h-screen flex flex-col antialiased">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .role-card:hover .icon-container {
+            background-color: #ffdbce;
+            color: #a83900;
+        }
+      `}} />
+
+      <header className="flex justify-between items-center px-8 py-4 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center gap-4">
+          <span className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white font-headline-md">MedCore Management</span>
         </div>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-gray-500">help</span>
+            <span className="font-label-md text-gray-500">Help</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-gray-500">settings</span>
+          </div>
+        </div>
+      </header>
+
+      <main className="flex-grow flex items-center justify-center p-gutter">
+        <div className="max-w-4xl w-full flex flex-col gap-section-gap items-center">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full mb-4">
+              <span className="material-symbols-outlined text-sm text-secondary">local_hospital</span>
+              <span className="font-label-sm text-secondary">{currentHospital?.hospitalName || 'Selected Facility'}</span>
+            </div>
+            <h1 className="font-headline-xl text-on-background mb-2">Select Your Role</h1>
+            <p className="font-body-lg text-tertiary max-w-md mx-auto">Choose a profile to continue your session for the selected facility.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            {(user?.roles || []).map((role) => {
+              const display = roleDisplayData[role] || {
+                icon: 'person',
+                title: role,
+                description: 'Access assigned department functions and tools.'
+              };
+              
+              return (
+                <button 
+                  key={role}
+                  onClick={() => handleSelect(role)}
+                  className="role-card group relative bg-surface-container-lowest border border-outline-variant p-8 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:shadow-lg hover:border-primary-container"
+                >
+                  <div className="icon-container w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-6 transition-colors duration-300">
+                    <span className="material-symbols-outlined text-3xl">{display.icon}</span>
+                  </div>
+                  <span className="font-headline-md text-on-surface mb-2">{display.title}</span>
+                  <p className="font-body-sm text-tertiary mb-6">{display.description}</p>
+                  <div className="mt-auto inline-flex items-center gap-2 text-primary font-label-md group-hover:gap-3 transition-all">
+                    <span>Select Role</span>
+                    <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {user?.detailedMemberships && user.detailedMemberships.length > 1 && (
+            <button 
+              onClick={handleSwitchHospital}
+              className="mt-base flex items-center gap-2 text-secondary font-label-md hover:text-primary transition-colors"
+            >
+              <span className="material-symbols-outlined text-lg">swap_horiz</span>
+              <span>Change Hospital Facility</span>
+            </button>
+          )}
+        </div>
+      </main>
+
+      <div className="fixed bottom-0 right-0 p-gutter -z-10 opacity-10 pointer-events-none">
+        <span className="material-symbols-outlined text-[300px]" style={{ fontVariationSettings: "'wght' 100" }}>vital_signs</span>
       </div>
+
+      <footer className="flex justify-between items-center px-8 py-4 w-full bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
+        <p className="font-manrope text-xs text-gray-500">© 2024 MedCore Health Systems. Clinical Accuracy Priority.</p>
+        <div className="flex gap-6">
+          <Link className="font-manrope text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white underline-offset-4 hover:underline" href="#">Privacy Policy</Link>
+          <Link className="font-manrope text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white underline-offset-4 hover:underline" href="#">Support</Link>
+          <Link className="font-manrope text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white underline-offset-4 hover:underline" href="#">Security Standards</Link>
+        </div>
+      </footer>
     </div>
   );
 };

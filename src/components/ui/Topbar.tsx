@@ -30,12 +30,14 @@ const Topbar: React.FC = () => {
   const handleHospitalSwitch = (hospitalId: string) => {
     dispatch(setCurrentHospitalId(hospitalId));
     setIsProfileOpen(false);
+    window.location.reload();
   };
 
   const handleRoleSwitch = (role: Role) => {
     dispatch(setActiveRole(role));
     dispatch(setSuperMode(false)); // Switching to a normal role turns off super mode
     setIsProfileOpen(false);
+    window.location.reload();
   };
 
   const toggleSuperMode = () => {
@@ -45,9 +47,21 @@ const Topbar: React.FC = () => {
     }
     setIsProfileOpen(false);
   };
-  const currentHospitalName = user?.memberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
+  const currentHospitalName = user?.detailedMemberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'DOCTOR': return 'stethoscope';
+      case 'ADMIN': return 'admin_panel_settings';
+      case 'RECEPTIONIST': return 'desk';
+      case 'PHARMACIST': return 'prescriptions';
+      case 'NURSE': return 'vital_signs';
+      case 'SUPER_ADMIN': return 'shield_person';
+      default: return 'person';
+    }
+  };
 
   return (
     <header className="bg-white flex justify-between items-center h-16 w-full sticky top-0 z-40 border-b border-gray-200 shadow-sm font-manrope antialiased">
@@ -57,7 +71,7 @@ const Topbar: React.FC = () => {
         </div>
         <GlobalSearch />
         <div className="h-8 w-px bg-gray-200 mx-6"></div>
-        <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-xs font-black">{title}</h2>
+        <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-xs font-black">{currentHospitalName}</h2>
       </div>
 
       <div className="flex items-center gap-4 px-6">
@@ -66,15 +80,6 @@ const Topbar: React.FC = () => {
             {headerActions}
             <div className="h-6 w-px bg-gray-200 mx-2"></div>
           </div>
-        )}
-        {user?.memberships && user.memberships.length > 1 && (
-          <button 
-            onClick={() => setIsProfileOpen(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <span className="material-symbols-outlined text-lg">domain</span>
-            <span>Hospital Switcher</span>
-          </button>
         )}
         
         <div className="h-6 w-px bg-gray-200"></div>
@@ -89,7 +94,10 @@ const Topbar: React.FC = () => {
             className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-gray-50 transition-colors text-gray-500"
           >
             <span className="material-symbols-outlined text-2xl">account_circle</span>
-            <span className="text-sm font-bold text-gray-700">{user?.username}</span>
+            <div className="flex flex-col items-start leading-none">
+              <span className="text-sm font-bold text-gray-700">{user?.username}</span>
+              <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-tighter">{roleLabel}</span>
+            </div>
             <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
           </button>
 
@@ -97,7 +105,7 @@ const Topbar: React.FC = () => {
               <div className="absolute right-0 mt-2 w-72 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
                 <div className="p-4 border-b border-[var(--border)] bg-[var(--background)]/50">
                   <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">Signed in as</p>
-                  <p className="text-sm font-black text-[var(--text-primary)]">{user?.username}</p>
+                  <p className="text-sm font-black text-[var(--text-primary)]">{user?.fullName || user?.username}</p>
                 </div>
 
                 <div className="p-2">
@@ -119,34 +127,26 @@ const Topbar: React.FC = () => {
 
                 <div className="px-2 py-1">
                   <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
-                    {user?.roles?.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => {
-                      let roleIcon = 'person';
-                      if (role === 'DOCTOR') {
-                        roleIcon = 'medical_services';
-                      } else if (role === 'ADMIN') {
-                        roleIcon = 'admin_panel_settings';
-                      }
-
-                      return (
+                    {user?.roles?.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => (
                         <button
                           key={role}
                           onClick={() => handleRoleSwitch(role)}
                           className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${activeRole === role ? 'text-[var(--primary)] bg-[var(--primary-light)]/50' : 'text-[var(--text-primary)]'}`}
                         >
                           <span className="material-symbols-outlined text-xl">
-                            {roleIcon}
+                            {getRoleIcon(role)}
                           </span>
                           <span className="text-sm font-bold">{role}</span>
                           {activeRole === role && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
                         </button>
-                      );
-                    })}
+                      )
+                    )}
                 </div>
 
-                {user?.memberships && user.memberships.length > 1 && (
+                {user?.detailedMemberships && user.detailedMemberships.length > 1 && (
                   <div className="px-2 py-1 border-t border-[var(--border)] mt-1">
                     <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Hospital</p>
-                    {user.memberships.map(h => (
+                    {user.detailedMemberships.map(h => (
                       <button
                         key={h.hospitalId}
                         onClick={() => handleHospitalSwitch(h.hospitalId)}

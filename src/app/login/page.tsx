@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUser } from '@/state/authSlice';
+import { setUser, clearAuthSession } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import HelpDeskModal from '@/components/HelpDeskModal';
 const LoginPage = () => {
@@ -22,6 +22,9 @@ const LoginPage = () => {
     try {
       const loginResponse = await authService.login(username, password);
       if (loginResponse.success) {
+        // Clear previous session selection (role/hospital)
+        dispatch(clearAuthSession());
+        
         // Fetch user profile after login sets cookie
         const meResponse = await authService.me();
         if (meResponse.success && meResponse.data) {

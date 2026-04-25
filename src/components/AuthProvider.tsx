@@ -68,12 +68,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [dispatch, isSuperMode, pathname, router]);
 
   const handleHospitalSelection = useCallback((roles: string[]) => {
-    if (user?.memberships && user.memberships.length > 1) {
+    if (user?.detailedMemberships && user.detailedMemberships.length > 1) {
       if (pathname !== '/select-hospital') {
         router.push('/select-hospital');
       }
-    } else if (user?.memberships && user.memberships.length === 1) {
-      const targetHospitalId = user.memberships[0].hospitalId;
+    } else if (user?.detailedMemberships && user.detailedMemberships.length === 1) {
+      const targetHospitalId = user.detailedMemberships[0].hospitalId;
 
       if (user.currentHospitalId === targetHospitalId) {
         return;
@@ -117,10 +117,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const targetPath = `/${path}/dashboard`;
       
       if (pathname !== targetPath) {
-        router.push(targetPath);
+        window.location.href = targetPath;
       }
     }
-  }, [activeRole, pathname, router]);
+  }, [activeRole, pathname]);
 
   useEffect(() => {
     if (isLoading) return;

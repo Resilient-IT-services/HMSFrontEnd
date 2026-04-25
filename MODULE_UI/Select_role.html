@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VitalSync | Role Selection</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-low": "#f3f3f9",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#e7e8ee",
+                      "on-secondary-container": "#5a6579",
+                      "surface-container-highest": "#e2e2e8",
+                      "on-tertiary-container": "#2f3234",
+                      "background": "#f9f9ff",
+                      "inverse-primary": "#ffb59a",
+                      "surface-bright": "#f9f9ff",
+                      "on-primary": "#ffffff",
+                      "primary": "#a83900",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#802a00",
+                      "on-primary-container": "#5c1c00",
+                      "on-surface-variant": "#594138",
+                      "on-error": "#ffffff",
+                      "secondary-fixed-dim": "#bcc7de",
+                      "on-tertiary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed": "#d8e3fb",
+                      "secondary": "#545f73",
+                      "inverse-on-surface": "#f0f0f6",
+                      "primary-fixed": "#ffdbce",
+                      "on-background": "#191c20",
+                      "surface-dim": "#d9dadf",
+                      "primary-fixed-dim": "#ffb59a",
+                      "on-tertiary-fixed-variant": "#444749",
+                      "on-secondary-fixed": "#111c2d",
+                      "primary-container": "#ff6b2b",
+                      "inverse-surface": "#2e3035",
+                      "secondary-container": "#d8e3fb",
+                      "surface-tint": "#a83900",
+                      "on-secondary-fixed-variant": "#3c475a",
+                      "surface-container": "#ededf3",
+                      "surface-variant": "#e2e2e8",
+                      "outline-variant": "#e2bfb3",
+                      "on-tertiary-fixed": "#191c1e",
+                      "on-primary-fixed": "#380d00",
+                      "outline": "#8d7167",
+                      "tertiary-fixed": "#e1e3e5",
+                      "tertiary": "#5c5f61",
+                      "surface": "#f9f9ff",
+                      "error": "#ba1a1a",
+                      "tertiary-fixed-dim": "#c4c7c9",
+                      "on-surface": "#191c20",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#979a9c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "base": "8px",
+                      "margin-page": "40px",
+                      "section-gap": "24px",
+                      "container-padding": "32px",
+                      "component-gap": "16px"
+              },
+              "fontFamily": {
+                      "label-md": ["Inter"],
+                      "headline-sm": ["Manrope"],
+                      "body-md": ["Inter"],
+                      "label-sm": ["Inter"],
+                      "headline-xl": ["Manrope"],
+                      "body-lg": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-md": ["Manrope"]
+              },
+              "fontSize": {
+                      "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                      "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .role-card:hover .icon-container {
+            background-color: #ffdbce;
+            color: #a83900;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-background min-h-screen flex flex-col">
+<!-- Top Navigation Anchor (Suppressed SideNav for transactional flow) -->
+<header class="flex justify-between items-center px-8 py-4 w-full bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+<div class="flex items-center gap-4">
+<span class="text-xl font-extrabold tracking-tight text-gray-900 dark:text-white font-headline-md">MedCore Management</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500">help</span>
+<span class="font-label-md text-gray-500">Help</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-gray-500">settings</span>
+</div>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center p-gutter">
+<div class="max-w-4xl w-full flex flex-col gap-section-gap items-center">
+<!-- Breadcrumb / Context Header -->
+<div class="text-center">
+<div class="inline-flex items-center gap-2 px-3 py-1 bg-surface-container rounded-full mb-4">
+<span class="material-symbols-outlined text-sm text-secondary">local_hospital</span>
+<span class="font-label-sm text-secondary">St. Jude Medical Center</span>
+</div>
+<h1 class="font-headline-xl text-on-background mb-2">Select Your Role</h1>
+<p class="font-body-lg text-tertiary max-w-md mx-auto">Choose a profile to continue your session for the selected facility.</p>
+</div>
+<!-- Role Selection Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+<!-- Role: Doctor -->
+<button class="role-card group relative bg-surface-container-lowest border border-outline-variant p-8 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:shadow-lg hover:border-primary-container">
+<div class="icon-container w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-6 transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl" data-icon="stethoscope">stethoscope</span>
+</div>
+<span class="font-headline-md text-on-surface mb-2">Doctor</span>
+<p class="font-body-sm text-tertiary mb-6">Patient diagnosis, prescriptions, and clinical rounds.</p>
+<div class="mt-auto inline-flex items-center gap-2 text-primary font-label-md group-hover:gap-3 transition-all">
+<span>Select Role</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</button>
+<!-- Role: Admin -->
+<button class="role-card group relative bg-surface-container-lowest border border-outline-variant p-8 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:shadow-lg hover:border-primary-container">
+<div class="icon-container w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-6 transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl" data-icon="admin_panel_settings">admin_panel_settings</span>
+</div>
+<span class="font-headline-md text-on-surface mb-2">Administrator</span>
+<p class="font-body-sm text-tertiary mb-6">Facility oversight, staffing schedules, and system logs.</p>
+<div class="mt-auto inline-flex items-center gap-2 text-primary font-label-md group-hover:gap-3 transition-all">
+<span>Select Role</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</button>
+<!-- Role: Receptionist -->
+<button class="role-card group relative bg-surface-container-lowest border border-outline-variant p-8 rounded-xl flex flex-col items-center text-center transition-all duration-300 hover:shadow-lg hover:border-primary-container">
+<div class="icon-container w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-6 transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl" data-icon="desk">desk</span>
+</div>
+<span class="font-headline-md text-on-surface mb-2">Receptionist</span>
+<p class="font-body-sm text-tertiary mb-6">Patient registration, appointment booking, and triage.</p>
+<div class="mt-auto inline-flex items-center gap-2 text-primary font-label-md group-hover:gap-3 transition-all">
+<span>Select Role</span>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</div>
+</button>
+</div>
+<!-- Switch Hospital Action -->
+<button class="mt-base flex items-center gap-2 text-secondary font-label-md hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">swap_horiz</span>
+<span>Change Hospital Facility</span>
+</button>
+</div>
+</main>
+<!-- Illustrative Background Element (Subtle) -->
+<div class="fixed bottom-0 right-0 p-gutter -z-10 opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-[300px]" data-icon="vital_signs" style="font-variation-settings: 'wght' 100;">vital_signs</span>
+</div>
+<!-- Footer Content -->
+<footer class="flex justify-between items-center px-8 py-4 w-full bg-gray-50 dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800">
+<p class="font-manrope text-xs text-gray-500">© 2024 MedCore Health Systems. Clinical Accuracy Priority.</p>
+<div class="flex gap-6">
+<a class="font-manrope text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white underline-offset-4 hover:underline" href="#">Privacy Policy</a>
+<a class="font-manrope text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white underline-offset-4 hover:underline" href="#">Support</a>
+<a class="font-manrope text-xs text-gray-500 hover:text-gray-900 dark:hover:text-white underline-offset-4 hover:underline" href="#">Security Standards</a>
+</div>
+</footer>
+</body></html>
