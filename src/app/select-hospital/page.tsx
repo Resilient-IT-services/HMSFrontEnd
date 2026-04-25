@@ -82,7 +82,7 @@ const SelectHospitalPage = () => {
                   </div>
                   <div className="flex items-center justify-between mt-2 pt-4 border-t border-surface-container-high">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-100">
-                      {h.roleAssignments.filter(ra => ra.active).length} Roles Assigned
+                      {(h.roleAssignments || []).filter(ra => ra.active).length} Roles Assigned
                     </span>
                     <span className="arrow-icon material-symbols-outlined text-primary transition-transform">arrow_forward</span>
                   </div>

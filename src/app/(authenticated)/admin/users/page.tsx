@@ -28,8 +28,15 @@ const UserManagement = () => {
           const allRoles = new Set<Role>();
           if (u.memberships) {
             for (const m of u.memberships) {
-              for (const ra of m.roleAssignments) {
-                allRoles.add(ra.roleCode as Role);
+              if (m.roleAssignments) {
+                for (const ra of m.roleAssignments) {
+                  allRoles.add(ra.roleCode as Role);
+                }
+              }
+              if (m.roles) {
+                for (const r of m.roles) {
+                  allRoles.add(r as Role);
+                }
               }
             }
           }
@@ -129,6 +136,7 @@ const UserManagement = () => {
                   <th className="px-6 py-4 font-label-md text-secondary">Mobile</th>
                   <th className="px-6 py-4 font-label-md text-secondary">Role(s)</th>
                   <th className="px-6 py-4 font-label-md text-secondary">Hospital</th>
+                  <th className="px-6 py-4 font-label-md text-secondary">Specialization</th>
                   <th className="px-6 py-4 font-label-md text-secondary">Department</th>
                   <th className="px-6 py-4 font-label-md text-secondary">Status</th>
                   <th className="px-6 py-4 font-label-md text-secondary text-right">Actions</th>
@@ -170,7 +178,10 @@ const UserManagement = () => {
                       {row.memberships?.[0]?.hospitalName || 'System'}
                     </td>
                     <td className="px-6 py-4 text-body-md">
-                      {row.memberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}
+                      {row.memberships?.[0]?.specialization || row.doctorInfo?.specialization || 'N/A'}
+                    </td>
+                    <td className="px-6 py-4 text-body-md">
+                      {row.memberships?.[0]?.departmentName || row.memberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border ${

@@ -44,11 +44,18 @@ const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Rol
   user.memberships.forEach(m => {
     // If no hospitalId filter or it matches, add roles
     if (!hospitalId || m.hospitalId === hospitalId) {
-      m.roleAssignments.forEach(ra => {
-        if (ra.active) {
-          effectiveRolesSet.add(ra.roleCode as Role);
-        }
-      });
+      if (m.roleAssignments) {
+        m.roleAssignments.forEach(ra => {
+          if (ra.active) {
+            effectiveRolesSet.add(ra.roleCode as Role);
+          }
+        });
+      }
+      if (m.roles) {
+        m.roles.forEach(r => {
+          effectiveRolesSet.add(r as Role);
+        });
+      }
     }
   });
 

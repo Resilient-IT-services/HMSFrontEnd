@@ -32,8 +32,8 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
       const membership = selectedUser.memberships[0];
       return {
         hospitalId: membership.hospitalId,
-        roles: membership.roleAssignments.map(ra => ra.roleCode as Role),
-        department: membership.roleAssignments[0]?.departmentName || ''
+        roles: (membership.roleAssignments || []).map(ra => ra.roleCode as Role),
+        department: membership.roleAssignments?.[0]?.departmentName || ''
       };
     }
     return { hospitalId: '', roles: [], department: '' };
@@ -111,8 +111,8 @@ export const RoleAllocationModal: React.FC<RoleAllocationModalProps> = ({
               const existing = selectedUser?.memberships?.find(m => m.hospitalId === hospId);
               setAllocation({
                 hospitalId: hospId,
-                roles: existing ? existing.roleAssignments.map(ra => ra.roleCode as Role) : [],
-                department: existing?.roleAssignments[0]?.departmentName || ''
+                roles: existing ? (existing.roleAssignments || []).map(ra => ra.roleCode as Role) : [],
+                department: existing?.roleAssignments?.[0]?.departmentName || ''
               });
             }}
           >

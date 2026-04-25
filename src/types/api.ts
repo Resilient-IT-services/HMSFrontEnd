@@ -120,7 +120,9 @@ export interface HospitalMembershipDTO {
   hospitalId: string;
   hospitalName?: string;
   hospitalCode?: string;
-  roleAssignments: RoleAssignmentDTO[];
+  roles?: string[];
+  specialization?: string;
+  departmentName?: string;
 }
 
 export interface UserResponse {

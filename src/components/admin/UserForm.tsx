@@ -50,7 +50,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   const assignedRoles = useMemo(() => {
     const roles = new Set<string>();
     formData.memberships?.forEach(m => {
-      m.roleAssignments.forEach(ra => roles.add(ra.roleCode));
+      m.roleAssignments?.forEach(ra => roles.add(ra.roleCode));
     });
     return Array.from(roles);
   }, [formData.memberships]);
@@ -441,7 +441,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                                 <div>
                                   <h4 className="font-bold text-sm">{m.hospitalName || hosp?.name || 'Hospital ID: ' + m.hospitalId}</h4>
                                   <p className="text-[11px] text-gray-500 font-bold uppercase tracking-tight">
-                                    {m.roleAssignments.map(ra => ra.roleCode).join(' • ')}
+                                    {(m.roleAssignments || []).map(ra => ra.roleCode).join(' • ')}
                                   </p>
                                 </div>
                               </div>
@@ -479,7 +479,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                               </div>
                             </div>
                             <div className="space-y-2">
-                              {m.roleAssignments.map((ra, raIdx) => (
+                              {(m.roleAssignments || []).map((ra, raIdx) => (
                                 <div key={raIdx} className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-100">
                                   <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode}</span>
                                   {ra.doctorDetails && <span className="text-[10px] font-bold">${ra.doctorDetails.consultationFee} Fee</span>}
