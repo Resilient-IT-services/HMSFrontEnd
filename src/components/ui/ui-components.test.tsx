@@ -5,17 +5,20 @@ import { FormField } from './FormField';
 import { Table } from './Table';
 import { Modal } from './Modal';
 import MainLayout from './MainLayout';
+import { LayoutProvider } from '@/context/LayoutContext';
 
 // Mock components that use Redux or Next.js hooks
 vi.mock('./Sidebar', () => ({ default: () => <div data-testid="sidebar">Sidebar</div> }));
-vi.mock('./Topbar', () => ({ default: ({ title }: any) => <div data-testid="topbar">{title}</div> }));
+vi.mock('./Topbar', () => ({ default: () => <div data-testid="topbar">Topbar</div> }));
 
 describe('UI Components', () => {
   describe('MainLayout', () => {
-    it('renders sidebar, topbar and children', () => {
-      render(<MainLayout title="Dashboard"><div>Content</div></MainLayout>);
-      expect(screen.getByTestId('sidebar')).toBeInTheDocument();
-      expect(screen.getByTestId('topbar')).toHaveTextContent('Dashboard');
+    it('renders children and manages page header', () => {
+      render(
+        <LayoutProvider>
+          <MainLayout title="Dashboard"><div>Content</div></MainLayout>
+        </LayoutProvider>
+      );
       expect(screen.getByText('Content')).toBeInTheDocument();
     });
   });

@@ -1,0 +1,108 @@
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import UserManagement from './page';
+import apiClient from '@/services/apiClient';
+import { Provider } from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
+import authReducer from '@/state/authSlice';
+import { LayoutProvider } from '@/context/LayoutContext';
+import { useRouter } from 'next/navigation';
+
+vi.mock('@/services/apiClient', () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+  },
+}));
+
+const mockPush = vi.fn();
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    back: vi.fn(),
+  }),
+  usePathname: () => '/admin/users',
+}));
+
+vi.mock('@/components/ui/MainLayout', () => ({
+  default: ({ children, title }: any) => (
+    <div data-testid="main-layout">
+      <h1>{title}</h1>
+      {children}
+    </div>
+  )
+}));
+
+const createMockStore = () => configureStore({ 
+  reducer: { auth: authReducer },
+  preloadedState: { auth: { user: { hospitalId: 1 } } as any }
+});
+
+describe('UserManagement', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders and fetches users', async () => {
+    (apiClient.get as any).mockResolvedValue({
+      data: { success: true, data: [{ id: 1, username: 'user1', roles: ['DOCTOR'] }] }
+    });
+
+    render(
+      <Provider store={createMockStore()}>
+        <LayoutProvider>
+          <UserManagement />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    expect(screen.getByPlaceholderText(/Search user.../i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+  });
+
+  it('contains a link to create user page', async () => {
+    (apiClient.get as any).mockResolvedValue({
+      data: { success: true, data: [] }
+    });
+
+    render(
+      <Provider store={createMockStore()}>
+        <LayoutProvider>
+          <UserManagement />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    const createBtn = screen.getByText(/Create User/i);
+    expect(createBtn.closest('a')).toHaveAttribute('href', '/admin/users/create');
+  });
+
+  it('navigates to contract add page when clicking add business button', async () => {
+    (apiClient.get as any).mockResolvedValue({
+      data: { success: true, data: [{ id: "1", username: 'user1', roles: ['DOCTOR'], memberships: [] }] }
+    });
+
+    const store = configureStore({ 
+      reducer: { auth: authReducer },
+      preloadedState: { auth: { user: { hospitalId: "1" }, isSuperMode: true } as any }
+    });
+
+    render(
+      <Provider store={store}>
+        <LayoutProvider>
+          <UserManagement />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('user1')).toBeInTheDocument();
+    });
+
+    const allocateBtn = screen.getByTitle(/Add Hospital Contract/i);
+    fireEvent.click(allocateBtn);
+    expect(mockPush).toHaveBeenCalledWith('/admin/users/1/contracts/add');
+  });
+});

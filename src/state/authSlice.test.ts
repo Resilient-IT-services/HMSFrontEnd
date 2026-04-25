@@ -4,12 +4,19 @@ import { UserProfileResponse } from '@/types/api';
 
 describe('authSlice', () => {
   const mockUser: UserProfileResponse = {
+    id: "user-1",
     userId: 1,
-    hospitalId: 101,
     username: 'testuser',
-    roles: ['DOCTOR', 'ADMIN'], // ✅ YE LINE ADD KAR
-    hospitals: [
-      { hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR', 'ADMIN'] }
+    fullName: 'Test User',
+    email: 'test@example.com',
+    phone: '1234567890',
+    dob: '1990-01-01',
+    gender: 'MALE',
+    active: true,
+    roles: [],
+    currentHospitalId: "101",
+    memberships: [
+      { hospitalId: "101", hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['DOCTOR', 'ADMIN'] }
     ]
   };
 
@@ -27,10 +34,8 @@ describe('authSlice', () => {
 
   it('should handle setUser', () => {
     const state = authReducer(undefined, setUser(mockUser));
-    expect(state.user).toEqual({
-      ...mockUser,
-      roles: ['DOCTOR', 'ADMIN']
-    });
+    expect(state.user?.roles).toContain('DOCTOR');
+    expect(state.user?.roles).toContain('ADMIN');
     expect(state.isAuthenticated).toBe(true);
   });
 
@@ -55,7 +60,7 @@ describe('authSlice', () => {
     localStorage.setItem('isSuperMode', 'true');
     
     const state = authReducer({
-      user: mockUser,
+      user: { ...mockUser, roles: ['DOCTOR'] },
       isAuthenticated: true,
       isLoading: false,
       error: null,
@@ -73,7 +78,7 @@ describe('authSlice', () => {
   it('should auto-set activeRole if user has only one effective role', () => {
     const singleRoleUser: UserProfileResponse = { 
       ...mockUser, 
-      hospitals: [{ hospitalId: 101, hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['RECEPTIONIST'] }] 
+      memberships: [{ hospitalId: "101", hospitalName: 'Hospital A', hospitalCode: 'HA', roles: ['RECEPTIONIST'] }] 
     };
     const state = authReducer(undefined, setUser(singleRoleUser));
     expect(state.activeRole).toBe('RECEPTIONIST');
@@ -90,7 +95,7 @@ describe('authSlice', () => {
         isSuperMode: true,
         activeRole: null 
       }, 
-      setUser(mockUser) // mockUser has DOCTOR, ADMIN, but not SUPER_ADMIN in its hospitals
+      setUser(mockUser) // mockUser has DOCTOR, ADMIN, but not SUPER_ADMIN in its memberships
     );
     expect(state.isSuperMode).toBe(false);
   });

@@ -13,8 +13,8 @@ const createMockStore = () => configureStore({
   preloadedState: {
     auth: {
       user: {
-        hospitals: [
-          { hospitalId: 1, hospitalName: 'Hospital 1', hospitalCode: 'H1', roles: [] }
+        memberships: [
+          { hospitalId: "101", hospitalName: 'Hospital 1', hospitalCode: 'H1', roles: [] }
         ]
       }
     } as any
@@ -33,6 +33,6 @@ describe('SelectHospitalPage', () => {
 
     expect(screen.getByText('Hospital 1')).toBeInTheDocument();
     fireEvent.click(screen.getByText('Hospital 1'));
-    expect(authService.selectHospital).toHaveBeenCalledWith(1);
+    expect(authService.selectHospital).toHaveBeenCalledWith("101");
   });
 });

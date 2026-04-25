@@ -91,9 +91,11 @@ const Topbar: React.FC = () => {
         <div className="relative" ref={dropdownRef}>
           <button 
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500"
+            className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-gray-50 transition-colors text-gray-500"
           >
             <span className="material-symbols-outlined text-2xl">account_circle</span>
+            <span className="text-sm font-bold text-gray-700">{user?.username}</span>
+            <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
           </button>
 
             {isProfileOpen && (
