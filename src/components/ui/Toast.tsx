@@ -37,8 +37,9 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Listen for global toast events (useful for axios interceptors)
   useEffect(() => {
-    const handleGlobalToast = (event: any) => {
-      const { message, type } = event.detail;
+    const handleGlobalToast = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { message, type } = customEvent.detail;
       showToast(message, type);
     };
     window.addEventListener('show-toast', handleGlobalToast);

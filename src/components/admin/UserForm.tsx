@@ -64,6 +64,8 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   }, []);
 
   const validate = (): boolean => {
+    const errors: ValidationErrors = {};
+    
     // Basic info validation
     if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
     if (!formData.username?.trim()) errors.username = 'Username is required';
@@ -72,52 +74,40 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     if (!formData.phone?.trim()) errors.phone = 'Phone number is required';
     if (!formData.dob) errors.dob = 'Date of birth is required';
     
-    // Contract validation
-    if (!formData.detailedMemberships || formData.detailedMemberships.length === 0) {
-      errors.memberships = 'At least one hospital contract is required';
-    } else {
-      formData.detailedMemberships.forEach((m, idx) => {
-        if (!m.hospitalId) errors[`membership_${idx}_hospital`] = 'Hospital is required for all contracts';
-        if (!m.roleAssignments || m.roleAssignments.length === 0) {
-          errors[`membership_${idx}_roles`] = 'At least one role is required for all contracts';
-        } else {
-          m.roleAssignments.forEach((ra, raIdx) => {
-            if (ra.roleCode === 'DOCTOR') {
-              if (!ra.doctorDetails?.consultationFee) errors[`membership_${idx}_role_${raIdx}_fee`] = 'Fee is required';
-            }
-            if (ra.roleCode === 'NURSE') {
-              if (!ra.nurseDetails?.floorLocation) errors[`membership_${idx}_role_${raIdx}_floor`] = 'Floor is required';
-            }
-          });
-        }
-      });
+    // Contract validation - Optional for superusers
+    if (!formData.superuser) {
+      if (!formData.detailedMemberships || formData.detailedMemberships.length === 0) {
+        errors.memberships = 'At least one hospital contract is required for standard staff.';
+      } else {
+        formData.detailedMemberships.forEach((m, idx) => {
+          if (!m.hospitalId) errors[`membership_${idx}_hospital`] = 'Hospital is required';
+          if (!m.roleAssignments || m.roleAssignments.length === 0) {
+            errors[`membership_${idx}_roles`] = 'At least one role is required';
+          } else {
+            m.roleAssignments.forEach((ra, raIdx) => {
+              if (ra.roleCode === 'DOCTOR') {
+                if (!ra.doctorDetails?.consultationFee) errors[`membership_${idx}_role_${raIdx}_fee`] = 'Fee is required';
+              }
+              if (ra.roleCode === 'NURSE') {
+                if (!ra.nurseDetails?.floorLocation) errors[`membership_${idx}_role_${raIdx}_floor`] = 'Floor is required';
+              }
+            });
+          }
+        });
+      }
     }
 
     // Profile info validation based on active roles
-    if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo?.specialization) {
-      errors.specialization = 'Doctor specialization is required';
+    if (assignedRoles.includes('DOCTOR')) {
+      if (!formData.doctorInfo?.specialization) errors.specialization = 'Doctor specialization is required';
+      if (!formData.doctorInfo?.licenseNumber) errors.licenseNumber = 'Medical license number is required';
     }
-    if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo?.licenseNumber) {
-      errors.licenseNumber = 'Medical license number is required';
-    }
-    if (assignedRoles.includes('NURSE') && !formData.nurseInfo?.department) {
-      errors.nurseDept = 'Nurse department is required';
-    }
-    if (assignedRoles.includes('NURSE') && !formData.nurseInfo?.nursingLicenseNo) {
-      errors.nurseLicense = 'Nursing license number is required';
+    if (assignedRoles.includes('NURSE')) {
+      if (!formData.nurseInfo?.department) errors.nurseDept = 'Nurse department is required';
+      if (!formData.nurseInfo?.nursingLicenseNo) errors.nurseLicense = 'Nursing license number is required';
     }
 
     setValidationErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      // Switch tab if error is in another tab
-      if (errors.fullName || errors.username || errors.password || errors.email || errors.phone || errors.dob) {
-        setActiveTab('personal');
-      } else if (errors.memberships || Object.keys(errors).some(k => k.startsWith('membership_'))) {
-        setActiveTab('contracts');
-      } else {
-        setActiveTab('profile');
-      }
-    }
     return Object.keys(errors).length === 0;
   };
 
@@ -129,7 +119,10 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       return;
     }
 
-    if (!validate()) return;
+    if (!validate()) {
+      // If validation fails, stay on the page and show errors
+      return;
+    }
 
     try {
       setLoading(true);
@@ -142,6 +135,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       }
     } catch (error: any) {
       console.error('Failed to save user', error);
+      // Backend validation errors
       if (error.response?.data?.details) {
         setValidationErrors(error.response.data.details);
       }
@@ -249,10 +243,13 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
 
   const hasTabError = (tab: 'personal' | 'contracts' | 'profile'): boolean => {
     if (tab === 'personal') {
-      return !!(validationErrors.fullName || validationErrors.username || validationErrors.password || validationErrors.dob);
+      return !!(validationErrors.fullName || validationErrors.username || validationErrors.password || validationErrors.email || validationErrors.phone || validationErrors.dob);
+    }
+    if (tab === 'contracts') {
+      return !!(validationErrors.memberships || Object.keys(validationErrors).some(k => k.startsWith('membership_')));
     }
     if (tab === 'profile') {
-      return !!(validationErrors.specialization || validationErrors.nursingLicenseNo);
+      return !!(validationErrors.specialization || validationErrors.licenseNumber || validationErrors.nurseDept || validationErrors.nurseLicense);
     }
     return false;
   };
@@ -314,11 +311,11 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`px-8 py-4 font-bold text-sm flex items-center gap-2 transition-all border-b-2 ${
                     isActive ? 'border-primary text-primary bg-white' : 'border-transparent text-gray-500 hover:bg-gray-50'
-                  } ${!isActive && hasError ? 'animate-blink text-error' : ''}`}
+                  } ${hasError ? 'text-error' : ''}`}
                 >
                   <span className="material-symbols-outlined text-lg">{tab.icon}</span>
                   {tab.label}
-                  {!isActive && hasError && <span className="material-symbols-outlined text-error text-sm">error</span>}
+                  {hasError && <span className="material-symbols-outlined text-error text-sm animate-pulse">error</span>}
                 </button>
               );
             })}
@@ -418,7 +415,10 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                 {!isAddingContract ? (
                   <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                      <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black">Hospital Memberships</h3>
+                      <div className="flex flex-col gap-1">
+                        <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black">Hospital Memberships</h3>
+                        {validationErrors.memberships && <p className="text-error text-[10px] font-bold uppercase tracking-tight">{validationErrors.memberships}</p>}
+                      </div>
                       <button 
                         type="button" 
                         onClick={() => setIsAddingContract(true)}
