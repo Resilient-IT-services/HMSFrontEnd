@@ -1,27 +1,33 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
-import apiClient from '@/services/apiClient';
-import { ApiResponse, UserResponse, Role } from '@/types/api';
+import { userService } from '@/services/userService';
+import { UserResponse, Role } from '@/types/api';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const UserManagement = () => {
   const { isSuperMode } = useSelector((state: RootState) => state.auth);
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
+  const [page, setPage] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [activeFilter, setActiveFilter] = useState<boolean | undefined>(true);
   const router = useRouter();
 
-  const fetchData = React.useCallback(async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const userRes = await apiClient.get<ApiResponse<UserResponse[]>>(`/users?includeDeleted=false`);
-      if (userRes.data.success) {
-        const usersWithRoles = (userRes.data.data || []).map(u => {
+      const userRes = await userService.listUsers(page, 20, debouncedSearch, roleFilter, activeFilter);
+      if (userRes.success && userRes.data) {
+        const usersWithRoles = (userRes.data.content || []).map(u => {
           const allRoles = new Set<Role>();
           if (u.memberships) {
             for (const m of u.memberships) {
@@ -33,23 +39,25 @@ const UserManagement = () => {
           return { ...u, roles: [...allRoles] };
         });
         setUsers(usersWithRoles);
+        setTotalElements(userRes.data.totalElements);
       }
     } catch (error) {
       console.error('Failed to fetch users', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [page, debouncedSearch, roleFilter, activeFilter]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.roles?.some(role => role.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, roleFilter, activeFilter]);
+
+  const totalPages = Math.ceil(totalElements / 20);
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
@@ -83,45 +91,13 @@ const UserManagement = () => {
                 <span className="material-symbols-outlined">person</span>
               </div>
             </div>
-            <p className="text-headline-md mt-2">{users.length}</p>
+            <p className="text-headline-md mt-2">{totalElements}</p>
             <p className="text-body-sm text-green-600 mt-1 flex items-center gap-1">
               <span className="material-symbols-outlined text-sm">trending_up</span>
               +12% this month
             </p>
           </div>
-          <div className="bg-white border border-outline-variant p-5 rounded-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-secondary font-label-sm uppercase tracking-wider">Doctors</span>
-              <div className="p-2 bg-surface-container-low rounded-lg text-primary">
-                <span className="material-symbols-outlined">medical_services</span>
-              </div>
-            </div>
-            <p className="text-headline-md mt-2">{users.filter(u => u.roles?.includes('DOCTOR')).length}</p>
-            <p className="text-body-sm text-secondary mt-1">Active Medical Staff</p>
-          </div>
-          <div className="bg-white border border-outline-variant p-5 rounded-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-secondary font-label-sm uppercase tracking-wider">Pending</span>
-              <div className="p-2 bg-surface-container-low rounded-lg text-primary">
-                <span className="material-symbols-outlined">hourglass_empty</span>
-              </div>
-            </div>
-            <p className="text-headline-md mt-2">24</p>
-            <p className="text-body-sm text-orange-600 mt-1">Awaiting approval</p>
-          </div>
-          <div className="bg-white border border-outline-variant p-5 rounded-xl">
-            <div className="flex items-center justify-between">
-              <span className="text-secondary font-label-sm uppercase tracking-wider">Active Now</span>
-              <div className="p-2 bg-surface-container-low rounded-lg text-primary">
-                <span className="material-symbols-outlined">bolt</span>
-              </div>
-            </div>
-            <p className="text-headline-md mt-2">89</p>
-            <p className="text-body-sm text-green-600 mt-1 flex items-center gap-1">
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
-              Live Session
-            </p>
-          </div>
+          {/* ... other stats could be updated to be server-side or removed if not available from basic list ... */}
         </div>
 
         {/* Table Container */}
@@ -129,15 +105,27 @@ const UserManagement = () => {
           {/* Table Filters */}
           <div className="p-4 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-bright">
             <div className="flex flex-wrap items-center gap-2">
-              <button className="px-4 py-2 bg-white border border-outline-variant rounded-lg font-label-md text-on-surface flex items-center gap-2 hover:bg-gray-50 transition-colors">
-                <span className="material-symbols-outlined text-lg">filter_list</span>
-                Filters
-              </button>
-              <div className="h-6 w-px bg-outline-variant mx-1"></div>
-              <span className="text-body-sm font-label-sm text-secondary px-3 py-1 bg-surface-container rounded-full flex items-center gap-2">
-                Status: Active
-                <span className="material-symbols-outlined text-xs cursor-pointer">close</span>
-              </span>
+              <select 
+                className="px-4 py-2 bg-white border border-outline-variant rounded-lg font-label-md text-on-surface outline-none"
+                value={roleFilter || ''}
+                onChange={(e) => setRoleFilter(e.target.value || undefined)}
+              >
+                <option value="">All Roles</option>
+                <option value="ADMIN">Admin</option>
+                <option value="DOCTOR">Doctor</option>
+                <option value="NURSE">Nurse</option>
+                <option value="RECEPTIONIST">Receptionist</option>
+                <option value="PHARMACIST">Pharmacist</option>
+              </select>
+              <select 
+                className="px-4 py-2 bg-white border border-outline-variant rounded-lg font-label-md text-on-surface outline-none"
+                value={activeFilter === undefined ? '' : activeFilter.toString()}
+                onChange={(e) => setActiveFilter(e.target.value === '' ? undefined : e.target.value === 'true')}
+              >
+                <option value="">All Status</option>
+                <option value="true">Active</option>
+                <option value="false">Inactive</option>
+              </select>
             </div>
             <div className="flex items-center gap-3">
               <div className="relative">
@@ -171,11 +159,11 @@ const UserManagement = () => {
                   <tr>
                     <td colSpan={7} className="px-6 py-10 text-center text-secondary font-body-md">Loading users...</td>
                   </tr>
-                ) : filteredUsers.length === 0 ? (
+                ) : users.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-10 text-center text-secondary font-body-md">No users found.</td>
                   </tr>
-                ) : filteredUsers.map((row) => (
+                ) : users.map((row) => (
                   <tr key={row.id} className="hover:bg-surface-bright transition-colors font-body-md">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -242,16 +230,24 @@ const UserManagement = () => {
           {/* Pagination */}
           <div className="px-6 py-4 border-t border-outline-variant flex items-center justify-between bg-surface-bright">
             <p className="font-body-sm text-secondary">
-              Showing <span className="font-bold text-on-surface">1</span> to <span className="font-bold text-on-surface">{filteredUsers.length}</span> of <span className="font-bold text-on-surface">{users.length}</span> entries
+              Showing <span className="font-bold text-on-surface">{page * 20 + 1}</span> to <span className="font-bold text-on-surface">{Math.min((page + 1) * 20, totalElements)}</span> of <span className="font-bold text-on-surface">{totalElements}</span> entries
             </p>
             <div className="flex items-center gap-2">
-              <button className="p-2 rounded-lg border border-outline-variant hover:bg-gray-50 transition-colors disabled:opacity-50" disabled>
+              <button 
+                onClick={() => setPage(p => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="p-2 rounded-lg border border-outline-variant hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
                 <span className="material-symbols-outlined">chevron_left</span>
               </button>
               <div className="flex items-center gap-1">
-                <button className="w-8 h-8 rounded-lg bg-primary-container text-on-primary font-label-md">1</button>
+                <span className="px-3 py-1 bg-primary-container text-on-primary rounded-lg font-label-md">{page + 1}</span>
               </div>
-              <button className="p-2 rounded-lg border border-outline-variant hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => setPage(p => p + 1)}
+                disabled={(page + 1) >= totalPages}
+                className="p-2 rounded-lg border border-outline-variant hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
                 <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>

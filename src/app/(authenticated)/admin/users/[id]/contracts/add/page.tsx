@@ -73,8 +73,8 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
         if (userRes.data.success && userRes.data.data) {
           setUserData(userRes.data.data);
         }
-        if (hospRes.success) {
-          setHospitals(hospRes.data || []);
+        if (hospRes.success && hospRes.data) {
+          setHospitals(hospRes.data.content || []);
         }
       } catch (error) {
         console.error('Failed to fetch data', error);

@@ -1,9 +1,11 @@
 import apiClient from './apiClient';
-import { ApiResponse, HospitalResponse, CreateHospitalRequest } from '@/types/api';
+import { ApiResponse, PageResponse, HospitalResponse, CreateHospitalRequest } from '@/types/api';
 
 export const hospitalService = {
-  async list(): Promise<ApiResponse<HospitalResponse[]>> {
-    const response = await apiClient.get<ApiResponse<HospitalResponse[]>>('/hospitals');
+  async list(page = 0, size = 20, name?: string, status?: string): Promise<ApiResponse<PageResponse<HospitalResponse>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<HospitalResponse>>>('/hospitals', {
+      params: { page, size, name, status }
+    });
     return response.data;
   },
 

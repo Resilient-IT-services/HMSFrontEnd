@@ -1,17 +1,15 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import UserManagement from './page';
-import apiClient from '@/services/apiClient';
+import { userService } from '@/services/userService';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/state/authSlice';
 import { LayoutProvider } from '@/context/LayoutContext';
-import { useRouter } from 'next/navigation';
 
-vi.mock('@/services/apiClient', () => ({
-  default: {
-    get: vi.fn(),
-    post: vi.fn(),
+vi.mock('@/services/userService', () => ({
+  userService: {
+    listUsers: vi.fn(),
   },
 }));
 
@@ -35,7 +33,7 @@ vi.mock('@/components/ui/MainLayout', () => ({
 
 const createMockStore = () => configureStore({ 
   reducer: { auth: authReducer },
-  preloadedState: { auth: { user: { hospitalId: 1 } } as any }
+  preloadedState: { auth: { user: { hospitalId: "1" } } as any }
 });
 
 describe('UserManagement', () => {
@@ -44,8 +42,15 @@ describe('UserManagement', () => {
   });
 
   it('renders and fetches users', async () => {
-    (apiClient.get as any).mockResolvedValue({
-      data: { success: true, data: [{ id: 1, username: 'user1', roles: ['DOCTOR'] }] }
+    (userService.listUsers as any).mockResolvedValue({
+      success: true,
+      data: {
+        content: [{ id: "1", username: 'user1', roles: ['DOCTOR'] }],
+        totalElements: 1,
+        totalPages: 1,
+        size: 20,
+        number: 0
+      }
     });
 
     render(
@@ -63,8 +68,9 @@ describe('UserManagement', () => {
   });
 
   it('contains a link to create user page', async () => {
-    (apiClient.get as any).mockResolvedValue({
-      data: { success: true, data: [] }
+    (userService.listUsers as any).mockResolvedValue({
+      success: true,
+      data: { content: [], totalElements: 0 }
     });
 
     render(
@@ -80,8 +86,12 @@ describe('UserManagement', () => {
   });
 
   it('navigates to contract add page when clicking add business button', async () => {
-    (apiClient.get as any).mockResolvedValue({
-      data: { success: true, data: [{ id: "1", username: 'user1', roles: ['DOCTOR'], memberships: [] }] }
+    (userService.listUsers as any).mockResolvedValue({
+      success: true,
+      data: {
+        content: [{ id: "1", username: 'user1', roles: ['DOCTOR'], memberships: [] }],
+        totalElements: 1
+      }
     });
 
     const store = configureStore({ 

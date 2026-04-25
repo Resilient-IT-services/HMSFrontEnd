@@ -10,14 +10,19 @@ import { HospitalResponse } from '@/types/api';
 export default function HospitalsPage() {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const router = useRouter();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await hospitalService.list();
-      if (res.success) {
-        setHospitals(res.data || []);
+      const res = await hospitalService.list(page, 20, searchTerm, statusFilter);
+      if (res.success && res.data) {
+        setHospitals(res.data.content || []);
+        setTotalElements(res.data.totalElements || 0);
       }
     } catch (error) {
       console.error('Failed to fetch hospitals', error);
@@ -28,7 +33,9 @@ export default function HospitalsPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [page, searchTerm, statusFilter]);
+
+  const totalPages = Math.ceil(totalElements / 20);
 
   return (
     <MainLayout title="Hospital Management">
@@ -91,15 +98,40 @@ export default function HospitalsPage() {
 
         {/* Hospital Table Container */}
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+          <div className="px-6 py-4 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
             <div className="flex gap-2">
-              <button className="px-3 py-1.5 text-xs font-bold bg-white border border-gray-200 rounded-md shadow-sm">All</button>
-              <button className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:bg-white hover:border-gray-200 rounded-md">Active</button>
-              <button className="px-3 py-1.5 text-xs font-bold text-gray-500 hover:bg-white hover:border-gray-200 rounded-md">Maintenance</button>
+              <button 
+                onClick={() => setStatusFilter(undefined)}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md shadow-sm ${!statusFilter ? 'bg-white border border-gray-200' : 'text-gray-500 hover:bg-white hover:border-gray-200'}`}
+              >
+                All
+              </button>
+              <button 
+                onClick={() => setStatusFilter('ACTIVE')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md shadow-sm ${statusFilter === 'ACTIVE' ? 'bg-white border border-gray-200' : 'text-gray-500 hover:bg-white hover:border-gray-200'}`}
+              >
+                Active
+              </button>
+              <button 
+                onClick={() => setStatusFilter('MAINTENANCE')}
+                className={`px-3 py-1.5 text-xs font-bold rounded-md shadow-sm ${statusFilter === 'MAINTENANCE' ? 'bg-white border border-gray-200' : 'text-gray-500 hover:bg-white hover:border-gray-200'}`}
+              >
+                Maintenance
+              </button>
             </div>
-            <button className="text-gray-500 hover:text-gray-700">
-              <span className="material-symbols-outlined text-lg">filter_list</span>
-            </button>
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+              <input 
+                className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-xs focus:ring-2 focus:ring-[var(--primary)] outline-none w-full md:w-64" 
+                placeholder="Search hospital name or code..." 
+                type="text"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setPage(0);
+                }}
+              />
+            </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
@@ -176,10 +208,24 @@ export default function HospitalsPage() {
           </div>
           {/* Pagination Footer */}
           <div className="px-6 py-4 bg-gray-50/50 border-t border-gray-100 flex items-center justify-between">
-            <p className="text-xs text-gray-500 font-bold">Showing 1 to {hospitals.length} of {hospitals.length} hospitals</p>
+            <p className="text-xs text-gray-500 font-bold">
+              Showing {page * 20 + 1} to {Math.min((page + 1) * 20, totalElements)} of {totalElements} hospitals
+            </p>
             <div className="flex gap-2">
-              <button className="px-3 py-1 text-xs font-bold border border-gray-200 rounded bg-white text-gray-400 cursor-not-allowed">Previous</button>
-              <button className="px-3 py-1 text-xs font-bold border border-gray-200 rounded bg-white hover:bg-gray-50 transition-colors">Next</button>
+              <button 
+                onClick={() => setPage(p => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="px-3 py-1 text-xs font-bold border border-gray-200 rounded bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Previous
+              </button>
+              <button 
+                onClick={() => setPage(p => p + 1)}
+                disabled={(page + 1) >= totalPages}
+                className="px-3 py-1 text-xs font-bold border border-gray-200 rounded bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Next
+              </button>
             </div>
           </div>
         </div>

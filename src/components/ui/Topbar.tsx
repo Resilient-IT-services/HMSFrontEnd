@@ -4,6 +4,7 @@ import { RootState } from '@/state/store';
 import { setSuperMode, setActiveRole, setUser } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { Role } from '@/types/api';
+import GlobalSearch from './GlobalSearch';
 
 import { useLayout } from '@/context/LayoutContext';
 
@@ -57,10 +58,7 @@ const Topbar: React.FC = () => {
         <div className="w-64 px-6">
           <h1 className="text-xl font-extrabold tracking-tight text-gray-900">VitalSync HMS</h1>
         </div>
-        <div className="hidden md:flex items-center relative ml-4">
-          <span className="material-symbols-outlined absolute left-3 text-gray-400 text-lg">search</span>
-          <input className="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:ring-2 focus:ring-primary-container outline-none" placeholder="Search across hospital..." type="text"/>
-        </div>
+        <GlobalSearch />
         <div className="h-8 w-px bg-gray-200 mx-6"></div>
         <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-xs font-black">{title}</h2>
       </div>
