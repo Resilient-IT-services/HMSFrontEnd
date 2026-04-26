@@ -135,10 +135,7 @@ const AppointmentScheduling = () => {
       <div className="flex flex-col h-full bg-[#f9f9ff] p-6 gap-6">
         <div className="flex justify-between items-center px-6 py-4 bg-white border border-slate-200 rounded-xl shadow-sm">          <div className="flex items-center space-x-6">
             <h2 className="text-xl font-bold text-slate-900 font-manrope">Appointment Scheduling</h2>
-            <div className="relative w-80">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-              <input className="w-full bg-slate-100 border-none rounded-full py-2 pl-10 pr-4 text-xs focus:ring-2 focus:ring-orange-500 transition-all outline-none" placeholder="Quick search doctor..." type="text" />
-            </div>
+
           </div>
           <div className="flex items-center space-x-4">
              <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 border border-orange-100 rounded-lg">
