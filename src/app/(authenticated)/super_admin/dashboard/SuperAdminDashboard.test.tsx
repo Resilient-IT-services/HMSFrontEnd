@@ -36,12 +36,12 @@ describe('SuperAdminDashboard', () => {
   it('renders stats and welcome message', async () => {
     vi.mocked(hospitalService.list).mockResolvedValue({
       success: true,
-      data: { totalElements: 5, content: new Array(5).fill({}) }
+      data: { totalElements: 5, content: Array.from({length: 5}).fill({}) }
     } as any);
     
     vi.mocked(userService.listUsers).mockResolvedValue({
       success: true,
-      data: { totalElements: 10, content: new Array(10).fill({}) }
+      data: { totalElements: 10, content: Array.from({length: 10}).fill({}) }
     } as any);
 
     render(<SuperAdminDashboard />);

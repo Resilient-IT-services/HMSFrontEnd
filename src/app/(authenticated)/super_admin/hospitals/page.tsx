@@ -29,8 +29,8 @@ const HospitalManagement = () => {
           setTotalElements(hospRes.data?.totalElements || 0);
         }
         if (userRes.success) setUsers(userRes.data?.content || []);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -127,7 +127,7 @@ const HospitalManagement = () => {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-700 font-bold overflow-hidden uppercase">
-                          {h.name.substring(0, 2)}
+                          {h.name.slice(0, 2)}
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 text-sm">{h.name}</p>

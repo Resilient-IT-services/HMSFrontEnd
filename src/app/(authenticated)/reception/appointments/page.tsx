@@ -45,7 +45,7 @@ const TodayAppointmentsPage = () => {
         triggerGlobalToast(`Appointment marked as ${status.replace('_', ' ')}`, 'success');
         fetchData();
       }
-    } catch (error) {
+    } catch {
       triggerGlobalToast('Failed to update status', 'error');
     }
   };
@@ -95,7 +95,7 @@ const TodayAppointmentsPage = () => {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Loading schedule...</td></tr>
-              ) : filteredAppointments.length === 0 ? (
+              ) : (filteredAppointments.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">No appointments found.</td></tr>
               ) : filteredAppointments.map((app) => (
                 <tr key={app.id} className="hover:bg-slate-50/50 transition-colors group">
@@ -104,7 +104,7 @@ const TodayAppointmentsPage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-slate-900">{app.patientName}</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">ID: {app.patientId?.substring(0, 8) || 'N/A'}</p>
+                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">ID: {app.patientId?.slice(0, 8) || 'N/A'}</p>
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-medium text-slate-700">{app.doctorName}</p>
@@ -131,7 +131,7 @@ const TodayAppointmentsPage = () => {
                     )}
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

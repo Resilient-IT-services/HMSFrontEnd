@@ -28,7 +28,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const showToast = useCallback((message: string, type: ToastType) => {
-    const id = Math.random().toString(36).substring(2, 9);
+    const id = Math.random().toString(36).slice(2, 9);
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -42,8 +42,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { message, type } = customEvent.detail;
       showToast(message, type);
     };
-    window.addEventListener('show-toast', handleGlobalToast);
-    return () => window.removeEventListener('show-toast', handleGlobalToast);
+    globalThis.addEventListener('show-toast', handleGlobalToast);
+    return () => globalThis.removeEventListener('show-toast', handleGlobalToast);
   }, [showToast]);
 
   return (
@@ -55,12 +55,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             key={toast.id}
             className={`pointer-events-auto flex items-center gap-3 px-6 py-4 rounded-xl shadow-2xl animate-in slide-in-from-bottom-4 fade-in duration-300 ${
               toast.type === 'error' ? 'bg-red-600 text-white' : 
-              toast.type === 'success' ? 'bg-green-600 text-white' : 
-              'bg-gray-800 text-white'
+              (toast.type === 'success' ? 'bg-green-600 text-white' : 
+              'bg-gray-800 text-white')
             }`}
           >
             <span className="material-symbols-outlined">
-              {toast.type === 'error' ? 'error' : toast.type === 'success' ? 'check_circle' : 'info'}
+              {toast.type === 'error' ? 'error' : (toast.type === 'success' ? 'check_circle' : 'info')}
             </span>
             <p className="font-bold text-sm">{toast.message}</p>
           </div>
@@ -72,7 +72,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 // Global helper to trigger toasts from non-component files
 export const triggerGlobalToast = (message: string, type: ToastType) => {
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
+  if (globalThis.window !== undefined) {
+    globalThis.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
   }
 };

@@ -40,7 +40,46 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 {/* Body */}
                 <div className="p-6 space-y-5">
 
-                    { !showForm ? (
+                    { showForm ? (
+                        <>
+                            {/* FORM */}
+                            <div className="space-y-4">
+
+                                <input
+                                    type="text"
+                                    placeholder="Your Name"
+                                    className="w-full px-4 py-3 rounded-lg bg-[var(--background)] border border-[var(--border)] focus:ring-2 focus:ring-[var(--primary)] outline-none"
+                                />
+
+                                <input
+                                    type="email"
+                                    placeholder="Your Email"
+                                    className="w-full px-4 py-3 rounded-lg bg-[var(--background)] border border-[var(--border)] focus:ring-2 focus:ring-[var(--primary)] outline-none"
+                                />
+
+                                <textarea
+                                    placeholder="Describe your issue..."
+                                    className="w-full px-4 py-3 rounded-lg bg-[var(--background)] border border-[var(--border)] h-28 focus:ring-2 focus:ring-[var(--primary)] outline-none"
+                                />
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowForm(false)}
+                                        className="w-1/2 border border-[var(--border)] py-3 rounded-lg font-semibold hover:bg-[var(--background)] transition"
+                                    >
+                                        Back
+                                    </button>
+
+                                    <button
+                                        type="submit"
+                                        className="w-1/2 bg-[var(--primary)] text-white py-3 rounded-lg font-bold hover:bg-[var(--primary-hover)] transition"
+                                    >
+                                        Submit
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
                         <>
                             {/* Contact Cards */}
                             <div className="grid gap-4">
@@ -87,45 +126,6 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
                                     </p>
                                 </div>
 
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            {/* FORM */}
-                            <div className="space-y-4">
-
-                                <input
-                                    type="text"
-                                    placeholder="Your Name"
-                                    className="w-full px-4 py-3 rounded-lg bg-[var(--background)] border border-[var(--border)] focus:ring-2 focus:ring-[var(--primary)] outline-none"
-                                />
-
-                                <input
-                                    type="email"
-                                    placeholder="Your Email"
-                                    className="w-full px-4 py-3 rounded-lg bg-[var(--background)] border border-[var(--border)] focus:ring-2 focus:ring-[var(--primary)] outline-none"
-                                />
-
-                                <textarea
-                                    placeholder="Describe your issue..."
-                                    className="w-full px-4 py-3 rounded-lg bg-[var(--background)] border border-[var(--border)] h-28 focus:ring-2 focus:ring-[var(--primary)] outline-none"
-                                />
-
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setShowForm(false)}
-                                        className="w-1/2 border border-[var(--border)] py-3 rounded-lg font-semibold hover:bg-[var(--background)] transition"
-                                    >
-                                        Back
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        className="w-1/2 bg-[var(--primary)] text-white py-3 rounded-lg font-bold hover:bg-[var(--primary-hover)] transition"
-                                    >
-                                        Submit
-                                    </button>
-                                </div>
                             </div>
                         </>
                     )}

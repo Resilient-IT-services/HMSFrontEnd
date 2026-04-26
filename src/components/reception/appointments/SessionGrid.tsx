@@ -67,9 +67,7 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
           <div className="flex flex-wrap gap-2 mb-3">
             {fetchingAvailability ? (
               <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">Querying sessions...</div>
-            ) : !selectedDoctor ? (
-              <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest">Select a doctor first</div>
-            ) : availability.length === 0 ? (
+            ) : selectedDoctor ? availability.length === 0 ? (
               <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest">No active sessions for this date</div>
             ) : (
               availability.map((session, idx) => {
@@ -83,9 +81,9 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
                     className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm shadow-sm border transition-all ${
                       isSelected
                         ? 'bg-primary-container text-white border-primary-container'
-                        : isDisabled
+                        : (isDisabled
                         ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-60'
-                        : 'bg-slate-100 text-slate-600 border-transparent hover:border-primary-container/50'
+                        : 'bg-slate-100 text-slate-600 border-transparent hover:border-primary-container/50')
                     }`}
                   >
                     <span className="material-symbols-outlined text-lg">{getSessionIcon(session.startTime)}</span>
@@ -93,6 +91,8 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
                   </button>
                 );
               })
+            ) : (
+              <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest">Select a doctor first</div>
             )}
           </div>
 

@@ -15,7 +15,7 @@ const UserManagement = () => {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [roleFilter, setRoleFilter] = useState<string | undefined>(undefined);
+  const [roleFilter, setRoleFilter] = useState<string | undefined>();
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>(true);
   const router = useRouter();
 
@@ -44,7 +44,7 @@ const UserManagement = () => {
           
           if (u.superuser) allRoles.add('SUPER_ADMIN');
           
-          return { ...u, roles: Array.from(allRoles) as Role[] };
+          return { ...u, roles: [...allRoles] as Role[] };
         });
         setUsers(usersWithRoles);
         setTotalElements(userRes.data.totalElements);
@@ -69,7 +69,7 @@ const UserManagement = () => {
 
   const getInitials = (name?: string) => {
     if (!name) return 'U';
-    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
   };
 
   return (
@@ -131,20 +131,20 @@ const UserManagement = () => {
                 <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">Roles</th>
                 <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">Hospital Context</th>
                 <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">Status</th>
-                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm text-right">Actions</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Loading staff records...</td></tr>
-              ) : users.length === 0 ? (
+              ) : (users.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">No staff members found.</td></tr>
               ) : users.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold uppercase overflow-hidden border-2 border-orange-50">
-                        {user.fullName ? user.fullName.substring(0, 2) : user.username.substring(0, 2)}
+                        {user.fullName ? user.fullName.slice(0, 2) : user.username.slice(0, 2)}
                       </div>
                       <div>
                         <p className="font-semibold text-slate-900 text-sm">{user.fullName || user.username}</p>
@@ -181,24 +181,19 @@ const UserManagement = () => {
                       {user.active ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center gap-2 transition-opacity">
                       <button 
                         onClick={() => router.push(`/admin/users/${user.id}`)}
-                        className="p-2 text-slate-400 hover:text-orange-700 transition-colors"
+                        className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                        title="Edit User"
                       >
                         <span className="material-symbols-outlined text-xl">edit</span>
-                      </button>
-                      <button 
-                        onClick={() => router.push(`/admin/users/${user.id}`)}
-                        className="px-4 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-                      >
-                        Allocate
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
 

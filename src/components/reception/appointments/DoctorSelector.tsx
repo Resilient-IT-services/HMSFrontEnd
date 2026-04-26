@@ -32,7 +32,7 @@ export const DoctorSelector: React.FC<DoctorSelectorProps> = ({
       <div className="flex-1 overflow-y-auto doctor-list-scrollbar p-2 space-y-1">
         {loading ? (
           <div className="p-4 text-center text-xs text-slate-400">Loading physicians...</div>
-        ) : doctors.length === 0 ? (
+        ) : (doctors.length === 0 ? (
           <div className="p-4 text-center text-xs text-slate-400">No physicians found.</div>
         ) : (
           doctors.map((doc) => {
@@ -64,7 +64,7 @@ export const DoctorSelector: React.FC<DoctorSelectorProps> = ({
               </div>
             );
           })
-        )}
+        ))}
       </div>
     </section>
   );

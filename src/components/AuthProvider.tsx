@@ -14,13 +14,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
 
-  const publicRoutes = ['/login', '/privacy', '/terms','/forgot-password'];
+  const publicRoutes = new Set(['/login', '/privacy', '/terms','/forgot-password']);
 
   // ✅ FIXED AUTH CHECK
   useEffect(() => {
 
     // 🚀 PUBLIC ROUTES ME AUTH CHECK MAT KAR
-    if (publicRoutes.includes(pathname)) {
+    if (publicRoutes.has(pathname)) {
       dispatch(setLoading(false));
       return;
     }
@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [dispatch, pathname]);
 
   const handleUnauthenticated = useCallback(() => {
-    if (!publicRoutes.includes(pathname)) {
+    if (!publicRoutes.has(pathname)) {
       router.push('/login');
     }
   }, [pathname, router]);
@@ -118,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const targetPath = `/${path}/dashboard`;
       
       if (pathname !== targetPath) {
-        window.location.href = targetPath;
+        globalThis.location.href = targetPath;
       }
     }
   }, [activeRole, pathname]);
@@ -127,7 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isLoading) return;
 
     if (!isAuthenticated) {
-      if (!publicRoutes.includes(pathname)) {
+      if (!publicRoutes.has(pathname)) {
         handleUnauthenticated();
       }
       return;

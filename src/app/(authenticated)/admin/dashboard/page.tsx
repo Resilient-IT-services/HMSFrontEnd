@@ -24,8 +24,8 @@ const AdminDashboard = () => {
 
         if (userRes.success) setUsers(userRes.data?.content || []);
         if (hospRes.success) setHospitals(hospRes.data?.content || []);
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -37,7 +37,7 @@ const AdminDashboard = () => {
     const activeNow = users.filter(u => u.active).length; // Mocking "Active Now" as active users
     const doctors = users.filter(u => {
         const roles = new Set<string>();
-        u.memberships?.forEach(m => m.roleAssignments?.forEach((ra: any) => roles.add(ra.roleCode)));
+        if (u.memberships) for (const m of u.memberships) m.roleAssignments?.forEach((ra: any) => roles.add(ra.roleCode));
         return roles.has('DOCTOR');
     }).length;
 
@@ -125,7 +125,7 @@ const AdminDashboard = () => {
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-orange-100 flex-shrink-0 flex items-center justify-center text-orange-700 font-bold uppercase">
-                            {h.name.substring(0, 2)}
+                            {h.name.slice(0, 2)}
                           </div>
                           <div>
                             <p className="text-sm font-bold text-slate-900">{h.name}</p>

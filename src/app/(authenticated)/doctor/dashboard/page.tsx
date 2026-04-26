@@ -148,9 +148,9 @@ const DoctorDashboard = () => {
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${
                         appointment.status === 'DELAYED'
                           ? 'bg-blue-50 text-blue-700 border-blue-100'
-                          : appointment.status === 'SCHEDULED'
+                          : (appointment.status === 'SCHEDULED'
                             ? 'bg-orange-50 text-orange-700 border-orange-100'
-                            : 'bg-slate-50 text-slate-600 border-slate-100'
+                            : 'bg-slate-50 text-slate-600 border-slate-100')
                       }`}>
                         {appointment.status === 'DELAYED' ? 'In Progress' : appointment.status}
                       </span>

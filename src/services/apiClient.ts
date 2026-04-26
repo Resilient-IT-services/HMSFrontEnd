@@ -36,8 +36,8 @@ apiClient.interceptors.response.use(
     (error: AxiosError) => {
       if (error.response?.status === 401) {
         store.dispatch(logout());
-        if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
-          window.location.href = '/login';
+        if (globalThis.window !== undefined && globalThis.location.pathname !== '/login') {
+          globalThis.location.href = '/login';
         }
       }
 

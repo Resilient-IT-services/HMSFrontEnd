@@ -35,7 +35,18 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
 }) => {
   return (
     <div className="p-container-padding">
-      {!isAddingContract ? (
+      {isAddingContract ? (
+        <ContractEditor 
+          newContract={newContract}
+          setNewContract={setNewContract}
+          hospitals={hospitals}
+          formData={formData}
+          editingContractIndex={editingContractIndex}
+          validationErrors={validationErrors}
+          onCancel={() => setIsAddingContract(false)}
+          onConfirm={confirmAddContract}
+        />
+      ) : (
         <div className="flex flex-col gap-6">
           <div className="flex justify-between items-center border-b border-gray-100 pb-4">
             <div className="flex flex-col gap-1">
@@ -120,17 +131,6 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
             )}
           </div>
         </div>
-      ) : (
-        <ContractEditor 
-          newContract={newContract}
-          setNewContract={setNewContract}
-          hospitals={hospitals}
-          formData={formData}
-          editingContractIndex={editingContractIndex}
-          validationErrors={validationErrors}
-          onCancel={() => setIsAddingContract(false)}
-          onConfirm={confirmAddContract}
-        />
       )}
     </div>
   );

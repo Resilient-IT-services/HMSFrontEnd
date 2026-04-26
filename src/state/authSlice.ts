@@ -18,14 +18,14 @@ export type AuthAction = PayloadAction<UserProfileResponse | null>
   | UnknownAction;
 
 const getInitialSuperMode = () => {
-  if (typeof window !== 'undefined') {
+  if (globalThis.window !== undefined) {
     return localStorage.getItem('isSuperMode') === 'true';
   }
   return false;
 };
 
 const getInitialActiveRole = () => {
-  if (typeof window !== 'undefined') {
+  if (globalThis.window !== undefined) {
     return localStorage.getItem('activeRole') as Role | null;
   }
   return null;
@@ -48,20 +48,18 @@ const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Rol
   }
 
   // Global/Detailed memberships processing
-  user.memberships.forEach(m => {
+  for (const m of user.memberships) {
     // If no hospitalId filter or it matches, add roles
-    if (!hospitalId || m.hospitalId === hospitalId) {
-      if (m.roleAssignments) {
-        m.roleAssignments.forEach(ra => {
+    if ((!hospitalId || m.hospitalId === hospitalId) && m.roleAssignments) {
+        for (const ra of m.roleAssignments) {
           if (ra.active) {
             effectiveRolesSet.add(ra.roleCode as Role);
           }
-        });
+        }
       }
-    }
-  });
+  }
 
-  return Array.from(effectiveRolesSet);
+  return [...effectiveRolesSet];
 };
 
 const authSlice = createSlice({
@@ -81,14 +79,14 @@ const authSlice = createSlice({
 
       // Restore hospitalId from localStorage if not provided in payload
       let hospitalId = action.payload.currentHospitalId;
-      if (!hospitalId && typeof window !== 'undefined') {
+      if (!hospitalId && globalThis.window !== undefined) {
         hospitalId = localStorage.getItem('currentHospitalId');
       }
 
       // Validate restored hospitalId against memberships
       if (hospitalId && !action.payload.memberships.some(m => m.hospitalId === hospitalId)) {
         hospitalId = null;
-        if (typeof window !== 'undefined') localStorage.removeItem('currentHospitalId');
+        if (globalThis.window !== undefined) localStorage.removeItem('currentHospitalId');
       }
 
       const rolesArray = computeRoles(action.payload, hospitalId || null);
@@ -106,25 +104,25 @@ const authSlice = createSlice({
       const isSuperUser = rolesArray.includes('SUPER_ADMIN');
       if (!isSuperUser) {
         state.isSuperMode = false;
-        if (typeof window !== 'undefined') localStorage.removeItem('isSuperMode');
+        if (globalThis.window !== undefined) localStorage.removeItem('isSuperMode');
       }
 
       // If active role is not in current effective roles, reset it
       if (state.activeRole && !rolesArray.includes(state.activeRole)) {
         state.activeRole = null;
-        if (typeof window !== 'undefined') localStorage.removeItem('activeRole');
+        if (globalThis.window !== undefined) localStorage.removeItem('activeRole');
       }
       
       // Auto-set active role ONLY if exactly one exists
       if (rolesArray.length === 1) {
         state.activeRole = rolesArray[0];
-        if (typeof window !== 'undefined') localStorage.setItem('activeRole', state.activeRole);
+        if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
       }
     },
     setCurrentHospitalId: (state, action: PayloadAction<string | null>) => {
       if (state.user) {
         state.user.currentHospitalId = action.payload;
-        if (typeof window !== 'undefined') {
+        if (globalThis.window !== undefined) {
           if (action.payload) localStorage.setItem('currentHospitalId', action.payload);
           else localStorage.removeItem('currentHospitalId');
         }
@@ -133,24 +131,24 @@ const authSlice = createSlice({
 
         if (state.activeRole && !rolesArray.includes(state.activeRole)) {
           state.activeRole = null;
-          if (typeof window !== 'undefined') localStorage.removeItem('activeRole');
+          if (globalThis.window !== undefined) localStorage.removeItem('activeRole');
         }
 
         if (rolesArray.length === 1 && !state.activeRole) {
           state.activeRole = rolesArray[0];
-          if (typeof window !== 'undefined') localStorage.setItem('activeRole', state.activeRole);
+          if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
         }
       }
     },
     setSuperMode: (state, action: PayloadAction<boolean>) => {
       state.isSuperMode = action.payload;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         localStorage.setItem('isSuperMode', String(action.payload));
       }
     },
     setActiveRole: (state, action: PayloadAction<Role | null>) => {
       state.activeRole = action.payload;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         if (action.payload) localStorage.setItem('activeRole', action.payload);
         else localStorage.removeItem('activeRole');
       }
@@ -169,7 +167,7 @@ const authSlice = createSlice({
       state.error = null;
       state.activeRole = null;
       state.isSuperMode = false;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('isSuperMode');
         localStorage.removeItem('currentHospitalId');
@@ -178,7 +176,7 @@ const authSlice = createSlice({
     },
     clearAuthSession: (state) => {
       state.activeRole = null;
-      if (typeof window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('currentHospitalId');
       }

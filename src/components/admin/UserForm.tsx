@@ -15,7 +15,7 @@ interface UserFormProps {
 const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   const logic = useUserFormLogic(initialData, isEdit);
 
-  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <div className="max-w-6xl mx-auto pb-20">

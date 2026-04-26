@@ -26,7 +26,7 @@ const TokenQueuePage = () => {
 
   useEffect(() => {
     fetchQueue();
-    const interval = setInterval(fetchQueue, 10000); // Poll every 10 seconds
+    const interval = setInterval(fetchQueue, 10_000); // Poll every 10 seconds
     return () => clearInterval(interval);
   }, [fetchQueue]);
 

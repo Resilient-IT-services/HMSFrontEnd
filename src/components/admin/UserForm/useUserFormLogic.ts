@@ -40,10 +40,10 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
   const assignedRoles = useMemo(() => {
     const roles = new Set<string>();
-    formData.memberships?.forEach(m => {
-      m.roleAssignments?.forEach(ra => roles.add(ra.roleCode));
-    });
-    return Array.from(roles);
+    if (formData.memberships) for (const m of formData.memberships) {
+      if (m.roleAssignments) for (const ra of m.roleAssignments) roles.add(ra.roleCode);
+    }
+    return [...roles];
   }, [formData.memberships]);
 
   useEffect(() => {
@@ -102,8 +102,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     if (!newContract.hospitalId) return;
     const hosp = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
     const updatedMemberships = [...(formData.memberships || [])];
-    if (editingContractIndex !== null) updatedMemberships[editingContractIndex] = { ...newContract, hospitalName: hosp?.name };
-    else updatedMemberships.push({ ...newContract, hospitalName: hosp?.name });
+    if (editingContractIndex === null) {updatedMemberships.push({ ...newContract, hospitalName: hosp?.name });}
+    else {updatedMemberships[editingContractIndex] = { ...newContract, hospitalName: hosp?.name };}
     
     setFormData({ ...formData, memberships: updatedMemberships });
     setIsAddingContract(false);

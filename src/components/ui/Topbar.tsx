@@ -30,14 +30,14 @@ const Topbar: React.FC = () => {
   const handleHospitalSwitch = (hospitalId: string) => {
     dispatch(setCurrentHospitalId(hospitalId));
     setIsProfileOpen(false);
-    window.location.reload();
+    globalThis.location.reload();
   };
 
   const handleRoleSwitch = (role: Role) => {
     dispatch(setActiveRole(role));
     dispatch(setSuperMode(false)); // Switching to a normal role turns off super mode
     setIsProfileOpen(false);
-    window.location.reload();
+    globalThis.location.reload();
   };
 
   const toggleSuperMode = () => {
@@ -53,13 +53,20 @@ const Topbar: React.FC = () => {
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'DOCTOR': return 'stethoscope';
-      case 'ADMIN': return 'admin_panel_settings';
-      case 'RECEPTIONIST': return 'desk';
-      case 'PHARMACIST': return 'prescriptions';
-      case 'NURSE': return 'vital_signs';
-      case 'SUPER_ADMIN': return 'shield_person';
-      default: return 'person';
+      case 'DOCTOR': { return 'stethoscope';
+      }
+      case 'ADMIN': { return 'admin_panel_settings';
+      }
+      case 'RECEPTIONIST': { return 'desk';
+      }
+      case 'PHARMACIST': { return 'prescriptions';
+      }
+      case 'NURSE': { return 'vital_signs';
+      }
+      case 'SUPER_ADMIN': { return 'shield_person';
+      }
+      default: { return 'person';
+      }
     }
   };
 
@@ -168,7 +175,7 @@ const Topbar: React.FC = () => {
                     onClick={async () => {
                       try {
                         await authService.logout();
-                        window.location.href = '/login';
+                        globalThis.location.href = '/login';
                       } catch (error) {
                         console.error('Logout failed', error);
                       }

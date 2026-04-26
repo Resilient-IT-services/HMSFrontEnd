@@ -17,7 +17,7 @@ const Sidebar = () => {
     try {
       await authService.logout();
       dispatch(logout());
-      window.location.href = '/login';
+      globalThis.location.href = '/login';
     } catch (error) {
       console.error('Logout failed', error);
     }

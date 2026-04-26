@@ -29,21 +29,20 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   };
 
   const addSlot = (raIdx: number) => {
-    const schedules = [...(newContract.roleAssignments?.[raIdx].schedules || [])];
-    schedules.push({ dayOfWeek: activeDay, startTime: '09:00', endTime: '17:00', slotDurationMinutes: 15, maxPatients: 20 });
+    const schedules = [...(newContract.roleAssignments?.[raIdx].schedules || []), { dayOfWeek: activeDay, startTime: '09:00', endTime: '17:00', slotDurationMinutes: 15, maxPatients: 20 }];
     handleUpdateSchedule(raIdx, schedules);
   };
 
   const handleCopySchedule = (raIdx: number) => {
     if (copyTargets.length === 0) return;
     const currentDaySlots = (newContract.roleAssignments?.[raIdx].schedules || []).filter(s => s.dayOfWeek === activeDay);
-    let updatedSchedules = (newContract.roleAssignments?.[raIdx].schedules || []).filter(s => !copyTargets.includes(s.dayOfWeek));
+    const updatedSchedules = (newContract.roleAssignments?.[raIdx].schedules || []).filter(s => !copyTargets.includes(s.dayOfWeek));
     
-    copyTargets.forEach(targetDay => {
-      currentDaySlots.forEach(slot => {
+    for (const targetDay of copyTargets) {
+      for (const slot of currentDaySlots) {
         updatedSchedules.push({ ...slot, dayOfWeek: targetDay, id: undefined });
-      });
-    });
+      }
+    }
 
     handleUpdateSchedule(raIdx, updatedSchedules);
     setShowCopyUI(null);
@@ -110,7 +109,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                       const count = ra.schedules?.filter(s => s.dayOfWeek === dayNum).length || 0;
                       return (
                         <button key={day} type="button" onClick={() => setActiveDay(dayNum)} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${activeDay === dayNum ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
-                          {day.substring(0, 3)} {count > 0 && `(${count})`}
+                          {day.slice(0, 3)} {count > 0 && `(${count})`}
                         </button>
                       );
                     })}
@@ -143,7 +142,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                                 onClick={() => setCopyTargets(prev => isSelected ? prev.filter(d => d !== dayNum) : [...prev, dayNum])}
                                 className={`px-3 py-1.5 rounded-lg border-2 text-[9px] font-black uppercase transition-all ${isSelected ? 'bg-primary border-primary text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                               >
-                                {day.substring(0, 3)}
+                                {day.slice(0, 3)}
                               </button>
                             );
                           })}

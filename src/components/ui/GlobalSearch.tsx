@@ -57,10 +57,14 @@ const GlobalSearch: React.FC = () => {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'HOSPITAL': return 'local_hospital';
-      case 'USER': return 'person';
-      case 'PATIENT': return 'personal_injury';
-      default: return 'search';
+      case 'HOSPITAL': { return 'local_hospital';
+      }
+      case 'USER': { return 'person';
+      }
+      case 'PATIENT': { return 'personal_injury';
+      }
+      default: { return 'search';
+      }
     }
   };
 

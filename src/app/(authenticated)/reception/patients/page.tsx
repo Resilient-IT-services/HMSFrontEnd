@@ -112,7 +112,7 @@ const PatientsPage = () => {
               <tbody className="divide-y divide-slate-50">
                 {loading ? (
                   <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic font-medium">Retrieving electronic health records...</td></tr>
-                ) : patients.length === 0 ? (
+                ) : (patients.length === 0 ? (
                   <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic font-medium">No patient records found.</td></tr>
                 ) : patients.map((row) => (
                   <tr 
@@ -122,7 +122,7 @@ const PatientsPage = () => {
                   >
                     <td className="px-6 py-5">
                       <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
-                        #PAT-{row.id.toString().substring(0, 5)}
+                        #PAT-{row.id.toString().slice(0, 5)}
                       </span>
                     </td>
                     <td className="px-6 py-5">
@@ -161,7 +161,7 @@ const PatientsPage = () => {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )))}
               </tbody>
             </table>
           </div>
