@@ -14,7 +14,6 @@ import { userService } from '@/services/userService';
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'personal' | 'contracts' | 'profile'>('personal');
-  const [currentStep, setCurrentStep] = useState(1);
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -29,10 +28,10 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     password: '',
     superuser: initialData?.superuser || false,
     memberships: initialData?.memberships || [],
-    doctorInfo: initialData?.doctorInfo || { specialization: '', licenseNumber: '', bio: '', education: { qualifications: [] } },
-    nurseInfo: initialData?.nurseInfo || { nursingLicenseNo: '', certificationLevel: 'RN' },
-    pharmacistInfo: initialData?.pharmacistInfo || { pciRegNo: '', qualification: '' },
-    receptionistInfo: initialData?.receptionistInfo || { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false },
+    doctorInfo: initialData?.doctorInfo,
+    nurseInfo: initialData?.nurseInfo,
+    pharmacistInfo: initialData?.pharmacistInfo,
+    receptionistInfo: initialData?.receptionistInfo,
   });
 
   const [isAddingContract, setIsAddingContract] = useState(false);
@@ -53,46 +52,25 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     });
   }, []);
 
-  const validateStep = (step: number): boolean => {
+  const validate = (): boolean => {
     const errors: Record<string, string> = {};
-    if (step === 1) {
-      if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
-      if (!formData.username?.trim()) errors.username = 'Username is required';
-      if (!isEdit && !formData.password?.trim()) errors.password = 'Password is required';
-      if (!formData.dob) errors.dob = 'DOB is required';
-    } else if (step === 2) {
-      if (!formData.email?.trim()) errors.email = 'Email is required';
-      if (!formData.phone?.trim()) errors.phone = 'Phone is required';
-    } else if (step === 3) {
-      if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) {
-        errors.memberships = 'At least one hospital contract is required.';
-      }
-      if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo?.specialization?.trim()) {
-        errors.specialization = 'Doctor specialization is required';
-      }
+    if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
+    if (!formData.username?.trim()) errors.username = 'Username is required';
+    if (!isEdit && !formData.password?.trim()) errors.password = 'Password is required';
+    if (!formData.email?.trim()) errors.email = 'Email is required';
+    if (!formData.phone?.trim()) errors.phone = 'Phone is required';
+    if (!formData.dob) errors.dob = 'DOB is required';
+    
+    if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) {
+      errors.memberships = 'At least one hospital contract is required.';
     }
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 3));
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
-  };
-
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
-        // If final validation fails, jump to first step with errors
-        if (!validateStep(1)) setCurrentStep(1);
-        else if (!validateStep(2)) setCurrentStep(2);
-        return;
-    }
+    if (!validate()) return;
 
     try {
       setLoading(true);
@@ -140,9 +118,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   };
 
   return {
-    formData, setFormData, currentStep, setCurrentStep, loading, validationErrors,
+    formData, setFormData, activeTab, setActiveTab, loading, validationErrors,
     hospitals, isAddingContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
-    newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract, duplicateContract, router,
-    nextStep, prevStep
+    newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract, duplicateContract, router
   };
 };

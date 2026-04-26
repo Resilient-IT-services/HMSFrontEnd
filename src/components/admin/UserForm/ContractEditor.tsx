@@ -90,24 +90,16 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-gray-500 uppercase px-1">Department Assignment</label>
-                    <input type="text" className="form-input" placeholder="e.g. Cardiology, General Medicine..." value={ra.departmentName} onChange={(e) => {
-                      const updated = [...(newContract.roleAssignments || [])];
-                      updated[raIdx].departmentName = e.target.value;
-                      setNewContract({ ...newContract, roleAssignments: updated });
-                    }} />
-                </div>
-                {ra.roleCode === 'DOCTOR' && (
-                    <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-gray-500 uppercase px-1">Consultation Fee ($)</label>
-                        <input type="number" className="form-input" placeholder="0.00" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
-                          const updated = [...(newContract.roleAssignments || [])];
-                          updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: Number(e.target.value) };
-                          setNewContract({ ...newContract, roleAssignments: updated });
-                        }} />
-                    </div>
-                )}
+                <input type="text" className="form-input" placeholder="Department..." value={ra.departmentName} onChange={(e) => {
+                  const updated = [...(newContract.roleAssignments || [])];
+                  updated[raIdx].departmentName = e.target.value;
+                  setNewContract({ ...newContract, roleAssignments: updated });
+                }} />
+                {ra.roleCode === 'DOCTOR' && <input type="number" className="form-input" placeholder="Consultation Fee ($)" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                  const updated = [...(newContract.roleAssignments || [])];
+                  updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: Number(e.target.value) };
+                  setNewContract({ ...newContract, roleAssignments: updated });
+                }} />}
               </div>
 
               {(ra.roleCode === 'DOCTOR' || ra.roleCode === 'NURSE') && (
