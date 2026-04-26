@@ -102,14 +102,13 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
                             </div>
 
-                            {/* Button */}
-                            {/*<button*/}
-                            {/*    onClick={() => setShowForm(true)}*/}
-                            {/*    className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary)]/20 transition"*/}
-                            {/*>*/}
-                            {/*    <span className="material-symbols-outlined">confirmation_number</span>*/}
-                            {/*    Raise a Ticket*/}
-                            {/*</button>*/}
+                            <button
+                                onClick={() => setShowForm(true)}
+                                className="w-full bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary)]/20 transition"
+                            >
+                                <span className="material-symbols-outlined">confirmation_number</span>
+                                Raise a Ticket
+                            </button>
                             <div className="mt-2 p-5 rounded-2xl bg-[var(--background)] border border-[var(--border)] space-y-3">
 
                                 <div className="flex items-center gap-3">

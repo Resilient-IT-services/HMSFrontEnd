@@ -64,7 +64,7 @@ const SelectRolePage = () => {
     };
     const path = rolePathMap[role] || role.toLowerCase();
     const targetPath = `/${path}/dashboard`;
-    globalThis.location.href = targetPath;
+    router.push(targetPath);
   };
 
   const handleSwitchHospital = () => {

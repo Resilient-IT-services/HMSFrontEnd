@@ -139,7 +139,15 @@ const UserManagement = () => {
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Loading staff records...</td></tr>
               ) : (users.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">No staff members found.</td></tr>
-              ) : users.map((user) => (
+              ) : users.map((user) => {
+                const membershipCount = user.memberships?.length ?? 0;
+                const primaryHospitalName = user.memberships?.[0]?.hospitalName || 'Unnamed Hospital';
+                const additionalHospitalSuffix = membershipCount > 1 ? ` + ${membershipCount - 1}` : '';
+                const hospitalSummary = membershipCount > 0
+                  ? `${primaryHospitalName}${additionalHospitalSuffix}`
+                  : 'No Hospital Assigned';
+
+                return (
                 <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -166,9 +174,7 @@ const UserManagement = () => {
                   <td className="px-6 py-4">
                     <div>
                         <p className="text-sm text-slate-600 font-medium">
-                          {user.memberships && user.memberships.length > 0 
-                            ? `${user.memberships[0].hospitalName}${user.memberships.length > 1 ? ` + ${user.memberships.length - 1}` : ''}`
-                            : 'No Hospital Assigned'}
+                          {hospitalSummary}
                         </p>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                           {(user.memberships && user.memberships[0]?.departmentName) || 'General'}
@@ -193,7 +199,7 @@ const UserManagement = () => {
                     </div>
                   </td>
                 </tr>
-              )))}
+              )}))}
             </tbody>
           </table>
 

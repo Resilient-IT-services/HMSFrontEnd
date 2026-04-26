@@ -46,6 +46,7 @@ const TodayAppointmentsPage = () => {
         fetchData();
       }
     } catch (error) {
+      console.error('Failed to update appointment status', error);
       triggerGlobalToast('Failed to update status', 'error');
     }
   };

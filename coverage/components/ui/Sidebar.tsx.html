@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">80% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>8/10</span>
+                <span class='fraction'>9/12</span>
             </div>
         
             
@@ -153,7 +153,18 @@
 <a name='L88'></a><a href='#L88'>88</a>
 <a name='L89'></a><a href='#L89'>89</a>
 <a name='L90'></a><a href='#L90'>90</a>
-<a name='L91'></a><a href='#L91'>91</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a>
+<a name='L97'></a><a href='#L97'>97</a>
+<a name='L98'></a><a href='#L98'>98</a>
+<a name='L99'></a><a href='#L99'>99</a>
+<a name='L100'></a><a href='#L100'>100</a>
+<a name='L101'></a><a href='#L101'>101</a>
+<a name='L102'></a><a href='#L102'>102</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -202,16 +213,27 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">32x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">40x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">14x</span>
 <span class="cline-any cline-yes">14x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -256,13 +278,13 @@ import { authService } from '@/services/authService';
 const Sidebar = () =&gt; {
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const { user, isSuperMode, activeRole } = useSelector((state: RootState) =&gt; state.auth);
+  const { isSuperMode, activeRole } = useSelector((state: RootState) =&gt; state.auth);
 &nbsp;
   const handleLogout = async () =&gt; {
     try {
       await authService.logout();
       dispatch(logout());
-      window.location.href = '/login';
+      globalThis.location.href = '/login';
     } catch (error) {
 <span class="cstat-no" title="statement not covered" >      console.error('Logout failed', error);</span>
     }
@@ -283,10 +305,12 @@ const Sidebar = () =&gt; {
 &nbsp;
   const menuItems = [
     { name: 'Dashboard', icon: 'dashboard', href: `/${dashboardPath}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] },
-    { name: 'Patients', icon: 'group', href: '/reception/patients', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN', 'SUPER_ADMIN'] },
-    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN', 'SUPER_ADMIN'] },
-    { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
-    { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN', 'SUPER_ADMIN'] },
+    { name: 'Patients', icon: 'group', href: '/reception/patients', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
+    { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
+    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
+    { name: 'Token Queue', icon: 'queue', href: '/reception/queue', roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] },
+    { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN'] },
+    { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'User Management', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },
     { name: 'Hospitals', icon: 'apartment', href: '/super_admin/hospitals', roles: ['SUPER_ADMIN'] },
     { name: 'Settings', icon: 'settings', href: '/settings', roles: ['ADMIN', 'SUPER_ADMIN'] },
@@ -297,35 +321,44 @@ const Sidebar = () =&gt; {
   );
 &nbsp;
   return (
-    &lt;aside className="hidden lg:flex w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] p-4 gap-2 h-screen"&gt;
-      &lt;nav className="flex flex-col gap-1"&gt;
+    &lt;aside className="bg-white h-[calc(100vh-64px)] w-64 border-r border-gray-200 flex flex-col p-4 gap-2 sticky top-16 z-50"&gt;
+      &lt;div className="px-2 mb-4"&gt;
+        &lt;p className="text-xs font-bold uppercase tracking-widest text-gray-400"&gt;Main Menu&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;nav className="flex-1 space-y-1"&gt;
         {filteredMenuItems.map((item) =&gt; {
-          const isActive = pathname === item.href;
+          // Check if current path starts with item.href to keep it active for sub-routes
+          // e.g. /admin/users and /admin/users/create both should highlight "User Management"
+          const isActive = pathname.startsWith(item.href);
           return (
             &lt;Link
               key={item.name}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-4 py-3 font-medium transition-colors ${
+              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 font-manrope text-sm font-medium ${
                 isActive
-                  ? <span class="branch-0 cbranch-no" title="branch not covered" >'bg-[var(--primary)] text-white'</span>
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)]'
+                  ? <span class="branch-0 cbranch-no" title="branch not covered" >'bg-orange-50 text-orange-600 rounded-lg'</span>
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
               }`}
             &gt;
-              &lt;span className="material-symbols-outlined"&gt;{item.icon}&lt;/span&gt;
-              {item.name}
+              &lt;span className="material-symbols-outlined" style={isActive ? <span class="branch-0 cbranch-no" title="branch not covered" >{ fontVariationSettings: "'FILL' 1" } </span>: {}}&gt;
+                {item.icon}
+              &lt;/span&gt;
+              &lt;span&gt;{item.name}&lt;/span&gt;
             &lt;/Link&gt;
           );
         })}
       &lt;/nav&gt;
-      
-      &lt;div className="mt-auto flex flex-col gap-1"&gt;
-        &lt;div className="my-4 border-t border-[var(--border)]"&gt;&lt;/div&gt;
+      &lt;div className="mt-auto flex flex-col gap-2 pt-4 border-t border-gray-100"&gt;
+        &lt;a className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium cursor-pointer"&gt;
+          &lt;span className="material-symbols-outlined"&gt;help&lt;/span&gt;
+          &lt;span&gt;Support&lt;/span&gt;
+        &lt;/a&gt;
         &lt;button
           onClick={handleLogout}
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-[var(--text-secondary)] hover:bg-[var(--error-light)] hover:text-[var(--error)] transition-colors font-medium w-full text-left"
+          className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium w-full text-left"
         &gt;
           &lt;span className="material-symbols-outlined"&gt;logout&lt;/span&gt;
-          Logout
+          &lt;span&gt;Logout&lt;/span&gt;
         &lt;/button&gt;
       &lt;/div&gt;
     &lt;/aside&gt;
@@ -340,7 +373,7 @@ export default Sidebar;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-04-18T11:29:57.877Z
+                at 2026-04-26T19:10:36.077Z
             </div>
         <script src="../../prettify.js"></script>
         <script>

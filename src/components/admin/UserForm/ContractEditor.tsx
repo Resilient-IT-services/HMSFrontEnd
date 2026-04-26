@@ -29,7 +29,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   };
 
   const addSlot = (raIdx: number) => {
-    const schedules = [...(newContract.roleAssignments?.[raIdx].schedules || []), { dayOfWeek: activeDay, startTime: '09:00', endTime: '17:00', slotDurationMinutes: 15, maxPatients: 20 }];
+    const schedules = [...(newContract.roleAssignments?.[raIdx].schedules || []), { dayOfWeek: activeDay, startTime: '09:00', endTime: '17:00', slotDurationMinutes: 15, maxPatients: 20 }];
     handleUpdateSchedule(raIdx, schedules);
   };
 
@@ -94,7 +94,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   updated[raIdx].departmentName = e.target.value;
                   setNewContract({ ...newContract, roleAssignments: updated });
                 }} />
-                {ra.roleCode === 'DOCTOR' && <input type="number" className="form-input" placeholder="Consultation Fee ($)" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                {ra.roleCode === 'DOCTOR' && <input type="number" className="form-input" placeholder="Consultation Fee (₹)" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
                   const updated = [...(newContract.roleAssignments || [])];
                   updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: Number(e.target.value) };
                   setNewContract({ ...newContract, roleAssignments: updated });

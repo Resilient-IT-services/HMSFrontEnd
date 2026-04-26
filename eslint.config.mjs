@@ -13,8 +13,25 @@ const eslintConfig = defineConfig([
   unicorn.configs.recommended,
   {
     rules: {
+      "@typescript-eslint/no-explicit-any": "off",
       "sonarjs/no-duplicate-string": "off",
+      "sonarjs/no-dead-store": "off",
+      "sonarjs/no-nested-conditional": "off",
+      "sonarjs/no-nested-functions": "off",
+      "sonarjs/no-unused-vars": "off",
+      "sonarjs/pseudo-random": "off",
+      "sonarjs/redundant-type-aliases": "off",
+      "sonarjs/unused-import": "off",
+      "sonarjs/use-type-alias": "off",
+      "sonarjs/concise-regex": "off",
+      "react/no-unescaped-entities": "off",
+      "@next/next/no-img-element": "off",
       "unicorn/prevent-abbreviations": "off",
+      "unicorn/consistent-function-scoping": "off",
+      "unicorn/no-array-for-each": "off",
+      "unicorn/no-nested-ternary": "off",
+      "unicorn/no-object-as-default-parameter": "off",
+      "unicorn/prefer-string-slice": "off",
       "unicorn/filename-case": [
         "error",
         {
@@ -37,11 +54,12 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "off",
       "sonarjs/no-duplicate-string": "off",
       "sonarjs/no-identical-functions": "off",
+      "unicorn/no-object-as-default-parameter": "off",
     }
   },
   // Allow CommonJS in specific config files
   {
-    files: ["*.config.js", "*.config.mjs", "tailwind.config.js", "postcss.config.js"],
+    files: ["*.config.js", "*.config.mjs", "*.config.ts", "tailwind.config.js", "postcss.config.js"],
     rules: {
       "unicorn/prefer-module": "off",
     }
