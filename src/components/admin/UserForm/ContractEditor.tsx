@@ -19,6 +19,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 }) => {
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const [activeDay, setActiveDay] = useState(1); // 1-7 (Mon-Sun)
+  const [showCopyUI, setShowCopyUI] = useState<number | null>(null); // raIdx
+  const [copyTargets, setCopyTargets] = useState<number[]>([]);
 
   const handleUpdateSchedule = (raIdx: number, newSchedules: ScheduleDTO[]) => {
     const updatedAssignments = [...(newContract.roleAssignments || [])];
@@ -30,6 +32,22 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
     const schedules = [...(newContract.roleAssignments?.[raIdx].schedules || [])];
     schedules.push({ dayOfWeek: activeDay, startTime: '09:00', endTime: '17:00', slotDurationMinutes: 15, maxPatients: 20 });
     handleUpdateSchedule(raIdx, schedules);
+  };
+
+  const handleCopySchedule = (raIdx: number) => {
+    if (copyTargets.length === 0) return;
+    const currentDaySlots = (newContract.roleAssignments?.[raIdx].schedules || []).filter(s => s.dayOfWeek === activeDay);
+    let updatedSchedules = (newContract.roleAssignments?.[raIdx].schedules || []).filter(s => !copyTargets.includes(s.dayOfWeek));
+    
+    copyTargets.forEach(targetDay => {
+      currentDaySlots.forEach(slot => {
+        updatedSchedules.push({ ...slot, dayOfWeek: targetDay, id: undefined });
+      });
+    });
+
+    handleUpdateSchedule(raIdx, updatedSchedules);
+    setShowCopyUI(null);
+    setCopyTargets([]);
   };
 
   return (
@@ -101,8 +119,42 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   <div className="space-y-3 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] font-black text-slate-400 uppercase">Daily Slots ({dayNames[activeDay-1]})</span>
-                      <button type="button" onClick={() => addSlot(raIdx)} className="text-primary text-[9px] font-black uppercase flex items-center gap-1"><span className="material-symbols-outlined text-xs">add</span> Add Slot</button>
+                      <div className="flex gap-4">
+                        <button type="button" onClick={() => setShowCopyUI(showCopyUI === raIdx ? null : raIdx)} className="text-slate-400 text-[9px] font-black uppercase flex items-center gap-1 hover:text-primary">
+                          <span className="material-symbols-outlined text-xs">content_copy</span> Copy to...
+                        </button>
+                        <button type="button" onClick={() => addSlot(raIdx)} className="text-primary text-[9px] font-black uppercase flex items-center gap-1">
+                          <span className="material-symbols-outlined text-xs">add</span> Add Slot
+                        </button>
+                      </div>
                     </div>
+
+                    {showCopyUI === raIdx && (
+                      <div className="p-4 bg-white rounded-xl border-2 border-primary/20 mb-4 animate-in zoom-in-95">
+                        <p className="text-[10px] font-black text-primary uppercase mb-3 tracking-widest">Select target days to copy {dayNames[activeDay-1]} slots:</p>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {dayNames.map((day, idx) => {
+                            const dayNum = idx + 1;
+                            if (dayNum === activeDay) return null;
+                            const isSelected = copyTargets.includes(dayNum);
+                            return (
+                              <button
+                                key={day} type="button"
+                                onClick={() => setCopyTargets(prev => isSelected ? prev.filter(d => d !== dayNum) : [...prev, dayNum])}
+                                className={`px-3 py-1.5 rounded-lg border-2 text-[9px] font-black uppercase transition-all ${isSelected ? 'bg-primary border-primary text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                              >
+                                {day.substring(0, 3)}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <div className="flex gap-2">
+                          <button type="button" onClick={() => handleCopySchedule(raIdx)} disabled={copyTargets.length === 0} className="flex-1 bg-primary text-white text-[9px] font-black uppercase py-2 rounded-lg disabled:opacity-50">Confirm Copy</button>
+                          <button type="button" onClick={() => setShowCopyUI(null)} className="flex-1 bg-slate-100 text-slate-500 text-[9px] font-black uppercase py-2 rounded-lg">Cancel</button>
+                        </div>
+                      </div>
+                    )}
+
                     {ra.schedules?.filter(s => s.dayOfWeek === activeDay).map((slot, sIdx) => (
                       <div key={sIdx} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 group">
                         <input type="time" className="form-input py-1 text-[10px] h-8" value={slot.startTime} onChange={(e) => {

@@ -62,8 +62,8 @@ const mockPatients = [
 const mockAvailability = {
   sessions: [
     {
-      startTime: '09:00',
-      endTime: '12:00',
+      startTime: '22:00',
+      endTime: '23:59',
       available: true,
       currentBookings: 0,
       maxPatients: 10,
@@ -129,9 +129,9 @@ describe('CreateAppointmentPage', () => {
 
     // Select session
     await waitFor(() => {
-      expect(screen.getByText('09:00 - 12:00')).toBeInTheDocument();
+      expect(screen.getByText('22:00 - 23:59')).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByText('09:00 - 12:00'));
+    fireEvent.click(screen.getByText('22:00 - 23:59'));
 
     // Search for patient
     const searchInput = screen.getByPlaceholderText(/Patient Name or Phone/i);

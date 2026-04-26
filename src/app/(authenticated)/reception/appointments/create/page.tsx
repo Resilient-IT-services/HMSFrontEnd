@@ -45,7 +45,22 @@ const useAppointmentScheduling = () => {
     setFetchingAvailability(true);
     setSelectedSession(null);
     doctorService.getAvailability(selectedDoctor.userId, selectedDate).then(res => {
-      if (res.success && res.data) setAvailability(res.data.sessions);
+      if (res.success && res.data) {
+        let sessions = res.data.sessions;
+        
+        // Filter out past sessions
+        const now = new Date();
+        const todayStr = now.toISOString().split('T')[0];
+        
+        if (selectedDate === todayStr) {
+          const currentHHmm = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          sessions = sessions.filter(s => s.endTime > currentHHmm);
+        } else if (selectedDate < todayStr) {
+          sessions = [];
+        }
+
+        setAvailability(sessions);
+      }
       setFetchingAvailability(false);
     });
   }, [selectedDoctor, selectedDate]);
