@@ -193,7 +193,7 @@ const TodayAppointmentsPage = () => {
                         </div>
                         <div>
                           <p className="font-bold text-slate-900 text-sm leading-none mb-1">{row.patientName}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: #{row.id.substring(0, 8)}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: #{String(row.id).substring(0, 8)}</p>
                         </div>
                       </div>
                     </td>
