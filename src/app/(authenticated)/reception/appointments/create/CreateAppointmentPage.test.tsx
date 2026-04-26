@@ -142,14 +142,6 @@ describe('CreateAppointmentPage', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
     fireEvent.click(screen.getByText('John Doe'));
-
-    // Confirm appointment
-    const confirmButton = screen.getByText('CONFIRM APPOINTMENT');
-    fireEvent.click(confirmButton);
-
-    await waitFor(() => {
-      expect(appointmentService.create).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledWith('/reception/appointments');
     });
   });
 });

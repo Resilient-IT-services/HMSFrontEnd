@@ -123,3 +123,33 @@ body {
 .btn-secondary {
   @apply px-6 py-2.5 border border-[#D0D5DD] bg-white text-on-surface font-label-md rounded-lg hover:bg-slate-50 transition-all;
 }
+
+@utility rounded-custom {
+  border-radius: 12px;
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+
+.session-card {
+    transition: all 150ms ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.session-card-default {
+    background-color: #f1f5f9;
+}
+.session-card-default:hover {
+    border-color: #ff6b2b;
+}
+.session-card-selected {
+    background-color: #ff6b2b;
+    color: white !important;
+    border-color: #ff6b2b;
+}
+.session-card-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background-color: #f1f5f9;
+}

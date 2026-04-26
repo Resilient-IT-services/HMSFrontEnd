@@ -26,131 +26,81 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
   dateOptions,
   formatLocalTime
 }) => {
+  const formattedDate = new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
   return (
-    <section className="flex-1 flex flex-col bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Calendar Header */}
-      <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-        <div>
-          <h4 className="font-manrope text-lg font-black text-slate-900">Session Availability</h4>
-          <p className="text-xs text-slate-500 font-medium">Select a slot from the doctor's active sessions.</p>
+    <section className="flex-1 bg-white rounded-custom border border-slate-200 flex flex-col shadow-sm overflow-hidden">
+      <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+        <div className="flex items-center space-x-3">
+          <button 
+            className="p-1.5 hover:bg-slate-50 rounded-lg border border-slate-200"
+            onClick={() => {
+              const d = new Date(selectedDate);
+              d.setDate(d.getDate() - 1);
+              setSelectedDate(d.toISOString().split('T')[0]);
+            }}
+          >
+            <span className="material-symbols-outlined text-base">chevron_left</span>
+          </button>
+          <h3 className="font-bold text-base">{formattedDate}</h3>
+          <button 
+            className="p-1.5 hover:bg-slate-50 rounded-lg border border-slate-200"
+            onClick={() => {
+              const d = new Date(selectedDate);
+              d.setDate(d.getDate() + 1);
+              setSelectedDate(d.toISOString().split('T')[0]);
+            }}
+          >
+            <span className="material-symbols-outlined text-base">chevron_right</span>
+          </button>
         </div>
-        <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-          {dateOptions.map(opt => (
-            <button 
-              key={opt.iso}
-              onClick={() => setSelectedDate(opt.iso)}
-              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase transition-all ${opt.active ? 'bg-orange-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              {opt.label}
-            </button>
-          ))}
+        <div className="flex bg-slate-100 p-1 rounded-lg scale-90">
+          <button className="px-4 py-1 bg-white shadow-sm rounded-md text-[11px] font-bold text-primary uppercase">Week</button>
+          <button className="px-4 py-1 text-[11px] font-bold text-slate-500 uppercase">Day</button>
         </div>
       </div>
 
-      {/* Availability Content */}
-      <div className="flex-1 overflow-y-auto p-8">
-         {fetchingAvailability ? (
-           <div className="h-full flex flex-col items-center justify-center space-y-4">
-              <div className="w-12 h-12 border-4 border-orange-100 border-t-orange-600 rounded-full animate-spin"></div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Querying schedule...</p>
-           </div>
-         ) : !selectedDoctor ? (
-           <div className="h-full flex flex-col items-center justify-center text-center max-w-xs mx-auto">
-              <span className="material-symbols-outlined text-5xl text-slate-200 mb-4">stethoscope</span>
-              <p className="text-sm font-bold text-slate-400">Select a physician from the list to view their daily sessions.</p>
-           </div>
-         ) : availability.length === 0 ? (
-           <div className="h-full flex flex-col items-center justify-center text-center max-w-xs mx-auto">
-              <span className="material-symbols-outlined text-5xl text-orange-200 mb-4">event_busy</span>
-              <p className="text-sm font-bold text-slate-400">No active sessions found for Dr. {selectedDoctor.fullName} on this date.</p>
-              <button onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])} className="mt-4 text-xs font-black text-orange-600 uppercase hover:underline">Check Today</button>
-           </div>
-         ) : (
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {availability.map((session, idx) => (
-                <div 
-                  key={idx}
-                  onClick={() => session.available && setSelectedSession(session)}
-                  className={`p-6 rounded-2xl border-2 transition-all cursor-pointer relative overflow-hidden group ${
-                    selectedSession === session ? 'border-orange-600 bg-orange-50/30' : 
-                    !session.available ? 'border-slate-100 bg-slate-50 opacity-60 cursor-not-allowed' : 
-                    'border-slate-100 hover:border-orange-200 bg-white'
-                  }`}
-                >
-                  <div className="relative z-10 flex justify-between items-start mb-6">
-                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                           <span className="material-symbols-outlined text-lg text-orange-600">alarm</span>
-                           <h5 className="font-manrope font-black text-slate-900 text-lg">
-                              {formatLocalTime(session.startTime)} - {formatLocalTime(session.endTime)}
-                           </h5>
-                        </div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Primary Consultation Session</p>
-                     </div>
-                     <span className={`px-2 py-1 rounded text-[9px] font-black uppercase tracking-tighter ${session.available ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {session.available ? 'Available' : 'Session Full'}
-                     </span>
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-3">
+        {fetchingAvailability ? (
+          <div className="h-full flex flex-col items-center justify-center space-y-4">
+            <div className="w-10 h-10 border-4 border-orange-100 border-t-orange-600 rounded-full animate-spin"></div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Loading...</p>
+          </div>
+        ) : availability.length === 0 ? (
+          <div className="h-full flex flex-col items-center justify-center text-center py-20">
+            <span className="material-symbols-outlined text-5xl text-slate-200 mb-4">event_busy</span>
+            <p className="text-sm font-bold text-slate-400">No slots available for this date.</p>
+          </div>
+        ) : (
+          availability.map((session, idx) => {
+            const isSelected = selectedSession === session;
+            const isDisabled = !session.available;
+            
+            return (
+              <div 
+                key={idx}
+                onClick={() => session.available && setSelectedSession(session)}
+                className={`session-card ${
+                  isSelected ? 'session-card-selected' : isDisabled ? 'session-card-disabled' : 'session-card-default'
+                } rounded-custom p-4 flex items-center justify-between transition-all`}
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="text-2xl">
+                    {session.startTime < '12:00' ? '🌅' : session.startTime < '17:00' ? '🌤' : '🌙'}
                   </div>
-
-                  <div className="relative z-10 space-y-4">
-                     <div className="flex items-end justify-between">
-                        <div>
-                           <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Capacity Status</p>
-                           <div className="flex items-baseline gap-1">
-                              <span className="text-2xl font-black text-slate-900">{session.currentBookings}</span>
-                              <span className="text-sm font-bold text-slate-300">/ {session.maxPatients} patients</span>
-                           </div>
-                        </div>
-                        {session.nextSuggestedTime && session.available && (
-                          <div className="text-right">
-                             <p className="text-[10px] font-black text-orange-600 uppercase mb-1">Next Slot</p>
-                             <p className="text-sm font-black text-orange-700">{formatLocalTime(session.nextSuggestedTime)}</p>
-                          </div>
-                        )}
-                     </div>
-                     
-                     <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full transition-all duration-1000 ${session.available ? 'bg-orange-500' : 'bg-slate-300'}`}
-                          style={{ width: `${(session.currentBookings / session.maxPatients) * 100}%` }}
-                        ></div>
-                     </div>
+                  <div>
+                    <p className={`font-bold ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                      {session.startTime < '12:00' ? 'Morning Session' : session.startTime < '17:00' ? 'Afternoon Session' : 'Evening Session'}
+                    </p>
+                    <p className={`text-xs ${isSelected ? 'text-white/90' : 'text-slate-500'}`}>
+                      {formatLocalTime(session.startTime)} – {formatLocalTime(session.endTime)}
+                    </p>
                   </div>
-                  
-                  {selectedSession === session && (
-                    <div className="absolute -right-4 -bottom-4 w-16 h-16 bg-orange-600 rounded-full flex items-center justify-center text-white">
-                       <span className="material-symbols-outlined text-2xl -translate-x-2 -translate-y-2">check</span>
-                    </div>
-                  )}
                 </div>
-              ))}
-           </div>
-         )}
-      </div>
-
-      <div className="px-8 py-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-        <div className="flex items-center space-x-8">
-          <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-green-500 shadow-sm shadow-green-500/20"></span>
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Active Slot</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full bg-slate-300"></span>
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Full / Blocked</span>
-          </div>
-        </div>
-        {selectedSession && (
-          <div className="flex items-center gap-3">
-             <div className="text-right">
-                <p className="text-[9px] font-black text-slate-400 uppercase">Selected Appointment Window</p>
-                <p className="text-xs font-black text-slate-900">{formatLocalTime(selectedSession.startTime)} - {formatLocalTime(selectedSession.endTime)}</p>
-             </div>
-             <div className="w-px h-8 bg-slate-200 mx-2"></div>
-             <div className="text-right">
-                <p className="text-[9px] font-black text-orange-600 uppercase">Suggested Time</p>
-                <p className="text-sm font-black text-orange-700">{selectedSession.nextSuggestedTime ? formatLocalTime(selectedSession.nextSuggestedTime) : formatLocalTime(selectedSession.startTime)}</p>
-             </div>
-          </div>
+                {isSelected && <span className="material-symbols-outlined text-xl text-white">check_circle</span>}
+              </div>
+            );
+          })
         )}
       </div>
     </section>
