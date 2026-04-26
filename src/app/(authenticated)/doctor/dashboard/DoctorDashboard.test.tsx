@@ -20,11 +20,11 @@ describe('DoctorDashboard', () => {
     });
 
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = {}) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Dr. John Doe' } }) => state } })}>
         <DoctorDashboard />
       </Provider>
     );
 
-    expect(screen.getByText(/Patient Waiting Queue/i)).toBeInTheDocument();
+    expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
   });
 });

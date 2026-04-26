@@ -25,6 +25,6 @@ describe('ReceptionDashboard', () => {
       </Provider>
     );
 
-    expect(screen.getByText(/Recent Appointments/i)).toBeInTheDocument();
+    expect(screen.getByText(/Recent Patient Arrivals/i)).toBeInTheDocument();
   });
 });
