@@ -25,18 +25,26 @@ const UserManagement = () => {
       const userRes = await userService.listUsers(page, 20, debouncedSearch, roleFilter, activeFilter);
       if (userRes.success && userRes.data) {
         const usersWithRoles = (userRes.data.content || []).map(u => {
-          const allRoles = new Set<Role>();
+          const allRoles = new Set<string>();
+          
           if (u.memberships) {
-            for (const m of u.memberships) {
-              if (m.roleAssignments) {
-                for (const ra of m.roleAssignments) {
-                  allRoles.add(ra.roleCode as Role);
-                }
+            u.memberships.forEach((m: any) => {
+              // Extract roles from membership.roles array
+              if (m.roles && Array.isArray(m.roles)) {
+                m.roles.forEach((r: string) => allRoles.add(r));
               }
-            }
+              // Fallback for roleAssignments if needed
+              if (m.roleAssignments) {
+                m.roleAssignments.forEach((ra: any) => {
+                  if (ra.roleCode) allRoles.add(ra.roleCode);
+                });
+              }
+            });
           }
+          
           if (u.superuser) allRoles.add('SUPER_ADMIN');
-          return { ...u, roles: Array.from(allRoles) };
+          
+          return { ...u, roles: Array.from(allRoles) as Role[] };
         });
         setUsers(usersWithRoles);
         setTotalElements(userRes.data.totalElements);
@@ -146,17 +154,25 @@ const UserManagement = () => {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex flex-wrap gap-1">
-                      {user.roles?.map(role => (
-                        <span key={role} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 uppercase border border-orange-100">
-                          {role}
+                      {user.roles && user.roles.length > 0 ? (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 uppercase border border-orange-100">
+                          {user.roles[0]}{user.roles.length > 1 ? ` + ${user.roles.length - 1}` : ''}
                         </span>
-                      ))}
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">No Roles</span>
+                      )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div>
-                        <p className="text-sm text-slate-600 font-medium">{user.memberships?.[0]?.hospitalName || 'No Hospital Assigned'}</p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user.memberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}</p>
+                        <p className="text-sm text-slate-600 font-medium">
+                          {user.memberships && user.memberships.length > 0 
+                            ? `${user.memberships[0].hospitalName}${user.memberships.length > 1 ? ` + ${user.memberships.length - 1}` : ''}`
+                            : 'No Hospital Assigned'}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                          {(user.memberships && user.memberships[0]?.departmentName) || 'General'}
+                        </p>
                     </div>
                   </td>
                   <td className="px-6 py-4">

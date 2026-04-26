@@ -43,6 +43,7 @@ vi.mock('@/components/ui/MainLayout', () => ({
 const mockAppointments = [
   {
     id: 1,
+    patientId: 'p1',
     patientName: 'John Doe',
     doctorId: 101,
     doctorName: 'Dr. Smith',
@@ -52,6 +53,7 @@ const mockAppointments = [
   },
   {
     id: 2,
+    patientId: 'p2',
     patientName: 'Jane Smith',
     doctorId: 102,
     doctorName: 'Dr. Jones',
@@ -134,7 +136,7 @@ describe('TodayAppointmentsPage', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
 
-    const checkedInButton = screen.getByText('CHECKED IN');
+    const checkedInButton = screen.getByRole('button', { name: 'CHECKED IN' });
     fireEvent.click(checkedInButton);
 
     expect(screen.queryByText('John Doe')).not.toBeInTheDocument();

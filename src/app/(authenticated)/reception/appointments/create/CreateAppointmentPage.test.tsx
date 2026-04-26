@@ -129,12 +129,12 @@ describe('CreateAppointmentPage', () => {
 
     // Select session
     await waitFor(() => {
-      expect(screen.getByText('22:00 - 23:59')).toBeInTheDocument();
+      expect(screen.getByText(/22:00 - 23:59/)).toBeInTheDocument();
     });
-    fireEvent.click(screen.getByText('22:00 - 23:59'));
+    fireEvent.click(screen.getByText(/22:00 - 23:59/));
 
     // Search for patient
-    const searchInput = screen.getByPlaceholderText(/Patient Name or Phone/i);
+    const searchInput = screen.getByPlaceholderText(/Search by name or phone/i);
     fireEvent.change(searchInput, { target: { value: 'John' } });
 
     // Select patient from search results
@@ -142,5 +142,14 @@ describe('CreateAppointmentPage', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
     fireEvent.click(screen.getByText('John Doe'));
+
+    // Confirm appointment
+    const confirmButton = screen.getByText(/Confirm Appointment/i);
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(appointmentService.create).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith('/reception/appointments');
+    });
   });
 });
