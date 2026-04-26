@@ -4,27 +4,63 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 export default function CreateHospitalPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: '',
     code: '',
+    registrationNo: '',
+    gstin: '',
     address: '',
+    city: '',
+    state: '',
+    pincode: '',
     status: 'ACTIVE'
   });
 
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    
+    // GSTIN Validation (India)
+    const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+    if (formData.gstin && !gstinRegex.test(formData.gstin)) {
+      newErrors.gstin = 'Invalid GSTIN format. Expected: 22AAAAA0000A1Z5';
+    }
+
+    // Registration No Validation
+    const regNoRegex = /^[A-Z0-9/-]{5,30}$/i;
+    if (!formData.registrationNo) {
+      newErrors.registrationNo = 'Registration number is required';
+    } else if (!regNoRegex.test(formData.registrationNo)) {
+      newErrors.registrationNo = 'Invalid registration number format';
+    }
+
+    if (!formData.name) newErrors.name = 'Hospital name is required';
+    if (!formData.code) newErrors.code = 'Hospital code is required';
+    if (!formData.pincode) newErrors.pincode = 'Pincode is required';
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
+
     try {
       setLoading(true);
       const res = await hospitalService.create(formData as any);
       if (res.success) {
+        triggerGlobalToast('Hospital facility created successfully', 'success');
         router.push('/super_admin/hospitals');
       }
     } catch (error) {
       console.error('Failed to create hospital', error);
+      triggerGlobalToast('Failed to create hospital facility', 'error');
     } finally {
       setLoading(false);
     }
@@ -77,34 +113,51 @@ export default function CreateHospitalPage() {
                 <div className="p-8 space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="col-span-2">
-                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Hospital Name</label>
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Hospital Name *</label>
                       <input 
-                        className="form-input font-body-md"
+                        className={`form-input font-body-md ${errors.name ? 'border-red-500' : ''}`}
                         type="text" 
                         placeholder="e.g. St. Mary's General Hospital"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         required
                       />
+                      {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                     </div>
                     <div>
-                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Hospital Code</label>
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Hospital Code *</label>
                       <input 
-                        className="form-input font-body-md"
+                        className={`form-input font-body-md ${errors.code ? 'border-red-500' : ''}`}
                         type="text" 
                         placeholder="e.g. HSP-001"
                         value={formData.code}
                         onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                         required
                       />
+                      {errors.code && <p className="text-red-500 text-xs mt-1">{errors.code}</p>}
                     </div>
                     <div>
-                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Registration Number</label>
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Registration Number *</label>
                       <input 
-                        className="form-input font-body-md"
+                        className={`form-input font-body-md ${errors.registrationNo ? 'border-red-500' : ''}`}
                         type="text" 
                         placeholder="REG-2024-XXXX"
+                        value={formData.registrationNo}
+                        onChange={(e) => setFormData({ ...formData, registrationNo: e.target.value })}
+                        required
                       />
+                      {errors.registrationNo && <p className="text-red-500 text-xs mt-1">{errors.registrationNo}</p>}
+                    </div>
+                    <div className="col-span-2">
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">GSTIN</label>
+                      <input 
+                        className={`form-input font-body-md ${errors.gstin ? 'border-red-500' : ''}`}
+                        type="text" 
+                        placeholder="22AAAAA0000A1Z5"
+                        value={formData.gstin}
+                        onChange={(e) => setFormData({ ...formData, gstin: e.target.value.toUpperCase() })}
+                      />
+                      {errors.gstin && <p className="text-red-500 text-xs mt-1">{errors.gstin}</p>}
                     </div>
                   </div>
                 </div>
@@ -121,39 +174,43 @@ export default function CreateHospitalPage() {
                 <div className="p-8 space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="col-span-2">
-                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Address Line 1</label>
-                      <input 
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] transition-all"
-                        type="text" 
-                        placeholder="Street address"
+                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Full Address</label>
+                      <textarea 
+                        className="form-input min-h-[100px] py-3"
+                        placeholder="Street address, building, landmark..."
                         value={formData.address}
                         onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                       />
                     </div>
-                    <div className="col-span-2">
-                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Address Line 2 (Optional)</label>
-                      <input 
-                        className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] transition-all"
-                        placeholder="Suite, Floor, Building"
-                        type="text"
-                      />
-                    </div>
                     <div>
                       <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">City</label>
-                      <input className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] transition-all" type="text" />
+                      <input 
+                        className="form-input" 
+                        type="text" 
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">State</label>
-                        <select className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] transition-all appearance-none">
-                          <option>Select State</option>
-                          <option>Texas</option>
-                          <option>California</option>
-                        </select>
+                        <input 
+                          className="form-input" 
+                          type="text" 
+                          value={formData.state}
+                          onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                        />
                       </div>
                       <div>
-                        <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Pincode</label>
-                        <input className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[var(--primary)] transition-all" type="text" />
+                        <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">Pincode *</label>
+                        <input 
+                          className={`form-input ${errors.pincode ? 'border-red-500' : ''}`}
+                          type="text" 
+                          value={formData.pincode}
+                          onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                          required
+                        />
+                        {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>}
                       </div>
                     </div>
                   </div>
@@ -182,14 +239,17 @@ export default function CreateHospitalPage() {
                       </label>
                     </div>
                     <div className="pt-6 border-t border-slate-100">
-                      <p className="font-bold text-[var(--text-primary)] text-sm mb-3">Enterprise Tier</p>
-                      <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 flex items-start gap-3">
-                        <span className="material-symbols-outlined text-orange-600">workspace_premium</span>
-                        <div>
-                          <p className="text-[12px] text-orange-800 font-bold uppercase">Platinum Partner</p>
-                          <p className="text-[11px] text-orange-700 mt-1">Priority support and advanced billing modules enabled.</p>
-                        </div>
-                      </div>
+                      <p className="font-bold text-[var(--text-primary)] text-sm mb-3">Onboarding Status</p>
+                      <select 
+                        className="form-input"
+                        value={formData.status}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                      >
+                        <option value="ACTIVE">Active</option>
+                        <option value="INACTIVE">Inactive</option>
+                        <option value="SUSPENDED">Suspended</option>
+                        <option value="ONBOARDING">Onboarding</option>
+                      </select>
                     </div>
                   </div>
                 </div>

@@ -14,8 +14,8 @@ export const hospitalService = {
     return response.data;
   },
 
-  async update(id: string, request: Partial<CreateHospitalRequest> & { status?: string }): Promise<ApiResponse<HospitalResponse>> {
-    const response = await apiClient.put<ApiResponse<HospitalResponse>>(`/hospitals/${id}`, request);
+  async update(hospitalId: string, request: Partial<CreateHospitalRequest> & { status?: string }): Promise<ApiResponse<HospitalResponse>> {
+    const response = await apiClient.put<ApiResponse<HospitalResponse>>(`/hospitals/${hospitalId}`, request);
     return response.data;
   },
 
@@ -26,8 +26,8 @@ export const hospitalService = {
     return this.create(data);
   },
 
-  async getById(id: string): Promise<ApiResponse<HospitalResponse>> {
-    const response = await apiClient.get<ApiResponse<HospitalResponse>>(`/hospitals/${id}`);
+  async getById(hospitalId: string): Promise<ApiResponse<HospitalResponse>> {
+    const response = await apiClient.get<ApiResponse<HospitalResponse>>(`/hospitals/${hospitalId}`);
     return response.data;
   }
 };

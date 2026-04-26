@@ -9,8 +9,8 @@ export const patientService = {
     return response.data;
   },
 
-  async get(id: string): Promise<ApiResponse<PatientResponse>> {
-    const response = await apiClient.get<ApiResponse<PatientResponse>>(`/patients/${id}`);
+  async get(patientId: string): Promise<ApiResponse<PatientResponse>> {
+    const response = await apiClient.get<ApiResponse<PatientResponse>>(`/patients/${patientId}`);
     return response.data;
   },
 
@@ -19,8 +19,8 @@ export const patientService = {
     return response.data;
   },
 
-  async update(id: string, request: Partial<CreatePatientRequest>): Promise<ApiResponse<PatientResponse>> {
-    const response = await apiClient.put<ApiResponse<PatientResponse>>(`/patients/${id}`, request);
+  async update(patientId: string, request: Partial<CreatePatientRequest>): Promise<ApiResponse<PatientResponse>> {
+    const response = await apiClient.put<ApiResponse<PatientResponse>>(`/patients/${patientId}`, request);
     return response.data;
   },
 

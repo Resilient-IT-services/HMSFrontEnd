@@ -118,7 +118,7 @@ const HospitalManagement = () => {
                   <th className="px-6 py-4 border-b border-slate-100">Region</th>
                   <th className="px-6 py-4 border-b border-slate-100">Category</th>
                   <th className="px-6 py-4 border-b border-slate-100">Status</th>
-                  <th className="px-6 py-4 border-b border-slate-100 text-right">Actions</th>
+                  <th className="px-6 py-4 border-b border-slate-100 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -145,15 +145,16 @@ const HospitalManagement = () => {
                         <span className="text-xs font-bold text-slate-700 uppercase tracking-tighter">{h.status === 'ACTIVE' ? 'Operational' : h.status}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex justify-center gap-2 items-center transition-opacity">
                         <button 
                           onClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
-                          className="p-2 text-slate-400 hover:text-orange-700 transition-colors"
+                          className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                          title="Edit Facility"
                         >
                           <span className="material-symbols-outlined text-xl">edit</span>
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
+                        <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm" title="View Details">
                           <span className="material-symbols-outlined text-xl">visibility</span>
                         </button>
                       </div>

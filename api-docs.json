@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/api/v1/users/{id}": {
+    "/api/v1/users/{userId}": {
       "put": {
         "tags": [
           "user-controller"
@@ -19,7 +19,7 @@
         "operationId": "update",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -58,7 +58,7 @@
         "operationId": "delete",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -81,7 +81,7 @@
         }
       }
     },
-    "/api/v1/patients/{id}": {
+    "/api/v1/patients/{patientId}": {
       "get": {
         "tags": [
           "Patients"
@@ -89,7 +89,7 @@
         "operationId": "get",
         "parameters": [
           {
-            "name": "id",
+            "name": "patientId",
             "in": "path",
             "required": true,
             "schema": {
@@ -118,7 +118,7 @@
         "operationId": "update_1",
         "parameters": [
           {
-            "name": "id",
+            "name": "patientId",
             "in": "path",
             "required": true,
             "schema": {
@@ -151,7 +151,7 @@
         }
       }
     },
-    "/api/v1/hospitals/{id}": {
+    "/api/v1/hospitals/{hospitalId}": {
       "get": {
         "tags": [
           "Hospitals"
@@ -159,7 +159,7 @@
         "operationId": "get_1",
         "parameters": [
           {
-            "name": "id",
+            "name": "hospitalId",
             "in": "path",
             "required": true,
             "schema": {
@@ -188,7 +188,7 @@
         "operationId": "update_2",
         "parameters": [
           {
-            "name": "id",
+            "name": "hospitalId",
             "in": "path",
             "required": true,
             "schema": {
@@ -221,7 +221,7 @@
         }
       }
     },
-    "/api/v1/appointments/{id}": {
+    "/api/v1/appointments/{appointmentId}": {
       "get": {
         "tags": [
           "Appointments"
@@ -229,7 +229,7 @@
         "operationId": "get_2",
         "parameters": [
           {
-            "name": "id",
+            "name": "appointmentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -258,7 +258,7 @@
         "operationId": "update_3",
         "parameters": [
           {
-            "name": "id",
+            "name": "appointmentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -686,7 +686,7 @@
         }
       }
     },
-    "/api/v1/appointments/{id}/status": {
+    "/api/v1/appointments/{appointmentId}/status": {
       "post": {
         "tags": [
           "Appointments"
@@ -694,7 +694,7 @@
         "operationId": "updateStatus",
         "parameters": [
           {
-            "name": "id",
+            "name": "appointmentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -727,7 +727,7 @@
         }
       }
     },
-    "/api/v1/users/{id}/full-profile": {
+    "/api/v1/users/{userId}/full-profile": {
       "get": {
         "tags": [
           "user-controller"
@@ -735,7 +735,7 @@
         "operationId": "getFullProfile",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
@@ -998,7 +998,7 @@
         }
       }
     },
-    "/api/v1/doctors/{id}/availability": {
+    "/api/v1/doctors/{doctorId}/availability": {
       "get": {
         "tags": [
           "doctor-controller"
@@ -1006,7 +1006,7 @@
         "operationId": "getAvailability",
         "parameters": [
           {
-            "name": "id",
+            "name": "doctorId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1191,6 +1191,10 @@
       "DoctorInfo": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "specialization": {
             "type": "string"
           },
@@ -1273,6 +1277,10 @@
       "NurseInfo": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
           "nursingLicenseNo": {
             "type": "string"
           },
@@ -1615,7 +1623,19 @@
           "address": {
             "type": "string"
           },
+          "city": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "pincode": {
+            "type": "string"
+          },
           "gstin": {
+            "type": "string"
+          },
+          "registrationNo": {
             "type": "string"
           },
           "status": {
@@ -1703,8 +1723,6 @@
             "type": "string",
             "enum": [
               "SCHEDULED",
-              "CONFIRMED",
-              "CHECKED_IN",
               "COMPLETED",
               "NO_SHOW",
               "DELAYED",
@@ -1884,11 +1902,15 @@
       "NurseStaffResponse": {
         "type": "object",
         "properties": {
-          "id": {
+          "userId": {
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
+          "nurseId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignmentId": {
             "type": "string",
             "format": "uuid"
           },
@@ -1972,11 +1994,15 @@
       "DoctorStaffResponse": {
         "type": "object",
         "properties": {
-          "id": {
+          "userId": {
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
+          "doctorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignmentId": {
             "type": "string",
             "format": "uuid"
           },

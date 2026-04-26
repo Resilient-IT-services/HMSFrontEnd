@@ -115,7 +115,7 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
                     {(m.roleAssignments || []).map((ra, raIdx) => (
                       <div key={raIdx} className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-100">
                         <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode}</span>
-                        {ra.doctorDetails && <span className="text-[10px] font-bold">${ra.doctorDetails.consultationFee} Fee</span>}
+                        {ra.doctorDetails && <span className="text-[10px] font-bold">₹{ra.doctorDetails.consultationFee} Fee</span>}
                       </div>
                     ))}
                   </div>

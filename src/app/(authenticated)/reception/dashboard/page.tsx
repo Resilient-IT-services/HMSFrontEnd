@@ -123,7 +123,7 @@ const ReceptionDashboard = () => {
                       <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Name</th>
                       <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</th>
                       <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-4"></th>
+                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -134,8 +134,10 @@ const ReceptionDashboard = () => {
                         <td className="px-6 py-4">
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Registered</span>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <button className="material-symbols-outlined text-slate-300 hover:text-slate-600">more_vert</button>
+                        <td className="px-6 py-4 text-center">
+                          <button className="p-1.5 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm">
+                            <span className="material-symbols-outlined text-xl">more_vert</span>
+                          </button>
                         </td>
                       </tr>
                     ))}

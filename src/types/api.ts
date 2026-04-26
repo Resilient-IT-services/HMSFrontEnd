@@ -44,6 +44,7 @@ export interface ReceptionistFluency {
 }
 
 export interface DoctorInfo {
+  id?: string;
   specialization: string;
   education: DoctorEducation;
   bio: string;
@@ -51,6 +52,7 @@ export interface DoctorInfo {
 }
 
 export interface NurseInfo {
+  id?: string;
   nursingLicenseNo: string;
   certificationLevel: 'RN' | 'LPN' | 'NP' | 'CNA';
 }
@@ -138,11 +140,12 @@ export interface HospitalMembershipDTO {
   hospitalId: string;
   hospitalName?: string;
   hospitalCode?: string;
+  roles?: string[]; // Direct roles array found in API response
   roleAssignments?: RoleAssignmentDTO[];
 }
 
 export interface UserResponse {
-  id: string;
+  id: string; // userId
   username: string;
   email: string;
   fullName: string;
@@ -192,7 +195,7 @@ export interface UserRequestDTO {
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 
 export interface PatientResponse {
-  id: string;
+  id: string; // patientId
   fullName: string;
   patientCode?: string;
   gender: Gender;
@@ -221,11 +224,15 @@ export interface HospitalSettings {
 }
 
 export interface HospitalResponse {
-  id: string;
+  id: string; // hospitalId
   name: string;
   code: string;
   address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
   gstin?: string;
+  registrationNo?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'ONBOARDING';
   settings?: HospitalSettings;
   createdAt: string;
@@ -236,7 +243,11 @@ export interface CreateHospitalRequest {
   name: string;
   code: string;
   address?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
   gstin?: string;
+  registrationNo?: string;
   status?: string;
   settings?: HospitalSettings;
 }
@@ -245,7 +256,7 @@ export interface CreateHospitalRequest {
 export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED' | 'CONFIRMED' | 'CHECKED_IN';
 
 export interface AppointmentResponse {
-  id: string;
+  id: string; // appointmentId
   patientId: string;
   patientName: string;
   doctorId: string;
@@ -286,8 +297,9 @@ export interface DoctorAvailabilityResponse {
 
 // Staff types
 export interface DoctorStaffResponse {
-  id: string;
   userId: string;
+  doctorId: string;
+  assignmentId: string;
   fullName: string;
   phone: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
@@ -297,8 +309,9 @@ export interface DoctorStaffResponse {
 }
 
 export interface NurseStaffResponse {
-  id: string;
   userId: string;
+  nurseId: string;
+  assignmentId: string;
   fullName: string;
   phone: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';

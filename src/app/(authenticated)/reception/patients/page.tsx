@@ -106,13 +106,13 @@ const PatientsPage = () => {
                   <th className="px-6 py-4">Patient Profile</th>
                   <th className="px-6 py-4 text-center">Gender</th>
                   <th className="px-6 py-4 text-center">Category</th>
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {loading ? (
                   <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic font-medium">Retrieving electronic health records...</td></tr>
-                ) : (patients.length === 0 ? (
+                ) : patients.length === 0 ? (
                   <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic font-medium">No patient records found.</td></tr>
                 ) : patients.map((row) => (
                   <tr 
@@ -122,7 +122,7 @@ const PatientsPage = () => {
                   >
                     <td className="px-6 py-5">
                       <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
-                        #PAT-{row.id.toString().slice(0, 5)}
+                        #PAT-{row.id.toString().substring(0, 5)}
                       </span>
                     </td>
                     <td className="px-6 py-5">
@@ -144,24 +144,25 @@ const PatientsPage = () => {
                          Out-Patient
                        </span>
                     </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex justify-end gap-2 items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-6 py-5 text-center">
+                      <div className="flex justify-center gap-2 items-center">
                         <Link 
                           href={`/reception/appointments/create?patientId=${row.id}`}
-                          className="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-orange-600 hover:text-white transition-all border border-orange-100"
+                          className="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-orange-600 hover:text-white transition-all border border-orange-100 shadow-sm"
                         >
                           Book Visit
                         </Link>
                         <button 
                           onClick={() => router.push(`/reception/patients/${row.id}`)}
-                          className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
+                          className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                          title="View Profile"
                         >
                           <span className="material-symbols-outlined text-xl">visibility</span>
                         </button>
                       </div>
                     </td>
                   </tr>
-                )))}
+                ))}
               </tbody>
             </table>
           </div>

@@ -84,17 +84,17 @@ const DoctorsPage = () => {
     {
       header: 'Actions',
       accessor: (row: DoctorStaffResponse) => (
-        <div className="flex justify-end gap-2 items-center">
+        <div className="flex justify-center gap-2 items-center">
           <button 
             onClick={() => viewSchedule(row)}
-            className="p-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
+            className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
             title="View Schedule"
           >
             <Eye className="size-4" />
           </button>
           <Link 
             href={`/reception/appointments/create?doctorId=${row.userId}`}
-            className="p-2 bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all"
+            className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
             title="Book Appointment"
           >
             <UserPlus className="size-4" />

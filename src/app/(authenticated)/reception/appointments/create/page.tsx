@@ -44,7 +44,7 @@ const useAppointmentScheduling = () => {
     if (!selectedDoctor) return;
     setFetchingAvailability(true);
     setSelectedSession(null);
-    doctorService.getAvailability(selectedDoctor.userId, selectedDate).then(res => {
+    doctorService.getAvailability(selectedDoctor.doctorId, selectedDate).then(res => {
       if (res.success && res.data) {
         let sessions = res.data.sessions;
         
@@ -83,7 +83,7 @@ const useAppointmentScheduling = () => {
       const timeToUse = selectedSession.nextSuggestedTime || selectedSession.startTime;
       const res = await appointmentService.create({
         patientId: selectedPatient.id,
-        doctorId: selectedDoctor.userId,
+        doctorId: selectedDoctor.doctorId,
         appointmentTime: `${selectedDate}T${timeToUse}:00`,
         notes
       });

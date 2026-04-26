@@ -133,7 +133,9 @@ export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
             </div>
             <div className="flex justify-between items-center">
               <p className="text-sm text-slate-600">Consultation Fee</p>
-              <p className="text-sm font-bold text-slate-900">$120.00</p>
+              <p className="text-sm font-bold text-slate-900">
+                {selectedDoctor ? `₹${selectedDoctor.consultationFee}` : 'N/A'}
+              </p>
             </div>
           </div>
           <button 

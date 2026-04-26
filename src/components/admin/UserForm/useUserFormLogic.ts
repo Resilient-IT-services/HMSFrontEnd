@@ -42,9 +42,38 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     const roles = new Set<string>();
     if (formData.memberships) for (const m of formData.memberships) {
       if (m.roleAssignments) for (const ra of m.roleAssignments) roles.add(ra.roleCode);
+      // Also check direct roles array if present (matches API response)
+      if ((m as any).roles) (m as any).roles.forEach((r: string) => roles.add(r));
     }
     return [...roles];
   }, [formData.memberships]);
+
+  // Automatically initialize profile info objects when roles are assigned
+  useEffect(() => {
+    const updatedInfo: Partial<UserRequestDTO> = {};
+    let changed = false;
+
+    if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo) {
+      updatedInfo.doctorInfo = { specialization: '', licenseNumber: '', bio: '', education: { qualifications: [] } };
+      changed = true;
+    }
+    if (assignedRoles.includes('NURSE') && !formData.nurseInfo) {
+      updatedInfo.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
+      changed = true;
+    }
+    if (assignedRoles.includes('PHARMACIST') && !formData.pharmacistInfo) {
+      updatedInfo.pharmacistInfo = { pciRegNo: '', qualification: '' };
+      changed = true;
+    }
+    if (assignedRoles.includes('RECEPTIONIST') && !formData.receptionistInfo) {
+      updatedInfo.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
+      changed = true;
+    }
+
+    if (changed) {
+      setFormData(prev => ({ ...prev, ...updatedInfo }));
+    }
+  }, [assignedRoles, formData.doctorInfo, formData.nurseInfo, formData.pharmacistInfo, formData.receptionistInfo]);
 
   useEffect(() => {
     hospitalService.list().then(res => {

@@ -9,13 +9,13 @@ export const userService = {
     return response.data;
   },
 
-  async getUser(id: string): Promise<ApiResponse<UserResponse>> {
-    const response = await apiClient.get<ApiResponse<UserResponse>>(`/users/${id}`);
+  async getUser(userId: string): Promise<ApiResponse<UserResponse>> {
+    const response = await apiClient.get<ApiResponse<UserResponse>>(`/users/${userId}`);
     return response.data;
   },
 
-  async getFullProfile(id: string): Promise<ApiResponse<UserResponse>> {
-    const response = await apiClient.get<ApiResponse<UserResponse>>(`/users/${id}/full-profile`);
+  async getFullProfile(userId: string): Promise<ApiResponse<UserResponse>> {
+    const response = await apiClient.get<ApiResponse<UserResponse>>(`/users/${userId}/full-profile`);
     return response.data;
   },
 
@@ -24,20 +24,21 @@ export const userService = {
     return response.data;
   },
 
-  async updateUser(id: string, data: Partial<UserRequestDTO>): Promise<ApiResponse<UserResponse>> {
-    const response = await apiClient.put<ApiResponse<UserResponse>>(`/users/${id}`, data);
+  async updateUser(userId: string, data: UserRequestDTO): Promise<ApiResponse<UserResponse>> {
+    const response = await apiClient.put<ApiResponse<UserResponse>>(`/users/${userId}`, data);
     return response.data;
   },
 
-  async save(data: UserRequestDTO): Promise<ApiResponse<UserResponse>> {
+  async saveUser(data: UserRequestDTO): Promise<ApiResponse<UserResponse>> {
     if (data.id) {
       return this.updateUser(data.id, data);
     }
     return this.createUser(data);
   },
 
-  async deleteUser(id: string): Promise<ApiResponse<void>> {
-    const response = await apiClient.delete<ApiResponse<void>>(`/users/${id}`);
+  async deleteUser(userId: string): Promise<ApiResponse<void>> {
+    const response = await apiClient.delete<ApiResponse<void>>(`/users/${userId}`);
     return response.data;
   }
+
 };

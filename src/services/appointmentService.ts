@@ -33,8 +33,8 @@ export const appointmentService = {
     return this.create(data);
   },
 
-  async updateStatus(id: string, request: UpdateAppointmentStatusRequest): Promise<ApiResponse<AppointmentResponse>> {
-    const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/${id}/status`, request);
+  async updateStatus(appointmentId: string, request: UpdateAppointmentStatusRequest): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/status`, request);
     return response.data;
   }
 };
