@@ -3,13 +3,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
-import { Table } from '@/components/ui/Table';
 import { patientService } from '@/services/patientService';
-import { PatientResponse, } from '@/types/api';
-import { Search, UserPlus } from 'lucide-react';
+import { PatientResponse } from '@/types/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { PatientRegistrationModal } from '@/components/reception/PatientRegistrationModal';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const PatientsPage = () => {
@@ -20,7 +17,6 @@ const PatientsPage = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
-  const [showRegModal, setShowRegModal] = useState(false);
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -46,167 +42,155 @@ const PatientsPage = () => {
     setPage(0);
   }, [debouncedSearchTerm]);
 
-  const columns = [
-    { 
-      header: 'Patient ID', 
-      accessor: (row: PatientResponse) => (
-        <span className="font-mono text-sm text-[var(--primary)] font-bold">#PAT-{row.id.toString().padStart(5, '0')}</span>
-      )
-    },
-    { 
-      header: 'Patient Name', 
-      accessor: (row: PatientResponse) => (
-        <div className="flex items-center gap-3">
-          <div className="size-8 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-bold text-xs uppercase">
-            {row.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+  return (
+    <MainLayout title="Patient Directory" hideTitle>
+      <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter">
+        {/* Page Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+          <div>
+            <h2 className="font-manrope text-3xl font-black text-slate-900 tracking-tight uppercase">Patient Directory</h2>
+            <p className="text-slate-500 font-medium mt-1">Access and manage comprehensive electronic health records.</p>
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">{row.fullName}</span>
-            <span className="text-xs text-[var(--text-secondary)]">{row.phone}</span>
-          </div>
-        </div>
-      )
-    },
-    { 
-      header: 'Gender', 
-      accessor: (row: PatientResponse) => (
-        <span className="text-sm capitalize">{row.gender.toLowerCase()}</span>
-      )
-    },
-    { 
-      header: 'Status', 
-      accessor: () => (
-        <span className="px-2 py-1 bg-[var(--success-light)] text-[var(--success)] text-[10px] font-black uppercase rounded">Out-patient</span>
-      )
-    },
-    { 
-      header: 'Created At', 
-      accessor: (row: PatientResponse) => (
-        <span className="text-sm text-[var(--text-secondary)]">
-          {new Date(row.createdAt).toLocaleDateString()}
-        </span>
-      )
-    },
-    {
-      header: 'Actions',
-      accessor: (row: PatientResponse) => (
-        <div className="flex justify-end gap-2 items-center">
-          <Link href={`/reception/patients/${row.id}`} className="text-xs font-bold text-[var(--primary)] hover:underline">View Profile</Link>
-          <Link 
-            href={`/reception/appointments/create?patientId=${row.id}`}
-            className="text-xs font-bold text-[var(--text-secondary)] bg-[var(--background)] px-3 py-1 rounded-lg border border-[var(--border)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all"
-          >
-            Book Appointment
+          <Link href="/reception/patients/create">
+            <button className="bg-orange-600 text-white px-8 py-3.5 rounded-xl font-bold flex items-center gap-2 hover:bg-orange-700 active:scale-95 transition-all shadow-lg shadow-orange-600/20">
+              <span className="material-symbols-outlined">person_add</span>
+              Register New Patient
+            </button>
           </Link>
         </div>
-      )
-    }
-  ];
 
-  return (
-    <MainLayout title="Patient Directory">
-      <div className="space-y-6">
-        <div className="bg-[var(--surface)] p-6 rounded-xl border border-[var(--border)] shadow-sm space-y-4">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1 relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
-                <Search className="size-5" />
-              </span>
-              <input 
-                className="w-full pl-12 pr-4 py-3 bg-[var(--background)] border border-[var(--border)] rounded-xl focus:ring-2 focus:ring-[var(--primary)] outline-none transition-all" 
-                placeholder="Search by Name, Patient ID, or Phone Number..." 
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex gap-2">
-              <select className="bg-[var(--background)] border border-[var(--border)] rounded-xl px-4 py-3 text-sm focus:ring-[var(--primary)] outline-none">
-                <option>Active Status</option>
-                <option>In-Patient</option>
-                <option>Out-Patient</option>
-                <option>Discharged</option>
-              </select>
-              <button 
-                onClick={() => setShowRegModal(true)}
-                className="bg-[var(--primary-light)] text-[var(--primary)] p-3 rounded-xl hover:bg-[var(--primary)] hover:text-white transition-colors"
-                title="Add New Patient"
-              >
-                <UserPlus className="size-5" />
-              </button>
-            </div>
-          </div>
+        {/* Stats & Search Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+           {/* Metric Cards */}
+           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {[
+                { label: 'Total Records', val: totalElements, color: 'text-slate-600', bg: 'bg-slate-100', icon: 'group' },
+                { label: 'New Today', val: '04', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'how_to_reg' },
+                { label: 'In-Patient', val: '12', color: 'text-blue-600', bg: 'bg-blue-50', icon: 'bed' },
+                { label: 'Emergency', val: '02', color: 'text-orange-600', bg: 'bg-orange-50', icon: 'emergency' },
+              ].map((s, i) => (
+                <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
+                  <div className={`p-2 ${s.bg} ${s.color} rounded-lg mb-2`}>
+                    <span className="material-symbols-outlined text-xl">{s.icon}</span>
+                  </div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{s.label}</p>
+                  <p className="text-2xl font-black text-slate-900">{s.val}</p>
+                </div>
+              ))}
+           </div>
+
+           {/* Search Box */}
+           <div className="lg:col-span-5">
+             <div className="bg-white p-2 rounded-2xl border border-slate-100 shadow-sm h-full flex items-center">
+                <div className="relative w-full">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                  <input 
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-orange-600/20 transition-all font-bold text-sm outline-none" 
+                    placeholder="Search by name, ID, or phone..." 
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+             </div>
+           </div>
         </div>
 
-        <Card>
-          <Table 
-            columns={columns} 
-            data={patients} 
-            isLoading={loading} 
-            onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
-          />
-          
-          <div className="bg-[var(--background)] border-t border-[var(--border)] px-6 py-4 flex items-center justify-between mt-4">
-            <p className="text-xs text-[var(--text-secondary)] font-medium">
-              Showing {patients.length} of {totalElements} patients
+        {/* Directory Table */}
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-12">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="px-6 py-4">Patient ID</th>
+                  <th className="px-6 py-4">Patient Profile</th>
+                  <th className="px-6 py-4 text-center">Gender</th>
+                  <th className="px-6 py-4 text-center">Category</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {loading ? (
+                  <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic font-medium">Retrieving electronic health records...</td></tr>
+                ) : patients.length === 0 ? (
+                  <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-400 italic font-medium">No patient records found.</td></tr>
+                ) : patients.map((row) => (
+                  <tr 
+                    key={row.id} 
+                    className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                    onDoubleClick={() => router.push(`/reception/patients/${row.id}`)}
+                  >
+                    <td className="px-6 py-5">
+                      <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
+                        #PAT-{row.id.toString().substring(0, 5)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 font-bold uppercase border-2 border-white shadow-sm">
+                          {row.fullName.split(' ').map(n => n[0]).join('')}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 text-sm leading-none mb-1">{row.fullName}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{row.phone}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-5 text-center font-bold text-xs text-slate-600 capitalize">
+                      {row.gender.toLowerCase()}
+                    </td>
+                    <td className="px-6 py-5 text-center">
+                       <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter bg-blue-50 text-blue-700 border border-blue-100">
+                         Out-Patient
+                       </span>
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      <div className="flex justify-end gap-2 items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Link 
+                          href={`/reception/appointments/create?patientId=${row.id}`}
+                          className="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase hover:bg-orange-600 hover:text-white transition-all border border-orange-100"
+                        >
+                          Book Visit
+                        </Link>
+                        <button 
+                          onClick={() => router.push(`/reception/patients/${row.id}`)}
+                          className="p-2 text-slate-400 hover:text-slate-900 transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-xl">visibility</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div className="p-6 bg-slate-50/50 border-t border-slate-50 flex justify-between items-center">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                Showing <span className="text-slate-900">{page * 20 + 1}-{Math.min((page + 1) * 20, totalElements)}</span> of {totalElements} patients
             </p>
             <div className="flex gap-2">
               <button 
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="px-3 py-1 border border-[var(--border)] rounded text-xs font-bold disabled:opacity-50"
+                className="p-2 border border-slate-200 rounded-lg text-slate-400 hover:bg-white disabled:opacity-50 transition-colors"
               >
-                Previous
+                <span className="material-symbols-outlined text-base">chevron_left</span>
               </button>
-              <button className="px-3 py-1 bg-[var(--primary)] text-white rounded text-xs font-bold">{page + 1}</button>
+              <button className="px-4 py-2 bg-white text-orange-700 border border-orange-200 rounded-lg text-xs font-black shadow-sm">{page + 1}</button>
               <button 
                 onClick={() => setPage(p => p + 1)}
-                disabled={patients.length < 20}
-                className="px-3 py-1 border border-[var(--border)] rounded text-xs font-bold disabled:opacity-50"
+                disabled={(page + 1) * 20 >= totalElements}
+                className="p-2 border border-slate-200 rounded-lg text-slate-400 hover:bg-white disabled:opacity-50 transition-colors"
               >
-                Next
+                <span className="material-symbols-outlined text-base">chevron_right</span>
               </button>
-            </div>
-          </div>
-        </Card>
-
-        {/* Stats Summary from HTML */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-          <div className="bg-[var(--primary-light)] border border-[var(--primary)]/20 p-5 rounded-xl flex items-center gap-4">
-            <div className="size-12 rounded-lg bg-[var(--primary)] flex items-center justify-center text-white font-bold">
-              <span className="material-symbols-outlined">group</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-[var(--primary)] uppercase tracking-widest">Total Patients</p>
-              <p className="text-2xl font-black text-[var(--text-primary)]">{totalElements}</p>
-            </div>
-          </div>
-          <div className="bg-[var(--success-light)] border border-[var(--success)]/20 p-5 rounded-xl flex items-center gap-4">
-            <div className="size-12 rounded-lg bg-[var(--success)] flex items-center justify-center text-white font-bold">
-              <span className="material-symbols-outlined">how_to_reg</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-[var(--success)] uppercase tracking-widest">New Today</p>
-              <p className="text-2xl font-black text-[var(--text-primary)]">--</p>
-            </div>
-          </div>
-          <div className="bg-orange-500/5 border border-orange-500/20 p-5 rounded-xl flex items-center gap-4">
-            <div className="size-12 rounded-lg bg-orange-500 flex items-center justify-center text-white font-bold">
-              <span className="material-symbols-outlined">pending_actions</span>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-orange-600 uppercase tracking-widest">Appointments</p>
-              <p className="text-2xl font-black text-[var(--text-primary)]">--</p>
             </div>
           </div>
         </div>
       </div>
-
-      <PatientRegistrationModal 
-        isOpen={showRegModal} 
-        onClose={() => setShowRegModal(false)} 
-        onSuccess={fetchPatients}
-      />
     </MainLayout>
   );
 };

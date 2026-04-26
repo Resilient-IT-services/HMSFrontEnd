@@ -24,22 +24,11 @@ vi.mock('@/components/ui/MainLayout', () => ({
 }));
 
 // Mock next/navigation
+const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn()
+    push: mockPush
   })
-}));
-
-// Mock PatientRegistrationModal
-vi.mock('@/components/reception/PatientRegistrationModal', () => ({
-  PatientRegistrationModal: ({ isOpen, onClose, onSuccess }: any) => (
-    isOpen ? (
-      <div data-testid="registration-modal">
-        <button onClick={onClose}>Close</button>
-        <button onClick={() => { onSuccess(); onClose(); }}>Success</button>
-      </div>
-    ) : null
-  )
 }));
 
 const mockPatients = [
@@ -115,7 +104,7 @@ describe('PatientsPage', () => {
       </Provider>
     );
 
-    const searchInput = screen.getByPlaceholderText(/Search by Name/i);
+    const searchInput = screen.getByPlaceholderText(/Search by name, ID, or phone/i);
     fireEvent.change(searchInput, { target: { value: 'Jane' } });
 
     // Should not call list immediately due to debounce
@@ -128,29 +117,5 @@ describe('PatientsPage', () => {
 
     expect(patientService.list).toHaveBeenCalledWith(0, 20, 'Jane');
     vi.useRealTimers();
-  });
-
-  it('opens registration modal when clicking add button', async () => {
-    (patientService.list as any).mockResolvedValue({
-      success: true,
-      data: {
-        content: [],
-        totalElements: 0,
-        totalPages: 0,
-        size: 20,
-        number: 0
-      }
-    });
-
-    render(
-      <Provider store={store}>
-        <PatientsPage />
-      </Provider>
-    );
-
-    const addButton = screen.getByTitle('Add New Patient');
-    fireEvent.click(addButton);
-
-    expect(screen.getByTestId('registration-modal')).toBeInTheDocument();
   });
 });

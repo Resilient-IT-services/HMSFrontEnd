@@ -6,18 +6,18 @@ import { Card } from '@/components/ui/Card';
 import { Table } from '@/components/ui/Table';
 import { doctorService } from '@/services/doctorService';
 import { appointmentService } from '@/services/appointmentService';
-import { DoctorResponse, AppointmentResponse } from '@/types/api';
+import { DoctorStaffResponse, AppointmentResponse } from '@/types/api';
 import { Search, Calendar, Clock, Filter, Stethoscope, UserPlus, Eye } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import Link from 'next/link';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const DoctorsPage = () => {
-  const [doctors, setDoctors] = useState<DoctorResponse[]>([]);
+  const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const [selectedDoctor, setSelectedDoctor] = useState<DoctorResponse | null>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
   const [doctorAppointments, setDoctorAppointments] = useState<AppointmentResponse[]>([]);
   const [loadingSchedule, setLoadingLoadingSchedule] = useState(false);
 
@@ -39,14 +39,14 @@ const DoctorsPage = () => {
     fetchDoctors();
   }, [fetchDoctors]);
 
-  const viewSchedule = async (doctor: DoctorResponse) => {
+  const viewSchedule = async (doctor: DoctorStaffResponse) => {
     setSelectedDoctor(doctor);
     try {
       setLoadingLoadingSchedule(true);
       // For now we use the global list and filter, in real app we'd have a specific doctor schedule API
       const res = await appointmentService.list(0, 500);
       if (res.success && res.data) {
-        const schedule = res.data.content.filter(a => a.doctorId === doctor.id);
+        const schedule = res.data.content.filter(a => a.doctorId === doctor.userId);
         setDoctorAppointments(schedule);
       }
     } catch (error) {
@@ -59,7 +59,7 @@ const DoctorsPage = () => {
   const columns = [
     { 
       header: 'Doctor Name', 
-      accessor: (row: DoctorResponse) => (
+      accessor: (row: DoctorStaffResponse) => (
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black uppercase">
             {row.fullName.split(' ').map(n => n[0]).join('')}
@@ -73,17 +73,17 @@ const DoctorsPage = () => {
     },
     { 
       header: 'Department', 
-      accessor: (row: DoctorResponse) => (
-        <span className="text-sm font-medium text-[var(--text-primary)]">{row.department || 'General Medicine'}</span>
+      accessor: (row: DoctorStaffResponse) => (
+        <span className="text-sm font-medium text-[var(--text-primary)]">{row.departmentName || 'General Medicine'}</span>
       )
     },
     { 
       header: 'Contact', 
-      accessor: (row: DoctorResponse) => row.phone 
+      accessor: (row: DoctorStaffResponse) => row.phone 
     },
     {
       header: 'Actions',
-      accessor: (row: DoctorResponse) => (
+      accessor: (row: DoctorStaffResponse) => (
         <div className="flex justify-end gap-2 items-center">
           <button 
             onClick={() => viewSchedule(row)}
@@ -93,7 +93,7 @@ const DoctorsPage = () => {
             <Eye className="size-4" />
           </button>
           <Link 
-            href={`/reception/appointments/create?doctorId=${row.id}`}
+            href={`/reception/appointments/create?doctorId=${row.userId}`}
             className="p-2 bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary)]/20 rounded-lg hover:bg-[var(--primary)] hover:text-white transition-all"
             title="Book Appointment"
           >
@@ -175,7 +175,7 @@ const DoctorsPage = () => {
            <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Department</p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">{selectedDoctor?.department || 'General Medicine'}</p>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{selectedDoctor?.departmentName || 'General Medicine'}</p>
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Status</p>

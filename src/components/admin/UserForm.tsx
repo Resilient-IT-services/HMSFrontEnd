@@ -6,9 +6,9 @@ import {
   UserRequestDTO, 
   UserFullProfileDTO, 
   HospitalResponse, 
-  Role, 
   HospitalMembershipDTO, 
-  RoleAssignmentDTO 
+  RoleAssignmentDTO,
+  Role
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
 import apiClient from '@/services/apiClient';
@@ -25,6 +25,22 @@ interface ValidationErrors {
 const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'personal' | 'contracts' | 'profile'>('personal');
+  
+  // Helper for LocalTime to string (HH:mm)
+  const localTimeToString = (lt?: any): string => {
+    if (!lt) return '09:00';
+    const h = lt.hour?.toString().padStart(2, '0') || '00';
+    const m = lt.minute?.toString().padStart(2, '0') || '00';
+    return `${h}:${m}`;
+  };
+
+  // Helper for string (HH:mm) to LocalTime
+  const stringToLocalTime = (s: string) => {
+    const [h, m] = s.split(':').map(Number);
+    return { hour: h, minute: m, second: 0, nano: 0 };
+  };
+
+  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
@@ -42,7 +58,6 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     doctorInfo: initialData?.doctorInfo,
     nurseInfo: initialData?.nurseInfo,
     pharmacistInfo: initialData?.pharmacistInfo,
-    labTechInfo: initialData?.labTechInfo,
     receptionistInfo: initialData?.receptionistInfo,
   });
 
@@ -103,7 +118,6 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       if (!formData.doctorInfo?.licenseNumber) errors.licenseNumber = 'Medical license number is required';
     }
     if (assignedRoles.includes('NURSE')) {
-      if (!formData.nurseInfo?.department) errors.nurseDept = 'Nurse department is required';
       if (!formData.nurseInfo?.nursingLicenseNo) errors.nurseLicense = 'Nursing license number is required';
     }
 
@@ -156,11 +170,12 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   });
 
   const handleAddRoleToNewContract = (role: string) => {
-    const exists = newContract.roleAssignments.find(r => r.roleCode === role);
+    const assignments = newContract.roleAssignments || [];
+    const exists = assignments.find(r => r.roleCode === role);
     if (exists) {
       setNewContract({
         ...newContract,
-        roleAssignments: newContract.roleAssignments.filter(r => r.roleCode !== role)
+        roleAssignments: assignments.filter(r => r.roleCode !== role)
       });
     } else {
       const assignment: RoleAssignmentDTO = {
@@ -176,7 +191,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       
       setNewContract({
         ...newContract,
-        roleAssignments: [...newContract.roleAssignments, assignment]
+        roleAssignments: [...assignments, assignment]
       });
     }
   };
@@ -206,7 +221,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
       }
     }
 
-    if (newContract.roleAssignments.length === 0) {
+    if (!newContract.roleAssignments || newContract.roleAssignments.length === 0) {
       alert('Select at least one role');
       return;
     }
@@ -218,8 +233,10 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
     newContract.roleAssignments.forEach(ra => {
       const key = `${ra.roleCode.toLowerCase()}Info` as keyof UserRequestDTO;
       if (!formData[key]) {
-        if (ra.roleCode === 'DOCTOR') updatedInfo.doctorInfo = { specialization: '', bio: '', licenseNumber: '' };
-        if (ra.roleCode === 'NURSE') updatedInfo.nurseInfo = { department: '', nursingLicenseNo: '', certificationLevel: 'RN' };
+        if (ra.roleCode === 'DOCTOR') updatedInfo.doctorInfo = { specialization: '', bio: '', licenseNumber: '', education: { qualifications: [] } };
+        if (ra.roleCode === 'NURSE') updatedInfo.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
+        if (ra.roleCode === 'PHARMACIST') updatedInfo.pharmacistInfo = { pciRegNo: '', qualification: '' };
+        if (ra.roleCode === 'RECEPTIONIST') updatedInfo.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
       }
     });
 
@@ -543,7 +560,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                         <label className="block text-[10px] font-black text-gray-700 uppercase mb-4">Roles at Facility <span className="text-primary">*</span></label>
                         <div className="flex flex-wrap gap-3 mb-4">
                           {['DOCTOR', 'NURSE', 'RECEPTIONIST', 'PHARMACIST', 'ADMIN'].map(role => {
-                            const isSelected = !!newContract.roleAssignments.find(r => r.roleCode === role);
+                            const isSelected = !!(newContract.roleAssignments || []).find(r => r.roleCode === role);
                             return (
                               <button
                                 key={role} type="button"
@@ -560,17 +577,33 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                       </section>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {newContract.roleAssignments.map((ra, raIdx) => (
+                        {(newContract.roleAssignments || []).map((ra, raIdx) => (
                           <div key={ra.roleCode} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-                            <p className="text-[10px] font-black text-primary uppercase mb-4 tracking-tighter border-b border-gray-50 pb-2 flex items-center gap-2">
-                              <span className="material-symbols-outlined text-sm">settings</span> {ra.roleCode} Configuration
+                            <p className="text-[10px] font-black text-primary uppercase mb-4 tracking-tighter border-b border-gray-50 pb-2 flex items-center justify-between gap-2">
+                              <span className="flex items-center gap-2">
+                                <span className="material-symbols-outlined text-sm">settings</span> {ra.roleCode} Configuration
+                              </span>
                             </p>
+                            <div className="mb-4">
+                              <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Assigned Department</label>
+                              <input 
+                                type="text" 
+                                className="form-input py-1.5" 
+                                placeholder="e.g. Cardiology, Emergency..."
+                                value={ra.departmentName} 
+                                onChange={(e) => {
+                                  const updated = [...(newContract.roleAssignments || [])];
+                                  updated[raIdx].departmentName = e.target.value;
+                                  setNewContract({ ...newContract, roleAssignments: updated });
+                                }} 
+                              />
+                            </div>
                             {ra.roleCode === 'DOCTOR' && ra.doctorDetails && (
                               <div className="space-y-4">
                                 <div>
                                   <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Consultation Fee ($)</label>
                                   <input type="number" className="form-input py-1.5" value={ra.doctorDetails.consultationFee} onChange={(e) => {
-                                    const updated = [...newContract.roleAssignments];
+                                    const updated = [...(newContract.roleAssignments || [])];
                                     updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: Number(e.target.value) };
                                     setNewContract({ ...newContract, roleAssignments: updated });
                                   }} />
@@ -579,7 +612,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                                   <div>
                                     <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Commission %</label>
                                     <input type="number" className="form-input py-1.5" value={ra.doctorDetails.commissionValue} onChange={(e) => {
-                                      const updated = [...newContract.roleAssignments];
+                                      const updated = [...(newContract.roleAssignments || [])];
                                       updated[raIdx].doctorDetails = { ...ra.doctorDetails!, commissionValue: Number(e.target.value) };
                                       setNewContract({ ...newContract, roleAssignments: updated });
                                     }} />
@@ -587,7 +620,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                                   <div>
                                     <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Status</label>
                                     <select className="form-input py-1.5" value={ra.doctorDetails.visitingConsultant ? 'V' : 'F'} onChange={(e) => {
-                                      const updated = [...newContract.roleAssignments];
+                                      const updated = [...(newContract.roleAssignments || [])];
                                       updated[raIdx].doctorDetails = { ...ra.doctorDetails!, visitingConsultant: e.target.value === 'V' };
                                       setNewContract({ ...newContract, roleAssignments: updated });
                                     }}>
@@ -603,14 +636,215 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                                 <div>
                                   <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Floor</label>
                                   <input type="text" className="form-input py-1.5" value={ra.nurseDetails.floorLocation} onChange={(e) => {
-                                    const updated = [...newContract.roleAssignments];
+                                    const updated = [...(newContract.roleAssignments || [])];
                                     updated[raIdx].nurseDetails = { ...ra.nurseDetails!, floorLocation: e.target.value };
                                     setNewContract({ ...newContract, roleAssignments: updated });
                                   }} />
                                 </div>
                               </div>
                             )}
-                            {(!ra.doctorDetails && !ra.nurseDetails) && <p className="text-[10px] text-gray-400 italic">No specific parameters for this role.</p>}
+                            {ra.roleCode === 'PHARMACIST' && ra.pharmacistDetails && (
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Counter Location</label>
+                                  <input type="text" className="form-input py-1.5" value={ra.pharmacistDetails.counterLocation} onChange={(e) => {
+                                    const updated = [...(newContract.roleAssignments || [])];
+                                    updated[raIdx].pharmacistDetails = { ...ra.pharmacistDetails!, counterLocation: e.target.value };
+                                    setNewContract({ ...newContract, roleAssignments: updated });
+                                  }} />
+                                </div>
+                              </div>
+                            )}
+                            {ra.roleCode === 'RECEPTIONIST' && ra.receptionistDetails && (
+                              <div className="space-y-4">
+                                <div>
+                                  <label className="text-[9px] font-black text-gray-400 uppercase block mb-1">Desk Location</label>
+                                  <input type="text" className="form-input py-1.5" value={ra.receptionistDetails.deskLocation} onChange={(e) => {
+                                    const updated = [...(newContract.roleAssignments || [])];
+                                    updated[raIdx].receptionistDetails = { ...ra.receptionistDetails!, deskLocation: e.target.value };
+                                    setNewContract({ ...newContract, roleAssignments: updated });
+                                  }} />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Scheduling Section for Doctors and Nurses */}
+                            {(ra.roleCode === 'DOCTOR' || ra.roleCode === 'NURSE') && (
+                              <div className="mt-6 pt-6 border-t border-gray-50 space-y-6">
+                                <div>
+                                  <div className="flex justify-between items-center mb-4">
+                                    <h5 className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                                      <span className="material-symbols-outlined text-sm">calendar_month</span> Recurring Schedule
+                                    </h5>
+                                  </div>
+                                  <div className="space-y-3">
+                                    {dayNames.map((day, dIdx) => {
+                                      const dayNum = dIdx + 1;
+                                      const existing = ra.schedules?.find(s => s.dayOfWeek === dayNum);
+                                      return (
+                                        <div key={day} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                          <div className="flex items-center gap-2 min-w-[100px]">
+                                            <input 
+                                              type="checkbox" 
+                                              className="w-4 h-4 accent-primary"
+                                              checked={!!existing}
+                                              onChange={(e) => {
+                                                const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                                let schedules = [...(updatedAssignments[raIdx].schedules || [])];
+                                                if (e.target.checked) {
+                                                  schedules.push({ dayOfWeek: dayNum, startTime: { hour: 9, minute: 0 }, endTime: { hour: 17, minute: 0 }, slotDurationMinutes: 15, maxPatients: 20 });
+                                                } else {
+                                                  schedules = schedules.filter(s => s.dayOfWeek !== dayNum);
+                                                }
+                                                updatedAssignments[raIdx].schedules = schedules;
+                                                setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                              }}
+                                            />
+                                            <span className="text-[11px] font-bold text-slate-700">{day.substring(0, 3)}</span>
+                                          </div>
+                                          {existing && (
+                                            <div className="flex-1 grid grid-cols-3 gap-2">
+                                              <div className="flex items-center gap-1">
+                                                <input 
+                                                  type="time" 
+                                                  className="form-input py-1 text-[10px] h-8"
+                                                  value={localTimeToString(existing.startTime)}
+                                                  onChange={(e) => {
+                                                    const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                                    const schedules = [...(updatedAssignments[raIdx].schedules || [])];
+                                                    const sIdx = schedules.findIndex(s => s.dayOfWeek === dayNum);
+                                                    schedules[sIdx] = { ...schedules[sIdx], startTime: stringToLocalTime(e.target.value) };
+                                                    updatedAssignments[raIdx].schedules = schedules;
+                                                    setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                                  }}
+                                                />
+                                              </div>
+                                              <div className="flex items-center gap-1">
+                                                <input 
+                                                  type="time" 
+                                                  className="form-input py-1 text-[10px] h-8"
+                                                  value={localTimeToString(existing.endTime)}
+                                                  onChange={(e) => {
+                                                    const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                                    const schedules = [...(updatedAssignments[raIdx].schedules || [])];
+                                                    const sIdx = schedules.findIndex(s => s.dayOfWeek === dayNum);
+                                                    schedules[sIdx] = { ...schedules[sIdx], endTime: stringToLocalTime(e.target.value) };
+                                                    updatedAssignments[raIdx].schedules = schedules;
+                                                    setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                                  }}
+                                                />
+                                              </div>
+                                              <div className="flex items-center gap-1">
+                                                <input 
+                                                  type="number" 
+                                                  placeholder="Patients"
+                                                  className="form-input py-1 text-[10px] h-8"
+                                                  value={existing.maxPatients}
+                                                  onChange={(e) => {
+                                                    const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                                    const schedules = [...(updatedAssignments[raIdx].schedules || [])];
+                                                    const sIdx = schedules.findIndex(s => s.dayOfWeek === dayNum);
+                                                    schedules[sIdx] = { ...schedules[sIdx], maxPatients: Number(e.target.value) };
+                                                    updatedAssignments[raIdx].schedules = schedules;
+                                                    setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                                  }}
+                                                />
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <div className="flex justify-between items-center mb-4">
+                                    <h5 className="text-[10px] font-black text-slate-700 uppercase tracking-widest flex items-center gap-2">
+                                      <span className="material-symbols-outlined text-sm">event_busy</span> Availability Overrides
+                                    </h5>
+                                    <button 
+                                      type="button"
+                                      onClick={() => {
+                                        const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                        const exceptions = [...(updatedAssignments[raIdx].availabilityExceptions || [])];
+                                        exceptions.push({ date: new Date().toISOString().split('T')[0], type: 'VACATION', mode: 'UNAVAILABLE', note: '' });
+                                        updatedAssignments[raIdx].availabilityExceptions = exceptions;
+                                        setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                      }}
+                                      className="text-primary text-[9px] font-black uppercase flex items-center gap-1 hover:underline"
+                                    >
+                                      <span className="material-symbols-outlined text-xs">add</span> Add Exception
+                                    </button>
+                                  </div>
+                                  <div className="space-y-3">
+                                    {ra.availabilityExceptions?.map((ex, exIdx) => (
+                                      <div key={exIdx} className="p-3 bg-orange-50/50 rounded-xl border border-orange-100/50 relative group">
+                                        <button 
+                                          type="button"
+                                          onClick={() => {
+                                            const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                            const exceptions = [...(updatedAssignments[raIdx].availabilityExceptions || [])];
+                                            exceptions.splice(exIdx, 1);
+                                            updatedAssignments[raIdx].availabilityExceptions = exceptions;
+                                            setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                          }}
+                                          className="absolute top-2 right-2 text-gray-400 hover:text-error opacity-0 group-hover:opacity-100 transition-all"
+                                        >
+                                          <span className="material-symbols-outlined text-sm">close</span>
+                                        </button>
+                                        <div className="grid grid-cols-2 gap-3 mb-2">
+                                          <input 
+                                            type="date" 
+                                            className="form-input py-1 text-[10px] h-8"
+                                            value={ex.date}
+                                            onChange={(e) => {
+                                              const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                              const exceptions = [...(updatedAssignments[raIdx].availabilityExceptions || [])];
+                                              exceptions[exIdx].date = e.target.value;
+                                              updatedAssignments[raIdx].availabilityExceptions = exceptions;
+                                              setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                            }}
+                                          />
+                                          <select 
+                                            className="form-input py-1 text-[10px] h-8"
+                                            value={ex.mode}
+                                            onChange={(e) => {
+                                              const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                              const exceptions = [...(updatedAssignments[raIdx].availabilityExceptions || [])];
+                                              exceptions[exIdx].mode = e.target.value;
+                                              updatedAssignments[raIdx].availabilityExceptions = exceptions;
+                                              setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                            }}
+                                          >
+                                            <option value="UNAVAILABLE">Unavailable</option>
+                                            <option value="AVAILABLE">Extra Available</option>
+                                          </select>
+                                        </div>
+                                        <input 
+                                          type="text" 
+                                          placeholder="Note (e.g. Vacation, Seminar...)"
+                                          className="form-input py-1 text-[10px] h-8"
+                                          value={ex.note}
+                                          onChange={(e) => {
+                                            const updatedAssignments = [...(newContract.roleAssignments || [])];
+                                            const exceptions = [...(updatedAssignments[raIdx].availabilityExceptions || [])];
+                                            exceptions[exIdx].note = e.target.value;
+                                            updatedAssignments[raIdx].availabilityExceptions = exceptions;
+                                            setNewContract({ ...newContract, roleAssignments: updatedAssignments });
+                                          }}
+                                        />
+                                      </div>
+                                    ))}
+                                    {(!ra.availabilityExceptions || ra.availabilityExceptions.length === 0) && (
+                                      <p className="text-[9px] text-gray-400 italic text-center py-2">No active overrides.</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {(!ra.doctorDetails && !ra.nurseDetails && !ra.pharmacistDetails && !ra.receptionistDetails) && ra.roleCode === 'ADMIN' && <p className="text-[10px] text-gray-400 italic">No specific parameters for this role.</p>}
                           </div>
                         ))}
                       </div>
@@ -654,6 +888,98 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                         <input className="form-input" type="text" value={formData.doctorInfo.licenseNumber} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} />
                       </div>
                     </div>
+
+                    <div className="space-y-4 pt-4">
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Medical Education & Qualifications</h4>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const quals = [...(formData.doctorInfo?.education?.qualifications || [])];
+                            quals.push({ degree: '', institution: '', year: new Date().getFullYear(), specialization: '' });
+                            setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, education: { qualifications: quals } } });
+                          }}
+                          className="text-primary text-[10px] font-bold flex items-center gap-1 hover:underline"
+                        >
+                          <span className="material-symbols-outlined text-sm">add_circle</span> Add Qualification
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 gap-4">
+                        {formData.doctorInfo.education?.qualifications.map((q, qIdx) => (
+                          <div key={qIdx} className="p-4 bg-gray-50 rounded-xl border border-gray-100 relative group">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                const quals = [...(formData.doctorInfo?.education?.qualifications || [])];
+                                quals.splice(qIdx, 1);
+                                setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, education: { qualifications: quals } } });
+                              }}
+                              className="absolute top-2 right-2 text-gray-400 hover:text-error opacity-0 group-hover:opacity-100 transition-all"
+                            >
+                              <span className="material-symbols-outlined text-sm">delete</span>
+                            </button>
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                              <div>
+                                <label className="text-[9px] font-black text-gray-500 uppercase block mb-1">Degree</label>
+                                <input 
+                                  type="text" 
+                                  className="form-input py-1 text-xs" 
+                                  value={q.degree} 
+                                  onChange={(e) => {
+                                    const quals = [...(formData.doctorInfo?.education?.qualifications || [])];
+                                    quals[qIdx].degree = e.target.value;
+                                    setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, education: { qualifications: quals } } });
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[9px] font-black text-gray-500 uppercase block mb-1">Institution</label>
+                                <input 
+                                  type="text" 
+                                  className="form-input py-1 text-xs" 
+                                  value={q.institution} 
+                                  onChange={(e) => {
+                                    const quals = [...(formData.doctorInfo?.education?.qualifications || [])];
+                                    quals[qIdx].institution = e.target.value;
+                                    setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, education: { qualifications: quals } } });
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[9px] font-black text-gray-500 uppercase block mb-1">Year</label>
+                                <input 
+                                  type="number" 
+                                  className="form-input py-1 text-xs" 
+                                  value={q.year} 
+                                  onChange={(e) => {
+                                    const quals = [...(formData.doctorInfo?.education?.qualifications || [])];
+                                    quals[qIdx].year = Number(e.target.value);
+                                    setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, education: { qualifications: quals } } });
+                                  }}
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[9px] font-black text-gray-500 uppercase block mb-1">Specialization</label>
+                                <input 
+                                  type="text" 
+                                  className="form-input py-1 text-xs" 
+                                  value={q.specialization} 
+                                  onChange={(e) => {
+                                    const quals = [...(formData.doctorInfo?.education?.qualifications || [])];
+                                    quals[qIdx].specialization = e.target.value;
+                                    setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, education: { qualifications: quals } } });
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {(!formData.doctorInfo.education?.qualifications || formData.doctorInfo.education.qualifications.length === 0) && (
+                          <p className="text-[11px] text-gray-400 italic text-center py-4 bg-gray-50 rounded-xl border border-dashed border-gray-200">No qualifications listed.</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -667,12 +993,117 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                       <div className="flex flex-col gap-1.5">
-                        <label className="font-label-sm text-gray-700 uppercase">Department</label>
-                        <input className="form-input" type="text" value={formData.nurseInfo.department} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, department: e.target.value } })} />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
                         <label className="font-label-sm text-gray-700 uppercase">License No.</label>
                         <input className="form-input" type="text" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo && (
+                  <div className="bg-white border border-gray-200 rounded-xl p-8 space-y-6 shadow-sm">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                      <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
+                        <span className="material-symbols-outlined">medication</span>
+                      </div>
+                      <h3 className="font-headline-sm text-on-surface uppercase tracking-widest text-xs font-black">Pharmacist Credentials</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">PCI Reg No.</label>
+                        <input className="form-input" type="text" value={formData.pharmacistInfo.pciRegNo} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, pciRegNo: e.target.value } })} />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-label-sm text-gray-700 uppercase">Qualification</label>
+                        <input className="form-input" type="text" value={formData.pharmacistInfo.qualification} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, qualification: e.target.value } })} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {assignedRoles.includes('RECEPTIONIST') && formData.receptionistInfo && (
+                  <div className="bg-white border border-gray-200 rounded-xl p-8 space-y-6 shadow-sm">
+                    <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
+                      <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                        <span className="material-symbols-outlined">desk</span>
+                      </div>
+                      <h3 className="font-headline-sm text-on-surface uppercase tracking-widest text-xs font-black">Receptionist Profile</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                      <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+                        <input 
+                          type="checkbox" 
+                          className="w-5 h-5 accent-indigo-600"
+                          checked={formData.receptionistInfo.insuranceSpecialist}
+                          onChange={(e) => setFormData({ ...formData, receptionistInfo: { ...formData.receptionistInfo!, insuranceSpecialist: e.target.checked } })}
+                        />
+                        <div>
+                          <p className="font-bold text-sm text-on-surface">Insurance Specialist</p>
+                          <p className="text-xs text-secondary">Is this staff member trained for insurance claims?</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4 pt-4">
+                      <div className="flex justify-between items-center border-b border-gray-100 pb-2">
+                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Languages Spoken</h4>
+                        <button 
+                          type="button"
+                          onClick={() => {
+                            const fluencies = [...(formData.receptionistInfo?.languagesSpoken?.fluencies || [])];
+                            fluencies.push({ language: '', proficiency: 'BASIC' });
+                            setFormData({ ...formData, receptionistInfo: { ...formData.receptionistInfo!, languagesSpoken: { fluencies } } });
+                          }}
+                          className="text-indigo-600 text-[10px] font-bold flex items-center gap-1 hover:underline"
+                        >
+                          <span className="material-symbols-outlined text-sm">add_circle</span> Add Language
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {formData.receptionistInfo.languagesSpoken?.fluencies.map((f, fIdx) => (
+                          <div key={fIdx} className="p-3 bg-gray-50 rounded-xl border border-gray-100 relative group flex items-center gap-3">
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                const fluencies = [...(formData.receptionistInfo?.languagesSpoken?.fluencies || [])];
+                                fluencies.splice(fIdx, 1);
+                                setFormData({ ...formData, receptionistInfo: { ...formData.receptionistInfo!, languagesSpoken: { fluencies } } });
+                              }}
+                              className="absolute -top-2 -right-2 bg-white text-gray-400 hover:text-error opacity-0 group-hover:opacity-100 transition-all rounded-full shadow-sm border border-gray-100 p-0.5"
+                            >
+                              <span className="material-symbols-outlined text-xs">close</span>
+                            </button>
+                            <input 
+                              type="text" 
+                              className="form-input py-1 text-xs" 
+                              placeholder="Language..."
+                              value={f.language} 
+                              onChange={(e) => {
+                                const fluencies = [...(formData.receptionistInfo?.languagesSpoken?.fluencies || [])];
+                                fluencies[fIdx].language = e.target.value;
+                                setFormData({ ...formData, receptionistInfo: { ...formData.receptionistInfo!, languagesSpoken: { fluencies } } });
+                              }}
+                            />
+                            <select 
+                              className="form-input py-1 text-xs w-32"
+                              value={f.proficiency}
+                              onChange={(e) => {
+                                const fluencies = [...(formData.receptionistInfo?.languagesSpoken?.fluencies || [])];
+                                fluencies[fIdx].proficiency = e.target.value as any;
+                                setFormData({ ...formData, receptionistInfo: { ...formData.receptionistInfo!, languagesSpoken: { fluencies } } });
+                              }}
+                            >
+                              <option value="NATIVE">Native</option>
+                              <option value="FLUENT">Fluent</option>
+                              <option value="INTERMEDIATE">Intermediate</option>
+                              <option value="BASIC">Basic</option>
+                            </select>
+                          </div>
+                        ))}
+                        {(!formData.receptionistInfo.languagesSpoken?.fluencies || formData.receptionistInfo.languagesSpoken.fluencies.length === 0) && (
+                          <p className="text-[11px] text-gray-400 italic md:col-span-2 text-center py-2">No languages added.</p>
+                        )}
                       </div>
                     </div>
                   </div>

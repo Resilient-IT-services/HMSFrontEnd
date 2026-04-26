@@ -33,11 +33,6 @@ const UserManagement = () => {
                   allRoles.add(ra.roleCode as Role);
                 }
               }
-              if (m.roles) {
-                for (const r of m.roles) {
-                  allRoles.add(r as Role);
-                }
-              }
             }
           }
           if (u.superuser) allRoles.add('SUPER_ADMIN');
@@ -70,196 +65,202 @@ const UserManagement = () => {
   };
 
   return (
-    <MainLayout title="User Management">
-      <div className="max-w-7xl mx-auto w-full">
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+    <MainLayout title="User Management" hideTitle>
+      <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f7f9fb] min-h-screen font-inter">
+        {/* Dashboard Header */}
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h2 className="font-headline-xl text-on-surface">User Management</h2>
-            <p className="font-body-md text-secondary mt-1">Configure and manage administrative and medical staff access.</p>
+            <h2 className="font-manrope text-3xl font-bold text-slate-900 uppercase">User Management</h2>
+            <p className="text-slate-500 mt-1">Manage hospital staff credentials and access levels</p>
           </div>
-          <Link 
-            href="/admin/users/create"
-            className="bg-primary-container text-on-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-label-md shadow-sm hover:opacity-90 transition-all active:scale-95"
+          <button 
+            onClick={() => router.push('/admin/users/create')}
+            className="bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md shadow-orange-700/10 active:scale-95"
           >
-            <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
+            <span className="material-symbols-outlined">person_add</span>
             Create User
-          </Link>
+          </button>
+        </div>
+
+        {/* Controls Row */}
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <div className="relative w-full max-w-md">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+            <input 
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-700/20 focus:border-orange-700 transition-all outline-none bg-white text-sm" 
+              placeholder="Search by name, email, or role..." 
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-3">
+            <select 
+              className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium outline-none"
+              value={roleFilter || ''}
+              onChange={(e) => setRoleFilter(e.target.value || undefined)}
+            >
+              <option value="">All Roles</option>
+              <option value="ADMIN">Admin</option>
+              <option value="DOCTOR">Doctor</option>
+              <option value="NURSE">Nurse</option>
+              <option value="RECEPTIONIST">Receptionist</option>
+              <option value="PHARMACIST">Pharmacist</option>
+            </select>
+            <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors font-medium text-sm">
+              <span className="material-symbols-outlined text-xl">file_download</span>
+              Export
+            </button>
+          </div>
         </div>
 
         {/* Table Container */}
-        <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-          {/* Table Filters */}
-          <div className="p-4 border-b border-outline-variant flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surface-bright">
-            <div className="flex flex-wrap items-center gap-2">
-              <select 
-                className="px-4 py-2 bg-white border border-outline-variant rounded-lg font-label-md text-on-surface outline-none"
-                value={roleFilter || ''}
-                onChange={(e) => setRoleFilter(e.target.value || undefined)}
-              >
-                <option value="">All Roles</option>
-                <option value="ADMIN">Admin</option>
-                <option value="DOCTOR">Doctor</option>
-                <option value="NURSE">Nurse</option>
-                <option value="RECEPTIONIST">Receptionist</option>
-                <option value="PHARMACIST">Pharmacist</option>
-              </select>
-              <select 
-                className="px-4 py-2 bg-white border border-outline-variant rounded-lg font-label-md text-on-surface outline-none"
-                value={activeFilter === undefined ? '' : activeFilter.toString()}
-                onChange={(e) => setActiveFilter(e.target.value === '' ? undefined : e.target.value === 'true')}
-              >
-                <option value="">All Status</option>
-                <option value="true">Active</option>
-                <option value="false">Inactive</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-                <input 
-                  className="pl-10 pr-4 py-2 border border-outline-variant rounded-lg text-body-md focus:ring-2 focus:ring-primary-container outline-none w-full md:w-64" 
-                  placeholder="Search user..." 
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-          {/* Table Content */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-surface-container-low border-b border-outline-variant">
-                  <th className="px-6 py-4 font-label-md text-secondary">Name</th>
-                  <th className="px-6 py-4 font-label-md text-secondary">Mobile</th>
-                  <th className="px-6 py-4 font-label-md text-secondary">Role(s)</th>
-                  <th className="px-6 py-4 font-label-md text-secondary">Hospital</th>
-                  <th className="px-6 py-4 font-label-md text-secondary">Specialization</th>
-                  <th className="px-6 py-4 font-label-md text-secondary">Department</th>
-                  <th className="px-6 py-4 font-label-md text-secondary">Status</th>
-                  <th className="px-6 py-4 font-label-md text-secondary text-right">Actions</th>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-slate-200">
+                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">User Details</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">Roles</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">Hospital Context</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">Status</th>
+                <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading ? (
+                <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Loading staff records...</td></tr>
+              ) : users.length === 0 ? (
+                <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">No staff members found.</td></tr>
+              ) : users.map((user) => (
+                <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold uppercase overflow-hidden border-2 border-orange-50">
+                        {user.fullName ? user.fullName.substring(0, 2) : user.username.substring(0, 2)}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900 text-sm">{user.fullName || user.username}</p>
+                        <p className="text-xs text-slate-400">{user.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {user.roles?.map(role => (
+                        <span key={role} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 uppercase border border-orange-100">
+                          {role}
+                        </span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div>
+                        <p className="text-sm text-slate-600 font-medium">{user.memberships?.[0]?.hospitalName || 'No Hospital Assigned'}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{user.memberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}</p>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className={`flex items-center gap-1.5 text-xs font-bold ${user.active ? 'text-emerald-600' : 'text-slate-400'}`}>
+                      <span className={`w-2 h-2 rounded-full ${user.active ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+                      {user.active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => router.push(`/admin/users/${user.id}`)}
+                        className="p-2 text-slate-400 hover:text-orange-700 transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-xl">edit</span>
+                      </button>
+                      <button 
+                        onClick={() => router.push(`/admin/users/${user.id}`)}
+                        className="px-4 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                      >
+                        Allocate
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-secondary font-body-md">Loading users...</td>
-                  </tr>
-                ) : users.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-10 text-center text-secondary font-body-md">No users found.</td>
-                  </tr>
-                ) : users.map((row) => (
-                  <tr key={row.id} className="hover:bg-surface-bright transition-colors font-body-md">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full overflow-hidden bg-primary-fixed flex items-center justify-center text-primary font-bold">
-                          {getInitials(row.fullName || row.username)}
-                        </div>
-                        <div>
-                          <p className="font-label-md text-on-surface">{row.fullName || row.username}</p>
-                          <p className="font-body-sm text-secondary">{row.username} • {row.email}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-body-md">{row.phone || 'N/A'}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {row.roles?.map(role => (
-                          <span key={role} className="px-2 py-0.5 bg-orange-50 text-orange-700 text-[10px] font-bold uppercase rounded-md border border-orange-100">
-                            {role}
-                          </span>
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-body-md">
-                      {row.memberships?.[0]?.hospitalName || 'System'}
-                    </td>
-                    <td className="px-6 py-4 text-body-md">
-                      {row.memberships?.[0]?.specialization || row.doctorInfo?.specialization || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 text-body-md">
-                      {row.memberships?.[0]?.departmentName || row.memberships?.[0]?.roleAssignments?.[0]?.departmentName || 'General'}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase border ${
-                        row.active 
-                          ? 'bg-green-50 text-green-700 border-green-200' 
-                          : 'bg-gray-100 text-gray-600 border-gray-300'
-                      }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${row.active ? 'bg-green-600' : 'bg-gray-400'}`}></span>
-                        {row.active ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end items-center gap-2">
-                        <button 
-                          onClick={() => router.push(`/admin/users/${row.id}`)}
-                          title="Edit User"
-                          className="p-2 text-secondary hover:text-primary transition-colors"
-                        >
-                          <span className="material-symbols-outlined">edit</span>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
+
           {/* Pagination */}
-          <div className="px-6 py-4 border-t border-outline-variant flex items-center justify-between bg-surface-bright">
-            <p className="font-body-sm text-secondary">
-              Showing <span className="font-bold text-on-surface">{page * 20 + 1}</span> to <span className="font-bold text-on-surface">{Math.min((page + 1) * 20, totalElements)}</span> of <span className="font-bold text-on-surface">{totalElements}</span> entries
+          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Showing {page * 20 + 1} to {Math.min((page + 1) * 20, totalElements)} of {totalElements} users
             </p>
-            <div className="flex items-center gap-2">
+            <div className="flex gap-2">
               <button 
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
-                className="p-2 rounded-lg border border-outline-variant hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-400 bg-white disabled:opacity-50"
               >
-                <span className="material-symbols-outlined">chevron_left</span>
+                <span className="material-symbols-outlined text-base">chevron_left</span>
               </button>
-              <div className="flex items-center gap-1">
-                <span className="px-3 py-1 bg-primary-container text-on-primary rounded-lg font-label-md">{page + 1}</span>
-              </div>
+              <button className="px-4 py-1.5 rounded-lg bg-orange-700 text-white font-bold text-xs">{page + 1}</button>
               <button 
                 onClick={() => setPage(p => p + 1)}
-                disabled={(page + 1) >= totalPages}
-                className="p-2 rounded-lg border border-outline-variant hover:bg-gray-50 transition-colors disabled:opacity-50"
+                disabled={(page + 1) * 20 >= totalElements}
+                className="px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
               >
-                <span className="material-symbols-outlined">chevron_right</span>
+                <span className="material-symbols-outlined text-base">chevron_right</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Bento Layout Contextual Tools */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-          <div className="lg:col-span-2 bg-white border border-outline-variant rounded-xl p-6 flex items-center gap-6 relative overflow-hidden">
-            <div className="relative z-10">
-              <h3 className="font-headline-sm text-on-surface">Bulk Import Users</h3>
-              <p className="font-body-md text-secondary mt-2 max-w-md">Import large staff directories using our CSV or Excel templates with automatic role mapping.</p>
-              <button className="mt-4 px-4 py-2 border border-primary text-primary font-label-md rounded-lg hover:bg-primary-fixed transition-colors">
-                Download Template
-              </button>
+        {/* Role Analytics Bento Grid Section */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-12 gap-8">
+          <div className="md:col-span-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h3 className="font-manrope text-xl font-bold text-slate-900 mb-6">User Permissions Matrix</h3>
+            <div className="space-y-4">
+              {[
+                  { label: 'Full System Access', icon: 'security', color: 'text-red-500', bg: 'bg-red-50', count: 3 },
+                  { label: 'Patient Records Edit', icon: 'clinical_notes', color: 'text-orange-500', bg: 'bg-orange-50', count: 16 },
+                  { label: 'Inventory Management', icon: 'inventory_2', color: 'text-blue-500', bg: 'bg-blue-50', count: 8 }
+              ].map((p, i) => (
+                <div key={i} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-default">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 ${p.bg} rounded-lg ${p.color}`}>
+                        <span className="material-symbols-outlined text-xl">{p.icon}</span>
+                    </div>
+                    <span className="font-bold text-slate-700 text-sm">{p.label}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.count} Members</span>
+                      <div className="flex -space-x-2">
+                        <div className="w-8 h-8 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-[10px] font-bold text-slate-600">+{p.count}</div>
+                      </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="ml-auto hidden md:block">
-              <img className="w-40 h-40 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKRa21wn0izbh4kPOW161cmB-k9pmGMSucAJxT44T0yQi09hXdbObJ3grxbPb4guqqYFPVOLeN4tKTYcOu1il6g-hrMS-3xXJwHZvS20QUCtedmCAwVswS6Weak8HFfCGFB-h4KalZbmVmfSzGIavYqVfZ5QkLKf7BNThPMSvoeanX9-yDnz3CHygnJwsGdP0sI1xY7SpeqLAdlxc0fJlTM6HMFgD7WGN1LsmrI1p6ryR8UqPetFCyxpJkzMUB4lVspHnHDv86fSQ" />
-            </div>
-            <div className="absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-orange-50 to-transparent pointer-events-none"></div>
           </div>
-          <div className="bg-primary text-on-primary rounded-xl p-6 relative overflow-hidden">
+          <div className="md:col-span-4 bg-orange-700 text-white p-6 rounded-xl shadow-lg relative overflow-hidden">
             <div className="relative z-10">
-              <h3 className="font-headline-sm">Security Audit</h3>
-              <p className="font-body-md text-orange-100 mt-2">3 users haven't enabled MFA. High security risk detected.</p>
-              <button className="mt-4 px-4 py-2 bg-white text-primary font-label-md rounded-lg hover:bg-orange-50 transition-colors">
-                Review Security
-              </button>
+              <h3 className="font-manrope text-xl font-bold mb-2">Staff Distribution</h3>
+              <p className="text-xs opacity-80 mb-8 uppercase font-bold tracking-widest">Global Assignment Overview</p>
+              <div className="space-y-6">
+                {[
+                    { label: 'Clinical Staff', val: '64%' },
+                    { label: 'Administrative', val: '22%' },
+                    { label: 'Technical/Pharmacy', val: '14%' }
+                ].map((s, i) => (
+                    <div key={i}>
+                        <div className="flex justify-between items-center text-xs font-bold mb-2 uppercase tracking-tighter">
+                            <span>{s.label}</span>
+                            <span>{s.val}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+                            <div className="h-full bg-white rounded-full" style={{ width: s.val }}></div>
+                        </div>
+                    </div>
+                ))}
+              </div>
             </div>
-            <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-orange-400/20 rotate-12" style={{ fontVariationSettings: "'wght' 700" }}>security</span>
+            <span className="material-symbols-outlined absolute -right-6 -bottom-6 text-white opacity-10 text-[140px]">groups</span>
           </div>
         </div>
       </div>

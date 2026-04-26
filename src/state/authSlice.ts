@@ -51,11 +51,6 @@ const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Rol
           }
         });
       }
-      if (m.roles) {
-        m.roles.forEach(r => {
-          effectiveRolesSet.add(r as Role);
-        });
-      }
     }
   });
 

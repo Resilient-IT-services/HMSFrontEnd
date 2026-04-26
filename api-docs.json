@@ -758,6 +758,146 @@
         }
       }
     },
+    "/api/v1/staff/nurses": {
+      "get": {
+        "tags": [
+          "staff-controller"
+        ],
+        "operationId": "getNurses",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "department",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseNurseStaffResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/staff/doctors": {
+      "get": {
+        "tags": [
+          "staff-controller"
+        ],
+        "operationId": "getDoctors",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "department",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "specialization",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "minFee",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "maxFee",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseDoctorStaffResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/search": {
       "get": {
         "tags": [
@@ -801,6 +941,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePageResponseSearchResultDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/doctors/{id}/availability": {
+      "get": {
+        "tags": [
+          "doctor-controller"
+        ],
+        "operationId": "getAvailability",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDoctorAvailabilityResponse"
                 }
               }
             }
@@ -885,6 +1065,38 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "AvailabilityExceptionDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "type": {
+            "type": "string"
+          },
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "mode": {
+            "type": "string"
+          },
+          "slotDurationMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "note": {
+            "type": "string"
           }
         }
       },
@@ -994,6 +1206,27 @@
           }
         }
       },
+      "LocalTime": {
+        "type": "object",
+        "properties": {
+          "hour": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minute": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "second": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nano": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "NurseHospitalDetailsDTO": {
         "type": "object",
         "properties": {
@@ -1017,9 +1250,6 @@
       "NurseInfo": {
         "type": "object",
         "properties": {
-          "department": {
-            "type": "string"
-          },
           "nursingLicenseNo": {
             "type": "string"
           },
@@ -1135,6 +1365,18 @@
           "active": {
             "type": "boolean"
           },
+          "schedules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ScheduleDTO"
+            }
+          },
+          "availabilityExceptions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvailabilityExceptionDTO"
+            }
+          },
           "doctorDetails": {
             "$ref": "#/components/schemas/DoctorHospitalDetailsDTO"
           },
@@ -1149,6 +1391,33 @@
           },
           "receptionistDetails": {
             "$ref": "#/components/schemas/ReceptionistHospitalDetailsDTO"
+          }
+        }
+      },
+      "ScheduleDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "dayOfWeek": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "slotDurationMinutes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxPatients": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1591,6 +1860,171 @@
           }
         }
       },
+      "ApiResponsePageResponseNurseStaffResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseNurseStaffResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "NurseStaffResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER"
+            ]
+          },
+          "departmentName": {
+            "type": "string"
+          },
+          "certificationLevel": {
+            "type": "string",
+            "enum": [
+              "RN",
+              "LPN",
+              "NP",
+              "CNA"
+            ]
+          },
+          "shiftType": {
+            "type": "string",
+            "enum": [
+              "DAY",
+              "NIGHT",
+              "ROTATIONAL"
+            ]
+          }
+        }
+      },
+      "PageResponseNurseStaffResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NurseStaffResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ApiResponsePageResponseDoctorStaffResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PageResponseDoctorStaffResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "DoctorStaffResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE",
+              "OTHER"
+            ]
+          },
+          "departmentName": {
+            "type": "string"
+          },
+          "specialization": {
+            "type": "string"
+          },
+          "consultationFee": {
+            "type": "number"
+          }
+        }
+      },
+      "PageResponseDoctorStaffResponse": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorStaffResponse"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ApiResponsePageResponseSearchResultDTO": {
         "type": "object",
         "properties": {
@@ -1732,6 +2166,60 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiResponseDoctorAvailabilityResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DoctorAvailabilityResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "DoctorAvailabilityResponse": {
+        "type": "object",
+        "properties": {
+          "sessions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SessionInfo"
+            }
+          }
+        }
+      },
+      "SessionInfo": {
+        "type": "object",
+        "properties": {
+          "scheduleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "endTime": {
+            "$ref": "#/components/schemas/LocalTime"
+          },
+          "maxPatients": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentBookings": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "nextSuggestedTime": {
+            "$ref": "#/components/schemas/LocalTime"
           }
         }
       },

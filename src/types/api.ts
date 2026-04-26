@@ -49,7 +49,6 @@ export interface DoctorInfo {
 }
 
 export interface NurseInfo {
-  department: string;
   nursingLicenseNo: string;
   certificationLevel: 'RN' | 'LPN' | 'NP' | 'CNA';
 }
@@ -59,17 +58,39 @@ export interface PharmacistInfo {
   qualification: string;
 }
 
-export interface LabTechInfo {
-  specialty: string;
-  licenseNo: string;
-}
-
 export interface ReceptionistInfo {
   languagesSpoken: ReceptionistFluency;
   insuranceSpecialist: boolean;
 }
 
 // Role Specific Details for Memberships
+export interface LocalTime {
+  hour: number;
+  minute: number;
+  second?: number;
+  nano?: number;
+}
+
+export interface ScheduleDTO {
+  id?: string;
+  dayOfWeek: number; // 1-7 (Mon-Sun)
+  startTime: LocalTime;
+  endTime: LocalTime;
+  slotDurationMinutes: number;
+  maxPatients: number;
+}
+
+export interface AvailabilityExceptionDTO {
+  id?: string;
+  date: string; // YYYY-MM-DD
+  type: string; // "VACATION", "SICK_LEAVE", "EXTRA_HOURS", "BREAK"
+  startTime?: LocalTime;
+  endTime?: LocalTime;
+  mode: string; // "AVAILABLE", "UNAVAILABLE"
+  slotDurationMinutes?: number;
+  note?: string;
+}
+
 export interface DoctorHospitalDetailsDTO {
   consultationFee: number;
   followUpDays: number;
@@ -109,6 +130,8 @@ export interface RoleAssignmentDTO {
   roleCode: string;
   departmentName: string;
   active: boolean;
+  schedules?: ScheduleDTO[];
+  availabilityExceptions?: AvailabilityExceptionDTO[];
   doctorDetails?: DoctorHospitalDetailsDTO;
   nurseDetails?: NurseHospitalDetailsDTO;
   adminDetails?: AdminHospitalDetailsDTO;
@@ -120,9 +143,7 @@ export interface HospitalMembershipDTO {
   hospitalId: string;
   hospitalName?: string;
   hospitalCode?: string;
-  roles?: string[];
-  specialization?: string;
-  departmentName?: string;
+  roleAssignments?: RoleAssignmentDTO[];
 }
 
 export interface UserResponse {
@@ -140,7 +161,6 @@ export interface UserResponse {
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
-  labTechInfo?: LabTechInfo;
   receptionistInfo?: ReceptionistInfo;
   memberships: HospitalMembershipDTO[];
   roles?: Role[]; // Computed on frontend for convenience
@@ -167,7 +187,6 @@ export interface UserRequestDTO {
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
-  labTechInfo?: LabTechInfo;
   receptionistInfo?: ReceptionistInfo;
   memberships?: HospitalMembershipDTO[];
 }
@@ -253,7 +272,45 @@ export interface UpdateAppointmentStatusRequest {
   status: AppointmentStatus;
 }
 
-// Doctor types
+// Availability types
+export interface SessionInfo {
+  scheduleId?: string;
+  startTime: LocalTime;
+  endTime: LocalTime;
+  maxPatients: number;
+  currentBookings: number;
+  available: boolean;
+  nextSuggestedTime?: LocalTime;
+}
+
+export interface DoctorAvailabilityResponse {
+  sessions: SessionInfo[];
+}
+
+// Staff types
+export interface DoctorStaffResponse {
+  id: string;
+  userId: string;
+  fullName: string;
+  phone: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  departmentName: string;
+  specialization: string;
+  consultationFee: number;
+}
+
+export interface NurseStaffResponse {
+  id: string;
+  userId: string;
+  fullName: string;
+  phone: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  departmentName: string;
+  certificationLevel: 'RN' | 'LPN' | 'NP' | 'CNA';
+  shiftType: 'DAY' | 'NIGHT' | 'ROTATIONAL';
+}
+
+// Doctor types (Legacy - used by some components)
 export interface DoctorResponse {
   id: string;
   fullName: string;
@@ -309,26 +366,5 @@ export interface BillingResponse {
   status: 'DRAFT' | 'GENERATED';
   totalAmount: number;
   items: BillingItemResponse[];
-  createdAt: string;
-}
-
-export interface SearchResultDTO {
-  id: string;
-  type: string;
-  title: string;
-  subtitle: string;
-  link: string;
-}
-
-export interface AuditLogResponse {
-  id: string;
-  entityName: string;
-  entityId: string;
-  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'UPDATE_STATUS';
-  performedBy: string;
-  details?: {
-    before?: Record<string, any>;
-    after?: Record<string, any>;
-  };
   createdAt: string;
 }
