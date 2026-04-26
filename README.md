@@ -53,9 +53,11 @@ Backend is the **source of truth for all decisions**.
 
 ---
 
-## 4. Cookie-Based Auth Only
-- Backend sets HTTP-only cookies
-- Frontend sends requests with credentials (withCredentials: true)
+## 4. Current Auth Transport
+- Frontend sends requests with credentials (`withCredentials: true`)
+- Backend session cookies are supported
+- The API client also attaches a bearer token from `localStorage` when one is present
+- Auth behavior should stay aligned with `src/services/apiClient.ts`
 
 ---
 
@@ -154,7 +156,7 @@ npm run dev
 
 ❌ No business logic in UI  
 ❌ No direct API calls (use `services/`)  
-❌ No localStorage auth  
+❌ Do not introduce a second auth flow without updating `src/services/apiClient.ts` and this README  
 ❌ No `labTechInfo` or unused legacy DTOs  
 
 ✔ Role-assignment based departments  
