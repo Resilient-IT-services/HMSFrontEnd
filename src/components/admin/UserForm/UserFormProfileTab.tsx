@@ -24,60 +24,166 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-orange-50/30 p-6 rounded-2xl border border-orange-100 mb-8">
-        <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black mb-2">Global Professional Profile</h3>
-        <p className="text-xs text-gray-500">Automated cards based on user's active hospital roles.</p>
+    <div className="space-y-12">
+      {/* 1. Dynamic Role-Based Inputs (Task 4) */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+          <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black">Professional Credentials</h3>
+        </div>
+
+        {assignedRoles.length === 0 && !formData.superuser && (
+            <div className="p-8 bg-gray-50 border border-dashed border-gray-200 rounded-2xl text-center">
+                <p className="text-sm text-gray-500 font-bold italic">No specific professional roles assigned yet.</p>
+            </div>
+        )}
+
+        {assignedRoles.includes('DOCTOR') && formData.doctorInfo && (
+          <div className={`bg-white border border-gray-200 rounded-xl p-6 space-y-4 shadow-sm ${validationErrors.specialization ? 'ring-2 ring-error/50' : ''}`}>
+            <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
+              <span className="material-symbols-outlined text-primary">stethoscope</span>
+              <h4 className="text-[10px] font-black text-on-surface uppercase tracking-widest">Doctor Profile Details</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-gray-700 uppercase">Specialization <span className="text-primary">*</span></label>
+                <input 
+                    className={`form-input ${validationErrors.specialization ? 'border-error' : ''}`} 
+                    type="text" 
+                    placeholder="e.g. Cardiologist, Orthopedic..."
+                    value={formData.doctorInfo.specialization} 
+                    onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } })} 
+                />
+                {renderFieldError('specialization')}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-gray-700 uppercase">License Number</label>
+                <input 
+                    className="form-input" 
+                    type="text" 
+                    placeholder="e.g. MED-12345678"
+                    value={formData.doctorInfo.licenseNumber} 
+                    onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} 
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-gray-700 uppercase">Years of Experience</label>
+                <input 
+                    className="form-input" 
+                    type="number" 
+                    placeholder="e.g. 10"
+                    value={formData.doctorInfo.bio ? formData.doctorInfo.bio.match(/Exp: (\d+)/)?.[1] || '' : ''} 
+                    onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, bio: `Exp: ${e.target.value} years` } })} 
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {assignedRoles.includes('NURSE') && formData.nurseInfo && (
+          <div className="bg-white border border-gray-200 rounded-xl p-6 space-y-4 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
+              <span className="material-symbols-outlined text-blue-600">medical_services</span>
+              <h4 className="text-[10px] font-black text-on-surface uppercase tracking-widest">Nursing Credentials</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Certification Level</label>
+                    <select className="form-input" value={formData.nurseInfo.certificationLevel} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, certificationLevel: e.target.value as any } })}>
+                        <option value="RN">Registered Nurse (RN)</option>
+                        <option value="LPN">Licensed Practical Nurse (LPN)</option>
+                        <option value="NP">Nurse Practitioner (NP)</option>
+                        <option value="CNA">Certified Nursing Assistant (CNA)</option>
+                    </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Nursing License No.</label>
+                    <input className="form-input" type="text" placeholder="e.g. RN-98765432" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
+                </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {assignedRoles.length === 0 && (
-        <div className="py-20 text-center text-gray-400">
-          <span className="material-symbols-outlined text-4xl mb-4">badge_critical</span>
-          <p className="font-bold">No professional roles assigned.</p>
-          <p className="text-sm">Assign roles in the Contracts tab to enable profile data entry.</p>
+      {/* 2. Full Summary UI (Task 5) */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+          <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black">Final Review Summary</h3>
         </div>
-      )}
 
-      {assignedRoles.includes('DOCTOR') && formData.doctorInfo && (
-        <div className={`bg-white border border-gray-200 rounded-xl p-8 space-y-6 shadow-sm ${validationErrors.specialization ? 'ring-2 ring-error/50' : ''}`}>
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-            <div className="w-10 h-10 rounded-full bg-orange-50 text-primary flex items-center justify-center">
-              <span className="material-symbols-outlined">stethoscope</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Identity Card */}
+            <div className="bg-gray-50/50 border border-gray-200 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-sm font-bold">person</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Identity & Access</span>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-xs text-gray-500 font-bold uppercase">Full Name</span>
+                        <span className="text-xs font-black text-on-surface">{formData.fullName || '—'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-xs text-gray-500 font-bold uppercase">Username</span>
+                        <span className="text-xs font-black text-on-surface">{formData.username || '—'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-xs text-gray-500 font-bold uppercase">DOB</span>
+                        <span className="text-xs font-black text-on-surface">{formData.dob || '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-xs text-gray-500 font-bold uppercase">Superuser</span>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${formData.superuser ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}`}>{formData.superuser ? 'YES' : 'NO'}</span>
+                    </div>
+                </div>
             </div>
-            <h3 className="font-headline-sm text-on-surface uppercase tracking-widest text-xs font-black">Doctor Specialization</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-label-sm text-gray-700 uppercase">Specialization <span className="text-primary">*</span></label>
-              <input className={`form-input ${validationErrors.specialization ? 'border-error' : ''}`} type="text" value={formData.doctorInfo.specialization} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } })} />
-              {renderFieldError('specialization')}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label className="font-label-sm text-gray-700 uppercase">License No.</label>
-              <input className="form-input" type="text" value={formData.doctorInfo.licenseNumber} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} />
-            </div>
-          </div>
-        </div>
-      )}
 
-      {assignedRoles.includes('NURSE') && formData.nurseInfo && (
-        <div className="bg-white border border-gray-200 rounded-xl p-8 space-y-6 shadow-sm">
-          <div className="flex items-center gap-3 border-b border-gray-100 pb-4">
-            <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-              <span className="material-symbols-outlined">medical_services</span>
+            {/* Contact Card */}
+            <div className="bg-gray-50/50 border border-gray-200 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-sm font-bold">contact_page</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">Contact Information</span>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-xs text-gray-500 font-bold uppercase">Email</span>
+                        <span className="text-xs font-black text-on-surface truncate max-w-[180px]">{formData.email || '—'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-100 pb-2">
+                        <span className="text-xs text-gray-500 font-bold uppercase">Phone</span>
+                        <span className="text-xs font-black text-on-surface">{formData.phone || '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-xs text-gray-500 font-bold uppercase">Gender</span>
+                        <span className="text-xs font-black text-on-surface">{formData.gender}</span>
+                    </div>
+                </div>
             </div>
-            <h3 className="font-headline-sm text-on-surface uppercase tracking-widest text-xs font-black">Nursing Credentials</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-            <div className="flex flex-col gap-1.5">
-              <label className="font-label-sm text-gray-700 uppercase">License No.</label>
-              <input className="form-input" type="text" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
-            </div>
-          </div>
         </div>
-      )}
-      
-      {/* Similar blocks for PHARMACIST and RECEPTIONIST could be added here or extracted further if this file grows */}
+
+        {/* Facility & Roles Card */}
+        <div className="bg-gray-50/50 border border-gray-200 rounded-2xl p-6 space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+                <span className="material-symbols-outlined text-sm font-bold">domain</span>
+                <span className="text-[10px] font-black uppercase tracking-widest">Assigned Facilities & Roles</span>
+            </div>
+            {formData.memberships && formData.memberships.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {formData.memberships.map((m, idx) => (
+                        <div key={idx} className="p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                            <p className="text-xs font-black text-on-surface mb-2">{m.hospitalName || 'Facility ID: ' + m.hospitalId}</p>
+                            <div className="flex flex-wrap gap-1">
+                                {m.roleAssignments?.map(ra => (
+                                    <span key={ra.roleCode} className="text-[9px] font-black px-2 py-0.5 bg-orange-50 text-primary border border-orange-100 rounded uppercase">{ra.roleCode}</span>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-xs text-gray-400 italic">No facility memberships assigned.</p>
+            )}
+        </div>
+      </div>
     </div>
   );
 };

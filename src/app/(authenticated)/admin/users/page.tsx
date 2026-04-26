@@ -166,15 +166,16 @@ const UserManagement = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="flex items-center justify-end gap-2">
                       <button 
                         onClick={() => router.push(`/admin/users/${user.id}`)}
                         className="p-2 text-slate-400 hover:text-orange-700 transition-colors"
+                        title="Edit User"
                       >
                         <span className="material-symbols-outlined text-xl">edit</span>
                       </button>
                       <button 
-                        onClick={() => router.push(`/admin/users/${user.id}`)}
+                        onClick={() => router.push(`/admin/users/${user.id}/contracts/add`)}
                         className="px-4 py-1.5 rounded-lg border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
                       >
                         Allocate
