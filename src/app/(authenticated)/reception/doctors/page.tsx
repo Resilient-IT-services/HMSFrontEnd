@@ -216,7 +216,7 @@ const DoctorsPage = () => {
            <div className="pt-4 flex gap-3">
               <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-3 bg-[var(--background)] border border-[var(--border)] rounded-xl text-sm font-bold text-[var(--text-secondary)] hover:bg-slate-50 transition-all">Close</button>
               <Link 
-                href={`/reception/appointments/create?doctorId=${selectedDoctor?.id}`} 
+                href={`/reception/appointments/create?doctorId=${selectedDoctor?.doctorId}`} 
                 className="flex-1 btn-primary flex items-center justify-center"
               >
                 Book New Slot

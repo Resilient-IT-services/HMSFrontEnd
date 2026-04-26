@@ -140,12 +140,14 @@ const UserManagement = () => {
               ) : (users.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">No staff members found.</td></tr>
               ) : users.map((user) => {
+                const primaryMembership = user.memberships?.[0];
                 const membershipCount = user.memberships?.length ?? 0;
-                const primaryHospitalName = user.memberships?.[0]?.hospitalName || 'Unnamed Hospital';
+                const primaryHospitalName = primaryMembership?.hospitalName || 'Unnamed Hospital';
                 const additionalHospitalSuffix = membershipCount > 1 ? ` + ${membershipCount - 1}` : '';
                 const hospitalSummary = membershipCount > 0
                   ? `${primaryHospitalName}${additionalHospitalSuffix}`
                   : 'No Hospital Assigned';
+                const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
 
                 return (
                 <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
@@ -177,7 +179,7 @@ const UserManagement = () => {
                           {hospitalSummary}
                         </p>
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                          {(user.memberships && user.memberships[0]?.departmentName) || 'General'}
+                          {departmentName}
                         </p>
                     </div>
                   </td>

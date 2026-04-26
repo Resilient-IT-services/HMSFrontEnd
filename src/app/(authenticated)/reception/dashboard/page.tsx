@@ -151,7 +151,7 @@ const ReceptionDashboard = () => {
               <h4 className="font-bold text-slate-900 px-1 uppercase text-[10px] tracking-widest text-slate-400">Doctor Availability Snapshot</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {doctors.map((doc) => (
-                  <div key={doc.id} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center gap-4 shadow-sm border-l-4 border-l-emerald-500 hover:shadow-md transition-all">
+                  <div key={doc.assignmentId} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center gap-4 shadow-sm border-l-4 border-l-emerald-500 hover:shadow-md transition-all">
                     <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xl">
                       {doc.fullName[0]}
                     </div>
@@ -204,7 +204,7 @@ const ReceptionDashboard = () => {
               <div className="space-y-4">
                 {loading && <p className="text-[10px] text-slate-400 italic">Loading staff list...</p>}
                 {nurses.map((n) => (
-                  <div key={n.id} className="flex items-center gap-3">
+                  <div key={n.assignmentId} className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
                       <span className="material-symbols-outlined text-sm">person</span>
                     </div>
