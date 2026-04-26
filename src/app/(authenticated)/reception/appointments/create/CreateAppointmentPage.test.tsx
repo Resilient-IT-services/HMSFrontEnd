@@ -5,11 +5,13 @@ import { doctorService } from '@/services/doctorService';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { LayoutProvider } from '@/context/LayoutContext';
 
 // Mock navigation
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(() => ({
     push: vi.fn(),
+    back: vi.fn(),
   })),
   useSearchParams: vi.fn(() => ({
     get: vi.fn(),
@@ -38,21 +40,43 @@ vi.mock('@/services/appointmentService', () => ({
   },
 }));
 
-// ... (lucide mock)
+// Mock MainLayout to prevent issues with it
+vi.mock('@/components/ui/MainLayout', () => ({
+  default: ({ children, title }: any) => (
+    <div data-testid="main-layout">
+      <h1>{title}</h1>
+      {children}
+    </div>
+  )
+}));
 
 const mockDoctors = [
   { userId: 'd1', id: 'd1', fullName: 'Dr. Smith', specialization: 'Cardiology' },
   { userId: 'd2', id: 'd2', fullName: 'Dr. Jones', specialization: 'Neurology' },
 ];
 
-// ...
+const mockPatients = [
+  { id: 'p1', fullName: 'John Doe', phone: '1234567890' },
+];
+
+const mockAvailability = {
+  sessions: [
+    {
+      startTime: { hour: 9, minute: 0 },
+      endTime: { hour: 12, minute: 0 },
+      available: true,
+      currentBookings: 0,
+      maxPatients: 10,
+    }
+  ]
+};
 
 describe('CreateAppointmentPage', () => {
   const mockPush = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as any).mockReturnValue({ push: mockPush });
+    (useRouter as any).mockReturnValue({ push: mockPush, back: vi.fn() });
     (useSearchParams as any).mockReturnValue({ get: vi.fn() });
     
     (doctorService.list as any).mockResolvedValue({
@@ -61,7 +85,7 @@ describe('CreateAppointmentPage', () => {
     });
     (doctorService.getAvailability as any).mockResolvedValue({
       success: true,
-      data: { sessions: [] }
+      data: mockAvailability
     });
     (appointmentService.list as any).mockResolvedValue({
       success: true,
@@ -81,7 +105,7 @@ describe('CreateAppointmentPage', () => {
     );
     
     await waitFor(() => {
-      expect(screen.getByText(/Appointment Scheduling/i)).toBeInTheDocument();
+      expect(screen.getByRole('heading', { name: /Appointment Scheduling/i, level: 1 })).toBeInTheDocument();
     });
 
     expect(screen.getAllByText('Dr. Smith')[0]).toBeInTheDocument();
@@ -103,8 +127,29 @@ describe('CreateAppointmentPage', () => {
     // Select doctor
     fireEvent.click(screen.getAllByText('Dr. Smith')[0]);
 
-    // Mock search results for patient manually since the search logic is inline
-    // In a real app we'd trigger search, but here we can just mock selected patient if we passed it in URL
-    // For this test, let's simulate the search input if needed or just mock initial patient
+    // Select session
+    await waitFor(() => {
+      expect(screen.getByText('09:00 - 12:00')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('09:00 - 12:00'));
+
+    // Search for patient
+    const searchInput = screen.getByPlaceholderText(/Patient Name or Phone/i);
+    fireEvent.change(searchInput, { target: { value: 'John' } });
+
+    // Select patient from search results
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByText('John Doe'));
+
+    // Confirm appointment
+    const confirmButton = screen.getByText('CONFIRM APPOINTMENT');
+    fireEvent.click(confirmButton);
+
+    await waitFor(() => {
+      expect(appointmentService.create).toHaveBeenCalled();
+      expect(mockPush).toHaveBeenCalledWith('/reception/appointments');
+    });
   });
 });
