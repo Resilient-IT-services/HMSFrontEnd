@@ -16,7 +16,15 @@ const createMockStore = (initialState?: any) => {
       auth: authReducer,
     },
     preloadedState: {
-      auth: initialState,
+      auth: {
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        activeRole: null,
+        isSuperMode: false,
+        error: null,
+        ...initialState
+      },
     },
   });
 };

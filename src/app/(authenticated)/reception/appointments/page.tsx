@@ -100,59 +100,43 @@ const AppointmentSchedulingPage = () => {
   }, [selectedDate]);
 
   return (
-    <MainLayout title="Appointment Scheduling" hideTitle>
-      <div className="flex flex-col h-[calc(100vh-64px)] -m-gutter overflow-hidden bg-[#f9f9fb] max-w-none w-[calc(100%+2*var(--spacing-gutter))]">
-        {/* Header matching HTML */}
-        <header className="h-16 border-b border-slate-200 bg-white/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-40 shrink-0">
-          <h2 className="text-lg font-bold text-slate-900">Appointment Scheduling</h2>
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
-              <input className="bg-slate-100 border-none rounded-full py-1.5 pl-9 pr-4 text-sm w-64 focus:ring-2 focus:ring-primary/20 outline-none font-medium" placeholder="Search..." type="text"/>
-            </div>
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors"><span className="material-symbols-outlined">notifications</span></button>
-            <button className="p-2 text-slate-500 hover:bg-slate-50 rounded-full transition-colors"><span className="material-symbols-outlined">settings</span></button>
-          </div>
-        </header>
-
-        {/* 3-Column Layout Area matching HTML */}
-        <div className="flex flex-1 overflow-hidden p-4 lg:p-6 gap-4 lg:gap-6">
-          <DoctorSelector 
-            doctors={doctors} 
-            selectedDoctor={selectedDoctor} 
-            onSelectDoctor={setSelectedDoctor} 
-            loading={loading} 
-          />
-          <SessionGrid 
-            fetchingAvailability={fetchingAvailability}
-            selectedDoctor={selectedDoctor}
-            availability={availability}
-            selectedSession={selectedSession}
-            setSelectedSession={setSelectedSession}
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            dateOptions={dateOptions}
-            formatLocalTime={(t) => t}
-          />
-          <ConfirmationPanel 
-            patientSearch={patientSearch}
-            setPatientSearch={setPatientSearch}
-            searchResults={searchResults}
-            selectedPatient={selectedPatient}
-            setSelectedPatient={setSelectedPatient}
-            selectedDoctor={selectedDoctor}
-            selectedSession={selectedSession}
-            notes={notes}
-            setNotes={setNotes}
-            handleConfirm={handleConfirm}
-            submitting={submitting}
-            onBack={() => {
-              setSelectedPatient(null);
-              setSelectedSession(null);
-              setNotes('');
-            }}
-          />
-        </div>
+    <MainLayout title="Appointment Booking" hideTitle>
+      <div className="flex h-[calc(100vh-64px)] -m-gutter overflow-hidden bg-background max-w-none w-[calc(100%+2*var(--spacing-gutter))]">
+        <DoctorSelector
+          doctors={doctors} 
+          selectedDoctor={selectedDoctor} 
+          onSelectDoctor={setSelectedDoctor} 
+          loading={loading} 
+        />
+        <SessionGrid 
+          fetchingAvailability={fetchingAvailability}
+          selectedDoctor={selectedDoctor}
+          availability={availability}
+          selectedSession={selectedSession}
+          setSelectedSession={setSelectedSession}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          dateOptions={dateOptions}
+          formatLocalTime={(t) => t}
+        />
+        <ConfirmationPanel 
+          patientSearch={patientSearch}
+          setPatientSearch={setPatientSearch}
+          searchResults={searchResults}
+          selectedPatient={selectedPatient}
+          setSelectedPatient={setSelectedPatient}
+          selectedDoctor={selectedDoctor}
+          selectedSession={selectedSession}
+          notes={notes}
+          setNotes={setNotes}
+          handleConfirm={handleConfirm}
+          submitting={submitting}
+          onBack={() => {
+            setSelectedPatient(null);
+            setSelectedSession(null);
+            setNotes('');
+          }}
+        />
       </div>
     </MainLayout>
   );

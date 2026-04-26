@@ -168,7 +168,7 @@ const Topbar: React.FC = () => {
                     onClick={async () => {
                       try {
                         await authService.logout();
-                        globalThis.location.href = '/login';
+                        window.location.href = '/login';
                       } catch (error) {
                         console.error('Logout failed', error);
                       }

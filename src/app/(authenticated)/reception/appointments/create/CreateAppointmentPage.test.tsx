@@ -142,6 +142,5 @@ describe('CreateAppointmentPage', () => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
     fireEvent.click(screen.getByText('John Doe'));
-    });
   });
 });

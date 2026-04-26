@@ -20,6 +20,8 @@ export interface PageResponse<T> {
   totalPages: number;
 }
 
+export type LocalTime = string;
+
 // Global User Info Types
 export interface Qualification {
   degree: string;
@@ -165,6 +167,8 @@ export interface UserProfileResponse extends UserResponse {
   currentHospitalId?: string | null;
   activeRole?: Role | null;
 }
+
+export type User = UserProfileResponse;
 
 export interface UserRequestDTO {
   id?: string;

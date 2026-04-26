@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, Reducer, UnknownAction } from '@reduxjs/toolkit';
 import { UserProfileResponse, Role } from '@/types/api';
 
-interface AuthState {
+export interface AuthState {
   user: UserProfileResponse | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -10,15 +10,22 @@ interface AuthState {
   activeRole: Role | null;
 }
 
+export type AuthAction = PayloadAction<UserProfileResponse | null> 
+  | PayloadAction<string | null> 
+  | PayloadAction<boolean> 
+  | PayloadAction<Role | null> 
+  | PayloadAction<void>
+  | UnknownAction;
+
 const getInitialSuperMode = () => {
-  if (globalThis.window !== undefined) {
+  if (typeof window !== 'undefined') {
     return localStorage.getItem('isSuperMode') === 'true';
   }
   return false;
 };
 
 const getInitialActiveRole = () => {
-  if (globalThis.window !== undefined) {
+  if (typeof window !== 'undefined') {
     return localStorage.getItem('activeRole') as Role | null;
   }
   return null;
@@ -74,14 +81,14 @@ const authSlice = createSlice({
 
       // Restore hospitalId from localStorage if not provided in payload
       let hospitalId = action.payload.currentHospitalId;
-      if (!hospitalId && globalThis.window !== undefined) {
+      if (!hospitalId && typeof window !== 'undefined') {
         hospitalId = localStorage.getItem('currentHospitalId');
       }
 
       // Validate restored hospitalId against memberships
       if (hospitalId && !action.payload.memberships.some(m => m.hospitalId === hospitalId)) {
         hospitalId = null;
-        if (globalThis.window !== undefined) localStorage.removeItem('currentHospitalId');
+        if (typeof window !== 'undefined') localStorage.removeItem('currentHospitalId');
       }
 
       const rolesArray = computeRoles(action.payload, hospitalId || null);
@@ -99,25 +106,25 @@ const authSlice = createSlice({
       const isSuperUser = rolesArray.includes('SUPER_ADMIN');
       if (!isSuperUser) {
         state.isSuperMode = false;
-        if (globalThis.window !== undefined) localStorage.removeItem('isSuperMode');
+        if (typeof window !== 'undefined') localStorage.removeItem('isSuperMode');
       }
 
       // If active role is not in current effective roles, reset it
       if (state.activeRole && !rolesArray.includes(state.activeRole)) {
         state.activeRole = null;
-        if (globalThis.window !== undefined) localStorage.removeItem('activeRole');
+        if (typeof window !== 'undefined') localStorage.removeItem('activeRole');
       }
       
       // Auto-set active role ONLY if exactly one exists
       if (rolesArray.length === 1) {
         state.activeRole = rolesArray[0];
-        if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
+        if (typeof window !== 'undefined') localStorage.setItem('activeRole', state.activeRole);
       }
     },
     setCurrentHospitalId: (state, action: PayloadAction<string | null>) => {
       if (state.user) {
         state.user.currentHospitalId = action.payload;
-        if (globalThis.window !== undefined) {
+        if (typeof window !== 'undefined') {
           if (action.payload) localStorage.setItem('currentHospitalId', action.payload);
           else localStorage.removeItem('currentHospitalId');
         }
@@ -126,24 +133,24 @@ const authSlice = createSlice({
 
         if (state.activeRole && !rolesArray.includes(state.activeRole)) {
           state.activeRole = null;
-          if (globalThis.window !== undefined) localStorage.removeItem('activeRole');
+          if (typeof window !== 'undefined') localStorage.removeItem('activeRole');
         }
 
         if (rolesArray.length === 1 && !state.activeRole) {
           state.activeRole = rolesArray[0];
-          if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
+          if (typeof window !== 'undefined') localStorage.setItem('activeRole', state.activeRole);
         }
       }
     },
     setSuperMode: (state, action: PayloadAction<boolean>) => {
       state.isSuperMode = action.payload;
-      if (globalThis.window !== undefined) {
+      if (typeof window !== 'undefined') {
         localStorage.setItem('isSuperMode', String(action.payload));
       }
     },
     setActiveRole: (state, action: PayloadAction<Role | null>) => {
       state.activeRole = action.payload;
-      if (globalThis.window !== undefined) {
+      if (typeof window !== 'undefined') {
         if (action.payload) localStorage.setItem('activeRole', action.payload);
         else localStorage.removeItem('activeRole');
       }
@@ -162,7 +169,7 @@ const authSlice = createSlice({
       state.error = null;
       state.activeRole = null;
       state.isSuperMode = false;
-      if (globalThis.window !== undefined) {
+      if (typeof window !== 'undefined') {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('isSuperMode');
         localStorage.removeItem('currentHospitalId');
@@ -171,7 +178,7 @@ const authSlice = createSlice({
     },
     clearAuthSession: (state) => {
       state.activeRole = null;
-      if (globalThis.window !== undefined) {
+      if (typeof window !== 'undefined') {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('currentHospitalId');
       }
@@ -180,4 +187,6 @@ const authSlice = createSlice({
 });
 
 export const { setUser, setLoading, setError, logout, setSuperMode, setActiveRole, setCurrentHospitalId, clearAuthSession } = authSlice.actions;
-export default authSlice.reducer;
+
+export const authReducer: Reducer<AuthState, AuthAction> = authSlice.reducer as Reducer<AuthState, AuthAction>;
+export default authReducer;

@@ -6,6 +6,7 @@ import { RootState } from '@/state/store';
 import { setUser, setLoading, setError, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname, useRouter } from 'next/navigation';
+import { Role } from '@/types/api';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
@@ -96,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } else if (roles.length === 1) {
       if (activeRole === roles[0]) return;
-      dispatch(setActiveRole(roles[0] as any));
+      dispatch(setActiveRole(roles[0] as Role));
     } else if (pathname !== '/unauthorized') {
       router.push('/unauthorized');
     }

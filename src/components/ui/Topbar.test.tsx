@@ -26,13 +26,17 @@ import { LayoutProvider } from '@/context/LayoutContext';
 const renderWithRedux = (initialState = {}) => {
   const store = configureStore({
     reducer: { auth: authReducer },
-    preloadedState: { auth: { 
-      user: mockUser, 
-      isAuthenticated: true, 
-      activeRole: 'DOCTOR',
-      isSuperMode: false,
-      ...initialState 
-    } },
+    preloadedState: { 
+      auth: { 
+        user: mockUser, 
+        isAuthenticated: true, 
+        isLoading: false,
+        activeRole: 'DOCTOR',
+        isSuperMode: false,
+        error: null,
+        ...initialState 
+      } as any
+    },
   });
   return render(
     <Provider store={store}>

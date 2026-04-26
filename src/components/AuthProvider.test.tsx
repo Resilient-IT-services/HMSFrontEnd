@@ -33,7 +33,17 @@ const mockUser = {
 const renderWithRedux = (children: React.ReactNode, initialState = {}) => {
   const store = configureStore({
     reducer: { auth: authReducer },
-    preloadedState: { auth: { user: null, isAuthenticated: false, isLoading: true, activeRole: null, ...initialState } },
+    preloadedState: { 
+      auth: { 
+        user: null, 
+        isAuthenticated: false, 
+        isLoading: true, 
+        activeRole: null, 
+        error: null, 
+        isSuperMode: false, 
+        ...initialState 
+      } as any
+    },
   });
   return render(<Provider store={store}>{children}</Provider>);
 };

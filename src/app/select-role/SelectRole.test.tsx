@@ -24,7 +24,17 @@ const mockUser = {
 const renderWithRedux = (initialState = {}) => {
   const store = configureStore({
     reducer: { auth: authReducer },
-    preloadedState: { auth: { user: mockUser, currentHospitalId: '1', ...initialState } },
+    preloadedState: { 
+      auth: { 
+        user: mockUser, 
+        isAuthenticated: true, 
+        isLoading: false, 
+        error: null, 
+        isSuperMode: false, 
+        activeRole: null, 
+        ...initialState 
+      } as any 
+    },
   });
   return render(
     <Provider store={store}>

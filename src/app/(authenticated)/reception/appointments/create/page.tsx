@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useRouter,  } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { doctorService } from '@/services/doctorService';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
-import { DoctorStaffResponse, PatientResponse, SessionInfo, LocalTime } from '@/types/api';
+import { DoctorStaffResponse, PatientResponse, SessionInfo } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { DoctorSelector } from '@/components/reception/appointments/DoctorSelector';
@@ -101,7 +101,19 @@ const useAppointmentScheduling = () => {
       const d = new Date();
       d.setDate(d.getDate() + i);
       const iso = d.toISOString().split('T')[0];
-      const label = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+      let label;
+
+      if (i === 0) {
+        label = 'Today';
+      } else if (i === 1) {
+        label = 'Tomorrow';
+      } else {
+        label = d.toLocaleDateString('en-US', {
+          weekday: 'short',
+          day: 'numeric',
+        });
+      }
+
       return { iso, label, active: iso === selectedDate };
     });
   }, [selectedDate]);
@@ -120,9 +132,8 @@ const AppointmentScheduling = () => {
 
   return (
     <MainLayout title="Appointment Scheduling" hideTitle>
-      <div className="flex flex-col h-screen -m-8 overflow-hidden bg-[#f9f9ff]">
-        <header className="flex justify-between items-center px-8 py-4 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 z-40">
-          <div className="flex items-center space-x-6">
+      <div className="flex flex-col h-full bg-[#f9f9ff] p-6 gap-6">
+        <div className="flex justify-between items-center px-6 py-4 bg-white border border-slate-200 rounded-xl shadow-sm">          <div className="flex items-center space-x-6">
             <h2 className="text-xl font-bold text-slate-900 font-manrope">Appointment Scheduling</h2>
             <div className="relative w-80">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
@@ -135,10 +146,10 @@ const AppointmentScheduling = () => {
                 <span className="text-xs font-bold text-orange-700">{new Date().toLocaleDateString()}</span>
              </div>
           </div>
-        </header>
+        </div>
 
-        <div className="flex flex-1 overflow-hidden p-6 gap-6">
-          <DoctorSelector 
+
+        <div className="flex flex-1 gap-6 overflow-hidden">          <DoctorSelector
             doctors={state.doctors} 
             selectedDoctor={state.selectedDoctor} 
             onSelectDoctor={state.setSelectedDoctor} 
