@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation';
 import { 
   UserRequestDTO, 
   UserFullProfileDTO, 
-  HospitalResponse, 
-  HospitalMembershipDTO, 
-  RoleAssignmentDTO 
+  HospitalResponse,
+  HospitalMembershipDTO
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
-import apiClient from '@/services/apiClient';
+import { userService } from '@/services/userService';
 
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
@@ -72,14 +71,28 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validate()) return;
+
     try {
       setLoading(true);
-      const url = isEdit ? `/users/${initialData?.id}` : '/users';
-      const method = isEdit ? 'put' : 'post';
-      const res = await apiClient[method](url, formData);
-      if (res.data.success) router.push('/admin/users');
-    } catch (error: any) {
-      if (error.response?.data?.details) setValidationErrors(error.response.data.details);
+      const response = isEdit && initialData?.id
+        ? await userService.updateUser(initialData.id, formData)
+        : await userService.createUser(formData);
+
+      if (response.success) {
+        router.push('/admin/users');
+      }
+    } catch (error: unknown) {
+      const apiError = error as {
+        response?: {
+          data?: {
+            details?: Record<string, string>;
+          };
+        };
+      };
+
+      if (apiError.response?.data?.details) {
+        setValidationErrors(apiError.response.data.details);
+      }
     } finally {
       setLoading(false);
     }

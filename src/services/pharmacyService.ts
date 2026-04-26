@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, PrescriptionResponse, MedicineResponse } from '@/types/api';
+import { ApiResponse, PageResponse, PrescriptionResponse } from '@/types/api';
 
 export const pharmacyService = {
   async listPrescriptions(): Promise<ApiResponse<PageResponse<PrescriptionResponse>>> {

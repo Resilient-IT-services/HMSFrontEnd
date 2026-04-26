@@ -38,8 +38,8 @@ const ReceptionDashboard = () => {
         if (docRes.success) setDoctors(docRes.data?.content || []);
         if (nurRes.success) setNurses(nurRes.data?.content || []);
 
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -48,12 +48,23 @@ const ReceptionDashboard = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const activeQueue = appointments.filter(a => a.status === 'CHECKED_IN').length;
+    const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
+    const doctorQueueByName = new Map<string, number>();
+
+    for (const appointment of appointments) {
+      if (appointment.status === 'COMPLETED' || appointment.status === 'CANCELLED') {
+        continue;
+      }
+
+      const currentCount = doctorQueueByName.get(appointment.doctorName) || 0;
+      doctorQueueByName.set(appointment.doctorName, currentCount + 1);
+    }
+
     return {
-      totalPatients: recentPatients.length > 100 ? recentPatients.length : 142, // Mocking if small
+      totalPatients: recentPatients.length,
       activeQueue,
       appointmentsToday: appointments.length,
-      revenue: '$12,450'
+      doctorQueueByName
     };
   }, [recentPatients, appointments]);
 
@@ -77,17 +88,17 @@ const ReceptionDashboard = () => {
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            { label: 'Total Patients Today', value: stats.totalPatients, color: 'text-orange-600', bg: 'bg-orange-50', icon: 'group', trend: '+12%' },
+            { label: 'Total Patients Today', value: stats.totalPatients, color: 'text-orange-600', bg: 'bg-orange-50', icon: 'group' },
             { label: 'Active Queue', value: stats.activeQueue, color: 'text-blue-600', bg: 'bg-blue-50', icon: 'hourglass_empty' },
             { label: 'Appointments Today', value: stats.appointmentsToday, color: 'text-purple-600', bg: 'bg-purple-50', icon: 'event_available' },
-            { label: 'Revenue Today', value: stats.revenue, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'payments' }
+            { label: 'Nurses On Duty', value: nurses.length, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'payments' }
           ].map((m, i) => (
             <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
               <div className="flex justify-between items-start mb-4">
                 <div className={`p-2 ${m.bg} rounded-xl ${m.color}`}>
                   <span className="material-symbols-outlined">{m.icon}</span>
                 </div>
-                {m.trend && <span className="text-green-600 bg-green-50 px-2 py-1 rounded-lg text-[10px] font-black">{m.trend}</span>}
+                <span className="text-slate-500 bg-slate-50 px-2 py-1 rounded-lg text-[10px] font-black">Live</span>
               </div>
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{m.label}</p>
               <h3 className="text-3xl font-black text-slate-900 mt-1">{m.value}</h3>
@@ -144,10 +155,10 @@ const ReceptionDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <p className="font-bold text-sm text-slate-900">{doc.fullName}</p>
-                      <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">Available</p>
+                      <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">{stats.doctorQueueByName.get(doc.fullName) || 0} queued today</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-black text-slate-900">0</p>
+                      <p className="text-xl font-black text-slate-900">{stats.doctorQueueByName.get(doc.fullName) || 0}</p>
                       <p className="text-[10px] uppercase text-slate-400 font-black">Queue</p>
                     </div>
                   </div>
@@ -189,6 +200,7 @@ const ReceptionDashboard = () => {
             <section className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
               <h4 className="font-bold text-slate-900 mb-4 uppercase text-[10px] tracking-widest text-slate-400">Nursing Staff on Duty</h4>
               <div className="space-y-4">
+                {loading && <p className="text-[10px] text-slate-400 italic">Loading staff list...</p>}
                 {nurses.map((n) => (
                   <div key={n.id} className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
