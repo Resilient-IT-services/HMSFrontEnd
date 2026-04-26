@@ -66,11 +66,10 @@ const useAppointmentScheduling = () => {
     setSubmitting(true);
     try {
       const timeToUse = selectedSession.nextSuggestedTime || selectedSession.startTime;
-      const formattedTime = `${timeToUse.hour.toString().padStart(2, '0')}:${timeToUse.minute.toString().padStart(2, '0')}:00`;
       const res = await appointmentService.create({
         patientId: selectedPatient.id,
         doctorId: selectedDoctor.userId,
-        appointmentTime: `${selectedDate}T${formattedTime}`,
+        appointmentTime: `${selectedDate}T${timeToUse}:00`,
         notes
       });
       if (res.success) {
@@ -103,7 +102,6 @@ const useAppointmentScheduling = () => {
 
 const AppointmentScheduling = () => {
   const state = useAppointmentScheduling();
-  const formatLocalTime = (lt: LocalTime) => `${lt.hour.toString().padStart(2, '0')}:${lt.minute.toString().padStart(2, '0')}`;
 
   return (
     <MainLayout title="Appointment Scheduling" hideTitle>
@@ -140,7 +138,7 @@ const AppointmentScheduling = () => {
             selectedDate={state.selectedDate}
             setSelectedDate={state.setSelectedDate}
             dateOptions={state.dateOptions}
-            formatLocalTime={formatLocalTime}
+            formatLocalTime={(t) => t}
           />
           <ConfirmationPanel 
             patientSearch={state.patientSearch}

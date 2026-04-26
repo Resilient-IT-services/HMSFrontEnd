@@ -64,18 +64,11 @@ export interface ReceptionistInfo {
 }
 
 // Role Specific Details for Memberships
-export interface LocalTime {
-  hour: number;
-  minute: number;
-  second?: number;
-  nano?: number;
-}
-
 export interface ScheduleDTO {
   id?: string;
   dayOfWeek: number; // 1-7 (Mon-Sun)
-  startTime: LocalTime;
-  endTime: LocalTime;
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
   slotDurationMinutes: number;
   maxPatients: number;
 }
@@ -84,8 +77,8 @@ export interface AvailabilityExceptionDTO {
   id?: string;
   date: string; // YYYY-MM-DD
   type: string; // "VACATION", "SICK_LEAVE", "EXTRA_HOURS", "BREAK"
-  startTime?: LocalTime;
-  endTime?: LocalTime;
+  startTime?: string; // HH:mm
+  endTime?: string; // HH:mm
   mode: string; // "AVAILABLE", "UNAVAILABLE"
   slotDurationMinutes?: number;
   note?: string;
@@ -275,12 +268,12 @@ export interface UpdateAppointmentStatusRequest {
 // Availability types
 export interface SessionInfo {
   scheduleId?: string;
-  startTime: LocalTime;
-  endTime: LocalTime;
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
   maxPatients: number;
   currentBookings: number;
   available: boolean;
-  nextSuggestedTime?: LocalTime;
+  nextSuggestedTime?: string; // HH:mm
 }
 
 export interface DoctorAvailabilityResponse {

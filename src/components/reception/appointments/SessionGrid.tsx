@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SessionInfo, DoctorStaffResponse, LocalTime } from '@/types/api';
+import { SessionInfo, DoctorStaffResponse } from '@/types/api';
 
 interface SessionGridProps {
   fetchingAvailability: boolean;
@@ -12,7 +12,7 @@ interface SessionGridProps {
   selectedDate: string;
   setSelectedDate: (date: string) => void;
   dateOptions: { iso: string, label: string, active: boolean }[];
-  formatLocalTime: (lt: LocalTime) => string;
+  formatLocalTime: (t: string) => string;
 }
 
 export const SessionGrid: React.FC<SessionGridProps> = ({

@@ -613,7 +613,7 @@
         "tags": [
           "Appointments"
         ],
-        "operationId": "list_4",
+        "operationId": "list_5",
         "parameters": [
           {
             "name": "page",
@@ -948,6 +948,56 @@
         }
       }
     },
+    "/api/v1/doctors": {
+      "get": {
+        "tags": [
+          "doctor-controller"
+        ],
+        "operationId": "list_3",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePageResponseUserSummaryDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/doctors/{id}/availability": {
       "get": {
         "tags": [
@@ -969,8 +1019,9 @@
             "in": "query",
             "required": true,
             "schema": {
+              "pattern": "yyyy-MM-dd",
               "type": "string",
-              "format": "date"
+              "example": "2024-04-26"
             }
           }
         ],
@@ -1013,7 +1064,7 @@
         "tags": [
           "Audit"
         ],
-        "operationId": "list_3",
+        "operationId": "list_4",
         "parameters": [
           {
             "name": "page",
@@ -1061,10 +1112,6 @@
           },
           "departmentHead": {
             "type": "boolean"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1076,17 +1123,22 @@
             "format": "uuid"
           },
           "date": {
+            "pattern": "yyyy-MM-dd",
             "type": "string",
-            "format": "date"
+            "example": "2024-04-26"
           },
           "type": {
             "type": "string"
           },
           "startTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           },
           "endTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           },
           "mode": {
             "type": "string"
@@ -1133,10 +1185,6 @@
           },
           "visitingConsultant": {
             "type": "boolean"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1206,27 +1254,6 @@
           }
         }
       },
-      "LocalTime": {
-        "type": "object",
-        "properties": {
-          "hour": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "minute": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "second": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "nano": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "NurseHospitalDetailsDTO": {
         "type": "object",
         "properties": {
@@ -1240,10 +1267,6 @@
               "NIGHT",
               "ROTATIONAL"
             ]
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1272,10 +1295,6 @@
           },
           "pharmacyWing": {
             "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1327,10 +1346,6 @@
           },
           "emergencyContactNumber": {
             "type": "string"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1406,10 +1421,14 @@
             "format": "int32"
           },
           "startTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           },
           "endTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           },
           "slotDurationMinutes": {
             "type": "integer",
@@ -1455,8 +1474,9 @@
             ]
           },
           "dob": {
+            "pattern": "yyyy-MM-dd",
             "type": "string",
-            "format": "date"
+            "example": "2024-04-26"
           },
           "phone": {
             "type": "string"
@@ -1466,10 +1486,6 @@
           },
           "superuser": {
             "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           },
           "doctorInfo": {
             "$ref": "#/components/schemas/DoctorInfo"
@@ -1550,18 +1566,18 @@
             ]
           },
           "dob": {
+            "pattern": "yyyy-MM-dd",
             "type": "string",
-            "format": "date"
+            "example": "2024-04-26"
           },
           "phone": {
             "type": "string"
           },
-          "address": {
+          "bloodGroup": {
             "type": "string"
           },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
+          "address": {
+            "type": "string"
           }
         }
       },
@@ -1613,10 +1629,6 @@
           },
           "settings": {
             "$ref": "#/components/schemas/HospitalSettings"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1699,10 +1711,6 @@
           },
           "notes": {
             "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },
@@ -1833,8 +1841,9 @@
             ]
           },
           "dob": {
+            "pattern": "yyyy-MM-dd",
             "type": "string",
-            "format": "date"
+            "example": "2024-04-26"
           },
           "phone": {
             "type": "string"
@@ -1847,10 +1856,6 @@
           },
           "superuser": {
             "type": "boolean"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           },
           "memberships": {
             "type": "array",
@@ -2202,10 +2207,14 @@
             "format": "uuid"
           },
           "startTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           },
           "endTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           },
           "maxPatients": {
             "type": "integer",
@@ -2219,7 +2228,9 @@
             "type": "boolean"
           },
           "nextSuggestedTime": {
-            "$ref": "#/components/schemas/LocalTime"
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
           }
         }
       },
@@ -2285,10 +2296,6 @@
           },
           "details": {
             "$ref": "#/components/schemas/AuditDetail"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       },

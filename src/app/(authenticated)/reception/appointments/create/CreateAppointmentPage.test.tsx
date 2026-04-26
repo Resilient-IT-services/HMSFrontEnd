@@ -62,8 +62,8 @@ const mockPatients = [
 const mockAvailability = {
   sessions: [
     {
-      startTime: { hour: 9, minute: 0 },
-      endTime: { hour: 12, minute: 0 },
+      startTime: '09:00',
+      endTime: '12:00',
       available: true,
       currentBookings: 0,
       maxPatients: 10,
