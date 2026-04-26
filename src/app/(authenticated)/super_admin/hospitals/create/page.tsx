@@ -243,7 +243,7 @@ export default function CreateHospitalPage() {
                       <select 
                         className="form-input"
                         value={formData.status}
-                        onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, status: e.target.value as typeof formData.status })}
                       >
                         <option value="ACTIVE">Active</option>
                         <option value="INACTIVE">Inactive</option>
