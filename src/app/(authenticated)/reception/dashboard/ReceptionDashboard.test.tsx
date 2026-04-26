@@ -9,14 +9,25 @@ vi.mock('@/services/apiClient', () => ({
   default: { get: vi.fn() }
 }));
 
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(() => ({
+    push: vi.fn(),
+  })),
+}));
+
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children }: any) => <div>{children}</div>
+  default: ({ children, title }: any) => (
+    <div>
+      <h1>{title}</h1>
+      {children}
+    </div>
+  )
 }));
 
 describe('ReceptionDashboard', () => {
   it('renders correctly', async () => {
     (apiClient.get as any).mockResolvedValue({
-      data: { success: true, data: [] }
+      data: { success: true, data: { content: [] } }
     });
 
     render(

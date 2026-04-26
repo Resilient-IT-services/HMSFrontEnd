@@ -100,7 +100,7 @@ describe('TodayAppointmentsPage', () => {
       </Provider>
     );
 
-    expect(screen.getByRole('heading', { name: "Today's Appointments", level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: "Daily Schedule", level: 1 })).toBeInTheDocument();
     
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -164,10 +164,10 @@ describe('TodayAppointmentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Check-in')).toBeInTheDocument();
+      expect(screen.getByText('Mark Check-in')).toBeInTheDocument();
     });
 
-    const checkInButton = screen.getByText('Check-in');
+    const checkInButton = screen.getByText('Mark Check-in');
     fireEvent.click(checkInButton);
 
     expect(appointmentService.updateStatus).toHaveBeenCalledWith(1, { status: 'CHECKED_IN' });
