@@ -55,13 +55,12 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   };
 
   const handlePrint = () => {
-    globalThis.print();
+    window.print();
   };
 
   const filteredPrescriptions = prescriptions.filter(p => p.medicine);
   
   // Pagination Logic
-  // Conservative estimates for row counts to avoid overflow
   const rowsPerPageFirst = 4;
   const rowsPerPageOthers = 10;
   
@@ -69,62 +68,14 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   if (filteredPrescriptions.length === 0) {
     prescriptionPages.push([]);
   } else {
-    // First page
     prescriptionPages.push(filteredPrescriptions.slice(0, rowsPerPageFirst));
-    // Subsequent pages
     for (let i = rowsPerPageFirst; i < filteredPrescriptions.length; i += rowsPerPageOthers) {
       prescriptionPages.push(filteredPrescriptions.slice(i, i + rowsPerPageOthers));
     }
   }
 
-  const BrandingHeader = () => (
-    <div className="flex justify-between items-start border-b-2 border-primary-container pb-8 mb-8">
-      <div className="space-y-1">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white font-extrabold text-xl">V</div>
-          <h1 className="font-headline-xl text-primary leading-tight">{hospital?.name || 'VitalSync Hospital'}</h1>
-        </div>
-        <div className="font-body-md text-on-surface-variant max-w-xs pt-2">
-          {hospital?.address && <p>{hospital.address}</p>}
-          <p>{hospital?.city}{hospital?.state ? `, ${hospital.state}` : ''} {hospital?.pincode}</p>
-        </div>
-      </div>
-      <div className="text-right space-y-1">
-        <p className="font-label-md text-primary">Contact Details</p>
-        <p className="font-body-sm text-on-surface-variant">emergency@vitalsync.health</p>
-        <p className="font-body-sm text-on-surface-variant">www.vitalsync.health</p>
-      </div>
-    </div>
-  );
-
-  const SignatureFooter = () => (
-    <div className="mt-auto pt-8 border-t border-gray-200">
-      <div className="grid grid-cols-3 items-end gap-12">
-        <div className="space-y-4">
-          <p className="font-label-sm text-tertiary">FOLLOW-UP APPOINTMENT</p>
-          <div className="flex items-center gap-2 text-primary font-bold">
-            <span className="material-symbols-outlined">calendar_today</span>
-            <span>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-          </div>
-          <p className="text-body-sm text-on-surface-variant">Please bring this document for the next visit.</p>
-        </div>
-        <div className="text-center">
-
-        </div>
-        <div className="text-right flex flex-col items-end">
-
-          <div className="border-t border-on-surface w-full pt-2">
-            <p className="font-headline-sm">Dr. {doctor?.fullName || 'Marcus Sterling'}</p>
-            <p className="text-body-sm text-tertiary">{doctor?.doctorInfo?.specialization || 'Senior Consultant'}</p>
-            <p className="text-body-sm text-tertiary">Reg No: {doctor?.doctorInfo?.licenseNumber || 'MED-88291-S'}</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-black/60 backdrop-blur-sm overflow-y-auto pt-10 pb-12 no-print-backdrop">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-black/60 backdrop-blur-sm overflow-y-auto pt-10 pb-12 prescription-modal-overlay">
       {/* Backdrop for closing */}
       <div className="fixed inset-0 no-print" onClick={onClose}></div>
       
@@ -146,13 +97,30 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
       </div>
 
       {/* Pages Wrapper */}
-      <div className="flex flex-col gap-8 no-print-backdrop items-center">
+      <div className="flex flex-col gap-8 items-center prescription-pages-container">
         {prescriptionPages.map((pageRows, index) => (
           <div 
             key={index} 
             className="relative w-[210mm] h-[297mm] bg-white shadow-2xl p-[15mm] flex flex-col print-page animate-in fade-in zoom-in duration-300"
           >
-            <BrandingHeader />
+            {/* Header: Branding & Address */}
+            <div className="flex justify-between items-start border-b-2 border-primary-container pb-8 mb-8">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white font-extrabold text-xl">V</div>
+                  <h1 className="font-headline-xl text-primary leading-tight">{hospital?.name || 'VitalSync Hospital'}</h1>
+                </div>
+                <div className="font-body-md text-on-surface-variant max-w-xs pt-2">
+                  {hospital?.address && <p>{hospital.address}</p>}
+                  <p>{hospital?.city}{hospital?.state ? `, ${hospital.state}` : ''} {hospital?.pincode}</p>
+                </div>
+              </div>
+              <div className="text-right space-y-1">
+                <p className="font-label-md text-primary">Contact Details</p>
+                <p className="font-body-sm text-on-surface-variant">emergency@vitalsync.health</p>
+                <p className="font-body-sm text-on-surface-variant">www.vitalsync.health</p>
+              </div>
+            </div>
 
             {/* Content Area */}
             <div className="flex-1 flex flex-col">
@@ -217,12 +185,11 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                 </>
               )}
 
-              {/* Prescription Table - Header only on page 1 or on every page?
-                  Usually, repeating the table header is good for clarity. */}
+              {/* Prescription Table */}
               <div className="flex items-center gap-2 mb-4">
                 <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>prescriptions</span>
                 <h2 className="font-headline-md">
-                  Medication Plan
+                  Medication Plan {prescriptionPages.length > 1 ? `(Page ${index + 1})` : ''}
                 </h2>
               </div>
               <div className="overflow-hidden border border-gray-200 rounded-lg">
@@ -261,7 +228,31 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
               </div>
             </div>
 
-            <SignatureFooter />
+            {/* Footer: Signatures & QR */}
+            <div className="mt-auto pt-8 border-t border-gray-200">
+              <div className="grid grid-cols-3 items-end gap-12">
+                <div className="space-y-4">
+                  <p className="font-label-sm text-tertiary">FOLLOW-UP APPOINTMENT</p>
+                  <div className="flex items-center gap-2 text-primary font-bold">
+                    <span className="material-symbols-outlined">calendar_today</span>
+                    <span>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  <p className="text-body-sm text-on-surface-variant">Please bring this document for the next visit.</p>
+                </div>
+                <div className="text-center">
+
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <div className="mb-2">
+                  </div>
+                  <div className="border-t border-on-surface w-full pt-2">
+                    <p className="font-headline-sm">Dr. {doctor?.fullName || 'Marcus Sterling'}</p>
+                    <p className="text-body-sm text-tertiary">{doctor?.doctorInfo?.specialization || 'Senior Consultant'}</p>
+                    <p className="text-body-sm text-tertiary">Reg No: {doctor?.doctorInfo?.licenseNumber || 'MED-88291-S'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
             
             {/* Page Number Indicator */}
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-tertiary font-mono uppercase tracking-widest">
@@ -280,7 +271,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
 
       <style jsx global>{`
         @media screen {
-          {
+          .print-page {
             margin-bottom: 2rem;
           }
         }
@@ -291,6 +282,11 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             margin: 0;
           }
           
+          html, body {
+            height: auto !important;
+            overflow: visible !important;
+          }
+
           body {
             visibility: hidden;
             background: white !important;
@@ -298,6 +294,27 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             padding: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+          }
+
+          /* The main fixed wrapper of the modal */
+          .prescription-modal-overlay {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
+            display: block !important;
+            visibility: visible !important;
+            background: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            z-index: auto !important;
+          }
+
+          .prescription-pages-container {
+            display: block !important;
+            gap: 0 !important;
           }
 
           .print-page {
@@ -320,18 +337,6 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
           }
 
           .no-print {
-            display: none !important;
-          }
-          
-          .no-print-backdrop {
-            background: none !important;
-            backdrop-filter: none !important;
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-
-          /* Prevent duplicate pages by hiding everything else */
-          #root, .next-route-announcer, [data-nextjs-scroll-focus-boundary] {
             display: none !important;
           }
         }
