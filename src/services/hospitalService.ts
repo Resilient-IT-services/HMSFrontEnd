@@ -27,7 +27,7 @@ export const hospitalService = {
   },
 
   async getById(hospitalId: string): Promise<ApiResponse<HospitalResponse>> {
-    const response = await apiClient.get<ApiResponse<HospitalResponse>>(`/hospitals/${hospitalId}`);
-    return response.data;
+    const { data } = await apiClient.get<ApiResponse<HospitalResponse>>(`/hospitals/${hospitalId}`);
+    return data;
   }
 };

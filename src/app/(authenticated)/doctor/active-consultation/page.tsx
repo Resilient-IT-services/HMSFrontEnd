@@ -6,8 +6,10 @@ import { useSearchParams } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
+import { hospitalService } from '@/services/hospitalService';
 import { RootState } from '@/state/store';
-import { AppointmentResponse, PatientResponse } from '@/types/api';
+import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
+import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 
 interface PrescriptionRow {
   id: string;
@@ -23,7 +25,9 @@ const ActiveConsultationPage = () => {
 
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
+  const [hospital, setHospital] = useState<HospitalResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showPrescription, setShowPrescription] = useState(false);
 
   // Form State
   const [complaint, setComplaint] = useState('');
@@ -52,9 +56,20 @@ const ActiveConsultationPage = () => {
           if (found) {
             setAppointment(found);
             setComplaint(found.notes || '');
+            
+            // Fetch patient details
             const pRes = await patientService.get(found.patientId);
             if (pRes.success && pRes.data) {
               setPatient(pRes.data);
+            }
+
+            // Fetch hospital details from user's current membership or first membership
+            const hospitalId = user?.currentHospitalId || user?.memberships[0]?.hospitalId;
+            if (hospitalId) {
+              const hRes = await hospitalService.getById(hospitalId);
+              if (hRes.success && hRes.data) {
+                setHospital(hRes.data);
+              }
             }
           }
         }
@@ -66,7 +81,7 @@ const ActiveConsultationPage = () => {
     };
 
     fetchData();
-  }, [appointmentId]);
+  }, [appointmentId, user]);
 
   const patientAge = useMemo(() => {
     if (!patient?.dob) return '--';
@@ -243,6 +258,8 @@ const ActiveConsultationPage = () => {
                         <option value="Amoxicillin 500mg">Amoxicillin 500mg</option>
                         <option value="Paracetamol 650mg">Paracetamol 650mg</option>
                         <option value="Ibuprofen 400mg">Ibuprofen 400mg</option>
+                        <option value="Omeprazole 20mg">Omeprazole 20mg</option>
+                        <option value="Hyoscine 10mg">Hyoscine 10mg</option>
                       </select>
                     </div>
                     <div className="col-span-3">
@@ -275,6 +292,7 @@ const ActiveConsultationPage = () => {
                         <option value="Before breakfast">Before breakfast</option>
                         <option value="Before sleep">Before sleep</option>
                         <option value="Empty stomach">Empty stomach</option>
+                        <option value="For acute spasms">For acute spasms</option>
                       </select>
                     </div>
                   </div>
@@ -282,7 +300,10 @@ const ActiveConsultationPage = () => {
               </div>
 
               <div className="mt-8 flex justify-end">
-                <button className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs">
+                <button 
+                  onClick={() => setShowPrescription(true)}
+                  className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
+                >
                   <span className="material-symbols-outlined text-[20px]">print</span> Generate Prescription
                 </button>
               </div>
@@ -290,6 +311,24 @@ const ActiveConsultationPage = () => {
           </div>
         </div>
       </div>
+
+      <DigitalPrescription
+        isOpen={showPrescription}
+        onClose={() => setShowPrescription(false)}
+        patient={patient}
+        doctor={user}
+        hospital={hospital}
+        complaints={complaint}
+        diagnosis={diagnosis}
+        prescriptions={prescriptions}
+        vitals={{
+          heartRate: '78',
+          temp: '98.6',
+          bp: '120/80',
+          weight: '64'
+        }}
+        date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+      />
     </MainLayout>
   );
 };
