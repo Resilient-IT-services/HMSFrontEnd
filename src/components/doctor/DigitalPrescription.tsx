@@ -55,7 +55,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   const filteredPrescriptions = prescriptions.filter(p => p.medicine);
