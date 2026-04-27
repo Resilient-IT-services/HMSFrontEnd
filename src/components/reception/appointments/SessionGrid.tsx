@@ -13,6 +13,8 @@ interface SessionGridProps {
   setSelectedDate: (date: string) => void;
   dateOptions: { iso: string, label: string, active: boolean }[];
   formatLocalTime: (t: string) => string;
+  editableTime: string;
+  setEditableTime: (t: string) => void;
 }
 
 export const SessionGrid: React.FC<SessionGridProps> = ({
@@ -24,7 +26,9 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
   selectedDate,
   setSelectedDate,
   dateOptions,
-  formatLocalTime
+  formatLocalTime,
+  editableTime,
+  setEditableTime
 }) => {
   const getSessionIcon = (startTime: string) => {
     if (startTime < '12:00') return 'wb_twilight';
@@ -39,92 +43,114 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
   };
 
   return (
-    <section className="flex-1 px-8 py-6 overflow-y-auto custom-scrollbar bg-background">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Date Selection */}
-        <div>
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 font-headline-sm">Choose Appointment Date</h2>
-          <div className="flex flex-wrap gap-2">
-            {dateOptions.map((opt) => (
+    <div className="space-y-6">
+      {/* Date Selection */}
+      <div>
+        <label className="block font-bold text-slate-700 mb-2 flex items-center gap-2 text-sm">
+          <span className="material-symbols-outlined text-primary text-base">calendar_today</span>
+          Select Date
+        </label>
+        <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
+          {dateOptions.map((opt) => {
+            const dateObj = new Date(opt.iso);
+            const day = dateObj.getDate();
+            const month = dateObj.toLocaleDateString('en-US', { month: 'short' });
+            const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            return (
               <button
                 key={opt.iso}
                 onClick={() => setSelectedDate(opt.iso)}
-                className={`px-4 py-2 rounded-full font-bold text-sm shadow-sm border transition-all ${
+                className={`flex-shrink-0 flex flex-col items-center justify-center w-16 py-2 border-2 rounded-lg transition-all ${
                   opt.active
-                    ? 'bg-primary-container text-white border-primary-container'
-                    : 'bg-slate-100 text-slate-600 border-transparent hover:border-primary-container/50'
+                    ? 'border-primary bg-orange-50'
+                    : 'border-slate-100 bg-white hover:border-primary/50'
                 }`}
               >
-                {opt.label}
+                <span className={`text-[9px] font-black uppercase ${opt.active ? 'text-primary' : 'text-slate-400'}`}>{month}</span>
+                <span className={`text-base font-black ${opt.active ? 'text-primary' : 'text-slate-900'}`}>{day}</span>
+                <span className={`text-[9px] font-bold ${opt.active ? 'text-primary/70' : 'text-slate-500'}`}>{opt.label === 'Today' ? 'Today' : weekday}</span>
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Session Selection */}
-        <div>
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 font-headline-sm">Select Preferred Session</h2>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {fetchingAvailability ? (
-              <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest animate-pulse">Querying sessions...</div>
-            ) : selectedDoctor ? availability.length === 0 ? (
-              <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest">No active sessions for this date</div>
-            ) : (
-              availability.map((session, idx) => {
-                const isSelected = selectedSession === session;
-                const isDisabled = !session.available;
-                return (
-                  <button
-                    key={idx}
-                    disabled={isDisabled}
-                    onClick={() => setSelectedSession(session)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm shadow-sm border transition-all ${
-                      isSelected
-                        ? 'bg-primary-container text-white border-primary-container'
-                        : (isDisabled
-                        ? 'bg-slate-50 text-slate-400 border-slate-100 cursor-not-allowed opacity-60'
-                        : 'bg-slate-100 text-slate-600 border-transparent hover:border-primary-container/50')
-                    }`}
-                  >
-                    <span className="material-symbols-outlined text-lg">{getSessionIcon(session.startTime)}</span>
-                    <span>{getSessionName(session.startTime)} {formatLocalTime(session.startTime)} - {formatLocalTime(session.endTime)}</span>
-                  </button>
-                );
-              })
-            ) : (
-              <div className="py-2 text-xs text-slate-400 font-bold uppercase tracking-widest">Select a doctor first</div>
-            )}
-          </div>
-
-          {/* Time Slots (Mockup of current selection) */}
-          {selectedSession && (
-            <div className="flex flex-wrap gap-2 pt-1 animate-in slide-in-from-top-1">
-               <button className="px-3 py-1.5 bg-primary-container text-white text-xs font-bold rounded-lg border border-primary-container shadow-sm">
-                 {formatLocalTime(selectedSession.nextSuggestedTime || selectedSession.startTime)} (Suggested)
-               </button>
-            </div>
-          )}
-
-          {/* Subtle Notice */}
-          <p className="mt-4 flex items-center gap-1.5 text-slate-500 text-[12px]">
-            <span className="material-symbols-outlined text-sm text-slate-400">warning</span>
-            Please ensure the patient arrives 15 minutes before the scheduled time.
-          </p>
-        </div>
-
-        {/* Slot Status Indicators */}
-        <div className="pt-2 flex gap-4 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-primary-container"></span> Selected
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-white border border-slate-300"></span> Available
-          </div>
-          <div className="flex items-center gap-1.5 opacity-50">
-            <span className="w-2 h-2 rounded-full bg-slate-100 border border-slate-200"></span> Booked
-          </div>
+            );
+          })}
         </div>
       </div>
-    </section>
+
+      {/* Session Selection */}
+      <div>
+        <label className="block font-bold text-slate-700 mb-3 flex justify-between items-center text-sm">
+          <span className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-base">schedule</span>
+            Available Slots {selectedDate === new Date().toISOString().split('T')[0] ? '(Today)' : ''}
+          </span>
+        </label>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+          {fetchingAvailability ? (
+            <div className="col-span-full py-4 text-center text-slate-400 text-[10px] font-black uppercase tracking-widest animate-pulse border border-dashed border-slate-200 rounded-lg">
+              Querying sessions...
+            </div>
+          ) : selectedDoctor ? availability.length === 0 ? (
+            <div className="col-span-full py-4 text-center text-slate-400 text-[10px] font-black uppercase tracking-widest border border-dashed border-slate-200 rounded-lg">
+              No active sessions
+            </div>
+          ) : (
+            availability.map((session, idx) => {
+              const isSelected = selectedSession === session;
+              const isDisabled = !session.available;
+              return (
+                <button
+                  key={idx}
+                  disabled={isDisabled}
+                  onClick={() => setSelectedSession(session)}
+                  className={`flex flex-col items-center justify-center p-3 border rounded-xl transition-all group ${
+                    isSelected
+                      ? 'border-primary bg-orange-50 ring-1 ring-primary/20'
+                      : (isDisabled
+                      ? 'bg-slate-50 border-slate-100 cursor-not-allowed opacity-50'
+                      : 'border-slate-200 bg-white hover:border-primary/50 hover:bg-slate-50')
+                  }`}
+                >
+                  <span className={`text-sm font-black ${isSelected ? 'text-primary' : 'text-slate-900 group-hover:text-primary transition-colors'}`}>
+                    {formatLocalTime(session.startTime)}
+                  </span>
+                  <span className={`text-[9px] font-bold uppercase tracking-tighter ${isSelected ? 'text-primary/70' : 'text-slate-400'}`}>
+                    {isSelected ? 'Selected' : (isDisabled ? 'Full' : 'Available')}
+                  </span>
+                </button>
+              );
+            })
+          ) : (
+            <div className="col-span-full py-4 text-center text-slate-400 text-[10px] font-black uppercase tracking-widest border border-dashed border-slate-200 rounded-lg">
+              Select doctor first
+            </div>
+          )}
+        </div>
+
+        {/* Editable Time Slot */}
+        {selectedSession && (
+          <div className="mt-4 p-4 bg-primary/5 border border-primary/10 rounded-xl animate-in slide-in-from-top-2">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">Exact Appointment Time</p>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="time" 
+                    value={editableTime}
+                    onChange={(e) => setEditableTime(e.target.value)}
+                    className="bg-white border border-primary/20 rounded-lg px-2 py-1 text-xl font-black text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
+                  />
+                  <span className="material-symbols-outlined text-primary/40 text-sm">edit</span>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Session Period</p>
+                <p className="font-bold text-slate-700 text-sm">{getSessionName(selectedSession.startTime)}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

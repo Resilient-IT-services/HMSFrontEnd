@@ -93,7 +93,7 @@ const DoctorsPage = () => {
             <Eye className="size-4" />
           </button>
           <Link 
-            href={`/reception/appointments/create?doctorId=${row.userId}`}
+            href={`/reception/appointments/create?doctorId=${row.doctorId}`}
             className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
             title="Book Appointment"
           >

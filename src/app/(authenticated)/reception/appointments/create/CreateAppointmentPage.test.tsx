@@ -1,24 +1,16 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+import { useRouter, useSearchParams } from 'next/navigation';
 import CreateAppointmentPage from './page';
+import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { patientService } from '@/services/patientService';
-import { appointmentService } from '@/services/appointmentService';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { LayoutProvider } from '@/context/LayoutContext';
 
-// Mock navigation
 vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
-    back: vi.fn(),
-  })),
-  useSearchParams: vi.fn(() => ({
-    get: vi.fn(),
-  })),
+  useRouter: vi.fn(),
+  useSearchParams: vi.fn(),
 }));
 
-// Mock services
 vi.mock('@/services/doctorService', () => ({
   doctorService: {
     list: vi.fn(),
@@ -35,121 +27,168 @@ vi.mock('@/services/patientService', () => ({
 
 vi.mock('@/services/appointmentService', () => ({
   appointmentService: {
-    list: vi.fn(),
     create: vi.fn(),
   },
 }));
 
-// Mock MainLayout to prevent issues with it
+// Mock MainLayout
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children, title }: any) => (
-    <div data-testid="main-layout">
-      <h1>{title}</h1>
-      {children}
-    </div>
-  )
+  __esModule: true,
+  default: ({ children, title }: any) => <div data-testid="main-layout"><h1>{title}</h1>{children}</div>,
 }));
 
-const mockDoctors = [
-  { userId: 'd1', id: 'd1', fullName: 'Dr. Smith', specialization: 'Cardiology' },
-  { userId: 'd2', id: 'd2', fullName: 'Dr. Jones', specialization: 'Neurology' },
-];
+// Mock triggerGlobalToast
+vi.mock('@/components/ui/Toast', () => ({
+  triggerGlobalToast: vi.fn(),
+}));
 
-const mockPatients = [
-  { id: 'p1', fullName: 'John Doe', phone: '1234567890' },
+const mockPush = vi.fn();
+const mockBack = vi.fn();
+
+const mockDoctors = [
+  { doctorId: 'doctor-1', fullName: 'Dr. Smith', specialization: 'Cardiology', userId: 'user-1', consultationFee: 500 },
 ];
 
 const mockAvailability = {
   sessions: [
-    {
-      startTime: '22:00',
-      endTime: '23:59',
-      available: true,
-      currentBookings: 0,
-      maxPatients: 10,
-    }
-  ]
+    { startTime: '10:00', endTime: '12:00', available: true, maxPatients: 10, currentBookings: 0 },
+    { startTime: '14:00', endTime: '16:00', available: true, maxPatients: 10, currentBookings: 0 },
+  ],
+};
+
+const mockPatient = {
+  id: 'patient-1',
+  fullName: 'John Doe',
+  phone: '1234567890',
+  gender: 'MALE',
+  dob: '1990-01-01',
 };
 
 describe('CreateAppointmentPage', () => {
-  const mockPush = vi.fn();
-
   beforeEach(() => {
     vi.clearAllMocks();
-    (useRouter as any).mockReturnValue({ push: mockPush, back: vi.fn() });
-    (useSearchParams as any).mockReturnValue({ get: vi.fn() });
-    
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-04-27T09:00:00'));
+
+    (useRouter as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      push: mockPush,
+      back: mockBack,
     });
-    (doctorService.getAvailability as any).mockResolvedValue({
-      success: true,
-      data: mockAvailability
+
+    (useSearchParams as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      get: vi.fn(() => null),
     });
-    (appointmentService.list as any).mockResolvedValue({
+
+    (doctorService.list as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
-      data: { content: [] }
+      data: { content: mockDoctors },
     });
-    (patientService.list as any).mockResolvedValue({
+
+    (doctorService.getAvailability as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
-      data: { content: mockPatients }
+      data: mockAvailability,
+    });
+
+    (patientService.list as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      success: true,
+      data: { content: [mockPatient] },
+    });
+
+    (patientService.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      success: true,
+      data: mockPatient,
+    });
+
+    (appointmentService.create as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      success: true,
     });
   });
 
-  it('renders correctly and fetches initial data', async () => {
-    render(
-      <LayoutProvider>
-        <CreateAppointmentPage />
-      </LayoutProvider>
-    );
-    
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Appointment Scheduling/i, level: 1 })).toBeInTheDocument();
-    });
-
-    expect(screen.getAllByText('Dr. Smith')[0]).toBeInTheDocument();
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
-  it('submits the form successfully', async () => {
-    (appointmentService.create as any).mockResolvedValue({ success: true });
-    
-    render(
-      <LayoutProvider>
-        <CreateAppointmentPage />
-      </LayoutProvider>
-    );
+  it('renders the fast-track booking flow', async () => {
+    render(<CreateAppointmentPage />);
 
     await waitFor(() => {
-      expect(screen.getAllByText('Dr. Smith')[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/Fast-Track Appointment/i).length).toBeGreaterThan(0);
     });
 
-    // Select doctor
-    fireEvent.click(screen.getAllByText('Dr. Smith')[0]);
+    expect(screen.getByLabelText(/Patient/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Doctor/i)).toBeInTheDocument();
+  });
 
-    // Select session
-    await waitFor(() => {
-      expect(screen.getByText(/22:00 - 23:59/)).toBeInTheDocument();
-    });
-    fireEvent.click(screen.getByText(/22:00 - 23:59/));
+  it('submits an appointment after selecting patient, doctor, and slot', async () => {
+    render(<CreateAppointmentPage />);
 
-    // Search for patient
-    const searchInput = screen.getByPlaceholderText(/Search by name or phone/i);
-    fireEvent.change(searchInput, { target: { value: 'John' } });
+    // Select Patient
+    const patientInput = screen.getByLabelText(/Patient/i);
+    fireEvent.change(patientInput, { target: { value: 'John' } });
 
-    // Select patient from search results
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
     });
+
     fireEvent.click(screen.getByText('John Doe'));
 
-    // Confirm appointment
-    const confirmButton = screen.getByText(/Confirm Appointment/i);
-    fireEvent.click(confirmButton);
+    await waitFor(() => {
+      expect(doctorService.getAvailability).toHaveBeenCalledWith('doctor-1', expect.any(String));
+    });
+
+    // Select slot
+    await waitFor(() => {
+      expect(screen.getByText('10:00')).toBeInTheDocument();
+    });
+    
+    fireEvent.click(screen.getByText('10:00'));
+    
+    // Confirm booking
+    const confirmButtons = screen.getAllByRole('button', { name: /Confirm (Booking|Appointment)/i });
+    fireEvent.click(confirmButtons[0]);
 
     await waitFor(() => {
-      expect(appointmentService.create).toHaveBeenCalled();
-      expect(mockPush).toHaveBeenCalledWith('/reception/appointments');
+      expect(appointmentService.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          patientId: 'patient-1',
+          doctorId: 'doctor-1',
+          appointmentTime: expect.stringContaining('T10:00:00'),
+        })
+      );
+    });
+  });
+
+  it('correctly suggests time 5 minutes in future if current time is after session start', async () => {
+    vi.setSystemTime(new Date('2026-04-27T11:15:00'));
+    
+    render(<CreateAppointmentPage />);
+    
+    await waitFor(() => {
+      expect(screen.getByText('10:00')).toBeInTheDocument();
+    });
+    
+    fireEvent.click(screen.getByText('10:00'));
+    
+    await waitFor(() => {
+      const timeInput = screen.getByDisplayValue('11:20');
+      expect(timeInput).toBeInTheDocument();
+    });
+  });
+
+  it('prefills patient and doctor from query params', async () => {
+    (useSearchParams as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      get: vi.fn((key: string) => {
+        if (key === 'patientId') return 'patient-1';
+        if (key === 'doctorId') return 'doctor-1';
+        return null;
+      }),
+    });
+
+    render(<CreateAppointmentPage />);
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('John Doe')).toBeInTheDocument();
+      expect(screen.getByDisplayValue(/Dr. Smith/i)).toBeInTheDocument();
     });
   });
 });
