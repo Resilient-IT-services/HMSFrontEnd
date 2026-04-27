@@ -126,61 +126,52 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             <div className="flex-1 flex flex-col">
               {index === 0 && (
                 <>
-                  {/* Patient Information - Only on Page 1 */}
-                  <div className="grid grid-cols-4 gap-6 bg-surface-container-lowest border border-outline-variant p-6 rounded-xl mb-8">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-sm text-tertiary">PATIENT NAME</span>
-                      <span className="font-headline-sm text-on-surface">{patient?.fullName || 'N/A'}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-sm text-tertiary">AGE / GENDER</span>
-                      <span className="font-headline-sm text-on-surface">{patientAge()} / {patient?.gender || 'N/A'}</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-sm text-tertiary">WEIGHT</span>
-                      <span className="font-headline-sm text-on-surface">{vitals.weight || '--'}kg</span>
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-label-sm text-tertiary">DATE</span>
-                      <span className="font-headline-sm text-on-surface">{date}</span>
-                    </div>
-                  </div>
+                  <div className="border border-gray-400 rounded-lg px-5 py-4 flex justify-between items-center mb-6 bg-gray-50">
 
-                  {/* Vitals Section - Only on Page 1 */}
-                  <div className="flex gap-12 mb-10 px-2">
-                    <div className="flex items-center gap-4">
-                      <span className="material-symbols-outlined text-primary">favorite</span>
-                      <div>
-                        <p className="font-label-sm text-tertiary">HEART RATE</p>
-                        <p className="font-headline-md">{vitals.heartRate} <span className="text-body-sm font-normal">bpm</span></p>
-                      </div>
+                    <div className="flex flex-col">
+        <span className="text-[10px] uppercase text-gray-500 font-bold">
+            Patient
+        </span>
+                      <span className="font-semibold">
+            {patient?.fullName} / {patientAge()} yrs / {vitals.weight} kg
+        </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="material-symbols-outlined text-primary">thermostat</span>
-                      <div>
-                        <p className="font-label-sm text-tertiary">TEMP</p>
-                        <p className="font-headline-md">{vitals.temp} <span className="text-body-sm font-normal">°F</span></p>
-                      </div>
+
+                    <div className="flex gap-6 items-center text-sm">
+                      <span>❤️ {vitals.heartRate} bpm</span>
+                      <span>🌡 {vitals.temp}</span>
+                      <span>🩸 {vitals.bp}</span>
                     </div>
-                    <div className="flex items-center gap-4">
-                      <span className="material-symbols-outlined text-primary">blood_pressure</span>
-                      <div>
-                        <p className="font-label-sm text-tertiary">BLOOD PRESSURE</p>
-                        <p className="font-headline-md">{vitals.bp} <span className="text-body-sm font-normal">mmHg</span></p>
-                      </div>
+
+                    <div className="text-right">
+        <span className="text-[10px] uppercase text-gray-500 font-bold">
+            Date
+        </span>
+                      <p className="font-semibold">{date}</p>
                     </div>
                   </div>
 
                   {/* Clinical Observations - Only on Page 1 */}
-                  <div className="grid grid-cols-2 gap-8 mb-10">
+                  <div className="flex flex-col gap-6 mb-10">
+
                     <div className="border-l-4 border-outline-variant pl-4 py-2">
-                      <h3 className="font-label-sm text-tertiary mb-2 uppercase tracking-wider">Chief Complaints</h3>
-                      <p className="font-body-lg text-on-surface italic">"{complaints || 'No complaints recorded'}"</p>
+                      <h3 className="font-label-sm text-tertiary mb-2 uppercase tracking-wider">
+                        Chief Complaints
+                      </h3>
+                      <p className="font-body-lg text-on-surface italic">
+                        "{complaints || 'No complaints recorded'}"
+                      </p>
                     </div>
+
                     <div className="border-l-4 border-primary pl-4 py-2">
-                      <h3 className="font-label-sm text-primary mb-2 uppercase tracking-wider">Diagnosis</h3>
-                      <p className="font-headline-sm text-on-surface">{diagnosis || 'General Checkup'}</p>
+                      <h3 className="font-label-sm text-primary mb-2 uppercase tracking-wider">
+                        Diagnosis
+                      </h3>
+                      <p className="font-headline-sm text-on-surface">
+                        {diagnosis || 'General Checkup'}
+                      </p>
                     </div>
+
                   </div>
                 </>
               )}
