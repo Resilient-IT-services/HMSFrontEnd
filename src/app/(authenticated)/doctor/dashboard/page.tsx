@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
@@ -82,10 +83,12 @@ const DoctorDashboard = () => {
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: '\'FILL\' 1' }}>play_arrow</span>
                   Start Next Consultation
                 </button>
-                <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 active:scale-95 transition-all">
-                  <span className="material-symbols-outlined">list_alt</span>
-                  Go to Queue
-                </button>
+                <Link href="/doctor/patient-queue">
+                  <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 active:scale-95 transition-all">
+                    <span className="material-symbols-outlined">list_alt</span>
+                    Go to Queue
+                  </button>
+                </Link>
               </div>
             </div>
             <div className="hidden lg:block absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-orange-100/50 to-transparent" />

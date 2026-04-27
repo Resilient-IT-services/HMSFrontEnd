@@ -1,105 +1,104 @@
 <!DOCTYPE html>
 
 <html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "on-tertiary-container": "#2f3234",
-                    "on-error": "#ffffff",
-                    "inverse-surface": "#2e3035",
-                    "on-tertiary-fixed": "#191c1e",
-                    "surface-container-highest": "#e2e2e8",
-                    "surface-container-high": "#e7e8ee",
-                    "on-surface-variant": "#594138",
-                    "surface": "#f9f9ff",
-                    "primary": "#a83900",
-                    "inverse-on-surface": "#f0f0f6",
-                    "on-primary-container": "#5c1c00",
-                    "on-secondary": "#ffffff",
-                    "outline-variant": "#e2bfb3",
-                    "inverse-primary": "#ffb59a",
-                    "surface-dim": "#d9dadf",
-                    "on-tertiary": "#ffffff",
-                    "surface-variant": "#e2e2e8",
-                    "on-primary": "#ffffff",
-                    "primary-fixed": "#ffdbce",
-                    "on-background": "#191c20",
-                    "secondary-fixed-dim": "#bcc7de",
-                    "error": "#ba1a1a",
-                    "surface-container": "#ededf3",
-                    "primary-container": "#ff6b2b",
-                    "surface-tint": "#a83900",
-                    "secondary": "#545f73",
-                    "on-surface": "#191c20",
-                    "on-secondary-fixed-variant": "#3c475a",
-                    "surface-container-lowest": "#ffffff",
-                    "secondary-container": "#d8e3fb",
-                    "tertiary-fixed-dim": "#c4c7c9",
-                    "primary-fixed-dim": "#ffb59a",
-                    "outline": "#8d7167",
-                    "on-secondary-fixed": "#111c2d",
-                    "on-secondary-container": "#5a6579",
-                    "on-primary-fixed": "#380d00",
-                    "on-tertiary-fixed-variant": "#444749",
-                    "tertiary-fixed": "#e1e3e5",
-                    "tertiary-container": "#979a9c",
-                    "surface-container-low": "#f3f3f9",
-                    "secondary-fixed": "#d8e3fb",
-                    "on-primary-fixed-variant": "#802a00",
-                    "on-error-container": "#93000a",
-                    "tertiary": "#5c5f61",
-                    "background": "#f9f9ff",
-                    "surface-bright": "#f9f9ff",
-                    "error-container": "#ffdad6"
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@500;600;700;800&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#2f3234",
+                        "on-error": "#ffffff",
+                        "inverse-surface": "#2e3035",
+                        "on-tertiary-fixed": "#191c1e",
+                        "surface-container-highest": "#e2e2e8",
+                        "surface-container-high": "#e7e8ee",
+                        "on-surface-variant": "#594138",
+                        "surface": "#f9f9ff",
+                        "primary": "#a83900",
+                        "inverse-on-surface": "#f0f0f6",
+                        "on-primary-container": "#5c1c00",
+                        "on-secondary": "#ffffff",
+                        "outline-variant": "#e2bfb3",
+                        "inverse-primary": "#ffb59a",
+                        "surface-dim": "#d9dadf",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#e2e2e8",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#ffdbce",
+                        "on-background": "#191c20",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "error": "#ba1a1a",
+                        "surface-container": "#ededf3",
+                        "primary-container": "#ff6b2b",
+                        "surface-tint": "#a83900",
+                        "secondary": "#545f73",
+                        "on-surface": "#191c20",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-container": "#d8e3fb",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "primary-fixed-dim": "#ffb59a",
+                        "outline": "#8d7167",
+                        "on-secondary-fixed": "#111c2d",
+                        "on-secondary-container": "#5a6579",
+                        "on-primary-fixed": "#380d00",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "tertiary-fixed": "#e1e3e5",
+                        "tertiary-container": "#979a9c",
+                        "surface-container-low": "#f3f3f9",
+                        "secondary-fixed": "#d8e3fb",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-error-container": "#93000a",
+                        "tertiary": "#5c5f61",
+                        "background": "#f9f9ff",
+                        "surface-bright": "#f9f9ff",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "container-padding": "32px",
+                        "section-gap": "24px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "margin-page": "40px",
+                        "component-gap": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-sm": ["Manrope"],
+                        "body-sm": ["Inter"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+                    }
+                },
             },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
-            },
-            "spacing": {
-                    "container-padding": "32px",
-                    "section-gap": "24px",
-                    "base": "8px",
-                    "gutter": "24px",
-                    "margin-page": "40px",
-                    "component-gap": "16px"
-            },
-            "fontFamily": {
-                    "label-sm": ["Inter"],
-                    "body-md": ["Inter"],
-                    "body-lg": ["Inter"],
-                    "headline-sm": ["Manrope"],
-                    "body-sm": ["Inter"],
-                    "label-md": ["Inter"],
-                    "headline-xl": ["Manrope"],
-                    "headline-md": ["Manrope"]
-            },
-            "fontSize": {
-                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
-                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                    "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
-                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
-                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
-                    "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
-                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
-            }
-          },
-        },
-      }
+        }
     </script>
-<style>
+    <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
@@ -110,302 +109,241 @@
 </head>
 <body class="font-body-md text-on-surface">
 <aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 py-4 z-40">
-<div class="px-6 mb-8 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
-<span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">medical_services</span>
-</div>
-<div>
-<h1 class="text-lg font-black text-orange-600 leading-tight">MedNexus Pro</h1>
-<p class="text-xs text-gray-500 font-manrope">General Surgery</p>
-</div>
-</div>
-<nav class="flex-1 px-3 space-y-1">
-<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
-<span class="material-symbols-outlined">dashboard</span> Dashboard
-            </a>
-<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
-<span class="material-symbols-outlined">group</span> Patient Queue
-            </a>
-<a class="bg-orange-50 dark:bg-orange-950/30 text-orange-600 font-bold border-r-4 border-orange-600 px-4 py-3 flex items-center gap-3 transition-all duration-200 ease-in-out font-manrope text-sm" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stethoscope</span> Consultation
-            </a>
-<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
-<span class="material-symbols-outlined">history_edu</span> History
-            </a>
-<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
-<span class="material-symbols-outlined">description</span> Prescriptions
-            </a>
-</nav>
-<div class="mt-auto px-3 border-t border-gray-100 dark:border-gray-800 pt-4 space-y-1">
-<button class="w-full bg-red-50 text-red-600 py-3 px-4 rounded-xl font-label-md flex items-center gap-2 justify-center mb-4 active:scale-95 transition-transform">
-<span class="material-symbols-outlined text-[18px]">emergency</span> Emergencies
-            </button>
-<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
-<span class="material-symbols-outlined">settings</span> Settings
-            </a>
-<a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
-<span class="material-symbols-outlined">logout</span> Logout
-            </a>
-</div>
+    <div class="px-6 mb-8 flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+            <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">medical_services</span>
+        </div>
+        <div>
+            <h1 class="text-lg font-black text-orange-600 leading-tight">MedNexus Pro</h1>
+            <p class="text-xs text-gray-500 font-manrope">General Surgery</p>
+        </div>
+    </div>
+    <nav class="flex-1 px-3 space-y-1">
+        <a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined">dashboard</span> Dashboard
+        </a>
+        <a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined">group</span> Patient Queue
+        </a>
+        <a class="bg-orange-50 dark:bg-orange-950/30 text-orange-600 font-bold border-r-4 border-orange-600 px-4 py-3 flex items-center gap-3 transition-all duration-200 ease-in-out font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stethoscope</span> Consultation
+        </a>
+        <a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined">history_edu</span> History
+        </a>
+        <a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined">description</span> Prescriptions
+        </a>
+    </nav>
+    <div class="mt-auto px-3 border-t border-gray-100 dark:border-gray-800 pt-4 space-y-1">
+        <button class="w-full bg-red-50 text-red-600 py-3 px-4 rounded-xl font-label-md flex items-center gap-2 justify-center mb-4 active:scale-95 transition-transform">
+            <span class="material-symbols-outlined text-[18px]">emergency</span> Emergencies
+        </button>
+        <a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined">settings</span> Settings
+        </a>
+        <a class="text-gray-600 dark:text-gray-400 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-orange-600 transition-all duration-200 ease-in-out rounded-lg font-manrope text-sm" href="#">
+            <span class="material-symbols-outlined">logout</span> Logout
+        </a>
+    </div>
 </aside>
 <header class="md:ml-64 flex justify-between items-center px-6 py-2 w-full sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-<div class="flex items-center gap-4">
-<button class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
-<span class="material-symbols-outlined">menu</span>
-</button>
-<div class="relative hidden sm:block">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
-<input class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-lg font-manrope text-sm w-64 focus:ring-2 focus:ring-orange-500" placeholder="Search patient ID, name..." type="text"/>
-</div>
-</div>
-<div class="flex items-center gap-4">
-<div class="flex gap-2">
-<button class="p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-full active:scale-95 transition-transform">
-<span class="material-symbols-outlined">notifications</span>
-</button>
-<button class="p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-full active:scale-95 transition-transform">
-<span class="material-symbols-outlined">help_outline</span>
-</button>
-</div>
-<div class="h-8 w-[1px] bg-gray-200 mx-1"></div>
-<div class="flex items-center gap-3 pl-2">
-<img alt="Doctor Avatar" class="w-9 h-9 rounded-full object-cover border border-gray-200" data-alt="professional male doctor portrait in white lab coat with stethoscope around neck in bright clinical hallway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5sEvhEKdz_KFVxWd0MqBUn4nB-l-Hv8nu9GrR13ZTQTRlgphCDxcaIKnJsFHvmvS755nAPZpnPqk6aChAvmguhKTDu6fSQaKTP2IfFhNCSciSE29n7zizfleK_666gakq65x-hR84MeK_W3eJ3kBN8SF18k_smhmzeYYzG1LlMQLBSPxQ9Xb6yA7KN0rtZfaYpc76ngpKlTPI4DP_D7NMwvdV0js1DfbY7GdJTvOcOzEKSz6hAoQTDTr1jXGm7jWiYG_ygPjo6dc"/>
-<div class="hidden lg:block">
-<p class="font-manrope text-sm font-bold text-gray-900 dark:text-white leading-none">Dr. Alaric Thorne</p>
-<p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider mt-1">Chief Surgeon</p>
-</div>
-</div>
-</div>
+    <div class="flex items-center gap-4">
+        <button class="md:hidden p-2 hover:bg-gray-100 rounded-lg">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="relative hidden sm:block">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+            <input class="pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border-none rounded-lg font-manrope text-sm w-64 focus:ring-2 focus:ring-orange-500" placeholder="Search patient ID, name..." type="text"/>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="flex gap-2">
+            <button class="p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-full active:scale-95 transition-transform">
+                <span class="material-symbols-outlined">notifications</span>
+            </button>
+        </div>
+        <div class="h-8 w-[1px] bg-gray-200 mx-1"></div>
+        <div class="flex items-center gap-3 pl-2">
+            <img alt="Doctor Avatar" class="w-9 h-9 rounded-full object-cover border border-gray-200" data-alt="professional male doctor portrait in white lab coat with stethoscope around neck in bright clinical hallway" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5sEvhEKdz_KFVxWd0MqBUn4nB-l-Hv8nu9GrR13ZTQTRlgphCDxcaIKnJsFHvmvS755nAPZpnPqk6aChAvmguhKTDu6fSQaKTP2IfFhNCSciSE29n7zizfleK_666gakq65x-hR84MeK_W3eJ3kBN8SF18k_smhmzeYYzG1LlMQLBSPxQ9Xb6yA7KN0rtZfaYpc76ngpKlTPI4DP_D7NMwvdV0js1DfbY7GdJTvOcOzEKSz6hAoQTDTr1jXGm7jWiYG_ygPjo6dc"/>
+            <div class="hidden lg:block">
+                <p class="font-manrope text-sm font-bold text-gray-900 dark:text-white leading-none">Dr. Alaric Thorne</p>
+                <p class="text-[10px] text-gray-500 font-medium uppercase tracking-wider mt-1">Chief Surgeon</p>
+            </div>
+        </div>
+    </div>
 </header>
-<main class="md:ml-64 p-6 lg:p-10 bg-surface">
-<div class="max-w-[1440px] mx-auto">
-<div class="flex flex-col lg:flex-row gap-section-gap items-start mb-8">
-<div class="flex-1">
-<nav class="flex items-center gap-2 text-gray-500 mb-2 font-body-sm">
-<span class="material-symbols-outlined text-sm">home</span>
-<span>/</span>
-<span>Consultation</span>
-<span>/</span>
-<span class="text-primary font-medium">Active Session</span>
-</nav>
-<h2 class="font-headline-xl text-on-surface">Active Consultation</h2>
-</div>
-<div class="flex items-center gap-3">
-<div class="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1.5 rounded-lg font-label-md border border-green-100">
-<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        Consultation Live
+<main class="md:ml-64 p-6 lg:p-10 bg-surface min-h-[calc(100vh-57px)]">
+    <div class="max-w-[1440px] mx-auto">
+        <div class="flex flex-col lg:flex-row justify-between items-start mb-6 gap-4">
+            <div>
+                <nav class="flex items-center gap-2 text-gray-500 mb-2 font-body-sm">
+                    <span class="material-symbols-outlined text-sm">home</span>
+                    <span>/</span>
+                    <span>Consultation</span>
+                    <span>/</span>
+                    <span class="text-primary font-medium">Active Session</span>
+                </nav>
+                <div class="flex items-center gap-4">
+                    <h2 class="font-headline-xl text-on-surface">Active Consultation</h2>
+                    <div class="h-8 w-[1px] bg-gray-300 hidden sm:block"></div>
+                    <div class="flex items-center gap-3 text-on-surface-variant">
+                        <span class="font-manrope font-bold text-lg">Evelyn Montgomery</span>
+                        <span class="text-sm font-medium">68 Yrs</span>
+                        <span class="text-sm font-medium">64 Kg</span>
+                        <span class="text-sm font-medium">Female</span>
                     </div>
-<p class="font-manrope text-sm text-gray-500 font-medium">Start time: 09:42 AM</p>
-</div>
-</div>
-<div class="grid grid-cols-12 gap-gutter">
-<div class="col-span-12 lg:col-span-4 space-y-section-gap">
-<div class="bg-white dark:bg-gray-900 rounded-xl border border-outline-variant p-6 overflow-hidden relative">
-<div class="absolute top-0 right-0 w-32 h-32 bg-orange-50 -mr-16 -mt-16 rounded-full opacity-50"></div>
-<div class="relative flex flex-col items-center text-center mb-6">
-<div class="w-24 h-24 rounded-full border-4 border-white shadow-lg overflow-hidden mb-4">
-<img alt="Patient Avatar" class="w-full h-full object-cover" data-alt="close up headshot of an elderly woman with kind eyes and gray hair in a soft lit indoor environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdGIzEDeipbizuZgtcoI0ObkMsMsEEDnWojZexFCOQvJ177OSNC-8Z1fC9ENsTk10FCLlM6OAdG-XlvkKsD1Gl0DPqgA1hMa7Q-aG0OfzVVpskZYOk4ELCcaE8k0VGORTqzkZ_n9QqfTHPVzOs8mJUrpKdQGrbppMVz0VYYlYXDPi4ChQexuEW9IJG5X9jrV_2H_yswU2jiMgOaArq_soTEYcQfAJhfqNWpGUPPj_Bm3nZReu1VTTgOjvU5ndE1BTE6TJdPc98k50"/>
-</div>
-<h3 class="font-headline-md text-on-surface mb-1">Evelyn Montgomery</h3>
-<p class="text-gray-500 font-label-md uppercase tracking-widest text-[10px]">Patient ID: NEX-88219</p>
-</div>
-<div class="grid grid-cols-3 gap-2 mb-6">
-<div class="bg-surface-container-low p-3 rounded-lg text-center">
-<p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Age</p>
-<p class="font-manrope font-bold text-on-surface">68 Yrs</p>
-</div>
-<div class="bg-surface-container-low p-3 rounded-lg text-center">
-<p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Blood</p>
-<p class="font-manrope font-bold text-on-surface">A+</p>
-</div>
-<div class="bg-surface-container-low p-3 rounded-lg text-center">
-<p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Weight</p>
-<p class="font-manrope font-bold text-on-surface">64 Kg</p>
-</div>
-</div>
-<div class="space-y-4">
-<div>
-<h4 class="font-label-md text-gray-400 uppercase mb-2 text-xs flex items-center gap-2">
-<span class="material-symbols-outlined text-[16px]">history</span> Last Visit
-                                </h4>
-<p class="font-body-md text-on-surface font-semibold">14 Oct 2023 - Routine Checkup</p>
-</div>
-<div>
-<h4 class="font-label-md text-gray-400 uppercase mb-2 text-xs flex items-center gap-2">
-<span class="material-symbols-outlined text-[16px]">medical_information</span> Primary Concern
-                                </h4>
-<p class="font-body-md text-on-surface font-semibold">Chronic Post-Surgical Abdominal Pain</p>
-</div>
-</div>
-</div>
-<div class="bg-white dark:bg-gray-900 rounded-xl border border-red-100 overflow-hidden">
-<div class="bg-red-50 px-6 py-3 border-b border-red-100 flex items-center justify-between">
-<h3 class="font-headline-sm text-red-700 flex items-center gap-2">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span> Clinical Alerts
-                            </h3>
-<span class="bg-red-200 text-red-800 text-[10px] font-bold px-2 py-0.5 rounded-full">2 CRITICAL</span>
-</div>
-<div class="p-6 space-y-4">
-<div class="flex items-start gap-4 p-4 bg-red-50/50 rounded-xl border-l-4 border-red-500">
-<div class="bg-white p-2 rounded-lg shadow-sm">
-<span class="material-symbols-outlined text-red-500">pill</span>
-</div>
-<div>
-<h4 class="font-label-md text-red-800">Severe Penicillin Allergy</h4>
-<p class="text-xs text-red-600 mt-1">Anaphylaxis risk. Avoid all Beta-lactams.</p>
-</div>
-</div>
-<div class="flex items-start gap-4 p-4 bg-orange-50/50 rounded-xl border-l-4 border-orange-500">
-<div class="bg-white p-2 rounded-lg shadow-sm">
-<span class="material-symbols-outlined text-orange-500">egg</span>
-</div>
-<div>
-<h4 class="font-label-md text-orange-800">Latex Sensitivity</h4>
-<p class="text-xs text-orange-600 mt-1">Mild contact dermatitis. Use non-latex gloves.</p>
-</div>
-</div>
-</div>
-</div>
-<div class="bg-surface-container rounded-xl p-6">
-<h4 class="font-headline-sm mb-4">Vital Signs</h4>
-<div class="space-y-4">
-<div class="flex items-center justify-between bg-white p-3 rounded-lg border border-outline-variant">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary">favorite</span>
-<span class="font-label-md text-gray-600">Heart Rate</span>
-</div>
-<span class="font-manrope font-bold">78 <span class="text-[10px] text-gray-400 font-normal">BPM</span></span>
-</div>
-<div class="flex items-center justify-between bg-white p-3 rounded-lg border border-outline-variant">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-blue-500">device_thermostat</span>
-<span class="font-label-md text-gray-600">Temp</span>
-</div>
-<span class="font-manrope font-bold">98.6 <span class="text-[10px] text-gray-400 font-normal">°F</span></span>
-</div>
-<div class="flex items-center justify-between bg-white p-3 rounded-lg border border-outline-variant">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-green-500">blood_pressure</span>
-<span class="font-label-md text-gray-600">BP</span>
-</div>
-<span class="font-manrope font-bold">120/80 <span class="text-[10px] text-gray-400 font-normal">mmHg</span></span>
-</div>
-</div>
-</div>
-</div>
-<div class="col-span-12 lg:col-span-8">
-<div class="bg-white dark:bg-gray-900 rounded-xl border border-outline-variant h-full flex flex-col">
-<div class="border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between bg-gray-50/30">
-<div class="flex gap-4">
-<button class="px-4 py-2 border-b-2 border-primary text-primary font-bold font-label-md">Current SOAP Note</button>
-<button class="px-4 py-2 text-gray-500 font-label-md hover:text-gray-700 transition-colors">Lab Results</button>
-<button class="px-4 py-2 text-gray-500 font-label-md hover:text-gray-700 transition-colors">Imaging</button>
-</div>
-<div class="flex items-center gap-2 text-xs text-gray-400 font-medium italic">
-<span class="material-symbols-outlined text-[14px]">cloud_done</span> Autosaved 2 min ago
+                </div>
+            </div>
+            <div class="bg-white p-3 rounded-xl border border-outline-variant shadow-sm flex items-center gap-6">
+                <div class="flex flex-col">
+                    <span class="text-[10px] uppercase font-bold text-gray-400">Vitals</span>
+                    <div class="flex gap-4 items-center">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-primary text-sm">favorite</span>
+                            <span class="font-manrope font-bold text-sm">78</span>
+                        </div>
+                        <div class="flex items-center gap-1 border-l pl-4 border-gray-100">
+                            <span class="material-symbols-outlined text-blue-500 text-sm">device_thermostat</span>
+                            <span class="font-manrope font-bold text-sm">98.6</span>
+                        </div>
+                        <div class="flex items-center gap-1 border-l pl-4 border-gray-100">
+                            <span class="material-symbols-outlined text-green-500 text-sm">blood_pressure</span>
+                            <span class="font-manrope font-bold text-sm">120/80</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="grid grid-cols-12 gap-gutter">
+            <div class="col-span-12 lg:col-span-6 space-y-6">
+                <div class="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-headline-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">record_voice_over</span> Patient Complaint
+                        </h3>
+                        <button class="p-1 hover:bg-gray-100 rounded text-gray-400"><span class="material-symbols-outlined text-[18px]">mic</span></button>
+                    </div>
+                    <textarea class="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md leading-relaxed resize-none" placeholder="Enter patient symptoms and complaints here..."></textarea>
+                </div>
+                <div class="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-headline-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">medical_information</span> Diagnosis
+                        </h3>
+                        <button class="p-1 hover:bg-gray-100 rounded text-gray-400"><span class="material-symbols-outlined text-[18px]">search</span></button>
+                    </div>
+                    <textarea class="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md leading-relaxed resize-none" placeholder="Enter final clinical diagnosis and assessment..."></textarea>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        <span class="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-xs font-bold">R10.9 Abdominal pain <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span></span>
+                        <button class="text-xs font-bold text-gray-400 hover:text-primary transition-colors flex items-center gap-1">+ Add ICD-10 Code</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-span-12 lg:col-span-6">
+                <div class="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm h-full flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="font-headline-sm text-on-surface flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">description</span> Prescriptions
+                        </h3>
+                        <button class="text-sm font-bold text-primary flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">add</span> Add Row
+                        </button>
+                    </div>
+                    <div class="flex-1 space-y-4">
+                        <div class="grid grid-cols-12 gap-3 pb-3 border-b border-gray-50">
+                            <div class="col-span-5">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Amoxicillin 500mg</option>
+                                    <option>Paracetamol 650mg</option>
+                                    <option>Ibuprofen 400mg</option>
+                                </select>
                             </div>
-</div>
-<div class="p-8 flex-1 space-y-8">
-<div>
-<label class="block font-label-md text-on-surface-variant mb-2 uppercase text-[11px] tracking-widest">Chief Complaints</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-4 text-gray-300">record_voice_over</span>
-<textarea class="w-full min-h-[100px] pl-12 pr-4 py-3 bg-white border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-body-md placeholder:text-gray-300" placeholder="e.g., Persistent abdominal sharp pain, localized in lower right quadrant..."></textarea>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
-<div>
-<label class="block font-label-md text-on-surface-variant mb-2 uppercase text-[11px] tracking-widest">Diagnosis (ICD-10)</label>
-<div class="relative">
-<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-300">search</span>
-<input class="w-full pl-12 pr-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary transition-all font-body-md" placeholder="Search codes..." type="text"/>
-</div>
-<div class="mt-3 flex flex-wrap gap-2">
-<span class="inline-flex items-center gap-1 bg-primary/10 text-primary px-2 py-1 rounded-md text-[11px] font-bold">R10.9 Abdominal pain <span class="material-symbols-outlined text-[14px] cursor-pointer">close</span></span>
-<span class="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-[11px] font-bold">+ Add Code</span>
-</div>
-</div>
-<div>
-<label class="block font-label-md text-on-surface-variant mb-2 uppercase text-[11px] tracking-widest">Prognosis</label>
-<select class="w-full px-4 py-3 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary transition-all font-body-md bg-white">
-<option>Stable - Expect Recovery</option>
-<option>Guarded - Monitoring Required</option>
-<option>Chronic - Long-term Care</option>
-</select>
-</div>
-</div>
-<div>
-<div class="flex items-center justify-between mb-2">
-<label class="block font-label-md text-on-surface-variant uppercase text-[11px] tracking-widest">Clinical Notes</label>
-<div class="flex gap-2">
-<button class="p-1 hover:bg-gray-100 rounded text-gray-400" title="Voice to Text"><span class="material-symbols-outlined text-[18px]">mic</span></button>
-<button class="p-1 hover:bg-gray-100 rounded text-gray-400" title="Add Template"><span class="material-symbols-outlined text-[18px]">post_add</span></button>
-</div>
-</div>
-<textarea class="w-full p-6 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary transition-all font-body-md leading-relaxed" placeholder="Detailed objective findings, examination results, and assessment plan..." rows="8"></textarea>
-</div>
-<div class="bg-blue-50/50 p-6 rounded-xl border border-blue-100">
-<h4 class="font-label-md text-blue-700 mb-3 flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px]">assignment_turned_in</span> Recommendation Checklist
-                                </h4>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<label class="flex items-center gap-3 cursor-pointer group">
-<input class="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300" type="checkbox"/>
-<span class="text-sm text-gray-600 group-hover:text-on-surface transition-colors">Refer to Radiologist (CT Scan)</span>
-</label>
-<label class="flex items-center gap-3 cursor-pointer group">
-<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300" type="checkbox"/>
-<span class="text-sm text-gray-600 group-hover:text-on-surface transition-colors">Adjust Pain Management Dosage</span>
-</label>
-<label class="flex items-center gap-3 cursor-pointer group">
-<input class="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300" type="checkbox"/>
-<span class="text-sm text-gray-600 group-hover:text-on-surface transition-colors">Schedule 2-week Follow-up</span>
-</label>
-<label class="flex items-center gap-3 cursor-pointer group">
-<input checked="" class="w-5 h-5 rounded text-primary focus:ring-primary border-gray-300" type="checkbox"/>
-<span class="text-sm text-gray-600 group-hover:text-on-surface transition-colors">Perform Physical Exam</span>
-</label>
-</div>
-</div>
-</div>
-<div class="border-t border-gray-100 dark:border-gray-800 p-8 bg-white flex flex-wrap gap-4 items-center justify-between rounded-b-xl">
-<button class="px-6 py-3 border border-outline-variant text-gray-700 font-bold font-label-md rounded-xl hover:bg-gray-50 transition-colors active:scale-95">
-                                Save Draft
-                            </button>
-<div class="flex gap-4">
-<button class="px-6 py-3 border-2 border-primary text-primary font-bold font-label-md rounded-xl hover:bg-primary/5 transition-colors active:scale-95 flex items-center gap-2">
-<span class="material-symbols-outlined text-[20px]">task_alt</span> Finalize Consultation
-                                </button>
-<button class="px-8 py-3 bg-primary text-white font-bold font-label-md rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2">
-                                    Go to Prescription <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
-</button>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
+                            <div class="col-span-3">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Frequency</label>
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>3 times a day</option>
+                                    <option>2 times a day</option>
+                                    <option>Once daily</option>
+                                    <option>As needed</option>
+                                </select>
+                            </div>
+                            <div class="col-span-4">
+                                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Instructions</label>
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>After lunch</option>
+                                    <option>Before breakfast</option>
+                                    <option>Before sleep</option>
+                                    <option>Empty stomach</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-3 pb-3 border-b border-gray-50">
+                            <div class="col-span-5">
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Select Medicine...</option>
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Frequency...</option>
+                                </select>
+                            </div>
+                            <div class="col-span-4">
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Instructions...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-12 gap-3 pb-3">
+                            <div class="col-span-5">
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Select Medicine...</option>
+                                </select>
+                            </div>
+                            <div class="col-span-3">
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Frequency...</option>
+                                </select>
+                            </div>
+                            <div class="col-span-4">
+                                <select class="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary">
+                                    <option>Instructions...</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 flex justify-end">
+                        <button class="px-8 py-3.5 bg-primary text-white font-bold font-label-md rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide">
+                            <span class="material-symbols-outlined text-[20px]">print</span> Generate Prescription
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 flex justify-around items-center z-50">
-<button class="flex flex-col items-center gap-1 text-gray-400">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="text-[10px] font-bold">Dashboard</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-gray-400">
-<span class="material-symbols-outlined">group</span>
-<span class="text-[10px] font-bold">Queue</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-orange-600">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stethoscope</span>
-<span class="text-[10px] font-bold">Consult</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-gray-400">
-<span class="material-symbols-outlined">description</span>
-<span class="text-[10px] font-bold">Rx</span>
-</button>
-<button class="flex flex-col items-center gap-1 text-gray-400">
-<span class="material-symbols-outlined">settings</span>
-<span class="text-[10px] font-bold">Settings</span>
-</button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-[10px] font-bold">Dashboard</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+        <span class="material-symbols-outlined">group</span>
+        <span class="text-[10px] font-bold">Queue</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-orange-600">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stethoscope</span>
+        <span class="text-[10px] font-bold">Consult</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+        <span class="material-symbols-outlined">description</span>
+        <span class="text-[10px] font-bold">Rx</span>
+    </button>
+    <button class="flex flex-col items-center gap-1 text-gray-400">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[10px] font-bold">Settings</span>
+    </button>
 </div>
 </body></html>
