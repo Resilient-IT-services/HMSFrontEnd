@@ -101,8 +101,9 @@ describe('ReceptionDashboard', () => {
       data: {
         content: [
           {
-            id: 'doctor-1',
+            doctorId: 'doctor-1',
             userId: 'user-1',
+            assignmentId: 'assign-1',
             fullName: 'Dr Khan',
             phone: '9999999999',
             gender: 'MALE',
@@ -123,8 +124,9 @@ describe('ReceptionDashboard', () => {
       data: {
         content: [
           {
-            id: 'nurse-1',
+            nurseId: 'nurse-1',
             userId: 'user-2',
+            assignmentId: 'assign-2',
             fullName: 'Nurse Reena',
             phone: '8888888888',
             gender: 'FEMALE',

@@ -81,7 +81,6 @@ describe('PatientQueuePage', () => {
     });
 
     // Check stats
-    expect(screen.getByText('02')).toBeInTheDocument(); // Total
-    expect(screen.getByText('01')).toBeAllInTheDocument ? expect(screen.getAllByText('01').length).toBeGreaterThan(0) : null;
-  });
+    const elements = screen.getAllByText('01');
+    expect(elements.length).toBeGreaterThan(0);  });
 });

@@ -97,7 +97,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             </div>
             <div className="text-right space-y-1">
                 <p className="font-label-md text-primary">Contact Details</p>
-                <p className="font-body-sm text-on-surface-variant">{hospital?.phone || '+1 (555) 123-4567'}</p>
+                {/*<p className="font-body-sm text-on-surface-variant">{hospital?.phone || '+1 (555) 123-4567'}</p>*/}
                 <p className="font-body-sm text-on-surface-variant">emergency@vitalsync.health</p>
                 <p className="font-body-sm text-on-surface-variant">www.vitalsync.health</p>
             </div>

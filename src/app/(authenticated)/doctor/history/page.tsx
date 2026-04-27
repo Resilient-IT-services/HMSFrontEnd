@@ -101,17 +101,21 @@ const MedicalHistoryPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {patients.map(p => (
-              <Card key={p.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => selectPatient(p.id)}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary font-bold">
-                    {p.fullName.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-on-surface">{p.fullName}</h3>
-                    <p className="text-xs text-gray-500">ID: #PAT-{p.id.substring(0, 8).toUpperCase()}</p>
-                  </div>
+                <div key={p.id} onClick={() => selectPatient(p.id)}>
+                  <Card className="cursor-pointer hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary font-bold">
+                        {p.fullName.split(' ').map(n => n[0]).join('')}
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-on-surface">{p.fullName}</h3>
+                        <p className="text-xs text-gray-500">
+                          ID: #PAT-{p.id.substring(0, 8).toUpperCase()}
+                        </p>
+                      </div>
+                    </div>
+                  </Card>
                 </div>
-              </Card>
             ))}
             {patients.length === 0 && !loading && (
               <p className="text-gray-500 italic col-span-2 text-center py-8">No patients found. Try searching.</p>
