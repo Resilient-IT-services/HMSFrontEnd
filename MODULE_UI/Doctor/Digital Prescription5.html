@@ -1,402 +1,377 @@
 <!DOCTYPE html>
 
-<html class="light" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            "colors": {
-                    "on-tertiary-container": "#2f3234",
-                    "on-error": "#ffffff",
-                    "inverse-surface": "#2e3035",
-                    "on-tertiary-fixed": "#191c1e",
-                    "surface-container-highest": "#e2e2e8",
-                    "surface-container-high": "#e7e8ee",
-                    "on-surface-variant": "#594138",
-                    "surface": "#f9f9ff",
-                    "primary": "#a83900",
-                    "inverse-on-surface": "#f0f0f6",
-                    "on-primary-container": "#5c1c00",
-                    "on-secondary": "#ffffff",
-                    "outline-variant": "#e2bfb3",
-                    "inverse-primary": "#ffb59a",
-                    "surface-dim": "#d9dadf",
-                    "on-tertiary": "#ffffff",
-                    "surface-variant": "#e2e2e8",
-                    "on-primary": "#ffffff",
-                    "primary-fixed": "#ffdbce",
-                    "on-background": "#191c20",
-                    "secondary-fixed-dim": "#bcc7de",
-                    "error": "#ba1a1a",
-                    "surface-container": "#ededf3",
-                    "primary-container": "#ff6b2b",
-                    "surface-tint": "#a83900",
-                    "secondary": "#545f73",
-                    "on-surface": "#191c20",
-                    "on-secondary-fixed-variant": "#3c475a",
-                    "surface-container-lowest": "#ffffff",
-                    "secondary-container": "#d8e3fb",
-                    "tertiary-fixed-dim": "#c4c7c9",
-                    "primary-fixed-dim": "#ffb59a",
-                    "outline": "#8d7167",
-                    "on-secondary-fixed": "#111c2d",
-                    "on-secondary-container": "#5a6579",
-                    "on-primary-fixed": "#380d00",
-                    "on-tertiary-fixed-variant": "#444749",
-                    "tertiary-fixed": "#e1e3e5",
-                    "tertiary-container": "#979a9c",
-                    "surface-container-low": "#f3f3f9",
-                    "secondary-fixed": "#d8e3fb",
-                    "on-primary-fixed-variant": "#802a00",
-                    "on-error-container": "#93000a",
-                    "tertiary": "#5c5f61",
-                    "background": "#f9f9ff",
-                    "surface-bright": "#f9f9ff",
-                    "error-container": "#ffdad6"
+<html lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Prescription Document - VitalSync</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-error-container": "#93000a",
+                        "primary-container": "#ff6b2b",
+                        "on-secondary-fixed": "#111c2d",
+                        "error": "#ba1a1a",
+                        "on-surface-variant": "#594138",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "tertiary-container": "#979a9c",
+                        "surface-bright": "#f9f9ff",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#d9dadf",
+                        "surface-tint": "#a83900",
+                        "background": "#f9f9ff",
+                        "inverse-on-surface": "#f0f0f6",
+                        "on-error": "#ffffff",
+                        "on-tertiary-container": "#2f3234",
+                        "on-secondary-container": "#5a6579",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#802a00",
+                        "on-background": "#191c20",
+                        "inverse-surface": "#2e3035",
+                        "surface-container": "#ededf3",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e7e8ee",
+                        "secondary-fixed": "#d8e3fb",
+                        "tertiary-fixed": "#e1e3e5",
+                        "surface": "#f9f9ff",
+                        "tertiary": "#5c5f61",
+                        "secondary-container": "#d8e3fb",
+                        "primary-fixed": "#ffdbce",
+                        "outline": "#8d7167",
+                        "on-surface": "#191c20",
+                        "inverse-primary": "#ffb59a",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary-fixed": "#380d00",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "surface-variant": "#e2e2e8",
+                        "surface-container-low": "#f3f3f9",
+                        "primary-fixed-dim": "#ffb59a",
+                        "on-tertiary-fixed": "#191c1e",
+                        "primary": "#a83900",
+                        "surface-container-highest": "#e2e2e8",
+                        "secondary": "#545f73",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-primary-container": "#5c1c00",
+                        "outline-variant": "#e2bfb3",
+                        "tertiary-fixed-dim": "#c4c7c9"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "24px",
+                        "gutter": "24px",
+                        "base": "8px",
+                        "component-gap": "16px",
+                        "container-padding": "32px",
+                        "margin-page": "40px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "headline-sm": ["Manrope"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "headline-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+                    }
+                },
             },
-            "borderRadius": {
-                    "DEFAULT": "0.25rem",
-                    "lg": "0.5rem",
-                    "xl": "0.75rem",
-                    "full": "9999px"
-            },
-            "spacing": {
-                    "container-padding": "32px",
-                    "section-gap": "24px",
-                    "base": "8px",
-                    "gutter": "24px",
-                    "margin-page": "40px",
-                    "component-gap": "16px"
-            },
-            "fontFamily": {
-                    "label-sm": ["Inter"],
-                    "body-md": ["Inter"],
-                    "body-lg": ["Inter"],
-                    "headline-sm": ["Manrope"],
-                    "body-sm": ["Inter"],
-                    "label-md": ["Inter"],
-                    "headline-xl": ["Manrope"],
-                    "headline-md": ["Manrope"]
-            },
-            "fontSize": {
-                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
-                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                    "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
-                    "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
-                    "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
-                    "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
-                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
-            }
-          },
-        },
-      }
+        }
     </script>
-<style>
+    <style>
         .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
-        .prescription-paper {
-            background-image: linear-gradient(rgba(255, 107, 43, 0.02) 1px, transparent 1px);
-            background-size: 100% 2rem;
+        @media print {
+            body { background: white; margin: 0; padding: 0; }
+            .no-print { display: none; }
+            .print-container {
+                box-shadow: none !important;
+                border: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 1.5cm !important;
+            }
+        }
+        .a4-canvas {
+            width: 210mm;
+            min-height: 297mm;
         }
     </style>
 </head>
-<body class="bg-background text-on-background font-body-md">
-<!-- Sidebar Navigation -->
-<aside class="h-screen w-64 fixed left-0 top-0 border-r border-gray-200 bg-white z-50 flex flex-col py-4">
-<div class="px-6 mb-8">
-<h1 class="text-lg font-black text-orange-600 font-headline-md">MedNexus Pro</h1>
-<p class="text-xs text-gray-500 font-label-sm">General Surgery</p>
-</div>
-<nav class="flex-1 space-y-1">
-<a class="text-gray-600 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-label-md">Dashboard</span>
-</a>
-<a class="text-gray-600 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
-<span class="material-symbols-outlined">group</span>
-<span class="font-label-md">Patient Queue</span>
-</a>
-<a class="bg-orange-50 text-orange-600 font-bold border-r-4 border-orange-600 px-4 py-3 flex items-center gap-3 transition-all" href="#">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stethoscope</span>
-<span class="font-label-md">Consultation</span>
-</a>
-<a class="text-gray-600 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
-<span class="material-symbols-outlined">history_edu</span>
-<span class="font-label-md">History</span>
-</a>
-<a class="text-gray-600 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
-<span class="material-symbols-outlined">description</span>
-<span class="font-label-md">Prescriptions</span>
-</a>
-</nav>
-<div class="px-4 mt-auto space-y-1">
-<button class="w-full bg-orange-600 text-white rounded-lg py-3 mb-4 font-label-md hover:bg-primary transition-colors flex items-center justify-center gap-2">
-<span class="material-symbols-outlined text-sm">emergency</span>
-                Emergencies
-            </button>
-<a class="text-gray-600 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-label-md">Settings</span>
-</a>
-<a class="text-gray-600 px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-all" href="#">
-<span class="material-symbols-outlined">logout</span>
-<span class="font-label-md">Logout</span>
-</a>
-</div>
-</aside>
-<!-- Top App Bar -->
-<header class="flex justify-between items-center px-6 py-2 w-[calc(100%-16rem)] ml-64 bg-white sticky top-0 z-40 border-b border-gray-200">
-<div class="flex items-center gap-4">
-<div class="relative">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
-<input class="pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none w-64 transition-all" placeholder="Search patient or record..." type="text"/>
-</div>
-</div>
-<div class="flex items-center gap-4">
-<button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors relative">
-<span class="material-symbols-outlined">notifications</span>
-<span class="absolute top-2 right-2 w-2 h-2 bg-orange-600 rounded-full border-2 border-white"></span>
-</button>
-<button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
-<span class="material-symbols-outlined">help_outline</span>
-</button>
-<div class="flex items-center gap-3 pl-4 border-l border-gray-200">
-<div class="text-right">
-<p class="text-sm font-bold text-gray-900 font-label-md">Dr. Sarah Jenkins</p>
-<p class="text-xs text-gray-500">Sr. Surgeon</p>
-</div>
-<img class="w-10 h-10 rounded-full border-2 border-orange-100 object-cover" data-alt="Portrait of a female professional doctor in clinical attire with soft studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2b7FWgCluH19K-HK823VLyVQdb8OApVMqxIntszGJas9SC1NiDhD095qUHU4K-GZBLTUA2PkhMK1kp3LEhEia-XzwvjcsZHVIgoQU4kJUd5OEwIOB1znZ-FXuQVa43JIp-x6edaxWOYs8x1tyjFoD3PlS7lRxv4HsvktMxTWwjhHFGJKyTIuEwntkBGqBfGgzjUFeQAW-5eFp4VI-lkOlCrVmFfWB95K1NFCnt5EOH2J0ip2fvVFNHy6iPlREXoBtDPePHjORrPY"/>
-</div>
-</div>
+<body class="bg-surface font-body-md text-on-surface antialiased">
+<!-- Desktop Navigation Shell -->
+<header class="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800 flex justify-between items-center w-full px-6 py-3 fixed top-0 z-40 no-print">
+    <div class="flex items-center gap-4">
+        <span class="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white font-manrope">VitalSync</span>
+        <div class="h-6 w-px bg-gray-200"></div>
+        <nav class="flex gap-6">
+            <a class="text-gray-500 font-medium hover:text-orange-600 transition-colors" href="#">Dashboard</a>
+            <a class="text-orange-600 font-bold border-b-2 border-orange-600" href="#">Prescriptions</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <button class="flex items-center gap-2 bg-primary-container text-white px-4 py-2 rounded-lg font-headline-sm hover:opacity-90 transition-all shadow-sm" onclick="window.print()">
+            <span class="material-symbols-outlined">print</span>
+            Print PDF
+        </button>
+        <div class="flex gap-2">
+            <span class="material-symbols-outlined p-2 text-gray-500 hover:bg-gray-50 rounded-full cursor-pointer">notifications</span>
+            <span class="material-symbols-outlined p-2 text-gray-500 hover:bg-gray-50 rounded-full cursor-pointer">settings</span>
+        </div>
+    </div>
 </header>
-<!-- Main Content -->
-<main class="ml-64 p-8 min-h-[calc(100vh-57px)]">
-<div class="max-w-7xl mx-auto">
-<!-- Page Header -->
-<div class="flex justify-between items-end mb-8">
-<div>
-<button class="flex items-center gap-2 text-gray-500 hover:text-orange-600 mb-2 transition-colors">
-<span class="material-symbols-outlined text-sm">arrow_back</span>
-<span class="text-sm font-label-md">Back to Patient Queue</span>
-</button>
-<h2 class="text-3xl font-bold text-gray-900 font-headline-xl">Digital Prescription Generator</h2>
+<div class="flex min-h-screen pt-20">
+    <!-- Sidebar Shell -->
+    <aside class="hidden lg:flex flex-col h-screen sticky top-0 overflow-y-auto bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 w-64 no-print">
+        <div class="p-6">
+            <h2 class="font-headline-sm text-primary mb-1">Clinical Portal</h2>
+            <p class="text-body-sm text-tertiary">Central Hospital Unit</p>
+        </div>
+        <nav class="flex-1 px-4 space-y-1">
+            <div class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="font-medium">Dashboard</span>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-3 text-orange-600 bg-orange-50 border-r-4 border-orange-600 font-semibold cursor-pointer">
+                <span class="material-symbols-outlined">description</span>
+                <span class="font-medium">Prescriptions</span>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                <span class="material-symbols-outlined">personal_injury</span>
+                <span class="font-medium">Patient Records</span>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                <span class="material-symbols-outlined">event_available</span>
+                <span class="font-medium">Appointments</span>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                <span class="material-symbols-outlined">medication</span>
+                <span class="font-medium">Pharmacy</span>
+            </div>
+            <div class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-lg cursor-pointer transition-all">
+                <span class="material-symbols-outlined">analytics</span>
+                <span class="font-medium">Analytics</span>
+            </div>
+        </nav>
+        <div class="p-4 border-t border-gray-100">
+            <button class="w-full bg-primary-container text-white py-3 rounded-lg font-headline-sm flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">add</span>
+                New Prescription
+            </button>
+        </div>
+    </aside>
+    <!-- Main Content Area (A4 Prescription) -->
+    <main class="flex-1 flex justify-center py-12 px-6 bg-surface-container-low overflow-y-auto">
+        <div class="a4-canvas print-container bg-white shadow-2xl border border-gray-200 p-12 flex flex-col">
+            <!-- Header: Branding & Address -->
+            <div class="flex justify-between items-start border-b-2 border-primary-container pb-8 mb-8">
+                <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white font-extrabold text-xl">V</div>
+                        <h1 class="font-headline-xl text-primary leading-tight">VitalSync Hospital</h1>
+                    </div>
+                    <p class="font-body-md text-on-surface-variant max-w-xs pt-2">
+                        742 Medical District Parkway<br/>
+                        Central Hospital Unit, Suite 102<br/>
+                        San Francisco, CA 94103
+                    </p>
+                </div>
+                <div class="text-right space-y-1">
+                    <p class="font-label-md text-primary">Contact Details</p>
+                    <p class="font-body-sm text-on-surface-variant">+1 (555) 123-4567</p>
+                    <p class="font-body-sm text-on-surface-variant">emergency@vitalsync.health</p>
+                    <p class="font-body-sm text-on-surface-variant">www.vitalsync.health</p>
+                </div>
+            </div>
+            <!-- Patient Information -->
+            <div class="grid grid-cols-4 gap-6 bg-surface-container-lowest border border-outline-variant p-6 rounded-xl mb-8">
+                <div class="flex flex-col gap-1">
+                    <span class="font-label-sm text-tertiary">PATIENT NAME</span>
+                    <span class="font-headline-sm text-on-surface">Evelyn Montgomery</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="font-label-sm text-tertiary">AGE / GENDER</span>
+                    <span class="font-headline-sm text-on-surface">68 / Female</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="font-label-sm text-tertiary">WEIGHT</span>
+                    <span class="font-headline-sm text-on-surface">64kg</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="font-label-sm text-tertiary">DATE</span>
+                    <span class="font-headline-sm text-on-surface">Oct 24, 2023</span>
+                </div>
+            </div>
+            <!-- Vitals Section -->
+            <div class="flex gap-12 mb-10 px-2">
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-primary" data-icon="favorite">favorite</span>
+                    <div>
+                        <p class="font-label-sm text-tertiary">HEART RATE</p>
+                        <p class="font-headline-md">78 <span class="text-body-sm font-normal">bpm</span></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-primary" data-icon="thermostat">thermostat</span>
+                    <div>
+                        <p class="font-label-sm text-tertiary">TEMP</p>
+                        <p class="font-headline-md">98.6 <span class="text-body-sm font-normal">°F</span></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-primary" data-icon="blood_pressure">blood_pressure</span>
+                    <div>
+                        <p class="font-label-sm text-tertiary">BLOOD PRESSURE</p>
+                        <p class="font-headline-md">120/80 <span class="text-body-sm font-normal">mmHg</span></p>
+                    </div>
+                </div>
+            </div>
+            <!-- Clinical Observations -->
+            <div class="grid grid-cols-2 gap-8 mb-10">
+                <div class="border-l-4 border-outline-variant pl-4 py-2">
+                    <h3 class="font-label-sm text-tertiary mb-2 uppercase tracking-wider">Chief Complaints</h3>
+                    <p class="font-body-lg text-on-surface italic">"Abdominal pain and discomfort"</p>
+                </div>
+                <div class="border-l-4 border-primary pl-4 py-2">
+                    <h3 class="font-label-sm text-primary mb-2 uppercase tracking-wider">Diagnosis</h3>
+                    <p class="font-headline-sm text-on-surface">R10.9 Abdominal pain, unspecified</p>
+                </div>
+            </div>
+            <!-- Prescription Content -->
+            <div class="flex-1">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-primary text-3xl" data-icon="prescriptions" style="font-variation-settings: 'FILL' 1;">prescriptions</span>
+                    <h2 class="font-headline-md">Medication Plan</h2>
+                </div>
+                <div class="overflow-hidden border border-gray-200 rounded-lg">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-surface-container-high border-b border-gray-200">
+                        <tr>
+                            <th class="p-4 font-label-md text-on-surface">Medicine Name &amp; Dosage</th>
+                            <th class="p-4 font-label-md text-on-surface text-center">Frequency</th>
+                            <th class="p-4 font-label-md text-on-surface">Instructions</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                        <tr>
+                            <td class="p-4">
+                                <p class="font-headline-sm">Amoxicillin 500mg</p>
+                                <p class="text-body-sm text-tertiary">Capsule | Oral</p>
+                            </td>
+                            <td class="p-4 text-center">
+                                <div class="inline-flex flex-col items-center">
+                                    <span class="font-body-md font-bold">3 times a day</span>
+                                    <span class="text-body-sm text-tertiary">Every 8 hours</span>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <p class="font-body-md">Take after lunch for 7 days. Complete the full course of antibiotics.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">
+                                <p class="font-headline-sm">Omeprazole 20mg</p>
+                                <p class="text-body-sm text-tertiary">Delayed-release Tablet</p>
+                            </td>
+                            <td class="p-4 text-center">
+                                <span class="font-body-md font-bold">Once daily</span>
+                            </td>
+                            <td class="p-4">
+                                <p class="font-body-md">Take in the morning on an empty stomach, 30 minutes before breakfast.</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="p-4">
+                                <p class="font-headline-sm">Hyoscine 10mg</p>
+                                <p class="text-body-sm text-tertiary">Tablet</p>
+                            </td>
+                            <td class="p-4 text-center">
+                                <span class="font-body-md font-bold">As needed</span>
+                            </td>
+                            <td class="p-4">
+                                <p class="font-body-md">For acute spasms. Maximum 4 doses in 24 hours.</p>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Footer: Signatures & QR -->
+            <div class="mt-12 pt-8 border-t border-gray-200">
+                <div class="grid grid-cols-3 items-end gap-12">
+                    <div class="space-y-4">
+                        <p class="font-label-sm text-tertiary">FOLLOW-UP APPOINTMENT</p>
+                        <div class="flex items-center gap-2 text-primary font-bold">
+                            <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+                            <span>November 07, 2023</span>
+                        </div>
+                        <p class="text-body-sm text-on-surface-variant">Please bring this document for the next visit.</p>
+                    </div>
+                    <div class="text-center">
+                        <div class="w-32 h-32 mx-auto bg-white border border-gray-200 p-2 rounded-lg">
+                            <img alt="Verification QR Code" class="w-full h-full object-contain" data-alt="digital verification QR code for a medical prescription document" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1rvvxUWJmSPSNziL08HKcqTYRQFEQlNf3AhQQLDCrQbqvnWJNNeQLwizywvUXvAC7Qq88A8gTZdUYjBZcr491p3wFbaAstWYjxNTAq92z_0pXjNe96aNEx5ifrEDMsFZLvFfVm9MM5L1aqqYQ_YYUQ55akj31PAyh2CE0NcikOiQ3GLTyychW2ybx0pWA976yiT5k5cn9xXUlT8uCvoCSNb7vmzwBHwazFZgHWzrlKr5YOAAZf7XUPC9rFpB2XBrxWHp7nweOm_M"/>
+                        </div>
+                        <p class="text-[10px] mt-2 text-tertiary font-mono">ID: VS-EM-49201-2023</p>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <div class="mb-2">
+                            <img alt="Doctor Signature" class="h-16 w-40 object-contain mix-blend-multiply opacity-80" data-alt="elegant medical doctor signature in dark blue ink on a white background with a slightly grainy paper texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtaQLHVQH732Q0TU7dZEt41zRX3xNqaZsaldxe9EpqlAM_VWKrMJxYNWy_FSVrM0EQULXFz5Wp9rxiAMQO2PSVql-g_DerrT4h1vfDk3xxSmjnEZTpkHpnrg5HRmNVk0cMjeZa-pQClUPJYw0-adcyDugjG_XJDh2AUAiAd0Wsh2vrmyyYBF2Hrh9ihkTIKxS_dsdO4zM8V1Ut4GRDjV9rdZeAfemsnkqdsVPkm_SvpNcdhPT-uQKzg6Y5l_v0FBTTOKFPPOaRKBg"/>
+                        </div>
+                        <div class="border-t border-on-surface w-full pt-2">
+                            <p class="font-headline-sm">Dr. Marcus Sterling</p>
+                            <p class="text-body-sm text-tertiary">Senior Gastroenterologist</p>
+                            <p class="text-body-sm text-tertiary">Reg No: MED-88291-S</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Print Note -->
+            <div class="mt-8 text-center text-[10px] text-tertiary font-medium uppercase tracking-widest no-print">
+                This is a digital document generated by VitalSync Medical Systems.
+            </div>
+        </div>
+    </main>
 </div>
-<div class="flex gap-3">
-<button class="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-label-md rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined">visibility</span>
-                        Preview
-                    </button>
-<button class="px-6 py-2.5 bg-orange-600 text-white font-label-md rounded-lg hover:bg-primary transition-colors flex items-center gap-2">
-<span class="material-symbols-outlined">description</span>
-                        Generate Prescription
-                    </button>
-</div>
-</div>
-<div class="grid grid-cols-12 gap-8">
-<!-- Left: Prescription Form -->
-<div class="col-span-12 lg:col-span-7 space-y-6">
-<!-- Patient Summary Card -->
-<div class="bg-white border border-gray-200 rounded-xl p-6 flex items-center justify-between">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center">
-<span class="material-symbols-outlined text-3xl">person</span>
-</div>
-<div>
-<p class="text-xs text-gray-500 font-label-sm uppercase tracking-wider">Active Patient</p>
-<h3 class="text-lg font-bold text-gray-900 font-headline-md">Robert D. Harrison</h3>
-<div class="flex gap-4 mt-1">
-<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">ID: #PX-8821</span>
-<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">Male, 45y</span>
-</div>
-</div>
-</div>
-<div class="text-right">
-<p class="text-xs text-gray-500 font-label-sm">Diagnosis</p>
-<p class="font-medium text-gray-800">Post-Op Recovery</p>
-</div>
-</div>
-<!-- Medicine Builder -->
-<div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-<div class="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-<h4 class="font-bold text-gray-800 font-headline-sm">Medication Details</h4>
-<button class="text-orange-600 text-sm font-label-md hover:underline flex items-center gap-1">
-<span class="material-symbols-outlined text-sm">add_circle</span>
-                                Add Medicine
-                            </button>
-</div>
-<div class="p-6">
-<table class="w-full">
-<thead>
-<tr class="text-left text-xs font-label-sm text-gray-400 uppercase tracking-wider">
-<th class="pb-4 font-semibold">Medicine Name</th>
-<th class="pb-4 font-semibold">Dosage</th>
-<th class="pb-4 font-semibold">Frequency</th>
-<th class="pb-4 font-semibold">Duration</th>
-<th class="pb-4"></th>
-</tr>
-</thead>
-<tbody class="divide-y divide-gray-100">
-<!-- Row 1 -->
-<tr>
-<td class="py-4 pr-4">
-<div class="relative">
-<input class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none" type="text" value="Amoxicillin 500mg"/>
-<div class="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 z-10 hidden">
-<div class="p-2 hover:bg-orange-50 cursor-pointer text-sm">Amoxicillin 250mg</div>
-<div class="p-2 hover:bg-orange-50 cursor-pointer text-sm">Amoxicillin 500mg</div>
-</div>
-</div>
-</td>
-<td class="py-4 pr-4">
-<input class="w-24 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none" type="text" value="1 tablet"/>
-</td>
-<td class="py-4 pr-4">
-<select class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none">
-<option>1-0-1 (After Food)</option>
-<option selected="">1-1-1 (After Food)</option>
-<option>0-0-1 (Before Bed)</option>
-</select>
-</td>
-<td class="py-4 pr-4">
-<input class="w-24 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none" type="text" value="7 Days"/>
-</td>
-<td class="py-4 text-right">
-<button class="text-gray-400 hover:text-red-500 transition-colors">
-<span class="material-symbols-outlined">delete</span>
-</button>
-</td>
-</tr>
-<!-- Row 2 -->
-<tr>
-<td class="py-4 pr-4">
-<input class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none" placeholder="Start typing medicine..." type="text"/>
-</td>
-<td class="py-4 pr-4">
-<input class="w-24 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none" placeholder="Dosage" type="text"/>
-</td>
-<td class="py-4 pr-4">
-<select class="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none">
-<option>Frequency</option>
-<option>1-0-1</option>
-</select>
-</td>
-<td class="py-4 pr-4">
-<input class="w-24 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none" placeholder="Duration" type="text"/>
-</td>
-<td class="py-4 text-right">
-<button class="text-gray-400 hover:text-red-500 transition-colors">
-<span class="material-symbols-outlined">delete</span>
-</button>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<!-- Additional Notes -->
-<div class="bg-white border border-gray-200 rounded-xl p-6">
-<label class="block text-sm font-bold text-gray-700 mb-2 font-label-md">Advice &amp; Instructions</label>
-<textarea class="w-full bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-orange-600 focus:outline-none resize-none" placeholder="Enter additional patient instructions or clinical advice..." rows="4"></textarea>
-<div class="flex flex-wrap gap-2 mt-3">
-<span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs cursor-pointer hover:bg-orange-100 hover:text-orange-600 transition-colors">Bed rest for 3 days</span>
-<span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs cursor-pointer hover:bg-orange-100 hover:text-orange-600 transition-colors">Increase fluid intake</span>
-<span class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs cursor-pointer hover:bg-orange-100 hover:text-orange-600 transition-colors">Avoid strenuous activity</span>
-</div>
-</div>
-</div>
-<!-- Right: Live Preview Panel -->
-<div class="col-span-12 lg:col-span-5">
-<div class="sticky top-24">
-<div class="flex items-center justify-between mb-4">
-<h4 class="text-sm font-bold text-gray-500 uppercase tracking-widest font-label-sm">Live Print Preview</h4>
-<span class="flex items-center gap-2 text-xs text-green-600 font-label-sm">
-<span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                                Auto-saved
-                            </span>
-</div>
-<!-- The Prescription Paper -->
-<div class="bg-white border border-gray-200 shadow-2xl rounded-sm p-10 min-h-[700px] prescription-paper flex flex-col">
-<!-- Header -->
-<div class="flex justify-between items-start border-b-2 border-orange-600 pb-6 mb-8">
-<div>
-<h5 class="text-xl font-bold text-gray-900 font-headline-md">Dr. Sarah Jenkins</h5>
-<p class="text-sm text-gray-600">MBBS, MS (General Surgery)</p>
-<p class="text-xs text-gray-500 mt-1">Reg No: 2024-SURG-99812</p>
-</div>
-<div class="text-right">
-<h5 class="text-lg font-bold text-orange-600">MedNexus Pro</h5>
-<p class="text-xs text-gray-600">City General Hospital, Ward 4B</p>
-<p class="text-xs text-gray-600">+1 (555) 000-9876</p>
-</div>
-</div>
-<!-- Patient Info -->
-<div class="grid grid-cols-2 gap-4 text-sm mb-8 bg-gray-50/50 p-4 rounded border border-gray-100">
-<div>
-<p class="text-gray-500 text-xs">Patient Name</p>
-<p class="font-bold text-gray-900">Robert D. Harrison</p>
-</div>
-<div class="text-right">
-<p class="text-gray-500 text-xs">Date</p>
-<p class="font-medium text-gray-900">Oct 24, 2023</p>
-</div>
-<div>
-<p class="text-gray-500 text-xs">Age / Gender</p>
-<p class="font-medium text-gray-900">45 Years / Male</p>
-</div>
-<div class="text-right">
-<p class="text-gray-500 text-xs">Weight</p>
-<p class="font-medium text-gray-900">78 kg</p>
-</div>
-</div>
-<!-- Rx Symbol -->
-<div class="mb-6">
-<span class="text-4xl font-serif text-orange-600 italic">Rx</span>
-</div>
-<!-- Prescription Content -->
-<div class="flex-1 space-y-6">
-<div class="relative pl-6">
-<div class="flex justify-between">
-<p class="font-bold text-gray-900">1. Amoxicillin 500mg</p>
-<p class="text-sm text-gray-600">7 Days</p>
-</div>
-<p class="text-sm text-gray-600 italic mt-1">1 tablet - 1-1-1 (After Food)</p>
-</div>
-<div class="pt-8 mt-8 border-t border-dashed border-gray-200">
-<h6 class="text-xs font-bold text-gray-400 uppercase mb-2">General Advice</h6>
-<p class="text-sm text-gray-700 leading-relaxed">Please ensure to take all medication at scheduled times. Maintain bed rest for the next 48-72 hours. Avoid any physical exertion and lifting heavy weights.</p>
-</div>
-</div>
-<!-- Footer -->
-<div class="mt-12 pt-10 border-t border-gray-100 flex justify-between items-end">
-<div class="flex flex-col items-center">
-<div class="w-32 h-1 bg-gray-200 mb-2"></div>
-<p class="text-[10px] text-gray-400 uppercase font-bold">Pharmacist Signature</p>
-</div>
-<div class="text-center">
-<img class="h-12 mix-blend-multiply mb-2 opacity-80" data-alt="Stylized digital handwritten signature on white background with blue ink texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWPRZz902cw2-7LmoFUWjwKgTTcv2FU6EyjIbaADvAcRJ53IEjUv5nHUuwOs6ucBmtcXPdAXAgwp--vUxubWFwm74Iie25bcI6NocPeeCRjrjLUyJ8MyWEDDUJWOAysGTqkaVVNYYzF53cXsxpn8EvHcl7MuXoycfDT7i-MyG1R5Fh2jNy3aSBt-4jgsxN7ZnQ2LPJRPDhRVLw2VvQ2iNvvgRKyByLtKrauShxOlZWrhIw6i7sYGAgGhibY8pCg6Q43f-3EoJLBmU"/>
-<p class="text-sm font-bold text-gray-900">Dr. Sarah Jenkins</p>
-<p class="text-[10px] text-gray-400 uppercase font-bold">Doctor's Digital Signature</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</main>
-<!-- Floating Tooltip for Help -->
-<div class="fixed bottom-8 right-8 z-[60]">
-<button class="w-14 h-14 bg-on-surface-variant text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform active:scale-95">
-<span class="material-symbols-outlined text-2xl">question_mark</span>
-</button>
-</div>
+<!-- Mobile Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 flex justify-around items-center h-16 px-6 z-50 no-print">
+    <div class="flex flex-col items-center text-gray-500">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-[10px]">Home</span>
+    </div>
+    <div class="flex flex-col items-center text-orange-600">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">description</span>
+        <span class="text-[10px] font-bold">Docs</span>
+    </div>
+    <div class="flex flex-col items-center text-gray-500">
+        <span class="material-symbols-outlined">event_available</span>
+        <span class="text-[10px]">Appts</span>
+    </div>
+    <div class="flex flex-col items-center text-gray-500">
+        <span class="material-symbols-outlined">person</span>
+        <span class="text-[10px]">Profile</span>
+    </div>
+</nav>
 </body></html>
