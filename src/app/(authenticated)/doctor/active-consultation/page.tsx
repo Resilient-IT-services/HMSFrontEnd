@@ -11,6 +11,7 @@ import { RootState } from '@/state/store';
 import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { formatToken } from '@/utils/tokenHelper';
 
 interface PrescriptionRow {
   id: string;
@@ -189,6 +190,9 @@ const ActiveConsultationPage = () => {
             </nav>
             <div className="flex items-center gap-4">
               <h2 className="text-2xl font-bold text-on-surface">Active Consultation</h2>
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-lg font-black text-sm border border-primary/20">
+                {formatToken(appointment)}
+              </div>
               <div className="h-8 w-[1px] bg-gray-300 hidden sm:block"></div>
               <div className="flex items-center gap-3 text-on-surface-variant">
                 <span className="font-manrope font-bold text-lg">{patient?.fullName || 'Unknown Patient'}</span>
@@ -381,6 +385,7 @@ const ActiveConsultationPage = () => {
           weight: appointment?.vitals?.weight?.toString() || '--'
         }}
         date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+        tokenDisplay={formatToken(appointment)}
       />
     </MainLayout>
   );

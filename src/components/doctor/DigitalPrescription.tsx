@@ -26,6 +26,7 @@ interface DigitalPrescriptionProps {
     weight: string;
   };
   date: string;
+  tokenDisplay?: string;
 }
 
 const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
@@ -39,6 +40,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   prescriptions,
   vitals,
   date,
+  tokenDisplay,
 }) => {
   if (!isOpen) return null;
 
@@ -129,9 +131,16 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                   <div className="border border-gray-400 rounded-lg px-5 py-4 flex justify-between items-center mb-6 bg-gray-50">
 
                     <div className="flex flex-col">
-        <span className="text-[10px] uppercase text-gray-500 font-bold">
-            Patient
-        </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] uppercase text-gray-500 font-bold">
+                            Patient
+                        </span>
+                        {tokenDisplay && (
+                          <span className="bg-primary/10 text-primary text-[9px] font-black px-1.5 py-0.5 rounded border border-primary/20">
+                            {tokenDisplay}
+                          </span>
+                        )}
+                      </div>
                       <span className="font-semibold">
             {patient?.fullName} / {patientAge()} yrs / {vitals.weight} kg
         </span>

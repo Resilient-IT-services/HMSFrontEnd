@@ -10,6 +10,7 @@ import { patientService } from '@/services/patientService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { formatToken, sortByToken } from '@/utils/tokenHelper';
 
 const PatientQueuePage = () => {
   const router = useRouter();
@@ -110,9 +111,13 @@ const PatientQueuePage = () => {
     const activeAppointments = appointments.filter(
       (a) => a.status !== 'COMPLETED' && a.status !== 'CANCELLED'
     );
-    if (!searchTerm) return activeAppointments;
+    
+    // Sort by token number
+    const sorted = sortByToken(activeAppointments);
+    
+    if (!searchTerm) return sorted;
     const term = searchTerm.toLowerCase();
-    return activeAppointments.filter(
+    return sorted.filter(
       (a) =>
         a.patientName.toLowerCase().includes(term) ||
         a.patientId.toLowerCase().includes(term)
@@ -233,11 +238,11 @@ const PatientQueuePage = () => {
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-400 italic">No patients in the queue for today.</td>
                   </tr>
                 ) : (
-                  filteredAppointments.map((appointment, index) => (
+                  filteredAppointments.map((appointment) => (
                     <tr key={appointment.id} className="hover:bg-orange-600/5 transition-colors group">
                       <td className="px-6 py-4">
                         <span className={`font-bold ${appointment.status === 'DELAYED' ? 'text-primary' : 'text-gray-900'}`}>
-                          #T-{100 + index + 1}
+                          #{formatToken(appointment)}
                         </span>
                       </td>
                       <td className="px-6 py-4">

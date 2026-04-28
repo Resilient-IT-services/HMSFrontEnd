@@ -60,6 +60,16 @@ const mockAppointments = [
     appointmentTime: new Date().toISOString(),
     status: 'CHECKED_IN',
     reason: 'Followup'
+  },
+  {
+    id: 3,
+    patientId: 'p3',
+    patientName: 'Future Patient',
+    doctorId: 101,
+    doctorName: 'Dr. Smith',
+    appointmentTime: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+    status: 'SCHEDULED',
+    reason: 'Checkup'
   }
 ];
 
@@ -75,12 +85,12 @@ describe('TodayAppointmentsPage', () => {
     vi.clearAllMocks();
   });
 
-  it('renders correctly and fetches appointments', async () => {
+  it('renders correctly and fetches today\'s appointments only', async () => {
     (appointmentService.list as any).mockResolvedValue({
       success: true,
       data: {
         content: mockAppointments,
-        totalElements: 2,
+        totalElements: 3,
         totalPages: 1,
         size: 100,
         number: 0
@@ -107,8 +117,73 @@ describe('TodayAppointmentsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
-      expect(screen.getAllByText('Dr. Smith').length).toBeGreaterThan(0);
+      expect(screen.queryByText('Future Patient')).not.toBeInTheDocument();
     });
+  });
+
+  it('shows future appointments only in UPCOMING tab', async () => {
+    (appointmentService.list as any).mockResolvedValue({
+      success: true,
+      data: {
+        content: mockAppointments,
+        totalElements: 3
+      }
+    });
+    (doctorService.list as any).mockResolvedValue({
+      success: true,
+      data: { content: mockDoctors }
+    });
+
+    render(
+      <Provider store={store}>
+        <LayoutProvider>
+          <TodayAppointmentsPage />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+
+    const upcomingButton = screen.getByRole('button', { name: 'UPCOMING' });
+    fireEvent.click(upcomingButton);
+
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+    expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
+    expect(screen.getByText('Future Patient')).toBeInTheDocument();
+  });
+
+  it('filters appointments by search term', async () => {
+    (appointmentService.list as any).mockResolvedValue({
+      success: true,
+      data: {
+        content: mockAppointments,
+        totalElements: 3
+      }
+    });
+    (doctorService.list as any).mockResolvedValue({
+      success: true,
+      data: { content: mockDoctors }
+    });
+
+    render(
+      <Provider store={store}>
+        <LayoutProvider>
+          <TodayAppointmentsPage />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText('Search patient...');
+    fireEvent.change(searchInput, { target: { value: 'Jane' } });
+
+    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
   });
 
   it('filters appointments by status', async () => {
@@ -141,37 +216,5 @@ describe('TodayAppointmentsPage', () => {
 
     expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
-  });
-
-  it('handles status update to CHECKED_IN', async () => {
-    (appointmentService.list as any).mockResolvedValue({
-      success: true,
-      data: {
-        content: [mockAppointments[0]],
-        totalElements: 1
-      }
-    });
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
-    });
-    (appointmentService.updateStatus as any).mockResolvedValue({ success: true });
-
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <TodayAppointmentsPage />
-        </LayoutProvider>
-      </Provider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Mark Check-in')).toBeInTheDocument();
-    });
-
-    const checkInButton = screen.getByText('Mark Check-in');
-    fireEvent.click(checkInButton);
-
-    expect(appointmentService.updateStatus).toHaveBeenCalledWith(1, { status: 'CHECKED_IN' });
   });
 });

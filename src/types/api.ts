@@ -273,6 +273,8 @@ export interface AppointmentResponse {
   doctorSpecialization?: string;
   appointmentTime: string;
   status: AppointmentStatus;
+  tokenNumber?: number;
+  tokenDisplay?: string;
   notes?: string;
   vitals?: VitalsDTO;
   createdAt: string;

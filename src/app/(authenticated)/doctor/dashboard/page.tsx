@@ -9,6 +9,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { formatToken, sortByToken } from '@/utils/tokenHelper';
 
 const DoctorDashboard = () => {
   const router = useRouter();
@@ -64,11 +65,12 @@ const DoctorDashboard = () => {
     };
   }, [appointments]);
 
-  const queue = useMemo(() => (
-    appointments
-      .filter((appointment) => appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED')
-      .toSorted((left, right) => left.appointmentTime.localeCompare(right.appointmentTime))
-  ), [appointments]);
+  const queue = useMemo(() => {
+    const base = appointments.filter(
+      (appointment) => appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED'
+    );
+    return sortByToken(base);
+  }, [appointments]);
 
   const activeAppointment = useMemo(
     () => queue.find((appointment) => appointment.status === 'DELAYED'),
@@ -162,11 +164,11 @@ const DoctorDashboard = () => {
                 <button className="text-orange-600 text-xs font-bold hover:underline">View All</button>
               </div>
               <div className="divide-y divide-slate-50">
-                {queue.map((appointment, index) => (
+                {queue.map((appointment) => (
                   <div key={appointment.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg ${index === 0 ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-400'}`}>
-                        {index + 1 < 10 ? `0${index + 1}` : index + 1}
+                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 ${appointment.status === 'DELAYED' ? 'bg-orange-100 text-orange-700' : ''}`}>
+                        {formatToken(appointment)}
                       </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900">{appointment.patientName}</h4>
