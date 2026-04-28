@@ -6,12 +6,17 @@ import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentResponse, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import VitalsModal from '@/components/reception/appointments/VitalsModal';
 
 const TodayAppointmentsPage = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
+  
+  // Vitals Modal State
+  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
+  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -122,14 +127,26 @@ const TodayAppointmentsPage = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {app.status !== 'CHECKED_IN' && app.status !== 'COMPLETED' && (
+                    <div className="flex items-center justify-center gap-2">
+                      {app.status !== 'CHECKED_IN' && app.status !== 'COMPLETED' && (
+                        <button 
+                          onClick={() => handleStatusUpdate(app.id, 'CHECKED_IN')}
+                          className="px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm"
+                        >
+                          Check-in
+                        </button>
+                      )}
                       <button 
-                        onClick={() => handleStatusUpdate(app.id, 'CHECKED_IN')}
-                        className="px-4 py-1.5 rounded-lg bg-orange-700 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm"
+                        onClick={() => {
+                          setSelectedAppointment(app);
+                          setIsVitalsModalOpen(true);
+                        }}
+                        className="px-4 py-1.5 rounded-lg bg-orange-700 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm flex items-center gap-1"
                       >
-                        Mark Check-in
+                        <span className="material-symbols-outlined text-[14px]">vital_signs</span>
+                        Vitals
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -137,6 +154,16 @@ const TodayAppointmentsPage = () => {
           </table>
         </div>
       </div>
+
+      <VitalsModal 
+        isOpen={isVitalsModalOpen}
+        onClose={() => {
+          setIsVitalsModalOpen(false);
+          setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
+        onSuccess={fetchData}
+      />
     </MainLayout>
   );
 };
