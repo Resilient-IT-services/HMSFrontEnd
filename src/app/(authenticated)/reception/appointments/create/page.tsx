@@ -17,7 +17,7 @@ const calculateSuggestedTime = (session: SessionInfo, date: string) => {
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
   
-  let baseTime = session.nextSuggestedTime || session.startTime;
+  const baseTime = session.nextSuggestedTime || session.startTime;
   
   if (date !== todayStr) return baseTime;
 
@@ -144,16 +144,18 @@ const AppointmentScheduling = () => {
         appointmentTime: `${selectedDate}T${editableTime}:00`,
         notes
       });
+
       if (res.success) {
         triggerGlobalToast('Appointment scheduled successfully', 'success');
         router.push('/reception/appointments');
       }
     } catch (error) {
+      console.error('Appointment Error:', error); // ✅ ESLint happy
       triggerGlobalToast('Failed to schedule appointment', 'error');
     } finally {
       setSubmitting(false);
     }
-  };
+    };
 
   const dateOptions = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
