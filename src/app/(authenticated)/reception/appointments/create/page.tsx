@@ -52,12 +52,6 @@ const AppointmentScheduling = () => {
   const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
   
   const [notes, setNotes] = useState('');
-  const [vitals, setVitals] = useState({
-    bloodPressure: '',
-    heartRate: '',
-    temperature: '',
-    weight: ''
-  });
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [availability, setAvailability] = useState<SessionInfo[]>([]);
   const [selectedSession, setSelectedSession] = useState<SessionInfo | null>(null);
@@ -148,13 +142,7 @@ const AppointmentScheduling = () => {
         patientId: selectedPatient.id,
         doctorId: selectedDoctor.doctorId,
         appointmentTime: `${selectedDate}T${editableTime}:00`,
-        notes,
-        vitals: {
-          bloodPressure: vitals.bloodPressure || undefined,
-          heartRate: vitals.heartRate || undefined,
-          temperature: vitals.temperature || undefined,
-          weight: vitals.weight || undefined
-        }
+        notes
       });
       if (res.success) {
         triggerGlobalToast('Appointment scheduled successfully', 'success');
@@ -276,58 +264,6 @@ const AppointmentScheduling = () => {
                       ))}
                     </select>
                     <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-sm">expand_more</span>
-                  </div>
-                </div>
-              </div>
-
-              <hr className="border-slate-50" />
-
-              {/* Vitals Section */}
-              <div className="space-y-4">
-                <label className="block font-bold text-slate-700 flex items-center gap-2 text-sm">
-                  <span className="material-symbols-outlined text-primary text-base">monitoring</span>
-                  Patient Vitals
-                </label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-slate-500 text-[10px] font-black uppercase mb-1 tracking-wider">BP (mmHg)</label>
-                    <input 
-                      type="text" 
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 font-medium placeholder:text-slate-400" 
-                      placeholder="120/80"
-                      value={vitals.bloodPressure}
-                      onChange={(e) => setVitals({...vitals, bloodPressure: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-500 text-[10px] font-black uppercase mb-1 tracking-wider">Heart Rate (bpm)</label>
-                    <input 
-                      type="text" 
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 font-medium placeholder:text-slate-400" 
-                      placeholder="72"
-                      value={vitals.heartRate}
-                      onChange={(e) => setVitals({...vitals, heartRate: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-500 text-[10px] font-black uppercase mb-1 tracking-wider">Temp (°F)</label>
-                    <input 
-                      type="text" 
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 font-medium placeholder:text-slate-400" 
-                      placeholder="98.6"
-                      value={vitals.temperature}
-                      onChange={(e) => setVitals({...vitals, temperature: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-500 text-[10px] font-black uppercase mb-1 tracking-wider">Weight (kg)</label>
-                    <input 
-                      type="text" 
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm text-slate-900 font-medium placeholder:text-slate-400" 
-                      placeholder="70"
-                      value={vitals.weight}
-                      onChange={(e) => setVitals({...vitals, weight: e.target.value})}
-                    />
                   </div>
                 </div>
               </div>

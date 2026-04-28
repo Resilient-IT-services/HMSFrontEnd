@@ -29,13 +29,6 @@ const ActiveConsultationPage = () => {
   const [loading, setLoading] = useState(true);
   const [showPrescription, setShowPrescription] = useState(false);
 
-  const [vitals, setVitals] = useState({
-    heartRate: '--',
-    temp: '--',
-    bp: '--',
-    weight: '--'
-  });
-
   // Form State
   const [complaint, setComplaint] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
@@ -56,40 +49,27 @@ const ActiveConsultationPage = () => {
 
       try {
         setLoading(true);
-        // Fetch detailed appointment by ID to get vitals and other details
-        const res = await appointmentService.getById(appointmentId);
-        
+        // We list and find to avoid creating new API methods if possible as per existing pattern
+        const res = await appointmentService.list(0, 100);
         if (res.success && res.data) {
-          const appointmentData = res.data;
-          console.log('Fetched Appointment Data:', appointmentData);
-          setAppointment(appointmentData);
-          setComplaint(appointmentData.notes || '');
-          
-          // Set vitals from appointment if available
-          if (appointmentData.vitals) {
-            console.log('Vitals found:', appointmentData.vitals);
-            setVitals({
-              heartRate: appointmentData.vitals.heartRate || '--',
-              temp: appointmentData.vitals.temperature || '--',
-              bp: appointmentData.vitals.bloodPressure || '--',
-              weight: appointmentData.vitals.weight || '--'
-            });
-          } else {
-            console.log('No vitals in appointment data');
-          }
+          const found = res.data.content.find(a => a.id === appointmentId);
+          if (found) {
+            setAppointment(found);
+            setComplaint(found.notes || '');
+            
+            // Fetch patient details
+            const pRes = await patientService.get(found.patientId);
+            if (pRes.success && pRes.data) {
+              setPatient(pRes.data);
+            }
 
-          // Fetch patient details
-          const pRes = await patientService.get(appointmentData.patientId);
-          if (pRes.success && pRes.data) {
-            setPatient(pRes.data);
-          }
-
-          // Fetch hospital details from user's current membership or first membership
-          const hospitalId = user?.currentHospitalId || user?.memberships[0]?.hospitalId;
-          if (hospitalId) {
-            const hRes = await hospitalService.getById(hospitalId);
-            if (hRes.success && hRes.data) {
-              setHospital(hRes.data);
+            // Fetch hospital details from user's current membership or first membership
+            const hospitalId = user?.currentHospitalId || user?.memberships[0]?.hospitalId;
+            if (hospitalId) {
+              const hRes = await hospitalService.getById(hospitalId);
+              if (hRes.success && hRes.data) {
+                setHospital(hRes.data);
+              }
             }
           }
         }
@@ -172,7 +152,7 @@ const ActiveConsultationPage = () => {
               <div className="flex items-center gap-3 text-on-surface-variant">
                 <span className="font-manrope font-bold text-lg">{patient?.fullName || 'Unknown Patient'}</span>
                 <span className="text-sm font-medium">{patientAge} Yrs</span>
-                <span className="text-sm font-medium">{vitals.weight !== '--' ? `${vitals.weight} Kg` : '-- Kg'}</span>
+                <span className="text-sm font-medium">-- Kg</span>
                 <span className="text-sm font-medium capitalize">{patient?.gender.toLowerCase() || '--'}</span>
               </div>
             </div>
@@ -185,15 +165,15 @@ const ActiveConsultationPage = () => {
               <div className="flex gap-4 items-center">
                 <div className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-primary text-[18px]">favorite</span>
-                  <span className="font-manrope font-bold text-sm">{vitals.heartRate}</span>
+                  <span className="font-manrope font-bold text-sm">78</span>
                 </div>
                 <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
                   <span className="material-symbols-outlined text-blue-500 text-[18px]">device_thermostat</span>
-                  <span className="font-manrope font-bold text-sm">{vitals.temp}</span>
+                  <span className="font-manrope font-bold text-sm">98.6</span>
                 </div>
                 <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
                   <span className="material-symbols-outlined text-green-500 text-[18px]">blood_pressure</span>
-                  <span className="font-manrope font-bold text-sm">{vitals.bp}</span>
+                  <span className="font-manrope font-bold text-sm">120/80</span>
                 </div>
               </div>
             </div>
@@ -341,7 +321,12 @@ const ActiveConsultationPage = () => {
         complaints={complaint}
         diagnosis={diagnosis}
         prescriptions={prescriptions}
-        vitals={vitals}
+        vitals={{
+          heartRate: '78',
+          temp: '98.6',
+          bp: '120/80',
+          weight: '64'
+        }}
         date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
       />
     </MainLayout>
