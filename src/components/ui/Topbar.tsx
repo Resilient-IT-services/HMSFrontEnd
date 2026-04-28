@@ -113,22 +113,7 @@ const Topbar: React.FC = () => {
                   <p className="text-sm font-black text-[var(--text-primary)]">{user?.fullName || user?.username}</p>
                 </div>
 
-                <div className="p-2">
-                  {isSuperUser && (
-                    <button 
-                      onClick={toggleSuperMode}
-                      className={`w-full flex items-center justify-between p-3 rounded-xl transition-all ${isSuperMode ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'hover:bg-[var(--background)] text-[var(--text-secondary)]'}`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined">shield_person</span>
-                        <span className="text-sm font-bold">Super User Mode</span>
-                      </div>
-                      <div className={`w-8 h-4 rounded-full relative transition-colors ${isSuperMode ? 'bg-[var(--primary)]' : 'bg-slate-300'}`}>
-                        <div className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${isSuperMode ? 'right-0.5' : 'left-0.5'}`}></div>
-                      </div>
-                    </button>
-                  )}
-                </div>
+
 
                 <div className="px-2 py-1">
                   <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
