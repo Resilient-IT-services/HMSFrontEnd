@@ -1,27 +1,43 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
+import { patientService } from '@/services/patientService';
 import { RootState } from '@/state/store';
-import { AppointmentResponse } from '@/types/api';
+import { AppointmentResponse, PatientResponse } from '@/types/api';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 const PatientQueuePage = () => {
+  const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [patientDetails, setPatientDetails] = useState<Record<string, PatientResponse>>({});
 
-  const fetchData = async () => {
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const fetchData = useCallback(async (isBackground = false) => {
     if (!user) {
       setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await appointmentService.list(0, 100);
 
       if (response.success && response.data) {
@@ -31,17 +47,37 @@ const PatientQueuePage = () => {
           return belongsToCurrentDoctor && appointment.appointmentTime.startsWith(today);
         });
         setAppointments(todaysAppointments);
+
+        // Fetch patient details for age and gender if not already in cache
+        const patientIdsToFetch = Array.from(new Set(todaysAppointments.map(a => a.patientId)))
+          .filter(id => !patientDetails[id]);
+
+        if (patientIdsToFetch.length > 0) {
+          const details = await Promise.all(
+            patientIdsToFetch.map(id => patientService.get(id))
+          );
+          
+          const newDetails: Record<string, PatientResponse> = { ...patientDetails };
+          details.forEach(res => {
+            if (res.success && res.data) {
+              newDetails[res.data.id] = res.data;
+            }
+          });
+          setPatientDetails(newDetails);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
-  };
+  }, [user, patientDetails]);
 
   useEffect(() => {
     fetchData();
-  }, [user]);
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED').length;
@@ -56,10 +92,27 @@ const PatientQueuePage = () => {
     };
   }, [appointments]);
 
+  const handleStartConsultation = async (id: string) => {
+    try {
+      const res = await appointmentService.updateStatus(id, { status: 'DELAYED' });
+      if (res.success) {
+        router.push(`/doctor/active-consultation?appointmentId=${id}`);
+      } else {
+        triggerGlobalToast('Failed to start consultation', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to start consultation', error);
+      triggerGlobalToast('Failed to start consultation', 'error');
+    }
+  };
+
   const filteredAppointments = useMemo(() => {
-    if (!searchTerm) return appointments;
+    const activeAppointments = appointments.filter(
+      (a) => a.status !== 'COMPLETED' && a.status !== 'CANCELLED'
+    );
+    if (!searchTerm) return activeAppointments;
     const term = searchTerm.toLowerCase();
-    return appointments.filter(
+    return activeAppointments.filter(
       (a) =>
         a.patientName.toLowerCase().includes(term) ||
         a.patientId.toLowerCase().includes(term)
@@ -108,7 +161,7 @@ const PatientQueuePage = () => {
               <span className="material-symbols-outlined">clinical_notes</span>
             </div>
             <div>
-              <p className="text-gray-500 font-label-sm">In-Progress</p>
+              <p className="text-gray-500 font-label-sm">Walk-in</p>
               <p className="font-headline-md">{stats.inProgress < 10 ? `0${stats.inProgress}` : stats.inProgress}</p>
             </div>
           </div>
@@ -150,7 +203,7 @@ const PatientQueuePage = () => {
                 <span className="material-symbols-outlined">filter_list</span>
               </button>
               <button 
-                onClick={fetchData}
+                onClick={() => fetchData()}
                 className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Refresh"
               >
@@ -199,7 +252,11 @@ const PatientQueuePage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-body-md">-- / --</span>
+                        <span className="text-body-md">
+                          {patientDetails[appointment.patientId] 
+                            ? `${calculateAge(patientDetails[appointment.patientId].dob)} / ${patientDetails[appointment.patientId].gender.charAt(0)}` 
+                            : '-- / --'}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-body-md">
@@ -214,7 +271,7 @@ const PatientQueuePage = () => {
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {appointment.status === 'DELAYED' ? 'In-Progress' : appointment.status}
+                          {appointment.status === 'DELAYED' ? 'Walk-in' : appointment.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -226,9 +283,12 @@ const PatientQueuePage = () => {
                           ) : appointment.status === 'COMPLETED' ? (
                             <button className="text-gray-500 bg-gray-50 px-4 py-1.5 rounded-lg text-xs font-semibold" disabled>Consulted</button>
                           ) : (
-                            <Link href={`/doctor/active-consultation?appointmentId=${appointment.id}`}>
-                              <button className="border border-primary text-primary px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-orange-50 transition-colors">Start Consultation</button>
-                            </Link>
+                            <button 
+                              onClick={() => handleStartConsultation(appointment.id)}
+                              className="border border-primary text-primary px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-orange-50 transition-colors"
+                            >
+                              Start Consultation
+                            </button>
                           )}
                           <button className="text-gray-500 hover:text-primary transition-colors">
                             <span className="material-symbols-outlined">history</span>

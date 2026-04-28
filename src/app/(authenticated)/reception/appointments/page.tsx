@@ -5,16 +5,17 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentResponse, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
-import { triggerGlobalToast } from '@/components/ui/Toast';
+import { useRouter } from 'next/navigation';
 
 const TodayAppointmentsPage = () => {
+  const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const [appRes, docRes] = await Promise.all([
         appointmentService.list(0, 100),
@@ -30,26 +31,15 @@ const TodayAppointmentsPage = () => {
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
   }, [fetchData]);
-
-  const handleStatusUpdate = async (id: string, status: AppointmentStatus) => {
-    try {
-      const res = await appointmentService.updateStatus(id, { status });
-      if (res.success) {
-        triggerGlobalToast(`Appointment marked as ${status.replace('_', ' ')}`, 'success');
-        fetchData();
-      }
-    } catch (error) {
-      console.error('Failed to update appointment status', error);
-      triggerGlobalToast('Failed to update status', 'error');
-    }
-  };
 
   const filteredAppointments = appointments.filter(app => 
     statusFilter === 'ALL' || app.status === statusFilter
@@ -60,7 +50,7 @@ const TodayAppointmentsPage = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex gap-2">
-            {['ALL', 'SCHEDULED', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED'].map((status) => (
+            {['ALL', 'SCHEDULED', 'CONFIRMED', 'CHECKED_IN', 'DELAYED', 'COMPLETED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status as any)}
@@ -70,12 +60,12 @@ const TodayAppointmentsPage = () => {
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status.replace('_', ' ')}
+                {status === 'DELAYED' ? 'Walk-in' : status.replace('_', ' ')}
               </button>
             ))}
           </div>
           <button 
-            onClick={fetchData}
+            onClick={() => fetchData()}
             className="p-2 text-slate-400 hover:text-orange-700 transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>
@@ -116,20 +106,24 @@ const TodayAppointmentsPage = () => {
                       app.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                       app.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-100' :
                       app.status === 'CONFIRMED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                      app.status === 'DELAYED' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
                       'bg-slate-50 text-slate-500 border-slate-100'
                     }`}>
-                      {app.status.replace('_', ' ')}
+                      {app.status === 'DELAYED' ? 'Walk-in' : app.status.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {app.status !== 'CHECKED_IN' && app.status !== 'COMPLETED' && (
+                    <div className="flex items-center justify-center gap-2">
                       <button 
-                        onClick={() => handleStatusUpdate(app.id, 'CHECKED_IN')}
-                        className="px-4 py-1.5 rounded-lg bg-orange-700 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm"
+                        onClick={() => {
+                          router.push(`/reception/appointments/vitals?appointmentId=${app.id}`);
+                        }}
+                        className="px-4 py-1.5 rounded-lg bg-orange-700 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm flex items-center gap-1"
                       >
-                        Mark Check-in
+                        <span className="material-symbols-outlined text-[14px]">vital_signs</span>
+                        Vitals
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}

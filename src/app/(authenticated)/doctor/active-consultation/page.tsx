@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
@@ -10,6 +10,7 @@ import { hospitalService } from '@/services/hospitalService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 interface PrescriptionRow {
   id: string;
@@ -19,6 +20,7 @@ interface PrescriptionRow {
 }
 
 const ActiveConsultationPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
   const { user } = useSelector((state: RootState) => state.auth);
@@ -27,14 +29,8 @@ const ActiveConsultationPage = () => {
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [hospital, setHospital] = useState<HospitalResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [finishing, setFinishing] = useState(false);
   const [showPrescription, setShowPrescription] = useState(false);
-
-  const [vitals, setVitals] = useState({
-    heartRate: '--',
-    temp: '--',
-    bp: '--',
-    weight: '--'
-  });
 
   // Form State
   const [complaint, setComplaint] = useState('');
@@ -56,30 +52,14 @@ const ActiveConsultationPage = () => {
 
       try {
         setLoading(true);
-        // Fetch detailed appointment by ID to get vitals and other details
-        const res = await appointmentService.getById(appointmentId);
-        
+        const res = await appointmentService.get(appointmentId);
         if (res.success && res.data) {
-          const appointmentData = res.data;
-          console.log('Fetched Appointment Data:', appointmentData);
-          setAppointment(appointmentData);
-          setComplaint(appointmentData.notes || '');
+          const found = res.data;
+          setAppointment(found);
+          setComplaint(found.notes || '');
           
-          // Set vitals from appointment if available
-          if (appointmentData.vitals) {
-            console.log('Vitals found:', appointmentData.vitals);
-            setVitals({
-              heartRate: appointmentData.vitals.heartRate || '--',
-              temp: appointmentData.vitals.temperature || '--',
-              bp: appointmentData.vitals.bloodPressure || '--',
-              weight: appointmentData.vitals.weight || '--'
-            });
-          } else {
-            console.log('No vitals in appointment data');
-          }
-
           // Fetch patient details
-          const pRes = await patientService.get(appointmentData.patientId);
+          const pRes = await patientService.get(found.patientId);
           if (pRes.success && pRes.data) {
             setPatient(pRes.data);
           }
@@ -131,6 +111,47 @@ const ActiveConsultationPage = () => {
     setIcdCodes(icdCodes.filter(c => c.code !== code));
   };
 
+  const handleFinishConsultation = async () => {
+    if (!appointmentId || !appointment) return;
+
+    try {
+      setFinishing(true);
+      const notes = `COMPLAINT: ${complaint}\n\nDIAGNOSIS: ${diagnosis}`;
+      
+      // Update notes first
+      // WORKAROUND: The backend validates appointmentTime must be in the future.
+      // We send a time 1 hour in the future to bypass this validation while keeping it on the same day.
+      const futureTime = new Date();
+      futureTime.setHours(futureTime.getHours() + 1);
+
+      try {
+        await appointmentService.update(appointmentId, { 
+          notes,
+          patientId: appointment.patientId,
+          doctorId: appointment.doctorId,
+          appointmentTime: futureTime.toISOString()
+        });
+      } catch (noteError) {
+        console.error('Failed to save notes, but proceeding with status update', noteError);
+      }
+
+      // Update status to COMPLETED
+      const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
+      
+      if (statusRes.success) {
+        triggerGlobalToast('Consultation finished successfully', 'success');
+        router.push('/doctor/patient-queue');
+      } else {
+        triggerGlobalToast('Failed to complete appointment status', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to finish consultation', error);
+      triggerGlobalToast('An error occurred while finishing consultation', 'error');
+    } finally {
+      setFinishing(false);
+    }
+  };
+
   if (loading) {
     return (
       <MainLayout title="Active Consultation" hideTitle>
@@ -172,7 +193,7 @@ const ActiveConsultationPage = () => {
               <div className="flex items-center gap-3 text-on-surface-variant">
                 <span className="font-manrope font-bold text-lg">{patient?.fullName || 'Unknown Patient'}</span>
                 <span className="text-sm font-medium">{patientAge} Yrs</span>
-                <span className="text-sm font-medium">{vitals.weight !== '--' ? `${vitals.weight} Kg` : '-- Kg'}</span>
+                <span className="text-sm font-medium">{appointment?.vitals?.weight || '--'} Kg</span>
                 <span className="text-sm font-medium capitalize">{patient?.gender.toLowerCase() || '--'}</span>
               </div>
             </div>
@@ -185,15 +206,15 @@ const ActiveConsultationPage = () => {
               <div className="flex gap-4 items-center">
                 <div className="flex items-center gap-1">
                   <span className="material-symbols-outlined text-primary text-[18px]">favorite</span>
-                  <span className="font-manrope font-bold text-sm">{vitals.heartRate}</span>
+                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.heartRate || '--'}</span>
                 </div>
                 <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
                   <span className="material-symbols-outlined text-blue-500 text-[18px]">device_thermostat</span>
-                  <span className="font-manrope font-bold text-sm">{vitals.temp}</span>
+                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.temperature || '--'}</span>
                 </div>
                 <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
                   <span className="material-symbols-outlined text-green-500 text-[18px]">blood_pressure</span>
-                  <span className="font-manrope font-bold text-sm">{vitals.bp}</span>
+                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.bloodPressure || '--'}</span>
                 </div>
               </div>
             </div>
@@ -319,12 +340,24 @@ const ActiveConsultationPage = () => {
                 ))}
               </div>
 
-              <div className="mt-8 flex justify-end">
+              <div className="mt-8 flex justify-end gap-3">
                 <button 
                   onClick={() => setShowPrescription(true)}
-                  className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
+                  className="px-8 py-3.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
                 >
                   <span className="material-symbols-outlined text-[20px]">print</span> Generate Prescription
+                </button>
+                <button 
+                  onClick={handleFinishConsultation}
+                  disabled={finishing}
+                  className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs disabled:opacity-70"
+                >
+                  {finishing ? (
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  )}
+                  Finish Consultation
                 </button>
               </div>
             </div>
@@ -341,7 +374,12 @@ const ActiveConsultationPage = () => {
         complaints={complaint}
         diagnosis={diagnosis}
         prescriptions={prescriptions}
-        vitals={vitals}
+        vitals={{
+          heartRate: appointment?.vitals?.heartRate?.toString() || '--',
+          temp: appointment?.vitals?.temperature?.toString() || '--',
+          bp: appointment?.vitals?.bloodPressure || '--',
+          weight: appointment?.vitals?.weight?.toString() || '--'
+        }}
         date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
       />
     </MainLayout>

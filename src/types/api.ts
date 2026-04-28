@@ -255,16 +255,26 @@ export interface CreateHospitalRequest {
 // Appointment types
 export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED' | 'CONFIRMED' | 'CHECKED_IN';
 
+export interface VitalsDTO {
+  bloodPressure: string;
+  heartRate: number;
+  temperature: number;
+  weight: number;
+}
+
 export interface AppointmentResponse {
   id: string; // appointmentId
   patientId: string;
   patientName: string;
+  patientAge?: number;
+  patientGender?: Gender;
   doctorId: string;
   doctorName: string;
   doctorSpecialization?: string;
   appointmentTime: string;
   status: AppointmentStatus;
   notes?: string;
+  vitals?: VitalsDTO;
   createdAt: string;
 }
 
@@ -274,6 +284,7 @@ export interface CreateAppointmentRequest {
   doctorId: string;
   appointmentTime: string;
   notes?: string;
+  vitals?: VitalsDTO;
 }
 
 export interface UpdateAppointmentStatusRequest {

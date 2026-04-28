@@ -16,6 +16,11 @@ export const appointmentService = {
     return response.data;
   },
 
+  async get(id: string): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.get<ApiResponse<AppointmentResponse>>(`/appointments/${id}`);
+    return response.data;
+  },
+
   async create(request: CreateAppointmentRequest): Promise<ApiResponse<AppointmentResponse>> {
     const response = await apiClient.post<ApiResponse<AppointmentResponse>>('/appointments', request);
     return response.data;
