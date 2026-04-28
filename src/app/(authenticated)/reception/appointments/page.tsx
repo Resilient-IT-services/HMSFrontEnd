@@ -5,7 +5,6 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentResponse, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
-import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 
 const TodayAppointmentsPage = () => {
@@ -39,19 +38,6 @@ const TodayAppointmentsPage = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  const handleStatusUpdate = async (id: string, status: AppointmentStatus) => {
-    try {
-      const res = await appointmentService.updateStatus(id, { status });
-      if (res.success) {
-        triggerGlobalToast(`Appointment marked as ${status.replace('_', ' ')}`, 'success');
-        fetchData();
-      }
-    } catch (error) {
-      console.error('Failed to update appointment status', error);
-      triggerGlobalToast('Failed to update status', 'error');
-    }
-  };
 
   const filteredAppointments = appointments.filter(app => 
     statusFilter === 'ALL' || app.status === statusFilter
@@ -125,14 +111,6 @@ const TodayAppointmentsPage = () => {
                   </td>
                   <td className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center gap-2">
-                      {app.status !== 'CHECKED_IN' && app.status !== 'COMPLETED' && (
-                        <button 
-                          onClick={() => handleStatusUpdate(app.id, 'CHECKED_IN')}
-                          className="px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm"
-                        >
-                          Check-in
-                        </button>
-                      )}
                       <button 
                         onClick={() => {
                           router.push(`/reception/appointments/vitals?appointmentId=${app.id}`);

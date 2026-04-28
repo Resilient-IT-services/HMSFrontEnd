@@ -44,12 +44,6 @@ const Sidebar = () => {
       href: effectiveRole === 'DOCTOR' ? '/doctor/patient-queue' : '/reception/patients', 
       roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
     },
-    { 
-      name: effectiveRole === 'DOCTOR' ? 'Active Consultation' : 'Consultation', 
-      icon: 'stethoscope', 
-      href: '/doctor/active-consultation', 
-      roles: ['DOCTOR'] 
-    },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
     { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
     { 

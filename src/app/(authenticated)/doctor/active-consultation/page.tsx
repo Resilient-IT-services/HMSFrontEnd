@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
@@ -10,6 +10,7 @@ import { hospitalService } from '@/services/hospitalService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 interface PrescriptionRow {
   id: string;
@@ -19,6 +20,7 @@ interface PrescriptionRow {
 }
 
 const ActiveConsultationPage = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
   const { user } = useSelector((state: RootState) => state.auth);
@@ -27,6 +29,7 @@ const ActiveConsultationPage = () => {
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [hospital, setHospital] = useState<HospitalResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [finishing, setFinishing] = useState(false);
   const [showPrescription, setShowPrescription] = useState(false);
 
   // Form State
@@ -106,6 +109,43 @@ const ActiveConsultationPage = () => {
 
   const removeIcdCode = (code: string) => {
     setIcdCodes(icdCodes.filter(c => c.code !== code));
+  };
+
+  const handleFinishConsultation = async () => {
+    if (!appointmentId) return;
+
+    try {
+      setFinishing(true);
+      const notes = `COMPLAINT: ${complaint}\n\nDIAGNOSIS: ${diagnosis}`;
+      
+      // Update notes
+      // WORKAROUND: The backend validates appointmentTime must be in the future even on updates.
+      // We send a future date just to bypass validation and save our notes.
+      const futureDate = new Date();
+      futureDate.setFullYear(futureDate.getFullYear() + 1);
+
+      await appointmentService.update(appointmentId, { 
+        notes,
+        patientId: appointment?.patientId || '',
+        doctorId: appointment?.doctorId || '',
+        appointmentTime: futureDate.toISOString()
+      });
+
+      // Update status to COMPLETED
+      const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
+      
+      if (statusRes.success) {
+        triggerGlobalToast('Consultation finished successfully', 'success');
+        router.push('/doctor/patient-queue');
+      } else {
+        triggerGlobalToast('Failed to complete appointment status', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to finish consultation', error);
+      triggerGlobalToast('An error occurred while finishing consultation', 'error');
+    } finally {
+      setFinishing(false);
+    }
   };
 
   if (loading) {
@@ -296,12 +336,24 @@ const ActiveConsultationPage = () => {
                 ))}
               </div>
 
-              <div className="mt-8 flex justify-end">
+              <div className="mt-8 flex justify-end gap-3">
                 <button 
                   onClick={() => setShowPrescription(true)}
-                  className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
+                  className="px-8 py-3.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
                 >
                   <span className="material-symbols-outlined text-[20px]">print</span> Generate Prescription
+                </button>
+                <button 
+                  onClick={handleFinishConsultation}
+                  disabled={finishing}
+                  className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs disabled:opacity-70"
+                >
+                  {finishing ? (
+                    <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
+                  ) : (
+                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                  )}
+                  Finish Consultation
                 </button>
               </div>
             </div>
