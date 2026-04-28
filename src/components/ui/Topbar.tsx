@@ -91,9 +91,7 @@ const Topbar: React.FC = () => {
         
         <div className="h-6 w-px bg-gray-200"></div>
 
-        <button className="p-2 rounded-full hover:bg-gray-50 transition-colors text-gray-500">
-          <span className="material-symbols-outlined">notifications</span>
-        </button>
+
         
         <div className="relative" ref={dropdownRef}>
           <button 
