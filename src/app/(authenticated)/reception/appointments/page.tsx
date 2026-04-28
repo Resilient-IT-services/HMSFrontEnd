@@ -79,6 +79,17 @@ const TodayAppointmentsPage = () => {
   return (
     <MainLayout title="Daily Schedule">
       <div className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-slate-800">Appointment Management</h2>
+          <button 
+            onClick={() => router.push('/reception/appointments/create')}
+            className="px-6 py-2.5 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-orange-800 transition-all shadow-lg shadow-orange-700/20 active:scale-95"
+          >
+            <span className="material-symbols-outlined">add_circle</span>
+            Create Appointment
+          </button>
+        </div>
+
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-wrap gap-2">
             {['ALL', 'UPCOMING', 'SCHEDULED', 'CHECKED_IN', 'DELAYED', 'COMPLETED'].map((status) => (
@@ -166,10 +177,19 @@ const TodayAppointmentsPage = () => {
                         onClick={() => {
                           router.push(`/reception/appointments/vitals?appointmentId=${app.id}`);
                         }}
-                        className="px-4 py-1.5 rounded-lg bg-orange-700 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm flex items-center gap-1"
+                        className="px-3 py-1.5 rounded-lg bg-orange-700 text-white text-[10px] font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm flex items-center gap-1"
                       >
-                        <span className="material-symbols-outlined text-[14px]">vital_signs</span>
+                        <span className="material-symbols-outlined text-[12px]">vital_signs</span>
                         Vitals
+                      </button>
+                      <button 
+                        onClick={() => {
+                          router.push(`/reception/billing?appointmentId=${app.id}`);
+                        }}
+                        className="px-3 py-1.5 rounded-lg border border-orange-700 text-orange-700 text-[10px] font-bold hover:bg-orange-50 transition-all active:scale-95 shadow-sm flex items-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-[12px]">payments</span>
+                        Bill
                       </button>
                     </div>
                   </td>

@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
-import { PatientResponse, AppointmentResponse } from '@/types/api';
+import { pharmacyService } from '@/services/pharmacyService';
+import { PatientResponse, AppointmentResponse, PrescriptionResponse } from '@/types/api';
 import { Card } from '@/components/ui/Card';
 
 const MedicalHistoryPage = () => {
@@ -17,6 +18,7 @@ const MedicalHistoryPage = () => {
   const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -37,9 +39,10 @@ const MedicalHistoryPage = () => {
   const fetchPatientDetails = useCallback(async (id: string) => {
     try {
       setLoading(true);
-      const [pRes, aRes] = await Promise.all([
+      const [pRes, aRes, prRes] = await Promise.all([
         patientService.get(id),
-        appointmentService.list(0, 100)
+        appointmentService.list(0, 100),
+        pharmacyService.listPrescriptions()
       ]);
 
       if (pRes.success && pRes.data) {
@@ -54,6 +57,10 @@ const MedicalHistoryPage = () => {
         if (patientAppointments.length > 0) {
           setSelectedAppointment(patientAppointments[0]);
         }
+      }
+
+      if (prRes.success && prRes.data) {
+        setPrescriptions(prRes.data.content.filter(p => p.patientId === id));
       }
     } catch (error) {
       console.error('Failed to fetch patient details', error);
@@ -244,12 +251,17 @@ const MedicalHistoryPage = () => {
                       </div>
                       <div className="space-y-4">
                         <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-primary">
-                          <p className="font-label-sm text-label-sm text-gray-500 mb-1 uppercase tracking-widest text-[10px]">Assessment</p>
-                          <p className="font-headline-sm text-headline-sm text-on-surface">Stable condition. Healing as expected.</p>
+                          <p className="font-label-sm text-label-sm text-gray-500 mb-1 uppercase tracking-widest text-[10px]">Assessment / Diagnosis</p>
+                          <p className="font-headline-sm text-headline-sm text-on-surface">
+                            {selectedAppointment.notes ? selectedAppointment.notes.split('.')[0] : 'Stable condition.'}
+                          </p>
                         </div>
-                        <p className="font-body-md text-body-md text-gray-700 leading-relaxed">
-                          {selectedAppointment.notes || 'No detailed clinical notes provided for this visit.'}
-                        </p>
+                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                           <p className="text-xs font-bold text-slate-400 uppercase mb-2">Clinical Notes</p>
+                           <p className="font-body-md text-body-md text-gray-700 leading-relaxed">
+                            {selectedAppointment.notes || 'No detailed clinical notes provided for this visit.'}
+                           </p>
+                        </div>
                       </div>
                     </div>
                     <div className="col-span-12 md:col-span-5 bg-surface-container-low border border-outline-variant rounded-xl p-6">
@@ -258,7 +270,28 @@ const MedicalHistoryPage = () => {
                         <h3 className="font-headline-sm text-headline-sm text-on-surface">Prescriptions</h3>
                       </div>
                       <div className="space-y-4">
-                        <p className="text-gray-500 italic text-sm">No prescriptions recorded for this visit.</p>
+                        {prescriptions.length > 0 ? (
+                          <div className="space-y-3">
+                            {prescriptions.map((pr) => (
+                              <div key={pr.id} className="bg-white p-3 rounded-lg border border-outline-variant">
+                                <div className="flex justify-between items-start mb-2">
+                                  <p className="font-bold text-sm text-slate-900">{new Date(pr.createdAt).toLocaleDateString()}</p>
+                                  <span className="text-[10px] font-black text-orange-600 uppercase bg-orange-50 px-1.5 py-0.5 rounded tracking-widest">Active</span>
+                                </div>
+                                <div className="space-y-2">
+                                  {pr.items.map((item, idx) => (
+                                    <div key={idx} className="flex justify-between text-xs border-b border-slate-50 pb-1 last:border-0 last:pb-0">
+                                      <span className="font-medium text-slate-700">{item.medicineName}</span>
+                                      <span className="text-slate-500">{item.dosage} • {item.duration}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-gray-500 italic text-sm">No prescriptions recorded for this patient.</p>
+                        )}
                       </div>
                     </div>
                     <div className="col-span-12 bg-white border border-outline-variant rounded-xl p-6 shadow-sm">

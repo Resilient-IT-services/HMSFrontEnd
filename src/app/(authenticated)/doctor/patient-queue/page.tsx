@@ -19,6 +19,7 @@ const PatientQueuePage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [patientDetails, setPatientDetails] = useState<Record<string, PatientResponse>>({});
+  const [activeTab, setActiveTab] = useState<'TODAY' | 'UPCOMING'>('TODAY');
 
   const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
@@ -43,14 +44,16 @@ const PatientQueuePage = () => {
 
       if (response.success && response.data) {
         const today = new Date().toISOString().split('T')[0];
-        const todaysAppointments = response.data.content.filter((appointment) => {
-          const belongsToCurrentDoctor = appointment.doctorId === user.id || appointment.doctorName === user.fullName;
-          return belongsToCurrentDoctor && appointment.appointmentTime.startsWith(today);
+        
+        // Filter by current doctor
+        const doctorAppointments = response.data.content.filter((appointment) => {
+          return appointment.doctorId === user.id || appointment.doctorName === user.fullName;
         });
-        setAppointments(todaysAppointments);
+
+        setAppointments(doctorAppointments);
 
         // Fetch patient details for age and gender if not already in cache
-        const patientIdsToFetch = Array.from(new Set(todaysAppointments.map(a => a.patientId)))
+        const patientIdsToFetch = Array.from(new Set(doctorAppointments.map(a => a.patientId)))
           .filter(id => !patientDetails[id]);
 
         if (patientIdsToFetch.length > 0) {
@@ -81,12 +84,15 @@ const PatientQueuePage = () => {
   }, [fetchData]);
 
   const stats = useMemo(() => {
-    const waiting = appointments.filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED').length;
-    const inProgress = appointments.filter((a) => a.status === 'DELAYED').length;
-    const completed = appointments.filter((a) => a.status === 'COMPLETED').length;
+    const today = new Date().toISOString().split('T')[0];
+    const todayApps = appointments.filter(a => a.appointmentTime.startsWith(today));
+
+    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED').length;
+    const inProgress = todayApps.filter((a) => a.status === 'DELAYED').length;
+    const completed = todayApps.filter((a) => a.status === 'COMPLETED').length;
 
     return {
-      total: appointments.length,
+      total: todayApps.length,
       waiting,
       inProgress,
       completed,
@@ -108,12 +114,22 @@ const PatientQueuePage = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    const activeAppointments = appointments.filter(
-      (a) => a.status !== 'COMPLETED' && a.status !== 'CANCELLED'
-    );
+    const today = new Date().toISOString().split('T')[0];
     
-    // Sort by token number
-    const sorted = sortByToken(activeAppointments);
+    let base = appointments;
+    if (activeTab === 'TODAY') {
+      base = appointments.filter(a => a.appointmentTime.startsWith(today) && a.status !== 'COMPLETED' && a.status !== 'CANCELLED');
+    } else {
+      base = appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
+    }
+    
+    // Sort by token number for today, or by time for upcoming
+    let sorted;
+    if (activeTab === 'TODAY') {
+      sorted = sortByToken(base);
+    } else {
+      sorted = [...base].sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
+    }
     
     if (!searchTerm) return sorted;
     const term = searchTerm.toLowerCase();
@@ -122,7 +138,7 @@ const PatientQueuePage = () => {
         a.patientName.toLowerCase().includes(term) ||
         a.patientId.toLowerCase().includes(term)
     );
-  }, [appointments, searchTerm]);
+  }, [appointments, searchTerm, activeTab]);
 
   return (
     <MainLayout title="Patient Queue" hideTitle>
@@ -131,12 +147,22 @@ const PatientQueuePage = () => {
         <section className="flex justify-between items-end">
           <div>
             <h2 className="font-headline-xl text-on-surface tracking-tight">Patient Queue</h2>
-            <p className="text-gray-500 mt-1">Manage today's appointments and surgical consultations.</p>
+            <p className="text-gray-500 mt-1">Manage {activeTab === 'TODAY' ? "today's" : "upcoming"} appointments and surgical consultations.</p>
           </div>
           <div className="flex gap-3">
             <div className="flex bg-white rounded-lg border border-outline-variant p-1">
-              <button className="px-4 py-1.5 text-label-md bg-primary-container text-white rounded-md">Today</button>
-              <button className="px-4 py-1.5 text-label-md text-gray-500 hover:bg-gray-50 rounded-md">Upcoming</button>
+              <button 
+                onClick={() => setActiveTab('TODAY')}
+                className={`px-4 py-1.5 text-label-md rounded-md transition-all ${activeTab === 'TODAY' ? 'bg-primary-container text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                Today
+              </button>
+              <button 
+                onClick={() => setActiveTab('UPCOMING')}
+                className={`px-4 py-1.5 text-label-md rounded-md transition-all ${activeTab === 'UPCOMING' ? 'bg-primary-container text-white shadow-sm' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                Upcoming
+              </button>
             </div>
           </div>
         </section>
