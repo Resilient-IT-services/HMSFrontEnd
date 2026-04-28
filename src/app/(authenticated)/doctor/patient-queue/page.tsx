@@ -74,9 +74,12 @@ const PatientQueuePage = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    if (!searchTerm) return appointments;
+    const activeAppointments = appointments.filter(
+      (a) => a.status !== 'COMPLETED' && a.status !== 'CANCELLED'
+    );
+    if (!searchTerm) return activeAppointments;
     const term = searchTerm.toLowerCase();
-    return appointments.filter(
+    return activeAppointments.filter(
       (a) =>
         a.patientName.toLowerCase().includes(term) ||
         a.patientId.toLowerCase().includes(term)

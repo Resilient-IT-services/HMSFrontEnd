@@ -2,13 +2,16 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse } from '@/types/api';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 const DoctorDashboard = () => {
+  const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,6 +73,26 @@ const DoctorDashboard = () => {
     [queue],
   );
 
+  const handleStartNextConsultation = async () => {
+    const nextAppointment = queue[0];
+    if (!nextAppointment) {
+      triggerGlobalToast('No patients in the queue', 'info');
+      return;
+    }
+
+    try {
+      const res = await appointmentService.updateStatus(nextAppointment.id, { status: 'DELAYED' });
+      if (res.success) {
+        router.push(`/doctor/active-consultation?appointmentId=${nextAppointment.id}`);
+      } else {
+        triggerGlobalToast('Failed to start consultation', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to start consultation', error);
+      triggerGlobalToast('Failed to start consultation', 'error');
+    }
+  };
+
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
       <div className="p-8 max-w-7xl mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen">
@@ -79,7 +102,10 @@ const DoctorDashboard = () => {
               <h2 className="text-3xl font-bold text-slate-900 mb-2 font-manrope">Good morning, Dr. {user?.fullName.split(' ')[0]}</h2>
               <p className="text-slate-500 max-w-lg">You have {stats.total} consultations scheduled for today. {stats.waiting} patients are currently in the queue.</p>
               <div className="flex gap-4 mt-6">
-                <button className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-orange-700 active:scale-95 transition-all shadow-lg shadow-orange-600/20">
+                <button 
+                  onClick={handleStartNextConsultation}
+                  className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-orange-700 active:scale-95 transition-all shadow-lg shadow-orange-600/20"
+                >
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: '\'FILL\' 1' }}>play_arrow</span>
                   Start Next Consultation
                 </button>
