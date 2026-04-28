@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
@@ -16,38 +16,40 @@ const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) {
-        setLoading(false);
+  const fetchData = useCallback(async (isBackground = false) => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (!isBackground) setLoading(true);
+      const response = await appointmentService.list(0, 100);
+
+      if (!response.success || !response.data) {
+        setAppointments([]);
         return;
       }
 
-      try {
-        setLoading(true);
-        const response = await appointmentService.list(0, 100);
+      const today = new Date().toISOString().split('T')[0];
+      const todaysAppointments = response.data.content.filter((appointment) => {
+        const belongsToCurrentDoctor = appointment.doctorId === user.id || appointment.doctorName === user.fullName;
+        return belongsToCurrentDoctor && appointment.appointmentTime.startsWith(today);
+      });
 
-        if (!response.success || !response.data) {
-          setAppointments([]);
-          return;
-        }
-
-        const today = new Date().toISOString().split('T')[0];
-        const todaysAppointments = response.data.content.filter((appointment) => {
-          const belongsToCurrentDoctor = appointment.doctorId === user.id || appointment.doctorName === user.fullName;
-          return belongsToCurrentDoctor && appointment.appointmentTime.startsWith(today);
-        });
-
-        setAppointments(todaysAppointments);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
+      setAppointments(todaysAppointments);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      if (!isBackground) setLoading(false);
+    }
   }, [user]);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED').length;

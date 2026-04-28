@@ -14,8 +14,8 @@ const TodayAppointmentsPage = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const [appRes, docRes] = await Promise.all([
         appointmentService.list(0, 100),
@@ -31,12 +31,14 @@ const TodayAppointmentsPage = () => {
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
   }, [fetchData]);
 
   const filteredAppointments = appointments.filter(app => 
@@ -63,7 +65,7 @@ const TodayAppointmentsPage = () => {
             ))}
           </div>
           <button 
-            onClick={fetchData}
+            onClick={() => fetchData()}
             className="p-2 text-slate-400 hover:text-orange-700 transition-colors"
           >
             <span className="material-symbols-outlined">refresh</span>

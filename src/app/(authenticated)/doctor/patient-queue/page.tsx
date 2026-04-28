@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
@@ -17,14 +17,14 @@ const PatientQueuePage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async (isBackground = false) => {
     if (!user) {
       setLoading(false);
       return;
     }
 
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       const response = await appointmentService.list(0, 100);
 
       if (response.success && response.data) {
@@ -38,13 +38,15 @@ const PatientQueuePage = () => {
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
     } finally {
-      setLoading(false);
+      if (!isBackground) setLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     fetchData();
-  }, [user]);
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED').length;
@@ -170,7 +172,7 @@ const PatientQueuePage = () => {
                 <span className="material-symbols-outlined">filter_list</span>
               </button>
               <button 
-                onClick={fetchData}
+                onClick={() => fetchData()}
                 className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
                 title="Refresh"
               >

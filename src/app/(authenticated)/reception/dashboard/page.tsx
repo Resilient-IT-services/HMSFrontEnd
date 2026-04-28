@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
@@ -17,35 +17,38 @@ const ReceptionDashboard = () => {
   const [nurses, setNurses] = useState<NurseStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const today = new Date().toISOString().split('T')[0];
-        
-        const [patRes, appRes, docRes, nurRes] = await Promise.all([
-          patientService.list(0, 5),
-          appointmentService.list(0, 100),
-          doctorService.list(0, 6),
-          nurseService.list(0, 5)
-        ]);
+  const fetchData = useCallback(async (isBackground = false) => {
+    try {
+      if (!isBackground) setLoading(true);
+      const today = new Date().toISOString().split('T')[0];
+      
+      const [patRes, appRes, docRes, nurRes] = await Promise.all([
+        patientService.list(0, 5),
+        appointmentService.list(0, 100),
+        doctorService.list(0, 6),
+        nurseService.list(0, 5)
+      ]);
 
-        if (patRes.success) setRecentPatients(patRes.data?.content || []);
-        if (appRes.success) {
-          const todayApps = appRes.data?.content.filter(a => a.appointmentTime.startsWith(today)) || [];
-          setAppointments(todayApps);
-        }
-        if (docRes.success) setDoctors(docRes.data?.content || []);
-        if (nurRes.success) setNurses(nurRes.data?.content || []);
-
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
+      if (patRes.success) setRecentPatients(patRes.data?.content || []);
+      if (appRes.success) {
+        const todayApps = appRes.data?.content.filter(a => a.appointmentTime.startsWith(today)) || [];
+        setAppointments(todayApps);
       }
-    };
-    fetchData();
+      if (docRes.success) setDoctors(docRes.data?.content || []);
+      if (nurRes.success) setNurses(nurRes.data?.content || []);
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      if (!isBackground) setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    return () => clearInterval(interval);
+  }, [fetchData]);
 
   const stats = useMemo(() => {
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
