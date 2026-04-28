@@ -6,17 +6,14 @@ import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentResponse, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import VitalsModal from '@/components/reception/appointments/VitalsModal';
+import { useRouter } from 'next/navigation';
 
 const TodayAppointmentsPage = () => {
+  const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL'>('ALL');
-  
-  // Vitals Modal State
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
-  const [isVitalsModalOpen, setIsVitalsModalOpen] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -138,8 +135,7 @@ const TodayAppointmentsPage = () => {
                       )}
                       <button 
                         onClick={() => {
-                          setSelectedAppointment(app);
-                          setIsVitalsModalOpen(true);
+                          router.push(`/reception/appointments/vitals?appointmentId=${app.id}`);
                         }}
                         className="px-4 py-1.5 rounded-lg bg-orange-700 text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95 shadow-sm flex items-center gap-1"
                       >
@@ -154,16 +150,6 @@ const TodayAppointmentsPage = () => {
           </table>
         </div>
       </div>
-
-      <VitalsModal 
-        isOpen={isVitalsModalOpen}
-        onClose={() => {
-          setIsVitalsModalOpen(false);
-          setSelectedAppointment(null);
-        }}
-        appointment={selectedAppointment}
-        onSuccess={fetchData}
-      />
     </MainLayout>
   );
 };
