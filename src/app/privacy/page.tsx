@@ -131,18 +131,15 @@ export default function PrivacyPolicy() {
                     </div>
                 </div>
 
-                {/* ✅ BUTTONS (TERMS STYLE DOWNLOAD) */}
+
                 <div className="bg-[var(--surface)] border rounded-lg p-4 flex justify-between items-center shadow-sm">
                     <div>
                         <p className="font-medium text-sm">Need a physical copy?</p>
                         <p className="text-xs text-[var(--text-secondary)]">
-                            Download the PDF version of this Privacy Policy.
+
                         </p>
                     </div>
 
-                    <button className="border border-[var(--primary)] text-[var(--primary)] px-4 py-2 rounded-md text-sm hover:bg-[var(--background)]">
-                        Download PDF ↓
-                    </button>
                 </div>
 
             </main>
