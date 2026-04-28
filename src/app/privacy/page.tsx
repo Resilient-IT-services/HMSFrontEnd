@@ -140,9 +140,6 @@ export default function PrivacyPolicy() {
                         </p>
                     </div>
 
-                    <button className="border border-[var(--primary)] text-[var(--primary)] px-4 py-2 rounded-md text-sm hover:bg-[var(--background)]">
-                        Download PDF ↓
-                    </button>
                 </div>
 
             </main>
