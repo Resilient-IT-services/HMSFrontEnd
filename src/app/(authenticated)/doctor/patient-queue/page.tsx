@@ -2,13 +2,16 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse } from '@/types/api';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 const PatientQueuePage = () => {
+  const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,6 +58,20 @@ const PatientQueuePage = () => {
       completed,
     };
   }, [appointments]);
+
+  const handleStartConsultation = async (id: string) => {
+    try {
+      const res = await appointmentService.updateStatus(id, { status: 'DELAYED' });
+      if (res.success) {
+        router.push(`/doctor/active-consultation?appointmentId=${id}`);
+      } else {
+        triggerGlobalToast('Failed to start consultation', 'error');
+      }
+    } catch (error) {
+      console.error('Failed to start consultation', error);
+      triggerGlobalToast('Failed to start consultation', 'error');
+    }
+  };
 
   const filteredAppointments = useMemo(() => {
     if (!searchTerm) return appointments;
@@ -214,7 +231,7 @@ const PatientQueuePage = () => {
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {appointment.status === 'DELAYED' ? 'In-Progress' : appointment.status}
+                          {appointment.status === 'DELAYED' ? 'Walk-in' : appointment.status}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
@@ -226,9 +243,12 @@ const PatientQueuePage = () => {
                           ) : appointment.status === 'COMPLETED' ? (
                             <button className="text-gray-500 bg-gray-50 px-4 py-1.5 rounded-lg text-xs font-semibold" disabled>Consulted</button>
                           ) : (
-                            <Link href={`/doctor/active-consultation?appointmentId=${appointment.id}`}>
-                              <button className="border border-primary text-primary px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-orange-50 transition-colors">Start Consultation</button>
-                            </Link>
+                            <button 
+                              onClick={() => handleStartConsultation(appointment.id)}
+                              className="border border-primary text-primary px-4 py-1.5 rounded-lg text-xs font-semibold hover:bg-orange-50 transition-colors"
+                            >
+                              Start Consultation
+                            </button>
                           )}
                           <button className="text-gray-500 hover:text-primary transition-colors">
                             <span className="material-symbols-outlined">history</span>
