@@ -6,8 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
+import { patientService } from '@/services/patientService';
 import { RootState } from '@/state/store';
-import { AppointmentResponse } from '@/types/api';
+import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
 const PatientQueuePage = () => {
@@ -16,6 +17,18 @@ const PatientQueuePage = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [patientDetails, setPatientDetails] = useState<Record<string, PatientResponse>>({});
+
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user) {
@@ -34,13 +47,31 @@ const PatientQueuePage = () => {
           return belongsToCurrentDoctor && appointment.appointmentTime.startsWith(today);
         });
         setAppointments(todaysAppointments);
+
+        // Fetch patient details for age and gender if not already in cache
+        const patientIdsToFetch = Array.from(new Set(todaysAppointments.map(a => a.patientId)))
+          .filter(id => !patientDetails[id]);
+
+        if (patientIdsToFetch.length > 0) {
+          const details = await Promise.all(
+            patientIdsToFetch.map(id => patientService.get(id))
+          );
+          
+          const newDetails: Record<string, PatientResponse> = { ...patientDetails };
+          details.forEach(res => {
+            if (res.success && res.data) {
+              newDetails[res.data.id] = res.data;
+            }
+          });
+          setPatientDetails(newDetails);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user]);
+  }, [user, patientDetails]);
 
   useEffect(() => {
     fetchData();
@@ -221,7 +252,11 @@ const PatientQueuePage = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="text-body-md">-- / --</span>
+                        <span className="text-body-md">
+                          {patientDetails[appointment.patientId] 
+                            ? `${calculateAge(patientDetails[appointment.patientId].dob)} / ${patientDetails[appointment.patientId].gender.charAt(0)}` 
+                            : '-- / --'}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         <span className="text-body-md">
