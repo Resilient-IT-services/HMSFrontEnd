@@ -125,7 +125,7 @@ const PatientQueuePage = () => {
               <span className="material-symbols-outlined">clinical_notes</span>
             </div>
             <div>
-              <p className="text-gray-500 font-label-sm">In-Progress</p>
+              <p className="text-gray-500 font-label-sm">Walk-in</p>
               <p className="font-headline-md">{stats.inProgress < 10 ? `0${stats.inProgress}` : stats.inProgress}</p>
             </div>
           </div>

@@ -48,7 +48,7 @@ const TodayAppointmentsPage = () => {
       <div className="space-y-6">
         <div className="flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex gap-2">
-            {['ALL', 'SCHEDULED', 'CONFIRMED', 'CHECKED_IN', 'COMPLETED'].map((status) => (
+            {['ALL', 'SCHEDULED', 'CONFIRMED', 'CHECKED_IN', 'DELAYED', 'COMPLETED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status as any)}
@@ -58,7 +58,7 @@ const TodayAppointmentsPage = () => {
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status.replace('_', ' ')}
+                {status === 'DELAYED' ? 'Walk-in' : status.replace('_', ' ')}
               </button>
             ))}
           </div>
@@ -104,9 +104,10 @@ const TodayAppointmentsPage = () => {
                       app.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                       app.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-100' :
                       app.status === 'CONFIRMED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                      app.status === 'DELAYED' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
                       'bg-slate-50 text-slate-500 border-slate-100'
                     }`}>
-                      {app.status.replace('_', ' ')}
+                      {app.status === 'DELAYED' ? 'Walk-in' : app.status.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">

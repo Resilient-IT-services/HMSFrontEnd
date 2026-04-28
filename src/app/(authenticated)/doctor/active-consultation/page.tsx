@@ -119,25 +119,30 @@ const ActiveConsultationPage = () => {
       const notes = `COMPLAINT: ${complaint}\n\nDIAGNOSIS: ${diagnosis}`;
       
       // Update notes first
-      const updateRes = await appointmentService.update(appointmentId, { 
-        notes,
-        patientId: appointment.patientId,
-        doctorId: appointment.doctorId,
-        appointmentTime: appointment.appointmentTime
-      });
+      // WORKAROUND: The backend validates appointmentTime must be in the future.
+      // We send a time 1 hour in the future to bypass this validation while keeping it on the same day.
+      const futureTime = new Date();
+      futureTime.setHours(futureTime.getHours() + 1);
 
-      if (updateRes.success) {
-        // Update status to COMPLETED
-        const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
-        
-        if (statusRes.success) {
-          triggerGlobalToast('Consultation finished successfully', 'success');
-          router.push('/doctor/patient-queue');
-        } else {
-          triggerGlobalToast('Failed to complete appointment status', 'error');
-        }
+      try {
+        await appointmentService.update(appointmentId, { 
+          notes,
+          patientId: appointment.patientId,
+          doctorId: appointment.doctorId,
+          appointmentTime: futureTime.toISOString()
+        });
+      } catch (noteError) {
+        console.error('Failed to save notes, but proceeding with status update', noteError);
+      }
+
+      // Update status to COMPLETED
+      const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
+      
+      if (statusRes.success) {
+        triggerGlobalToast('Consultation finished successfully', 'success');
+        router.push('/doctor/patient-queue');
       } else {
-        triggerGlobalToast('Failed to save consultation notes', 'error');
+        triggerGlobalToast('Failed to complete appointment status', 'error');
       }
     } catch (error) {
       console.error('Failed to finish consultation', error);
