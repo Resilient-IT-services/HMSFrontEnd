@@ -62,12 +62,11 @@ const PatientsPage = () => {
         {/* Stats & Search Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
            {/* Metric Cards */}
-           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-4">
+           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-4">
               {[
                 { label: 'Total Records', val: totalElements, color: 'text-slate-600', bg: 'bg-slate-100', icon: 'group' },
                 { label: 'New Today', val: '04', color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'how_to_reg' },
                 { label: 'In-Patient', val: '12', color: 'text-blue-600', bg: 'bg-blue-50', icon: 'bed' },
-                { label: 'Emergency', val: '02', color: 'text-orange-600', bg: 'bg-orange-50', icon: 'emergency' },
               ].map((s, i) => (
                 <div key={i} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center">
                   <div className={`p-2 ${s.bg} ${s.color} rounded-lg mb-2`}>

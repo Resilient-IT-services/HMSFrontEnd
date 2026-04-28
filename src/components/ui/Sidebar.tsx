@@ -46,11 +46,11 @@ const Sidebar = () => {
     },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
     { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { 
-      name: effectiveRole === 'DOCTOR' ? 'History' : 'Token Queue', 
-      icon: effectiveRole === 'DOCTOR' ? 'history_edu' : 'queue', 
-      href: effectiveRole === 'DOCTOR' ? '/doctor/history' : '/reception/queue', 
-      roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
+    {
+      name: 'History',
+      icon: 'history_edu',
+      href: '/doctor/history',
+      roles: ['DOCTOR', 'ADMIN']
     },
     { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN'] },
     { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },

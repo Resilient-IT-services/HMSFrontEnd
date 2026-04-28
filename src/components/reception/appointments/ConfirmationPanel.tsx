@@ -98,7 +98,7 @@ export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
           onClick={handleConfirm}
           className="w-full py-3 bg-primary text-white rounded-lg font-black flex items-center justify-center gap-2 shadow-lg shadow-orange-200 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:active:scale-100 text-sm"
         >
-          {submitting ? 'Confirming...' : 'Confirm Booking'}
+          {submitting ? 'Booking...' : 'Book Appointment'}
           <span className="material-symbols-outlined text-base">arrow_forward</span>
         </button>
       </div>
