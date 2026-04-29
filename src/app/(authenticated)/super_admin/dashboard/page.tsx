@@ -5,11 +5,11 @@ import Link from 'next/link';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
-import { HospitalResponse, UserResponse } from '@/types/api';
+import { HospitalResponse, UserSummaryDTO } from '@/types/api';
 
 const SuperAdminDashboard = () => {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<UserSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = React.useCallback(async () => {

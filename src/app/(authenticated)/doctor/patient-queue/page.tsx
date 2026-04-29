@@ -43,39 +43,51 @@ const PatientQueuePage = () => {
       const response = await appointmentService.list(0, 100);
 
       if (response.success && response.data) {
-        const today = new Date().toISOString().split('T')[0];
-        
         // Filter by current doctor
         const doctorAppointments = response.data.content.filter((appointment) => {
           return appointment.doctorId === user.id || appointment.doctorName === user.fullName;
         });
 
         setAppointments(doctorAppointments);
-
-        // Fetch patient details for age and gender if not already in cache
-        const patientIdsToFetch = Array.from(new Set(doctorAppointments.map(a => a.patientId)))
-          .filter(id => !patientDetails[id]);
-
-        if (patientIdsToFetch.length > 0) {
-          const details = await Promise.all(
-            patientIdsToFetch.map(id => patientService.get(id))
-          );
-          
-          const newDetails: Record<string, PatientResponse> = { ...patientDetails };
-          details.forEach(res => {
-            if (res.success && res.data) {
-              newDetails[res.data.id] = res.data;
-            }
-          });
-          setPatientDetails(newDetails);
-        }
       }
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user, patientDetails]);
+  }, [user?.id, user?.fullName]);
+
+  // Separate effect for fetching missing patient details to avoid re-fetching appointments
+  useEffect(() => {
+    const fetchMissingPatients = async () => {
+      const patientIdsToFetch = Array.from(new Set(appointments.map(a => a.patientId)))
+        .filter(id => !patientDetails[id]);
+
+      if (patientIdsToFetch.length > 0) {
+        try {
+          const details = await Promise.all(
+            patientIdsToFetch.map(id => patientService.get(id))
+          );
+          
+          setPatientDetails(prev => {
+            const newDetails = { ...prev };
+            details.forEach(res => {
+              if (res.success && res.data) {
+                newDetails[res.data.id] = res.data;
+              }
+            });
+            return newDetails;
+          });
+        } catch (error) {
+          console.error('Failed to fetch patient details', error);
+        }
+      }
+    };
+
+    if (appointments.length > 0) {
+      fetchMissingPatients();
+    }
+  }, [appointments, patientDetails]);
 
   useEffect(() => {
     fetchData();
@@ -87,8 +99,8 @@ const PatientQueuePage = () => {
     const today = new Date().toISOString().split('T')[0];
     const todayApps = appointments.filter(a => a.appointmentTime.startsWith(today));
 
-    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED' || a.status === 'CONFIRMED').length;
-    const inProgress = todayApps.filter((a) => a.status === 'DELAYED').length;
+    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED').length;
+    const inProgress = todayApps.filter((a) => a.status === 'WALK_IN').length;
     const completed = todayApps.filter((a) => a.status === 'COMPLETED').length;
 
     return {
@@ -101,7 +113,8 @@ const PatientQueuePage = () => {
 
   const handleStartConsultation = async (id: string) => {
     try {
-      const res = await appointmentService.updateStatus(id, { status: 'DELAYED' });
+      // Using WALK_IN as the "In Consultation" status as per available enum
+      const res = await appointmentService.updateStatus(id, { status: 'WALK_IN' });
       if (res.success) {
         router.push(`/doctor/active-consultation?appointmentId=${id}`);
       } else {
@@ -118,7 +131,10 @@ const PatientQueuePage = () => {
     
     let base = appointments;
     if (activeTab === 'TODAY') {
-      base = appointments.filter(a => a.appointmentTime.startsWith(today) && a.status !== 'COMPLETED' && a.status !== 'CANCELLED');
+      base = appointments.filter(a => 
+        a.appointmentTime.startsWith(today) && 
+        (a.status === 'SCHEDULED' || a.status === 'WALK_IN')
+      );
     } else {
       base = appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
     }
@@ -267,7 +283,7 @@ const PatientQueuePage = () => {
                   filteredAppointments.map((appointment) => (
                     <tr key={appointment.id} className="hover:bg-orange-600/5 transition-colors group">
                       <td className="px-6 py-4">
-                        <span className={`font-bold ${appointment.status === 'DELAYED' ? 'text-primary' : 'text-gray-900'}`}>
+                        <span className={`font-bold ${appointment.status === 'WALK_IN' ? 'text-primary' : 'text-gray-900'}`}>
                           #{formatToken(appointment)}
                         </span>
                       </td>
@@ -296,18 +312,18 @@ const PatientQueuePage = () => {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          appointment.status === 'DELAYED' 
+                          appointment.status === 'WALK_IN' 
                             ? 'bg-yellow-100 text-yellow-800' 
                             : appointment.status === 'COMPLETED'
                               ? 'bg-green-100 text-green-800'
                               : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {appointment.status === 'DELAYED' ? 'Walk-in' : appointment.status}
+                          {appointment.status.replace('_', ' ')}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-                          {appointment.status === 'DELAYED' ? (
+                          {appointment.status === 'WALK_IN' ? (
                             <Link href={`/doctor/active-consultation?appointmentId=${appointment.id}`}>
                               <button className="bg-primary text-white px-4 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 transition-opacity">Resume</button>
                             </Link>

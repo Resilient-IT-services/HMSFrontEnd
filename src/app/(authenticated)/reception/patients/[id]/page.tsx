@@ -7,6 +7,7 @@ import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
 import { PatientResponse, AppointmentResponse } from '@/types/api';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   Cake, 
   MapPin, 
@@ -28,6 +29,7 @@ interface PatientProfileProps {
 
 const PatientProfilePage = ({ params }: PatientProfileProps) => {
   const { id } = use(params);
+  const router = useRouter();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,7 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [id]); // Only re-run if patient ID changes
 
   if (loading) return <MainLayout title="Loading..."><div className="p-8">Loading patient profile...</div></MainLayout>;
   if (!patient) return <MainLayout title="Not Found"><div className="p-8">Patient not found.</div></MainLayout>;
@@ -65,6 +67,16 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
   return (
     <MainLayout title={`Profile: ${patient.fullName}`}>
       <div className="max-w-6xl mx-auto space-y-6">
+        <div className="flex items-center gap-4 mb-2">
+          <button 
+            onClick={() => router.back()}
+            className="p-2 hover:bg-slate-100 rounded-full border border-slate-200 transition-colors"
+          >
+            <span className="material-symbols-outlined text-slate-600">arrow_back</span>
+          </button>
+          <h2 className="text-xl font-bold text-slate-800">Patient Profile</h2>
+        </div>
+
         {/* Patient Header Card */}
         <div className="bg-[var(--surface)] rounded-xl shadow-sm border border-[var(--border)] overflow-hidden">
           <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -88,7 +100,7 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
                 </div>
                 <p className="text-[var(--text-secondary)] font-medium">Patient ID: <span className="text-[var(--primary)] font-bold">#PAT-{patient.id.toString().padStart(5, '0')}</span></p>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--text-secondary)]">
-                  <span className="flex items-center gap-1"><Cake className="size-4" /> {new Date(patient.dob).toLocaleDateString()} (38y)</span>
+                  <span className="flex items-center gap-1"><Cake className="size-4" /> {new Date(patient.dob).toLocaleDateString()}</span>
                   <span className="flex items-center gap-1"><MapPin className="size-4" /> {patient.address}</span>
                 </div>
               </div>
@@ -105,52 +117,12 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
               </button>
             </div>
           </div>
-
-          {/* Vitals Summary Strip */}
-          <div className="border-t border-[var(--border)] bg-[var(--background)]/50 px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 flex items-center justify-center">
-                <Heart className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-wider">Heart Rate</p>
-                <p className="text-lg font-bold text-[var(--text-primary)]">72 <span className="text-xs font-normal text-[var(--text-secondary)] opacity-50">bpm</span></p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                <Activity className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-wider">Blood Pressure</p>
-                <p className="text-lg font-bold text-[var(--text-primary)]">120/80 <span className="text-xs font-normal text-[var(--text-secondary)] opacity-50">mmHg</span></p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-teal-100 dark:bg-teal-900/30 text-teal-600 flex items-center justify-center">
-                <Droplet className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-wider">Oxygen (SpO2)</p>
-                <p className="text-lg font-bold text-[var(--text-primary)]">98% <span className="text-xs font-normal text-[var(--text-secondary)] opacity-50">Normal</span></p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="size-10 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 flex items-center justify-center">
-                <Thermometer className="size-5" />
-              </div>
-              <div>
-                <p className="text-xs text-[var(--text-secondary)] font-medium uppercase tracking-wider">Body Temp</p>
-                <p className="text-lg font-bold text-[var(--text-primary)]">98.6 <span className="text-xs font-normal text-[var(--text-secondary)] opacity-50">°F</span></p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Tabs Navigation */}
         <div className="border-b border-[var(--border)]">
           <nav className="flex gap-8 px-2 overflow-x-auto no-scrollbar">
-            {['Overview', 'Personal Details', 'Visit History', 'Prescriptions'].map(tab => (
+            {['Overview', 'Visit History', 'Prescriptions'].map(tab => (
               <button 
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -168,29 +140,9 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             {activeTab === 'Overview' && (
               <>
-                <Card>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-[var(--text-primary)]">Patient Information</h3>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
-                    <div className="space-y-1">
-                      <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-50">Full Name</p>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">{patient.fullName}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-50">Phone Number</p>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">{patient.phone}</p>
-                    </div>
-                    <div className="space-y-1 md:col-span-2">
-                      <p className="text-xs text-[var(--text-secondary)] font-bold uppercase tracking-widest opacity-50">Home Address</p>
-                      <p className="text-sm font-medium text-[var(--text-primary)]">{patient.address}</p>
-                    </div>
-                  </div>
-                </Card>
-
                 {/* Timeline Component (Derived from 10_patient_timeline.html) */}
                 <Card>
                   <h3 className="text-lg font-bold mb-6 text-[var(--text-primary)]">Medical Timeline</h3>
@@ -245,47 +197,6 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
                 </div>
               </Card>
             )}
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            <Card className="text-center">
-              <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-6 opacity-50">Primary Physician</h3>
-              <div className="flex flex-col items-center">
-                <div className="size-20 rounded-full ring-4 ring-[var(--primary-light)] p-1 mb-4">
-                  <div className="w-full h-full rounded-full bg-[var(--background)] flex items-center justify-center text-[var(--primary)] font-black text-xl">
-                    MD
-                  </div>
-                </div>
-                <h4 className="text-lg font-bold text-[var(--text-primary)]">Unassigned</h4>
-                <p className="text-sm text-[var(--text-secondary)] mb-6">General Medicine</p>
-                <div className="flex gap-2 w-full">
-                  <button className="flex-1 px-4 py-2 bg-[var(--background)] border border-[var(--border)] rounded-lg text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors">
-                    <Clock className="size-5 mx-auto" />
-                  </button>
-                </div>
-              </div>
-            </Card>
-
-            <Card>
-              <h3 className="text-sm font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-4 opacity-50">Clinical Alerts</h3>
-              <div className="space-y-3">
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/30 rounded-lg flex items-start gap-3">
-                  <AlertTriangle className="size-5 text-red-500 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-red-800 dark:text-red-400 uppercase tracking-tighter">Allergies</p>
-                    <p className="text-sm font-medium text-red-700 dark:text-red-300">None Recorded</p>
-                  </div>
-                </div>
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-lg flex items-start gap-3">
-                  <Info className="size-5 text-blue-500 shrink-0" />
-                  <div>
-                    <p className="text-xs font-bold text-blue-800 dark:text-blue-400 uppercase tracking-tighter">Notice</p>
-                    <p className="text-sm font-medium text-blue-700 dark:text-blue-300">New Patient</p>
-                  </div>
-                </div>
-              </div>
-            </Card>
           </div>
         </div>
       </div>

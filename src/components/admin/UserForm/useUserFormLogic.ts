@@ -10,6 +10,7 @@ import {
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
@@ -83,17 +84,63 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
-    if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
-    if (!formData.username?.trim()) errors.username = 'Username is required';
-    if (!isEdit && !formData.password?.trim()) errors.password = 'Password is required';
-    if (!formData.email?.trim()) errors.email = 'Email is required';
-    if (!formData.phone?.trim()) errors.phone = 'Phone is required';
-    if (!formData.dob) errors.dob = 'DOB is required';
+    
+    // Full Name
+    if (!formData.fullName?.trim()) {
+      errors.fullName = 'Full name is required';
+    } else if (formData.fullName.trim().length < 3) {
+      errors.fullName = 'Full name must be at least 3 characters';
+    }
+
+    // Username
+    if (!formData.username?.trim()) {
+      errors.username = 'Username is required';
+    } else if (formData.username.trim().length < 4) {
+      errors.username = 'Username must be at least 4 characters';
+    }
+
+    // Password (only for new users)
+    if (!isEdit && !formData.password?.trim()) {
+      errors.password = 'Password is required';
+    } else if (!isEdit && formData.password && formData.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
+
+    // Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email?.trim()) {
+      errors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      errors.email = 'Invalid email format';
+    }
+
+    // Phone
+    const phoneRegex = /^\+?[0-9]{10,15}$/;
+    if (!formData.phone?.trim()) {
+      errors.phone = 'Phone number is required';
+    } else if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      errors.phone = 'Invalid phone number (10-15 digits)';
+    }
+
+    // DOB
+    if (!formData.dob) {
+      errors.dob = 'Date of birth is required';
+    } else {
+      const dobDate = new Date(formData.dob);
+      const today = new Date();
+      if (dobDate >= today) {
+        errors.dob = 'Date of birth cannot be in the future';
+      }
+    }
     
     if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) {
-      errors.memberships = 'At least one hospital contract is required.';
+      errors.memberships = 'At least one hospital contract is required for non-superusers.';
     }
+
     setValidationErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      triggerGlobalToast('Please fix the validation errors', 'error');
+    }
     return Object.keys(errors).length === 0;
   };
 

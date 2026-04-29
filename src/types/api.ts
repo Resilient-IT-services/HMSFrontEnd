@@ -10,6 +10,7 @@ export interface ApiResponse<T> {
   success: boolean;
   data?: T;
   error?: ApiError;
+  message?: string;
 }
 
 export interface PageResponse<T> {
@@ -253,13 +254,20 @@ export interface CreateHospitalRequest {
 }
 
 // Appointment types
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED' | 'CONFIRMED' | 'CHECKED_IN';
+export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'PAYMENT_PENDING' | 'WAITING_FOR_VITALS' | 'WALK_IN' | 'CANCELLED' | 'ADD_VITALS' | 'DELAYED' | 'CHECKED_IN';
 
 export interface VitalsDTO {
-  bloodPressure: string;
+  bloodPressure: string; // Combined for legacy or display
+  systolic?: number;
+  diastolic?: number;
   heartRate: number;
+  pulseRate?: number;
   temperature: number;
+  temperatureUnit?: 'CELSIUS' | 'FAHRENHEIT';
   weight: number;
+  weightUnit?: 'KG' | 'LB';
+  oxygenLevel?: number;
+  respiratoryRate?: number;
 }
 
 export interface AppointmentResponse {
@@ -275,8 +283,13 @@ export interface AppointmentResponse {
   status: AppointmentStatus;
   tokenNumber?: number;
   tokenDisplay?: string;
+  chiefComplaints?: string;
+  diagnosis?: string;
+  clinicalNotes?: string;
+  icdCodes?: string[];
   notes?: string;
   vitals?: VitalsDTO;
+  prescription?: PrescriptionDTO;
   createdAt: string;
 }
 
@@ -286,7 +299,13 @@ export interface CreateAppointmentRequest {
   doctorId: string;
   appointmentTime: string;
   notes?: string;
+  status?: AppointmentStatus;
   vitals?: VitalsDTO;
+  chiefComplaints?: string;
+  diagnosis?: string;
+  clinicalNotes?: string;
+  icdCodes?: string[];
+  prescription?: PrescriptionDTO;
 }
 
 export interface UpdateAppointmentStatusRequest {
@@ -345,7 +364,7 @@ export interface DoctorResponse {
   createdAt: string;
 }
 
-// Pharmacy types (Not fully documented in api-docs.json but needed by UI)
+// Pharmacy types
 export interface MedicineResponse {
   id: string;
   name: string;
@@ -354,40 +373,126 @@ export interface MedicineResponse {
   createdAt: string;
 }
 
-export interface PrescriptionItemResponse {
-  id: string;
-  medicineId: string;
+export interface PrescriptionItemDTO {
+  id?: string;
+  medicineId?: string;
   medicineName: string;
   dosage: string;
   duration: string;
 }
 
-export interface PrescriptionResponse {
-  id: string;
-  patientId: string;
-  patientName: string;
-  doctorId: string;
-  doctorName: string;
-  items: PrescriptionItemResponse[];
-  status: string;
-  createdAt: string;
+export interface PrescriptionDTO {
+  id?: string;
+  patientId?: string;
+  patientName?: string;
+  doctorId?: string;
+  doctorName?: string;
+  appointmentId?: string;
+  items: PrescriptionItemDTO[];
+  status?: string;
+  createdAt?: string;
 }
 
+// Legacy aliases
+export type PrescriptionItemResponse = PrescriptionItemDTO;
+export type PrescriptionResponse = PrescriptionDTO;
+
+
 // Billing types
-export interface BillingItemResponse {
-  id: string;
+export interface BillingItemDTO {
+  id?: string;
   itemName: string;
   amount: number;
   quantity: number;
   subtotal: number;
 }
 
-export interface BillingResponse {
-  id: string;
+export interface BillingDTO {
+  id?: string;
   patientId: string;
-  sourceType: 'OPD' | 'PHARMACY';
-  status: 'DRAFT' | 'GENERATED';
+  patientName?: string;
+  appointmentId?: string;
+  sourceType: 'OPD' | 'IPD' | 'PHARMACY' | 'LAB' | 'EMERGENCY' | 'APPOINTMENT';
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'PARTIALLY_PAID';
   totalAmount: number;
-  items: BillingItemResponse[];
+  discount?: number;
+  paymentMethod?: string;
+  createdAt?: string;
+  items: BillingItemDTO[];
+}
+
+// Legacy aliases
+export type BillingItemResponse = BillingItemDTO;
+export type BillingResponse = BillingDTO;
+
+// Audit types
+export interface AuditDetail {
+  before?: Record<string, any>;
+  after?: Record<string, any>;
+}
+
+export interface AuditLogResponse {
+  id: string;
+  entityName: string;
+  entityId: string;
+  action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'UPDATE_STATUS';
+  performedBy: string;
+  details?: AuditDetail;
   createdAt: string;
+}
+
+// Search types
+export interface SearchResultDTO {
+  id: string;
+  type: string;
+  title: string;
+  subtitle?: string;
+  link: string;
+}
+
+// Patient History
+export interface PatientHistoryDTO {
+  patient: PatientResponse;
+  visits: AppointmentResponse[];
+}
+
+// Doctor Slot
+export interface DoctorSlotDTO {
+  startTime: string; // HH:mm
+  endTime: string; // HH:mm
+  available: boolean;
+  status?: string;
+}
+
+// Appointment Stats
+export interface AppointmentStatsDTO {
+  total: number;
+  byStatus: Record<string, number>;
+}
+
+// Vital Settings
+export interface VitalSetting {
+  id?: string;
+  hospitalId?: string;
+  vitalName: string;
+  minValue?: number;
+  maxValue?: number;
+  unit?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// User Summary
+export interface UserSummaryDTO {
+  id: string;
+  username: string;
+  email: string;
+  fullName: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  dob: string;
+  phone: string;
+  active: boolean;
+  deleted?: boolean;
+  superuser: boolean;
+  memberships: HospitalMembershipDTO[];
 }

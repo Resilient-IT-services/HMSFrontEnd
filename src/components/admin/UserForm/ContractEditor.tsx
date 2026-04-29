@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HospitalMembershipDTO, HospitalResponse, UserRequestDTO, RoleAssignmentDTO, ScheduleDTO } from '@/types/api';
+import { HospitalMembershipDTO, HospitalResponse, UserRequestDTO, RoleAssignmentDTO, ScheduleDTO, VitalsDTO } from '@/types/api';
 
 interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
@@ -73,7 +73,13 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                 <button key={role} type="button" onClick={() => {
                   const assignments = [...(newContract.roleAssignments || [])];
                   if (isSelected) setNewContract({ ...newContract, roleAssignments: assignments.filter(r => r.roleCode !== role) });
-                  else setNewContract({ ...newContract, roleAssignments: [...assignments, { roleCode: role, departmentName: 'General', active: true, assignmentId: '', doctorDetails: role === 'DOCTOR' ? { consultationFee: 0 } : undefined } as any] });
+                  else setNewContract({ ...newContract, roleAssignments: [...assignments, { 
+                    roleCode: role, 
+                    departmentName: 'General', 
+                    active: true, 
+                    assignmentId: '', 
+                    doctorDetails: role === 'DOCTOR' ? { consultationFee: 0, followUpDays: 0 } : undefined 
+                  } as any] });
                 }} className={`px-3 py-1.5 rounded-lg border-2 font-black text-[9px] uppercase tracking-widest ${isSelected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}>{role}</button>
               );
             })}
@@ -85,20 +91,41 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
             <div key={ra.roleCode} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-6 border-b border-gray-50 pb-2">
                 <span className="material-symbols-outlined text-sm text-primary">settings</span>
-                <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode} CONFIGURATION</span>
+                <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode}  CONFIGURATION</span>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <input type="text" className="form-input" placeholder="Department..." value={ra.departmentName} onChange={(e) => {
-                  const updated = [...(newContract.roleAssignments || [])];
-                  updated[raIdx].departmentName = e.target.value;
-                  setNewContract({ ...newContract, roleAssignments: updated });
-                }} />
-                {ra.roleCode === 'DOCTOR' && <input type="number" className="form-input" placeholder="Consultation Fee (₹)" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
-                  const updated = [...(newContract.roleAssignments || [])];
-                  updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: Number(e.target.value) };
-                  setNewContract({ ...newContract, roleAssignments: updated });
-                }} />}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-label-sm text-gray-700 uppercase">Department <span className="text-primary">*</span></label>
+                  <input type="text" className="form-input" placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
+                    const updated = [...(newContract.roleAssignments || [])];
+                    updated[raIdx].departmentName = e.target.value;
+                    setNewContract({ ...newContract, roleAssignments: updated });
+                  }} />
+                </div>
+
+                {ra.roleCode === 'DOCTOR' && (
+                  <>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (₹) <span className="text-primary">*</span></label>
+                      <input type="number" min="0" className="form-input" placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                        const val = Math.max(0, Number(e.target.value));
+                        const updated = [...(newContract.roleAssignments || [])];
+                        updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: val };
+                        setNewContract({ ...newContract, roleAssignments: updated });
+                      }} />
+                    </div>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-gray-700 uppercase">Follow-up Days <span className="text-primary">*</span></label>
+                      <input type="number" min="0" className="form-input" placeholder="e.g. 7" value={ra.doctorDetails?.followUpDays} onChange={(e) => {
+                        const val = Math.max(0, Number(e.target.value));
+                        const updated = [...(newContract.roleAssignments || [])];
+                        updated[raIdx].doctorDetails = { ...ra.doctorDetails!, followUpDays: val };
+                        setNewContract({ ...newContract, roleAssignments: updated });
+                      }} />
+                    </div>
+                  </>
+                )}
               </div>
 
               {(ra.roleCode === 'DOCTOR' || ra.roleCode === 'NURSE') && (

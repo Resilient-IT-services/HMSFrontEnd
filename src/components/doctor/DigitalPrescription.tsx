@@ -24,6 +24,7 @@ interface DigitalPrescriptionProps {
     temp: string;
     bp: string;
     weight: string;
+    spo2?: string;
   };
   date: string;
   tokenDisplay?: string;
@@ -150,6 +151,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                       <span>❤️ {vitals.heartRate} bpm</span>
                       <span>🌡 {vitals.temp}</span>
                       <span>🩸 {vitals.bp}</span>
+                      {vitals.spo2 && <span>🫁 {vitals.spo2}%</span>}
                     </div>
 
                     <div className="text-right">

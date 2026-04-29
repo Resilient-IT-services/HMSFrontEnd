@@ -17,6 +17,10 @@ const BillingPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const appointmentId = searchParams.get('appointmentId');
+  const patientIdParam = searchParams.get('patientId');
+  const doctorIdParam = searchParams.get('doctorId');
+  const appointmentTimeParam = searchParams.get('appointmentTime');
+  const notesParam = searchParams.get('notes');
 
   const [appointment, setAppointment] =
       useState<AppointmentResponse | null>(null);
@@ -29,43 +33,52 @@ const BillingPage = () => {
 
   const [loading, setLoading] = useState(true);
 
-  const [paymentMethod, setPaymentMethod] = useState<
-      'CASH' | 'UPI' | 'CARD'
-  >('CASH');
-
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [discount, setDiscount] = useState(0);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const fetchData = useCallback(async () => {
-    if (!appointmentId) return;
-
     setLoading(true);
-
     try {
-      const appRes = await appointmentService.get(appointmentId);
-
-      if (appRes.success && appRes.data) {
-        const appointmentData = appRes.data;
-
-        setAppointment(appointmentData);
-
-        const [patRes, docRes] = await Promise.all([
-          patientService.get(appointmentData.patientId),
-          doctorService.list(0, 100),
-        ]);
-
-        if (patRes.success) {
-          setPatient(patRes.data || null);
-        }
-
-        if (docRes.success && docRes.data) {
-          const doc = docRes.data.content.find(
-              (d) => d.doctorId === appointmentData.doctorId
-          );
-
-          if (doc) {
-            setDoctor(doc);
+      if (appointmentId) {
+        const appRes = await appointmentService.get(appointmentId);
+        const appData = appRes.data;
+        if (appRes.success && appData) {
+          setAppointment(appData);
+          const [patRes, docRes] = await Promise.all([
+            patientService.get(appData.patientId),
+            doctorService.list(0, 100),
+          ]);
+          if (patRes.success) setPatient(patRes.data || null);
+          const docData = docRes.data;
+          if (docRes.success && docData) {
+            const doc = docData.content.find((d) => d.doctorId === appData.doctorId);
+            if (doc) setDoctor(doc);
           }
         }
+      } else if (patientIdParam && doctorIdParam) {
+        // Handle direct flow from scheduling (before appointment is created)
+        const [patRes, docRes] = await Promise.all([
+          patientService.get(patientIdParam),
+          doctorService.list(0, 100),
+        ]);
+        if (patRes.success) setPatient(patRes.data || null);
+        if (docRes.success && docRes.data) {
+          const doc = docRes.data.content.find((d) => d.doctorId === doctorIdParam);
+          if (doc) setDoctor(doc);
+        }
+        // Mock appointment object for UI display
+        setAppointment({
+          id: 'TEMP',
+          patientId: patientIdParam,
+          patientName: patRes.data?.fullName || 'N/A',
+          doctorId: doctorIdParam,
+          doctorName: docRes.data?.content.find(d => d.doctorId === doctorIdParam)?.fullName || 'N/A',
+          appointmentTime: appointmentTimeParam || new Date().toISOString(),
+          status: 'PAYMENT_PENDING',
+          notes: notesParam || '',
+          createdAt: new Date().toISOString()
+        } as any);
       }
     } catch (error) {
       console.error('Failed to fetch billing data', error);
@@ -73,7 +86,7 @@ const BillingPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [appointmentId]);
+  }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, notesParam]);
 
   useEffect(() => {
     fetchData();
@@ -82,6 +95,44 @@ const BillingPage = () => {
   const consultationFee = doctor?.consultationFee || 0;
   const tax = 0;
   const total = Math.max(0, consultationFee - discount + tax);
+
+  const [submittingPayment, setSubmittingPayment] = useState(false);
+
+  const handleMarkAsPaid = async () => {
+    setSubmittingPayment(true);
+    try {
+      if (appointmentId && appointment) {
+        // Traditional flow: update existing appointment
+        const res = await appointmentService.update(appointmentId, {
+          ...appointment,
+          status: 'ADD_VITALS'
+        });
+        if (res.success) {
+          triggerGlobalToast('Payment confirmed successfully', 'success');
+          fetchData();
+        }
+      } else if (patientIdParam && doctorIdParam && appointmentTimeParam) {
+        // New flow: create appointment only after payment
+        const res = await appointmentService.create({
+          patientId: patientIdParam,
+          doctorId: doctorIdParam,
+          appointmentTime: appointmentTimeParam,
+          notes: notesParam || '',
+          status: 'ADD_VITALS'
+        });
+        if (res.success && res.data) {
+          triggerGlobalToast('Appointment created and payment confirmed', 'success');
+          // Redirect to vitals page for the newly created appointment
+          router.push(`/reception/appointments/vitals?appointmentId=${res.data.id}`);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to confirm payment', error);
+      triggerGlobalToast('Failed to process payment', 'error');
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
 
   const handleGenerateBill = () => {
     triggerGlobalToast('Bill generated successfully', 'success');
@@ -124,6 +175,8 @@ const BillingPage = () => {
     );
   }
 
+  const isPaid = appointment.status !== 'PAYMENT_PENDING';
+
   return (
       <MainLayout title="OP Consultation Billing" hideTitle>
         <div className="h-screen flex flex-col bg-[#f9f9ff] font-inter overflow-hidden">
@@ -146,6 +199,12 @@ const BillingPage = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              <div className="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs border border-slate-200 flex items-center gap-2">
+                Status: 
+                <span className={`uppercase ${isPaid ? 'text-emerald-600' : 'text-orange-600'}`}>
+                  {appointment.status.replace('_', ' ')}
+                </span>
+              </div>
               <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-xl font-bold text-xs border border-orange-100">
                 Bill ID: #INV-{appointmentId?.substring(0, 8).toUpperCase()}
               </div>
@@ -422,27 +481,42 @@ const BillingPage = () => {
 
             <div className="flex items-center gap-4">
 
-              <button
-                  onClick={handleDownloadReceipt}
-                  className="px-6 py-3 text-slate-600 font-bold hover:text-slate-900 flex items-center gap-2"
-              >
-              <span className="material-symbols-outlined text-xl">
-                download
-              </span>
+              {isPaid ? (
+                <>
+                  <button
+                      onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointmentId}`)}
+                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      vital_signs
+                    </span>
+                    Add Vitals
+                  </button>
 
-                Download Receipt
-              </button>
+                  <button
+                      onClick={handleGenerateBill}
+                      className="px-10 py-3 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95"
+                  >
+                  <span className="material-symbols-outlined text-xl">
+                    receipt_long
+                  </span>
 
-              <button
-                  onClick={handleGenerateBill}
-                  className="px-10 py-3 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95"
-              >
-              <span className="material-symbols-outlined text-xl">
-                receipt_long
-              </span>
+                    Generate Bill & Print
+                  </button>
+                </>
+              ) : (
+                <button
+                    onClick={handleMarkAsPaid}
+                    disabled={submittingPayment}
+                    className="px-10 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+                >
+                <span className="material-symbols-outlined text-xl">
+                  check_circle
+                </span>
 
-                Generate Bill & Print
-              </button>
+                  {submittingPayment ? 'Confirming...' : 'Bill is Paid'}
+                </button>
+              )}
 
             </div>
           </footer>

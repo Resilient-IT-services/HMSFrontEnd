@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
-import { HospitalResponse, UserResponse } from '@/types/api';
+import { HospitalResponse, UserSummaryDTO } from '@/types/api';
 
 const HospitalManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -16,7 +16,7 @@ const HospitalManagement = () => {
   const showStatsCards = false;
   const router = useRouter();
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<UserSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);

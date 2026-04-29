@@ -16,10 +16,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const publicRoutes = new Set(['/login', '/privacy', '/terms','/forgot-password']);
 
-  // ✅ FIXED AUTH CHECK
+  // ✅ FIXED AUTH CHECK: Only run on mount or if we lose authentication
   useEffect(() => {
+    // Skip if already authenticated and we have user data
+    if (isAuthenticated && user) {
+      dispatch(setLoading(false));
+      return;
+    }
 
-    // 🚀 PUBLIC ROUTES ME AUTH CHECK MAT KAR
+    // Skip for public routes
     if (publicRoutes.has(pathname)) {
       dispatch(setLoading(false));
       return;
@@ -35,16 +40,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } else {
           dispatch(setUser(null));
         }
-
       } catch {
-        dispatch(setUser(null)); // ❌ error remove
+        dispatch(setUser(null));
       } finally {
-        dispatch(setLoading(false)); // ✅ important
+        dispatch(setLoading(false));
       }
     };
 
     checkAuth();
-  }, [dispatch, pathname]);
+  }, [dispatch]); // Removed pathname dependency to stop /me calls on every navigation
 
   const handleUnauthenticated = useCallback(() => {
     if (!publicRoutes.has(pathname)) {

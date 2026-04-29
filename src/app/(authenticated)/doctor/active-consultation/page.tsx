@@ -7,8 +7,9 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { hospitalService } from '@/services/hospitalService';
+import { pharmacyService } from '@/services/pharmacyService';
 import { RootState } from '@/state/store';
-import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
+import { AppointmentResponse, PatientResponse, HospitalResponse, PrescriptionDTO } from '@/types/api';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
@@ -57,7 +58,8 @@ const ActiveConsultationPage = () => {
         if (res.success && res.data) {
           const found = res.data;
           setAppointment(found);
-          setComplaint(found.notes || '');
+          setComplaint(found.chiefComplaints || found.notes || '');
+          setDiagnosis(found.diagnosis || '');
           
           // Fetch patient details
           const pRes = await patientService.get(found.patientId);
@@ -86,14 +88,20 @@ const ActiveConsultationPage = () => {
 
   const patientAge = useMemo(() => {
     if (!patient?.dob) return '--';
-    const birthDate = new Date(patient.dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+    try {
+      const birthDate = new Date(patient.dob);
+      if (Number.isNaN(birthDate.getTime())) return '--';
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      console.error('Failed to calculate patient age', error);
+      return '--';
     }
-    return age;
   }, [patient]);
 
   const updatePrescription = (index: number, field: keyof PrescriptionRow, value: string) => {
@@ -117,33 +125,57 @@ const ActiveConsultationPage = () => {
 
     try {
       setFinishing(true);
-      const notes = `COMPLAINT: ${complaint}\n\nDIAGNOSIS: ${diagnosis}`;
       
-      // Update notes first
-      // WORKAROUND: The backend validates appointmentTime must be in the future.
-      // We send a time 1 hour in the future to bypass this validation while keeping it on the same day.
-      const futureTime = new Date();
-      futureTime.setHours(futureTime.getHours() + 1);
-
-      try {
-        await appointmentService.update(appointmentId, { 
-          notes,
+      // 1. Prepare Prescription Data
+      const validPrescriptions = prescriptions.filter(p => p.medicine.trim() !== '');
+      
+      if (validPrescriptions.length > 0) {
+        const prescriptionData: PrescriptionDTO = {
           patientId: appointment.patientId,
           doctorId: appointment.doctorId,
-          appointmentTime: futureTime.toISOString()
-        });
-      } catch (noteError) {
-        console.error('Failed to save notes, but proceeding with status update', noteError);
+          appointmentId: appointment.id,
+          items: validPrescriptions.map(p => ({
+            medicineName: p.medicine,
+            dosage: p.frequency,
+            duration: p.instructions
+          }))
+        };
+
+        // SAVE PRESCRIPTION TO PHARMACY MODULE
+        const presRes = await pharmacyService.createPrescription(prescriptionData);
+        if (!presRes.success) {
+          triggerGlobalToast('Failed to save prescription to pharmacy', 'error');
+          setFinishing(false);
+          return;
+        }
       }
 
-      // Update status to COMPLETED
+      // 2. Call updateConsultation API for Clinical Notes
+      // This endpoint handles clinical data (complaints, diagnosis)
+      const consultationRes = await appointmentService.updateConsultation(appointmentId, {
+        chiefComplaints: complaint,
+        diagnosis: diagnosis,
+        icdCodes: icdCodes.map(c => c.code),
+        // We keep sending appointment data to satisfy general DTO requirements if needed
+        patientId: appointment.patientId,
+        doctorId: appointment.doctorId,
+        appointmentTime: appointment.appointmentTime 
+      });
+
+      if (!consultationRes.success) {
+        triggerGlobalToast('Failed to save clinical details', 'error');
+        setFinishing(false);
+        return;
+      }
+
+      // 3. Update status to COMPLETED
       const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
       
       if (statusRes.success) {
         triggerGlobalToast('Consultation finished successfully', 'success');
         router.push('/doctor/patient-queue');
       } else {
-        triggerGlobalToast('Failed to complete appointment status', 'error');
+        triggerGlobalToast('Consultation saved but failed to close appointment', 'warning');
       }
     } catch (error) {
       console.error('Failed to finish consultation', error);
@@ -220,6 +252,10 @@ const ActiveConsultationPage = () => {
                   <span className="material-symbols-outlined text-green-500 text-[18px]">blood_pressure</span>
                   <span className="font-manrope font-bold text-sm">{appointment?.vitals?.bloodPressure || '--'}</span>
                 </div>
+                <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
+                  <span className="material-symbols-outlined text-cyan-500 text-[18px]">pulse_alert</span>
+                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.oxygenLevel || '--'}%</span>
+                </div>
               </div>
             </div>
           </div>
@@ -289,7 +325,7 @@ const ActiveConsultationPage = () => {
               
               <div className="flex-1 space-y-4">
                 {prescriptions.map((row, index) => (
-                  <div key={row.id} className={`grid grid-cols-12 gap-3 pb-3 ${index !== prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                  <div key={row.id} className={`grid grid-cols-12 gap-3 pb-3 ${index < prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
                     <div className="col-span-5">
                       {index === 0 && (
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>
@@ -382,7 +418,8 @@ const ActiveConsultationPage = () => {
           heartRate: appointment?.vitals?.heartRate?.toString() || '--',
           temp: appointment?.vitals?.temperature?.toString() || '--',
           bp: appointment?.vitals?.bloodPressure || '--',
-          weight: appointment?.vitals?.weight?.toString() || '--'
+          weight: appointment?.vitals?.weight?.toString() || '--',
+          spo2: appointment?.vitals?.oxygenLevel?.toString() || '--'
         }}
         date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         tokenDisplay={formatToken(appointment)}

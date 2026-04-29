@@ -29,13 +29,13 @@ const ReceptionDashboard = () => {
         nurseService.list(0, 5)
       ]);
 
-      if (patRes.success) setRecentPatients(patRes.data?.content || []);
-      if (appRes.success) {
-        const todayApps = appRes.data?.content.filter(a => a.appointmentTime.startsWith(today)) || [];
+      if (patRes.success && patRes.data) setRecentPatients(patRes.data.content || []);
+      if (appRes.success && appRes.data) {
+        const todayApps = appRes.data.content?.filter(a => a.appointmentTime.startsWith(today)) || [];
         setAppointments(todayApps);
       }
-      if (docRes.success) setDoctors(docRes.data?.content || []);
-      if (nurRes.success) setNurses(nurRes.data?.content || []);
+      if (docRes.success && docRes.data) setDoctors(docRes.data.content || []);
+      if (nurRes.success && nurRes.data) setNurses(nurRes.data.content || []);
 
     } catch (error) {
       console.error(error);
@@ -48,7 +48,7 @@ const ReceptionDashboard = () => {
     fetchData();
     const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, []); // Run on mount only, fetchData is stable
 
   const stats = useMemo(() => {
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;

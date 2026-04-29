@@ -15,20 +15,38 @@ const PharmacyDashboard = () => {
       try {
         setLoading(true);
 
-        const [prescriptionResponse, lowStockResponse] = await Promise.all([
+        const [prescriptionResponse, lowStockResponse] = await Promise.allSettled([
           pharmacyService.listPrescriptions(),
           pharmacyService.getLowStockCount(),
         ]);
 
-        if (prescriptionResponse.success && prescriptionResponse.data) {
-          setPrescriptions(prescriptionResponse.data.content || []);
+        if (prescriptionResponse.status === 'fulfilled') {
+          const res = prescriptionResponse.value;
+          if (res.success && res.data && Array.isArray(res.data.content)) {
+            setPrescriptions(res.data.content);
+          } else {
+            console.error('Pharmacy Dashboard - Prescriptions API returned unsuccessful or invalid data:', res);
+            setPrescriptions([]);
+          }
+        } else {
+          console.error('Pharmacy Dashboard - Prescriptions API request failed:', prescriptionResponse.reason);
+          setPrescriptions([]);
         }
 
-        if (lowStockResponse.success) {
-          setLowStockCount(lowStockResponse.data?.totalElements || 0);
+        if (lowStockResponse.status === 'fulfilled') {
+          const res = lowStockResponse.value;
+          if (res.success && res.data && typeof res.data.totalElements === 'number') {
+            setLowStockCount(res.data.totalElements);
+          } else {
+            console.error('Pharmacy Dashboard - Low Stock API returned unsuccessful or invalid data:', res);
+            setLowStockCount(0);
+          }
+        } else {
+          console.error('Pharmacy Dashboard - Low Stock API request failed:', lowStockResponse.reason);
+          setLowStockCount(0);
         }
       } catch (error) {
-        console.error('Failed to fetch pharmacy data', error);
+        console.error('Pharmacy Dashboard - Unexpected Error:', error);
       } finally {
         setLoading(false);
       }
@@ -38,15 +56,27 @@ const PharmacyDashboard = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const pendingPrescriptions = prescriptions.filter((prescription) => prescription.status !== 'COMPLETED').length;
-    const dispensedToday = prescriptions.filter((prescription) => prescription.status === 'COMPLETED').length;
-    const queuedItems = prescriptions.reduce((total, prescription) => total + prescription.items.length, 0);
+    // Ensure prescriptions is an array before processing
+    const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
+    
+    const pendingPrescriptions = safePrescriptions.filter((prescription) => 
+      prescription && prescription.status !== 'COMPLETED'
+    ).length;
+    
+    const dispensedToday = safePrescriptions.filter((prescription) => 
+      prescription && prescription.status === 'COMPLETED'
+    ).length;
+    
+    const queuedItems = safePrescriptions.reduce((total, prescription) => {
+      const itemsCount = Array.isArray(prescription?.items) ? prescription.items.length : 0;
+      return total + itemsCount;
+    }, 0);
 
     return {
       pendingPrescriptions,
       dispensedToday,
       queuedItems,
-      lowStockCount,
+      lowStockCount: typeof lowStockCount === 'number' ? lowStockCount : 0,
     };
   }, [lowStockCount, prescriptions]);
 
@@ -122,7 +152,7 @@ const PharmacyDashboard = () => {
                 <tbody className="divide-y divide-[var(--border)]">
                   {loading ? (
                     <tr><td colSpan={4} className="py-8 text-center text-[var(--text-secondary)]">Loading...</td></tr>
-                  ) : prescriptions.map((prescription) => (
+                  ) : (Array.isArray(prescriptions) && prescriptions.length > 0) ? prescriptions.map((prescription) => (
                     <tr key={prescription.id} className="hover:bg-[var(--background)] transition-colors">
                       <td className="py-4">
                         <p className="font-bold text-[var(--text-primary)]">{prescription.patientName}</p>
@@ -130,13 +160,15 @@ const PharmacyDashboard = () => {
                       </td>
                       <td className="py-4 text-sm font-medium text-[var(--text-primary)]">{prescription.doctorName}</td>
                       <td className="py-4 text-center">
-                        <span className="rounded-full bg-[var(--primary-light)] px-2 py-1 text-xs font-bold text-[var(--primary)]">{prescription.items.length} items</span>
+                        <span className="rounded-full bg-[var(--primary-light)] px-2 py-1 text-xs font-bold text-[var(--primary)]">{prescription.items?.length || 0} items</span>
                       </td>
                       <td className="py-4 text-right">
                         <button className="text-[var(--primary)] hover:underline text-sm font-bold">Process Bill</button>
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr><td colSpan={4} className="py-8 text-center text-[var(--text-secondary)]">No prescriptions found.</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>

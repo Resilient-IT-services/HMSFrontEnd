@@ -102,18 +102,7 @@ export default function TermsPage() {
                     </p>
                 </div>
 
-                {/* PDF Card */}
-                <div className="bg-white border rounded-lg p-4 flex justify-between items-center shadow-sm">
-                    <div>
-                        <p className="font-medium text-sm">Need a physical copy?</p>
-                        <p className="text-xs text-gray-500">
-                            Download the PDF version of these Terms for your records.
-                        </p>
-                    </div>
-                    <button className="border border-orange-600 text-orange-600 px-4 py-2 rounded-md text-sm hover:bg-orange-50">
-                        Download PDF ↓
-                    </button>
-                </div>
+
             </main>
 
 

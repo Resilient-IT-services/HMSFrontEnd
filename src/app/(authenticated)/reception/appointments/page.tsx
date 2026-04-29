@@ -17,6 +17,21 @@ const TodayAppointmentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const stats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayApps = appointments.filter(app => app.appointmentTime.split('T')[0] === today);
+    
+    return {
+      total: todayApps.length,
+      walkIn: todayApps.filter(app => app.status === 'WALK_IN').length,
+      upcoming: appointments.filter(app => app.appointmentTime.split('T')[0] > today).length,
+      paymentPending: todayApps.filter(app => app.status === 'PAYMENT_PENDING').length,
+      waitingForVitals: todayApps.filter(app => app.status === 'WAITING_FOR_VITALS').length,
+      completed: todayApps.filter(app => app.status === 'COMPLETED').length,
+      cancelled: todayApps.filter(app => app.status === 'CANCELLED').length,
+    };
+  }, [appointments]);
+
   const fetchData = useCallback(async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
@@ -25,22 +40,24 @@ const TodayAppointmentsPage = () => {
         doctorService.list(0, 100)
       ]);
 
-      if (appRes.success && appRes.data) {
-        setAppointments(appRes.data.content);
+      const appData = appRes.data;
+      if (appRes.success && appData) {
+        setAppointments(appData.content);
       }
-      if (docRes.success && docRes.data) {
-        setDoctors(docRes.data.content);
+      const docData = docRes.data;
+      if (docRes.success && docData) {
+        setDoctors(docData.content);
       }
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, []);
+  }, []); // Kept empty to ensure it's stable and only runs once or when manually refreshed
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    const interval = setInterval(() => fetchData(true), 30000); // Auto-refresh every 30 seconds
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -90,9 +107,31 @@ const TodayAppointmentsPage = () => {
           </button>
         </div>
 
+        {/* Statistics Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+          {[
+            { label: 'Today Total', value: stats.total, color: 'text-slate-600', bg: 'bg-slate-50', filter: 'ALL' },
+            { label: 'Walk-In', value: stats.walkIn, color: 'text-emerald-600', bg: 'bg-emerald-50', filter: 'WALK_IN' },
+            { label: 'Upcoming', value: stats.upcoming, color: 'text-blue-600', bg: 'bg-blue-50', filter: 'UPCOMING' },
+            { label: 'Pay Pending', value: stats.paymentPending, color: 'text-amber-600', bg: 'bg-amber-50', filter: 'PAYMENT_PENDING' },
+            { label: 'Waiting Vitals', value: stats.waitingForVitals, color: 'text-purple-600', bg: 'bg-purple-50', filter: 'WAITING_FOR_VITALS' },
+            { label: 'Completed', value: stats.completed, color: 'text-green-600', bg: 'bg-green-50', filter: 'COMPLETED' },
+            { label: 'Cancelled', value: stats.cancelled, color: 'text-red-600', bg: 'bg-red-50', filter: 'CANCELLED' },
+          ].map((stat, i) => (
+            <div 
+              key={i} 
+              onClick={() => setStatusFilter(stat.filter as any)}
+              className={`${stat.bg} p-3 rounded-xl border ${statusFilter === stat.filter ? 'border-orange-500 ring-1 ring-orange-500/20' : 'border-slate-100'} shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95`}
+            >
+              <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">{stat.label}</p>
+              <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-wrap gap-2">
-            {['ALL', 'UPCOMING', 'SCHEDULED', 'CHECKED_IN', 'DELAYED', 'COMPLETED'].map((status) => (
+            {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status as any)}
@@ -102,7 +141,7 @@ const TodayAppointmentsPage = () => {
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status === 'DELAYED' ? 'Walk-in' : status.replace('_', ' ')}
+                {status === 'ALL' ? 'Today Appointments' : status.replace('_', ' ')}
               </button>
             ))}
           </div>
@@ -162,13 +201,16 @@ const TodayAppointmentsPage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${
-                      app.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                      app.status === 'WALK_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                       app.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                      app.status === 'CONFIRMED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                      app.status === 'DELAYED' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
+                      app.status === 'PAYMENT_PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                      app.status === 'ADD_VITALS' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                      app.status === 'WAITING_FOR_VITALS' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                      app.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-100' :
+                      app.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border-red-100' :
                       'bg-slate-50 text-slate-500 border-slate-100'
                     }`}>
-                      {app.status === 'DELAYED' ? 'Walk-in' : app.status.replace('_', ' ')}
+                      {app.status.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">

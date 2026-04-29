@@ -1,16 +1,11 @@
 import apiClient from './apiClient';
-import { ApiResponse, UserResponse, PageResponse, UserRequestDTO } from '@/types/api';
+import { ApiResponse, UserResponse, PageResponse, UserRequestDTO, UserSummaryDTO } from '@/types/api';
 
 export const userService = {
-  async listUsers(page = 0, size = 20, search?: string, role?: string, active?: boolean, includeDeleted = false): Promise<ApiResponse<PageResponse<UserResponse>>> {
-    const response = await apiClient.get<ApiResponse<PageResponse<UserResponse>>>('/users', {
+  async listUsers(page = 0, size = 20, search?: string, role?: string, active?: boolean, includeDeleted = false): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<UserSummaryDTO>>>('/users', {
       params: { page, size, search, role, active, includeDeleted }
     });
-    return response.data;
-  },
-
-  async getUser(userId: string): Promise<ApiResponse<UserResponse>> {
-    const response = await apiClient.get<ApiResponse<UserResponse>>(`/users/${userId}`);
     return response.data;
   },
 

@@ -25,9 +25,9 @@ export const formatToken = (appointment: AppointmentResponse | undefined | null)
  * Sorts appointments by token number ascending.
  */
 export const sortByToken = (appointments: AppointmentResponse[]): AppointmentResponse[] => {
-  return [...appointments].sort((a, b) => {
-    const tokenA = a.tokenNumber ?? 999999;
-    const tokenB = b.tokenNumber ?? 999999;
+  return appointments.toSorted((a, b) => {
+    const tokenA = a.tokenNumber ?? 999_999;
+    const tokenB = b.tokenNumber ?? 999_999;
     return tokenA - tokenB;
   });
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
 import { Table } from '@/components/ui/Table';
@@ -18,7 +18,8 @@ const DoctorsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
-  const [doctorAppointments, setDoctorAppointments] = useState<AppointmentResponse[]>([]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [availability, setAvailability] = useState<import('@/types/api').SessionInfo[]>([]);
   const [loadingSchedule, setLoadingLoadingSchedule] = useState(false);
 
   const fetchDoctors = useCallback(async () => {
@@ -39,22 +40,41 @@ const DoctorsPage = () => {
     fetchDoctors();
   }, [fetchDoctors]);
 
-  const viewSchedule = async (doctor: DoctorStaffResponse) => {
-    setSelectedDoctor(doctor);
+  const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
     try {
       setLoadingLoadingSchedule(true);
-      // For now we use the global list and filter, in real app we'd have a specific doctor schedule API
-      const res = await appointmentService.list(0, 500);
+      const res = await doctorService.getAvailability(doctorId, date);
       if (res.success && res.data) {
-        const schedule = res.data.content.filter(a => a.doctorId === doctor.userId);
-        setDoctorAppointments(schedule);
+        setAvailability(res.data.sessions);
       }
     } catch (error) {
-      console.error('Failed to fetch schedule', error);
+      console.error('Failed to fetch availability', error);
     } finally {
       setLoadingLoadingSchedule(false);
     }
+  }, []);
+
+  useEffect(() => {
+    if (selectedDoctor) {
+      fetchAvailability(selectedDoctor.doctorId, selectedDate);
+    }
+  }, [selectedDoctor, selectedDate, fetchAvailability]);
+
+  const viewSchedule = (doctor: DoctorStaffResponse) => {
+    setSelectedDoctor(doctor);
+    setSelectedDate(new Date().toISOString().split('T')[0]);
   };
+
+  const dateOptions = useMemo(() => {
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      const iso = d.toISOString().split('T')[0];
+      const label = i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' });
+      const day = d.getDate();
+      return { iso, label, day };
+    });
+  }, []);
 
   const columns = [
     { 
@@ -178,34 +198,57 @@ const DoctorsPage = () => {
                 <p className="text-sm font-bold text-[var(--text-primary)]">{selectedDoctor?.departmentName || 'General Medicine'}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Status</p>
-                <span className="text-xs font-bold text-green-600 uppercase">Available Today</span>
+                <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Consultation Fee</p>
+                <span className="text-sm font-bold text-orange-600 uppercase">₹{selectedDoctor?.consultationFee || '0'}</span>
+              </div>
+           </div>
+
+           {/* Weekly Calendar View */}
+           <div className="space-y-3">
+              <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Weekly Schedule</h4>
+              <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+                {dateOptions.map((opt: any) => (
+                  <button
+                    key={opt.iso}
+                    onClick={() => setSelectedDate(opt.iso)}
+                    className={`flex-shrink-0 flex flex-col items-center justify-center w-14 py-2 border-2 rounded-xl transition-all ${
+                      selectedDate === opt.iso
+                        ? 'border-orange-600 bg-orange-50'
+                        : 'border-slate-100 bg-white hover:border-orange-200'
+                    }`}
+                  >
+                    <span className={`text-[10px] font-bold uppercase ${selectedDate === opt.iso ? 'text-orange-600' : 'text-slate-400'}`}>{opt.label}</span>
+                    <span className={`text-base font-black ${selectedDate === opt.iso ? 'text-orange-600' : 'text-slate-900'}`}>{opt.day}</span>
+                  </button>
+                ))}
               </div>
            </div>
 
            <div className="space-y-3">
-              <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Today&apos;s Slots</h4>
+              <h4 className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">Available Slots</h4>
               {loadingSchedule ? (
-                <div className="py-10 text-center animate-pulse text-[var(--text-secondary)]">Fetching appointments...</div>
+                <div className="py-10 text-center animate-pulse text-[var(--text-secondary)] text-xs font-bold uppercase tracking-widest">Fetching slots...</div>
               ) : (
-                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
-                  {doctorAppointments.length === 0 ? (
-                    <div className="py-10 text-center text-xs font-bold text-[var(--text-secondary)] uppercase border-2 border-dashed border-[var(--border)] rounded-xl">No booked appointments for today</div>
+                <div className="grid grid-cols-2 gap-3 max-h-[250px] overflow-y-auto pr-2 no-scrollbar">
+                  {availability.length === 0 ? (
+                    <div className="col-span-2 py-10 text-center text-xs font-bold text-[var(--text-secondary)] uppercase border-2 border-dashed border-[var(--border)] rounded-xl">No available slots for this day</div>
                   ) : (
-                    doctorAppointments.map(apt => (
-                      <div key={apt.id} className="flex items-center gap-4 p-3 bg-[var(--background)] rounded-xl border border-[var(--border)]">
-                        <div className="px-3 py-1 bg-[var(--primary-light)] text-[var(--primary)] rounded-lg text-xs font-black">
-                          {new Date(apt.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    availability.map((session, idx) => (
+                      <div key={idx} className={`flex items-center justify-between p-3 rounded-xl border ${session.available ? 'bg-white border-slate-200' : 'bg-slate-50 border-slate-100 opacity-60'}`}>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-[var(--text-primary)]">{session.startTime} - {session.endTime}</span>
+                          <span className="text-[9px] font-bold text-[var(--text-secondary)] uppercase">
+                            {session.available ? `${session.maxPatients - session.currentBookings} Left` : 'Full'}
+                          </span>
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-bold text-[var(--text-primary)]">{apt.patientName}</p>
-                          <p className="text-[10px] font-medium text-[var(--text-secondary)]">Regular Checkup</p>
-                        </div>
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
-                          apt.status === 'COMPLETED' ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          {apt.status}
-                        </span>
+                        {session.available && (
+                          <Link 
+                            href={`/reception/appointments/create?doctorId=${selectedDoctor?.doctorId}&date=${selectedDate}&time=${session.startTime}`}
+                            className="p-1.5 bg-orange-700 text-white rounded-lg hover:bg-orange-800 transition-colors"
+                          >
+                            <UserPlus className="size-3" />
+                          </Link>
+                        )}
                       </div>
                     ))
                   )}
@@ -215,12 +258,6 @@ const DoctorsPage = () => {
 
            <div className="pt-4 flex gap-3">
               <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-3 bg-[var(--background)] border border-[var(--border)] rounded-xl text-sm font-bold text-[var(--text-secondary)] hover:bg-slate-50 transition-all">Close</button>
-              <Link 
-                href={`/reception/appointments/create?doctorId=${selectedDoctor?.doctorId}`} 
-                className="flex-1 btn-primary flex items-center justify-center"
-              >
-                Book New Slot
-              </Link>
            </div>
         </div>
       </Modal>

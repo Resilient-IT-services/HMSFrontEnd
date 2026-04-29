@@ -130,7 +130,7 @@ const PatientRegistration = () => {
                   <label className="text-xs font-bold text-slate-500 uppercase block">Phone Number</label>
                   <input 
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
-                    placeholder="Phone number" 
+                    placeholder="e.g., +91 98765 43210" 
                     required 
                     type="tel"
                     value={formData.phone}
@@ -141,7 +141,7 @@ const PatientRegistration = () => {
                   <label className="text-xs font-bold text-slate-500 uppercase block">Address</label>
                   <input 
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
-                    placeholder="Patient address" 
+                    placeholder="e.g., 123 Main St, New York, NY" 
                     required 
                     type="text"
                     value={formData.address}

@@ -13,9 +13,16 @@ import { SessionGrid } from '@/components/reception/appointments/SessionGrid';
 import { ConfirmationPanel } from '@/components/reception/appointments/ConfirmationPanel';
 import Link from 'next/link';
 
+const getLocalDateString = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const calculateSuggestedTime = (session: SessionInfo, date: string) => {
   const now = new Date();
-  const todayStr = now.toISOString().split('T')[0];
+  const todayStr = getLocalDateString(now);
   
   let baseTime = session.nextSuggestedTime || session.startTime;
   
@@ -26,9 +33,9 @@ const calculateSuggestedTime = (session: SessionInfo, date: string) => {
   
   const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
   
-  // If current time + 5 mins is after the base time (session start or next available)
-  if (currentTotalMinutes + 5 > baseTotalMinutes) {
-    const suggestedTotalMinutes = currentTotalMinutes + 5;
+  // Use a 10-minute buffer to ensure the time is in the future even with minor delays
+  if (currentTotalMinutes + 10 > baseTotalMinutes) {
+    const suggestedTotalMinutes = currentTotalMinutes + 10;
     const h = Math.floor(suggestedTotalMinutes / 60);
     const m = suggestedTotalMinutes % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
@@ -52,7 +59,7 @@ const AppointmentScheduling = () => {
   const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
   
   const [notes, setNotes] = useState('');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString(new Date()));
   const [availability, setAvailability] = useState<SessionInfo[]>([]);
   const [selectedSession, setSelectedSession] = useState<SessionInfo | null>(null);
   const [editableTime, setEditableTime] = useState<string>('');
@@ -98,7 +105,7 @@ const AppointmentScheduling = () => {
         
         // Filter out past sessions
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
+        const todayStr = getLocalDateString(now);
         
         if (selectedDate === todayStr) {
           const currentHHmm = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
@@ -136,20 +143,32 @@ const AppointmentScheduling = () => {
       triggerGlobalToast('Please complete all selections', 'error');
       return;
     }
+
+    // Double check time is in the future if it's today
+    const now = new Date();
+    const todayStr = getLocalDateString(now);
+    if (selectedDate === todayStr) {
+      const [h, m] = editableTime.split(':').map(Number);
+      const chosenTotalMinutes = h * 60 + m;
+      const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+      
+      if (chosenTotalMinutes <= currentTotalMinutes) {
+        triggerGlobalToast('Please select a time in the future', 'error');
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      const res = await appointmentService.create({
+      const params = new URLSearchParams({
         patientId: selectedPatient.id,
         doctorId: selectedDoctor.doctorId,
         appointmentTime: `${selectedDate}T${editableTime}:00`,
         notes
       });
-      if (res.success) {
-        triggerGlobalToast('Appointment scheduled successfully', 'success');
-        router.push('/reception/appointments');
-      }
+      router.push(`/reception/billing?${params.toString()}`);
     } catch (error) {
-      triggerGlobalToast('Failed to schedule appointment', 'error');
+      triggerGlobalToast('Failed to prepare billing', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -159,7 +178,7 @@ const AppointmentScheduling = () => {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() + i);
-      const iso = d.toISOString().split('T')[0];
+      const iso = getLocalDateString(d);
       let label;
 
       if (i === 0) label = 'Today';

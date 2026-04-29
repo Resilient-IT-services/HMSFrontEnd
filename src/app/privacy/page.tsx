@@ -132,15 +132,7 @@ export default function PrivacyPolicy() {
                 </div>
 
 
-                <div className="bg-[var(--surface)] border rounded-lg p-4 flex justify-between items-center shadow-sm">
-                    <div>
-                        <p className="font-medium text-sm">Need a physical copy?</p>
-                        <p className="text-xs text-[var(--text-secondary)]">
 
-                        </p>
-                    </div>
-
-                </div>
 
             </main>
 

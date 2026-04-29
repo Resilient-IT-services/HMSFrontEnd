@@ -4,12 +4,12 @@ import React, { useEffect, useState, useMemo } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { userService } from '@/services/userService';
 import { hospitalService } from '@/services/hospitalService';
-import { UserResponse, HospitalResponse } from '@/types/api';
+import { UserSummaryDTO, HospitalResponse } from '@/types/api';
 import { useRouter } from 'next/navigation';
 
 const AdminDashboard = () => {
   const router = useRouter();
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<UserSummaryDTO[]>([]);
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
