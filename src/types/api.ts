@@ -253,7 +253,7 @@ export interface CreateHospitalRequest {
 }
 
 // Appointment types
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'NO_SHOW' | 'DELAYED' | 'CANCELLED' | 'CONFIRMED' | 'CHECKED_IN' | 'PAYMENT_PENDING' | 'ADD_VITALS';
+export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'PAYMENT_PENDING' | 'WAITING_FOR_VITALS' | 'WALK_IN' | 'CANCELLED' | 'ADD_VITALS';
 
 export interface VitalsDTO {
   bloodPressure: string;

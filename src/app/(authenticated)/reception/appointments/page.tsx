@@ -92,7 +92,7 @@ const TodayAppointmentsPage = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-wrap gap-2">
-            {['ALL', 'UPCOMING', 'SCHEDULED', 'CHECKED_IN', 'DELAYED', 'COMPLETED', 'PAYMENT_PENDING', 'ADD_VITALS'].map((status) => (
+            {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status as any)}
@@ -102,7 +102,7 @@ const TodayAppointmentsPage = () => {
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status === 'DELAYED' ? 'Walk-in' : status.replace('_', ' ')}
+                {status.replace('_', ' ')}
               </button>
             ))}
           </div>
@@ -162,15 +162,16 @@ const TodayAppointmentsPage = () => {
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${
-                      app.status === 'CHECKED_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                      app.status === 'WALK_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
                       app.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                      app.status === 'CONFIRMED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
-                      app.status === 'DELAYED' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
                       app.status === 'PAYMENT_PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
                       app.status === 'ADD_VITALS' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                      app.status === 'WAITING_FOR_VITALS' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                      app.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-100' :
+                      app.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border-red-100' :
                       'bg-slate-50 text-slate-500 border-slate-100'
                     }`}>
-                      {app.status === 'DELAYED' ? 'Walk-in' : app.status.replace('_', ' ')}
+                      {app.status.replace('_', ' ')}
                     </span>
                   </td>
                   <td className="px-6 py-4 text-center">
