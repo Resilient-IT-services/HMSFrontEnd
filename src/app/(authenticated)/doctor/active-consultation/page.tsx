@@ -7,8 +7,9 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { hospitalService } from '@/services/hospitalService';
+import { pharmacyService } from '@/services/pharmacyService';
 import { RootState } from '@/state/store';
-import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
+import { AppointmentResponse, PatientResponse, HospitalResponse, PrescriptionDTO } from '@/types/api';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
@@ -57,7 +58,8 @@ const ActiveConsultationPage = () => {
         if (res.success && res.data) {
           const found = res.data;
           setAppointment(found);
-          setComplaint(found.notes || '');
+          setComplaint(found.chiefComplaints || found.notes || '');
+          setDiagnosis(found.diagnosis || '');
           
           // Fetch patient details
           const pRes = await patientService.get(found.patientId);
@@ -120,24 +122,34 @@ const ActiveConsultationPage = () => {
       
       // 1. Prepare Prescription Data
       const validPrescriptions = prescriptions.filter(p => p.medicine.trim() !== '');
-      const prescription: any = validPrescriptions.length > 0 ? {
-        patientId: appointment.patientId,
-        doctorId: appointment.doctorId,
-        appointmentId: appointment.id,
-        items: validPrescriptions.map(p => ({
-          medicineName: p.medicine,
-          dosage: p.frequency,
-          duration: p.instructions
-        }))
-      } : undefined;
+      
+      if (validPrescriptions.length > 0) {
+        const prescriptionData: PrescriptionDTO = {
+          patientId: appointment.patientId,
+          doctorId: appointment.doctorId,
+          appointmentId: appointment.id,
+          items: validPrescriptions.map(p => ({
+            medicineName: p.medicine,
+            dosage: p.frequency,
+            duration: p.instructions
+          }))
+        };
 
-      // 2. Call updateConsultation API
-      // This endpoint handles clinical data (complaints, diagnosis, prescriptions)
+        // SAVE PRESCRIPTION TO PHARMACY MODULE
+        const presRes = await pharmacyService.createPrescription(prescriptionData);
+        if (!presRes.success) {
+          triggerGlobalToast('Failed to save prescription to pharmacy', 'error');
+          setFinishing(false);
+          return;
+        }
+      }
+
+      // 2. Call updateConsultation API for Clinical Notes
+      // This endpoint handles clinical data (complaints, diagnosis)
       const consultationRes = await appointmentService.updateConsultation(appointmentId, {
         chiefComplaints: complaint,
         diagnosis: diagnosis,
         icdCodes: icdCodes.map(c => c.code),
-        prescription: prescription,
         // We keep sending appointment data to satisfy general DTO requirements if needed
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
@@ -145,7 +157,7 @@ const ActiveConsultationPage = () => {
       });
 
       if (!consultationRes.success) {
-        triggerGlobalToast('Failed to save consultation details', 'error');
+        triggerGlobalToast('Failed to save clinical details', 'error');
         setFinishing(false);
         return;
       }
@@ -154,7 +166,7 @@ const ActiveConsultationPage = () => {
       const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
       
       if (statusRes.success) {
-        triggerGlobalToast('Consultation finished and prescription saved', 'success');
+        triggerGlobalToast('Consultation finished successfully', 'success');
         router.push('/doctor/patient-queue');
       } else {
         triggerGlobalToast('Consultation saved but failed to close appointment', 'warning');
