@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
@@ -64,6 +64,24 @@ const VitalsEntryPage = () => {
     fetchConfig();
   }, []);
 
+  const populateVitals = useCallback((vitals: any) => {
+    if (!vitals) return;
+    setSystolic(vitals.systolic?.toString() || vitals.bloodPressure?.split('/')[0] || '');
+    setDiastolic(vitals.diastolic?.toString() || vitals.bloodPressure?.split('/')[1] || '');
+    setHeartRate(vitals.heartRate?.toString() || '');
+    setTemperature(vitals.temperature?.toString() || '');
+    
+    const tUnit = (vitals.temperatureUnit as string);
+    setTempUnit(tUnit === '°C' ? 'CELSIUS' : (tUnit === '°F' ? 'FAHRENHEIT' : (vitals.temperatureUnit || 'CELSIUS')));
+    
+    setWeight(vitals.weight?.toString() || '');
+    const wUnit = (vitals.weightUnit as string);
+    setWeightUnit(wUnit === 'kg' ? 'KG' : (wUnit === 'lb' ? 'LB' : (vitals.weightUnit || 'KG')));
+    
+    setOxygenLevel(vitals.oxygenLevel?.toString() || '');
+    setRespiratoryRate(vitals.respiratoryRate?.toString() || '');
+  }, []);
+
   useEffect(() => {
     const fetchDetails = async () => {
       if (!appointmentId) {
@@ -78,23 +96,7 @@ const VitalsEntryPage = () => {
           setAppointment(appData);
           setComplaints(appData.notes || '');
           
-          if (appData.vitals) {
-            setSystolic(appData.vitals.systolic?.toString() || appData.vitals.bloodPressure?.split('/')[0] || '');
-            setDiastolic(appData.vitals.diastolic?.toString() || appData.vitals.bloodPressure?.split('/')[1] || '');
-            setHeartRate(appData.vitals.heartRate?.toString() || '');
-            setTemperature(appData.vitals.temperature?.toString() || '');
-            
-            // Fix TS2367 by casting to string for comparison with legacy/alternate symbols
-            const tUnit = (appData.vitals.temperatureUnit as string);
-            setTempUnit(tUnit === '°C' ? 'CELSIUS' : (tUnit === '°F' ? 'FAHRENHEIT' : (appData.vitals.temperatureUnit || 'CELSIUS')));
-            
-            setWeight(appData.vitals.weight?.toString() || '');
-            const wUnit = (appData.vitals.weightUnit as string);
-            setWeightUnit(wUnit === 'kg' ? 'KG' : (wUnit === 'lb' ? 'LB' : (appData.vitals.weightUnit || 'KG')));
-            
-            setOxygenLevel(appData.vitals.oxygenLevel?.toString() || '');
-            setRespiratoryRate(appData.vitals.respiratoryRate?.toString() || '');
-          }
+          populateVitals(appData.vitals);
 
           const patRes = await patientService.get(appData.patientId);
           if (patRes.success && patRes.data) {
@@ -156,13 +158,20 @@ const VitalsEntryPage = () => {
     let required = true;
 
     switch (field) {
-      case 'temperature': range = vitalRanges.BODY_TEMPERATURE; label = 'Body Temperature'; break;
-      case 'weight': range = vitalRanges.WEIGHT; label = 'Weight'; break;
-      case 'oxygenLevel': range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break;
-      case 'systolic': range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break;
-      case 'diastolic': range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break;
-      case 'heartRate': range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break;
-      case 'respiratoryRate': range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break;
+      case 'temperature': { range = vitalRanges.BODY_TEMPERATURE; label = 'Body Temperature'; break;
+      }
+      case 'weight': { range = vitalRanges.WEIGHT; label = 'Weight'; break;
+      }
+      case 'oxygenLevel': { range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break;
+      }
+      case 'systolic': { range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break;
+      }
+      case 'diastolic': { range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break;
+      }
+      case 'heartRate': { range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break;
+      }
+      case 'respiratoryRate': { range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break;
+      }
     }
 
     const error = validateVital(value, range, label || field, required);

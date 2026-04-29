@@ -2,7 +2,7 @@ import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
 import { ApiResponse, VitalSetting, VitalRangesResponse, VitalRange } from '@/types/api';
 
-export type { VitalSetting };
+
 
 export const adminService = {
   async listVitalSettings(config?: AxiosRequestConfig): Promise<ApiResponse<VitalSetting[]>> {
@@ -25,3 +25,5 @@ export const adminService = {
     return response.data;
   }
 };
+
+export {type VitalSetting} from '@/types/api';

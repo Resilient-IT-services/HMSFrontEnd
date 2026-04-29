@@ -34,8 +34,8 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
       setLoading(true);
       const response = await pharmacyApi.addMedicine({
         ...formData,
-        unitPrice: parseFloat(formData.unitPrice),
-        stockQuantity: parseInt(formData.stockQuantity)
+        unitPrice: Number.parseFloat(formData.unitPrice),
+        stockQuantity: Number.parseInt(formData.stockQuantity)
       });
       if (response.success) {
         showToast('Medicine added successfully', 'success');
@@ -47,7 +47,7 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
         onSuccess();
         onClose();
       }
-    } catch (err) {
+    } catch {
       showToast('Failed to add medicine', 'error');
     } finally {
       setLoading(false);

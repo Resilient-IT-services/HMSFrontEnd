@@ -33,8 +33,8 @@ const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({ patientId, on
             setPrescriptions(rxResponse.data);
           }
         }
-      } catch (err) {
-        console.error('Failed to fetch patient history', err);
+      } catch (error) {
+        console.error('Failed to fetch patient history', error);
       } finally {
         setLoading(false);
       }

@@ -45,9 +45,9 @@ const PrescriptionDetailsPage: React.FC = () => {
         } else {
           setError(rxResponse.message || 'Prescription not found');
         }
-      } catch (err) {
+      } catch (error_) {
         setError('Failed to load prescription details');
-        console.error(err);
+        console.error(error_);
       } finally {
         setLoading(false);
       }
@@ -70,7 +70,7 @@ const PrescriptionDetailsPage: React.FC = () => {
         setPrescription({ ...prescription, status: 'COMPLETED' });
         showToast('Prescription dispensed (Frontend Update)', 'success');
       }
-    } catch (err) {
+    } catch {
       showToast('Failed to dispense prescription', 'error');
     } finally {
       setDispensing(false);
@@ -78,7 +78,7 @@ const PrescriptionDetailsPage: React.FC = () => {
   };
 
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   if (loading) return <div className="p-8"><LoadingSkeleton /></div>;

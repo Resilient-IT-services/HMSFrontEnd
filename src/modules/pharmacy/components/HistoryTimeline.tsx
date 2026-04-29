@@ -11,7 +11,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({ appointments, prescri
   const events = [
     ...appointments.map(a => ({ type: 'APPOINTMENT', date: a.appointmentTime, data: a })),
     ...prescriptions.map(p => ({ type: 'PRESCRIPTION', date: p.createdAt, data: p }))
-  ].sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+  ].toSorted((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
 
   if (events.length === 0) {
     return <div className="text-center py-8 text-gray-500">No history available for this patient.</div>;
@@ -23,9 +23,9 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({ appointments, prescri
         {events.map((event, eventIdx) => (
           <li key={eventIdx}>
             <div className="relative pb-8">
-              {eventIdx !== events.length - 1 ? (
+              {eventIdx === events.length - 1 ? null : (
                 <span className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />
-              ) : null}
+              )}
               <div className="relative flex space-x-3">
                 <div>
                   <span className={`h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white ${

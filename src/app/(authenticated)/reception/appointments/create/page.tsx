@@ -24,7 +24,7 @@ const calculateSuggestedTime = (session: SessionInfo, date: string) => {
   const now = new Date();
   const todayStr = getLocalDateString(now);
   
-  let baseTime = session.nextSuggestedTime || session.startTime;
+  const baseTime = session.nextSuggestedTime || session.startTime;
   
   if (date !== todayStr) return baseTime;
 
@@ -167,7 +167,7 @@ const AppointmentScheduling = () => {
         notes
       });
       router.push(`/reception/billing?${params.toString()}`);
-    } catch (error) {
+    } catch {
       triggerGlobalToast('Failed to prepare billing', 'error');
     } finally {
       setSubmitting(false);

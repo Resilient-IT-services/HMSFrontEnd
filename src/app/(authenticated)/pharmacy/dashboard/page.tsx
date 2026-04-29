@@ -68,10 +68,11 @@ const PharmacyDashboard = () => {
       prescription && prescription.status === 'COMPLETED'
     ).length;
     
-    const queuedItems = safePrescriptions.reduce((total, prescription) => {
+    let queuedItems = 0;
+    for (const prescription of safePrescriptions) {
       const itemsCount = Array.isArray(prescription?.items) ? prescription.items.length : 0;
-      return total + itemsCount;
-    }, 0);
+      queuedItems += itemsCount;
+    }
 
     return {
       pendingPrescriptions,

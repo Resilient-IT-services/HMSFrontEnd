@@ -20,18 +20,16 @@ export const validateVital = (
     return isRequired ? `${label} is required` : null;
   }
 
-  const numValue = typeof value === 'string' ? parseFloat(value) : value;
+  const numValue = typeof value === 'string' ? Number.parseFloat(value) : value;
 
   // Handle non-numeric input
-  if (isNaN(numValue)) {
+  if (Number.isNaN(numValue)) {
     return `Invalid ${label.toLowerCase()}`;
   }
 
   // Handle range validation if config exists
-  if (range) {
-    if (numValue < range.minValue || numValue > range.maxValue) {
-      return `${label} must be between ${range.minValue} and ${range.maxValue} ${range.unit || ''}`;
-    }
+  if (range && (numValue < range.minValue || numValue > range.maxValue)) {
+    return `${label} must be between ${range.minValue} and ${range.maxValue} ${range.unit || ''}`;
   }
 
   return null;

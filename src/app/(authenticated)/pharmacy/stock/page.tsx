@@ -22,13 +22,13 @@ export default function StockPage() {
       } else {
         // Mock data for demo if API fails
         setMedicines([
-          { id: '1', name: 'Amoxicillin 500mg', form: 'Capsule', batchNumber: 'AMX-2023-014', expiryDate: '2025-10-12', unitPrice: 12.50, stockQuantity: 450, category: 'Antibiotics' },
-          { id: '2', name: 'Lisinopril 10mg', form: 'Tablet', batchNumber: 'LIS-B92-X0', expiryDate: '2024-08-15', unitPrice: 8.20, stockQuantity: 12, category: 'Cardiovascular' },
-          { id: '3', name: 'Metformin 850mg', form: 'Tablet', batchNumber: 'MET-2023-991', expiryDate: '2026-11-30', unitPrice: 14.00, stockQuantity: 0, category: 'Analgesics' },
+          { id: '1', name: 'Amoxicillin 500mg', form: 'Capsule', batchNumber: 'AMX-2023-014', expiryDate: '2025-10-12', unitPrice: 12.5, stockQuantity: 450, category: 'Antibiotics' },
+          { id: '2', name: 'Lisinopril 10mg', form: 'Tablet', batchNumber: 'LIS-B92-X0', expiryDate: '2024-08-15', unitPrice: 8.2, stockQuantity: 12, category: 'Cardiovascular' },
+          { id: '3', name: 'Metformin 850mg', form: 'Tablet', batchNumber: 'MET-2023-991', expiryDate: '2026-11-30', unitPrice: 14, stockQuantity: 0, category: 'Analgesics' },
         ]);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }
