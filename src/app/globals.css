@@ -153,3 +153,9 @@ body {
     cursor: not-allowed;
     background-color: #f1f5f9;
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

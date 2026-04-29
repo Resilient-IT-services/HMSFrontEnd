@@ -182,6 +182,18 @@ const VitalsEntryPage = () => {
     return <p className="text-[10px] text-slate-400 mt-1 italic">{helper}</p>;
   };
 
+  const mapBackendErrorToField = (message: string): string | null => {
+    const msg = message.toLowerCase();
+    if (msg.includes('heart rate')) return 'heartRate';
+    if (msg.includes('temperature')) return 'temperature';
+    if (msg.includes('oxygen level') || msg.includes('spo2')) return 'oxygenLevel';
+    if (msg.includes('systolic')) return 'systolic';
+    if (msg.includes('diastolic')) return 'diastolic';
+    if (msg.includes('weight')) return 'weight';
+    if (msg.includes('respiratory rate')) return 'respiratoryRate';
+    return null;
+  };
+
   const handleSave = async (isDraft: boolean = false) => {
     if (!appointment) return;
     if (!validateVitals(true)) {
@@ -191,7 +203,6 @@ const VitalsEntryPage = () => {
 
     setSaving(true);
     try {
-      // Construct sanitized payload matching server VitalsDTO exactly
       const vitals: VitalsDTO = {
         bloodPressure: `${systolic}/${diastolic}`,
         systolic: Number.parseInt(systolic, 10) || 0,
@@ -205,8 +216,6 @@ const VitalsEntryPage = () => {
         respiratoryRate: Number.parseFloat(respiratoryRate) || 0,
       };
 
-      // 4. Try using the general update method instead of patchVitals
-      // Include mandatory fields required by the PUT endpoint
       const res = await appointmentService.update(appointment.id, { 
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
@@ -214,15 +223,33 @@ const VitalsEntryPage = () => {
         vitals,
         notes: complaints,
         chiefComplaints: complaints
-      });
+      }, { skipToast: true });
 
       if (res.success) {
         triggerGlobalToast(isDraft ? 'Draft saved successfully' : 'Vitals submitted successfully', 'success');
         router.push('/reception/appointments');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save vitals', error);
-      // The error message from Axios interceptor will already show a toast
+      
+      // Handle Backend Validation Errors
+      const apiData = error.response?.data;
+      if (apiData?.code === 'VALIDATION_ERROR' || error.response?.status === 400) {
+        const message = apiData?.error?.message || apiData?.message || '';
+        const field = mapBackendErrorToField(message);
+        
+        if (field) {
+          setFieldErrors(prev => ({ ...prev, [field]: message }));
+          triggerGlobalToast(`Backend Validation: ${message}`, 'error');
+        } else {
+          // Fallback if field cannot be mapped
+          triggerGlobalToast(message || 'Validation failed on server', 'error');
+        }
+      } else {
+        // Generic error handling
+        const message = apiData?.error?.message || apiData?.message || 'Failed to save vitals';
+        triggerGlobalToast(message, 'error');
+      }
     } finally {
       setSaving(false);
     }

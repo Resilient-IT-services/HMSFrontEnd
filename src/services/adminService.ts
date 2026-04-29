@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
-import { ApiResponse, VitalSetting, VitalRangesResponse } from '@/types/api';
+import { ApiResponse, VitalSetting, VitalRangesResponse, VitalRange } from '@/types/api';
 
 export type { VitalSetting };
 
