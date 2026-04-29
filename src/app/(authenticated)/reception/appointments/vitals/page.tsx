@@ -105,7 +105,8 @@ const VitalsEntryPage = () => {
         doctorId: appointment.doctorId,
         appointmentTime: safeAppointmentTime,
         vitals,
-        notes: complaints
+        notes: complaints,
+        status: 'SCHEDULED'
       });
 
       if (res.success) {

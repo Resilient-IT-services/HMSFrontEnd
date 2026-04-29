@@ -92,7 +92,7 @@ const TodayAppointmentsPage = () => {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-wrap gap-2">
-            {['ALL', 'UPCOMING', 'SCHEDULED', 'CHECKED_IN', 'DELAYED', 'COMPLETED', 'PAYMENT_PENDING'].map((status) => (
+            {['ALL', 'UPCOMING', 'SCHEDULED', 'CHECKED_IN', 'DELAYED', 'COMPLETED', 'PAYMENT_PENDING', 'ADD_VITALS'].map((status) => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status as any)}
@@ -167,6 +167,7 @@ const TodayAppointmentsPage = () => {
                       app.status === 'CONFIRMED' ? 'bg-orange-50 text-orange-700 border-orange-100' :
                       app.status === 'DELAYED' ? 'bg-yellow-50 text-yellow-700 border-yellow-100' :
                       app.status === 'PAYMENT_PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                      app.status === 'ADD_VITALS' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                       'bg-slate-50 text-slate-500 border-slate-100'
                     }`}>
                       {app.status === 'DELAYED' ? 'Walk-in' : app.status.replace('_', ' ')}

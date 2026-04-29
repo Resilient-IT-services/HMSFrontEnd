@@ -118,7 +118,10 @@ const PatientQueuePage = () => {
     
     let base = appointments;
     if (activeTab === 'TODAY') {
-      base = appointments.filter(a => a.appointmentTime.startsWith(today) && a.status !== 'COMPLETED' && a.status !== 'CANCELLED');
+      base = appointments.filter(a => 
+        a.appointmentTime.startsWith(today) && 
+        (a.status === 'SCHEDULED' || a.status === 'DELAYED' || a.status === 'CONFIRMED')
+      );
     } else {
       base = appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
     }

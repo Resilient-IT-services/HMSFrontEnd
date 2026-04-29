@@ -83,6 +83,29 @@ const BillingPage = () => {
   const tax = 0;
   const total = Math.max(0, consultationFee - discount + tax);
 
+  const [submittingPayment, setSubmittingPayment] = useState(false);
+
+  const handleMarkAsPaid = async () => {
+    if (!appointmentId || !appointment) return;
+    setSubmittingPayment(true);
+    try {
+      // The PUT endpoint requires a full AppointmentDTO (patientId, doctorId, appointmentTime)
+      // We spread the existing appointment data and override the status
+      const res = await appointmentService.update(appointmentId, {
+        ...appointment,
+        status: 'ADD_VITALS'
+      });
+      if (res.success) {
+        triggerGlobalToast('Payment confirmed successfully', 'success');
+        fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to confirm payment', error);
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
+
   const handleGenerateBill = () => {
     triggerGlobalToast('Bill generated successfully', 'success');
     globalThis.print();
@@ -124,6 +147,8 @@ const BillingPage = () => {
     );
   }
 
+  const isPaid = appointment.status !== 'PAYMENT_PENDING';
+
   return (
       <MainLayout title="OP Consultation Billing" hideTitle>
         <div className="h-screen flex flex-col bg-[#f9f9ff] font-inter overflow-hidden">
@@ -146,6 +171,12 @@ const BillingPage = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              <div className="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs border border-slate-200 flex items-center gap-2">
+                Status: 
+                <span className={`uppercase ${isPaid ? 'text-emerald-600' : 'text-orange-600'}`}>
+                  {appointment.status.replace('_', ' ')}
+                </span>
+              </div>
               <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-xl font-bold text-xs border border-orange-100">
                 Bill ID: #INV-{appointmentId?.substring(0, 8).toUpperCase()}
               </div>
@@ -422,27 +453,42 @@ const BillingPage = () => {
 
             <div className="flex items-center gap-4">
 
-              <button
-                  onClick={handleDownloadReceipt}
-                  className="px-6 py-3 text-slate-600 font-bold hover:text-slate-900 flex items-center gap-2"
-              >
-              <span className="material-symbols-outlined text-xl">
-                download
-              </span>
+              {isPaid ? (
+                <>
+                  <button
+                      onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointmentId}`)}
+                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95"
+                  >
+                    <span className="material-symbols-outlined text-xl">
+                      vital_signs
+                    </span>
+                    Add Vitals
+                  </button>
 
-                Download Receipt
-              </button>
+                  <button
+                      onClick={handleGenerateBill}
+                      className="px-10 py-3 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95"
+                  >
+                  <span className="material-symbols-outlined text-xl">
+                    receipt_long
+                  </span>
 
-              <button
-                  onClick={handleGenerateBill}
-                  className="px-10 py-3 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95"
-              >
-              <span className="material-symbols-outlined text-xl">
-                receipt_long
-              </span>
+                    Generate Bill & Print
+                  </button>
+                </>
+              ) : (
+                <button
+                    onClick={handleMarkAsPaid}
+                    disabled={submittingPayment}
+                    className="px-10 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
+                >
+                <span className="material-symbols-outlined text-xl">
+                  check_circle
+                </span>
 
-                Generate Bill & Print
-              </button>
+                  {submittingPayment ? 'Confirming...' : 'Bill is Paid'}
+                </button>
+              )}
 
             </div>
           </footer>

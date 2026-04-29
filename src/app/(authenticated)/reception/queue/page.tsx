@@ -32,7 +32,7 @@ const TokenQueuePage = () => {
 
   const getDepartmentQueue = (dept: string) => {
     // For now, filtering by specialization if available or just mocking grouping
-    return appointments.filter(a => a.status === 'CHECKED_IN' || a.status === 'CONFIRMED');
+    return appointments.filter(a => a.status === 'CHECKED_IN' || a.status === 'CONFIRMED' || a.status === 'SCHEDULED');
   };
 
   const opdQueue = getDepartmentQueue('OPD');
