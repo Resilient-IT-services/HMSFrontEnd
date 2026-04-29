@@ -8,6 +8,8 @@ import { userService } from '@/services/userService';
 import { HospitalResponse, UserResponse } from '@/types/api';
 
 const HospitalManagement = () => {
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showFilter, setShowFilter] = useState(false);
   const [selectedHospital, setSelectedHospital] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showExportButton = false;
@@ -62,8 +64,7 @@ const HospitalManagement = () => {
           </div>
           <button 
             onClick={() => router.push('/super_admin/hospitals/create')}
-            className="bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:opacity-90 active:scale-95 transition-all"
-          >
+            className="bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:opacity-90 active:scale-95 transition-all">
             <span className="material-symbols-outlined text-[20px]">add</span>
             Register New Hospital
           </button>
@@ -101,11 +102,38 @@ const HospitalManagement = () => {
               <h3 className="font-manrope text-xl font-bold text-slate-900">Hospital Directory</h3>
               <p className="text-sm text-slate-500">Managing {totalElements} facilities across global regions</p>
             </div>
-            <div className="flex gap-3">
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 transition-colors uppercase tracking-tighter">
+            <div className="flex gap-3 relative">
+              <button
+                  onClick={() => setShowFilter(!showFilter)}
+                  className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 transition-colors uppercase tracking-tighter">
                 <span className="material-symbols-outlined text-sm">filter_list</span>
                 Filter
               </button>
+              {showFilter && (
+                  <div className="absolute right-0 top-12 w-44 bg-white border border-slate-200 rounded-xl shadow-lg z-50">
+
+                    {/* Header */}
+                    <div className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b">
+                      Filter by Status
+                    </div>
+
+                    {/* Scrollable List */}
+                    <div className="max-h-48 overflow-y-auto">
+
+                      {['ALL', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'ONBOARDING'].map((status) => (
+                          <div
+                              key={status}
+                              onClick={() => {setStatusFilter(status);setShowFilter(false);}}
+                              className={`px-4 py-2.5 text-sm cursor-pointer flex justify-between items-center ${statusFilter === status ? 'bg-orange-50 text-orange-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'}`}>
+                            {status}
+                            {statusFilter === status && (
+                                <span className="material-symbols-outlined text-sm">check</span>
+                            )}
+                          </div>
+                      ))}
+                    </div>
+                  </div>
+              )}
               {showExportButton && (
               <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 transition-colors uppercase tracking-tighter">
                 <span className="material-symbols-outlined text-sm">download</span>
@@ -119,14 +147,15 @@ const HospitalManagement = () => {
               <thead>
                 <tr className="bg-white text-slate-400 text-[10px] font-black uppercase tracking-widest">
                   <th className="px-6 py-4 border-b border-slate-100">Hospital Name & ID</th>
-                  <th className="px-6 py-4 border-b border-slate-100">Region</th>
-                  <th className="px-6 py-4 border-b border-slate-100">Category</th>
+                  <th className="px-6 py-4 border-b border-slate-100">city</th>
                   <th className="px-6 py-4 border-b border-slate-100">Status</th>
                   <th className="px-6 py-4 border-b border-slate-100 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {hospitals.map((h) => (
+              {hospitals
+                  .filter((h) => statusFilter === 'ALL' || h.status === statusFilter)
+                  .map((h) => (
                   <tr key={h.id} className="hover:bg-slate-50/80 transition-colors group">
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
@@ -139,9 +168,8 @@ const HospitalManagement = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-sm text-slate-600 font-medium">Global Sector</td>
-                    <td className="px-6 py-5">
-                      <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-[10px] font-black uppercase">Tier 1</span>
+                    <td className="px-6 py-5 text-sm text-slate-600 font-medium">
+                      {h.city ?? 'N/A'}
                     </td>
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2">
