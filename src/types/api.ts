@@ -482,6 +482,14 @@ export interface VitalSetting {
   updatedAt?: string;
 }
 
+export interface VitalRange {
+  minValue: number;
+  maxValue: number;
+  unit: string;
+}
+
+export type VitalRangesResponse = Record<string, VitalRange>;
+
 // User Summary
 export interface UserSummaryDTO {
   id: string;
