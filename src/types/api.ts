@@ -275,8 +275,13 @@ export interface AppointmentResponse {
   status: AppointmentStatus;
   tokenNumber?: number;
   tokenDisplay?: string;
+  chiefComplaints?: string;
+  diagnosis?: string;
+  clinicalNotes?: string;
+  icdCodes?: string[];
   notes?: string;
   vitals?: VitalsDTO;
+  prescription?: PrescriptionDTO;
   createdAt: string;
 }
 
@@ -288,6 +293,11 @@ export interface CreateAppointmentRequest {
   notes?: string;
   status?: AppointmentStatus;
   vitals?: VitalsDTO;
+  chiefComplaints?: string;
+  diagnosis?: string;
+  clinicalNotes?: string;
+  icdCodes?: string[];
+  prescription?: PrescriptionDTO;
 }
 
 export interface UpdateAppointmentStatusRequest {
@@ -346,7 +356,7 @@ export interface DoctorResponse {
   createdAt: string;
 }
 
-// Pharmacy types (Not fully documented in api-docs.json but needed by UI)
+// Pharmacy types
 export interface MedicineResponse {
   id: string;
   name: string;
@@ -355,24 +365,29 @@ export interface MedicineResponse {
   createdAt: string;
 }
 
-export interface PrescriptionItemResponse {
-  id: string;
-  medicineId: string;
+export interface PrescriptionItemDTO {
+  id?: string;
+  medicineId?: string;
   medicineName: string;
   dosage: string;
   duration: string;
 }
 
-export interface PrescriptionResponse {
-  id: string;
-  patientId: string;
-  patientName: string;
-  doctorId: string;
-  doctorName: string;
-  items: PrescriptionItemResponse[];
-  status: string;
-  createdAt: string;
+export interface PrescriptionDTO {
+  id?: string;
+  patientId?: string;
+  patientName?: string;
+  doctorId?: string;
+  doctorName?: string;
+  appointmentId?: string;
+  items: PrescriptionItemDTO[];
+  createdAt?: string;
 }
+
+// Legacy aliases
+export type PrescriptionItemResponse = PrescriptionItemDTO;
+export type PrescriptionResponse = PrescriptionDTO;
+
 
 // Billing types
 export interface BillingItemResponse {

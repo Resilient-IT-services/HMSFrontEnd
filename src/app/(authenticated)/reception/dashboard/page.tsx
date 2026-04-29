@@ -48,7 +48,7 @@ const ReceptionDashboard = () => {
     fetchData();
     const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, []); // Run on mount only, fetchData is stable
 
   const stats = useMemo(() => {
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;

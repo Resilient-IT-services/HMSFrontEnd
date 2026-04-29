@@ -77,7 +77,7 @@ const BillingPage = () => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [appointmentId]); // Run only when appointmentId changes
 
   const consultationFee = doctor?.consultationFee || 0;
   const tax = 0;

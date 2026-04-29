@@ -117,33 +117,47 @@ const ActiveConsultationPage = () => {
 
     try {
       setFinishing(true);
-      const notes = `COMPLAINT: ${complaint}\n\nDIAGNOSIS: ${diagnosis}`;
       
-      // Update notes first
-      // WORKAROUND: The backend validates appointmentTime must be in the future.
-      // We send a time 1 hour in the future to bypass this validation while keeping it on the same day.
-      const futureTime = new Date();
-      futureTime.setHours(futureTime.getHours() + 1);
+      // 1. Prepare Prescription Data
+      const validPrescriptions = prescriptions.filter(p => p.medicine.trim() !== '');
+      const prescription: any = validPrescriptions.length > 0 ? {
+        patientId: appointment.patientId,
+        doctorId: appointment.doctorId,
+        appointmentId: appointment.id,
+        items: validPrescriptions.map(p => ({
+          medicineName: p.medicine,
+          dosage: p.frequency,
+          duration: p.instructions
+        }))
+      } : undefined;
 
-      try {
-        await appointmentService.update(appointmentId, { 
-          notes,
-          patientId: appointment.patientId,
-          doctorId: appointment.doctorId,
-          appointmentTime: futureTime.toISOString()
-        });
-      } catch (noteError) {
-        console.error('Failed to save notes, but proceeding with status update', noteError);
+      // 2. Call updateConsultation API
+      // This endpoint handles clinical data (complaints, diagnosis, prescriptions)
+      const consultationRes = await appointmentService.updateConsultation(appointmentId, {
+        chiefComplaints: complaint,
+        diagnosis: diagnosis,
+        icdCodes: icdCodes.map(c => c.code),
+        prescription: prescription,
+        // We keep sending appointment data to satisfy general DTO requirements if needed
+        patientId: appointment.patientId,
+        doctorId: appointment.doctorId,
+        appointmentTime: appointment.appointmentTime 
+      });
+
+      if (!consultationRes.success) {
+        triggerGlobalToast('Failed to save consultation details', 'error');
+        setFinishing(false);
+        return;
       }
 
-      // Update status to COMPLETED
+      // 3. Update status to COMPLETED
       const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
       
       if (statusRes.success) {
-        triggerGlobalToast('Consultation finished successfully', 'success');
+        triggerGlobalToast('Consultation finished and prescription saved', 'success');
         router.push('/doctor/patient-queue');
       } else {
-        triggerGlobalToast('Failed to complete appointment status', 'error');
+        triggerGlobalToast('Consultation saved but failed to close appointment', 'warning');
       }
     } catch (error) {
       console.error('Failed to finish consultation', error);

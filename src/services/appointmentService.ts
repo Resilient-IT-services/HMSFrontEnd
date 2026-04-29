@@ -41,5 +41,10 @@ export const appointmentService = {
   async updateStatus(appointmentId: string, request: UpdateAppointmentStatusRequest): Promise<ApiResponse<AppointmentResponse>> {
     const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/status`, request);
     return response.data;
+  },
+
+  async updateConsultation(appointmentId: string, request: Partial<AppointmentResponse>): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.patch<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/consultation`, request);
+    return response.data;
   }
 };

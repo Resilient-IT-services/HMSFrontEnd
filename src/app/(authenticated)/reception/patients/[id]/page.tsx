@@ -57,7 +57,7 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [id]); // Only re-run if patient ID changes
 
   if (loading) return <MainLayout title="Loading..."><div className="p-8">Loading patient profile...</div></MainLayout>;
   if (!patient) return <MainLayout title="Not Found"><div className="p-8">Patient not found.</div></MainLayout>;

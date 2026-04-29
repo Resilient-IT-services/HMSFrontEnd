@@ -44,7 +44,7 @@ const DoctorDashboard = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user]);
+  }, [user?.id, user?.fullName]);
 
   useEffect(() => {
     fetchData();

@@ -30,11 +30,9 @@ const UserManagement = () => {
           
           if (u.memberships) {
             u.memberships.forEach((m: any) => {
-              // Extract roles from membership.roles array
               if (m.roles && Array.isArray(m.roles)) {
                 m.roles.forEach((r: string) => allRoles.add(r));
               }
-              // Fallback for roleAssignments if needed
               if (m.roleAssignments) {
                 m.roleAssignments.forEach((ra: any) => {
                   if (ra.roleCode) allRoles.add(ra.roleCode);
@@ -57,11 +55,12 @@ const UserManagement = () => {
     }
   }, [page, debouncedSearch, roleFilter, activeFilter]);
 
+  // Consolidate effect: fetchData already depends on all these
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Reset page when filters change
+  // Reset page separately but DON'T call fetchData here (the page dependency in fetchData will handle it)
   useEffect(() => {
     setPage(0);
   }, [debouncedSearch, roleFilter, activeFilter]);

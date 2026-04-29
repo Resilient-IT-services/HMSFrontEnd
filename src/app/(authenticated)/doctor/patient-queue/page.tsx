@@ -43,39 +43,51 @@ const PatientQueuePage = () => {
       const response = await appointmentService.list(0, 100);
 
       if (response.success && response.data) {
-        const today = new Date().toISOString().split('T')[0];
-        
         // Filter by current doctor
         const doctorAppointments = response.data.content.filter((appointment) => {
           return appointment.doctorId === user.id || appointment.doctorName === user.fullName;
         });
 
         setAppointments(doctorAppointments);
-
-        // Fetch patient details for age and gender if not already in cache
-        const patientIdsToFetch = Array.from(new Set(doctorAppointments.map(a => a.patientId)))
-          .filter(id => !patientDetails[id]);
-
-        if (patientIdsToFetch.length > 0) {
-          const details = await Promise.all(
-            patientIdsToFetch.map(id => patientService.get(id))
-          );
-          
-          const newDetails: Record<string, PatientResponse> = { ...patientDetails };
-          details.forEach(res => {
-            if (res.success && res.data) {
-              newDetails[res.data.id] = res.data;
-            }
-          });
-          setPatientDetails(newDetails);
-        }
       }
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user, patientDetails]);
+  }, [user?.id, user?.fullName]);
+
+  // Separate effect for fetching missing patient details to avoid re-fetching appointments
+  useEffect(() => {
+    const fetchMissingPatients = async () => {
+      const patientIdsToFetch = Array.from(new Set(appointments.map(a => a.patientId)))
+        .filter(id => !patientDetails[id]);
+
+      if (patientIdsToFetch.length > 0) {
+        try {
+          const details = await Promise.all(
+            patientIdsToFetch.map(id => patientService.get(id))
+          );
+          
+          setPatientDetails(prev => {
+            const newDetails = { ...prev };
+            details.forEach(res => {
+              if (res.success && res.data) {
+                newDetails[res.data.id] = res.data;
+              }
+            });
+            return newDetails;
+          });
+        } catch (error) {
+          console.error('Failed to fetch patient details', error);
+        }
+      }
+    };
+
+    if (appointments.length > 0) {
+      fetchMissingPatients();
+    }
+  }, [appointments, patientDetails]);
 
   useEffect(() => {
     fetchData();

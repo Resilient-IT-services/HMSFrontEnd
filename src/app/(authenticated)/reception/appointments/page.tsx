@@ -36,7 +36,7 @@ const TodayAppointmentsPage = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, []);
+  }, []); // Kept empty to ensure it's stable and only runs once or when manually refreshed
 
   useEffect(() => {
     fetchData();
