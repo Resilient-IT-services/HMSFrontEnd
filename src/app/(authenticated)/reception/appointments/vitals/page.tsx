@@ -5,10 +5,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
-import { AppointmentResponse, PatientResponse, VitalsDTO } from '@/types/api';
+import { AppointmentResponse, PatientResponse, VitalsDTO, VitalRangesResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
-import { adminService, VitalSetting } from '@/services/adminService';
+import { adminService } from '@/services/adminService';
+import { validateVital, formatRangeHelper } from '@/utils/vitalsValidator';
 
 const VitalsEntryPage = () => {
   const searchParams = useSearchParams();
@@ -32,30 +33,31 @@ const VitalsEntryPage = () => {
   const [respiratoryRate, setRespiratoryRate] = useState(''); 
   const [complaints, setComplaints] = useState('');
 
-  const [vitalSettings, setVitalSettings] = useState<VitalSetting[]>([]);
+  const [vitalRanges, setVitalRanges] = useState<VitalRangesResponse>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        // Use skipToast: true to avoid global error if receptionist isn't authorized for admin endpoints
-        const res = await adminService.listVitalSettings({ skipToast: true });
-        if (res.success && res.data) {
-          setVitalSettings(res.data);
+        // Fetch new dynamic vital ranges
+        const rangeRes = await adminService.getVitalRanges({ skipToast: true });
+        if (rangeRes.success && rangeRes.data) {
+          setVitalRanges(rangeRes.data);
           
-          // Set default units from config if available
-          const tempConfig = (res.data as VitalSetting[]).find((s: VitalSetting) => s.vitalName.toUpperCase().includes('TEMPERATURE'));
-          if (tempConfig && tempConfig.unit) setTempUnit(tempConfig.unit as any);
-          
-          const weightConfig = (res.data as VitalSetting[]).find((s: VitalSetting) => s.vitalName.toUpperCase().includes('WEIGHT'));
-          if (weightConfig && weightConfig.unit) setWeightUnit(weightConfig.unit as any);
+          // Apply default units if present in ranges
+          if (rangeRes.data.BODY_TEMPERATURE?.unit) {
+            const unit = rangeRes.data.BODY_TEMPERATURE.unit;
+            setTempUnit(unit === 'F' || unit === 'FAHRENHEIT' ? 'FAHRENHEIT' : 'CELSIUS');
+          }
+          if (rangeRes.data.WEIGHT?.unit) {
+            const unit = rangeRes.data.WEIGHT.unit;
+            setWeightUnit(unit.toUpperCase() === 'LB' ? 'LB' : 'KG');
+          }
         }
       } catch (error: any) {
-        // Only log if it's not a 403 (unauthorized) which is expected for non-admin roles
         if (error.response?.status !== 403) {
           console.error('Failed to load vitals config', error);
-        } else {
-          console.log('Vitals configuration access restricted (403), using client defaults.');
+          triggerGlobalToast('Could not load validation ranges. Using defaults.', 'warning');
         }
       }
     };
@@ -122,45 +124,49 @@ const VitalsEntryPage = () => {
     return age;
   }, [patient]);
 
-  const validateVitals = () => {
+  const validateVitals = (showAllErrors: boolean = true) => {
     const errors: Record<string, string> = {};
     
-    const validateField = (value: string, configName: string, fieldName: string, isRequired: boolean = true) => {
-      if (!value) {
-        if (isRequired) errors[fieldName] = 'Required';
-        return;
-      }
+    // Define validations
+    const validations = [
+      { value: temperature, range: vitalRanges.BODY_TEMPERATURE, label: 'Body Temperature', field: 'temperature', required: true },
+      { value: weight, range: vitalRanges.WEIGHT, label: 'Weight', field: 'weight', required: true },
+      { value: oxygenLevel, range: vitalRanges.OXYGEN_LEVEL, label: 'Oxygen Level', field: 'oxygenLevel', required: true },
+      { value: systolic, range: vitalRanges.SYSTOLIC_BP, label: 'Systolic BP', field: 'systolic', required: true },
+      { value: diastolic, range: vitalRanges.DIASTOLIC_BP, label: 'Diastolic BP', field: 'diastolic', required: true },
+      { value: heartRate, range: vitalRanges.HEART_RATE, label: 'Heart Rate', field: 'heartRate', required: true },
+      { value: respiratoryRate, range: vitalRanges.RESPIRATORY_RATE, label: 'Respiratory Rate', field: 'respiratoryRate', required: false },
+    ];
 
-      const numValue = Number.parseFloat(value);
-      if (Number.isNaN(numValue)) {
-        errors[fieldName] = 'Invalid number';
-        return;
-      }
+    validations.forEach(v => {
+      const error = validateVital(v.value, v.range, v.label, v.required);
+      if (error) errors[v.field] = error;
+    });
 
-      const setting = vitalSettings.find(s => 
-        s.vitalName.toUpperCase().includes(configName.toUpperCase()) || 
-        configName.toUpperCase().includes(s.vitalName.toUpperCase())
-      );
-      if (setting) {
-        if (numValue < (setting.minValue ?? 0) || numValue > (setting.maxValue ?? 999)) {
-          errors[fieldName] = `Must be between ${setting.minValue} and ${setting.maxValue} ${setting.unit || ''}`;
-        }
-      } else {
-        // Log it but don't necessarily block if it's a known standard vital
-        console.warn(`No configuration found for vital: ${configName}`);
-      }
-    };
-
-    validateField(temperature, 'TEMPERATURE', 'temperature');
-    validateField(weight, 'WEIGHT', 'weight');
-    validateField(oxygenLevel, 'OXYGEN', 'oxygenLevel');
-    validateField(systolic, 'SYSTOLIC', 'systolic');
-    validateField(diastolic, 'DIASTOLIC', 'diastolic');
-    validateField(heartRate, 'HEART RATE', 'heartRate');
-    validateField(respiratoryRate, 'RESPIRATORY', 'respiratoryRate', false);
-
-    setFieldErrors(errors);
+    if (showAllErrors) {
+      setFieldErrors(errors);
+    }
     return Object.keys(errors).length === 0;
+  };
+
+  // Real-time validation for specific field
+  const validateField = (field: string, value: any) => {
+    let range;
+    let label;
+    let required = true;
+
+    switch (field) {
+      case 'temperature': range = vitalRanges.BODY_TEMPERATURE; label = 'Body Temperature'; break;
+      case 'weight': range = vitalRanges.WEIGHT; label = 'Weight'; break;
+      case 'oxygenLevel': range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break;
+      case 'systolic': range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break;
+      case 'diastolic': range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break;
+      case 'heartRate': range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break;
+      case 'respiratoryRate': range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break;
+    }
+
+    const error = validateVital(value, range, label || field, required);
+    setFieldErrors(prev => ({ ...prev, [field]: error || '' }));
   };
 
   const renderFieldError = (field: string) => {
@@ -170,9 +176,15 @@ const VitalsEntryPage = () => {
     return null;
   };
 
+  const renderHelperText = (range?: any) => {
+    const helper = formatRangeHelper(range);
+    if (!helper) return null;
+    return <p className="text-[10px] text-slate-400 mt-1 italic">{helper}</p>;
+  };
+
   const handleSave = async (isDraft: boolean = false) => {
     if (!appointment) return;
-    if (!validateVitals()) {
+    if (!validateVitals(true)) {
       triggerGlobalToast('Please correct the errors in the form', 'error');
       return;
     }
@@ -327,12 +339,6 @@ const VitalsEntryPage = () => {
                   <div className="col-span-1 md:col-span-2">
                     <label className="block text-label-md font-bold text-on-surface mb-2">
                       Blood Pressure 
-                      {vitalSettings.find(s => s.vitalName.toUpperCase().includes('SYSTOLIC')) && (
-                        <span className="text-[10px] text-slate-400 ml-2 normal-case font-normal">
-                          (Sys: {vitalSettings.find(s => s.vitalName.toUpperCase().includes('SYSTOLIC'))?.minValue}-{vitalSettings.find(s => s.vitalName.toUpperCase().includes('SYSTOLIC'))?.maxValue}, 
-                           Dia: {vitalSettings.find(s => s.vitalName.toUpperCase().includes('DIASTOLIC'))?.minValue}-{vitalSettings.find(s => s.vitalName.toUpperCase().includes('DIASTOLIC'))?.maxValue})
-                        </span>
-                      )}
                     </label>
                     <div className="flex items-center gap-3">
                       <div className="relative flex-1">
@@ -343,10 +349,11 @@ const VitalsEntryPage = () => {
                           value={systolic}
                           onChange={(e) => {
                             setSystolic(e.target.value);
-                            if (fieldErrors.systolic) setFieldErrors(prev => ({ ...prev, systolic: '' }));
+                            validateField('systolic', e.target.value);
                           }}
                         />
                         {renderFieldError('systolic')}
+                        {renderHelperText(vitalRanges.SYSTOLIC_BP)}
                       </div>
                       <span className="text-headline-md text-gray-300">/</span>
                       <div className="relative flex-1">
@@ -357,10 +364,11 @@ const VitalsEntryPage = () => {
                           value={diastolic}
                           onChange={(e) => {
                             setDiastolic(e.target.value);
-                            if (fieldErrors.diastolic) setFieldErrors(prev => ({ ...prev, diastolic: '' }));
+                            validateField('diastolic', e.target.value);
                           }}
                         />
                         {renderFieldError('diastolic')}
+                        {renderHelperText(vitalRanges.DIASTOLIC_BP)}
                       </div>
                     </div>
                   </div>
@@ -368,11 +376,6 @@ const VitalsEntryPage = () => {
                   <div className="col-span-1">
                     <label className="block text-label-md font-bold text-on-surface mb-2">
                       Heart Rate
-                      {vitalSettings.find(s => s.vitalName.toUpperCase().includes('HEART RATE')) && (
-                        <span className="text-[10px] text-slate-400 ml-2 normal-case font-normal">
-                          ({vitalSettings.find(s => s.vitalName.toUpperCase().includes('HEART RATE'))?.minValue}-{vitalSettings.find(s => s.vitalName.toUpperCase().includes('HEART RATE'))?.maxValue} BPM)
-                        </span>
-                      )}
                     </label>
                     <div className="relative">
                       <input 
@@ -382,22 +385,18 @@ const VitalsEntryPage = () => {
                         value={heartRate}
                         onChange={(e) => {
                           setHeartRate(e.target.value);
-                          if (fieldErrors.heartRate) setFieldErrors(prev => ({ ...prev, heartRate: '' }));
+                          validateField('heartRate', e.target.value);
                         }}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">BPM</span>
                     </div>
                     {renderFieldError('heartRate')}
+                    {renderHelperText(vitalRanges.HEART_RATE)}
                   </div>
                   {/* Oxygen Level */}
                   <div className="col-span-1">
                     <label className="block text-label-md font-bold text-on-surface mb-2">
                       Oxygen Level (SpO2)
-                      {vitalSettings.find(s => s.vitalName.toUpperCase().includes('OXYGEN')) && (
-                        <span className="text-[10px] text-slate-400 ml-2 normal-case font-normal">
-                          ({vitalSettings.find(s => s.vitalName.toUpperCase().includes('OXYGEN'))?.minValue}-{vitalSettings.find(s => s.vitalName.toUpperCase().includes('OXYGEN'))?.maxValue}%)
-                        </span>
-                      )}
                     </label>
                     <div className="relative">
                       <input 
@@ -407,23 +406,19 @@ const VitalsEntryPage = () => {
                         value={oxygenLevel}
                         onChange={(e) => {
                           setOxygenLevel(e.target.value);
-                          if (fieldErrors.oxygenLevel) setFieldErrors(prev => ({ ...prev, oxygenLevel: '' }));
+                          validateField('oxygenLevel', e.target.value);
                         }}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
                     </div>
                     {renderFieldError('oxygenLevel')}
+                    {renderHelperText(vitalRanges.OXYGEN_LEVEL)}
                   </div>
                   {/* Body Temperature */}
                   <div className="col-span-1">
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-label-md font-bold text-on-surface">
                         Body Temperature
-                        {vitalSettings.find(s => s.vitalName.toUpperCase().includes('TEMPERATURE')) && (
-                          <span className="text-[10px] text-slate-400 ml-2 normal-case font-normal">
-                            ({vitalSettings.find(s => s.vitalName.toUpperCase().includes('TEMPERATURE'))?.minValue}-{vitalSettings.find(s => s.vitalName.toUpperCase().includes('TEMPERATURE'))?.maxValue} {tempUnit === 'CELSIUS' ? '°C' : '°F'})
-                          </span>
-                        )}
                       </label>
                       <select 
                         className="text-xs bg-gray-100 border-none rounded px-2 py-1 font-bold"
@@ -442,23 +437,19 @@ const VitalsEntryPage = () => {
                         value={temperature}
                         onChange={(e) => {
                           setTemperature(e.target.value);
-                          if (fieldErrors.temperature) setFieldErrors(prev => ({ ...prev, temperature: '' }));
+                          validateField('temperature', e.target.value);
                         }}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">{tempUnit === 'CELSIUS' ? '°C' : '°F'}</span>
                     </div>
                     {renderFieldError('temperature')}
+                    {renderHelperText(vitalRanges.BODY_TEMPERATURE)}
                   </div>
                   {/* Weight */}
                   <div className="col-span-1">
                     <div className="flex justify-between items-center mb-2">
                       <label className="block text-label-md font-bold text-on-surface">
                         Patient Weight
-                        {vitalSettings.find(s => s.vitalName.toUpperCase().includes('WEIGHT')) && (
-                          <span className="text-[10px] text-slate-400 ml-2 normal-case font-normal">
-                            ({vitalSettings.find(s => s.vitalName.toUpperCase().includes('WEIGHT'))?.minValue}-{vitalSettings.find(s => s.vitalName.toUpperCase().includes('WEIGHT'))?.maxValue} {weightUnit.toLowerCase()})
-                          </span>
-                        )}
                       </label>
                       <select 
                         className="text-xs bg-gray-100 border-none rounded px-2 py-1 font-bold"
@@ -477,12 +468,34 @@ const VitalsEntryPage = () => {
                         value={weight}
                         onChange={(e) => {
                           setWeight(e.target.value);
-                          if (fieldErrors.weight) setFieldErrors(prev => ({ ...prev, weight: '' }));
+                          validateField('weight', e.target.value);
                         }}
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">{weightUnit.toLowerCase()}</span>
                     </div>
                     {renderFieldError('weight')}
+                    {renderHelperText(vitalRanges.WEIGHT)}
+                  </div>
+                  {/* Respiratory Rate */}
+                  <div className="col-span-1">
+                    <label className="block text-label-md font-bold text-on-surface mb-2">
+                      Respiratory Rate
+                    </label>
+                    <div className="relative">
+                      <input 
+                        className={`w-full px-4 py-3 bg-gray-50 border rounded-lg text-headline-sm focus:ring-2 focus:ring-primary-container transition-all ${fieldErrors.respiratoryRate ? 'border-error ring-1 ring-error/20' : 'border-outline-variant'}`}
+                        placeholder="e.g. 16" 
+                        type="text"
+                        value={respiratoryRate}
+                        onChange={(e) => {
+                          setRespiratoryRate(e.target.value);
+                          validateField('respiratoryRate', e.target.value);
+                        }}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">BPM</span>
+                    </div>
+                    {renderFieldError('respiratoryRate')}
+                    {renderHelperText(vitalRanges.RESPIRATORY_RATE)}
                   </div>
 
                 </div>
