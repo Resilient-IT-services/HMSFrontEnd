@@ -252,6 +252,10 @@ const ActiveConsultationPage = () => {
                   <span className="material-symbols-outlined text-green-500 text-[18px]">blood_pressure</span>
                   <span className="font-manrope font-bold text-sm">{appointment?.vitals?.bloodPressure || '--'}</span>
                 </div>
+                <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
+                  <span className="material-symbols-outlined text-cyan-500 text-[18px]">pulse_alert</span>
+                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.oxygenLevel || '--'}%</span>
+                </div>
               </div>
             </div>
           </div>
@@ -414,7 +418,8 @@ const ActiveConsultationPage = () => {
           heartRate: appointment?.vitals?.heartRate?.toString() || '--',
           temp: appointment?.vitals?.temperature?.toString() || '--',
           bp: appointment?.vitals?.bloodPressure || '--',
-          weight: appointment?.vitals?.weight?.toString() || '--'
+          weight: appointment?.vitals?.weight?.toString() || '--',
+          spo2: appointment?.vitals?.oxygenLevel?.toString() || '--'
         }}
         date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
         tokenDisplay={formatToken(appointment)}
