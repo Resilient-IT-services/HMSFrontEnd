@@ -42,6 +42,13 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
     return 'Evening';
   };
 
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   return (
     <div className="space-y-6">
       {/* Date Selection */}
@@ -81,7 +88,7 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
         <label className="block font-bold text-slate-700 mb-3 flex justify-between items-center text-sm">
           <span className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-base">schedule</span>
-            Available Slots {selectedDate === new Date().toISOString().split('T')[0] ? '(Today)' : ''}
+            Available Slots {selectedDate === getLocalDateString(new Date()) ? '(Today)' : ''}
           </span>
         </label>
         
