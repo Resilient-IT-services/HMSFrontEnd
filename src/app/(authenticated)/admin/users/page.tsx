@@ -9,6 +9,7 @@ import { UserResponse, Role, UserSummaryDTO } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const UserManagement = () => {
+  const showBottomSection = false;
   const showExportButton = false;
   const [users, setUsers] = useState<(UserSummaryDTO & { roles: Role[] })[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,6 +234,7 @@ const UserManagement = () => {
         </div>
 
         {/* Role Analytics Bento Grid Section */}
+        {showBottomSection && (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-12 gap-8">
           <div className="md:col-span-8 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="font-manrope text-xl font-bold text-slate-900 mb-6">User Permissions Matrix</h3>
@@ -284,7 +286,9 @@ const UserManagement = () => {
             <span className="material-symbols-outlined absolute -right-6 -bottom-6 text-white opacity-10 text-[140px]">groups</span>
           </div>
         </div>
+        )}
       </div>
+
     </MainLayout>
   );
 };
