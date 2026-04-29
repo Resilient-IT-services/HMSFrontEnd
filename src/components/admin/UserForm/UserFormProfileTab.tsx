@@ -49,12 +49,12 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div className="flex flex-col gap-1.5">
               <label className="font-label-sm text-gray-700 uppercase">Specialization <span className="text-primary">*</span></label>
-              <input className={`form-input ${validationErrors.specialization ? 'border-error' : ''}`} type="text" value={formData.doctorInfo.specialization} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } })} />
+              <input className={`form-input ${validationErrors.specialization ? 'border-error' : ''}`} type="text" placeholder="e.g. Cardiology" value={formData.doctorInfo.specialization} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } })} />
               {renderFieldError('specialization')}
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-label-sm text-gray-700 uppercase">License No.</label>
-              <input className="form-input" type="text" value={formData.doctorInfo.licenseNumber} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} />
+              <input className="form-input" type="text" placeholder="e.g. MC-12345" value={formData.doctorInfo.licenseNumber} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} />
             </div>
           </div>
         </div>
@@ -71,7 +71,7 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div className="flex flex-col gap-1.5">
               <label className="font-label-sm text-gray-700 uppercase">License No.</label>
-              <input className="form-input" type="text" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
+              <input className="form-input" type="text" placeholder="e.g. NR-98765" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
             </div>
           </div>
         </div>
@@ -88,11 +88,11 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             <div className="flex flex-col gap-1.5">
               <label className="font-label-sm text-gray-700 uppercase">PCI Registration No.</label>
-              <input className="form-input" type="text" value={formData.pharmacistInfo.pciRegNo} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, pciRegNo: e.target.value } })} />
+              <input className="form-input" type="text" placeholder="e.g. PCI-556677" value={formData.pharmacistInfo.pciRegNo} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, pciRegNo: e.target.value } })} />
             </div>
             <div className="flex flex-col gap-1.5">
               <label className="font-label-sm text-gray-700 uppercase">Qualification</label>
-              <input className="form-input" type="text" value={formData.pharmacistInfo.qualification} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, qualification: e.target.value } })} />
+              <input className="form-input" type="text" placeholder="e.g. B.Pharm, M.Pharm" value={formData.pharmacistInfo.qualification} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, qualification: e.target.value } })} />
             </div>
           </div>
         </div>

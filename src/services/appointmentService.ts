@@ -1,10 +1,10 @@
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, AppointmentResponse, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus } from '@/types/api';
+import { ApiResponse, PageResponse, AppointmentResponse, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO } from '@/types/api';
 
 export const appointmentService = {
-  async list(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
+  async list(page = 0, size = 20, search?: string, date?: string): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<AppointmentResponse>>>('/appointments', {
-      params: { page, size, search }
+      params: { page, size, search, date }
     });
     return response.data;
   },
@@ -43,8 +43,20 @@ export const appointmentService = {
     return response.data;
   },
 
+  async patchVitals(appointmentId: string, vitals: VitalsDTO): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.patch<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/vitals`, vitals);
+    return response.data;
+  },
+
   async updateConsultation(appointmentId: string, request: Partial<AppointmentResponse>): Promise<ApiResponse<AppointmentResponse>> {
     const response = await apiClient.patch<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/consultation`, request);
+    return response.data;
+  },
+
+  async getStats(date: string): Promise<ApiResponse<AppointmentStatsDTO>> {
+    const response = await apiClient.get<ApiResponse<AppointmentStatsDTO>>('/appointments/stats', {
+      params: { date }
+    });
     return response.data;
   }
 };

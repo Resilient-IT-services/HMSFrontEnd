@@ -29,13 +29,13 @@ const ReceptionDashboard = () => {
         nurseService.list(0, 5)
       ]);
 
-      if (patRes.success) setRecentPatients(patRes.data?.content || []);
-      if (appRes.success) {
-        const todayApps = appRes.data?.content.filter(a => a.appointmentTime.startsWith(today)) || [];
+      if (patRes.success && patRes.data) setRecentPatients(patRes.data.content || []);
+      if (appRes.success && appRes.data) {
+        const todayApps = appRes.data.content?.filter(a => a.appointmentTime.startsWith(today)) || [];
         setAppointments(todayApps);
       }
-      if (docRes.success) setDoctors(docRes.data?.content || []);
-      if (nurRes.success) setNurses(nurRes.data?.content || []);
+      if (docRes.success && docRes.data) setDoctors(docRes.data.content || []);
+      if (nurRes.success && nurRes.data) setNurses(nurRes.data.content || []);
 
     } catch (error) {
       console.error(error);

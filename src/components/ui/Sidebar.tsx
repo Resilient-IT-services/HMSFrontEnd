@@ -56,6 +56,7 @@ const Sidebar = () => {
     { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'User Management', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },
     { name: 'Hospitals', icon: 'apartment', href: '/super_admin/hospitals', roles: ['SUPER_ADMIN'] },
+    { name: 'Vitals Config', icon: 'monitoring', href: '/super_admin/vitals', roles: ['SUPER_ADMIN'] },
     { name: 'Settings', icon: 'settings', href: '/settings', roles: ['ADMIN', 'SUPER_ADMIN'] },
   ];
 

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { searchService, SearchResult } from '@/services/searchService';
+import { searchService } from '@/services/searchService';
+import { SearchResultDTO as SearchResult } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const GlobalSearch: React.FC = () => {

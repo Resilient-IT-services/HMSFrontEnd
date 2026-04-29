@@ -88,14 +88,20 @@ const ActiveConsultationPage = () => {
 
   const patientAge = useMemo(() => {
     if (!patient?.dob) return '--';
-    const birthDate = new Date(patient.dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+    try {
+      const birthDate = new Date(patient.dob);
+      if (Number.isNaN(birthDate.getTime())) return '--';
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    } catch (error) {
+      console.error('Failed to calculate patient age', error);
+      return '--';
     }
-    return age;
   }, [patient]);
 
   const updatePrescription = (index: number, field: keyof PrescriptionRow, value: string) => {
@@ -315,7 +321,7 @@ const ActiveConsultationPage = () => {
               
               <div className="flex-1 space-y-4">
                 {prescriptions.map((row, index) => (
-                  <div key={row.id} className={`grid grid-cols-12 gap-3 pb-3 ${index !== prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                  <div key={row.id} className={`grid grid-cols-12 gap-3 pb-3 ${index < prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
                     <div className="col-span-5">
                       {index === 0 && (
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>

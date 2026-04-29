@@ -17,6 +17,10 @@ const BillingPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const appointmentId = searchParams.get('appointmentId');
+  const patientIdParam = searchParams.get('patientId');
+  const doctorIdParam = searchParams.get('doctorId');
+  const appointmentTimeParam = searchParams.get('appointmentTime');
+  const notesParam = searchParams.get('notes');
 
   const [appointment, setAppointment] =
       useState<AppointmentResponse | null>(null);
@@ -29,43 +33,52 @@ const BillingPage = () => {
 
   const [loading, setLoading] = useState(true);
 
-  const [paymentMethod, setPaymentMethod] = useState<
-      'CASH' | 'UPI' | 'CARD'
-  >('CASH');
-
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [discount, setDiscount] = useState(0);
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const fetchData = useCallback(async () => {
-    if (!appointmentId) return;
-
     setLoading(true);
-
     try {
-      const appRes = await appointmentService.get(appointmentId);
-
-      if (appRes.success && appRes.data) {
-        const appointmentData = appRes.data;
-
-        setAppointment(appointmentData);
-
-        const [patRes, docRes] = await Promise.all([
-          patientService.get(appointmentData.patientId),
-          doctorService.list(0, 100),
-        ]);
-
-        if (patRes.success) {
-          setPatient(patRes.data || null);
-        }
-
-        if (docRes.success && docRes.data) {
-          const doc = docRes.data.content.find(
-              (d) => d.doctorId === appointmentData.doctorId
-          );
-
-          if (doc) {
-            setDoctor(doc);
+      if (appointmentId) {
+        const appRes = await appointmentService.get(appointmentId);
+        const appData = appRes.data;
+        if (appRes.success && appData) {
+          setAppointment(appData);
+          const [patRes, docRes] = await Promise.all([
+            patientService.get(appData.patientId),
+            doctorService.list(0, 100),
+          ]);
+          if (patRes.success) setPatient(patRes.data || null);
+          const docData = docRes.data;
+          if (docRes.success && docData) {
+            const doc = docData.content.find((d) => d.doctorId === appData.doctorId);
+            if (doc) setDoctor(doc);
           }
         }
+      } else if (patientIdParam && doctorIdParam) {
+        // Handle direct flow from scheduling (before appointment is created)
+        const [patRes, docRes] = await Promise.all([
+          patientService.get(patientIdParam),
+          doctorService.list(0, 100),
+        ]);
+        if (patRes.success) setPatient(patRes.data || null);
+        if (docRes.success && docRes.data) {
+          const doc = docRes.data.content.find((d) => d.doctorId === doctorIdParam);
+          if (doc) setDoctor(doc);
+        }
+        // Mock appointment object for UI display
+        setAppointment({
+          id: 'TEMP',
+          patientId: patientIdParam,
+          patientName: patRes.data?.fullName || 'N/A',
+          doctorId: doctorIdParam,
+          doctorName: docRes.data?.content.find(d => d.doctorId === doctorIdParam)?.fullName || 'N/A',
+          appointmentTime: appointmentTimeParam || new Date().toISOString(),
+          status: 'PAYMENT_PENDING',
+          notes: notesParam || '',
+          createdAt: new Date().toISOString()
+        } as any);
       }
     } catch (error) {
       console.error('Failed to fetch billing data', error);
@@ -73,11 +86,11 @@ const BillingPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [appointmentId]);
+  }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, notesParam]);
 
   useEffect(() => {
     fetchData();
-  }, [appointmentId]); // Run only when appointmentId changes
+  }, [fetchData]);
 
   const consultationFee = doctor?.consultationFee || 0;
   const tax = 0;
@@ -86,21 +99,36 @@ const BillingPage = () => {
   const [submittingPayment, setSubmittingPayment] = useState(false);
 
   const handleMarkAsPaid = async () => {
-    if (!appointmentId || !appointment) return;
     setSubmittingPayment(true);
     try {
-      // The PUT endpoint requires a full AppointmentDTO (patientId, doctorId, appointmentTime)
-      // We spread the existing appointment data and override the status
-      const res = await appointmentService.update(appointmentId, {
-        ...appointment,
-        status: 'ADD_VITALS'
-      });
-      if (res.success) {
-        triggerGlobalToast('Payment confirmed successfully', 'success');
-        fetchData();
+      if (appointmentId && appointment) {
+        // Traditional flow: update existing appointment
+        const res = await appointmentService.update(appointmentId, {
+          ...appointment,
+          status: 'ADD_VITALS'
+        });
+        if (res.success) {
+          triggerGlobalToast('Payment confirmed successfully', 'success');
+          fetchData();
+        }
+      } else if (patientIdParam && doctorIdParam && appointmentTimeParam) {
+        // New flow: create appointment only after payment
+        const res = await appointmentService.create({
+          patientId: patientIdParam,
+          doctorId: doctorIdParam,
+          appointmentTime: appointmentTimeParam,
+          notes: notesParam || '',
+          status: 'ADD_VITALS'
+        });
+        if (res.success && res.data) {
+          triggerGlobalToast('Appointment created and payment confirmed', 'success');
+          // Redirect to vitals page for the newly created appointment
+          router.push(`/reception/appointments/vitals?appointmentId=${res.data.id}`);
+        }
       }
     } catch (error) {
       console.error('Failed to confirm payment', error);
+      triggerGlobalToast('Failed to process payment', 'error');
     } finally {
       setSubmittingPayment(false);
     }

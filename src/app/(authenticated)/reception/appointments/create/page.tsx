@@ -160,20 +160,15 @@ const AppointmentScheduling = () => {
 
     setSubmitting(true);
     try {
-      const res = await appointmentService.create({
+      const params = new URLSearchParams({
         patientId: selectedPatient.id,
         doctorId: selectedDoctor.doctorId,
         appointmentTime: `${selectedDate}T${editableTime}:00`,
-        notes,
-        status: 'PAYMENT_PENDING'
+        notes
       });
-      if (res.success && res.data) {
-        triggerGlobalToast('Appointment scheduled successfully', 'success');
-        // Automatically redirect to billing page to "generate" the bill
-        router.push(`/reception/billing?appointmentId=${res.data.id}`);
-      }
+      router.push(`/reception/billing?${params.toString()}`);
     } catch (error) {
-      triggerGlobalToast('Failed to schedule appointment', 'error');
+      triggerGlobalToast('Failed to prepare billing', 'error');
     } finally {
       setSubmitting(false);
     }

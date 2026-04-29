@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { userService } from '@/services/userService';
-import { UserResponse, Role } from '@/types/api';
+import { UserResponse, Role, UserSummaryDTO } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const UserManagement = () => {
   const showExportButton = false;
-  const [users, setUsers] = useState<UserResponse[]>([]);
+  const [users, setUsers] = useState<(UserSummaryDTO & { roles: Role[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);

@@ -221,6 +221,51 @@
         }
       }
     },
+    "/api/v1/billing/{billingId}/status": {
+      "put": {
+        "tags": [
+          "Billing"
+        ],
+        "operationId": "updateStatus",
+        "parameters": [
+          {
+            "name": "billingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PENDING",
+                "PAID",
+                "CANCELLED",
+                "PARTIALLY_PAID"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseBillingDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/appointments/{appointmentId}": {
       "get": {
         "tags": [
@@ -702,6 +747,16 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
           }
         ],
         "responses": {
@@ -751,7 +806,7 @@
         "tags": [
           "Appointments"
         ],
-        "operationId": "updateStatus",
+        "operationId": "updateStatus_1",
         "parameters": [
           {
             "name": "appointmentId",
@@ -780,6 +835,54 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/vital-settings": {
+      "get": {
+        "tags": [
+          "Vital Settings"
+        ],
+        "operationId": "list_6",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListVitalSetting"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Vital Settings"
+        ],
+        "operationId": "save",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VitalSetting"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVitalSetting"
                 }
               }
             }
@@ -1233,6 +1336,47 @@
         }
       }
     },
+    "/api/v1/doctors/{doctorId}/slots": {
+      "get": {
+        "tags": [
+          "doctor-controller"
+        ],
+        "operationId": "getSlots",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListDoctorSlotDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/doctors/{doctorId}/availability": {
       "get": {
         "tags": [
@@ -1360,6 +1504,38 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePageResponseAuditLogResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/appointments/stats": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "operationId": "getStats",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAppointmentStatsDTO"
                 }
               }
             }
@@ -1964,6 +2140,101 @@
           }
         }
       },
+      "ApiResponseBillingDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/BillingDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "BillingDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientName": {
+            "type": "string"
+          },
+          "appointmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceType": {
+            "type": "string",
+            "enum": [
+              "OPD",
+              "IPD",
+              "PHARMACY",
+              "LAB",
+              "EMERGENCY",
+              "APPOINTMENT"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "PAID",
+              "CANCELLED",
+              "PARTIALLY_PAID"
+            ]
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "discount": {
+            "type": "number"
+          },
+          "paymentMethod": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BillingItemDTO"
+            }
+          }
+        }
+      },
+      "BillingItemDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemName": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "subtotal": {
+            "type": "number"
+          }
+        }
+      },
       "AppointmentDTO": {
         "required": [
           "appointmentTime",
@@ -2009,6 +2280,14 @@
           "tokenNumber": {
             "type": "integer",
             "format": "int32"
+          },
+          "sessionPeriod": {
+            "type": "string",
+            "enum": [
+              "MORNING",
+              "AFTERNOON",
+              "EVENING"
+            ]
           },
           "chiefComplaints": {
             "type": "string"
@@ -2102,18 +2381,43 @@
             "pattern": "^\\d{2,3}/\\d{2,3}$",
             "type": "string"
           },
+          "systolic": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "diastolic": {
+            "type": "integer",
+            "format": "int32"
+          },
           "heartRate": {
             "maximum": 250,
             "minimum": 30,
             "type": "integer",
             "format": "int32"
           },
+          "oxygenLevel": {
+            "type": "number"
+          },
+          "temperatureUnit": {
+            "type": "string",
+            "enum": [
+              "CELSIUS",
+              "FAHRENHEIT"
+            ]
+          },
           "temperature": {
-            "maximum": 45,
+            "maximum": 115,
             "exclusiveMaximum": false,
             "minimum": 30,
             "exclusiveMinimum": false,
             "type": "number"
+          },
+          "weightUnit": {
+            "type": "string",
+            "enum": [
+              "KG",
+              "LB"
+            ]
           },
           "weight": {
             "type": "number"
@@ -2142,100 +2446,6 @@
           },
           "data": {
             "$ref": "#/components/schemas/PrescriptionDTO"
-          },
-          "error": {
-            "$ref": "#/components/schemas/ApiError"
-          }
-        }
-      },
-      "BillingDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "patientId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "patientName": {
-            "type": "string"
-          },
-          "appointmentId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sourceType": {
-            "type": "string",
-            "enum": [
-              "OPD",
-              "IPD",
-              "PHARMACY",
-              "LAB",
-              "EMERGENCY"
-            ]
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "PENDING",
-              "PAID",
-              "CANCELLED",
-              "PARTIALLY_PAID"
-            ]
-          },
-          "totalAmount": {
-            "type": "number"
-          },
-          "discount": {
-            "type": "number"
-          },
-          "paymentMethod": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BillingItemDTO"
-            }
-          }
-        }
-      },
-      "BillingItemDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "itemName": {
-            "type": "string"
-          },
-          "amount": {
-            "type": "number"
-          },
-          "quantity": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "subtotal": {
-            "type": "number"
-          }
-        }
-      },
-      "ApiResponseBillingDTO": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/BillingDTO"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
@@ -2288,6 +2498,53 @@
               "CANCELLED",
               "ADD_VITALS"
             ]
+          }
+        }
+      },
+      "VitalSetting": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hospitalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vitalName": {
+            "type": "string"
+          },
+          "minValue": {
+            "type": "number"
+          },
+          "maxValue": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseVitalSetting": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/VitalSetting"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
           }
         }
       },
@@ -2743,6 +3000,44 @@
           }
         }
       },
+      "ApiResponseListDoctorSlotDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DoctorSlotDTO"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "DoctorSlotDTO": {
+        "type": "object",
+        "properties": {
+          "startTime": {
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
+          },
+          "endTime": {
+            "pattern": "HH:mm",
+            "type": "string",
+            "example": "09:00"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
       "ApiResponseDoctorAvailabilityResponse": {
         "type": "object",
         "properties": {
@@ -2933,6 +3228,53 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiResponseAppointmentStatsDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AppointmentStatsDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "AppointmentStatsDTO": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "byStatus": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "ApiResponseListVitalSetting": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VitalSetting"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
           }
         }
       }

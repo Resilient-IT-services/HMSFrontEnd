@@ -35,6 +35,7 @@ export const UserFormPersonalTab: React.FC<UserFormPersonalTabProps> = ({
             <input 
               className={`form-input ${validationErrors.fullName ? 'border-error ring-1 ring-error/20' : ''}`}
               type="text" 
+              placeholder="e.g. John Doe"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             />
@@ -45,6 +46,7 @@ export const UserFormPersonalTab: React.FC<UserFormPersonalTabProps> = ({
             <input 
               className={`form-input ${validationErrors.username ? 'border-error ring-1 ring-error/20' : ''}`}
               type="text" 
+              placeholder="e.g. jdoe_01"
               value={formData.username}
               onChange={(e) => setFormData({ ...formData, username: e.target.value })}
               disabled={isEdit}
@@ -57,6 +59,7 @@ export const UserFormPersonalTab: React.FC<UserFormPersonalTabProps> = ({
               <input 
                 className={`form-input ${validationErrors.password ? 'border-error ring-1 ring-error/20' : ''}`}
                 type="password" 
+                placeholder="••••••••"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
@@ -65,12 +68,24 @@ export const UserFormPersonalTab: React.FC<UserFormPersonalTabProps> = ({
           )}
           <div className="flex flex-col gap-1.5">
             <label className="font-label-sm text-gray-700 uppercase">Email Address <span className="text-primary">*</span></label>
-            <input className={`form-input ${validationErrors.email ? 'border-error' : ''}`} type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+            <input 
+              className={`form-input ${validationErrors.email ? 'border-error' : ''}`} 
+              type="email" 
+              placeholder="johndoe@example.com"
+              value={formData.email} 
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+            />
             {renderFieldError('email')}
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="font-label-sm text-gray-700 uppercase">Primary Phone <span className="text-primary">*</span></label>
-            <input className={`form-input ${validationErrors.phone ? 'border-error' : ''}`} type="tel" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+            <input 
+              className={`form-input ${validationErrors.phone ? 'border-error' : ''}`} 
+              type="tel" 
+              placeholder="+91 98765 43210"
+              value={formData.phone} 
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
+            />
             {renderFieldError('phone')}
           </div>
           <div className="flex flex-col gap-1.5">

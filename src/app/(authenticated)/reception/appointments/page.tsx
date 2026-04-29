@@ -17,6 +17,21 @@ const TodayAppointmentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
+  const stats = useMemo(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const todayApps = appointments.filter(app => app.appointmentTime.split('T')[0] === today);
+    
+    return {
+      total: todayApps.length,
+      walkIn: todayApps.filter(app => app.status === 'WALK_IN').length,
+      upcoming: appointments.filter(app => app.appointmentTime.split('T')[0] > today).length,
+      paymentPending: todayApps.filter(app => app.status === 'PAYMENT_PENDING').length,
+      waitingForVitals: todayApps.filter(app => app.status === 'WAITING_FOR_VITALS').length,
+      completed: todayApps.filter(app => app.status === 'COMPLETED').length,
+      cancelled: todayApps.filter(app => app.status === 'CANCELLED').length,
+    };
+  }, [appointments]);
+
   const fetchData = useCallback(async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
@@ -25,11 +40,13 @@ const TodayAppointmentsPage = () => {
         doctorService.list(0, 100)
       ]);
 
-      if (appRes.success && appRes.data) {
-        setAppointments(appRes.data.content);
+      const appData = appRes.data;
+      if (appRes.success && appData) {
+        setAppointments(appData.content);
       }
-      if (docRes.success && docRes.data) {
-        setDoctors(docRes.data.content);
+      const docData = docRes.data;
+      if (docRes.success && docData) {
+        setDoctors(docData.content);
       }
     } catch (error) {
       console.error('Failed to fetch data', error);
@@ -40,7 +57,7 @@ const TodayAppointmentsPage = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    const interval = setInterval(() => fetchData(true), 30000); // Auto-refresh every 30 seconds
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -90,6 +107,28 @@ const TodayAppointmentsPage = () => {
           </button>
         </div>
 
+        {/* Statistics Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+          {[
+            { label: 'Today Total', value: stats.total, color: 'text-slate-600', bg: 'bg-slate-50', filter: 'ALL' },
+            { label: 'Walk-In', value: stats.walkIn, color: 'text-emerald-600', bg: 'bg-emerald-50', filter: 'WALK_IN' },
+            { label: 'Upcoming', value: stats.upcoming, color: 'text-blue-600', bg: 'bg-blue-50', filter: 'UPCOMING' },
+            { label: 'Pay Pending', value: stats.paymentPending, color: 'text-amber-600', bg: 'bg-amber-50', filter: 'PAYMENT_PENDING' },
+            { label: 'Waiting Vitals', value: stats.waitingForVitals, color: 'text-purple-600', bg: 'bg-purple-50', filter: 'WAITING_FOR_VITALS' },
+            { label: 'Completed', value: stats.completed, color: 'text-green-600', bg: 'bg-green-50', filter: 'COMPLETED' },
+            { label: 'Cancelled', value: stats.cancelled, color: 'text-red-600', bg: 'bg-red-50', filter: 'CANCELLED' },
+          ].map((stat, i) => (
+            <div 
+              key={i} 
+              onClick={() => setStatusFilter(stat.filter as any)}
+              className={`${stat.bg} p-3 rounded-xl border ${statusFilter === stat.filter ? 'border-orange-500 ring-1 ring-orange-500/20' : 'border-slate-100'} shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95`}
+            >
+              <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">{stat.label}</p>
+              <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
+            </div>
+          ))}
+        </div>
+
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-wrap gap-2">
             {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
@@ -102,7 +141,7 @@ const TodayAppointmentsPage = () => {
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status.replace('_', ' ')}
+                {status === 'ALL' ? 'Today Appointments' : status.replace('_', ' ')}
               </button>
             ))}
           </div>

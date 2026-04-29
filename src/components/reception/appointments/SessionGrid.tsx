@@ -36,9 +36,10 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
     return 'dark_mode';
   };
 
-  const getSessionName = (startTime: string) => {
-    if (startTime < '12:00') return 'Morning';
-    if (startTime < '17:00') return 'Afternoon';
+  const getSessionName = (time: string) => {
+    if (!time) return '--';
+    if (time < '12:00') return 'Morning';
+    if (time < '17:00') return 'Afternoon';
     return 'Evening';
   };
 
@@ -49,6 +50,15 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
     return `${year}-${month}-${day}`;
   };
 
+  const matchingSession = availability.find(s => editableTime >= s.startTime && editableTime < s.endTime);
+
+  // Sync selected session when editableTime changes
+  React.useEffect(() => {
+    if (matchingSession && matchingSession !== selectedSession) {
+      setSelectedSession(matchingSession);
+    }
+  }, [editableTime, matchingSession, selectedSession, setSelectedSession]);
+
   return (
     <div className="space-y-6">
       {/* Date Selection */}
@@ -58,7 +68,7 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
           Select Date
         </label>
         <div className="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
-          {dateOptions.map((opt) => {
+          {dateOptions.map((opt: any) => {
             const dateObj = new Date(opt.iso);
             const day = dateObj.getDate();
             const month = dateObj.toLocaleDateString('en-US', { month: 'short' });
@@ -135,28 +145,28 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
         </div>
 
         {/* Editable Time Slot */}
-        {selectedSession && (
-          <div className="mt-4 p-4 bg-primary/5 border border-primary/10 rounded-xl animate-in slide-in-from-top-2">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">Exact Appointment Time</p>
-                <div className="flex items-center gap-2">
-                  <input 
-                    type="time" 
-                    value={editableTime}
-                    onChange={(e) => setEditableTime(e.target.value)}
-                    className="bg-white border border-primary/20 rounded-lg px-2 py-1 text-xl font-black text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
-                  />
-                  <span className="material-symbols-outlined text-primary/40 text-sm">edit</span>
-                </div>
+        <div className="mt-4 p-4 bg-primary/5 border border-primary/10 rounded-xl animate-in slide-in-from-top-2">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-[9px] font-black text-primary uppercase tracking-widest mb-1">Exact Appointment Time</p>
+              <div className="flex items-center gap-2">
+                <input 
+                  type="time" 
+                  value={editableTime}
+                  onChange={(e) => setEditableTime(e.target.value)}
+                  className="bg-white border border-primary/20 rounded-lg px-2 py-1 text-xl font-black text-primary focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
+                />
               </div>
-              <div className="text-right">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Session Period</p>
-                <p className="font-bold text-slate-700 text-sm">{getSessionName(selectedSession.startTime)}</p>
-              </div>
+              {!matchingSession && editableTime && (
+                <p className="text-[10px] font-bold text-red-600 mt-1">No available slot found for the selected appointment time.</p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Session Period</p>
+              <p className="font-bold text-slate-700 text-sm">{getSessionName(editableTime)}</p>
             </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
