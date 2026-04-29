@@ -8,6 +8,10 @@ import { userService } from '@/services/userService';
 import { HospitalResponse, UserResponse } from '@/types/api';
 
 const HospitalManagement = () => {
+  const [selectedHospital, setSelectedHospital] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const showExportButton = false;
+  const showStatsCards = false;
   const router = useRouter();
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [users, setUsers] = useState<UserResponse[]>([]);
@@ -64,34 +68,32 @@ const HospitalManagement = () => {
             Register New Hospital
           </button>
         </div>
-
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {[
-            { label: 'Total Facilities', value: stats.totalFacilities, icon: 'local_hospital', color: 'text-orange-700', bg: 'bg-orange-50', trend: '+2 this month' },
-            { label: 'Active Beds', value: stats.activeBeds, icon: 'bed', color: 'text-blue-700', bg: 'bg-blue-50', sub: '84% Occupied' },
-            { label: 'Staff Count', value: stats.staffCount, icon: 'medical_services', color: 'text-purple-700', bg: 'bg-purple-50' },
-            { label: 'Revenue Growth', value: stats.revenueGrowth, icon: 'monitoring', color: 'text-green-700', bg: 'bg-green-50' }
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start">
-                <div className={`w-12 h-12 ${stat.bg} rounded-xl flex items-center justify-center ${stat.color}`}>
-                  <span className="material-symbols-outlined text-2xl">{stat.icon}</span>
-                </div>
-                {(stat.trend || stat.sub) && (
-                  <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${stat.trend ? 'text-green-600 bg-green-50' : 'text-slate-500 bg-slate-50'}`}>
-                    {stat.trend || stat.sub}
-                  </span>
-                )}
-              </div>
-              <div className="mt-4">
-                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{stat.label}</p>
-                <h3 className="text-3xl font-extrabold text-slate-900 mt-1">{stat.value}</h3>
-              </div>
-            </div>
-          ))}
-        </div>
+        {showStatsCards && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[
+                { label: 'Total Facilities', value: stats.totalFacilities, icon: 'local_hospital', color: 'text-orange-700', bg: 'bg-orange-50', trend: '+2 this month' },
+                { label: 'Active Beds', value: stats.activeBeds, icon: 'bed', color: 'text-blue-700', bg: 'bg-blue-50', sub: '84% Occupied' },
+                { label: 'Staff Count', value: stats.staffCount, icon: 'medical_services', color: 'text-purple-700', bg: 'bg-purple-50' },
+                { label: 'Revenue Growth', value: stats.revenueGrowth, icon: 'monitoring', color: 'text-green-700', bg: 'bg-green-50' }
+              ].map((stat, i) => (
+                  <div
+                      key={i}
+                      className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                    <div className="flex justify-between items-start"></div>
 
+                    <div className="mt-4">
+                      <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                        {stat.label}
+                      </p>
+                      <h3 className="text-3xl font-extrabold text-slate-900 mt-1">
+                        {stat.value}
+                      </h3>
+                    </div>
+                  </div>
+              ))}
+            </div>
+        )}
         {/* Hospital Directory Table */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
@@ -104,10 +106,12 @@ const HospitalManagement = () => {
                 <span className="material-symbols-outlined text-sm">filter_list</span>
                 Filter
               </button>
+              {showExportButton && (
               <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-600 bg-white hover:bg-slate-50 transition-colors uppercase tracking-tighter">
                 <span className="material-symbols-outlined text-sm">download</span>
                 Export
               </button>
+              )}
             </div>
           </div>
           <div className="overflow-x-auto">
@@ -150,11 +154,13 @@ const HospitalManagement = () => {
                         <button 
                           onClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
                           className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
-                          title="Edit Facility"
-                        >
+                          title="Edit Facility">
                           <span className="material-symbols-outlined text-xl">edit</span>
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-slate-900 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm" title="View Details">
+                        <button
+                            onClick={() => {setSelectedHospital(h);setIsModalOpen(true);}}
+                            className="p-2 text-slate-400 hover:text-slate-900 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                            title="View Details">
                           <span className="material-symbols-outlined text-xl">visibility</span>
                         </button>
                       </div>
@@ -222,6 +228,64 @@ const HospitalManagement = () => {
           </div>
         </div>
       </div>
+      {isModalOpen && selectedHospital && (
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+
+            <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl border border-orange-100 overflow-hidden animate-fadeIn">
+
+              {/* Header */}
+              <div className="flex justify-between items-center px-6 py-4 bg-orange-700 text-white">
+                <h2 className="text-lg font-bold">Hospital Details</h2>
+                <button
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-white/80 hover:text-white text-xl"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 space-y-5">
+
+                {/* Name */}
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-slate-500 text-sm">Name</span>
+                  <span className="font-semibold text-slate-900">{selectedHospital.name}</span>
+                </div>
+
+                {/* ID */}
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-slate-500 text-sm">Hospital ID</span>
+                  <span className="font-semibold text-slate-900">{selectedHospital.code}</span>
+                </div>
+
+                {/* Status */}
+                <div className="flex justify-between border-b pb-2">
+                  <span className="text-slate-500 text-sm">Status</span>
+                  <span className={`font-bold ${
+                      selectedHospital.status === 'ACTIVE' ? 'text-green-600' : 'text-orange-600'
+                  }`}>
+            {selectedHospital.status}
+          </span>
+                </div>
+
+                {/* Address Section */}
+                <div className="mt-4 bg-orange-50 p-4 rounded-xl border border-orange-100">
+                  <h3 className="text-sm font-bold text-orange-700 mb-2 uppercase tracking-wide">
+                    Address Information
+                  </h3>
+
+                  <p><b>Full Address:</b> {selectedHospital.address}</p>
+                  <p><b>City:</b> {selectedHospital.city }</p>
+                  <p><b>State:</b> {selectedHospital.state }</p>
+                  <p><b>Pincode:</b> {selectedHospital.pincode }</p>
+                </div>
+
+              </div>
+            </div>
+          </div>
+      )}
+
     </MainLayout>
   );
 };

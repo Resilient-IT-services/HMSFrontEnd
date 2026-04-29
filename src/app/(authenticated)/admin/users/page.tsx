@@ -9,6 +9,7 @@ import { UserResponse, Role } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const UserManagement = () => {
+  const showExportButton = false;
   const [users, setUsers] = useState<UserResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -115,10 +116,12 @@ const UserManagement = () => {
               <option value="RECEPTIONIST">Receptionist</option>
               <option value="PHARMACIST">Pharmacist</option>
             </select>
+            {showExportButton && (
             <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors font-medium text-sm">
               <span className="material-symbols-outlined text-xl">file_download</span>
               Export
             </button>
+            )}
           </div>
         </div>
 
