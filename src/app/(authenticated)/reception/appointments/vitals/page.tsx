@@ -38,7 +38,8 @@ const VitalsEntryPage = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const res = await adminService.listVitalSettings();
+        // Use skipToast: true to avoid global error if receptionist isn't authorized for admin endpoints
+        const res = await adminService.listVitalSettings({ skipToast: true });
         if (res.success && res.data) {
           setVitalSettings(res.data);
           
@@ -49,8 +50,13 @@ const VitalsEntryPage = () => {
           const weightConfig = (res.data as VitalSetting[]).find((s: VitalSetting) => s.vitalName.toUpperCase().includes('WEIGHT'));
           if (weightConfig && weightConfig.unit) setWeightUnit(weightConfig.unit as any);
         }
-      } catch (error) {
-        console.error('Failed to load vitals config', error);
+      } catch (error: any) {
+        // Only log if it's not a 403 (unauthorized) which is expected for non-admin roles
+        if (error.response?.status !== 403) {
+          console.error('Failed to load vitals config', error);
+        } else {
+          console.log('Vitals configuration access restricted (403), using client defaults.');
+        }
       }
     };
     fetchConfig();

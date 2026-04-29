@@ -3,6 +3,12 @@ import { store } from '@/state/store';
 import { logout } from '@/state/authSlice';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipToast?: boolean;
+  }
+}
+
 const apiClient = axios.create({
   baseURL: '/api/v1',
   withCredentials: true,
@@ -41,10 +47,12 @@ apiClient.interceptors.response.use(
         }
       }
 
-      // Trigger global toast for any error
-      const apiData = error.response?.data as any;
-      const message = apiData?.error?.message || apiData?.message || error.message || 'An unexpected error occurred';
-      triggerGlobalToast(message, 'error');
+      // Trigger global toast for any error unless skipToast is set
+      if (!error.config?.skipToast) {
+        const apiData = error.response?.data as any;
+        const message = apiData?.error?.message || apiData?.message || error.message || 'An unexpected error occurred';
+        triggerGlobalToast(message, 'error');
+      }
 
       return Promise.reject(error);
     }
