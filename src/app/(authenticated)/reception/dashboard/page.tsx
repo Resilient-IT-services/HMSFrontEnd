@@ -131,7 +131,11 @@ export default function ReceptionDashboard() {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {recentPatients.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr 
+                        key={p.id} 
+                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                        onDoubleClick={() => router.push(`/reception/patients/${p.id}`)}
+                      >
                         <td className="px-6 py-4 font-bold text-sm text-slate-900">{p.fullName}</td>
                         <td className="px-6 py-4 text-xs text-slate-500 font-medium">{p.phone}</td>
                         <td className="px-6 py-4">

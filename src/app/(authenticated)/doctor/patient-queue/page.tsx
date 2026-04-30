@@ -272,7 +272,17 @@ const PatientQueuePage = () => {
                   </tr>
                 ) : (
                   filteredAppointments.map((appointment) => (
-                    <tr key={appointment.id} className="hover:bg-orange-600/5 transition-colors group">
+                    <tr 
+                      key={appointment.id} 
+                      className="hover:bg-orange-600/5 transition-colors group cursor-pointer"
+                      onDoubleClick={() => {
+                        if (appointment.status === 'WALK_IN') {
+                          router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`);
+                        } else if (appointment.status !== 'COMPLETED') {
+                          handleStartConsultation(appointment.id);
+                        }
+                      }}
+                    >
                       <td className="px-6 py-4">
                         <span className={`font-bold ${appointment.status === 'WALK_IN' ? 'text-primary' : 'text-gray-900'}`}>
                           #{formatToken(appointment)}

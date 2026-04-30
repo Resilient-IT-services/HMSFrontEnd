@@ -217,7 +217,11 @@ const VitalsConfigPage = () => {
                   ) : VITAL_TYPES.map((type) => {
                     const range = settings[type.value];
                     return (
-                      <tr key={type.value} className="hover:bg-slate-50 transition-colors group">
+                      <tr 
+                        key={type.value} 
+                        className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                        onDoubleClick={() => handleOpenModal(type.value, range)}
+                      >
                         <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
                         <td className="px-6 py-4">
                           {range ? (

@@ -121,7 +121,11 @@ export default function AdminDashboard() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {hospitals.slice(0, 5).map((h) => (
-                    <tr key={h.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr 
+                      key={h.id} 
+                      className="hover:bg-slate-50/80 transition-colors cursor-pointer"
+                      onDoubleClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
+                    >
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-orange-100 flex-shrink-0 flex items-center justify-center text-orange-700 font-bold uppercase">

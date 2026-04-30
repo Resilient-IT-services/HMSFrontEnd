@@ -142,7 +142,11 @@ export default function StockPage() {
                 <tr><td colSpan={6} className="p-8"><EmptyState message="No inventory found matching your search" /></td></tr>
               ) : (
                 medicines.map((medicine) => (
-                  <tr key={medicine.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <tr 
+                    key={medicine.id} 
+                    className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                    onDoubleClick={() => setSelectedMedicine({ id: medicine.id, name: medicine.name })}
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${medicine.currentStock === 0 ? 'bg-red-50 border-red-100 text-red-600' : 'bg-orange-50 border-orange-100 text-orange-600'}`}>

@@ -153,7 +153,11 @@ export default function UserManagement() {
                 const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
 
                 return (
-                <tr key={user.id} className="hover:bg-slate-50/50 transition-colors group">
+                <tr 
+                  key={user.id} 
+                  className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                  onDoubleClick={() => router.push(`/admin/users/${user.id}`)}
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold uppercase overflow-hidden border-2 border-orange-50">

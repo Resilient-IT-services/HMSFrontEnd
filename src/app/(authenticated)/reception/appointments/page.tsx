@@ -319,7 +319,11 @@ export default function TodayAppointmentsPage() {
                   </td>
                 </tr>
               ) : filteredAppointments.map((app) => (
-                <tr key={app.id} className="hover:bg-slate-50/50 transition-colors group">
+                <tr 
+                  key={app.id} 
+                  className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                  onDoubleClick={() => router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
+                >
                   <td className="px-6 py-4">
                     <span className="font-bold text-slate-900">{formatToken(app)}</span>
                   </td>

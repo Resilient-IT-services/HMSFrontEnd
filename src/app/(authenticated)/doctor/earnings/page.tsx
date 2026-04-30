@@ -177,7 +177,11 @@ const DoctorEarningsPage = () => {
                   filteredAppointments.sort((a, b) => b.appointmentTime.localeCompare(a.appointmentTime)).map((app) => {
                     const isEarned = app.status !== 'CANCELLED' && app.status !== 'PAYMENT_PENDING';
                     return (
-                      <tr key={app.id} className="hover:bg-slate-50/50 transition-colors">
+                      <tr 
+                        key={app.id} 
+                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
+                        onDoubleClick={() => console.log('Appointment details:', app)}
+                      >
                         <td className="px-6 py-4">
                           <p className="text-sm font-bold text-slate-900">{new Date(app.appointmentTime).toLocaleDateString()}</p>
                           <p className="text-[10px] text-slate-500">{new Date(app.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>

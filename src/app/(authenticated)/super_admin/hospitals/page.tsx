@@ -156,7 +156,11 @@ const HospitalManagement = () => {
               {hospitals
                   .filter((h) => statusFilter === 'ALL' || h.status === statusFilter)
                   .map((h) => (
-                  <tr key={h.id} className="hover:bg-slate-50/80 transition-colors group">
+                  <tr 
+                    key={h.id} 
+                    className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
+                    onDoubleClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
+                  >
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-700 font-bold overflow-hidden uppercase">
