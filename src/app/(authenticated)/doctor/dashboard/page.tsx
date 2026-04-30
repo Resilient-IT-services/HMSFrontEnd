@@ -25,26 +25,21 @@ const DoctorDashboard = () => {
 
     try {
       if (!isBackground) setLoading(true);
-      const response = await appointmentService.list(0, 100);
+      const today = new Date().toISOString().split('T')[0];
+      const response = await appointmentService.list(0, 100, undefined, today, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
         return;
       }
 
-      const today = new Date().toISOString().split('T')[0];
-      const todaysAppointments = response.data.content.filter((appointment) => {
-        const belongsToCurrentDoctor = appointment.doctorId === user.id || appointment.doctorName === user.fullName;
-        return belongsToCurrentDoctor && appointment.appointmentTime.startsWith(today);
-      });
-
-      setAppointments(todaysAppointments);
+      setAppointments(response.data.content);
     } catch (error) {
       console.error(error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id, user?.fullName]);
+  }, [user?.id]);
 
   useEffect(() => {
     fetchData();
@@ -52,18 +47,28 @@ const DoctorDashboard = () => {
     return () => clearInterval(interval);
   }, [fetchData]);
 
+  const consultationFee = useMemo(() => {
+    if (!user || !user.currentHospitalId) return 0;
+    const membership = user.memberships.find(m => m.hospitalId === user.currentHospitalId);
+    if (!membership || !membership.roleAssignments) return 0;
+    const doctorRole = membership.roleAssignments.find(ra => ra.roleCode === 'DOCTOR' && ra.active);
+    return doctorRole?.doctorDetails?.consultationFee || 0;
+  }, [user]);
+
   const stats = useMemo(() => {
-    const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED').length;
+    const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN' || appointment.status === 'ADD_VITALS').length;
     const active = appointments.filter((appointment) => appointment.status === 'DELAYED').length;
     const completed = appointments.filter((appointment) => appointment.status === 'COMPLETED').length;
+    const earnedCount = appointments.filter((appointment) => appointment.status !== 'CANCELLED' && appointment.status !== 'PAYMENT_PENDING').length;
 
     return {
       total: appointments.length,
       waiting,
       active,
       completed,
+      earnings: earnedCount * consultationFee,
     };
-  }, [appointments]);
+  }, [appointments, consultationFee]);
 
   const queue = useMemo(() => {
     const base = appointments.filter(
@@ -130,17 +135,18 @@ const DoctorDashboard = () => {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           {[
             { label: 'Total Patients', value: stats.total, color: 'bg-orange-600', trend: '12%', icon: 'trending_up' },
             { label: 'Waiting', value: stats.waiting, color: 'bg-orange-400', icon: 'hourglass_empty' },
             { label: 'In Progress', value: stats.active, color: 'bg-blue-500', icon: 'clinical_notes' },
-            { label: 'Completed', value: stats.completed, color: 'bg-green-500', icon: 'check_circle' }
+            { label: 'Completed', value: stats.completed, color: 'bg-green-500', icon: 'check_circle' },
+            { label: "Today's Earnings", value: `₹${stats.earnings}`, color: 'bg-indigo-600', icon: 'payments' }
           ].map((stat, i) => (
             <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 hover:shadow-md transition-all">
               <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</p>
               <div className="flex items-end justify-between">
-                <h3 className="text-3xl font-bold text-slate-900">{stat.value < 10 ? `0${stat.value}` : stat.value}</h3>
+                <h3 className="text-2xl font-bold text-slate-900">{typeof stat.value === 'number' ? (stat.value < 10 ? `0${stat.value}` : stat.value) : stat.value}</h3>
                 {stat.trend ? (
                   <span className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-full flex items-center gap-1">
                     <span className="material-symbols-outlined text-[14px]">trending_up</span> {stat.trend}
@@ -150,7 +156,7 @@ const DoctorDashboard = () => {
                 )}
               </div>
               <div className="mt-4 h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div className={`h-full ${stat.color} rounded-full`} style={{ width: `${(stat.value / (stats.total || 1)) * 100}%` }} />
+                <div className={`h-full ${stat.color} rounded-full`} style={{ width: i === 4 ? '100%' : `${(Number(stat.value) / (stats.total || 1)) * 100}%` }} />
               </div>
             </div>
           ))}

@@ -58,8 +58,27 @@ describe('DoctorDashboard', () => {
       },
     });
 
+    const today = new Date().toISOString().split('T')[0];
+    const mockUser = { 
+      id: 'doctor-1', 
+      fullName: 'John Doe',
+      currentHospitalId: 'hosp-1',
+      memberships: [
+        {
+          hospitalId: 'hosp-1',
+          roleAssignments: [
+            {
+              roleCode: 'DOCTOR',
+              active: true,
+              doctorDetails: { consultationFee: 500 }
+            }
+          ]
+        }
+      ]
+    };
+
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = { user: { id: 'doctor-1', fullName: 'John Doe' } }) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser }) => state } })}>
         <DoctorDashboard />
       </Provider>,
     );
@@ -67,13 +86,15 @@ describe('DoctorDashboard', () => {
     expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(appointmentService.list).toHaveBeenCalledWith(0, 100);
+      expect(appointmentService.list).toHaveBeenCalledWith(0, 100, undefined, today, 'doctor-1');
       expect(screen.getByText('Jane Roe')).toBeInTheDocument();
-      expect(screen.queryByText('Other Patient')).not.toBeInTheDocument();
+      expect(screen.getByText(/Today's Earnings/i)).toBeInTheDocument();
+      expect(screen.getByText(/₹1000/i)).toBeInTheDocument();
     });
   });
 
   it('starts next consultation when clicking the button', async () => {
+    const today = new Date().toISOString().split('T')[0];
     vi.mocked(appointmentService.list).mockResolvedValue({
       success: true,
       data: {
@@ -84,7 +105,7 @@ describe('DoctorDashboard', () => {
             patientName: 'Jane Roe',
             doctorId: 'doctor-1',
             doctorName: 'John Doe',
-            appointmentTime: `${new Date().toISOString().split('T')[0]}T09:00:00`,
+            appointmentTime: `${today}T09:00:00`,
             status: 'SCHEDULED',
             notes: 'Follow-up',
             createdAt: '2026-04-26T00:00:00',
@@ -99,8 +120,26 @@ describe('DoctorDashboard', () => {
 
     vi.mocked(appointmentService.updateStatus).mockResolvedValue({ success: true, data: {} as any });
 
+    const mockUser = { 
+      id: 'doctor-1', 
+      fullName: 'John Doe',
+      currentHospitalId: 'hosp-1',
+      memberships: [
+        {
+          hospitalId: 'hosp-1',
+          roleAssignments: [
+            {
+              roleCode: 'DOCTOR',
+              active: true,
+              doctorDetails: { consultationFee: 500 }
+            }
+          ]
+        }
+      ]
+    };
+
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = { user: { id: 'doctor-1', fullName: 'John Doe' } }) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser }) => state } })}>
         <DoctorDashboard />
       </Provider>,
     );

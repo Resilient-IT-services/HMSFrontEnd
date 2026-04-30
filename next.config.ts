@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   allowedDevOrigins: ['quizzes-bulletin-inherited-geography.trycloudflare.com'],
   async rewrites() {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8081';
+    const apiBaseUrl =  'http://localhost:8081';
     return [
       {
         // Standard API calls
