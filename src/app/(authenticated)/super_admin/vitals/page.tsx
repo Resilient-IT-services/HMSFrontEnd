@@ -117,7 +117,7 @@ const VitalsConfigPage = () => {
         setIsModalOpen(false);
         fetchSettings();
       }
-    } catch (error) {
+    } catch {
       // Interceptor handles toast
     }
   };
@@ -192,13 +192,7 @@ const VitalsConfigPage = () => {
           </div>
         </div>
 
-        {!currentHospitalId ? (
-          <div className="bg-white p-12 rounded-xl border border-dashed border-gray-200 text-center">
-            <span className="material-symbols-outlined text-6xl text-gray-200 mb-4">clinical_notes</span>
-            <h3 className="text-xl font-bold text-gray-400 italic">No Hospital Context Selected</h3>
-            <p className="text-gray-400 mt-2">Please select a hospital above to view and configure patient safety ranges.</p>
-          </div>
-        ) : (
+        {currentHospitalId ? (
           <Card>
             <div className="p-4 border-b border-gray-50 flex justify-between items-center">
               <h3 className="font-bold text-slate-700 flex items-center gap-2">
@@ -257,6 +251,12 @@ const VitalsConfigPage = () => {
               </table>
             </div>
           </Card>
+        ) : (
+          <div className="bg-white p-12 rounded-xl border border-dashed border-gray-200 text-center">
+            <span className="material-symbols-outlined text-6xl text-gray-200 mb-4">clinical_notes</span>
+            <h3 className="text-xl font-bold text-gray-400 italic">No Hospital Context Selected</h3>
+            <p className="text-gray-400 mt-2">Please select a hospital above to view and configure patient safety ranges.</p>
+          </div>
         )}
       </div>
 

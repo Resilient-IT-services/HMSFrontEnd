@@ -1,3 +1,4 @@
+import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
 import { ApiResponse, PageResponse, AppointmentResponse, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO } from '@/types/api';
 
@@ -26,25 +27,25 @@ export const appointmentService = {
     return response.data;
   },
 
-  async update(id: string, request: Partial<CreateAppointmentRequest>): Promise<ApiResponse<AppointmentResponse>> {
-    const response = await apiClient.put<ApiResponse<AppointmentResponse>>(`/appointments/${id}`, request);
+  async update(id: string, request: Partial<CreateAppointmentRequest>, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.put<ApiResponse<AppointmentResponse>>(`/appointments/${id}`, request, config);
     return response.data;
   },
 
-  async save(data: CreateAppointmentRequest): Promise<ApiResponse<AppointmentResponse>> {
+  async save(data: CreateAppointmentRequest, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
     if (data.id) {
-      return this.update(data.id, data);
+      return this.update(data.id, data, config);
     }
     return this.create(data);
   },
 
-  async updateStatus(appointmentId: string, request: UpdateAppointmentStatusRequest): Promise<ApiResponse<AppointmentResponse>> {
-    const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/status`, request);
+  async updateStatus(appointmentId: string, request: UpdateAppointmentStatusRequest, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/status`, request, config);
     return response.data;
   },
 
-  async patchVitals(appointmentId: string, vitals: VitalsDTO): Promise<ApiResponse<AppointmentResponse>> {
-    const response = await apiClient.patch<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/vitals`, vitals);
+  async patchVitals(appointmentId: string, vitals: VitalsDTO, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.patch<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/vitals`, vitals, config);
     return response.data;
   },
 

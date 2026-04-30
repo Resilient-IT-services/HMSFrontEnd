@@ -67,7 +67,7 @@ const mockAppointments = [
     patientName: 'Future Patient',
     doctorId: 101,
     doctorName: 'Dr. Smith',
-    appointmentTime: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
+    appointmentTime: new Date(Date.now() + 86_400_000).toISOString(), // Tomorrow
     status: 'SCHEDULED',
     reason: 'Checkup'
   }

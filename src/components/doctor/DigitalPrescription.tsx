@@ -43,6 +43,11 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   date,
   tokenDisplay,
 }) => {
+  const [followUpDate, setFollowUpDate] = React.useState<string>('');
+  React.useEffect(() => {
+    setFollowUpDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+  }, []);
+
   if (!isOpen) return null;
 
   const patientAge = () => {
@@ -237,7 +242,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                   <p className="font-label-sm text-tertiary">FOLLOW-UP APPOINTMENT</p>
                   <div className="flex items-center gap-2 text-primary font-bold">
                     <span className="material-symbols-outlined">calendar_today</span>
-                    <span>{new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                    <span>{followUpDate}</span>
                   </div>
                   <p className="text-body-sm text-on-surface-variant">Please bring this document for the next visit.</p>
                 </div>

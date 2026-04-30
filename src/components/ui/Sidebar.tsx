@@ -52,7 +52,12 @@ const Sidebar = () => {
       href: '/doctor/history',
       roles: ['DOCTOR', 'ADMIN']
     },
-    { name: 'Prescriptions', icon: 'prescriptions', href: '/doctor/prescriptions', roles: ['DOCTOR', 'PHARMACIST', 'ADMIN'] },
+    {
+      name: 'Prescriptions',
+      icon: 'prescriptions',
+      href: effectiveRole === 'PHARMACIST' ? '/pharmacy/prescriptions' : '/doctor/prescriptions',
+      roles: ['DOCTOR', 'PHARMACIST', 'ADMIN']
+    },
     { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'User Management', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },
     { name: 'Hospitals', icon: 'apartment', href: '/super_admin/hospitals', roles: ['SUPER_ADMIN'] },

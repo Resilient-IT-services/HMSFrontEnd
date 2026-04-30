@@ -107,6 +107,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     }
 
     // Email
+    // eslint-disable-next-line sonarjs/slow-regex
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email?.trim()) {
       errors.email = 'Email is required';
@@ -118,19 +119,19 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     const phoneRegex = /^\+?[0-9]{10,15}$/;
     if (!formData.phone?.trim()) {
       errors.phone = 'Phone number is required';
-    } else if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+    } else if (!phoneRegex.test(formData.phone.replaceAll(/\s/g, ''))) {
       errors.phone = 'Invalid phone number (10-15 digits)';
     }
 
     // DOB
-    if (!formData.dob) {
-      errors.dob = 'Date of birth is required';
-    } else {
+    if (formData.dob) {
       const dobDate = new Date(formData.dob);
       const today = new Date();
       if (dobDate >= today) {
         errors.dob = 'Date of birth cannot be in the future';
       }
+    } else {
+      errors.dob = 'Date of birth is required';
     }
     
     if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) {

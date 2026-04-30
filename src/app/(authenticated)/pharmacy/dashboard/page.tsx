@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyService } from '@/services/pharmacyService';
 import { PrescriptionResponse } from '@/types/api';
+import Link from 'next/link';
 
 const PharmacyDashboard = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
@@ -67,10 +68,11 @@ const PharmacyDashboard = () => {
       prescription && prescription.status === 'COMPLETED'
     ).length;
     
-    const queuedItems = safePrescriptions.reduce((total, prescription) => {
+    let queuedItems = 0;
+    for (const prescription of safePrescriptions) {
       const itemsCount = Array.isArray(prescription?.items) ? prescription.items.length : 0;
-      return total + itemsCount;
-    }, 0);
+      queuedItems += itemsCount;
+    }
 
     return {
       pendingPrescriptions,
@@ -163,7 +165,7 @@ const PharmacyDashboard = () => {
                         <span className="rounded-full bg-[var(--primary-light)] px-2 py-1 text-xs font-bold text-[var(--primary)]">{prescription.items?.length || 0} items</span>
                       </td>
                       <td className="py-4 text-right">
-                        <button className="text-[var(--primary)] hover:underline text-sm font-bold">Process Bill</button>
+                        <Link href={`/pharmacy/prescriptions/${prescription.id}`} className="text-[var(--primary)] hover:underline text-sm font-bold">Process Bill</Link>
                       </td>
                     </tr>
                   )) : (

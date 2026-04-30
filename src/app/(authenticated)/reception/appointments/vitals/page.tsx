@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
@@ -64,6 +64,24 @@ const VitalsEntryPage = () => {
     fetchConfig();
   }, []);
 
+  const populateVitals = useCallback((vitals: any) => {
+    if (!vitals) return;
+    setSystolic(vitals.systolic?.toString() || vitals.bloodPressure?.split('/')[0] || '');
+    setDiastolic(vitals.diastolic?.toString() || vitals.bloodPressure?.split('/')[1] || '');
+    setHeartRate(vitals.heartRate?.toString() || '');
+    setTemperature(vitals.temperature?.toString() || '');
+    
+    const tUnit = (vitals.temperatureUnit as string);
+    setTempUnit(tUnit === '°C' ? 'CELSIUS' : (tUnit === '°F' ? 'FAHRENHEIT' : (vitals.temperatureUnit || 'CELSIUS')));
+    
+    setWeight(vitals.weight?.toString() || '');
+    const wUnit = (vitals.weightUnit as string);
+    setWeightUnit(wUnit === 'kg' ? 'KG' : (wUnit === 'lb' ? 'LB' : (vitals.weightUnit || 'KG')));
+    
+    setOxygenLevel(vitals.oxygenLevel?.toString() || '');
+    setRespiratoryRate(vitals.respiratoryRate?.toString() || '');
+  }, []);
+
   useEffect(() => {
     const fetchDetails = async () => {
       if (!appointmentId) {
@@ -78,23 +96,7 @@ const VitalsEntryPage = () => {
           setAppointment(appData);
           setComplaints(appData.notes || '');
           
-          if (appData.vitals) {
-            setSystolic(appData.vitals.systolic?.toString() || appData.vitals.bloodPressure?.split('/')[0] || '');
-            setDiastolic(appData.vitals.diastolic?.toString() || appData.vitals.bloodPressure?.split('/')[1] || '');
-            setHeartRate(appData.vitals.heartRate?.toString() || '');
-            setTemperature(appData.vitals.temperature?.toString() || '');
-            
-            // Fix TS2367 by casting to string for comparison with legacy/alternate symbols
-            const tUnit = (appData.vitals.temperatureUnit as string);
-            setTempUnit(tUnit === '°C' ? 'CELSIUS' : (tUnit === '°F' ? 'FAHRENHEIT' : (appData.vitals.temperatureUnit || 'CELSIUS')));
-            
-            setWeight(appData.vitals.weight?.toString() || '');
-            const wUnit = (appData.vitals.weightUnit as string);
-            setWeightUnit(wUnit === 'kg' ? 'KG' : (wUnit === 'lb' ? 'LB' : (appData.vitals.weightUnit || 'KG')));
-            
-            setOxygenLevel(appData.vitals.oxygenLevel?.toString() || '');
-            setRespiratoryRate(appData.vitals.respiratoryRate?.toString() || '');
-          }
+          populateVitals(appData.vitals);
 
           const patRes = await patientService.get(appData.patientId);
           if (patRes.success && patRes.data) {
@@ -156,13 +158,20 @@ const VitalsEntryPage = () => {
     let required = true;
 
     switch (field) {
-      case 'temperature': range = vitalRanges.BODY_TEMPERATURE; label = 'Body Temperature'; break;
-      case 'weight': range = vitalRanges.WEIGHT; label = 'Weight'; break;
-      case 'oxygenLevel': range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break;
-      case 'systolic': range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break;
-      case 'diastolic': range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break;
-      case 'heartRate': range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break;
-      case 'respiratoryRate': range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break;
+      case 'temperature': { range = vitalRanges.BODY_TEMPERATURE; label = 'Body Temperature'; break;
+      }
+      case 'weight': { range = vitalRanges.WEIGHT; label = 'Weight'; break;
+      }
+      case 'oxygenLevel': { range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break;
+      }
+      case 'systolic': { range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break;
+      }
+      case 'diastolic': { range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break;
+      }
+      case 'heartRate': { range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break;
+      }
+      case 'respiratoryRate': { range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break;
+      }
     }
 
     const error = validateVital(value, range, label || field, required);
@@ -182,6 +191,18 @@ const VitalsEntryPage = () => {
     return <p className="text-[10px] text-slate-400 mt-1 italic">{helper}</p>;
   };
 
+  const mapBackendErrorToField = (message: string): string | null => {
+    const msg = message.toLowerCase();
+    if (msg.includes('heart rate')) return 'heartRate';
+    if (msg.includes('temperature')) return 'temperature';
+    if (msg.includes('oxygen level') || msg.includes('spo2')) return 'oxygenLevel';
+    if (msg.includes('systolic')) return 'systolic';
+    if (msg.includes('diastolic')) return 'diastolic';
+    if (msg.includes('weight')) return 'weight';
+    if (msg.includes('respiratory rate')) return 'respiratoryRate';
+    return null;
+  };
+
   const handleSave = async (isDraft: boolean = false) => {
     if (!appointment) return;
     if (!validateVitals(true)) {
@@ -191,7 +212,6 @@ const VitalsEntryPage = () => {
 
     setSaving(true);
     try {
-      // Construct sanitized payload matching server VitalsDTO exactly
       const vitals: VitalsDTO = {
         bloodPressure: `${systolic}/${diastolic}`,
         systolic: Number.parseInt(systolic, 10) || 0,
@@ -205,8 +225,6 @@ const VitalsEntryPage = () => {
         respiratoryRate: Number.parseFloat(respiratoryRate) || 0,
       };
 
-      // 4. Try using the general update method instead of patchVitals
-      // Include mandatory fields required by the PUT endpoint
       const res = await appointmentService.update(appointment.id, { 
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
@@ -214,15 +232,33 @@ const VitalsEntryPage = () => {
         vitals,
         notes: complaints,
         chiefComplaints: complaints
-      });
+      }, { skipToast: true });
 
       if (res.success) {
         triggerGlobalToast(isDraft ? 'Draft saved successfully' : 'Vitals submitted successfully', 'success');
         router.push('/reception/appointments');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save vitals', error);
-      // The error message from Axios interceptor will already show a toast
+      
+      // Handle Backend Validation Errors
+      const apiData = error.response?.data;
+      if (apiData?.code === 'VALIDATION_ERROR' || error.response?.status === 400) {
+        const message = apiData?.error?.message || apiData?.message || '';
+        const field = mapBackendErrorToField(message);
+        
+        if (field) {
+          setFieldErrors(prev => ({ ...prev, [field]: message }));
+          triggerGlobalToast(`Backend Validation: ${message}`, 'error');
+        } else {
+          // Fallback if field cannot be mapped
+          triggerGlobalToast(message || 'Validation failed on server', 'error');
+        }
+      } else {
+        // Generic error handling
+        const message = apiData?.error?.message || apiData?.message || 'Failed to save vitals';
+        triggerGlobalToast(message, 'error');
+      }
     } finally {
       setSaving(false);
     }

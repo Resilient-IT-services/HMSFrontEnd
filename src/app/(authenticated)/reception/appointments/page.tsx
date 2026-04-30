@@ -9,6 +9,27 @@ import { useRouter } from 'next/navigation';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case 'WALK_IN': { return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    }
+    case 'SCHEDULED': { return 'bg-blue-50 text-blue-700 border-blue-100';
+    }
+    case 'PAYMENT_PENDING': { return 'bg-amber-50 text-amber-700 border-amber-100';
+    }
+    case 'ADD_VITALS': { return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    }
+    case 'WAITING_FOR_VITALS': { return 'bg-purple-50 text-purple-700 border-purple-100';
+    }
+    case 'COMPLETED': { return 'bg-green-50 text-green-700 border-green-100';
+    }
+    case 'CANCELLED': { return 'bg-red-50 text-red-700 border-red-100';
+    }
+    default: { return 'bg-slate-50 text-slate-500 border-slate-100';
+    }
+  }
+};
+
 const TodayAppointmentsPage = () => {
   const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
@@ -57,7 +78,7 @@ const TodayAppointmentsPage = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30000); // Auto-refresh every 30 seconds
+    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -200,16 +221,7 @@ const TodayAppointmentsPage = () => {
                     <p className="text-[10px] text-slate-400 uppercase font-bold">{app.doctorSpecialization}</p>
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${
-                      app.status === 'WALK_IN' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                      app.status === 'SCHEDULED' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                      app.status === 'PAYMENT_PENDING' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                      app.status === 'ADD_VITALS' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
-                      app.status === 'WAITING_FOR_VITALS' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                      app.status === 'COMPLETED' ? 'bg-green-50 text-green-700 border-green-100' :
-                      app.status === 'CANCELLED' ? 'bg-red-50 text-red-700 border-red-100' :
-                      'bg-slate-50 text-slate-500 border-slate-100'
-                    }`}>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase border ${getStatusStyles(app.status)}`}>
                       {app.status.replace('_', ' ')}
                     </span>
                   </td>

@@ -228,6 +228,7 @@ export interface HospitalResponse {
   id: string; // hospitalId
   name: string;
   code: string;
+  hospitalCode?: string;
   address?: string;
   city?: string;
   state?: string;

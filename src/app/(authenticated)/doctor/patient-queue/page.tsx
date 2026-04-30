@@ -60,7 +60,7 @@ const PatientQueuePage = () => {
   // Separate effect for fetching missing patient details to avoid re-fetching appointments
   useEffect(() => {
     const fetchMissingPatients = async () => {
-      const patientIdsToFetch = Array.from(new Set(appointments.map(a => a.patientId)))
+      const patientIdsToFetch = [...new Set(appointments.map(a => a.patientId))]
         .filter(id => !patientDetails[id]);
 
       if (patientIdsToFetch.length > 0) {
@@ -130,22 +130,13 @@ const PatientQueuePage = () => {
     const today = new Date().toISOString().split('T')[0];
     
     let base = appointments;
-    if (activeTab === 'TODAY') {
-      base = appointments.filter(a => 
+    base = activeTab === 'TODAY' ? appointments.filter(a => 
         a.appointmentTime.startsWith(today) && 
         (a.status === 'SCHEDULED' || a.status === 'WALK_IN')
-      );
-    } else {
-      base = appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
-    }
+      ) : appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
     
     // Sort by token number for today, or by time for upcoming
-    let sorted;
-    if (activeTab === 'TODAY') {
-      sorted = sortByToken(base);
-    } else {
-      sorted = [...base].sort((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
-    }
+    const sorted = activeTab === 'TODAY' ? sortByToken(base) : [...base].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
     
     if (!searchTerm) return sorted;
     const term = searchTerm.toLowerCase();
