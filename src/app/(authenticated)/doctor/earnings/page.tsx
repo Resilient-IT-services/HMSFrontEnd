@@ -78,6 +78,18 @@ const DoctorEarningsPage = () => {
     };
   }, [filteredAppointments, consultationFee]);
 
+  const statusCaptions: Record<string, string> = {
+    'SCHEDULED': 'Scheduled',
+    'COMPLETED': 'Completed',
+    'PAYMENT_PENDING': 'Payment Pending',
+    'WAITING_FOR_VITALS': 'Waiting for Vitals',
+    'WALK_IN': 'Walk-in',
+    'CANCELLED': 'Cancelled',
+    'ADD_VITALS': 'Add Vitals',
+    'DELAYED': 'In Progress',
+    'CHECKED_IN': 'Checked In'
+  };
+
   return (
     <MainLayout title="My Earnings">
       <div className="p-8 max-w-7xl mx-auto w-full">
@@ -177,7 +189,7 @@ const DoctorEarningsPage = () => {
                             app.status === 'CANCELLED' ? 'bg-rose-50 text-rose-700 border-rose-100' :
                             'bg-slate-50 text-slate-600 border-slate-100'
                           }`}>
-                            {app.status}
+                            {statusCaptions[app.status] || app.status}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">

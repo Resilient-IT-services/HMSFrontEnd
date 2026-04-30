@@ -82,6 +82,18 @@ const DoctorDashboard = () => {
     [queue],
   );
 
+  const statusCaptions: Record<string, string> = {
+    'SCHEDULED': 'Scheduled',
+    'COMPLETED': 'Completed',
+    'PAYMENT_PENDING': 'Payment Pending',
+    'WAITING_FOR_VITALS': 'Waiting for Vitals',
+    'WALK_IN': 'Walk-in',
+    'CANCELLED': 'Cancelled',
+    'ADD_VITALS': 'Add Vitals',
+    'DELAYED': 'In Progress',
+    'CHECKED_IN': 'Checked In'
+  };
+
   const handleStartNextConsultation = async () => {
     const nextAppointment = queue[0];
     if (!nextAppointment) {
@@ -173,13 +185,13 @@ const DoctorDashboard = () => {
                 {queue.map((appointment) => (
                   <div key={appointment.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 ${appointment.status === 'DELAYED' ? 'bg-orange-100 text-orange-700' : ''}`}>
+                      <div className={`w-20 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 shrink-0 ${appointment.status === 'DELAYED' ? 'bg-orange-100 text-orange-700' : ''}`}>
                         {formatToken(appointment)}
                       </div>
                       <div>
                         <h4 className="font-bold text-sm text-slate-900">{appointment.patientName}</h4>
                         <p className="text-[10px] text-slate-500 uppercase font-black">
-                          Scheduled: {appointment.appointmentTime.split('T')[1].slice(0, 5)} • {appointment.notes || 'Routine Checkup'}
+                          Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} • {appointment.notes || 'Routine Checkup'}
                         </p>
                       </div>
                     </div>
@@ -191,7 +203,7 @@ const DoctorDashboard = () => {
                             ? 'bg-orange-50 text-orange-700 border-orange-100'
                             : 'bg-slate-50 text-slate-600 border-slate-100')
                       }`}>
-                        {appointment.status === 'DELAYED' ? 'In Progress' : appointment.status}
+                        {statusCaptions[appointment.status] || appointment.status}
                       </span>
                       <button className="p-2 text-slate-300 hover:text-orange-600 transition-colors">
                         <span className="material-symbols-outlined text-lg">more_vert</span>
@@ -213,7 +225,7 @@ const DoctorDashboard = () => {
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-4">
                   <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Current Visit</span>
-                  <span className="text-[10px] font-mono font-bold">{activeAppointment ? activeAppointment.appointmentTime.split('T')[1].slice(0, 5) : '--:--'}</span>
+                  <span className="text-[10px] font-mono font-bold">{activeAppointment ? `${new Date(activeAppointment.appointmentTime).toLocaleDateString()} ${activeAppointment.appointmentTime.split('T')[1].slice(0, 5)}` : '--:--'}</span>
                 </div>
                 {activeAppointment ? (
                   <>
