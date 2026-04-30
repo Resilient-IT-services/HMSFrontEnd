@@ -151,22 +151,7 @@ export default function PatientRegistration() {
               </div>
             </section>
 
-            <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm opacity-60">
-              <div className="flex items-center gap-2 mb-8 pb-4 border-b border-slate-100">
-                <span className="material-symbols-outlined text-primary">emergency</span>
-                <h3 className="text-xl font-bold text-slate-900">Emergency Contact (Optional)</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase block">Full Name</label>
-                  <input className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50/50 text-sm" placeholder="Next of kin name" type="text" disabled />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-500 uppercase block">Relationship</label>
-                  <input className="w-full px-4 py-3 border border-slate-200 rounded-xl bg-slate-50/50 text-sm" placeholder="e.g., Spouse, Parent" type="text" disabled />
-                </div>
-              </div>
-            </section>
+
 
             {/* Action Bar */}
             <div className="flex items-center justify-end gap-4 pt-4">
