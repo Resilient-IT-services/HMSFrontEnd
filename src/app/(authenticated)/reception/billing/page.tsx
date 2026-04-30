@@ -13,7 +13,7 @@ import {
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
-const BillingPage = () => {
+export default function BillingPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const appointmentId = searchParams.get('appointmentId');
@@ -522,7 +522,5 @@ const BillingPage = () => {
           </footer>
         </div>
       </MainLayout>
-  );
-};
-
-export default BillingPage;
+      );
+      }

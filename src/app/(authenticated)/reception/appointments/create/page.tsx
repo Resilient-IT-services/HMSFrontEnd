@@ -44,7 +44,7 @@ const calculateSuggestedTime = (session: SessionInfo, date: string) => {
   return baseTime;
 };
 
-const AppointmentScheduling = () => {
+export default function AppointmentScheduling() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedPatientId = searchParams.get('patientId');
@@ -324,6 +324,4 @@ const AppointmentScheduling = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default AppointmentScheduling;
+}

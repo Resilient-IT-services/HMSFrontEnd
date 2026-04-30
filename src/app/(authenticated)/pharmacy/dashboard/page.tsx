@@ -6,7 +6,7 @@ import { pharmacyService } from '@/services/pharmacyService';
 import { PrescriptionResponse } from '@/types/api';
 import Link from 'next/link';
 
-const PharmacyDashboard = () => {
+export default function PharmacyDashboard() {
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
   const [lowStockCount, setLowStockCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -226,6 +226,4 @@ const PharmacyDashboard = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default PharmacyDashboard;
+}

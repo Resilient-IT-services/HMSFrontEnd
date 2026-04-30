@@ -13,15 +13,17 @@ import { AppointmentResponse, PatientResponse, HospitalResponse, PrescriptionDTO
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
+import MedicineAutocomplete from '@/modules/pharmacy/components/MedicineAutocomplete';
 
 interface PrescriptionRow {
   id: string;
   medicine: string;
+  medicineId?: string;
   frequency: string;
   instructions: string;
 }
 
-const ActiveConsultationPage = () => {
+export default function ActiveConsultationPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const appointmentId = searchParams.get('appointmentId');
@@ -40,7 +42,7 @@ const ActiveConsultationPage = () => {
   const [icdCodes, setIcdCodes] = useState<{ code: string; label: string }[]>([
   ]);
   const [prescriptions, setPrescriptions] = useState<PrescriptionRow[]>([
-    { id: '1', medicine: 'Amoxicillin 500mg', frequency: '3 times a day', instructions: 'After lunch' },
+    { id: '1', medicine: '', frequency: '', instructions: '' },
     { id: '2', medicine: '', frequency: '', instructions: '' },
     { id: '3', medicine: '', frequency: '', instructions: '' },
   ]);
@@ -104,9 +106,13 @@ const ActiveConsultationPage = () => {
     }
   }, [patient]);
 
-  const updatePrescription = (index: number, field: keyof PrescriptionRow, value: string) => {
+  const updatePrescription = (index: number, field: keyof PrescriptionRow, value: string, medicineId?: string) => {
     const newPrescriptions = [...prescriptions];
     newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
+    
+    if (medicineId) {
+      newPrescriptions[index].medicineId = medicineId;
+    }
     
     // Auto-add new row if last row is being filled
     if (index === prescriptions.length - 1 && value !== '') {
@@ -135,6 +141,7 @@ const ActiveConsultationPage = () => {
           doctorId: appointment.doctorId,
           appointmentId: appointment.id,
           items: validPrescriptions.map(p => ({
+            medicineId: p.medicineId,
             medicineName: p.medicine,
             dosage: p.frequency,
             duration: p.instructions
@@ -330,18 +337,11 @@ const ActiveConsultationPage = () => {
                       {index === 0 && (
                         <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>
                       )}
-                      <select 
-                        className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                        value={row.medicine}
-                        onChange={(e) => updatePrescription(index, 'medicine', e.target.value)}
-                      >
-                        <option value="">Select Medicine...</option>
-                        <option value="Amoxicillin 500mg">Amoxicillin 500mg</option>
-                        <option value="Paracetamol 650mg">Paracetamol 650mg</option>
-                        <option value="Ibuprofen 400mg">Ibuprofen 400mg</option>
-                        <option value="Omeprazole 20mg">Omeprazole 20mg</option>
-                        <option value="Hyoscine 10mg">Hyoscine 10mg</option>
-                      </select>
+                      <MedicineAutocomplete 
+                        defaultValue={row.medicine}
+                        onSelect={(med) => updatePrescription(index, 'medicine', med.name, med.id)}
+                        placeholder="Search medicine..."
+                      />
                     </div>
                     <div className="col-span-3">
                       {index === 0 && (
@@ -426,6 +426,4 @@ const ActiveConsultationPage = () => {
       />
     </MainLayout>
   );
-};
-
-export default ActiveConsultationPage;
+}

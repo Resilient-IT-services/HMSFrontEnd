@@ -8,29 +8,30 @@ import { AppointmentResponse, DoctorStaffResponse, AppointmentStatus } from '@/t
 import { useRouter } from 'next/navigation';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
+import { Modal } from '@/components/ui/Modal';
 
 const getStatusStyles = (status: string) => {
   switch (status) {
-    case 'WALK_IN': { return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    }
-    case 'SCHEDULED': { return 'bg-blue-50 text-blue-700 border-blue-100';
-    }
-    case 'PAYMENT_PENDING': { return 'bg-amber-50 text-amber-700 border-amber-100';
-    }
-    case 'ADD_VITALS': { return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-    }
-    case 'WAITING_FOR_VITALS': { return 'bg-purple-50 text-purple-700 border-purple-100';
-    }
-    case 'COMPLETED': { return 'bg-green-50 text-green-700 border-green-100';
-    }
-    case 'CANCELLED': { return 'bg-red-50 text-red-700 border-red-100';
-    }
-    default: { return 'bg-slate-50 text-slate-500 border-slate-100';
-    }
+    case 'WALK_IN':
+      return 'bg-emerald-50 text-emerald-700 border-emerald-100';
+    case 'SCHEDULED':
+      return 'bg-blue-50 text-blue-700 border-blue-100';
+    case 'PAYMENT_PENDING':
+      return 'bg-amber-50 text-amber-700 border-amber-100';
+    case 'ADD_VITALS':
+      return 'bg-indigo-50 text-indigo-700 border-indigo-100';
+    case 'WAITING_FOR_VITALS':
+      return 'bg-purple-50 text-purple-700 border-purple-100';
+    case 'COMPLETED':
+      return 'bg-green-50 text-green-700 border-green-100';
+    case 'CANCELLED':
+      return 'bg-red-50 text-red-700 border-red-100';
+    default:
+      return 'bg-slate-50 text-slate-500 border-slate-100';
   }
 };
 
-const TodayAppointmentsPage = () => {
+export default function TodayAppointmentsPage() {
   const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
@@ -38,27 +39,52 @@ const TodayAppointmentsPage = () => {
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const todayApps = appointments.filter(app => app.appointmentTime.split('T')[0] === today);
-    
-    return {
-      total: todayApps.length,
-      walkIn: todayApps.filter(app => app.status === 'WALK_IN').length,
-      upcoming: appointments.filter(app => app.appointmentTime.split('T')[0] > today).length,
-      paymentPending: todayApps.filter(app => app.status === 'PAYMENT_PENDING').length,
-      waitingForVitals: todayApps.filter(app => app.status === 'WAITING_FOR_VITALS').length,
-      completed: todayApps.filter(app => app.status === 'COMPLETED').length,
-      cancelled: todayApps.filter(app => app.status === 'CANCELLED').length,
-    };
-  }, [appointments]);
+  // Advanced Filter State
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    statuses: [] as string[],
+    paymentStatuses: [] as string[]
+  });
 
-  const fetchData = useCallback(async (isBackground = false) => {
+  const [activeFilters, setActiveFilters] = useState<any>({});
+  const [stats, setStats] = useState({
+    total: 0,
+    walkIn: 0,
+    upcoming: 0,
+    paymentPending: 0,
+    waitingForVitals: 0,
+    completed: 0,
+    cancelled: 0,
+  });
+
+  const fetchData = useCallback(async (isBackground = false, filters = activeFilters) => {
     if (!isBackground) setLoading(true);
     try {
-      const [appRes, docRes] = await Promise.all([
-        appointmentService.list(0, 100),
-        doctorService.list(0, 100)
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Determine date based on status filter
+      let dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
+      
+      // Determine statuses based on status filter or advanced filter
+      let statusesToUse = filters.statuses?.length > 0 
+        ? filters.statuses.join(',') 
+        : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
+
+      const [appRes, docRes, statsRes] = await Promise.all([
+        appointmentService.list(
+          0, 100, 
+          searchTerm, 
+          dateToUse,
+          undefined,
+          statusesToUse,
+          filters.paymentStatuses?.join(','),
+          undefined,
+          undefined,
+          undefined
+        ),
+        doctorService.list(0, 100),
+        // Fetch unfiltered appointments for global stats calculation
+        appointmentService.list(0, 500)
       ]);
 
       const appData = appRes.data;
@@ -69,18 +95,59 @@ const TodayAppointmentsPage = () => {
       if (docRes.success && docData) {
         setDoctors(docData.content);
       }
+
+      // Calculate global stats independently of search/filter
+      if (statsRes.success && statsRes.data) {
+        const allApps = statsRes.data.content;
+        const todayApps = allApps.filter(app => app.appointmentTime.split('T')[0] === today);
+        setStats({
+          total: todayApps.length,
+          walkIn: todayApps.filter(app => app.status === 'WALK_IN').length,
+          upcoming: allApps.filter(app => app.appointmentTime.split('T')[0] > today).length,
+          paymentPending: todayApps.filter(app => app.status === 'PAYMENT_PENDING').length,
+          waitingForVitals: todayApps.filter(app => app.status === 'WAITING_FOR_VITALS').length,
+          completed: todayApps.filter(app => app.status === 'COMPLETED').length,
+          cancelled: todayApps.filter(app => app.status === 'CANCELLED').length,
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, []); // Kept empty to ensure it's stable and only runs once or when manually refreshed
+  }, [statusFilter, searchTerm, activeFilters]);
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
+    const interval = setInterval(() => fetchData(true), 30_000);
     return () => clearInterval(interval);
   }, [fetchData]);
+
+  const applyFilters = () => {
+    setActiveFilters(advancedFilters);
+    setIsFilterModalOpen(false);
+  };
+
+  const resetFilters = () => {
+    const reset = {
+      statuses: [],
+      paymentStatuses: []
+    };
+    setAdvancedFilters(reset);
+    setActiveFilters(reset);
+    setIsFilterModalOpen(false);
+  };
+
+  const removeFilter = (key: string, value?: string) => {
+    const updated = { ...activeFilters };
+    if (Array.isArray(updated[key])) {
+      updated[key] = updated[key].filter((v: string) => v !== value);
+    } else {
+      updated[key] = '';
+    }
+    setActiveFilters(updated);
+    setAdvancedFilters(updated);
+  };
 
   const filteredAppointments = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
@@ -90,29 +157,19 @@ const TodayAppointmentsPage = () => {
       const isToday = appDate === today;
       const isUpcoming = appDate > today;
 
-      // 1. Time-based and Status-based filtering
       if (statusFilter === 'UPCOMING') {
         if (!isUpcoming) return false;
       } else if (statusFilter === 'ALL') {
         if (!isToday) return false;
       } else {
-        if (!isToday || app.status !== statusFilter) return false;
-      }
-
-      // 2. Search term filtering
-      if (searchTerm) {
-        const term = searchTerm.toLowerCase();
-        return (
-          app.patientName.toLowerCase().includes(term) ||
-          (app.patientId && app.patientId.toLowerCase().includes(term))
-        );
+        if (!activeFilters.statuses?.length && app.status !== statusFilter) return false;
       }
 
       return true;
     });
 
     return sortByToken(base);
-  }, [appointments, statusFilter, searchTerm]);
+  }, [appointments, statusFilter, activeFilters]);
 
   return (
     <MainLayout title="Daily Schedule">
@@ -128,7 +185,6 @@ const TodayAppointmentsPage = () => {
           </button>
         </div>
 
-        {/* Statistics Section */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
           {[
             { label: 'Today Total', value: stats.total, color: 'text-slate-600', bg: 'bg-slate-50', filter: 'ALL' },
@@ -141,7 +197,14 @@ const TodayAppointmentsPage = () => {
           ].map((stat, i) => (
             <div 
               key={i} 
-              onClick={() => setStatusFilter(stat.filter as any)}
+              onClick={() => {
+                setStatusFilter(stat.filter as any);
+                if (activeFilters.statuses?.length) {
+                  const updated = { ...activeFilters, statuses: [] };
+                  setActiveFilters(updated);
+                  setAdvancedFilters(updated);
+                }
+              }}
               className={`${stat.bg} p-3 rounded-xl border ${statusFilter === stat.filter ? 'border-orange-500 ring-1 ring-orange-500/20' : 'border-slate-100'} shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95`}
             >
               <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">{stat.label}</p>
@@ -155,7 +218,14 @@ const TodayAppointmentsPage = () => {
             {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
-                onClick={() => setStatusFilter(status as any)}
+                onClick={() => {
+                  setStatusFilter(status as any);
+                  if (activeFilters.statuses?.length) {
+                    const updated = { ...activeFilters, statuses: [] };
+                    setActiveFilters(updated);
+                    setAdvancedFilters(updated);
+                  }
+                }}
                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
                   statusFilter === status 
                     ? 'bg-orange-700 text-white shadow-md' 
@@ -178,6 +248,18 @@ const TodayAppointmentsPage = () => {
               />
             </div>
             <button 
+              onClick={() => setIsFilterModalOpen(true)}
+              className={`p-2 rounded-lg border flex items-center gap-2 transition-all ${
+                Object.values(activeFilters).some(v => Array.isArray(v) ? v.length > 0 : !!v)
+                  ? 'bg-orange-50 border-orange-200 text-orange-700 shadow-sm'
+                  : 'bg-slate-50 border-slate-200 text-slate-400 hover:text-orange-700'
+              }`}
+              title="Advanced Filter"
+            >
+              <span className="material-symbols-outlined text-sm">filter_list</span>
+              <span className="text-[10px] font-bold hidden md:block">Filters</span>
+            </button>
+            <button 
               onClick={() => fetchData()}
               className="p-2 text-slate-400 hover:text-orange-700 transition-colors bg-slate-50 rounded-lg border border-slate-200"
               title="Refresh"
@@ -186,6 +268,30 @@ const TodayAppointmentsPage = () => {
             </button>
           </div>
         </div>
+
+        {Object.values(activeFilters).some(v => Array.isArray(v) ? v.length > 0 : !!v) && (
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Filters:</span>
+            {activeFilters.statuses?.map((s: string) => (
+              <span key={s} className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-[10px] font-bold flex items-center gap-1 border border-purple-200">
+                Status: {s.replace('_', ' ')}
+                <button onClick={() => removeFilter('statuses', s)} className="hover:text-purple-900"><span className="material-symbols-outlined text-[14px]">close</span></button>
+              </span>
+            ))}
+            {activeFilters.paymentStatuses?.map((ps: string) => (
+              <span key={ps} className="px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-[10px] font-bold flex items-center gap-1 border border-amber-200">
+                Payment: {ps}
+                <button onClick={() => removeFilter('paymentStatuses', ps)} className="hover:text-amber-900"><span className="material-symbols-outlined text-[14px]">close</span></button>
+              </span>
+            ))}
+            <button 
+              onClick={resetFilters}
+              className="text-[10px] font-bold text-slate-400 hover:text-red-500 underline transition-colors ml-2"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <table className="w-full text-left">
@@ -203,7 +309,15 @@ const TodayAppointmentsPage = () => {
               {loading ? (
                 <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400 italic">Loading schedule...</td></tr>
               ) : filteredAppointments.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-10 text-center text-slate-400 italic">No appointments found.</td></tr>
+                <tr>
+                  <td colSpan={6} className="px-6 py-20 text-center">
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="material-symbols-outlined text-4xl text-slate-200">search_off</span>
+                      <p className="text-slate-400 italic font-medium">No appointments found for selected filters.</p>
+                      <button onClick={resetFilters} className="text-orange-700 text-xs font-bold hover:underline">Clear all filters</button>
+                    </div>
+                  </td>
+                </tr>
               ) : filteredAppointments.map((app) => (
                 <tr key={app.id} className="hover:bg-slate-50/50 transition-colors group">
                   <td className="px-6 py-4">
@@ -253,8 +367,81 @@ const TodayAppointmentsPage = () => {
           </table>
         </div>
       </div>
-    </MainLayout>
-  );
-};
 
-export default TodayAppointmentsPage;
+      <Modal 
+        isOpen={isFilterModalOpen} 
+        onClose={() => setIsFilterModalOpen(false)} 
+        title="Advanced Filters"
+      >
+        <div className="p-6 space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-slate-400">Appointment Status</label>
+            <div className="flex flex-wrap gap-2">
+              {['SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map(s => (
+                <label key={s} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
+                  advancedFilters.statuses.includes(s) 
+                    ? 'bg-orange-700 text-white border-orange-700' 
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    hidden
+                    checked={advancedFilters.statuses.includes(s)}
+                    onChange={(e) => {
+                      const items = e.target.checked 
+                        ? [...advancedFilters.statuses, s]
+                        : advancedFilters.statuses.filter(i => i !== s);
+                      setAdvancedFilters({...advancedFilters, statuses: items});
+                    }}
+                  />
+                  <span className="text-[10px] font-bold">{s.replace('_', ' ')}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-slate-400">Payment Status</label>
+            <div className="flex flex-wrap gap-2">
+              {['PENDING', 'PAID', 'PARTIALLY_PAID', 'CANCELLED'].map(ps => (
+                <label key={ps} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
+                  advancedFilters.paymentStatuses.includes(ps) 
+                    ? 'bg-blue-700 text-white border-blue-700' 
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    hidden
+                    checked={advancedFilters.paymentStatuses.includes(ps)}
+                    onChange={(e) => {
+                      const items = e.target.checked 
+                        ? [...advancedFilters.paymentStatuses, ps]
+                        : advancedFilters.paymentStatuses.filter(i => i !== ps);
+                      setAdvancedFilters({...advancedFilters, paymentStatuses: items});
+                    }}
+                  />
+                  <span className="text-[10px] font-bold">{ps.replace('_', ' ')}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+            <button 
+              onClick={resetFilters}
+              className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Reset All
+            </button>
+            <button 
+              onClick={applyFilters}
+              className="px-6 py-2 bg-orange-700 text-white rounded-lg text-xs font-bold hover:bg-orange-800 transition-all shadow-md active:scale-95"
+            >
+              Apply Filters
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </MainLayout>
+    );
+    }

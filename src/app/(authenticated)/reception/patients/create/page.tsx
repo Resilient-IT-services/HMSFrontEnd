@@ -7,7 +7,7 @@ import { patientService } from '@/services/patientService';
 import { CreatePatientRequest } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
-const PatientRegistration = () => {
+export default function PatientRegistration() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CreatePatientRequest & { firstName: string, lastName: string, email: string }>({
@@ -234,6 +234,4 @@ const PatientRegistration = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default PatientRegistration;
+}

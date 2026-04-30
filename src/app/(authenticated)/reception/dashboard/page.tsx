@@ -9,7 +9,7 @@ import { doctorService } from '@/services/doctorService';
 import { nurseService } from '@/services/nurseService';
 import { PatientResponse, AppointmentResponse, DoctorStaffResponse, NurseStaffResponse } from '@/types/api';
 
-const ReceptionDashboard = () => {
+export default function ReceptionDashboard() {
   const router = useRouter();
   const [recentPatients, setRecentPatients] = useState<PatientResponse[]>([]);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
@@ -234,6 +234,4 @@ const ReceptionDashboard = () => {
       </button>
     </MainLayout>
   );
-};
-
-export default ReceptionDashboard;
+}

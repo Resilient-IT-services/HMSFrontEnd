@@ -3,9 +3,31 @@ import apiClient from './apiClient';
 import { ApiResponse, PageResponse, AppointmentResponse, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO } from '@/types/api';
 
 export const appointmentService = {
-  async list(page = 0, size = 20, search?: string, date?: string): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
+  async list(
+    page = 0, 
+    size = 20, 
+    search?: string, 
+    date?: string,
+    doctorId?: string,
+    status?: string,
+    paymentStatus?: string,
+    vitalsStatus?: string,
+    tokenNumber?: string,
+    timeSlot?: string
+  ): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<AppointmentResponse>>>('/appointments', {
-      params: { page, size, search, date }
+      params: { 
+        page, 
+        size, 
+        search, 
+        date,
+        doctorId,
+        status,
+        paymentStatus,
+        vitalsStatus,
+        tokenNumber,
+        timeSlot
+      }
     });
     return response.data;
   },

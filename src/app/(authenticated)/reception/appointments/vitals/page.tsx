@@ -11,7 +11,7 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { adminService } from '@/services/adminService';
 import { validateVital, formatRangeHelper } from '@/utils/vitalsValidator';
 
-const VitalsEntryPage = () => {
+export default function VitalsEntryPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const appointmentId = searchParams.get('appointmentId');
@@ -231,7 +231,8 @@ const VitalsEntryPage = () => {
         appointmentTime: appointment.appointmentTime,
         vitals,
         notes: complaints,
-        chiefComplaints: complaints
+        chiefComplaints: complaints,
+        status: 'SCHEDULED'
       }, { skipToast: true });
 
       if (res.success) {
@@ -512,27 +513,8 @@ const VitalsEntryPage = () => {
                     {renderFieldError('weight')}
                     {renderHelperText(vitalRanges.WEIGHT)}
                   </div>
-                  {/* Respiratory Rate */}
-                  <div className="col-span-1">
-                    <label className="block text-label-md font-bold text-on-surface mb-2">
-                      Respiratory Rate
-                    </label>
-                    <div className="relative">
-                      <input 
-                        className={`w-full px-4 py-3 bg-gray-50 border rounded-lg text-headline-sm focus:ring-2 focus:ring-primary-container transition-all ${fieldErrors.respiratoryRate ? 'border-error ring-1 ring-error/20' : 'border-outline-variant'}`}
-                        placeholder="e.g. 16" 
-                        type="text"
-                        value={respiratoryRate}
-                        onChange={(e) => {
-                          setRespiratoryRate(e.target.value);
-                          validateField('respiratoryRate', e.target.value);
-                        }}
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">BPM</span>
-                    </div>
-                    {renderFieldError('respiratoryRate')}
-                    {renderHelperText(vitalRanges.RESPIRATORY_RATE)}
-                  </div>
+
+
 
                 </div>
                 {/* Patient Complaints */}
@@ -559,6 +541,4 @@ const VitalsEntryPage = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default VitalsEntryPage;
+}

@@ -369,9 +369,57 @@ export interface DoctorResponse {
 export interface MedicineResponse {
   id: string;
   name: string;
+  genericName?: string;
   composition?: string;
+  category?: string;
   manufacturer?: string;
+  batchNumber?: string;
+  expiryDate?: string;
+  currentStock?: number;
+  reorderLevel?: number;
+  purchasePrice?: number;
+  sellingPrice?: number;
+  taxPercentage?: number;
+  temperature?: string;
+  humidity?: string;
+  specialNotes?: string;
+}
+
+export type MedicineRequestDTO = Omit<MedicineResponse, 'id'> & { id?: string };
+
+export interface PharmacyStockDTO {
+  id: string;
+  medicineId: string;
+  medicineName: string;
+  batchNumber: string;
+  expiryDate: string;
+  quantity: number;
+  price: number;
+}
+
+
+export interface InventoryItemResponse {
+  id: string;
+  name: string;
+  category: string;
+  unit: string;
+  currentStock: number;
   createdAt: string;
+}
+
+export interface InventoryItemRequestDTO {
+  name: string;
+  category: string;
+  unit: string;
+}
+
+export type StockTransactionType = 'STOCK_IN' | 'STOCK_OUT' | 'RETURN' | 'ADJUSTMENT';
+
+export interface StockTransactionRequestDTO {
+  itemId: string;
+  type: StockTransactionType;
+  quantity: number;
+  reference?: string;
 }
 
 export interface PrescriptionItemDTO {

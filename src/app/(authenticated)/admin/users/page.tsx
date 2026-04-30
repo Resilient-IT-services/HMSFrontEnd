@@ -8,7 +8,7 @@ import { userService } from '@/services/userService';
 import { UserResponse, Role, UserSummaryDTO } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
-const UserManagement = () => {
+export default function UserManagement() {
   const showBottomSection = false;
   const showExportButton = false;
   const [users, setUsers] = useState<(UserSummaryDTO & { roles: Role[] })[]>([]);
@@ -291,6 +291,4 @@ const UserManagement = () => {
 
     </MainLayout>
   );
-};
-
-export default UserManagement;
+}

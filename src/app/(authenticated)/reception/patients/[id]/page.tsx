@@ -27,7 +27,7 @@ interface PatientProfileProps {
   params: Promise<{ id: string }>;
 }
 
-const PatientProfilePage = ({ params }: PatientProfileProps) => {
+export default function PatientProfilePage({ params }: PatientProfileProps) {
   const { id } = use(params);
   const router = useRouter();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
@@ -202,6 +202,4 @@ const PatientProfilePage = ({ params }: PatientProfileProps) => {
       </div>
     </MainLayout>
   );
-};
-
-export default PatientProfilePage;
+}

@@ -2,14 +2,13 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
-import { Card } from '@/components/ui/Card';
 import { patientService } from '@/services/patientService';
 import { PatientResponse } from '@/types/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 
-const PatientsPage = () => {
+export default function PatientsPage() {
   const router = useRouter();
   const [patients, setPatients] = useState<PatientResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -193,6 +192,4 @@ const PatientsPage = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default PatientsPage;
+}

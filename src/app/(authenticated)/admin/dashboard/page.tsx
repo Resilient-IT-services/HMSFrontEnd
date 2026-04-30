@@ -7,7 +7,7 @@ import { hospitalService } from '@/services/hospitalService';
 import { UserSummaryDTO, HospitalResponse } from '@/types/api';
 import { useRouter } from 'next/navigation';
 
-const AdminDashboard = () => {
+export default function AdminDashboard() {
   const router = useRouter();
   const [users, setUsers] = useState<UserSummaryDTO[]>([]);
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
@@ -223,6 +223,4 @@ const AdminDashboard = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default AdminDashboard;
+}

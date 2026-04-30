@@ -7,7 +7,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { AppointmentResponse } from '@/types/api';
 import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
 
-const TokenQueuePage = () => {
+export default function TokenQueuePage() {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -164,6 +164,4 @@ const TokenQueuePage = () => {
       </div>
     </MainLayout>
   );
-};
-
-export default TokenQueuePage;
+}

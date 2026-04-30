@@ -12,7 +12,7 @@ import { Modal } from '@/components/ui/Modal';
 import Link from 'next/link';
 import { useDebounce } from '@/hooks/useDebounce';
 
-const DoctorsPage = () => {
+export default function DoctorsPage() {
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -263,6 +263,4 @@ const DoctorsPage = () => {
       </Modal>
     </MainLayout>
   );
-};
-
-export default DoctorsPage;
+}
