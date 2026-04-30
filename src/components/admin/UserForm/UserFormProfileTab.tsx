@@ -53,7 +53,9 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
               {renderFieldError('specialization')}
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="font-label-sm text-gray-700 uppercase">License No.</label>
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500">
+                License No. <span className="text-primary">*</span>
+              </label>
               <input className="form-input" type="text" placeholder="e.g. MC-12345" value={formData.doctorInfo.licenseNumber} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} />
             </div>
           </div>
