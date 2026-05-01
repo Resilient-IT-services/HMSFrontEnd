@@ -39,8 +39,7 @@ export default function ActiveConsultationPage() {
   // Form State
   const [complaint, setComplaint] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
-  const [icdCodes, setIcdCodes] = useState<{ code: string; label: string }[]>([
-  ]);
+  const [icdCodes, setIcdCodes] = useState<{ code: string; label: string }[]>([]);
   const [prescriptions, setPrescriptions] = useState<PrescriptionRow[]>([
     { id: '1', medicine: '', frequency: '', instructions: '' },
     { id: '2', medicine: '', frequency: '', instructions: '' },
@@ -63,13 +62,11 @@ export default function ActiveConsultationPage() {
           setComplaint(found.chiefComplaints || found.notes || '');
           setDiagnosis(found.diagnosis || '');
           
-          // Fetch patient details
           const pRes = await patientService.get(found.patientId);
           if (pRes.success && pRes.data) {
             setPatient(pRes.data);
           }
 
-          // Fetch hospital details from user's current membership or first membership
           const hospitalId = user?.currentHospitalId || user?.memberships[0]?.hospitalId;
           if (hospitalId) {
             const hRes = await hospitalService.getById(hospitalId);
@@ -114,7 +111,6 @@ export default function ActiveConsultationPage() {
       newPrescriptions[index].medicineId = medicineId;
     }
     
-    // Auto-add new row if last row is being filled
     if (index === prescriptions.length - 1 && value !== '') {
       newPrescriptions.push({ id: Math.random().toString(), medicine: '', frequency: '', instructions: '' });
     }
@@ -132,7 +128,6 @@ export default function ActiveConsultationPage() {
     try {
       setFinishing(true);
       
-      // 1. Prepare Prescription Data
       const validPrescriptions = prescriptions.filter(p => p.medicine.trim() !== '');
       
       if (validPrescriptions.length > 0) {
@@ -148,7 +143,6 @@ export default function ActiveConsultationPage() {
           }))
         };
 
-        // SAVE PRESCRIPTION TO PHARMACY MODULE
         const presRes = await pharmacyService.createPrescription(prescriptionData);
         if (!presRes.success) {
           triggerGlobalToast('Failed to save prescription to pharmacy', 'error');
@@ -157,13 +151,10 @@ export default function ActiveConsultationPage() {
         }
       }
 
-      // 2. Call updateConsultation API for Clinical Notes
-      // This endpoint handles clinical data (complaints, diagnosis)
       const consultationRes = await appointmentService.updateConsultation(appointmentId, {
         chiefComplaints: complaint,
         diagnosis: diagnosis,
         icdCodes: icdCodes.map(c => c.code),
-        // We keep sending appointment data to satisfy general DTO requirements if needed
         patientId: appointment.patientId,
         doctorId: appointment.doctorId,
         appointmentTime: appointment.appointmentTime 
@@ -175,7 +166,6 @@ export default function ActiveConsultationPage() {
         return;
       }
 
-      // 3. Update status to COMPLETED
       const statusRes = await appointmentService.updateStatus(appointmentId, { status: 'COMPLETED' });
       
       if (statusRes.success) {
@@ -202,202 +192,175 @@ export default function ActiveConsultationPage() {
     );
   }
 
-  if (!appointmentId) {
-    return (
-      <MainLayout title="Active Consultation" hideTitle>
-        <div className="bg-white p-8 rounded-xl border border-outline-variant text-center">
-          <span className="material-symbols-outlined text-6xl text-gray-300 mb-4">clinical_notes</span>
-          <h3 className="text-xl font-bold text-gray-900">No Active Consultation</h3>
-          <p className="text-gray-500 mt-2">Please select a patient from the queue to start a consultation.</p>
-        </div>
-      </MainLayout>
-    );
-  }
-
   return (
     <MainLayout title="Active Consultation" hideTitle>
-      <div className="max-w-[1440px] mx-auto">
-        {/* Header Section */}
-        <div className="flex flex-col lg:flex-row justify-between items-start mb-6 gap-4">
-          <div>
-            <nav className="flex items-center gap-2 text-gray-500 mb-2 text-xs">
-              <span className="material-symbols-outlined text-[14px]">home</span>
-              <span>/</span>
-              <span>Consultation</span>
-              <span>/</span>
-              <span className="text-primary font-medium">Active Session</span>
-            </nav>
+      <div className="flex flex-col bg-surface min-h-screen">
+        {/* Sticky Mobile-Friendly Header */}
+        <div className="bg-white border-b border-outline-variant sticky top-16 z-30 px-4 lg:px-8 py-4 shadow-sm">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <h2 className="text-2xl font-bold text-on-surface">Active Consultation</h2>
-              <div className="bg-primary/10 text-primary px-3 py-1 rounded-lg font-black text-sm border border-primary/20">
-                {formatToken(appointment)}
+              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
+                {patient?.fullName?.charAt(0) || 'P'}
               </div>
-              <div className="h-8 w-[1px] bg-gray-300 hidden sm:block"></div>
-              <div className="flex items-center gap-3 text-on-surface-variant">
-                <span className="font-manrope font-bold text-lg">{patient?.fullName || 'Unknown Patient'}</span>
-                <span className="text-sm font-medium">{patientAge} Yrs</span>
-                <span className="text-sm font-medium">{appointment?.vitals?.weight || '--'} Kg</span>
-                <span className="text-sm font-medium capitalize">{patient?.gender.toLowerCase() || '--'}</span>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg lg:text-xl font-bold text-on-surface truncate">{patient?.fullName || 'Unknown Patient'}</h1>
+                  <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-black border border-primary/20 shrink-0">
+                    {formatToken(appointment)}
+                  </span>
+                </div>
+                <p className="text-[11px] lg:text-xs text-gray-500 font-medium">
+                  {patientAge} yrs • {patient?.gender} • {appointment?.vitals?.weight || '--'} kg • ID: #PAT-{patient?.id.substring(0, 8).toUpperCase()}
+                </p>
               </div>
             </div>
-          </div>
-          
-          {/* Vitals in Header */}
-          <div className="bg-white p-3 rounded-xl border border-outline-variant shadow-sm flex items-center gap-6">
-            <div className="flex flex-col">
-              <span className="text-[10px] uppercase font-bold text-gray-400">Vitals</span>
-              <div className="flex gap-4 items-center">
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-primary text-[18px]">favorite</span>
-                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.heartRate || '--'}</span>
-                </div>
-                <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
-                  <span className="material-symbols-outlined text-blue-500 text-[18px]">device_thermostat</span>
-                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.temperature || '--'}</span>
-                </div>
-                <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
-                  <span className="material-symbols-outlined text-green-500 text-[18px]">blood_pressure</span>
-                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.bloodPressure || '--'}</span>
-                </div>
-                <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
-                  <span className="material-symbols-outlined text-cyan-500 text-[18px]">pulse_alert</span>
-                  <span className="font-manrope font-bold text-sm">{appointment?.vitals?.oxygenLevel || '--'}%</span>
-                </div>
+            
+            <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100 overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-1.5 shrink-0 px-2">
+                <span className="material-symbols-outlined text-primary text-[16px]">favorite</span>
+                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.heartRate || '--'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0 px-2 border-l border-gray-200">
+                <span className="material-symbols-outlined text-blue-500 text-[16px]">device_thermostat</span>
+                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.temperature || '--'}°</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0 px-2 border-l border-gray-200">
+                <span className="material-symbols-outlined text-green-500 text-[16px]">blood_pressure</span>
+                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.bloodPressure || '--'}</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0 px-2 border-l border-gray-200">
+                <span className="material-symbols-outlined text-cyan-500 text-[16px]">pulse_alert</span>
+                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.oxygenLevel || '--'}%</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Grid Layout */}
-        <div className="grid grid-cols-12 gap-6">
-          {/* Left Column: Complaint & Diagnosis */}
-          <div className="col-span-12 lg:col-span-6 space-y-6">
-            <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">record_voice_over</span> Patient Complaint
-                </h3>
-                <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
-                  <span className="material-symbols-outlined text-[18px]">mic</span>
-                </button>
+        {/* Main Content Area */}
+        <div className="p-4 lg:p-8 max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+            {/* Left Column: Complaint & Diagnosis */}
+            <div className="space-y-6">
+              <div className="bg-white rounded-2xl border border-outline-variant p-5 lg:p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-md lg:text-lg font-bold text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">record_voice_over</span> Chief Complaint
+                  </h3>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
+                    <span className="material-symbols-outlined text-xl">mic</span>
+                  </button>
+                </div>
+                <textarea 
+                  className="w-full min-h-[150px] lg:min-h-[200px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm leading-relaxed resize-none outline-none" 
+                  placeholder="Enter patient symptoms and complaints here..."
+                  value={complaint}
+                  onChange={(e) => setComplaint(e.target.value)}
+                />
               </div>
-              <textarea 
-                className="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm leading-relaxed resize-none outline-none" 
-                placeholder="Enter patient symptoms and complaints here..."
-                value={complaint}
-                onChange={(e) => setComplaint(e.target.value)}
-              />
-            </div>
 
-            <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">medical_information</span> Diagnosis
-                </h3>
-                <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
-                  <span className="material-symbols-outlined text-[18px]">search</span>
-                </button>
-              </div>
-              <textarea 
-                className="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm leading-relaxed resize-none outline-none" 
-                placeholder="Enter final clinical diagnosis and assessment..."
-                value={diagnosis}
-                onChange={(e) => setDiagnosis(e.target.value)}
-              />
-              <div className="mt-4 flex flex-wrap gap-2">
-                {icdCodes.map((icd) => (
-                  <span key={icd.code} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-xs font-bold">
-                    {icd.code} {icd.label}
-                    <span 
-                      className="material-symbols-outlined text-[14px] cursor-pointer" 
-                      onClick={() => removeIcdCode(icd.code)}
-                    >
-                      close
+              <div className="bg-white rounded-2xl border border-outline-variant p-5 lg:p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-md lg:text-lg font-bold text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">medical_information</span> Diagnosis
+                  </h3>
+                  <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
+                    <span className="material-symbols-outlined text-xl">search</span>
+                  </button>
+                </div>
+                <textarea 
+                  className="w-full min-h-[150px] lg:min-h-[200px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm leading-relaxed resize-none outline-none" 
+                  placeholder="Enter final clinical diagnosis and assessment..."
+                  value={diagnosis}
+                  onChange={(e) => setDiagnosis(e.target.value)}
+                />
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {icdCodes.map((icd) => (
+                    <span key={icd.code} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-[10px] lg:text-xs font-bold">
+                      {icd.code} {icd.label}
+                      <span 
+                        className="material-symbols-outlined text-[14px] cursor-pointer" 
+                        onClick={() => removeIcdCode(icd.code)}
+                      >
+                        close
+                      </span>
                     </span>
-                  </span>
-                ))}
-
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Right Column: Prescriptions */}
-          <div className="col-span-12 lg:col-span-6">
-            <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm h-full flex flex-col">
+            {/* Right Column: Prescriptions */}
+            <div className="bg-white rounded-2xl border border-outline-variant p-5 lg:p-6 shadow-sm flex flex-col h-full">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">description</span> Prescriptions
+                <h3 className="text-md lg:text-lg font-bold text-on-surface flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary">description</span> Medication & Rx
                 </h3>
               </div>
               
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 space-y-6">
                 {prescriptions.map((row, index) => (
-                  <div key={row.id} className={`grid grid-cols-12 gap-3 pb-3 ${index < prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                    <div className="col-span-5">
-                      {index === 0 && (
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>
-                      )}
+                  <div key={row.id} className={`flex flex-col gap-4 pb-6 ${index < prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
+                    <div className="w-full">
+                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Medicine Name</label>
                       <MedicineAutocomplete 
                         defaultValue={row.medicine}
                         onSelect={(med) => updatePrescription(index, 'medicine', med.name, med.id)}
-                        placeholder="Search medicine..."
+                        placeholder="Search medicine database..."
                       />
                     </div>
-                    <div className="col-span-3">
-                      {index === 0 && (
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Frequency</label>
-                      )}
-                      <select 
-                        className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                        value={row.frequency}
-                        onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}
-                      >
-                        <option value="">Frequency...</option>
-                        <option value="3 times a day">3 times a day</option>
-                        <option value="2 times a day">2 times a day</option>
-                        <option value="Once daily">Once daily</option>
-                        <option value="As needed">As needed</option>
-                      </select>
-                    </div>
-                    <div className="col-span-4">
-                      {index === 0 && (
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Instructions</label>
-                      )}
-                      <select 
-                        className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
-                        value={row.instructions}
-                        onChange={(e) => updatePrescription(index, 'instructions', e.target.value)}
-                      >
-                        <option value="">Instructions...</option>
-                        <option value="After lunch">After lunch</option>
-                        <option value="Before breakfast">Before breakfast</option>
-                        <option value="Before sleep">Before sleep</option>
-                        <option value="Empty stomach">Empty stomach</option>
-                        <option value="For acute spasms">For acute spasms</option>
-                      </select>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex flex-col">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Frequency</label>
+                        <select 
+                          className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-xs lg:text-sm focus:ring-2 focus:ring-primary outline-none"
+                          value={row.frequency}
+                          onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}
+                        >
+                          <option value="">Select frequency...</option>
+                          <option value="3 times a day">3 times a day</option>
+                          <option value="2 times a day">2 times a day</option>
+                          <option value="Once daily">Once daily</option>
+                          <option value="As needed">As needed</option>
+                        </select>
+                      </div>
+                      <div className="flex flex-col">
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Instructions</label>
+                        <select 
+                          className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-xs lg:text-sm focus:ring-2 focus:ring-primary outline-none"
+                          value={row.instructions}
+                          onChange={(e) => updatePrescription(index, 'instructions', e.target.value)}
+                        >
+                          <option value="">Select instructions...</option>
+                          <option value="After lunch">After lunch</option>
+                          <option value="Before breakfast">Before breakfast</option>
+                          <option value="Before sleep">Before sleep</option>
+                          <option value="Empty stomach">Empty stomach</option>
+                          <option value="For acute spasms">For acute spasms</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-8 flex justify-end gap-3">
+              <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
                 <button 
                   onClick={() => setShowPrescription(true)}
-                  className="px-8 py-3.5 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
+                  className="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide text-[10px] lg:text-xs"
                 >
-                  <span className="material-symbols-outlined text-[20px]">print</span> Generate Prescription
+                  <span className="material-symbols-outlined text-[18px]">print</span> Generate Rx
                 </button>
                 <button 
                   onClick={handleFinishConsultation}
                   disabled={finishing}
-                  className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs disabled:opacity-70"
+                  className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-orange-700 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide text-[10px] lg:text-xs disabled:opacity-70"
                 >
                   {finishing ? (
                     <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
                   ) : (
-                    <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
                   )}
-                  Finish Consultation
+                  Finish Visit
                 </button>
               </div>
             </div>

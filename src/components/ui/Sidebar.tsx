@@ -7,11 +7,13 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
 import { logout } from '@/state/authSlice';
 import { authService } from '@/services/authService';
+import { useLayout } from '@/context/LayoutContext';
 
 const Sidebar = () => {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const { isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
+  const { isSidebarOpen, setIsSidebarOpen } = useLayout();
 
   const handleLogout = async () => {
     try {
@@ -20,6 +22,12 @@ const Sidebar = () => {
       globalThis.location.href = '/login';
     } catch (error) {
       console.error('Logout failed', error);
+    }
+  };
+
+  const handleLinkClick = () => {
+    if (globalThis.innerWidth < 1024) {
+      setIsSidebarOpen(false);
     }
   };
 
@@ -71,47 +79,64 @@ const Sidebar = () => {
   );
 
   return (
-    <aside className="bg-white h-[calc(100vh-64px)] w-64 border-r border-gray-200 flex flex-col p-4 gap-2 sticky top-16 z-50">
-      <div className="px-2 mb-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Main Menu</p>
-      </div>
-      <nav className="flex-1 space-y-1">
-        {filteredMenuItems.map((item) => {
-          // Check if current path starts with item.href to keep it active for sub-routes
-          // e.g. /admin/users and /admin/users/create both should highlight "User Management"
-          const isActive = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 font-manrope text-sm font-medium ${
-                isActive
-                  ? 'bg-orange-50 text-orange-600 rounded-lg'
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
-            >
-              <span className="material-symbols-outlined" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
-                {item.icon}
-              </span>
-              <span>{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-      <div className="mt-auto flex flex-col gap-2 pt-4 border-t border-gray-100">
-        <a className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium cursor-pointer">
-          <span className="material-symbols-outlined">help</span>
-          <span>Support</span>
-        </a>
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium w-full text-left"
-        >
-          <span className="material-symbols-outlined">logout</span>
-          <span>Logout</span>
-        </button>
-      </div>
-    </aside>
+    <>
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[55] lg:hidden backdrop-blur-sm transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      <aside className={`bg-white h-[calc(100vh-64px)] w-64 border-r border-gray-200 flex flex-col p-4 gap-2 fixed lg:sticky top-16 z-[56] transition-transform duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        <div className="px-2 mb-4 flex items-center justify-between">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Main Menu</p>
+          <button 
+            onClick={() => setIsSidebarOpen(false)}
+            className="lg:hidden p-1 hover:bg-gray-100 rounded-lg text-gray-400"
+          >
+            <span className="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+        <nav className="flex-1 space-y-1">
+          {filteredMenuItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={handleLinkClick}
+                className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 font-manrope text-sm font-medium ${
+                  isActive
+                    ? 'bg-orange-50 text-orange-600 rounded-lg'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <span className="material-symbols-outlined" style={isActive ? { fontVariationSettings: "'FILL' 1" } : {}}>
+                  {item.icon}
+                </span>
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="mt-auto flex flex-col gap-2 pt-4 border-t border-gray-100">
+          <a className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium cursor-pointer">
+            <span className="material-symbols-outlined">help</span>
+            <span>Support</span>
+          </a>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 transition-all font-manrope text-sm font-medium w-full text-left"
+          >
+            <span className="material-symbols-outlined">logout</span>
+            <span>Logout</span>
+          </button>
+        </div>
+      </aside>
+    </>
   );
 };
 

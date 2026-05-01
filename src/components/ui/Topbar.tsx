@@ -9,7 +9,7 @@ import GlobalSearch from './GlobalSearch';
 import { useLayout } from '@/context/LayoutContext';
 
 const Topbar: React.FC = () => {
-  const { title, headerActions } = useLayout();
+  const { title, headerActions, toggleSidebar } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -71,39 +71,44 @@ const Topbar: React.FC = () => {
   };
 
   return (
-    <header className="bg-white flex justify-between items-center h-16 w-full sticky top-0 z-40 border-b border-gray-200 shadow-sm font-manrope antialiased">
-      <div className="flex items-center">
-        <div className="w-64 px-6">
-          <h1 className="text-xl font-extrabold tracking-tight text-gray-900">VitalSync HMS</h1>
+    <header className="bg-white flex justify-between items-center h-16 w-full sticky top-0 z-[60] border-b border-gray-200 shadow-sm font-manrope antialiased">
+      <div className="flex items-center h-full">
+        <div className="lg:w-64 px-4 lg:px-6 flex items-center gap-3">
+          <button 
+            onClick={toggleSidebar}
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
+          >
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+          <h1 className="text-lg lg:text-xl font-extrabold tracking-tight text-gray-900 truncate">VitalSync<span className="hidden sm:inline"> HMS</span></h1>
         </div>
-        <GlobalSearch />
-        <div className="h-8 w-px bg-gray-200 mx-6"></div>
-        <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-xs font-black">{currentHospitalName}</h2>
+        <div className="hidden md:flex items-center h-full">
+          <GlobalSearch />
+          <div className="h-8 w-px bg-gray-200 mx-6"></div>
+          <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-[10px] font-black max-w-[150px] lg:max-w-[300px] truncate">{currentHospitalName}</h2>
+        </div>
       </div>
 
-      <div className="flex items-center gap-4 px-6">
+      <div className="flex items-center gap-2 lg:gap-4 px-4 lg:px-6">
         {headerActions && (
-          <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3">
             {headerActions}
-            <div className="h-6 w-px bg-gray-200 mx-2"></div>
           </div>
         )}
         
-        <div className="h-6 w-px bg-gray-200"></div>
+        <div className="hidden sm:block h-6 w-px bg-gray-200 mx-2"></div>
 
-
-        
         <div className="relative" ref={dropdownRef}>
           <button 
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="flex items-center gap-3 p-1.5 pr-3 rounded-full hover:bg-gray-50 transition-colors text-gray-500"
+            className="flex items-center gap-2 lg:gap-3 p-1.5 rounded-full hover:bg-gray-50 transition-colors text-gray-500"
           >
             <span className="material-symbols-outlined text-2xl">account_circle</span>
-            <div className="flex flex-col items-start leading-none">
+            <div className="hidden sm:flex flex-col items-start leading-none">
               <span className="text-sm font-bold text-gray-700">{user?.username}</span>
               <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-tighter">{roleLabel}</span>
             </div>
-            <span className="material-symbols-outlined text-sm">keyboard_arrow_down</span>
+            <span className="material-symbols-outlined text-sm hidden sm:inline">keyboard_arrow_down</span>
           </button>
 
             {isProfileOpen && (

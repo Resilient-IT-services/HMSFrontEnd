@@ -2,6 +2,7 @@ import React from 'react';
 import { PrescriptionDTO } from '@/types/api';
 import StatusBadge from './StatusBadge';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface PrescriptionTableProps {
   prescriptions: PrescriptionDTO[];
@@ -9,6 +10,8 @@ interface PrescriptionTableProps {
 }
 
 const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, loading }) => {
+  const router = useRouter();
+
   if (loading) {
     return (
       <div className="py-8 text-center text-[var(--text-secondary)]">Loading prescriptions...</div>
@@ -36,7 +39,11 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
         </thead>
         <tbody className="divide-y divide-[var(--border)]">
           {prescriptions.map((prescription) => (
-            <tr key={prescription.id} className="hover:bg-[var(--background)] transition-colors">
+            <tr 
+              key={prescription.id} 
+              className="hover:bg-[var(--background)] transition-colors cursor-pointer"
+              onDoubleClick={() => router.push(`/pharmacy/prescriptions/${prescription.id}`)}
+            >
               <td className="px-6 py-4">
                 <span className="font-medium text-[var(--text-primary)]">#RX-{prescription.id}</span>
               </td>

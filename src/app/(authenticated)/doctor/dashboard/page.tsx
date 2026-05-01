@@ -57,7 +57,7 @@ const DoctorDashboard = () => {
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN' || appointment.status === 'ADD_VITALS').length;
-    const active = appointments.filter((appointment) => appointment.status === 'DELAYED').length;
+    const active = appointments.filter((appointment) => appointment.status === 'WALK_IN').length;
     const completed = appointments.filter((appointment) => appointment.status === 'COMPLETED').length;
     const earnedCount = appointments.filter((appointment) => appointment.status !== 'CANCELLED' && appointment.status !== 'PAYMENT_PENDING').length;
 
@@ -78,7 +78,7 @@ const DoctorDashboard = () => {
   }, [appointments]);
 
   const activeAppointment = useMemo(
-    () => queue.find((appointment) => appointment.status === 'DELAYED'),
+    () => queue.find((appointment) => appointment.status === 'WALK_IN'),
     [queue],
   );
 
@@ -87,24 +87,17 @@ const DoctorDashboard = () => {
     'COMPLETED': 'Completed',
     'PAYMENT_PENDING': 'Payment Pending',
     'WAITING_FOR_VITALS': 'Waiting for Vitals',
-    'WALK_IN': 'Walk-in',
+    'WALK_IN': 'In Progress',
     'CANCELLED': 'Cancelled',
     'ADD_VITALS': 'Add Vitals',
-    'DELAYED': 'In Progress',
     'CHECKED_IN': 'Checked In'
   };
 
-  const handleStartNextConsultation = async () => {
-    const nextAppointment = queue[0];
-    if (!nextAppointment) {
-      triggerGlobalToast('No patients in the queue', 'info');
-      return;
-    }
-
+  const handleStartConsultation = async (appointmentId: string) => {
     try {
-      const res = await appointmentService.updateStatus(nextAppointment.id, { status: 'DELAYED' });
+      const res = await appointmentService.updateStatus(appointmentId, { status: 'WALK_IN' });
       if (res.success) {
-        router.push(`/doctor/active-consultation?appointmentId=${nextAppointment.id}`);
+        router.push(`/doctor/active-consultation?appointmentId=${appointmentId}`);
       } else {
         triggerGlobalToast('Failed to start consultation', 'error');
       }
@@ -114,24 +107,34 @@ const DoctorDashboard = () => {
     }
   };
 
+  const handleStartNextConsultation = async () => {
+    const nextAppointment = queue[0];
+    if (!nextAppointment) {
+      triggerGlobalToast('No patients in the queue', 'info');
+      return;
+    }
+
+    handleStartConsultation(nextAppointment.id);
+  };
+
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
-      <div className="p-8 max-w-7xl mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen">
+      <div className="p-4 lg:p-8 max-w-7xl mx-auto w-full bg-[#f9f9ff] min-h-screen">
         <section className="mb-8">
-          <div className="bg-white rounded-xl border border-slate-200 p-8 flex justify-between items-center relative overflow-hidden shadow-sm">
-            <div className="relative z-10">
-              <h2 className="text-3xl font-bold text-slate-900 mb-2 font-manrope">Good morning, Dr. {user?.fullName.split(' ')[0]}</h2>
+          <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center relative overflow-hidden shadow-sm gap-6">
+            <div className="relative z-10 w-full lg:w-auto">
+              <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-2 font-manrope">Good morning, Dr. {user?.fullName.split(' ')[0]}</h2>
               <p className="text-slate-500 max-w-lg">You have {stats.total} consultations scheduled for today. {stats.waiting} patients are currently in the queue.</p>
-              <div className="flex gap-4 mt-6">
+              <div className="flex flex-col sm:flex-row gap-4 mt-6">
                 <button 
                   onClick={handleStartNextConsultation}
-                  className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-orange-700 active:scale-95 transition-all shadow-lg shadow-orange-600/20"
+                  className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-orange-700 active:scale-95 transition-all shadow-lg shadow-orange-600/20"
                 >
                   <span className="material-symbols-outlined" style={{ fontVariationSettings: '\'FILL\' 1' }}>play_arrow</span>
                   Start Next Consultation
                 </button>
-                <Link href="/doctor/patient-queue">
-                  <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 active:scale-95 transition-all">
+                <Link href="/doctor/patient-queue" className="w-full sm:w-auto">
+                  <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-50 active:scale-95 transition-all w-full">
                     <span className="material-symbols-outlined">list_alt</span>
                     Go to Queue
                   </button>
@@ -147,7 +150,7 @@ const DoctorDashboard = () => {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
           {[
             { label: 'Total Patients', value: stats.total, color: 'bg-orange-600', trend: '12%', icon: 'trending_up' },
             { label: 'Waiting', value: stats.waiting, color: 'bg-orange-400', icon: 'hourglass_empty' },
@@ -183,9 +186,13 @@ const DoctorDashboard = () => {
               </div>
               <div className="divide-y divide-slate-50">
                 {queue.map((appointment) => (
-                  <div key={appointment.id} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                  <div 
+                    key={appointment.id} 
+                    className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors cursor-pointer"
+                    onDoubleClick={() => handleStartConsultation(appointment.id)}
+                  >
                     <div className="flex items-center gap-4">
-                      <div className={`w-20 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 shrink-0 ${appointment.status === 'DELAYED' ? 'bg-orange-100 text-orange-700' : ''}`}>
+                      <div className={`w-20 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 shrink-0 ${appointment.status === 'WALK_IN' ? 'bg-orange-100 text-orange-700' : ''}`}>
                         {formatToken(appointment)}
                       </div>
                       <div>
@@ -197,7 +204,7 @@ const DoctorDashboard = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${
-                        appointment.status === 'DELAYED'
+                        appointment.status === 'WALK_IN'
                           ? 'bg-blue-50 text-blue-700 border-blue-100'
                           : (appointment.status === 'SCHEDULED'
                             ? 'bg-orange-50 text-orange-700 border-orange-100'
@@ -230,7 +237,7 @@ const DoctorDashboard = () => {
                 {activeAppointment ? (
                   <>
                     <h4 className="text-xl font-bold mb-1">{activeAppointment.patientName}</h4>
-                    <p className="text-xs opacity-90 mb-4">Marked as delayed or currently in progress.</p>
+                    <p className="text-xs opacity-90 mb-4">Patient currently in consultation.</p>
                   </>
                 ) : (
                   <>

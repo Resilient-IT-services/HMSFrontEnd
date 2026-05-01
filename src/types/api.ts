@@ -255,7 +255,7 @@ export interface CreateHospitalRequest {
 }
 
 // Appointment types
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'PAYMENT_PENDING' | 'WAITING_FOR_VITALS' | 'WALK_IN' | 'CANCELLED' | 'ADD_VITALS' | 'DELAYED' | 'CHECKED_IN';
+export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'PAYMENT_PENDING' | 'WAITING_FOR_VITALS' | 'WALK_IN' | 'CANCELLED' | 'ADD_VITALS' | 'CHECKED_IN';
 
 export interface VitalsDTO {
   bloodPressure: string; // Combined for legacy or display

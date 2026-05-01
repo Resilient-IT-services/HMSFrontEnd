@@ -59,7 +59,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T11:00:00',
-        status: 'DELAYED',
+        status: 'WALK_IN',
       }
     ];
 

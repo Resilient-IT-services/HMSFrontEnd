@@ -46,7 +46,7 @@ describe('DoctorDashboard', () => {
             doctorId: 'doctor-2',
             doctorName: 'Other Doctor',
             appointmentTime: `${new Date().toISOString().split('T')[0]}T11:00:00`,
-            status: 'DELAYED',
+            status: 'WALK_IN',
             notes: '',
             createdAt: '2026-04-26T00:00:00',
           },
@@ -150,7 +150,7 @@ describe('DoctorDashboard', () => {
     fireEvent.click(startBtn);
 
     await waitFor(() => {
-      expect(appointmentService.updateStatus).toHaveBeenCalledWith('app-1', { status: 'DELAYED' });
+      expect(appointmentService.updateStatus).toHaveBeenCalledWith('app-1', { status: 'WALK_IN' });
       expect(mockPush).toHaveBeenCalledWith('/doctor/active-consultation?appointmentId=app-1');
     });
   });

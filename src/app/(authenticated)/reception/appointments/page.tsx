@@ -62,10 +62,8 @@ export default function TodayAppointmentsPage() {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      // Determine date based on status filter
       let dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
       
-      // Determine statuses based on status filter or advanced filter
       let statusesToUse = filters.statuses?.length > 0 
         ? filters.statuses.join(',') 
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
@@ -83,7 +81,6 @@ export default function TodayAppointmentsPage() {
           undefined
         ),
         doctorService.list(0, 100),
-        // Fetch unfiltered appointments for global stats calculation
         appointmentService.list(0, 500)
       ]);
 
@@ -96,7 +93,6 @@ export default function TodayAppointmentsPage() {
         setDoctors(docData.content);
       }
 
-      // Calculate global stats independently of search/filter
       if (statsRes.success && statsRes.data) {
         const allApps = statsRes.data.content;
         const todayApps = allApps.filter(app => app.appointmentTime.split('T')[0] === today);
@@ -172,19 +168,33 @@ export default function TodayAppointmentsPage() {
   }, [appointments, statusFilter, activeFilters]);
 
   return (
-    <MainLayout title="Daily Schedule">
-      <div className="space-y-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-slate-800">Appointment Management</h2>
-          <button 
-            onClick={() => router.push('/reception/appointments/create')}
-            className="px-6 py-2.5 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 hover:bg-orange-800 transition-all shadow-lg shadow-orange-700/20 active:scale-95"
-          >
-            <span className="material-symbols-outlined">add_circle</span>
-            Create Appointment
-          </button>
+    <MainLayout title="Appointments Dashboard" hideTitle>
+      <div className="p-4 lg:p-8 space-y-6 lg:space-y-8 bg-gray-50/50 min-h-screen">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 font-manrope">Today's Appointments</h1>
+            <p className="text-slate-500 text-sm lg:text-base">Real-time status of all patient visits for today.</p>
+          </div>
+          <div className="flex w-full sm:w-auto gap-3">
+            <button 
+              onClick={() => setIsFilterModalOpen(true)}
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-50 shadow-sm"
+            >
+              <span className="material-symbols-outlined text-lg">filter_list</span>
+              Filters {(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0) > 0 && 
+                `(${(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0)})`}
+            </button>
+            <button 
+              onClick={() => router.push('/reception/patient-registration')}
+              className="flex-1 sm:flex-none px-6 py-2.5 bg-orange-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-orange-700 shadow-md shadow-orange-600/20 active:scale-95 transition-all"
+            >
+              <span className="material-symbols-outlined text-lg">add_circle</span>
+              New Visit
+            </button>
+          </div>
         </div>
 
+        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
           {[
             { label: 'Today Total', value: stats.total, color: 'text-slate-600', bg: 'bg-slate-50', filter: 'ALL' },
@@ -207,14 +217,14 @@ export default function TodayAppointmentsPage() {
               }}
               className={`${stat.bg} p-3 rounded-xl border ${statusFilter === stat.filter ? 'border-orange-500 ring-1 ring-orange-500/20' : 'border-slate-100'} shadow-sm cursor-pointer hover:shadow-md transition-all active:scale-95`}
             >
-              <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1">{stat.label}</p>
+              <p className="text-[9px] font-black uppercase text-slate-400 tracking-wider mb-1 truncate">{stat.label}</p>
               <p className={`text-xl font-black ${stat.color}`}>{stat.value}</p>
             </div>
           ))}
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
             {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
@@ -226,13 +236,13 @@ export default function TodayAppointmentsPage() {
                     setAdvancedFilters(updated);
                   }
                 }}
-                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 md:flex-none px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
                   statusFilter === status 
                     ? 'bg-orange-700 text-white shadow-md' 
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status === 'ALL' ? 'Today Appointments' : status.replace('_', ' ')}
+                {status === 'ALL' ? 'Today' : status.replace('_', ' ')}
               </button>
             ))}
           </div>
@@ -294,7 +304,8 @@ export default function TodayAppointmentsPage() {
         )}
 
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <table className="w-full text-left">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left min-w-[900px]">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-200">
                 <th className="px-6 py-4 font-bold text-slate-700 text-xs uppercase">Token</th>
@@ -369,6 +380,7 @@ export default function TodayAppointmentsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
@@ -447,5 +459,5 @@ export default function TodayAppointmentsPage() {
         </div>
       </Modal>
     </MainLayout>
-    );
-    }
+  );
+}

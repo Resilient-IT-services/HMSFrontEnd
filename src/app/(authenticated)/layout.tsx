@@ -10,11 +10,11 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Topbar />
-      <div className="flex min-h-[calc(100vh-64px)]">
+      <div className="flex flex-1 relative">
         <Sidebar />
-        <main className="flex-1 p-gutter max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 lg:p-gutter max-w-7xl mx-auto w-full overflow-x-hidden">
           {children}
         </main>
       </div>

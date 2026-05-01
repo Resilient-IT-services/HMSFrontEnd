@@ -75,16 +75,16 @@ export default function UserManagement() {
 
   return (
     <MainLayout title="User Management" hideTitle>
-      <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f7f9fb] min-h-screen font-inter">
+      <div className="p-4 lg:p-8 max-w-[1600px] mx-auto w-full bg-[#f7f9fb] min-h-screen font-inter">
         {/* Dashboard Header */}
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div>
-            <h2 className="font-manrope text-3xl font-bold text-slate-900 uppercase">User Management</h2>
-            <p className="text-slate-500 mt-1">Manage hospital staff credentials and access levels</p>
+            <h2 className="font-manrope text-2xl lg:text-3xl font-bold text-slate-900 uppercase tracking-tight">User Management</h2>
+            <p className="text-slate-500 mt-1 text-sm lg:text-base">Manage hospital staff credentials and access levels</p>
           </div>
           <button 
             onClick={() => router.push('/admin/users/create')}
-            className="bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 hover:opacity-90 transition-all shadow-md shadow-orange-700/10 active:scale-95"
+            className="w-full sm:w-auto bg-orange-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-md shadow-orange-700/10 active:scale-95"
           >
             <span className="material-symbols-outlined">person_add</span>
             Create User
@@ -92,8 +92,8 @@ export default function UserManagement() {
         </div>
 
         {/* Controls Row */}
-        <div className="flex items-center justify-between mb-6 gap-4">
-          <div className="relative w-full max-w-md">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between mb-6 gap-4">
+          <div className="relative w-full max-w-xl">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
             <input 
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-700/20 focus:border-orange-700 transition-all outline-none bg-white text-sm" 
@@ -103,9 +103,9 @@ export default function UserManagement() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
             <select 
-              className="px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium outline-none"
+              className="w-full sm:w-auto px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-medium outline-none"
               value={roleFilter || ''}
               onChange={(e) => setRoleFilter(e.target.value || undefined)}
             >
@@ -117,7 +117,7 @@ export default function UserManagement() {
               <option value="PHARMACIST">Pharmacist</option>
             </select>
             {showExportButton && (
-            <button className="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors font-medium text-sm">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors font-medium text-sm">
               <span className="material-symbols-outlined text-xl">file_download</span>
               Export
             </button>
@@ -127,7 +127,8 @@ export default function UserManagement() {
 
         {/* Table Container */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-200">
                 <th className="px-6 py-4 font-semibold text-slate-700 font-manrope text-sm">User Details</th>

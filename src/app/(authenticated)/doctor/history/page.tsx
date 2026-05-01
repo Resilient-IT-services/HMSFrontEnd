@@ -115,7 +115,11 @@ const MedicalHistoryPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {patients.map(p => (
-                <div key={p.id} onClick={() => selectPatient(p.id)}>
+                <div 
+                  key={p.id} 
+                  onClick={() => selectPatient(p.id)}
+                  onDoubleClick={() => selectPatient(p.id)}
+                >
                   <Card className="cursor-pointer hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-primary font-bold">

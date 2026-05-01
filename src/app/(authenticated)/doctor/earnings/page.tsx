@@ -83,10 +83,9 @@ const DoctorEarningsPage = () => {
     'COMPLETED': 'Completed',
     'PAYMENT_PENDING': 'Payment Pending',
     'WAITING_FOR_VITALS': 'Waiting for Vitals',
-    'WALK_IN': 'Walk-in',
+    'WALK_IN': 'In Progress',
     'CANCELLED': 'Cancelled',
     'ADD_VITALS': 'Add Vitals',
-    'DELAYED': 'In Progress',
     'CHECKED_IN': 'Checked In'
   };
 
