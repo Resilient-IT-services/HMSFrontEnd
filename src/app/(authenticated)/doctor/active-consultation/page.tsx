@@ -21,6 +21,7 @@ interface PrescriptionRow {
   medicineId?: string;
   frequency: string;
   instructions: string;
+  composition?: string;
 }
 
 export default function ActiveConsultationPage() {
@@ -103,15 +104,18 @@ export default function ActiveConsultationPage() {
     }
   }, [patient]);
 
-  const updatePrescription = (index: number, field: keyof PrescriptionRow, value: string, medicineId?: string) => {
+  const updatePrescription = (index: number, field: keyof PrescriptionRow, value: string, extra?: { medicineId?: string; composition?: string }) => {
     const newPrescriptions = [...prescriptions];
     newPrescriptions[index] = { ...newPrescriptions[index], [field]: value };
     
-    if (medicineId) {
-      newPrescriptions[index].medicineId = medicineId;
+    if (extra?.medicineId) {
+      newPrescriptions[index].medicineId = extra.medicineId;
+    }
+    if (extra?.composition) {
+      newPrescriptions[index].composition = extra.composition;
     }
     
-    if (index === prescriptions.length - 1 && value !== '') {
+    if (index === prescriptions.length - 1 && value !== '' && field === 'medicine') {
       newPrescriptions.push({ id: Math.random().toString(), medicine: '', frequency: '', instructions: '' });
     }
     
@@ -194,88 +198,100 @@ export default function ActiveConsultationPage() {
 
   return (
     <MainLayout title="Active Consultation" hideTitle>
-      <div className="flex flex-col bg-surface min-h-screen">
-        {/* Sticky Mobile-Friendly Header */}
-        <div className="bg-white border-b border-outline-variant sticky top-16 z-30 px-4 lg:px-8 py-4 shadow-sm">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg shrink-0">
-                {patient?.fullName?.charAt(0) || 'P'}
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg lg:text-xl font-bold text-on-surface truncate">{patient?.fullName || 'Unknown Patient'}</h1>
-                  <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-black border border-primary/20 shrink-0">
-                    {formatToken(appointment)}
-                  </span>
+      <main className="p-6 lg:p-10 bg-surface min-h-[calc(100vh-64px)]">
+        <div className="max-w-[1440px] mx-auto">
+          {/* Sub Header */}
+          <div className="flex flex-col lg:flex-row justify-between items-start mb-6 gap-4">
+            <div>
+              <nav className="flex items-center gap-2 text-gray-500 mb-2 font-body-sm">
+                <span className="material-symbols-outlined text-sm">home</span>
+                <span>/</span>
+                <span>Consultation</span>
+                <span>/</span>
+                <span className="text-primary font-medium">Active Session</span>
+              </nav>
+              <div className="flex items-center gap-4">
+                <h2 className="font-headline-xl text-on-surface">Active Consultation</h2>
+                <div className="h-8 w-[1px] bg-gray-300 hidden sm:block"></div>
+                <div className="flex items-center gap-3 text-on-surface-variant">
+                  <span className="font-manrope font-bold text-lg">{patient?.fullName || 'Unknown Patient'}</span>
+                  <span className="text-sm font-medium">{patientAge} Yrs</span>
+                  <span className="text-sm font-medium">{appointment?.vitals?.weight || '--'} Kg</span>
+                  <span className="text-sm font-medium">{patient?.gender}</span>
+                  {appointment?.tokenDisplay && (
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[10px] font-black border border-primary/20 ml-2 uppercase">
+                      Token: {appointment.tokenDisplay}
+                    </span>
+                  )}
                 </div>
-                <p className="text-[11px] lg:text-xs text-gray-500 font-medium">
-                  {patientAge} yrs • {patient?.gender} • {appointment?.vitals?.weight || '--'} kg • ID: #PAT-{patient?.id.substring(0, 8).toUpperCase()}
-                </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-xl border border-gray-100 overflow-x-auto no-scrollbar">
-              <div className="flex items-center gap-1.5 shrink-0 px-2">
-                <span className="material-symbols-outlined text-primary text-[16px]">favorite</span>
-                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.heartRate || '--'}</span>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0 px-2 border-l border-gray-200">
-                <span className="material-symbols-outlined text-blue-500 text-[16px]">device_thermostat</span>
-                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.temperature || '--'}°</span>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0 px-2 border-l border-gray-200">
-                <span className="material-symbols-outlined text-green-500 text-[16px]">blood_pressure</span>
-                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.bloodPressure || '--'}</span>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0 px-2 border-l border-gray-200">
-                <span className="material-symbols-outlined text-cyan-500 text-[16px]">pulse_alert</span>
-                <span className="font-manrope font-bold text-xs">{appointment?.vitals?.oxygenLevel || '--'}%</span>
+            <div className="bg-white p-3 rounded-xl border border-outline-variant shadow-sm flex items-center gap-6">
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold text-gray-400">Vitals</span>
+                <div className="flex gap-4 items-center">
+                  <div className="flex items-center gap-1">
+                    <span className="material-symbols-outlined text-primary text-sm">favorite</span>
+                    <span className="font-manrope font-bold text-sm">{appointment?.vitals?.heartRate || '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
+                    <span className="material-symbols-outlined text-blue-500 text-sm">device_thermostat</span>
+                    <span className="font-manrope font-bold text-sm">{appointment?.vitals?.temperature || '--'}</span>
+                  </div>
+                  <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
+                    <span className="material-symbols-outlined text-green-500 text-sm">blood_pressure</span>
+                    <span className="font-manrope font-bold text-sm">{appointment?.vitals?.bloodPressure || '--'}</span>
+                  </div>
+                  {appointment?.vitals?.oxygenLevel && (
+                    <div className="flex items-center gap-1 border-l pl-4 border-gray-100">
+                      <span className="material-symbols-outlined text-cyan-500 text-sm">pulse_alert</span>
+                      <span className="font-manrope font-bold text-sm">{appointment?.vitals?.oxygenLevel}%</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Main Content Area */}
-        <div className="p-4 lg:p-8 max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="grid grid-cols-12 gap-gutter">
             {/* Left Column: Complaint & Diagnosis */}
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl border border-outline-variant p-5 lg:p-6 shadow-sm">
+            <div className="col-span-12 lg:col-span-5 space-y-6">
+              <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-md lg:text-lg font-bold text-on-surface flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">record_voice_over</span> Chief Complaint
+                  <h3 className="font-headline-sm text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">record_voice_over</span> Patient Complaint
                   </h3>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
-                    <span className="material-symbols-outlined text-xl">mic</span>
+                  <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
+                    <span className="material-symbols-outlined text-[18px]">mic</span>
                   </button>
                 </div>
                 <textarea 
-                  className="w-full min-h-[150px] lg:min-h-[200px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm leading-relaxed resize-none outline-none" 
+                  className="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md leading-relaxed resize-none outline-none" 
                   placeholder="Enter patient symptoms and complaints here..."
                   value={complaint}
                   onChange={(e) => setComplaint(e.target.value)}
                 />
               </div>
 
-              <div className="bg-white rounded-2xl border border-outline-variant p-5 lg:p-6 shadow-sm">
+              <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-md lg:text-lg font-bold text-on-surface flex items-center gap-2">
+                  <h3 className="font-headline-sm text-on-surface flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">medical_information</span> Diagnosis
                   </h3>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-400 transition-colors">
-                    <span className="material-symbols-outlined text-xl">search</span>
+                  <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
+                    <span className="material-symbols-outlined text-[18px]">search</span>
                   </button>
                 </div>
                 <textarea 
-                  className="w-full min-h-[150px] lg:min-h-[200px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all text-sm leading-relaxed resize-none outline-none" 
+                  className="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md leading-relaxed resize-none outline-none" 
                   placeholder="Enter final clinical diagnosis and assessment..."
                   value={diagnosis}
                   onChange={(e) => setDiagnosis(e.target.value)}
                 />
                 <div className="mt-4 flex flex-wrap gap-2">
                   {icdCodes.map((icd) => (
-                    <span key={icd.code} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-[10px] lg:text-xs font-bold">
+                    <span key={icd.code} className="inline-flex items-center gap-1 bg-primary/10 text-primary px-3 py-1.5 rounded-lg text-xs font-bold">
                       {icd.code} {icd.label}
                       <span 
                         className="material-symbols-outlined text-[14px] cursor-pointer" 
@@ -285,88 +301,96 @@ export default function ActiveConsultationPage() {
                       </span>
                     </span>
                   ))}
+                  <button className="text-xs font-bold text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
+                    + Add ICD-10 Code
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* Right Column: Prescriptions */}
-            <div className="bg-white rounded-2xl border border-outline-variant p-5 lg:p-6 shadow-sm flex flex-col h-full">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-md lg:text-lg font-bold text-on-surface flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary">description</span> Medication & Rx
-                </h3>
-              </div>
-              
-              <div className="flex-1 space-y-6">
-                {prescriptions.map((row, index) => (
-                  <div key={row.id} className={`flex flex-col gap-4 pb-6 ${index < prescriptions.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                    <div className="w-full">
-                      <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Medicine Name</label>
-                      <MedicineAutocomplete 
-                        defaultValue={row.medicine}
-                        onSelect={(med) => updatePrescription(index, 'medicine', med.name, med.id)}
-                        placeholder="Search medicine database..."
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex flex-col">
-                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Frequency</label>
+            <div className="col-span-12 lg:col-span-7">
+              <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm h-full flex flex-col">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-headline-sm text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-primary">description</span> Prescriptions
+                  </h3>
+                </div>
+                
+                <div className="flex-1 space-y-4">
+                  {prescriptions.map((row, index) => (
+                    <div key={row.id} className="grid grid-cols-12 gap-3 pb-3 border-b border-gray-50 last:border-none">
+                      <div className="col-span-12 md:col-span-5">
+                        {index === 0 && <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>}
+                        <MedicineAutocomplete 
+                          defaultValue={row.medicine}
+                          onSelect={(med) => updatePrescription(index, 'medicine', med.name, { medicineId: med.id, composition: med.composition })}
+                          placeholder="Select Medicine..."
+                          className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
+                        />
+                        {row.composition && (
+                          <p className="mt-1 text-[10px] text-primary/70 font-medium italic truncate" title={row.composition}>
+                            Salts: {row.composition}
+                          </p>
+                        )}
+                      </div>
+                      <div className="col-span-6 md:col-span-3">
+                        {index === 0 && <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Frequency</label>}
                         <select 
-                          className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-xs lg:text-sm focus:ring-2 focus:ring-primary outline-none"
+                          className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
                           value={row.frequency}
                           onChange={(e) => updatePrescription(index, 'frequency', e.target.value)}
                         >
-                          <option value="">Select frequency...</option>
+                          <option value="">Frequency...</option>
                           <option value="3 times a day">3 times a day</option>
                           <option value="2 times a day">2 times a day</option>
                           <option value="Once daily">Once daily</option>
                           <option value="As needed">As needed</option>
                         </select>
                       </div>
-                      <div className="flex flex-col">
-                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5">Instructions</label>
+                      <div className="col-span-6 md:col-span-4">
+                        {index === 0 && <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Instructions</label>}
                         <select 
-                          className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-xs lg:text-sm focus:ring-2 focus:ring-primary outline-none"
+                          className="w-full px-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none"
                           value={row.instructions}
                           onChange={(e) => updatePrescription(index, 'instructions', e.target.value)}
                         >
-                          <option value="">Select instructions...</option>
+                          <option value="">Instructions...</option>
                           <option value="After lunch">After lunch</option>
                           <option value="Before breakfast">Before breakfast</option>
                           <option value="Before sleep">Before sleep</option>
                           <option value="Empty stomach">Empty stomach</option>
-                          <option value="For acute spasms">For acute spasms</option>
                         </select>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              <div className="mt-8 flex flex-col sm:flex-row justify-end gap-3">
-                <button 
-                  onClick={() => setShowPrescription(true)}
-                  className="px-6 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide text-[10px] lg:text-xs"
-                >
-                  <span className="material-symbols-outlined text-[18px]">print</span> Generate Rx
-                </button>
-                <button 
-                  onClick={handleFinishConsultation}
-                  disabled={finishing}
-                  className="px-6 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-orange-700 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-wide text-[10px] lg:text-xs disabled:opacity-70"
-                >
-                  {finishing ? (
-                    <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
-                  ) : (
-                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                  )}
-                  Finish Visit
-                </button>
+                <div className="mt-8 flex justify-end gap-3">
+                  <button 
+                    onClick={() => setShowPrescription(true)}
+                    className="px-6 py-3 border border-outline-variant text-on-surface font-bold rounded-xl hover:bg-gray-50 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">visibility</span> Preview
+                  </button>
+                  <button 
+                    onClick={handleFinishConsultation}
+                    disabled={finishing}
+                    className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs disabled:opacity-70"
+                  >
+                    {finishing ? (
+                      <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
+                    ) : (
+                      <span className="material-symbols-outlined text-[20px]">check_circle</span>
+                    )}
+                    Finish & Generate Rx
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <DigitalPrescription
         isOpen={showPrescription}

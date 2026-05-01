@@ -64,7 +64,7 @@ const Sidebar = () => {
       name: 'Prescriptions',
       icon: 'prescriptions',
       href: effectiveRole === 'PHARMACIST' ? '/pharmacy/prescriptions' : '/doctor/prescriptions',
-      roles: ['DOCTOR', 'PHARMACIST', 'ADMIN']
+      roles: ['PHARMACIST', 'ADMIN']
     },
     { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'User Management', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },

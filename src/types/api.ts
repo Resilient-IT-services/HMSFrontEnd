@@ -192,6 +192,10 @@ export interface UserRequestDTO {
   memberships?: HospitalMembershipDTO[];
 }
 
+export interface AdminResetPasswordRequest {
+  newPassword: string;
+}
+
 // Patient types
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 

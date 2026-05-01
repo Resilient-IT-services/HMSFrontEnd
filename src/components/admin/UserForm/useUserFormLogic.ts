@@ -20,6 +20,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
   const [formData, setFormData] = useState<UserRequestDTO>({
+    id: initialData?.id,
     username: initialData?.username || '',
     fullName: initialData?.fullName || '',
     email: initialData?.email || '',

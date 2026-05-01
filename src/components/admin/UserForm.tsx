@@ -1,11 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import { UserFullProfileDTO } from '@/types/api';
 import { useUserFormLogic } from './UserForm/useUserFormLogic';
 import { UserFormPersonalTab } from './UserForm/UserFormPersonalTab';
 import { UserFormContractsTab } from './UserForm/UserFormContractsTab';
 import { UserFormProfileTab } from './UserForm/UserFormProfileTab';
+import ChangePasswordModal from './ChangePasswordModal';
 
 interface UserFormProps {
   initialData?: UserFullProfileDTO;
@@ -14,6 +17,11 @@ interface UserFormProps {
 
 const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   const logic = useUserFormLogic(initialData, isEdit);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const { user: currentUser, isSuperMode } = useSelector((state: RootState) => state.auth);
+  
+  const isSuperUser = currentUser?.superuser || currentUser?.roles?.includes('SUPER_ADMIN') || isSuperMode;
+  const canChangePassword = isEdit && logic.formData.id && isSuperUser;
 
   const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
@@ -30,10 +38,18 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
               <p className="font-body-lg text-gray-500">{logic.formData.fullName || 'New Staff Member'}</p>
             </div>
           </div>
-          <button type="submit" disabled={logic.loading} className="btn-primary flex items-center gap-2">
-            <span className="material-symbols-outlined">save</span>
-            {logic.loading ? 'Saving...' : 'Save Changes'}
-          </button>
+          <div className="flex items-center gap-3">
+            {canChangePassword && (
+              <button 
+                type="button" 
+                onClick={() => setIsPasswordModalOpen(true)}
+                className="px-6 py-2.5 bg-white border-2 border-orange-200 text-orange-700 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-orange-50 transition-all shadow-sm"
+              >
+                <span className="material-symbols-outlined text-lg">lock_reset</span>
+                CHANGE PASSWORD
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
@@ -69,6 +85,14 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
           </div>
         </div>
       </form>
+
+      {isEdit && logic.formData.id && (
+        <ChangePasswordModal 
+          isOpen={isPasswordModalOpen}
+          onClose={() => setIsPasswordModalOpen(false)}
+          userId={logic.formData.id}
+        />
+      )}
     </div>
   );
 };

@@ -8,6 +8,7 @@ interface PrescriptionRow {
   medicine: string;
   frequency: string;
   instructions: string;
+  composition?: string;
 }
 
 interface DigitalPrescriptionProps {
@@ -213,6 +214,11 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                       <tr key={p.id}>
                         <td className="p-4">
                           <p className="font-headline-sm">{p.medicine}</p>
+                          {p.composition && (
+                            <p className="text-[10px] text-primary font-bold italic mb-1 uppercase tracking-tight">
+                              Salts: {p.composition}
+                            </p>
+                          )}
                           <p className="text-body-sm text-tertiary">Prescribed Medicine</p>
                         </td>
                         <td className="p-4 text-center">

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['quizzes-bulletin-inherited-geography.trycloudflare.com'],
+  allowedDevOrigins: ['bull-coupons-write-dealtime.trycloudflare.com'],
   async rewrites() {
     const apiBaseUrl =  'http://localhost:8081';
     return [

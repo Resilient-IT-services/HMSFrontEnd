@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, UserResponse, PageResponse, UserRequestDTO, UserSummaryDTO } from '@/types/api';
+import { ApiResponse, UserResponse, PageResponse, UserRequestDTO, UserSummaryDTO, AdminResetPasswordRequest } from '@/types/api';
 
 export const userService = {
   async listUsers(page = 0, size = 20, search?: string, role?: string, active?: boolean, includeDeleted = false): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
@@ -33,6 +33,11 @@ export const userService = {
 
   async deleteUser(userId: string): Promise<ApiResponse<void>> {
     const response = await apiClient.delete<ApiResponse<void>>(`/users/${userId}`);
+    return response.data;
+  },
+
+  async resetPassword(userId: string, data: AdminResetPasswordRequest): Promise<ApiResponse<void>> {
+    const response = await apiClient.post<ApiResponse<void>>(`/users/${userId}/reset-password`, data);
     return response.data;
   }
 

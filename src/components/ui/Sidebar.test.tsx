@@ -6,6 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname } from 'next/navigation';
+import { LayoutProvider } from '@/context/LayoutContext';
 
 vi.mock('@/services/authService');
 vi.mock('next/navigation');
@@ -42,7 +43,9 @@ describe('Sidebar', () => {
     });
     render(
       <Provider store={store}>
-        <Sidebar />
+        <LayoutProvider>
+          <Sidebar />
+        </LayoutProvider>
       </Provider>
     );
     
@@ -62,7 +65,9 @@ describe('Sidebar', () => {
     });
     render(
       <Provider store={store}>
-        <Sidebar />
+        <LayoutProvider>
+          <Sidebar />
+        </LayoutProvider>
       </Provider>
     );
     
@@ -75,7 +80,9 @@ describe('Sidebar', () => {
 
     render(
       <Provider store={store}>
-        <Sidebar />
+        <LayoutProvider>
+          <Sidebar />
+        </LayoutProvider>
       </Provider>
     );
     
