@@ -15,7 +15,7 @@ interface LayoutContextType {
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
 
 export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [title, setTitleState] = useState('HMS');
+  const [title, setTitleState] = useState('CareFlow');
   const [headerActions, setHeaderActions] = useState<React.ReactNode | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -23,7 +23,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setTitleState(newTitle);
     // Also update document title
     if (typeof document !== 'undefined') {
-      document.title = `${newTitle} | HMS`;
+      document.title = `${newTitle} | CareFlow`;
     }
   }, []);
 

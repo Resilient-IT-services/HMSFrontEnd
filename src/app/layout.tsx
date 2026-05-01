@@ -8,8 +8,8 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { LayoutProvider } from "@/context/LayoutContext";
 
 export const metadata: Metadata = {
-  title: "HMS Frontend",
-  description: "Hospital Management System frontend",
+  title: "CareFlow",
+  description: "Modern Hospital Management System",
 };
 
 export default function RootLayout({

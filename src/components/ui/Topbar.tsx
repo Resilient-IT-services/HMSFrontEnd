@@ -80,7 +80,15 @@ const Topbar: React.FC = () => {
           >
             <span className="material-symbols-outlined">menu</span>
           </button>
-          <h1 className="text-lg lg:text-xl font-extrabold tracking-tight text-gray-900 truncate">VitalSync<span className="hidden sm:inline"> HMS</span></h1>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/20 shrink-0">
+              <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>medical_services</span>
+            </div>
+            <div className="flex flex-col leading-none">
+              <h1 className="text-xl font-black tracking-tight text-primary font-manrope">CareFlow</h1>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">System Intelligence</span>
+            </div>
+          </div>
         </div>
         <div className="hidden md:flex items-center h-full">
           <GlobalSearch />

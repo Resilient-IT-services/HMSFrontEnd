@@ -62,7 +62,7 @@ const LoginPage = () => {
             <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
               <span className="material-symbols-outlined text-2xl">medical_services</span>
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">HMS System</h2>
+            <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">CareFlow</h2>
           </div>
           <div className="flex items-center gap-4">
 
@@ -203,7 +203,7 @@ const LoginPage = () => {
 
       {/* Footer Copyright */}
       <footer className="relative z-10 py-6 text-center text-sm text-[var(--text-secondary)]">
-        © 2026 HMS System. All rights reserved. Hospital Management Solutions.
+        © 2026 CareFlow <span className="text-[10px] opacity-70">by Resilient</span>. All rights reserved.
       </footer>
     </div>
   );

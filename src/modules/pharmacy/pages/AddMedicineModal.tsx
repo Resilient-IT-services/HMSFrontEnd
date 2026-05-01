@@ -67,7 +67,7 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
             <h1 className="text-xl font-bold text-slate-800">Add Medicine to Catalog</h1>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden md:block">VitalSync Healthcare</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest hidden md:block">CareFlow Healthcare</span>
             <button 
               onClick={onClose}
               className="text-slate-400 hover:text-slate-600 p-1 rounded-lg transition-colors"
@@ -323,8 +323,8 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
         </form>
 
         <div className="bg-slate-50 py-4 px-8 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-          <span>VitalSync Systems</span>
-          <p>© 2026 VitalSync Healthcare. All rights reserved.</p>
+          <span>CareFlow Systems</span>
+          <p>© 2026 CareFlow Healthcare. All rights reserved.</p>
           <div className="flex gap-4">
             <a className="hover:text-orange-700 transition-colors" href="#">Privacy</a>
             <a className="hover:text-orange-700 transition-colors" href="#">Terms</a>

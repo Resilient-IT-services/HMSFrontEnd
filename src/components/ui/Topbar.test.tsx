@@ -54,7 +54,7 @@ describe('Topbar', () => {
 
   it('renders title and username', () => {
     renderWithRedux();
-    expect(screen.getByText('VitalSync HMS')).toBeInTheDocument();
+    expect(screen.getByText('CareFlow')).toBeInTheDocument();
     expect(screen.getByText('testuser')).toBeInTheDocument();
     expect(screen.getByText('Test Hospital')).toBeInTheDocument();
   });

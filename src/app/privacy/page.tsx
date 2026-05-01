@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
                             <span className="material-symbols-outlined text-2xl">medical_services</span>
                         </div>
                         <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">
-                            HMS System
+                            CareFlow
                         </h2>
                     </div>
 

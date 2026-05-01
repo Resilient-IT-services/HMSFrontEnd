@@ -18,12 +18,10 @@ export default function ForgotPasswordPage() {
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
 
                     <div className="flex items-center gap-3">
-                        <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
-                            <span className="material-symbols-outlined text-2xl">medical_services</span>
-                        </div>
-                        <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">
-                            HMS System
-                        </h2>
+                      <div className="size-10 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white">
+                        <span className="material-symbols-outlined text-2xl">medical_services</span>
+                      </div>
+                      <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">CareFlow</h2>
                     </div>
 
                     <button
@@ -74,7 +72,7 @@ export default function ForgotPasswordPage() {
                                 <Mail size={16} className="text-gray-400 mr-2" />
                                 <input
                                     type="email"
-                                    placeholder="dr.smith@hms-system.com"
+                                    placeholder="dr.smith@careflow.health"
                                     className="bg-transparent outline-none text-sm w-full text-gray-600"
                                 />
                             </div>
@@ -116,7 +114,7 @@ export default function ForgotPasswordPage() {
             <div className="text-center text-sm text-gray-500 mb-6">
                 Need immediate assistance?{" "}
                 <span className="text-orange-600 cursor-pointer font-medium">
-          Contact HMS Support
+          Contact CareFlow Support
         </span>
             </div>
 

@@ -19,7 +19,7 @@ export default function TermsPage() {
                             <span className="material-symbols-outlined text-2xl">medical_services</span>
                         </div>
                         <h2 className="text-xl font-bold tracking-tight text-[var(--primary)]">
-                            HMS System
+                            CareFlow
                         </h2>
                     </div>
 
@@ -56,7 +56,7 @@ export default function TermsPage() {
                             EFFECTIVE DATE: OCTOBER 24, 2024
                         </p>
                         <p className="mt-4 text-sm">
-                            Please read these terms carefully before using the HMS System.
+                            Please read these terms carefully before using CareFlow.
                             This agreement governs your access to and use of our clinical
                             management services.
                         </p>
@@ -121,7 +121,7 @@ const sections = [
         content: (
             <>
                 <p>
-                    By accessing or using the HMS System ("Service"), you agree to be
+                    By accessing or using the CareFlow ("Service"), you agree to be
                     bound by these Terms of Service and all applicable laws.
                 </p>
                 <p>
@@ -147,7 +147,7 @@ const sections = [
         content: (
             <>
                 <p>
-                    HMS System shall not be liable for any damages including loss of
+                    CareFlow shall not be liable for any damages including loss of
                     data or profit.
                 </p>
                 <p>
