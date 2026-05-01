@@ -285,6 +285,7 @@ export interface AppointmentResponse {
   doctorName: string;
   doctorSpecialization?: string;
   appointmentTime: string;
+  timeSlot?: string;
   status: AppointmentStatus;
   tokenNumber?: number;
   tokenDisplay?: string;
