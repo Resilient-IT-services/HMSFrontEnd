@@ -141,75 +141,78 @@ export default function UserManagement() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">Loading staff records...</td></tr>
-              ) : (users.length === 0 ? (
+              ) : users.length === 0 ? (
                 <tr><td colSpan={5} className="px-6 py-10 text-center text-slate-400 italic">No staff members found.</td></tr>
-              ) : users.map((user) => {
-                const primaryMembership = user.memberships?.[0];
-                const membershipCount = user.memberships?.length ?? 0;
-                const primaryHospitalName = primaryMembership?.hospitalName || 'Unnamed Hospital';
-                const additionalHospitalSuffix = membershipCount > 1 ? ` + ${membershipCount - 1}` : '';
-                const hospitalSummary = membershipCount > 0
-                  ? `${primaryHospitalName}${additionalHospitalSuffix}`
-                  : 'No Hospital Assigned';
-                const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
+              ) : (
+                users.map((user) => {
+                  const primaryMembership = user.memberships?.[0];
+                  const membershipCount = user.memberships?.length ?? 0;
+                  const primaryHospitalName = primaryMembership?.hospitalName || 'Unnamed Hospital';
+                  const additionalHospitalSuffix = membershipCount > 1 ? ` + ${membershipCount - 1}` : '';
+                  const hospitalSummary = membershipCount > 0
+                    ? `${primaryHospitalName}${additionalHospitalSuffix}`
+                    : 'No Hospital Assigned';
+                  const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
 
-                return (
-                <tr 
-                  key={user.id} 
-                  className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
-                  onDoubleClick={() => router.push(`/admin/users/${user.id}`)}
-                >
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold uppercase overflow-hidden border-2 border-orange-50">
-                        {user.fullName ? user.fullName.slice(0, 2) : user.username.slice(0, 2)}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-slate-900 text-sm">{user.fullName || user.username}</p>
-                        <p className="text-xs text-slate-400">{user.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {user.roles && user.roles.length > 0 ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 uppercase border border-orange-100">
-                          {user.roles[0]}{user.roles.length > 1 ? ` + ${user.roles.length - 1}` : ''}
+                  return (
+                    <tr 
+                      key={user.id} 
+                      className="hover:bg-slate-50/50 transition-colors group cursor-pointer"
+                      onDoubleClick={() => router.push(`/admin/users/${user.id}`)}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold uppercase overflow-hidden border-2 border-orange-50">
+                            {user.fullName ? user.fullName.slice(0, 2) : user.username.slice(0, 2)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-slate-900 text-sm">{user.fullName || user.username}</p>
+                            <p className="text-xs text-slate-400">{user.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles && user.roles.length > 0 ? (
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 uppercase border border-orange-100">
+                              {user.roles[0]}{user.roles.length > 1 ? ` + ${user.roles.length - 1}` : ''}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">No Roles</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div>
+                            <p className="text-sm text-slate-600 font-medium">
+                              {hospitalSummary}
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                              {departmentName}
+                            </p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`flex items-center gap-1.5 text-xs font-bold ${user.active ? 'text-emerald-600' : 'text-slate-400'}`}>
+                          <span className={`w-2 h-2 rounded-full ${user.active ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+                          {user.active ? 'Active' : 'Inactive'}
                         </span>
-                      ) : (
-                        <span className="text-xs text-slate-400 italic">No Roles</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div>
-                        <p className="text-sm text-slate-600 font-medium">
-                          {hospitalSummary}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                          {departmentName}
-                        </p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`flex items-center gap-1.5 text-xs font-bold ${user.active ? 'text-emerald-600' : 'text-slate-400'}`}>
-                      <span className={`w-2 h-2 rounded-full ${user.active ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
-                      {user.active ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center gap-2 transition-opacity">
-                      <button 
-                        onClick={() => router.push(`/admin/users/${user.id}`)}
-                        className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
-                        title="Edit User"
-                      >
-                        <span className="material-symbols-outlined text-xl">edit</span>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )}))}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex items-center justify-center gap-2 transition-opacity">
+                          <button 
+                            onClick={() => router.push(`/admin/users/${user.id}`)}
+                            className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                            title="Edit User"
+                          >
+                            <span className="material-symbols-outlined text-xl">edit</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
 
@@ -293,7 +296,7 @@ export default function UserManagement() {
         </div>
         )}
       </div>
-
+      </div>
     </MainLayout>
   );
 }
