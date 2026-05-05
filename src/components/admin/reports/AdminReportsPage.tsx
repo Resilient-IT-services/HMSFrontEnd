@@ -231,6 +231,40 @@ export default function AdminReportsPage() {
   const handleExport = async (format: 'pdf' | 'excel') => {
     try {
       setExporting(format);
+
+      // If 'All Hospitals' is selected, handle export differently since backend requires hospital context
+      if (!hospitalId) {
+        if (format === 'excel') {
+          if (rows.length === 0) {
+            setError('Please generate the report first to export "All Hospitals" data.');
+            return;
+          }
+          // Generate CSV from currently loaded merged rows
+          const header = columns.map(titleCase).join(',');
+          const csvRows = rows.map((row) =>
+            columns
+              .map((col) => {
+                const val = row[col];
+                const stringVal = val === null || val === undefined ? '' : String(val);
+                return `"${stringVal.replace(/"/g, '""')}"`;
+              })
+              .join(',')
+          );
+          const csvContent = '\uFEFF' + [header, ...csvRows].join('\n');
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+          downloadBlob(blob, `all-hospitals-${reportType.toLowerCase()}-${startDate}-to-${endDate}.csv`);
+          return;
+        } else {
+          // Trigger print for PDF export of "All Hospitals"
+          if (rows.length === 0) {
+            setError('Please generate the report first to print "All Hospitals" data.');
+            return;
+          }
+          globalThis.print();
+          return;
+        }
+      }
+
       const blob = format === 'pdf' ? await reportService.exportPdf(filters) : await reportService.exportExcel(filters);
       downloadBlob(blob, `reports-${reportType.toLowerCase()}-${startDate}-to-${endDate}.${format === 'pdf' ? 'pdf' : 'xlsx'}`);
     } catch (exportError) {
@@ -244,8 +278,27 @@ export default function AdminReportsPage() {
   return (
     <MainLayout title="Reports" hideTitle>
       <div className="min-h-screen bg-[#f7f9fb] p-4 sm:p-6 lg:p-8">
-        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        {/* Print-only Header */}
+        <div className="hidden print:block mb-8 border-b-2 border-slate-800 pb-4">
+          <h1 className="text-2xl font-bold text-slate-900">System Revenue Report</h1>
+          <p className="text-sm text-slate-600">
+            {reportTypeOptions.find((o) => o.value === reportType)?.label} | {startDate} to {endDate}
+          </p>
+          <p className="text-sm text-slate-600">Hospitals: All | Doctors: {selectedDoctor ? selectedDoctor.fullName : 'All'}</p>
+          <div className="mt-4 grid grid-cols-3 gap-4">
+            <div className="rounded border border-slate-200 p-2">
+              <p className="text-[10px] font-bold uppercase text-slate-500">Total Revenue</p>
+              <p className="text-lg font-bold">{stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
+            </div>
+            <div className="rounded border border-slate-200 p-2">
+              <p className="text-[10px] font-bold uppercase text-slate-500">Record Count</p>
+              <p className="text-lg font-bold">{stats.recordCount}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 print:m-0 print:max-w-none">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between no-print">
             <div>
               <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
                 <span>Super Admin</span>
