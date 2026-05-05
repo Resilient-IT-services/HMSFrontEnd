@@ -277,22 +277,36 @@ export default function AdminReportsPage() {
 
   return (
     <MainLayout title="Reports" hideTitle>
-      <div className="min-h-screen bg-[#f7f9fb] p-4 sm:p-6 lg:p-8">
-        {/* Print-only Header */}
-        <div className="hidden print:block mb-8 border-b-2 border-slate-800 pb-4">
-          <h1 className="text-2xl font-bold text-slate-900">System Revenue Report</h1>
-          <p className="text-sm text-slate-600">
-            {reportTypeOptions.find((o) => o.value === reportType)?.label} | {startDate} to {endDate}
-          </p>
-          <p className="text-sm text-slate-600">Hospitals: All | Doctors: {selectedDoctor ? selectedDoctor.fullName : 'All'}</p>
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            <div className="rounded border border-slate-200 p-2">
-              <p className="text-[10px] font-bold uppercase text-slate-500">Total Revenue</p>
-              <p className="text-lg font-bold">{stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
+      <div className="min-h-screen bg-[#f7f9fb] p-4 sm:p-6 lg:p-8 print:bg-white print:p-0">
+        {/* Professional Print Header & Summary */}
+        <div className="hidden print:block mb-6 w-full">
+          <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">System Revenue Report</h1>
+              <p className="text-sm text-slate-500 mt-1">Generated on {new Date().toLocaleDateString('en-IN')} at {new Date().toLocaleTimeString('en-IN')}</p>
             </div>
-            <div className="rounded border border-slate-200 p-2">
-              <p className="text-[10px] font-bold uppercase text-slate-500">Record Count</p>
-              <p className="text-lg font-bold">{stats.recordCount}</p>
+            <div className="text-right">
+              <p className="text-xs font-bold text-orange-700 uppercase tracking-widest">VitalSync HMS Enterprise</p>
+              <p className="text-sm font-semibold text-slate-900">All Hospitals Combined Data</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-4 gap-4 mb-8">
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <p className="text-[10px] font-bold text-slate-500 uppercase">Report Type</p>
+              <p className="text-sm font-bold text-slate-900">{reportTypeOptions.find(o => o.value === reportType)?.label}</p>
+            </div>
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <p className="text-[10px] font-bold text-slate-500 uppercase">Period</p>
+              <p className="text-sm font-bold text-slate-900">{startDate} to {endDate}</p>
+            </div>
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <p className="text-[10px] font-bold text-slate-500 uppercase">Total Revenue</p>
+              <p className="text-sm font-bold text-slate-900">{stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
+            </div>
+            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+              <p className="text-[10px] font-bold text-slate-500 uppercase">Total Records</p>
+              <p className="text-sm font-bold text-slate-900">{stats.recordCount}</p>
             </div>
           </div>
         </div>
@@ -330,7 +344,7 @@ export default function AdminReportsPage() {
             </div>
           </div>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm no-print">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
               <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
                 Hospital
@@ -414,12 +428,12 @@ export default function AdminReportsPage() {
           </section>
 
           {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 no-print">
               {error}
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 no-print">
             <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Total Revenue</p>
               <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
@@ -443,8 +457,8 @@ export default function AdminReportsPage() {
             </section>
           </div>
 
-          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm print:border-slate-800 print:rounded-none">
+            <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between no-print">
               <div>
                 <h2 className="font-manrope text-xl font-bold text-slate-900">Report Preview</h2>
                 <p className="text-sm text-slate-500">
@@ -454,21 +468,21 @@ export default function AdminReportsPage() {
               {loading && <span className="text-sm font-semibold text-orange-700">Fetching latest data...</span>}
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left">
-                <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500">
+              <table className="w-full min-w-[760px] text-left border-collapse print:min-w-0">
+                <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500 print:bg-slate-100 print:text-slate-900 print:border-b-2 print:border-slate-800">
                   <tr>
                     {(columns.length > 0 ? columns : ['report']).map((column) => (
-                      <th key={column} className="px-5 py-3">
+                      <th key={column} className="px-5 py-3 border-b border-slate-100 print:border-slate-300">
                         {titleCase(column)}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
+                <tbody className="divide-y divide-slate-100 text-sm text-slate-700 print:divide-slate-300">
                   {rows.map((row, index) => (
-                    <tr key={`${reportType}-${index}`} className="hover:bg-slate-50">
+                    <tr key={`${reportType}-${index}`} className="hover:bg-slate-50 print:hover:bg-transparent">
                       {columns.map((column) => (
-                        <td key={column} className="px-5 py-4 font-medium">
+                        <td key={column} className="px-5 py-4 font-medium print:py-2 print:px-3 print:border-b print:border-slate-200">
                           {getDisplayValue(row[column])}
                         </td>
                       ))}
