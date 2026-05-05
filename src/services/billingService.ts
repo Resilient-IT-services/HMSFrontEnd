@@ -7,9 +7,9 @@ export const billingService = {
     return response.data;
   },
 
-  async updateStatus(billingId: string, status: string): Promise<ApiResponse<BillingDTO>> {
+  async updateStatus(billingId: string, status: string, paymentMethod?: string, discount?: number): Promise<ApiResponse<BillingDTO>> {
     const response = await apiClient.put<ApiResponse<BillingDTO>>(`/billing/${billingId}/status`, null, {
-      params: { status }
+      params: { status, paymentMethod, discount }
     });
     return response.data;
   },

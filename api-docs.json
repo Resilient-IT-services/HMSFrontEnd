@@ -1637,6 +1637,170 @@
         }
       }
     },
+    "/api/v1/reports/preview": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "getReportPreview",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DOCTOR_REVENUE",
+                "PAYMENT_SUMMARY"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/export/pdf": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "exportPdf",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DOCTOR_REVENUE",
+                "PAYMENT_SUMMARY"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/export/excel": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "operationId": "exportExcel",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DOCTOR_REVENUE",
+                "PAYMENT_SUMMARY"
+              ]
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "yyyy-MM-dd",
+              "type": "string",
+              "example": "2024-04-26"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/pharmacy/prescriptions/{id}": {
       "get": {
         "tags": [
@@ -3612,6 +3776,23 @@
           },
           "link": {
             "type": "string"
+          }
+        }
+      },
+      "ApiResponseListObject": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
           }
         }
       },

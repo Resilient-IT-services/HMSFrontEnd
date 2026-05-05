@@ -6,10 +6,12 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { doctorService } from '@/services/doctorService';
+import { billingService } from '@/services/billingService';
 import {
   AppointmentResponse,
   PatientResponse,
   DoctorStaffResponse,
+  BillingResponse,
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
@@ -31,6 +33,8 @@ export default function BillingPage() {
   const [doctor, setDoctor] =
       useState<DoctorStaffResponse | null>(null);
 
+  const [billing, setBilling] = useState<BillingResponse | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
@@ -41,10 +45,23 @@ export default function BillingPage() {
     setLoading(true);
     try {
       if (appointmentId) {
-        const appRes = await appointmentService.get(appointmentId);
+        const [appRes, billRes] = await Promise.all([
+          appointmentService.get(appointmentId),
+          billingService.getByAppointment(appointmentId).catch(() => ({ success: false, data: null }))
+        ]);
+
         const appData = appRes.data;
         if (appRes.success && appData) {
           setAppointment(appData);
+
+          if (billRes.success && billRes.data) {
+            setBilling(billRes.data);
+            setDiscount(billRes.data.discount || 0);
+            if (billRes.data.paymentMethod) {
+              setPaymentMethod(billRes.data.paymentMethod as any);
+            }
+          }
+
           const [patRes, docRes] = await Promise.all([
             patientService.get(appData.patientId),
             doctorService.list(0, 100),
@@ -101,29 +118,65 @@ export default function BillingPage() {
   const handleMarkAsPaid = async () => {
     setSubmittingPayment(true);
     try {
-      if (appointmentId && appointment) {
-        // Traditional flow: update existing appointment
-        const res = await appointmentService.update(appointmentId, {
-          ...appointment,
-          status: 'ADD_VITALS'
-        });
-        if (res.success) {
-          triggerGlobalToast('Payment confirmed successfully', 'success');
-          fetchData();
-        }
-      } else if (patientIdParam && doctorIdParam && appointmentTimeParam) {
-        // New flow: create appointment only after payment
+      let currentAppointmentId = appointmentId;
+      let currentAppointment = appointment;
+
+      // 1. Create appointment if it doesn't exist (new flow)
+      if (!appointmentId && patientIdParam && doctorIdParam && appointmentTimeParam) {
         const res = await appointmentService.create({
           patientId: patientIdParam,
           doctorId: doctorIdParam,
           appointmentTime: appointmentTimeParam,
           notes: notesParam || '',
-          status: 'ADD_VITALS'
+          status: 'PAYMENT_PENDING'
         });
         if (res.success && res.data) {
-          triggerGlobalToast('Appointment created and payment confirmed', 'success');
-          // Redirect to vitals page for the newly created appointment
-          router.push(`/reception/appointments/vitals?appointmentId=${res.data.id}`);
+          currentAppointmentId = res.data.id;
+          currentAppointment = res.data;
+        } else {
+          throw new Error('Failed to create appointment');
+        }
+      }
+
+      if (!currentAppointmentId || !currentAppointment || !patient) return;
+
+      // 2. Handle Billing
+      if (billing) {
+        // Update existing bill
+        await billingService.updateStatus(billing.id!, 'PAID', paymentMethod, discount);
+      } else {
+        // Create new bill
+        await billingService.create({
+          patientId: patient.id,
+          appointmentId: currentAppointmentId,
+          sourceType: 'APPOINTMENT',
+          status: 'PAID',
+          totalAmount: consultationFee,
+          discount: discount,
+          paymentMethod: paymentMethod,
+          items: [
+            {
+              itemName: 'Consultation Fee',
+              amount: consultationFee,
+              quantity: 1,
+              subtotal: consultationFee
+            }
+          ]
+        });
+      }
+
+      // 3. Update Appointment Status
+      const updateRes = await appointmentService.update(currentAppointmentId, {
+        ...currentAppointment,
+        status: 'ADD_VITALS'
+      });
+
+      if (updateRes.success) {
+        triggerGlobalToast('Payment confirmed successfully', 'success');
+        if (!appointmentId) {
+          router.push(`/reception/appointments/vitals?appointmentId=${currentAppointmentId}`);
+        } else {
+          fetchData();
         }
       }
     } catch (error) {

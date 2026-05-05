@@ -6,6 +6,7 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 declare module 'axios' {
   export interface AxiosRequestConfig {
     skipToast?: boolean;
+    skipHospitalHeader?: boolean;
   }
 }
 
@@ -27,7 +28,7 @@ apiClient.interceptors.request.use((config) => {
 
   const state = store.getState();
   const hospitalId = state.auth.user?.currentHospitalId;
-  if (hospitalId) {
+  if (hospitalId && !config.skipHospitalHeader) {
     config.headers['X-Hospital-Id'] = hospitalId;
   }
 

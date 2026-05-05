@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>VitalSync | System Reports</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#bcc7de",
+                        "on-secondary-container": "#5a6579",
+                        "primary": "#a83900",
+                        "on-surface-variant": "#594138",
+                        "primary-fixed": "#ffdbce",
+                        "primary-container": "#ff6b2b",
+                        "on-surface": "#191c20",
+                        "surface-container": "#ededf3",
+                        "secondary-fixed": "#d8e3fb",
+                        "inverse-surface": "#2e3035",
+                        "tertiary-container": "#979a9c",
+                        "tertiary-fixed-dim": "#c4c7c9",
+                        "surface-container-highest": "#e2e2e8",
+                        "on-tertiary-fixed-variant": "#444749",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#e1e3e5",
+                        "on-primary-fixed-variant": "#802a00",
+                        "surface-dim": "#d9dadf",
+                        "on-tertiary-fixed": "#191c1e",
+                        "on-primary-container": "#5c1c00",
+                        "on-error": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f9f9ff",
+                        "on-background": "#191c20",
+                        "inverse-on-surface": "#f0f0f6",
+                        "inverse-primary": "#ffb59a",
+                        "secondary": "#545f73",
+                        "background": "#f9f9ff",
+                        "surface-container-high": "#e7e8ee",
+                        "secondary-container": "#d8e3fb",
+                        "on-tertiary-container": "#2f3234",
+                        "surface-tint": "#a83900",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#ffb59a",
+                        "surface-variant": "#e2e2e8",
+                        "error": "#ba1a1a",
+                        "outline": "#8d7167",
+                        "on-primary-fixed": "#380d00",
+                        "on-primary": "#ffffff",
+                        "tertiary": "#5c5f61",
+                        "surface-container-low": "#f3f3f9",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "on-secondary-fixed": "#111c2d",
+                        "surface": "#f9f9ff",
+                        "outline-variant": "#e2bfb3",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "base": "8px",
+                        "margin-page": "40px",
+                        "container-padding": "32px",
+                        "component-gap": "16px",
+                        "section-gap": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Manrope"],
+                        "label-md": ["Inter"],
+                        "headline-xl": ["Manrope"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-sm": ["Manrope"],
+                        "body-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "headline-xl": ["30px", {"lineHeight": "38px", "fontWeight": "700"}],
+                        "body-sm": ["12px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-active {
+            background-color: #ffdbce; /* bg-primary-fixed */
+            color: #802a00; /* on-primary-fixed-variant */
+        }
+        body {
+            background-color: #f9f9ff;
+            color: #191c20;
+        }
+    </style>
+</head>
+<body class="font-body-md antialiased overflow-x-hidden">
+<!-- Sidebar Wrapper -->
+<aside class="h-screen w-64 border-r fixed left-0 top-0 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 flex flex-col h-full py-6 px-4 gap-2 z-50">
+    <div class="flex items-center gap-3 px-2 mb-8">
+        <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white font-extrabold text-xl">V</div>
+        <div>
+            <h1 class="text-lg font-bold text-gray-900 dark:text-white leading-tight">VitalSync Admin</h1>
+            <p class="text-xs text-gray-500">Enterprise HMS</p>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-all group" href="#">
+            <span class="material-symbols-outlined text-lg">dashboard</span>
+            <span class="font-medium">Dashboard</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-all group" href="#">
+            <span class="material-symbols-outlined text-lg">domain</span>
+            <span class="font-medium">Facilities</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-all group" href="#">
+            <span class="material-symbols-outlined text-lg">badge</span>
+            <span class="font-medium">Staff Management</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 rounded-lg transition-all group translate-x-1" href="#">
+            <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+            <span class="font-medium">Health Analytics</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-all group" href="#">
+            <span class="material-symbols-outlined text-lg">inventory_2</span>
+            <span class="font-medium">Inventory Control</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-all group" href="#">
+            <span class="material-symbols-outlined text-lg">terminal</span>
+            <span class="font-medium">System Logs</span>
+        </a>
+    </nav>
+    <div class="mt-auto space-y-1 border-t pt-4 border-gray-100">
+        <a class="flex items-center gap-3 px-3 py-2 text-gray-500 hover:bg-gray-50 rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined text-lg">contact_support</span>
+            <span class="font-medium">Support</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-2 text-error hover:bg-error-container rounded-lg transition-all" href="#">
+            <span class="material-symbols-outlined text-lg">logout</span>
+            <span class="font-medium">Logout</span>
+        </a>
+    </div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-64 min-h-screen">
+    <!-- TopAppBar -->
+    <header class="flex justify-between items-center h-16 px-6 sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
+        <div class="flex items-center gap-4 flex-1">
+            <div class="relative w-full max-w-md">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">search</span>
+                <input class="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-primary-container text-sm" placeholder="Search analytics or records..." type="text"/>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors relative">
+                <span class="material-symbols-outlined text-xl">notifications</span>
+                <span class="absolute top-2 right-2 w-2 h-2 bg-orange-600 rounded-full border-2 border-white"></span>
+            </button>
+            <button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-xl">help</span>
+            </button>
+            <button class="p-2 text-gray-500 hover:bg-gray-50 rounded-full transition-colors">
+                <span class="material-symbols-outlined text-xl">settings</span>
+            </button>
+            <div class="h-8 w-[1px] bg-gray-200 mx-2"></div>
+            <div class="flex items-center gap-3 pl-2">
+                <div class="text-right">
+                    <p class="text-sm font-bold text-gray-900 leading-none">Super Admin</p>
+                    <p class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider">Hospital Manager</p>
+                </div>
+                <img alt="Super Admin Avatar" class="w-10 h-10 rounded-full object-cover border-2 border-primary-container p-0.5" data-alt="A professional headshot of a senior hospital administrator in a minimalist, high-key medical office setting. The person wears a modern, clean lab coat over a professional shirt. The lighting is bright and airy with a cool white aesthetic. The background is slightly blurred showing medical equipment silhouettes and a glass window overlooking a clean, modern facility." src="https://lh3.googleusercontent.com/aida/ADBb0uh6kTm5LB8VLYwkIFtYB52r-8LlSLrvKX4RM3AW1L9E5Ftdqv59jTliQcqIIC4YMm0Z9jIfCNYaCYvGKtJrMf26FYbLtltNGOfXlwUnx-UzpB6maB6Lc53C-L5pwbvoq2QQ-CmR3CUyaf2W3xGjmUMyW0GWIe6sW_SaJnco-08f0Xrm7Q1XXmW2ztzNhtiKlQm5Au8DbmhsxiVPC2A-yOSZtuu-c9s-GeH8P5wYTos1nONlDcjOwldpa3l6vaSFUvdbvU4lvKSS2A"/>
+            </div>
+        </div>
+    </header>
+    <!-- Page Header -->
+    <div class="px-8 py-8">
+        <div class="flex justify-between items-end mb-gutter">
+            <div>
+                <nav class="flex items-center gap-2 text-body-sm text-gray-500 mb-2">
+                    <span>Admin</span>
+                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+                    <span class="text-primary font-medium">Reports</span>
+                </nav>
+                <h2 class="font-headline-xl text-headline-xl text-gray-900">System Reports</h2>
+                <p class="font-body-md text-gray-600 mt-1">Analyze hospital revenue and operational performance.</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-label-md hover:bg-gray-50 transition-all">
+                    <span class="material-symbols-outlined text-lg">cloud_download</span>
+                    Export to Excel
+                </button>
+                <button class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-label-md hover:bg-gray-50 transition-all">
+                    <span class="material-symbols-outlined text-lg">picture_as_pdf</span>
+                    Export to PDF
+                </button>
+            </div>
+        </div>
+        <!-- Filter & Control Panel -->
+        <div class="bg-white border border-gray-200 rounded-xl p-container-padding mb-gutter shadow-sm">
+            <div class="grid grid-cols-12 gap-gutter items-end">
+                <div class="col-span-3">
+                    <label class="block text-label-sm text-gray-700 mb-2">Report Type</label>
+                    <select class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container focus:ring-opacity-20">
+                        <option>Doctor-wise Revenue</option>
+                        <option>Payment Mode Summary</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-label-sm text-gray-700 mb-2">Start Date</label>
+                    <input class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container focus:ring-opacity-20" type="date" value="2023-11-01"/>
+                </div>
+                <div class="col-span-2">
+                    <label class="block text-label-sm text-gray-700 mb-2">End Date</label>
+                    <input class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container focus:ring-opacity-20" type="date" value="2023-11-30"/>
+                </div>
+                <div class="col-span-3">
+                    <label class="block text-label-sm text-gray-700 mb-2">Select Doctor</label>
+                    <select class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-body-md focus:border-primary-container focus:ring-2 focus:ring-primary-container focus:ring-opacity-20">
+                        <option>All Doctors</option>
+                        <option>Dr. Sarah Jenkins</option>
+                        <option>Dr. Michael Chen</option>
+                        <option>Dr. Elena Rodriguez</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <button class="w-full py-2.5 bg-primary-container text-white font-semibold rounded-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 shadow-md">
+                        <span class="material-symbols-outlined">analytics</span>
+                        Generate Report
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Dashboard Bento Grid Visuals -->
+        <div class="grid grid-cols-4 gap-gutter mb-gutter">
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between overflow-hidden relative">
+                <div class="z-10">
+                    <p class="text-label-sm text-gray-500 mb-1">Total Revenue</p>
+                    <h3 class="text-headline-xl font-bold text-gray-900">$128,450.00</h3>
+                    <p class="text-xs text-green-600 flex items-center gap-1 mt-2">
+                        <span class="material-symbols-outlined text-sm">trending_up</span>
+                        +12.4% from last month
+                    </p>
+                </div>
+                <div class="absolute -right-4 -bottom-4 opacity-5">
+                    <span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">payments</span>
+                </div>
+            </div>
+            <div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm flex flex-col justify-between overflow-hidden relative">
+                <div class="z-10">
+                    <p class="text-label-sm text-gray-500 mb-1">Total Visits</p>
+                    <h3 class="text-headline-xl font-bold text-gray-900">1,842</h3>
+                    <p class="text-xs text-green-600 flex items-center gap-1 mt-2">
+                        <span class="material-symbols-outlined text-sm">trending_up</span>
+                        +4.2% from last month
+                    </p>
+                </div>
+                <div class="absolute -right-4 -bottom-4 opacity-5">
+                    <span class="material-symbols-outlined text-8xl" style="font-variation-settings: 'FILL' 1;">group</span>
+                </div>
+            </div>
+            <div class="col-span-2 bg-primary-container rounded-xl p-6 shadow-lg text-white flex items-center relative overflow-hidden">
+                <div class="flex-1 z-10">
+                    <h4 class="text-headline-sm font-bold mb-2">Performance Milestone</h4>
+                    <p class="text-body-sm opacity-90 mb-4 max-w-xs">You've reached 95% of your quarterly revenue target. Consider optimizing slot allocation for next month.</p>
+                    <div class="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+                        <div class="bg-white h-full" style="width: 95%"></div>
+                    </div>
+                </div>
+                <img alt="Performance Graphic" class="w-40 h-40 object-cover rounded-lg ml-4 shadow-2xl" data-alt="A futuristic medical data visualization showing glowing blue and orange charts overlaid on a semi-transparent surface. The background is a clean, modern hospital interior with soft white lighting and professional clinical aesthetics. The image conveys high-tech accuracy, progress, and professional hospital management." src="https://lh3.googleusercontent.com/aida/ADBb0ug1il61THwu2Tc8i1J9Llml8xDGgn8Ybz16V9ORSl1TN6c44VhsUYSLrXJpB0ViMTEDjOVJcSrYuYv1JB201I-CvfdwViFWszxG95kOr2_CWRAYT6H0DJqoRjvhXlh4yGp0VyUIU3woxZRXzz4FkzUKmE_Nn0IwJdRi8CGNilQb6ulUY8o96re8MeugruZ3BPE45dsfXi7NLtBWDlrco5aWiNKEvjSzqiDk0VG-DPzQNbfFa4Lss8U-npmPIJvBX3u7n9FHHJ_r"/>
+            </div>
+        </div>
+        <!-- Report Preview Area -->
+        <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div class="px-gutter py-4 bg-gray-50/50 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="font-headline-sm text-gray-900">Doctor-wise Revenue Summary</h3>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-xs font-medium text-gray-500 uppercase tracking-widest">Preview Mode</span>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                    <tr class="bg-white text-label-sm text-gray-500 uppercase tracking-wider">
+                        <th class="px-gutter py-4 font-semibold border-b border-gray-100">Doctor Name</th>
+                        <th class="px-gutter py-4 font-semibold border-b border-gray-100">Department</th>
+                        <th class="px-gutter py-4 font-semibold border-b border-gray-100 text-center">Total Appointments</th>
+                        <th class="px-gutter py-4 font-semibold border-b border-gray-100 text-right">Total Revenue</th>
+                    </tr>
+                    </thead>
+                    <tbody class="text-body-md text-gray-700">
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-gutter py-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <img alt="Doctor" class="w-8 h-8 rounded-full object-cover" data-alt="Close-up portrait of Dr. Sarah Jenkins, a professional female physician in her 40s. She is smiling warmly and wearing a clean white lab coat with a stethoscope around her neck. The setting is a brightly lit, modern medical office with soft daylight and clean white walls. Professional medical photography style." src="https://lh3.googleusercontent.com/aida/ADBb0ui21BJcnGn3iN9mTiFVSuod0n-lcYJ1n3Xz-apOOi4vqZLafY1u5d7chnwXloNm2H_lO0BCwu0uf0b2pT46AO8w8v1FROSrTDqo7e3DpXkFPxGoTEw7w7MMkdqj60TyfxEyn9iSToVG6RTYvntwsdtdqB8WMcQgltjPGK4j_qI1O1zLBbqZ1d2w31jslgG-gYvk5bkgtm-H34wAB2_8famNJNW0SgKrMCqXNSwQiPL2QEM_aicXpF4FMFDU1NMPV_2yvBdKzlWKVQ"/>
+                                <span class="font-semibold">Dr. Sarah Jenkins</span>
+                            </div>
+                        </td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-gray-500">Cardiology</td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-center">342</td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-right font-medium">$42,850.00</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-gutter py-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <img alt="Doctor" class="w-8 h-8 rounded-full object-cover" data-alt="Professional portrait of Dr. Michael Chen, an experienced Asian male doctor in a high-end hospital setting. He exudes a calm, confident demeanor. He is wearing professional attire under a tailored lab coat. The lighting is crisp and clean, reflecting a high-standard medical facility atmosphere." src="https://lh3.googleusercontent.com/aida/ADBb0uhBKPGsgjxrJyN2xh17ZoS4av_ajdwosS8psI8Z_xa5n2nOF9k3FWmZJScoWE9ioInxE_sbeclFay90vcq56OqLaIM4ztJh77g1nEfy9ibWQ15IfB8HzB9Z6Nawz3YI4Rt_n-8v2AG5LiDYSyEtT0hyC6htr-slIKY-m4wwB5bF64LVnH_3m9OWGpdTV0VadFEbq-3SaH7I0qePMkwkAQP9WOvLjLyb0UDVnIzD4kaB_ggG0JOZ0cGBsspfQaRy2fPEhM5l7E2S"/>
+                                <span class="font-semibold">Dr. Michael Chen</span>
+                            </div>
+                        </td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-gray-500">Pediatrics</td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-center">415</td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-right font-medium">$31,200.00</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-gutter py-4 border-b border-gray-100">
+                            <div class="flex items-center gap-3">
+                                <img alt="Doctor" class="w-8 h-8 rounded-full object-cover" data-alt="Portrait of Dr. Elena Rodriguez, a professional medical researcher and clinician. She has a dedicated and focused expression, wearing a stethoscope over her professional blouse. The environment is a cutting-edge clinical laboratory with soft ambient cool lighting, emphasizing precision and scientific excellence." src="https://lh3.googleusercontent.com/aida/ADBb0ui21BJcnGn3iN9mTiFVSuod0n-lcYJ1n3Xz-apOOi4vqZLafY1u5d7chnwXloNm2H_lO0BCwu0uf0b2pT46AO8w8v1FROSrTDqo7e3DpXkFPxGoTEw7w7MMkdqj60TyfxEyn9iSToVG6RTYvntwsdtdqB8WMcQgltjPGK4j_qI1O1zLBbqZ1d2w31jslgG-gYvk5bkgtm-H34wAB2_8famNJNW0SgKrMCqXNSwQiPL2QEM_aicXpF4FMFDU1NMPV_2yvBdKzlWKVQ"/>
+                                <span class="font-semibold">Dr. Elena Rodriguez</span>
+                            </div>
+                        </td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-gray-500">Neurology</td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-center">289</td>
+                        <td class="px-gutter py-4 border-b border-gray-100 text-right font-medium">$54,400.00</td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr class="bg-primary-container text-white font-bold">
+                        <td class="px-gutter py-5 rounded-bl-xl" colspan="2">GRAND TOTAL</td>
+                        <td class="px-gutter py-5 text-center">1,046</td>
+                        <td class="px-gutter py-5 text-right rounded-br-xl">$128,450.00</td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <!-- Payment Mode Section -->
+        <div class="mt-gutter grid grid-cols-12 gap-gutter">
+            <div class="col-span-8">
+                <div class="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm h-full">
+                    <div class="px-gutter py-4 bg-gray-50/50 border-b border-gray-200">
+                        <h3 class="font-headline-sm text-gray-900">Payment Mode Summary</h3>
+                    </div>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                        <tr class="bg-white text-label-sm text-gray-500 uppercase tracking-wider">
+                            <th class="px-gutter py-4 font-semibold border-b border-gray-100">Payment Mode</th>
+                            <th class="px-gutter py-4 font-semibold border-b border-gray-100 text-center">Transactions</th>
+                            <th class="px-gutter py-4 font-semibold border-b border-gray-100 text-right">Total Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody class="text-body-md text-gray-700">
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-gutter py-4 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">payments</span>
+                                    Cash
+                                </div>
+                            </td>
+                            <td class="px-gutter py-4 border-b border-gray-100 text-center">245</td>
+                            <td class="px-gutter py-4 border-b border-gray-100 text-right">$32,500.00</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-gutter py-4 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">qr_code_2</span>
+                                    UPI / Digital
+                                </div>
+                            </td>
+                            <td class="px-gutter py-4 border-b border-gray-100 text-center">582</td>
+                            <td class="px-gutter py-4 border-b border-gray-100 text-right">$64,250.00</td>
+                        </tr>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-gutter py-4 border-b border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-primary">credit_card</span>
+                                    Card
+                                </div>
+                            </td>
+                            <td class="px-gutter py-4 border-b border-gray-100 text-center">219</td>
+                            <td class="px-gutter py-4 border-b border-gray-100 text-right">$31,700.00</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- Promotional / Contextual Information Card -->
+            <div class="col-span-4 space-y-gutter">
+                <div class="bg-surface-container-high rounded-xl p-gutter border border-surface-variant relative overflow-hidden min-h-[160px]">
+                    <div class="relative z-10">
+                        <h4 class="text-headline-sm font-bold text-gray-900 mb-2">Need Custom Reports?</h4>
+                        <p class="text-body-sm text-gray-600 mb-4">Request a personalized report structure from our data science team for specialized insights.</p>
+                        <button class="text-primary font-semibold text-label-md flex items-center gap-1 hover:underline">
+                            Request Access
+                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </button>
+                    </div>
+                    <div class="absolute -right-6 -bottom-6 opacity-20">
+                        <span class="material-symbols-outlined text-9xl text-primary">insert_chart</span>
+                    </div>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-xl p-gutter shadow-sm">
+                    <h4 class="text-label-sm font-bold text-gray-900 uppercase tracking-widest mb-4">Quick Stats</h4>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-body-sm text-gray-500">Average Daily Revenue</span>
+                            <span class="text-body-md font-bold text-gray-900">$4,281.67</span>
+                        </div>
+                        <div class="w-full bg-gray-100 h-1.5 rounded-full">
+                            <div class="bg-primary h-full rounded-full" style="width: 78%"></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-body-sm text-gray-500">Highest Earner</span>
+                            <span class="text-body-md font-bold text-gray-900">Dr. Rodriguez</span>
+                        </div>
+                        <div class="w-full bg-gray-100 h-1.5 rounded-full">
+                            <div class="bg-primary h-full rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Empty State / Footer Note -->
+        <div class="mt-12 text-center pb-12">
+            <p class="text-body-sm text-gray-400">Reports are generated based on real-time transaction data. Processing time may vary for large data ranges.</p>
+            <p class="text-body-sm text-gray-400 mt-1">© 2023 VitalSync Enterprise HMS. All rights reserved.</p>
+        </div>
+    </div>
+</main>
+<!-- FAB for Quick Actions (Hidden on sub-pages as per mandate, but used here for specialized report action) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary-container text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50">
+    <span class="material-symbols-outlined text-2xl">add_chart</span>
+</button>
+</body></html>
