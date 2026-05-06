@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  UserRequestDTO, 
-  UserFullProfileDTO, 
+import {
+  UserRequestDTO,
+  UserFullProfileDTO,
   HospitalResponse,
-  HospitalMembershipDTO
+  HospitalMembershipDTO, ScheduleDTO
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
@@ -179,51 +179,70 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const confirmAddContract = () => {
     if (!newContract.hospitalId) return;
 
+    const hosp = hospitals.find(
+      h => String(h.id) === String(newContract.hospitalId)
+    );
+    
+    const updatedMemberships = [...(formData.memberships || [])];
+    const contractWithHospitalName = {
+      ...newContract,
+      hospitalName: hosp?.name || newContract.hospitalName
+    };
 
-    for (const ra of newContract.roleAssignments || []) {
-      const schedules = [...(ra.schedules || [])];
+    if (editingContractIndex === null) {
+      updatedMemberships.push(contractWithHospitalName);
+    } else {
+      updatedMemberships[editingContractIndex] = contractWithHospitalName;
+    }
 
-      schedules.sort((a, b) =>
-          a.startTime.localeCompare(b.startTime)
-      );
+    // Comprehensive overlap check across ALL roles and ALL hospitals
+    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const allSchedules: Array<ScheduleDTO & { hospitalName: string; roleCode: string }> = [];
+    
+    for (const m of updatedMemberships) {
+      for (const ra of m.roleAssignments || []) {
+        if (ra.schedules) {
+          for (const s of ra.schedules) {
+            allSchedules.push({
+              ...s,
+              hospitalName: m.hospitalName || 'Unknown Hospital',
+              roleCode: ra.roleCode
+            });
+          }
+        }
+      }
+    }
 
-      for (let i = 0; i < schedules.length - 1; i++) {
-        const current = schedules[i];
-        const next = schedules[i + 1];
+    // Sort by day, then start time
+    allSchedules.sort((a, b) => {
+      if (a.dayOfWeek !== b.dayOfWeek) return a.dayOfWeek - b.dayOfWeek;
+      return a.startTime.localeCompare(b.startTime);
+    });
 
-        // same day overlap check
-        const currentEnd = new Date(`1970-01-01T${current.endTime}`);
-        const nextStart = new Date(`1970-01-01T${next.startTime}`);
+    const timeToMinutes = (time: string) => {
+      const [h, m] = time.split(':').map(Number);
+      return (h || 0) * 60 + (m || 0);
+    };
 
-        if (
-            current.dayOfWeek === next.dayOfWeek &&
-            currentEnd > nextStart
-        ) {
+    for (let i = 0; i < allSchedules.length - 1; i++) {
+      const current = allSchedules[i];
+      const next = allSchedules[i + 1];
+
+      if (current.dayOfWeek === next.dayOfWeek) {
+        const currentEnd = timeToMinutes(current.endTime);
+        const nextStart = timeToMinutes(next.startTime);
+
+        if (currentEnd > nextStart) {
+          const dayName = dayNames[current.dayOfWeek - 1] || `Day ${current.dayOfWeek}`;
           triggerGlobalToast(
-              `DoctorProfile has overlapping schedules on ${current.dayOfWeek}: ${current.startTime}-${current.endTime} and ${next.startTime}-${next.endTime}`,
-              'error'
+            `Overlapping schedules on ${dayName}: ${current.startTime}-${current.endTime} (${current.hospitalName}) and ${next.startTime}-${next.endTime} (${next.hospitalName})`,
+            'error'
           );
-
           return;
         }
       }
     }
-    const hosp = hospitals.find(
-        h => String(h.id) === String(newContract.hospitalId)
-    );
-    const updatedMemberships = [...(formData.memberships || [])];
 
-    if (editingContractIndex === null) {
-      updatedMemberships.push({
-        ...newContract,
-        hospitalName: hosp?.name
-      });
-    } else {
-      updatedMemberships[editingContractIndex] = {
-        ...newContract,
-        hospitalName: hosp?.name
-      };
-    }
     setFormData({
       ...formData,
       memberships: updatedMemberships
