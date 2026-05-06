@@ -173,10 +173,10 @@ export default function BillingPage() {
 
       if (updateRes.success) {
         triggerGlobalToast('Payment confirmed successfully', 'success');
-        if (!appointmentId) {
-          router.push(`/reception/appointments/vitals?appointmentId=${currentAppointmentId}`);
-        } else {
+        if (appointmentId) {
           fetchData();
+        } else {
+          router.push(`/reception/appointments/vitals?appointmentId=${currentAppointmentId}`);
         }
       }
     } catch (error) {

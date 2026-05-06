@@ -98,9 +98,14 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
               className="w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-none group"
             >
               <p className="font-bold text-on-surface group-hover:text-primary">{medicine.name}</p>
-              {medicine.composition && (
-                <p className="text-[10px] text-gray-500 line-clamp-1">{medicine.composition}</p>
-              )}
+              <div className="flex items-center gap-2 mt-0.5">
+                <span className="px-1.5 py-0.5 bg-gray-100 text-[9px] font-black uppercase rounded text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  {medicine.form || medicine.category || 'General'}
+                </span>
+                {medicine.composition && (
+                  <p className="text-[10px] text-gray-500 line-clamp-1 italic">{medicine.composition}</p>
+                )}
+              </div>
             </button>
           ))}
         </div>

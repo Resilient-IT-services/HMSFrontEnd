@@ -12,22 +12,30 @@ import { Modal } from '@/components/ui/Modal';
 
 const getStatusStyles = (status: string) => {
   switch (status) {
-    case 'WALK_IN':
+    case 'WALK_IN': {
       return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    case 'SCHEDULED':
+    }
+    case 'SCHEDULED': {
       return 'bg-blue-50 text-blue-700 border-blue-100';
-    case 'PAYMENT_PENDING':
+    }
+    case 'PAYMENT_PENDING': {
       return 'bg-amber-50 text-amber-700 border-amber-100';
-    case 'ADD_VITALS':
+    }
+    case 'ADD_VITALS': {
       return 'bg-indigo-50 text-indigo-700 border-indigo-100';
-    case 'WAITING_FOR_VITALS':
+    }
+    case 'WAITING_FOR_VITALS': {
       return 'bg-purple-50 text-purple-700 border-purple-100';
-    case 'COMPLETED':
+    }
+    case 'COMPLETED': {
       return 'bg-green-50 text-green-700 border-green-100';
-    case 'CANCELLED':
+    }
+    case 'CANCELLED': {
       return 'bg-red-50 text-red-700 border-red-100';
-    default:
+    }
+    default: {
       return 'bg-slate-50 text-slate-500 border-slate-100';
+    }
   }
 };
 
@@ -62,9 +70,9 @@ export default function TodayAppointmentsPage() {
     try {
       const today = new Date().toISOString().split('T')[0];
       
-      let dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
+      const dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
       
-      let statusesToUse = filters.statuses?.length > 0 
+      const statusesToUse = filters.statuses?.length > 0 
         ? filters.statuses.join(',') 
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
 
@@ -75,10 +83,7 @@ export default function TodayAppointmentsPage() {
           dateToUse,
           undefined,
           statusesToUse,
-          filters.paymentStatuses?.join(','),
-          undefined,
-          undefined,
-          undefined
+          filters.paymentStatuses?.join(',')
         ),
         doctorService.list(0, 100),
         appointmentService.list(0, 500)
@@ -136,11 +141,7 @@ export default function TodayAppointmentsPage() {
 
   const removeFilter = (key: string, value?: string) => {
     const updated = { ...activeFilters };
-    if (Array.isArray(updated[key])) {
-      updated[key] = updated[key].filter((v: string) => v !== value);
-    } else {
-      updated[key] = '';
-    }
+    updated[key] = Array.isArray(updated[key]) ? updated[key].filter((v: string) => v !== value) : '';
     setActiveFilters(updated);
     setAdvancedFilters(updated);
   };

@@ -119,7 +119,13 @@ export default function AdminReportsPage() {
       setLoading(true);
       setError('');
 
-      if (!hospitalId) {
+      if (hospitalId) {
+        const response = await reportService.preview(filters);
+        setRows(response.success ? response.data ?? [] : []);
+        if (!response.success) {
+          setError(response.error?.message || response.message || 'Unable to load report data.');
+        }
+      } else {
         if (hospitals.length === 0) {
           setRows([]);
           return;
@@ -133,7 +139,7 @@ export default function AdminReportsPage() {
                 hospital,
                 response
               };
-            } catch (e) {
+            } catch {
               return { hospital, response: { success: false, message: 'Failed' } };
             }
           })
@@ -151,12 +157,6 @@ export default function AdminReportsPage() {
 
         if (mergedRows.length === 0 && responses.some(({ response }) => !response || !response.success)) {
           setError('Unable to load report data for one or more hospitals.');
-        }
-      } else {
-        const response = await reportService.preview(filters);
-        setRows(response.success ? response.data ?? [] : []);
-        if (!response.success) {
-          setError(response.error?.message || response.message || 'Unable to load report data.');
         }
       }
     } catch (fetchError) {
@@ -196,7 +196,10 @@ export default function AdminReportsPage() {
         setLoadingDoctors(true);
         setDoctorId('');
 
-        if (!hospitalId) {
+        if (hospitalId) {
+          const response = await reportService.listDoctors(hospitalId);
+          setDoctors(response.success ? response.data?.content ?? [] : []);
+        } else {
           if (hospitals.length === 0) {
             setDoctors([]);
             return;
@@ -206,15 +209,12 @@ export default function AdminReportsPage() {
               try {
                 const response = await reportService.listDoctors(hospital.id);
                 return response.success ? response.data?.content ?? [] : [];
-              } catch (e) {
+              } catch {
                 return [];
               }
             })
           );
           setDoctors(responses.flat());
-        } else {
-          const response = await reportService.listDoctors(hospitalId);
-          setDoctors(response.success ? response.data?.content ?? [] : []);
         }
       } catch (doctorError) {
         console.error(doctorError);
@@ -246,7 +246,7 @@ export default function AdminReportsPage() {
               .map((col) => {
                 const val = row[col];
                 const stringVal = val === null || val === undefined ? '' : String(val);
-                return `"${stringVal.replace(/"/g, '""')}"`;
+                return `"${stringVal.replaceAll('"', '""')}"`;
               })
               .join(',')
           );

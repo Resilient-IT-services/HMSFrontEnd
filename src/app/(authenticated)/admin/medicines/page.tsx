@@ -69,7 +69,7 @@ export default function AdminMedicinePage() {
         setImportFile(null);
         fetchMedicines();
       }
-    } catch (error) {
+    } catch {
       triggerGlobalToast('Failed to import data', 'error');
     } finally {
       setLoading(false);
@@ -77,7 +77,7 @@ export default function AdminMedicinePage() {
   };
 
   const handleDeleteMedicine = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}" from the master catalog?`)) return;
+    if (!globalThis.confirm(`Are you sure you want to delete "${name}" from the master catalog?`)) return;
     
     try {
       setLoading(true);

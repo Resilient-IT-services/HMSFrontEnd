@@ -33,15 +33,11 @@ export default function BatchEntryPage() {
 
     try {
       setLoading(true);
-      // Using updateStock or a similar API. Since we are adding a new batch, 
-      // we might need to update the medicine itself if the API expects it this way,
-      // or use a specific batch creation API if available.
-      // For now, we'll simulate the update.
-      const response = await pharmacyApi.updateMedicine(selectedMedicine.id, {
-        ...selectedMedicine,
+      const response = await pharmacyApi.addStock({
+        medicineId: selectedMedicine.id,
         batchNumber: formData.batchNumber,
         expiryDate: formData.expiryDate,
-        currentStock: (selectedMedicine.currentStock || 0) + Number(formData.quantity),
+        quantity: Number(formData.quantity),
         purchasePrice: Number(formData.purchasePrice),
         sellingPrice: Number(formData.sellingPrice),
       });
@@ -85,7 +81,12 @@ export default function BatchEntryPage() {
                   <div className="mt-2 p-3 bg-orange-50 rounded-lg border border-orange-100 flex items-center justify-between">
                     <div>
                       <p className="text-sm font-bold text-orange-900">{selectedMedicine.name}</p>
-                      <p className="text-[10px] text-orange-700 font-bold uppercase">{selectedMedicine.genericName} • {selectedMedicine.category}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="px-1.5 py-0.5 bg-orange-100 text-[9px] font-black uppercase rounded text-orange-700">
+                          {selectedMedicine.form || selectedMedicine.category || 'General'}
+                        </span>
+                        <p className="text-[10px] text-orange-700 font-bold uppercase">{selectedMedicine.genericName}</p>
+                      </div>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] text-orange-700 font-bold uppercase">Current Stock</p>

@@ -51,7 +51,7 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  getMedicineStock: async (params?: { page?: number; size?: number }) => {
+  getMedicineStock: async (params?: { search?: string; page?: number; size?: number }) => {
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params });
     return response.data;
   },
@@ -76,13 +76,27 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  // Stock Transactions
-  updateStock: async (data: StockTransactionRequestDTO) => {
+  // Stock Management
+  addStock: async (data: any) => {
     const response = await apiClient.post<ApiResponse<void>>('/pharmacy/stock', data);
     return response.data;
   },
 
-  // Sales & Returns
+  updateStock: async (data: StockTransactionRequestDTO) => {
+    const response = await apiClient.post<ApiResponse<void>>('/inventory/stock', data);
+    return response.data;
+  },
+
+  importStock: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/stock/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  // Alerts
   createSale: async (saleData: any) => {
     const response = await apiClient.post<ApiResponse<any>>('/pharmacy/sales', saleData);
     return response.data;

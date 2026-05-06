@@ -17,27 +17,13 @@ export type AuthAction = PayloadAction<UserProfileResponse | null>
   | PayloadAction<void>
   | UnknownAction;
 
-const getInitialSuperMode = () => {
-  if (globalThis.window !== undefined) {
-    return localStorage.getItem('isSuperMode') === 'true';
-  }
-  return false;
-};
-
-const getInitialActiveRole = () => {
-  if (globalThis.window !== undefined) {
-    return localStorage.getItem('activeRole') as Role | null;
-  }
-  return null;
-};
-
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: true,
   error: null,
-  isSuperMode: getInitialSuperMode(),
-  activeRole: getInitialActiveRole(),
+  isSuperMode: false,
+  activeRole: null,
 };
 
 const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Role[] => {
@@ -47,9 +33,7 @@ const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Rol
     effectiveRolesSet.add('SUPER_ADMIN');
   }
 
-  // Global/Detailed memberships processing
   for (const m of user.memberships) {
-    // If no hospitalId filter or it matches, add roles
     if ((!hospitalId || m.hospitalId === hospitalId) && m.roleAssignments) {
         for (const ra of m.roleAssignments) {
           if (ra.active) {
@@ -66,6 +50,12 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    hydrateAuth: (state) => {
+      if (globalThis.window !== undefined) {
+        state.isSuperMode = localStorage.getItem('isSuperMode') === 'true';
+        state.activeRole = (localStorage.getItem('activeRole') as Role) || null;
+      }
+    },
     setUser: (state, action: PayloadAction<UserProfileResponse | null>) => {
       if (!action.payload) {
         state.user = null;
@@ -77,13 +67,11 @@ const authSlice = createSlice({
         return;
       }
 
-      // Restore hospitalId from localStorage if not provided in payload
       let hospitalId = action.payload.currentHospitalId;
       if (!hospitalId && globalThis.window !== undefined) {
         hospitalId = localStorage.getItem('currentHospitalId');
       }
 
-      // Validate restored hospitalId against memberships
       if (hospitalId && !action.payload.memberships.some(m => m.hospitalId === hospitalId)) {
         hospitalId = null;
         if (globalThis.window !== undefined) localStorage.removeItem('currentHospitalId');
@@ -107,13 +95,11 @@ const authSlice = createSlice({
         if (globalThis.window !== undefined) localStorage.removeItem('isSuperMode');
       }
 
-      // If active role is not in current effective roles, reset it
       if (state.activeRole && !rolesArray.includes(state.activeRole)) {
         state.activeRole = null;
         if (globalThis.window !== undefined) localStorage.removeItem('activeRole');
       }
       
-      // Auto-set active role ONLY if exactly one exists
       if (rolesArray.length === 1) {
         state.activeRole = rolesArray[0];
         if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
@@ -184,7 +170,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, setLoading, setError, logout, setSuperMode, setActiveRole, setCurrentHospitalId, clearAuthSession } = authSlice.actions;
+export const { hydrateAuth, setUser, setLoading, setError, logout, setSuperMode, setActiveRole, setCurrentHospitalId, clearAuthSession } = authSlice.actions;
 
 export const authReducer: Reducer<AuthState, AuthAction> = authSlice.reducer as Reducer<AuthState, AuthAction>;
 export default authReducer;

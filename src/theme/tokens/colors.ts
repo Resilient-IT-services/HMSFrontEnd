@@ -1,7 +1,7 @@
 export const colorTokens = {
-  primary: '#ec5b13',
-  primaryHover: '#d44d0f',
-  primaryLight: '#fde9df',
+  primary: '#FF6B2B',
+  primaryHover: '#E55A20',
+  primaryLight: '#FFF0EA',
 
   background: '#f8f6f6',
   surface: '#FFFFFF',

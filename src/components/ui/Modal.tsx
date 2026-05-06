@@ -7,9 +7,10 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: React.ReactNode;
+  maxWidth?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -26,7 +27,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
         onClick={onClose}
       ></div>
-      <div className="relative bg-[var(--surface)] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden border border-[var(--border)] transition-all transform scale-100">
+      <div className={`relative bg-[var(--surface)] rounded-2xl w-full ${maxWidth} shadow-2xl overflow-hidden border border-[var(--border)] transition-all transform scale-100`}>
         <div className="p-6 border-b border-[var(--border)] flex justify-between items-center bg-[var(--primary)] text-white">
           <h3 className="text-lg font-bold">{title}</h3>
           <button 

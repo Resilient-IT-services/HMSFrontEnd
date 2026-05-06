@@ -75,7 +75,7 @@ export default function MedicineMasterPage() {
   };
 
   const handleDeleteMedicine = async (id: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete "${name}" from the master catalog?`)) return;
+    if (!globalThis.confirm(`Are you sure you want to delete "${name}" from the master catalog?`)) return;
     
     try {
       setLoading(true);

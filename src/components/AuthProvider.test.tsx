@@ -9,9 +9,11 @@ import { usePathname } from 'next/navigation';
 
 // Mock services and navigation
 vi.mock('@/services/authService');
+
+const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn(),
+    push: mockPush,
   }),
   usePathname: vi.fn(),
 }));
@@ -52,6 +54,7 @@ describe('AuthProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockLocation.href = '';
+    mockPush.mockClear();
   });
 
   it('shows loader while fetching user', () => {
@@ -83,7 +86,7 @@ describe('AuthProvider', () => {
     });
 
     await waitFor(() => {
-      expect(mockLocation.href).toBe('/doctor/dashboard');
+      expect(mockPush).toHaveBeenCalledWith('/doctor/dashboard');
     });
   });
 });

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
 import { logout } from '@/state/authSlice';
@@ -11,6 +11,7 @@ import { useLayout } from '@/context/LayoutContext';
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useDispatch();
   const { isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const { isSidebarOpen, setIsSidebarOpen } = useLayout();
@@ -19,7 +20,7 @@ const Sidebar = () => {
     try {
       await authService.logout();
       dispatch(logout());
-      globalThis.location.href = '/login';
+      router.push('/login');
     } catch (error) {
       console.error('Logout failed', error);
     }
@@ -107,7 +108,7 @@ const Sidebar = () => {
                 onClick={handleLinkClick}
                 className={`flex items-center gap-3 px-3 py-2.5 transition-all duration-200 font-manrope text-sm font-medium ${
                   isActive
-                    ? 'bg-orange-50 text-orange-600 rounded-lg'
+                    ? 'bg-[var(--primary-light)] text-[var(--primary)] rounded-lg'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >

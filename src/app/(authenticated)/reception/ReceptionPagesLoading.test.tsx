@@ -68,7 +68,7 @@ describe('Reception Pages Loading', () => {
         <TodayAppointmentsPage />
       </Provider>
     );
-    expect(screen.getByTestId('layout-title')).toHaveTextContent(/Daily Schedule/i);
+    expect(screen.getByTestId('layout-title')).toHaveTextContent(/Appointments Dashboard/i);
   });
 
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setUser, setLoading, setError, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
+import { hydrateAuth, setUser, setLoading, setError, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname, useRouter } from 'next/navigation';
 import { Role } from '@/types/api';
@@ -18,6 +18,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // ✅ FIXED AUTH CHECK: Only run on mount or if we lose authentication
   useEffect(() => {
+    dispatch(hydrateAuth());
+
     // Skip if already authenticated and we have user data
     if (isAuthenticated && user) {
       dispatch(setLoading(false));
@@ -122,10 +124,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const targetPath = `/${path}/dashboard`;
       
       if (pathname !== targetPath) {
-        globalThis.location.href = targetPath;
+        router.push(targetPath);
       }
     }
-  }, [activeRole, pathname]);
+  }, [activeRole, pathname, router]);
 
   useEffect(() => {
     if (isLoading) return;
