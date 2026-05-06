@@ -74,7 +74,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   const assignments = [...(newContract.roleAssignments || [])];
                   if (isSelected) setNewContract({ ...newContract, roleAssignments: assignments.filter(r => r.roleCode !== role) });
                   else setNewContract({ ...newContract, roleAssignments: [...assignments, { 
-                    roleCode: role, 
+                    roleCode: role,
                     departmentName: 'General', 
                     active: true, 
                     assignmentId: '', 
@@ -123,12 +123,15 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Follow-up Days <span className="text-primary">*</span></label>
-                      <input type="number" min="0" className="form-input" placeholder="e.g. 7" value={ra.doctorDetails?.followUpDays} onChange={(e) => {
-                        const val = Math.max(0, Number(e.target.value));
+                      <input type="number" min="0" step="1" className="form-input" value={ra.doctorDetails?.followUpDays ?? 0} onChange={(e) => {
+                        let value = e.target.value;
+                        value = value.replaceAll(/\D/g, '');
                         const updated = [...(newContract.roleAssignments || [])];
-                        updated[raIdx].doctorDetails = { ...ra.doctorDetails!, followUpDays: val };
-                        setNewContract({ ...newContract, roleAssignments: updated });
-                      }} />
+                            updated[raIdx].doctorDetails = {...ra.doctorDetails!, followUpDays: value === '' ? 0 : Number(value)
+                            };
+                            setNewContract({...newContract, roleAssignments: updated});
+                          }}
+                      />
                     </div>
                   </>
                 )}

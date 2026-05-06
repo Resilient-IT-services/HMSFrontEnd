@@ -141,7 +141,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     setValidationErrors(errors);
     if (Object.keys(errors).length > 0) {
-      triggerGlobalToast('Please fix the validation errors', 'error');
+      triggerGlobalToast('Fill all the required details', 'error');
     }
     return Object.keys(errors).length === 0;
   };
