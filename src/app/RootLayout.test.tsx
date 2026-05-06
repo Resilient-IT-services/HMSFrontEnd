@@ -2,6 +2,12 @@ import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import RootLayout from './layout';
 
+// Mock fonts
+vi.mock('next/font/google', () => ({
+  Inter: () => ({ variable: 'inter' }),
+  Manrope: () => ({ variable: 'manrope' }),
+}));
+
 // Mock client components and providers
 vi.mock('@/state/StoreProvider', () => ({ default: ({ children }: any) => <div>{children}</div> }));
 vi.mock('@/components/AuthProvider', () => ({ AuthProvider: ({ children }: any) => <div>{children}</div> }));

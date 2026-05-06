@@ -1,7 +1,6 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { store } from '@/state/store';
 import { logout } from '@/state/authSlice';
-import { triggerGlobalToast } from '@/components/ui/Toast';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -18,9 +17,16 @@ const apiClient = axios.create({
   },
 });
 
+// Helper to trigger toasts without importing UI components (avoids circular dependency)
+const triggerToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+  if (globalThis.window !== undefined) {
+    globalThis.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
+  }
+};
+
 
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const token = globalThis.window === undefined ? null : localStorage.getItem("token");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -43,6 +49,7 @@ apiClient.interceptors.response.use(
     (error: AxiosError) => {
       if (error.response?.status === 401) {
         store.dispatch(logout());
+        // We use window.location.href here as a last resort for unauthorized access from non-component files
         if (globalThis.window !== undefined && globalThis.location.pathname !== '/login') {
           globalThis.location.href = '/login';
         }
@@ -52,7 +59,7 @@ apiClient.interceptors.response.use(
       if (!error.config?.skipToast) {
         const apiData = error.response?.data as any;
         const message = apiData?.error?.message || apiData?.message || error.message || 'An unexpected error occurred';
-        triggerGlobalToast(message, 'error');
+        triggerToast(message, 'error');
       }
 
       return Promise.reject(error);
