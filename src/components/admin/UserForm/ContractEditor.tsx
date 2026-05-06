@@ -108,12 +108,18 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   <>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (₹) <span className="text-primary">*</span></label>
-                      <input type="number" min="0" className="form-input" placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
-                        const val = Math.max(0, Number(e.target.value));
+                      <input type="number" min="0" step="1" className="form-input" placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                        let value = e.target.value;
+                        value = value.replaceAll(/[^0-9]/g, '');
+                        const val = value === '' ? 0 : Number(value);
                         const updated = [...(newContract.roleAssignments || [])];
-                        updated[raIdx].doctorDetails = { ...ra.doctorDetails!, consultationFee: val };
+                        updated[raIdx].doctorDetails = {
+                          ...ra.doctorDetails!,
+                          consultationFee: val
+                        };
                         setNewContract({ ...newContract, roleAssignments: updated });
-                      }} />
+                      }}
+                      />
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Follow-up Days <span className="text-primary">*</span></label>
