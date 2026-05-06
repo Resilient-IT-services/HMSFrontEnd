@@ -35,8 +35,24 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  getMedicineStock: async (params?: { lowStock?: boolean; page?: number; size?: number }) => {
-    const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/medicines/stock', { params });
+  importMedicines: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/medicines/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  getAvailableMedicines: async (search: string) => {
+    const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/medicines/available', {
+      params: { search }
+    });
+    return response.data;
+  },
+
+  getMedicineStock: async (params?: { page?: number; size?: number }) => {
+    const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params });
     return response.data;
   },
 
@@ -60,20 +76,35 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  // Inventory Item Catalog (Generic Items)
-  getInventoryItems: async (params?: { search?: string; page?: number; size?: number }) => {
-    const response = await apiClient.get<ApiResponse<PageResponse<InventoryItemResponse>>>('/inventory/items', { params });
-    return response.data;
-  },
-
-  defineInventoryItem: async (data: InventoryItemRequestDTO) => {
-    const response = await apiClient.post<ApiResponse<InventoryItemResponse>>('/inventory/items', data);
-    return response.data;
-  },
-
   // Stock Transactions
   updateStock: async (data: StockTransactionRequestDTO) => {
-    const response = await apiClient.post<ApiResponse<void>>('/inventory/stock', data);
+    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/stock', data);
+    return response.data;
+  },
+
+  // Sales & Returns
+  createSale: async (saleData: any) => {
+    const response = await apiClient.post<ApiResponse<any>>('/pharmacy/sales', saleData);
+    return response.data;
+  },
+
+  processReturn: async (returnData: any) => {
+    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/returns', returnData);
+    return response.data;
+  },
+
+  // Alerts
+  getLowStockAlerts: async (threshold: number = 20) => {
+    const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/alerts/low-stock', {
+      params: { threshold }
+    });
+    return response.data;
+  },
+
+  getExpiryAlerts: async (days: number = 30) => {
+    const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/alerts/expiry', {
+      params: { days }
+    });
     return response.data;
   },
 
@@ -85,6 +116,17 @@ export const pharmacyApi = {
 
   getPatientHistory: async (id: string) => {
     const response = await apiClient.get<ApiResponse<any>>(`/patients/${id}/history`);
+    return response.data;
+  },
+
+  // Inventory Management
+  getInventoryItems: async (params?: { search?: string; page?: number; size?: number }) => {
+    const response = await apiClient.get<ApiResponse<PageResponse<InventoryItemResponse>>>('/inventory/items', { params });
+    return response.data;
+  },
+
+  defineInventoryItem: async (data: InventoryItemRequestDTO) => {
+    const response = await apiClient.post<ApiResponse<InventoryItemResponse>>('/inventory/items', data);
     return response.data;
   }
 };

@@ -376,6 +376,8 @@ export interface MedicineResponse {
   name: string;
   genericName?: string;
   composition?: string;
+  strength?: string;
+  form?: string; // mapping from category
   category?: string;
   manufacturer?: string;
   batchNumber?: string;
@@ -388,6 +390,8 @@ export interface MedicineResponse {
   temperature?: string;
   humidity?: string;
   specialNotes?: string;
+  scheduleDrug?: string; // e.g., Schedule H, H1, X
+  scheduledType?: string; // Correct field from DB
 }
 
 export type MedicineRequestDTO = Omit<MedicineResponse, 'id'> & { id?: string };

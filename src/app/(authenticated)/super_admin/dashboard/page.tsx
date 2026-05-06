@@ -93,6 +93,7 @@ const SuperAdminDashboard = () => {
             </p>
             <div className="flex gap-3 justify-center">
               <Link href="/super_admin/hospitals" className="btn-primary">Manage Hospitals</Link>
+              <Link href="/admin/medicines" className="btn-secondary">Medicine Master</Link>
               <Link href="/admin/users" className="btn-secondary">Manage Users</Link>
             </div>
           </div>

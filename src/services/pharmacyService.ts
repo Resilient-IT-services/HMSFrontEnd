@@ -61,6 +61,15 @@ export const pharmacyService = {
     return response.data;
   },
 
+  async importMaster(file: File): Promise<ApiResponse<void>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/medicines/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
   // Inventory Management
   async listInventoryItems(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<InventoryItemResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<InventoryItemResponse>>>('/inventory/items', { params });

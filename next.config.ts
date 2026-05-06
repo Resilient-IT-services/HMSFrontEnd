@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ['bull-coupons-write-dealtime.trycloudflare.com'],
+  allowedDevOrigins: ['fcc-reg-recall-voting.trycloudflare.com'],
   async rewrites() {
     const apiBaseUrl =  'http://localhost:8081';
     return [
