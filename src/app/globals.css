@@ -58,15 +58,15 @@
   --spacing-container-padding: 32px;
   --spacing-base: 8px;
 
-  /* Font Families */
-  --font-inter: "Inter", sans-serif;
-  --font-manrope: "Manrope", sans-serif;
+  /* Font Families - Now using variables from Next.js font optimization */
+  --font-inter: var(--font-inter), sans-serif;
+  --font-manrope: var(--font-manrope), sans-serif;
 }
 
 :root {
   color-scheme: light;
-  --primary: #a83900;
-  --primary-container: #ff6b2b;
+  --primary: #FF6B2B;
+  --primary-container: #FF6B2B;
   --on-primary: #ffffff;
   --on-surface: #191c20;
   --on-surface-variant: #594138;
