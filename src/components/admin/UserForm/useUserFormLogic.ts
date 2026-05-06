@@ -178,16 +178,65 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
   const confirmAddContract = () => {
     if (!newContract.hospitalId) return;
-    const hosp = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
+
+
+    for (const ra of newContract.roleAssignments || []) {
+      const schedules = [...(ra.schedules || [])];
+
+      schedules.sort((a, b) =>
+          a.startTime.localeCompare(b.startTime)
+      );
+
+      for (let i = 0; i < schedules.length - 1; i++) {
+        const current = schedules[i];
+        const next = schedules[i + 1];
+
+        // same day overlap check
+        const currentEnd = new Date(`1970-01-01T${current.endTime}`);
+        const nextStart = new Date(`1970-01-01T${next.startTime}`);
+
+        if (
+            current.dayOfWeek === next.dayOfWeek &&
+            currentEnd > nextStart
+        ) {
+          triggerGlobalToast(
+              `DoctorProfile has overlapping schedules on ${current.dayOfWeek}: ${current.startTime}-${current.endTime} and ${next.startTime}-${next.endTime}`,
+              'error'
+          );
+
+          return;
+        }
+      }
+    }
+    const hosp = hospitals.find(
+        h => String(h.id) === String(newContract.hospitalId)
+    );
     const updatedMemberships = [...(formData.memberships || [])];
-    if (editingContractIndex === null) {updatedMemberships.push({ ...newContract, hospitalName: hosp?.name });}
-    else {updatedMemberships[editingContractIndex] = { ...newContract, hospitalName: hosp?.name };}
-    
-    setFormData({ ...formData, memberships: updatedMemberships });
+
+    if (editingContractIndex === null) {
+      updatedMemberships.push({
+        ...newContract,
+        hospitalName: hosp?.name
+      });
+    } else {
+      updatedMemberships[editingContractIndex] = {
+        ...newContract,
+        hospitalName: hosp?.name
+      };
+    }
+    setFormData({
+      ...formData,
+      memberships: updatedMemberships
+    });
+
     setIsAddingContract(false);
     setEditingContractIndex(null);
-    setNewContract({ hospitalId: '', roleAssignments: [] });
+    setNewContract({
+      hospitalId: '',
+      roleAssignments: []
+    });
   };
+
 
   const duplicateContract = (contract: HospitalMembershipDTO) => {
     setNewContract({ ...contract, hospitalId: '', hospitalName: undefined });
