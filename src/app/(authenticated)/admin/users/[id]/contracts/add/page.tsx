@@ -30,6 +30,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
+import { triggerGlobalToast } from '@/components/ui/Toast';
+
 type ContractRole = 'DOCTOR' | 'NURSE' | 'RECEPTIONIST' | 'PHARMACIST' | 'ADMIN';
 
 export default function AddContractPage({ params }: { params: Promise<{ id: string }> }) {
@@ -107,12 +109,12 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
 
   const handleSave = async () => {
     if (!selectedHospitalId) {
-      alert('Please select a hospital');
+      triggerGlobalToast('Please select a hospital before saving the contract', 'error');
       return;
     }
 
     if (selectedRoles.length === 0) {
-      alert('Please select at least one role');
+      triggerGlobalToast('Please select at least one role', 'error');
       return;
     }
 

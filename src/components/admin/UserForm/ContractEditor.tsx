@@ -49,6 +49,13 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
     setCopyTargets([]);
   };
 
+  const renderFieldError = (field: string) => {
+    if (validationErrors[field]) {
+      return <p className="text-error text-[10px] font-bold mt-1 uppercase tracking-tight">{validationErrors[field]}</p>;
+    }
+    return null;
+  };
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-center">
@@ -60,13 +67,20 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
       </div>
 
       <div className="space-y-6">
-        <section className="bg-gray-50 border border-gray-200 rounded-xl p-6">
-          <label className="block text-[10px] font-black text-gray-700 uppercase mb-4">Facility & Roles</label>
-          <select className="form-input mb-4" value={newContract.hospitalId} onChange={(e) => setNewContract({ ...newContract, hospitalId: e.target.value })} disabled={editingContractIndex !== null}>
+        <section className={`bg-gray-50 border ${validationErrors.contractHospital || validationErrors.contractRoles ? 'border-error ring-1 ring-error/10' : 'border-gray-200'} rounded-xl p-6`}>
+          <label className="block text-[10px] font-black text-gray-700 uppercase mb-4">Facility & Roles <span className="text-primary">*</span></label>
+          <select 
+            className={`form-input mb-4 ${validationErrors.contractHospital ? 'border-error ring-1 ring-error/20' : ''}`} 
+            value={newContract.hospitalId} 
+            onChange={(e) => setNewContract({ ...newContract, hospitalId: e.target.value })} 
+            disabled={editingContractIndex !== null}
+          >
             <option value="">Select Facility...</option>
             {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
           </select>
-          <div className="flex flex-wrap gap-2">
+          {renderFieldError('contractHospital')}
+          
+          <div className="flex flex-wrap gap-2 mt-4">
             {['DOCTOR', 'NURSE', 'RECEPTIONIST', 'PHARMACIST', 'ADMIN'].map(role => {
               const isSelected = !!newContract.roleAssignments?.find(r => r.roleCode === role);
               return (
@@ -80,10 +94,11 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     assignmentId: '', 
                     doctorDetails: role === 'DOCTOR' ? { consultationFee: 0, followUpDays: 0 } : undefined 
                   } as any] });
-                }} className={`px-3 py-1.5 rounded-lg border-2 font-black text-[9px] uppercase tracking-widest ${isSelected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}>{role}</button>
+                }} className={`px-3 py-1.5 rounded-lg border-2 font-black text-[9px] uppercase tracking-widest transition-all ${isSelected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}>{role}</button>
               );
             })}
           </div>
+          {renderFieldError('contractRoles')}
         </section>
 
         <div className="grid grid-cols-1 gap-6">
@@ -97,18 +112,19 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-gray-700 uppercase">Department <span className="text-primary">*</span></label>
-                  <input type="text" className="form-input" placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
+                  <input type="text" className={`form-input ${validationErrors[`department_${ra.roleCode}`] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
                     const updated = [...(newContract.roleAssignments || [])];
                     updated[raIdx].departmentName = e.target.value;
                     setNewContract({ ...newContract, roleAssignments: updated });
                   }} />
+                  {renderFieldError(`department_${ra.roleCode}`)}
                 </div>
 
                 {ra.roleCode === 'DOCTOR' && (
                   <>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (₹) <span className="text-primary">*</span></label>
-                      <input type="number" min="0" step="1" className="form-input" placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                      <input type="number" min="0" step="1" className={`form-input ${validationErrors[`fee_${ra.roleCode}`] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
                         let value = e.target.value;
                         value = value.replaceAll(/[^0-9]/g, '');
                         const val = value === '' ? 0 : Number(value);
@@ -120,6 +136,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         setNewContract({ ...newContract, roleAssignments: updated });
                       }}
                       />
+                      {renderFieldError(`fee_${ra.roleCode}`)}
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Follow-up Days <span className="text-primary">*</span></label>

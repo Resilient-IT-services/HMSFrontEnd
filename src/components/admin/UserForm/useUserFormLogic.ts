@@ -40,6 +40,23 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const [editingContractIndex, setEditingContractIndex] = useState<number | null>(null);
   const [newContract, setNewContract] = useState<HospitalMembershipDTO>({ hospitalId: '', roleAssignments: [] });
 
+  // Clear contract-related errors when editor is opened
+  useEffect(() => {
+    if (isAddingContract) {
+      setValidationErrors(prev => {
+        const next = { ...prev };
+        delete next.contractHospital;
+        delete next.contractRoles;
+        Object.keys(next).forEach(key => {
+          if (key.startsWith('department_') || key.startsWith('fee_')) {
+            delete next[key];
+          }
+        });
+        return next;
+      });
+    }
+  }, [isAddingContract]);
+
   const assignedRoles = useMemo(() => {
     const roles = new Set<string>();
     if (formData.memberships) for (const m of formData.memberships) {
@@ -139,6 +156,16 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       errors.memberships = 'At least one hospital contract is required for non-superusers.';
     }
 
+    // Doctor Specific Validation
+    if (assignedRoles.includes('DOCTOR') && formData.doctorInfo) {
+      if (!formData.doctorInfo.specialization?.trim()) {
+        errors.specialization = 'Specialization is required';
+      }
+      if (!formData.doctorInfo.licenseNumber?.trim()) {
+        errors.licenseNumber = 'License number is required';
+      }
+    }
+
     setValidationErrors(errors);
     if (Object.keys(errors).length > 0) {
       triggerGlobalToast('Fill all the required details', 'error');
@@ -176,44 +203,20 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     }
   };
 
-  const confirmAddContract = () => {
-    if (!newContract.hospitalId) return;
-
-    const hosp = hospitals.find(
-      h => String(h.id) === String(newContract.hospitalId)
-    );
-    
-    const updatedMemberships = [...(formData.memberships || [])];
-    const contractWithHospitalName = {
-      ...newContract,
-      hospitalName: hosp?.name || newContract.hospitalName
-    };
-
-    if (editingContractIndex === null) {
-      updatedMemberships.push(contractWithHospitalName);
-    } else {
-      updatedMemberships[editingContractIndex] = contractWithHospitalName;
-    }
-
-    // Comprehensive overlap check across ALL roles and ALL hospitals
+  const checkScheduleOverlaps = (memberships: HospitalMembershipDTO[]) => {
     const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     const allSchedules: Array<ScheduleDTO & { hospitalName: string; roleCode: string }> = [];
     
-    for (const m of updatedMemberships) {
+    for (const m of memberships) {
       for (const ra of m.roleAssignments || []) {
         if (ra.schedules) {
           for (const s of ra.schedules) {
-            allSchedules.push({
-              ...s,
-              hospitalName: m.hospitalName || 'Unknown Hospital',
-              roleCode: ra.roleCode
-            });
+            allSchedules.push({ ...s, hospitalName: m.hospitalName || 'Unknown Hospital', roleCode: ra.roleCode });
           }
         }
       }
     }
 
-    // Sort by day, then start time
     allSchedules.sort((a, b) => {
       if (a.dayOfWeek !== b.dayOfWeek) return a.dayOfWeek - b.dayOfWeek;
       return a.startTime.localeCompare(b.startTime);
@@ -228,32 +231,71 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       const current = allSchedules[i];
       const next = allSchedules[i + 1];
 
-      if (current.dayOfWeek === next.dayOfWeek) {
-        const currentEnd = timeToMinutes(current.endTime);
-        const nextStart = timeToMinutes(next.startTime);
-
-        if (currentEnd > nextStart) {
-          const dayName = dayNames[current.dayOfWeek - 1] || `Day ${current.dayOfWeek}`;
-          triggerGlobalToast(
-            `Overlapping schedules on ${dayName}: ${current.startTime}-${current.endTime} (${current.hospitalName}) and ${next.startTime}-${next.endTime} (${next.hospitalName})`,
-            'error'
-          );
-          return;
-        }
+      if (current.dayOfWeek === next.dayOfWeek && timeToMinutes(current.endTime) > timeToMinutes(next.startTime)) {
+        const dayName = dayNames[current.dayOfWeek - 1] || `Day ${current.dayOfWeek}`;
+        triggerGlobalToast(
+          `Overlapping schedules on ${dayName}: ${current.startTime}-${current.endTime} (${current.hospitalName}) and ${next.startTime}-${next.endTime} (${next.hospitalName})`,
+          'error'
+        );
+        return true;
       }
     }
+    return false;
+  };
 
-    setFormData({
-      ...formData,
-      memberships: updatedMemberships
+  const confirmAddContract = () => {
+    const errors: Record<string, string> = {};
+    if (!newContract.hospitalId) {
+      errors.contractHospital = 'Please select a hospital facility';
+    }
+    if (!newContract.roleAssignments || newContract.roleAssignments.length === 0) {
+      errors.contractRoles = 'Please select at least one role for this contract';
+    } else {
+      newContract.roleAssignments.forEach((ra) => {
+        if (!ra.departmentName?.trim()) {
+          errors[`department_${ra.roleCode}`] = 'Department is required';
+        }
+        if (ra.roleCode === 'DOCTOR' && (ra.doctorDetails?.consultationFee === undefined || ra.doctorDetails?.consultationFee === null)) {
+          errors[`fee_${ra.roleCode}`] = 'Consultation fee is required';
+        }
+      });
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(prev => ({ ...prev, ...errors }));
+      return;
+    }
+
+    const hosp = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
+    const updatedMemberships = [...(formData.memberships || [])];
+    const contractWithHospitalName = { ...newContract, hospitalName: hosp?.name || newContract.hospitalName };
+
+    if (editingContractIndex === null) {
+      updatedMemberships.push(contractWithHospitalName);
+    } else {
+      updatedMemberships[editingContractIndex] = contractWithHospitalName;
+    }
+
+    if (checkScheduleOverlaps(updatedMemberships)) return;
+
+    setFormData({ ...formData, memberships: updatedMemberships });
+
+    setValidationErrors(prev => {
+      const next = { ...prev };
+      delete next.contractHospital;
+      delete next.contractRoles;
+      // Clear all department and fee errors
+      Object.keys(next).forEach(key => {
+        if (key.startsWith('department_') || key.startsWith('fee_')) {
+          delete next[key];
+        }
+      });
+      return next;
     });
 
     setIsAddingContract(false);
     setEditingContractIndex(null);
-    setNewContract({
-      hospitalId: '',
-      roleAssignments: []
-    });
+    setNewContract({ hospitalId: '', roleAssignments: [] });
   };
 
 
