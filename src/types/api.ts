@@ -404,6 +404,7 @@ export interface PharmacyStockDTO {
   expiryDate: string;
   quantity: number;
   price: number;
+  purchasePrice?: number;
 }
 
 

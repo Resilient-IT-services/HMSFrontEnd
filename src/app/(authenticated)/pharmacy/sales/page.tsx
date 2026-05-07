@@ -18,10 +18,18 @@ export default function SalesPage() {
   const total = cart.reduce((acc, item) => acc + (item.sellingPrice || 0) * item.quantity, 0);
 
   const handleAddToCart = (medicine: MedicineResponse) => {
+    // Basic stock check
     if ((medicine.currentStock || 0) <= 0) {
       triggerGlobalToast('Medicine out of stock', 'error');
       return;
     }
+
+    // Expiry check
+    if (medicine.expiryDate && new Date(medicine.expiryDate) < new Date()) {
+      triggerGlobalToast('Cannot sell expired medicine', 'error');
+      return;
+    }
+
     dispatch(addToCart(medicine));
   };
 
@@ -32,6 +40,7 @@ export default function SalesPage() {
     try {
       const saleItems = cart.map(item => ({
         medicineId: item.id,
+        batchNumber: item.batchNumber, // Ensure batch-wise selling
         quantity: item.quantity,
         price: item.sellingPrice
       }));
@@ -39,12 +48,11 @@ export default function SalesPage() {
       const response = await pharmacyApi.createSale({ items: saleItems });
       
       if (response.success) {
-        triggerGlobalToast('Sale completed successfully (FEFO applied)', 'success');
+        triggerGlobalToast('Sale completed successfully (Stock updated)', 'success');
         dispatch(clearCart());
       }
     } catch (error) {
       console.error(error);
-      // apiClient will show the error toast
     } finally {
       setLoading(false);
     }
@@ -59,19 +67,20 @@ export default function SalesPage() {
             <h2 className="text-lg font-bold text-slate-800 mb-4">Search Medicines</h2>
             <MedicineAutocomplete 
               onSelect={handleAddToCart}
-              placeholder="Type medicine name to add to cart..."
+              stockOnly={true}
+              placeholder="Search in-stock medicines..."
               className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-base focus:ring-4 focus:ring-orange-500/10 outline-none transition-all shadow-inner"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-orange-50 p-4 rounded-xl border border-orange-100">
-              <p className="text-[10px] font-black uppercase text-orange-700 tracking-widest">Quick Tip</p>
-              <p className="text-xs text-orange-900 mt-1 font-medium">Use the search bar above to quickly find medicines by name or composition.</p>
+              <p className="text-[10px] font-black uppercase text-orange-700 tracking-widest">Stock Alert</p>
+              <p className="text-xs text-orange-900 mt-1 font-medium">Quantities are fetched batch-wise. Expired batches are automatically hidden.</p>
             </div>
             <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-              <p className="text-[10px] font-black uppercase text-blue-700 tracking-widest">In Stock Only</p>
-              <p className="text-xs text-blue-900 mt-1 font-medium">Only medicines with available stock can be added to the billing cart.</p>
+              <p className="text-[10px] font-black uppercase text-blue-700 tracking-widest">FEFO Applied</p>
+              <p className="text-xs text-blue-900 mt-1 font-medium">System prioritizes medicines with the nearest expiry date first.</p>
             </div>
           </div>
         </div>

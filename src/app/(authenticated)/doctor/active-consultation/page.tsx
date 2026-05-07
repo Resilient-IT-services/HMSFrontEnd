@@ -324,8 +324,9 @@ export default function ActiveConsultationPage() {
                         {index === 0 && <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Medicine Name</label>}
                         <MedicineAutocomplete 
                           defaultValue={row.medicine}
+                          stockOnly={true}
                           onSelect={(med) => updatePrescription(index, 'medicine', med.name, { medicineId: med.id, composition: med.composition })}
-                          placeholder="Select Medicine..."
+                          placeholder="Search in-stock medicines..."
                           className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-outline-variant rounded-lg text-sm focus:ring-2 focus:ring-primary outline-none transition-all"
                         />
                         {row.composition && (

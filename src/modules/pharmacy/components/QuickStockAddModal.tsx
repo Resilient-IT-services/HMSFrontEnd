@@ -72,21 +72,12 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
       <Modal
           isOpen={true}
           onClose={onClose}
-          title="Add Stock"
+          title="Add New Stock"
           maxWidth="max-w-3xl"
       >
         <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
 
-          {/* Header */}
-          <div className="px-6 py-5 border-b border-slate-200 bg-slate-50">
-            <h2 className="text-lg font-semibold text-slate-800">
-              Add New Stock
-            </h2>
 
-            <p className="text-sm text-slate-500 mt-1">
-              Enter batch and pricing details
-            </p>
-          </div>
 
           {/* Medicine Info */}
           <div className="px-6 pt-6">
