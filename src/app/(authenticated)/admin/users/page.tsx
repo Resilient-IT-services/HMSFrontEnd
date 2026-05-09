@@ -125,9 +125,74 @@ export default function UserManagement() {
           </div>
         </div>
 
-        {/* Table Container */}
+        {/* Table/Card Container */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Mobile/Tablet Card View */}
+          <div className="lg:hidden divide-y divide-slate-100">
+            {loading ? (
+              <div className="px-6 py-10 text-center text-slate-400 italic">Loading staff records...</div>
+            ) : users.length === 0 ? (
+              <div className="px-6 py-10 text-center text-slate-400 italic">No staff members found.</div>
+            ) : (
+              users.map((user) => {
+                const primaryMembership = user.memberships?.[0];
+                const membershipCount = user.memberships?.length ?? 0;
+                const primaryHospitalName = primaryMembership?.hospitalName || 'Unnamed Hospital';
+                const additionalHospitalSuffix = membershipCount > 1 ? ` + ${membershipCount - 1}` : '';
+                const hospitalSummary = membershipCount > 0
+                  ? `${primaryHospitalName}${additionalHospitalSuffix}`
+                  : 'No Hospital Assigned';
+                const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
+
+                return (
+                  <div 
+                    key={user.id} 
+                    className="p-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                    onClick={() => router.push(`/admin/users/${user.id}`)}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold uppercase overflow-hidden border-2 border-orange-50">
+                          {user.fullName ? user.fullName.slice(0, 2) : user.username.slice(0, 2)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900 text-sm">{user.fullName || user.username}</p>
+                          <p className="text-xs text-slate-400">{user.email}</p>
+                        </div>
+                      </div>
+                      <span className={`flex items-center gap-1.5 text-xs font-bold ${user.active ? 'text-emerald-600' : 'text-slate-400'}`}>
+                        <span className={`w-2 h-2 rounded-full ${user.active ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
+                        {user.active ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Roles</p>
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles && user.roles.length > 0 ? (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 uppercase border border-orange-100">
+                              {user.roles[0]}{user.roles.length > 1 ? ` + ${user.roles.length - 1}` : ''}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">No Roles</span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Context</p>
+                        <p className="text-xs text-slate-600 font-medium truncate">{hospitalSummary}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter truncate">{departmentName}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-200">
@@ -201,7 +266,10 @@ export default function UserManagement() {
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2 transition-opacity">
                           <button 
-                            onClick={() => router.push(`/admin/users/${user.id}`)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/admin/users/${user.id}`);
+                            }}
                             className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
                             title="Edit User"
                           >
@@ -215,6 +283,7 @@ export default function UserManagement() {
               )}
             </tbody>
           </table>
+          </div>
 
           {/* Pagination */}
           <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 flex items-center justify-between">
@@ -295,7 +364,6 @@ export default function UserManagement() {
           </div>
         </div>
         )}
-      </div>
       </div>
     </MainLayout>
   );

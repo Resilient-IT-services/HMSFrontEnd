@@ -95,7 +95,7 @@ const HospitalManagement = () => {
               ))}
             </div>
         )}
-        {/* Hospital Directory Table */}
+        {/* Hospital Directory Container */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <div>
@@ -142,7 +142,71 @@ const HospitalManagement = () => {
               )}
             </div>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Mobile/Tablet Card View */}
+          <div className="lg:hidden divide-y divide-slate-100">
+            {hospitals
+              .filter((h) => statusFilter === 'ALL' || h.status === statusFilter)
+              .map((h) => (
+                <div 
+                  key={h.id} 
+                  className="p-4 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center text-orange-700 font-bold overflow-hidden uppercase">
+                        {h.name.slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900 text-sm">{h.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">ID: {h.code}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${h.status === 'ACTIVE' ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                      <span className="text-xs font-bold text-slate-700 uppercase tracking-tighter">{h.status === 'ACTIVE' ? 'Operational' : h.status}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">City</p>
+                      <p className="text-sm text-slate-600 font-medium">{h.city ?? 'N/A'}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/super_admin/hospitals/${h.id}`);
+                        }}
+                        className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                        title="Edit Facility"
+                      >
+                        <span className="material-symbols-outlined text-xl">edit</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedHospital(h);
+                          setIsModalOpen(true);
+                        }}
+                        className="p-2 text-slate-400 hover:text-slate-900 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
+                        title="View Details"
+                      >
+                        <span className="material-symbols-outlined text-xl">visibility</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            {hospitals.length === 0 && !loading && (
+              <div className="px-6 py-10 text-center text-slate-400 italic">No hospitals found.</div>
+            )}
+          </div>
+
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-left">
               <thead>
                 <tr className="bg-white text-slate-400 text-[10px] font-black uppercase tracking-widest">
@@ -184,13 +248,20 @@ const HospitalManagement = () => {
                     <td className="px-6 py-5 text-center">
                       <div className="flex justify-center gap-2 items-center transition-opacity">
                         <button 
-                          onClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/super_admin/hospitals/${h.id}`);
+                          }}
                           className="p-2 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
                           title="Edit Facility">
                           <span className="material-symbols-outlined text-xl">edit</span>
                         </button>
                         <button
-                            onClick={() => {setSelectedHospital(h);setIsModalOpen(true);}}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedHospital(h);
+                              setIsModalOpen(true);
+                            }}
                             className="p-2 text-slate-400 hover:text-slate-900 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm"
                             title="View Details">
                           <span className="material-symbols-outlined text-xl">visibility</span>

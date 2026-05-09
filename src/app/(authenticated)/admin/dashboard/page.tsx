@@ -109,7 +109,56 @@ export default function AdminDashboard() {
               <h2 className="text-xl font-bold text-slate-900 font-manrope">Network Activity</h2>
               <button onClick={() => router.push('/super_admin/hospitals')} className="text-orange-700 text-sm font-bold hover:underline">View All Records</button>
             </div>
-            <div className="overflow-x-auto">
+            
+            {/* Mobile/Tablet Card View */}
+            <div className="lg:hidden divide-y divide-slate-100">
+              {hospitals.slice(0, 5).map((h) => (
+                <div 
+                  key={h.id} 
+                  className="p-6 hover:bg-slate-50 transition-colors cursor-pointer"
+                  onClick={() => router.push(`/super_admin/hospitals/${h.id}`)}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-orange-100 flex-shrink-0 flex items-center justify-center text-orange-700 font-bold uppercase">
+                        {h.name.slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-900">{h.name}</p>
+                        <p className="text-xs text-slate-400">{h.code}</p>
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-tighter ${h.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-orange-700'}`}>
+                      {h.status === 'ACTIVE' ? 'Fully Integrated' : h.status}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 items-end">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Daily Users</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium text-slate-700">85%</p>
+                        <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="bg-emerald-500 h-full w-[85%]"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Last Sync</p>
+                      <p className="font-bold text-slate-500 text-xs">
+                        {new Date(h.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {hospitals.length === 0 && (
+                <div className="px-6 py-10 text-center text-slate-400 italic">No hospital activity records found.</div>
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
                   <tr className="bg-slate-50/50 text-slate-500 text-[11px] font-bold uppercase tracking-wider">
