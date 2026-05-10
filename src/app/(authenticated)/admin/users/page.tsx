@@ -97,7 +97,7 @@ export default function UserManagement() {
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
             <input 
               className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-orange-700/20 focus:border-orange-700 transition-all outline-none bg-white text-sm" 
-              placeholder="Search by name, email..."
+              placeholder="Search by name, email, or role..."
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}

@@ -20,7 +20,7 @@ export default function ReturnPage() {
     setLoading(true);
     try {
       const response = await pharmacyApi.processReturn({
-        medicineId: selectedMedicine.id,
+        saleItemId: selectedMedicine.id,
         quantity: Number(returnQty),
         reason: reason
       });

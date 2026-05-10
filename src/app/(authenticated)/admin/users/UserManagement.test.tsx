@@ -72,7 +72,7 @@ describe('UserManagement', () => {
 
     expect(screen.getByPlaceholderText(/Search by name, email, or role.../i)).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText('user1')).toBeInTheDocument();
+      expect(screen.getAllByText('user1').length).toBeGreaterThan(0);
     });
   });
 

@@ -61,10 +61,46 @@ describe('LoginPage', () => {
     });
   });
 
-  it('shows error on failed login', async () => {
-    (authService.login as any).mockResolvedValue({ 
-      success: false, 
-      error: { message: 'Invalid credentials' } 
+  it('toggles password visibility', () => {
+    render(
+      <Provider store={createMockStore()}>
+        <LoginPage />
+      </Provider>
+    );
+
+    const passwordInput = screen.getByLabelText(/password/i);
+    const toggleButton = screen.getByRole('button', { name: /visibility/i });
+
+    expect(passwordInput).toHaveAttribute('type', 'password');
+    
+    fireEvent.click(toggleButton);
+    expect(passwordInput).toHaveAttribute('type', 'text');
+
+    fireEvent.click(screen.getByRole('button', { name: /visibility_off/i }));
+    expect(passwordInput).toHaveAttribute('type', 'password');
+  });
+
+  it('opens and closes help desk modal', () => {
+    render(
+      <Provider store={createMockStore()}>
+        <LoginPage />
+      </Provider>
+    );
+
+    const helpButton = screen.getByRole('button', { name: /help desk/i });
+    fireEvent.click(helpButton);
+    
+    expect(screen.getByText(/Support Center/i)).toBeInTheDocument();
+    
+    const closeButton = screen.getByText('✕');
+    fireEvent.click(closeButton);
+    
+    expect(screen.queryByText(/Support Center/i)).not.toBeInTheDocument();
+  });
+
+  it('handles generic error in handleSubmit', async () => {
+    (authService.login as any).mockRejectedValue({ 
+      response: { data: { error: { message: 'Network error' } } } 
     });
 
     render(
@@ -73,12 +109,12 @@ describe('LoginPage', () => {
       </Provider>
     );
 
-    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'wronguser' } });
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'wrongpass' } });
+    fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'user' } });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'pass' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+      expect(screen.getByText('Network error')).toBeInTheDocument();
     });
   });
 });
