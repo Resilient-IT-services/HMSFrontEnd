@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, BillingDTO } from '@/types/api';
+import { ApiResponse, BillingDTO, UpdateBillingStatusRequest } from '@/types/api';
 
 export const billingService = {
   async create(data: BillingDTO): Promise<ApiResponse<BillingDTO>> {
@@ -7,10 +7,13 @@ export const billingService = {
     return response.data;
   },
 
-  async updateStatus(billingId: string, status: string, paymentMethod?: string, discount?: number): Promise<ApiResponse<BillingDTO>> {
-    const response = await apiClient.put<ApiResponse<BillingDTO>>(`/billing/${billingId}/status`, null, {
-      params: { status, paymentMethod, discount }
-    });
+  async updateStatus(billingId: string, status: any, paymentMethod?: string, discount?: number): Promise<ApiResponse<BillingDTO>> {
+    const payload: UpdateBillingStatusRequest = {
+      status,
+      paymentMethod,
+      discount
+    };
+    const response = await apiClient.put<ApiResponse<BillingDTO>>(`/billing/${billingId}/status-v2`, payload);
     return response.data;
   },
 

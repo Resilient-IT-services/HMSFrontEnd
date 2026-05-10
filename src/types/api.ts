@@ -224,6 +224,7 @@ export interface PatientResponse {
 export interface CreatePatientRequest {
   id?: string;
   fullName: string;
+  patientCode?: string;
   email?: string;
   gender: Gender;
   dob: string;
@@ -231,6 +232,14 @@ export interface CreatePatientRequest {
   address: string;
   bloodGroup?: string;
   medicalHistory?: string;
+}
+
+// ... other types ...
+
+export interface UpdateBillingStatusRequest {
+  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'PARTIALLY_PAID';
+  paymentMethod?: string;
+  discount?: number;
 }
 
 // Hospital types
