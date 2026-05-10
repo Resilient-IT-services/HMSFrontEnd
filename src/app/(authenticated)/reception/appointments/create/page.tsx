@@ -158,12 +158,19 @@ export default function AppointmentScheduling() {
       }
     }
 
+    const getSessionPeriod = (time: string) => {
+      if (time < '12:00') return 'MORNING';
+      if (time < '17:00') return 'AFTERNOON';
+      return 'EVENING';
+    };
+
     setSubmitting(true);
     try {
       const params = new URLSearchParams({
         patientId: selectedPatient.id,
         doctorId: selectedDoctor.doctorId,
         appointmentTime: `${selectedDate}T${editableTime}:00`,
+        sessionPeriod: getSessionPeriod(editableTime),
         notes
       });
       router.push(`/reception/billing?${params.toString()}`);

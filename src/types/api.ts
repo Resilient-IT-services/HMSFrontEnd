@@ -1,4 +1,4 @@
-export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST' | 'PHARMACIST';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST' | 'PHARMACIST' | 'LAB_TECHNICIAN';
 
 export interface ApiError {
   code?: string;
@@ -63,6 +63,11 @@ export interface PharmacistInfo {
   qualification: string;
 }
 
+export interface LabTechInfo {
+  specialty: string;
+  licenseNo: string;
+}
+
 export interface ReceptionistInfo {
   languagesSpoken: ReceptionistFluency;
   insuranceSpecialist: boolean;
@@ -113,6 +118,7 @@ export interface AdminHospitalDetailsDTO {
 export interface PharmacistHospitalDetailsDTO {
   counterLocation: string;
   pharmacyWing: string;
+  pharmacyLicenseNo?: string;
   updatedAt: string;
 }
 
@@ -160,6 +166,7 @@ export interface UserResponse {
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
+  labTechInfo?: LabTechInfo;
   receptionistInfo?: ReceptionistInfo;
   memberships: HospitalMembershipDTO[];
   roles?: Role[]; // Computed on frontend for convenience
@@ -188,6 +195,7 @@ export interface UserRequestDTO {
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
+  labTechInfo?: LabTechInfo;
   receptionistInfo?: ReceptionistInfo;
   memberships?: HospitalMembershipDTO[];
 }
@@ -203,9 +211,12 @@ export interface PatientResponse {
   id: string; // patientId
   fullName: string;
   patientCode?: string;
+  email?: string;
+  medicalHistory?: string;
   gender: Gender;
   dob: string;
   phone: string;
+  bloodGroup?: string;
   address: string;
   createdAt: string;
 }
@@ -213,10 +224,13 @@ export interface PatientResponse {
 export interface CreatePatientRequest {
   id?: string;
   fullName: string;
+  email?: string;
   gender: Gender;
   dob: string;
   phone: string;
   address: string;
+  bloodGroup?: string;
+  medicalHistory?: string;
 }
 
 // Hospital types
@@ -286,6 +300,7 @@ export interface AppointmentResponse {
   doctorSpecialization?: string;
   appointmentTime: string;
   timeSlot?: string;
+  sessionPeriod?: 'MORNING' | 'AFTERNOON' | 'EVENING';
   status: AppointmentStatus;
   tokenNumber?: number;
   tokenDisplay?: string;
@@ -306,6 +321,7 @@ export interface CreateAppointmentRequest {
   appointmentTime: string;
   notes?: string;
   status?: AppointmentStatus;
+  sessionPeriod?: 'MORNING' | 'AFTERNOON' | 'EVENING';
   vitals?: VitalsDTO;
   chiefComplaints?: string;
   diagnosis?: string;
@@ -390,8 +406,11 @@ export interface MedicineResponse {
   temperature?: string;
   humidity?: string;
   specialNotes?: string;
-  scheduleDrug?: string; // e.g., Schedule H, H1, X
-  scheduledType?: string; // Correct field from DB
+  scheduleType?: string; // Correct field from API
+  /** @deprecated use scheduleType */
+  scheduleDrug?: string;
+  /** @deprecated use scheduleType */
+  scheduledType?: string;
 }
 
 export type MedicineRequestDTO = Omit<MedicineResponse, 'id'> & { id?: string };
@@ -400,13 +419,65 @@ export interface PharmacyStockDTO {
   id: string;
   medicineId: string;
   medicineName: string;
+  genericName?: string;
+  composition?: string;
   batchNumber: string;
   expiryDate: string;
   quantity: number;
+  totalQuantity?: number;
   price: number;
   purchasePrice?: number;
+  sellingPrice?: number;
 }
 
+export interface StockRequest {
+  medicineId: string;
+  batchNumber: string;
+  expiryDate?: string;
+  quantity: number;
+  purchasePrice: number;
+  sellingPrice: number;
+}
+
+export interface PharmacySaleItem {
+  medicineId: string;
+  quantity: number;
+}
+
+export interface PharmacySaleRequest {
+  patientId?: string;
+  prescriptionId?: string;
+  items: PharmacySaleItem[];
+}
+
+export interface PharmacySaleResponse {
+  id: string;
+  patientId?: string;
+  prescriptionId?: string;
+  totalAmount: number;
+  items: PharmacySaleItem[];
+}
+
+export interface PharmacyReturnRequest {
+  saleItemId: string;
+  quantity: number;
+  reason?: string;
+}
+
+export interface PharmacyReturnResponse {
+  id: string;
+  saleItemId: string;
+  stockId: string;
+  quantity: number;
+  reason?: string;
+}
+
+export interface InventoryStockDTO {
+  itemId: string;
+  itemName: string;
+  quantity: number;
+  lastUpdated: string;
+}
 
 export interface InventoryItemResponse {
   id: string;
@@ -542,6 +613,14 @@ export interface VitalSetting {
 }
 
 export interface VitalRange {
+  minValue: number;
+  maxValue: number;
+  unit: string;
+}
+
+export interface VitalRangeConfigDTO {
+  id: string;
+  vitalType: 'BODY_TEMPERATURE' | 'SYSTOLIC_BP' | 'DIASTOLIC_BP' | 'OXYGEN_LEVEL' | 'WEIGHT' | 'HEART_RATE';
   minValue: number;
   maxValue: number;
   unit: string;

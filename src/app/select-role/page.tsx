@@ -34,6 +34,11 @@ const roleDisplayData: Record<string, { icon: string, title: string, description
     title: 'Nurse',
     description: 'Patient care, vitals monitoring, and treatment administration.'
   },
+  'LAB_TECHNICIAN': {
+    icon: 'biotech',
+    title: 'Lab Technician',
+    description: 'Laboratory tests, sample analysis, and diagnostic reporting.'
+  },
   'SUPER_ADMIN': {
     icon: 'shield_person',
     title: 'Super Admin',

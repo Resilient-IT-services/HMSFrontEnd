@@ -9,7 +9,12 @@ import {
   PharmacyStockDTO,
   InventoryItemResponse,
   InventoryItemRequestDTO,
-  StockTransactionRequestDTO
+  StockTransactionRequestDTO,
+  StockRequest,
+  PharmacySaleRequest,
+  PharmacySaleResponse,
+  PharmacyReturnRequest,
+  PharmacyReturnResponse
 } from '@/types/api';
 
 export const pharmacyApi = {
@@ -77,8 +82,8 @@ export const pharmacyApi = {
   },
 
   // Stock Management
-  addStock: async (data: any) => {
-    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/stock', data);
+  addStock: async (data: StockRequest) => {
+    const response = await apiClient.post<ApiResponse<PharmacyStockDTO>>('/pharmacy/stock', data);
     return response.data;
   },
 
@@ -96,14 +101,14 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  // Alerts
-  createSale: async (saleData: any) => {
-    const response = await apiClient.post<ApiResponse<any>>('/pharmacy/sales', saleData);
+  // Sale & Returns
+  createSale: async (saleData: PharmacySaleRequest) => {
+    const response = await apiClient.post<ApiResponse<PharmacySaleResponse>>('/pharmacy/sales', saleData);
     return response.data;
   },
 
-  processReturn: async (returnData: any) => {
-    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/returns', returnData);
+  processReturn: async (returnData: PharmacyReturnRequest) => {
+    const response = await apiClient.post<ApiResponse<PharmacyReturnResponse>>('/pharmacy/returns', returnData);
     return response.data;
   },
 

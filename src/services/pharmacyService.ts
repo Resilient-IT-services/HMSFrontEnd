@@ -9,7 +9,13 @@ import {
   PharmacyStockDTO,
   InventoryItemResponse,
   InventoryItemRequestDTO,
-  StockTransactionRequestDTO
+  StockTransactionRequestDTO,
+  StockRequest,
+  PharmacySaleRequest,
+  PharmacySaleResponse,
+  PharmacyReturnRequest,
+  PharmacyReturnResponse,
+  InventoryStockDTO
 } from '@/types/api';
 import { AxiosError } from 'axios';
 
@@ -37,7 +43,12 @@ export const pharmacyService = {
   },
 
   async listStock(params?: { lowStock?: boolean; page?: number; size?: number }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
-    const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/medicines/stock', { params });
+    const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params });
+    return response.data;
+  },
+
+  async addStock(request: StockRequest): Promise<ApiResponse<PharmacyStockDTO>> {
+    const response = await apiClient.post<ApiResponse<PharmacyStockDTO>>('/pharmacy/stock', request);
     return response.data;
   },
 
@@ -70,9 +81,34 @@ export const pharmacyService = {
     return response.data;
   },
 
+  async importStock(file: File): Promise<ApiResponse<void>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/stock/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  // Sale & Returns
+  async processSale(request: PharmacySaleRequest): Promise<ApiResponse<PharmacySaleResponse>> {
+    const response = await apiClient.post<ApiResponse<PharmacySaleResponse>>('/pharmacy/sales', request);
+    return response.data;
+  },
+
+  async processReturn(request: PharmacyReturnRequest): Promise<ApiResponse<PharmacyReturnResponse>> {
+    const response = await apiClient.post<ApiResponse<PharmacyReturnResponse>>('/pharmacy/returns', request);
+    return response.data;
+  },
+
   // Inventory Management
   async listInventoryItems(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<InventoryItemResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<InventoryItemResponse>>>('/inventory/items', { params });
+    return response.data;
+  },
+
+  async listInventoryStock(params?: { page?: number; size?: number }): Promise<ApiResponse<PageResponse<InventoryStockDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<InventoryStockDTO>>>('/inventory/stock', { params });
     return response.data;
   },
 
@@ -89,7 +125,7 @@ export const pharmacyService = {
 
   async getLowStockCount(): Promise<ApiResponse<{ totalElements: number }>> {
     try {
-      const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/medicines/stock', {
+      const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', {
         params: { lowStock: true, size: 1 }
       });
       return {

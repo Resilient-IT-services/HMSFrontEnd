@@ -22,6 +22,7 @@ export default function BillingPage() {
   const patientIdParam = searchParams.get('patientId');
   const doctorIdParam = searchParams.get('doctorId');
   const appointmentTimeParam = searchParams.get('appointmentTime');
+  const sessionPeriodParam = searchParams.get('sessionPeriod') as any;
   const notesParam = searchParams.get('notes');
 
   const [appointment, setAppointment] =
@@ -92,6 +93,7 @@ export default function BillingPage() {
           doctorId: doctorIdParam,
           doctorName: docRes.data?.content.find(d => d.doctorId === doctorIdParam)?.fullName || 'N/A',
           appointmentTime: appointmentTimeParam || new Date().toISOString(),
+          sessionPeriod: sessionPeriodParam,
           status: 'PAYMENT_PENDING',
           notes: notesParam || '',
           createdAt: new Date().toISOString()
@@ -103,7 +105,7 @@ export default function BillingPage() {
     } finally {
       setLoading(false);
     }
-  }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, notesParam]);
+  }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, sessionPeriodParam, notesParam]);
 
   useEffect(() => {
     fetchData();
@@ -127,6 +129,7 @@ export default function BillingPage() {
           patientId: patientIdParam,
           doctorId: doctorIdParam,
           appointmentTime: appointmentTimeParam,
+          sessionPeriod: sessionPeriodParam,
           notes: notesParam || '',
           status: 'PAYMENT_PENDING'
         });

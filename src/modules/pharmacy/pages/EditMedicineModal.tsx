@@ -20,8 +20,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
     strength: medicine.strength || '',
     form: medicine.form || 'Tablet',
     manufacturer: medicine.manufacturer || '',
-    scheduleDrug: medicine.scheduleDrug || 'None',
-    scheduledType: medicine.scheduledType || medicine.scheduleDrug || 'None',
+    scheduleType: medicine.scheduleType || 'None',
     category: medicine.category || 'General',
     reorderLevel: medicine.reorderLevel || 50,
     taxPercentage: medicine.taxPercentage || 12,
@@ -145,8 +144,8 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
             <div>
               <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Schedule Drug</label>
               <select 
-                name="scheduledType"
-                value={formData.scheduledType}
+                name="scheduleType"
+                value={formData.scheduleType}
                 onChange={handleChange}
                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold appearance-none cursor-pointer"
               >
