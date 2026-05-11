@@ -8,6 +8,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { nurseService } from '@/services/nurseService';
 import { PatientResponse, AppointmentResponse, DoctorStaffResponse, NurseStaffResponse } from '@/types/api';
+import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
 
 export default function ReceptionDashboard() {
   const router = useRouter();
@@ -31,8 +32,10 @@ export default function ReceptionDashboard() {
 
       if (patRes.success && patRes.data) setRecentPatients(patRes.data.content || []);
       if (appRes.success && appRes.data) {
-        const todayApps = appRes.data.content?.filter(a => a.appointmentTime.startsWith(today)) || [];
+        const normalized = normalizeAppointmentData(appRes.data.content || []);
+        const todayApps = normalized.filter(a => a.appointmentTime.startsWith(today)) || [];
         setAppointments(todayApps);
+        syncExpiredAppointments(appRes.data.content || []);
       }
       if (docRes.success && docRes.data) setDoctors(docRes.data.content || []);
       if (nurRes.success && nurRes.data) setNurses(nurRes.data.content || []);
