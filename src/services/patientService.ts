@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, PatientResponse, PatientSummaryDTO, CreatePatientRequest, PrescriptionDTO, PatientHistoryDTO } from '@/types/api';
+import { ApiResponse, PageResponse, PatientResponse, PatientSummaryDTO, CreatePatientRequest, PrescriptionDTO, PatientHistoryDTO, PatientHistorySummaryDTO } from '@/types/api';
 
 export const patientService = {
   async list(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<PatientResponse>>> {
@@ -38,6 +38,11 @@ export const patientService = {
 
   async getFullHistory(patientId: string): Promise<ApiResponse<PatientHistoryDTO>> {
     const response = await apiClient.get<ApiResponse<PatientHistoryDTO>>(`/patients/${patientId}/full-history`);
+    return response.data;
+  },
+
+  async getHistorySummary(patientId: string): Promise<ApiResponse<PatientHistorySummaryDTO>> {
+    const response = await apiClient.get<ApiResponse<PatientHistorySummaryDTO>>(`/patients/${patientId}/history-summary`);
     return response.data;
   },
 

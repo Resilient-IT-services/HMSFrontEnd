@@ -10,9 +10,8 @@
 !.yarn/releases
 !.yarn/versions
 
-[[[]]]# testing
-/colpv
-erage
+# testing
+/coverage
 .env
 # next.js
 /.next/

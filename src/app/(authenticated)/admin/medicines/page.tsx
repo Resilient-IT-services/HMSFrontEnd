@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
-import { MedicineResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 import { useDebounce } from '@/hooks/useDebounce';

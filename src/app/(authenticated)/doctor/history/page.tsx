@@ -72,7 +72,8 @@ const AppointmentsTable = ({ appointments, loading, onSelect }: { appointments: 
           </td>
           <td className="px-6 py-5">
              <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-black uppercase">
-               {row.timeSlot || 'N/A'}
+               {new Date(row.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+
              </span>
           </td>
           <td className="px-6 py-5">
@@ -204,15 +205,24 @@ const MedicalHistoryPage = () => {
   const fetchPatientDetails = useCallback(async (id: string) => {
     try {
       setLoading(true);
-      const res = await patientService.getFullHistory(id);
+      // Fetch summary first (lean)
+      const res = await patientService.getHistorySummary(id);
 
       if (res.success && res.data) {
-        setSelectedPatient(res.data.patient);
+        setSelectedPatient(res.data.patient as any); // Cast as any for compatibility or update types
         const sortedVisits = (res.data.visits || []).toSorted(
           (a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime()
         );
-        setAppointments(sortedVisits);
-        if (sortedVisits.length > 0) setSelectedAppointment(sortedVisits[0]);
+        setAppointments(sortedVisits as any);
+        
+        // If there's at least one visit, fetch its full details
+        if (sortedVisits.length > 0) {
+          const firstVisitId = sortedVisits[0].id;
+          const detailRes = await appointmentService.get(firstVisitId);
+          if (detailRes.success && detailRes.data) {
+            setSelectedAppointment(detailRes.data);
+          }
+        }
       }
     } catch (error) {
       console.error('Failed to fetch patient details', error);
@@ -220,6 +230,23 @@ const MedicalHistoryPage = () => {
       setLoading(false);
     }
   }, []);
+
+  // New function to handle visit selection
+  const handleSelectAppointment = async (apt: any) => {
+    if (selectedAppointment?.id === apt.id) return;
+    
+    try {
+      setLoading(true);
+      const res = await appointmentService.get(apt.id);
+      if (res.success && res.data) {
+        setSelectedAppointment(res.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch appointment details', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (patientId) {
@@ -358,7 +385,7 @@ const MedicalHistoryPage = () => {
               <h3 className="font-headline-sm text-headline-sm text-on-surface mb-6">Visit Timeline</h3>
               <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-200">
                 {appointments.map((apt) => (
-                  <div key={apt.id} className="relative pl-8 group cursor-pointer" onClick={() => setSelectedAppointment(apt)}>
+                  <div key={apt.id} className="relative pl-8 group cursor-pointer" onClick={() => handleSelectAppointment(apt)}>
                     <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm z-10 transition-colors ${
                       selectedAppointment?.id === apt.id ? 'bg-primary' : 'bg-gray-300 group-hover:bg-primary/50'
                     }`}></div>
@@ -372,7 +399,7 @@ const MedicalHistoryPage = () => {
                         {selectedAppointment?.id === apt.id && <span className="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase rounded">Selected</span>}
                       </div>
                       <p className="font-headline-sm text-headline-sm text-on-surface">Consultation</p>
-                      <p className="font-body-sm text-body-sm text-gray-500">{apt.timeSlot} • Dr. {apt.doctorName}</p>
+                      <p className="font-body-sm text-body-sm text-gray-500">{new Date(apt.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Dr. {apt.doctorName}</p>
                     </div>
                   </div>
                 ))}
@@ -427,7 +454,7 @@ const MedicalHistoryPage = () => {
                       </div>
                       <div className="md:col-span-2">
                         <p className="text-gray-500 font-label-sm text-label-sm mb-2 uppercase tracking-wider">Consultation Time</p>
-                        <p className="font-body-lg text-body-lg text-on-surface">{selectedAppointment.timeSlot || new Date(selectedAppointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        <p className="font-body-lg text-body-lg text-on-surface">{new Date(selectedAppointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                     </div>
                   </div>

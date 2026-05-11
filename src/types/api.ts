@@ -316,7 +316,6 @@ export interface AppointmentResponse {
   doctorName: string;
   doctorSpecialization?: string;
   appointmentTime: string;
-  timeSlot?: string;
   sessionPeriod?: 'MORNING' | 'AFTERNOON' | 'EVENING';
   status: AppointmentStatus;
   tokenNumber?: number;
@@ -340,7 +339,6 @@ export interface AppointmentSummaryDTO {
   doctorName: string;
   doctorSpecialization: string;
   appointmentTime: string;
-  timeSlot: string;
   status: AppointmentStatus;
   tokenNumber: number;
 }
@@ -642,6 +640,11 @@ export interface PatientHistoryDTO {
   visits: AppointmentResponse[];
 }
 
+export interface PatientHistorySummaryDTO {
+  patient: PatientSummaryDTO;
+  visits: AppointmentSummaryDTO[];
+}
+
 // Doctor Slot
 export interface DoctorSlotDTO {
   startTime: string; // HH:mm
@@ -653,6 +656,7 @@ export interface DoctorSlotDTO {
 // Appointment Stats
 export interface AppointmentStatsDTO {
   total: number;
+  upcoming: number;
   byStatus: Record<string, number>;
 }
 

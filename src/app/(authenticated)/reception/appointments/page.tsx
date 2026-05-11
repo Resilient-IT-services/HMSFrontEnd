@@ -103,7 +103,7 @@ export default function TodayAppointmentsPage() {
         setStats({
           total: statsRes.data.total,
           walkIn: (statusStats['WALK_IN'] as any) || 0,
-          upcoming: 0, // Need separate API for upcoming stats or update backend
+          upcoming: statsRes.data.upcoming || 0,
           paymentPending: (statusStats['PAYMENT_PENDING'] as any) || 0,
           waitingForVitals: (statusStats['WAITING_FOR_VITALS'] as any) || 0,
           completed: (statusStats['COMPLETED'] as any) || 0,
