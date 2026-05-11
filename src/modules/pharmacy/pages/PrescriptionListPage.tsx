@@ -6,17 +6,19 @@ import { PrescriptionSummaryDTO } from '@/types/api';
 import PrescriptionTable from '../components/PrescriptionTable';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import EmptyState from '../components/EmptyState';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const PrescriptionListPage: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const debouncedSearch = useDebounce(searchTerm, 500);
 
   const fetchPrescriptions = async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getPrescriptionsSummary({ search: searchTerm });
+      const response = await pharmacyApi.getPrescriptionsSummary({ search: debouncedSearch });
       if (response.success && response.data) {
         setPrescriptions(response.data.content);
       } else {
@@ -32,7 +34,7 @@ const PrescriptionListPage: React.FC = () => {
 
   useEffect(() => {
     fetchPrescriptions();
-  }, [searchTerm]);
+  }, [debouncedSearch]);
 
   return (
     <div className="space-y-6">

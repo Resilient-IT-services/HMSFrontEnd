@@ -6,17 +6,20 @@ import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
 import { HospitalResponse, UserSummaryDTO } from '@/types/api';
+import { useDebounce } from '@/hooks/useDebounce';
 
 const HospitalManagement = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [showFilter, setShowFilter] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [selectedHospital, setSelectedHospital] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const showExportButton = false;
   const showStatsCards = false;
   const router = useRouter();
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
-  const [users, setUsers] = useState<UserSummaryDTO[]>([]);
+  const [staffCount, setStaffCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -26,15 +29,15 @@ const HospitalManagement = () => {
       try {
         setLoading(true);
         const [hospRes, userRes] = await Promise.all([
-          hospitalService.list(page, 20),
-          userService.listUsers(0, 100)
+          hospitalService.list(page, 20, debouncedSearch, statusFilter === 'ALL' ? undefined : statusFilter),
+          userService.listUsers(0, 1) // Only need total count
         ]);
 
         if (hospRes.success) {
           setHospitals(hospRes.data?.content || []);
           setTotalElements(hospRes.data?.totalElements || 0);
         }
-        if (userRes.success) setUsers(userRes.data?.content || []);
+        if (userRes.success) setStaffCount(userRes.data?.totalElements || 0);
       } catch (error) {
         console.error(error);
       } finally {
@@ -42,16 +45,21 @@ const HospitalManagement = () => {
       }
     };
     fetchData();
-  }, [page]);
+  }, [page, debouncedSearch, statusFilter]);
 
   const stats = useMemo(() => {
     return {
       totalFacilities: totalElements,
       activeBeds: 1842, // Mocked as not in DTO yet
-      staffCount: users.length > 4000 ? users.length : 4210, // Mocked if small
+      staffCount: staffCount > 4000 ? staffCount : 4210, // Mocked if small
       revenueGrowth: '12.4%'
     };
-  }, [totalElements, users]);
+  }, [totalElements, staffCount]);
+
+  // Reset page on search or filter change
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, statusFilter]);
 
   return (
     <MainLayout title="Hospital Network" hideTitle>
@@ -97,10 +105,18 @@ const HospitalManagement = () => {
         )}
         {/* Hospital Directory Container */}
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <div>
-              <h3 className="font-manrope text-xl font-bold text-slate-900">Hospital Directory</h3>
-              <p className="text-sm text-slate-500">Managing {totalElements} facilities across global regions</p>
+          <div className="p-6 border-b border-slate-100 flex flex-wrap justify-between items-center bg-slate-50/50 gap-4">
+            <div className="flex-1 min-w-[300px]">
+              <div className="relative">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                <input 
+                  type="text"
+                  placeholder="Search hospitals by name or code..."
+                  className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-orange-200 outline-none"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
             <div className="flex gap-3 relative">
               <button

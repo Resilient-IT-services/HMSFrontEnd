@@ -4,16 +4,16 @@ import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
 import { appointmentService } from '@/services/appointmentService';
-import { AppointmentResponse } from '@/types/api';
+import { AppointmentSummaryDTO } from '@/types/api';
 import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
 
 export default function TokenQueuePage() {
-  const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchQueue = useCallback(async () => {
     try {
-      const res = await appointmentService.list(0, 100);
+      const res = await appointmentService.listSummary(0, 100);
       if (res.success && res.data) {
         setAppointments(res.data.content);
       }

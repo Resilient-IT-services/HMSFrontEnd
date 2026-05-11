@@ -21,6 +21,11 @@ export const patientService = {
     return response.data;
   },
 
+  async getSummary(patientId: string): Promise<ApiResponse<PatientSummaryDTO>> {
+    const response = await apiClient.get<ApiResponse<PatientSummaryDTO>>(`/patients/${patientId}/summary`);
+    return response.data;
+  },
+
   async create(request: CreatePatientRequest): Promise<ApiResponse<PatientResponse>> {
     const response = await apiClient.post<ApiResponse<PatientResponse>>('/patients', request);
     return response.data;

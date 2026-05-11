@@ -9,7 +9,7 @@ import { doctorService } from '@/services/doctorService';
 import { billingService } from '@/services/billingService';
 import {
   AppointmentResponse,
-  PatientResponse,
+  PatientSummaryDTO,
   DoctorStaffResponse,
   BillingResponse,
 } from '@/types/api';
@@ -29,7 +29,7 @@ export default function BillingPage() {
       useState<AppointmentResponse | null>(null);
 
   const [patient, setPatient] =
-      useState<PatientResponse | null>(null);
+      useState<PatientSummaryDTO | null>(null);
 
   const [doctor, setDoctor] =
       useState<DoctorStaffResponse | null>(null);
@@ -64,7 +64,7 @@ export default function BillingPage() {
           }
 
           const [patRes, docRes] = await Promise.all([
-            patientService.get(appData.patientId),
+            patientService.getSummary(appData.patientId),
             doctorService.get(appData.doctorId),
           ]);
           if (patRes.success) setPatient(patRes.data || null);
@@ -75,7 +75,7 @@ export default function BillingPage() {
       } else if (patientIdParam && doctorIdParam) {
         // Handle direct flow from scheduling (before appointment is created)
         const [patRes, docRes] = await Promise.all([
-          patientService.get(patientIdParam),
+          patientService.getSummary(patientIdParam),
           doctorService.get(doctorIdParam),
         ]);
         if (patRes.success) setPatient(patRes.data || null);

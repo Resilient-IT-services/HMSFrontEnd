@@ -448,6 +448,7 @@ export interface MedicineSummaryDTO {
   id: string;
   name: string;
   genericName?: string;
+  composition?: string;
   strength?: string;
   form?: string;
   category?: string;

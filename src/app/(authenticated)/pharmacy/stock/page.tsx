@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
@@ -12,71 +12,52 @@ import { PharmacyStockDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
 export default function StockPage() {
-  const [allMedicines, setAllMedicines] = useState<PharmacyStockDTO[]>([]); // Master list
-  const [filteredMedicines, setFilteredMedicines] = useState<PharmacyStockDTO[]>([]); // Display list
+  const [medicines, setMedicines] = useState<PharmacyStockDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
-  const debouncedSearch = useDebounce(searchTerm, 300);
+  const [page, setPage] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  const debouncedSearch = useDebounce(searchTerm, 500);
   const [selectedMedicineForStock, setSelectedMedicineForStock] = useState<{ id: string; name: string } | null>(null);
   const [selectedMedicineForView, setSelectedMedicineForView] = useState<{ id: string; name: string } | null>(null);
 
-  const fetchInventory = async () => {
+  const fetchInventory = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getMedicineStock({ size: 2000, page: 0 });
+      const response = await pharmacyApi.getMedicineStock({ 
+        size: 20, 
+        page, 
+        search: debouncedSearch,
+        lowStock: statusFilter === 'LOW_STOCK'
+      });
       if (response.success && response.data) {
-        setAllMedicines(response.data.content || []);
+        setMedicines(response.data.content || []);
+        setTotalElements(response.data.totalElements);
       } else {
-        setAllMedicines([]);
+        setMedicines([]);
+        setTotalElements(0);
       }
     } catch (error) {
       console.error('Fetch Inventory Error:', error);
-      setAllMedicines([]);
+      setMedicines([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, debouncedSearch, statusFilter]);
 
-  // Handle Filtering and Searching Client-Side for instant response
   useEffect(() => {
-    let result = [...allMedicines];
+    fetchInventory();
+  }, [fetchInventory]);
 
-    // Search Filter
-    if (debouncedSearch) {
-      const term = debouncedSearch.toLowerCase();
-      result = result.filter(m => 
-        m.medicineName.toLowerCase().includes(term) || 
-        m.batchNumber.toLowerCase().includes(term)
-      );
-    }
-
-    // Status Filter
-    switch (statusFilter) {
-    case 'LOW_STOCK': {
-      result = result.filter(m => (m.quantity || 0) > 0 && (m.quantity || 0) < 50);
-    
-    break;
-    }
-    case 'OUT_OF_STOCK': {
-      result = result.filter(m => (m.quantity || 0) === 0);
-    
-    break;
-    }
-    case 'AVAILABLE': {
-      result = result.filter(m => (m.quantity || 0) >= 50);
-    
-    break;
-    }
-    // No default
-    }
-
-    setFilteredMedicines(result);
-  }, [debouncedSearch, statusFilter, allMedicines]);
+  // Reset page on search or filter change
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, statusFilter]);
 
   const handleExport = () => {
-    if (filteredMedicines.length === 0) {
+    if (medicines.length === 0) {
         triggerGlobalToast('No data available to export', 'error');
         return;
     }
@@ -84,7 +65,7 @@ export default function StockPage() {
     const headers = ['Medicine Name', 'Batch', 'Expiry Date', 'Quantity', 'Price (₹)'];
     const csvContent = [
       headers.join(','),
-      ...filteredMedicines.map(m => [
+      ...medicines.map(m => [
         `"${m.medicineName}"`,
         `"${m.batchNumber}"`,
         `"${m.expiryDate}"`,
@@ -133,7 +114,7 @@ export default function StockPage() {
       setLoading(true);
       const response = await pharmacyApi.deleteMedicine(id); 
       if (response.success) {
-        setAllMedicines(prev => prev.filter(m => m.id !== id));
+        setMedicines(prev => prev.filter(m => m.id !== id));
         triggerGlobalToast('Record deleted', 'success');
       }
     } catch (error) {
@@ -143,15 +124,11 @@ export default function StockPage() {
     }
   };
 
-  useEffect(() => {
-    fetchInventory();
-  }, []);
-
-  // KPI Calculations (Based on Master list)
-  const totalProductsCount = new Set(allMedicines.map(m => m.medicineId)).size;
-  const totalStockUnits = allMedicines.reduce((acc, m) => acc + (m.quantity || 0), 0);
-  const lowStockCount = allMedicines.filter(m => (m.quantity || 0) > 0 && (m.quantity || 0) < 50).length;
-  const expiringSoonCount = allMedicines.filter(m => {
+  // KPI Calculations (Based on current page or total)
+  const totalProductsCount = totalElements; // Approximate for now
+  const totalStockUnits = medicines.reduce((acc, m) => acc + (m.quantity || 0), 0);
+  const lowStockCount = medicines.filter(m => (m.quantity || 0) > 0 && (m.quantity || 0) < 50).length;
+  const expiringSoonCount = medicines.filter(m => {
     if (!m.expiryDate) return false;
     const expDate = new Date(m.expiryDate);
     const thirtyDaysFromNow = new Date();
@@ -194,7 +171,7 @@ export default function StockPage() {
                     <span className="material-symbols-outlined text-3xl">medical_services</span>
                 </div>
                 <div>
-                    <p className="font-label-md text-label-md text-on-surface-variant">Total Products</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Total Batches</p>
                     <h3 className="font-headline-xl text-headline-xl text-on-surface leading-tight">{totalProductsCount.toLocaleString()}</h3>
                 </div>
             </div>
@@ -203,7 +180,7 @@ export default function StockPage() {
                     <span className="material-symbols-outlined text-3xl">inventory</span>
                 </div>
                 <div>
-                    <p className="font-label-md text-label-md text-on-surface-variant">Total Units</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Total Units (Page)</p>
                     <h3 className="font-headline-xl text-headline-xl text-on-surface leading-tight">{totalStockUnits.toLocaleString()}</h3>
                 </div>
             </div>
@@ -212,7 +189,7 @@ export default function StockPage() {
                     <span className="material-symbols-outlined text-3xl text-[#a83900]">warning</span>
                 </div>
                 <div>
-                    <p className="font-label-md text-label-md text-on-surface-variant">Low Stock</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Low Stock (Page)</p>
                     <h3 className="font-headline-xl text-headline-xl text-on-surface leading-tight text-orange-600">{lowStockCount}</h3>
                 </div>
             </div>
@@ -221,7 +198,7 @@ export default function StockPage() {
                     <span className="material-symbols-outlined text-3xl">event_busy</span>
                 </div>
                 <div>
-                    <p className="font-label-md text-label-md text-on-surface-variant">Expiring Soon</p>
+                    <p className="font-label-md text-label-md text-on-surface-variant">Expiring Soon (Page)</p>
                     <h3 className="font-headline-xl text-headline-xl text-on-surface leading-tight text-error">{expiringSoonCount}</h3>
                 </div>
             </div>
@@ -248,9 +225,7 @@ export default function StockPage() {
                       className="px-4 py-2.5 border border-outline-variant rounded-xl text-on-surface font-label-md bg-white outline-none hover:bg-surface-container-low transition-colors cursor-pointer"
                     >
                         <option value="ALL">All Inventory</option>
-                        <option value="AVAILABLE">In Stock</option>
                         <option value="LOW_STOCK">Low Stock</option>
-                        <option value="OUT_OF_STOCK">Out of Stock</option>
                     </select>
                 </div>
                 <div className="flex items-center gap-3">
@@ -279,10 +254,10 @@ export default function StockPage() {
                     <tbody className="divide-y divide-outline-variant font-body-md text-body-md bg-white">
                       {loading ? (
                         <tr><td colSpan={6} className="p-20 text-center"><LoadingSkeleton /></td></tr>
-                      ) : filteredMedicines.length === 0 ? (
+                      ) : medicines.length === 0 ? (
                         <tr><td colSpan={6} className="p-20"><EmptyState message="No inventory found matching your criteria." /></td></tr>
                       ) : (
-                        filteredMedicines.map((m) => (
+                        medicines.map((m) => (
                           <tr key={m.id} className="hover:bg-primary/5 transition-all group">
                             <td className="px-8 py-5">
                                 <div className="flex items-center gap-4">
@@ -375,12 +350,24 @@ export default function StockPage() {
             {/* Footer */}
             <div className="p-6 bg-slate-50 border-t border-outline-variant flex flex-wrap items-center justify-between gap-4">
                 <p className="font-bold text-xs text-slate-500 uppercase tracking-widest">
-                  Showing {filteredMedicines.length} Batch Records
+                  Showing {page * 20 + 1} to {Math.min((page + 1) * 20, totalElements)} of {totalElements} Batch Records
                 </p>
                 <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 bg-white border border-outline-variant rounded-xl text-xs font-black uppercase text-slate-400 cursor-not-allowed">Previous</button>
-                    <button className="w-10 h-10 bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg shadow-slate-200">1</button>
-                    <button className="px-4 py-2 bg-white border border-outline-variant rounded-xl text-xs font-black uppercase text-slate-400 cursor-not-allowed">Next</button>
+                    <button 
+                      onClick={() => setPage(p => Math.max(0, p - 1))}
+                      disabled={page === 0}
+                      className="px-4 py-2 bg-white border border-outline-variant rounded-xl text-xs font-black uppercase text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Previous
+                    </button>
+                    <button className="w-10 h-10 bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg shadow-slate-200">{page + 1}</button>
+                    <button 
+                      onClick={() => setPage(p => p + 1)}
+                      disabled={(page + 1) * 20 >= totalElements}
+                      className="px-4 py-2 bg-white border border-outline-variant rounded-xl text-xs font-black uppercase text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                    </button>
                 </div>
             </div>
         </div>
@@ -440,7 +427,7 @@ export default function StockPage() {
         <QuickStockAddModal 
           medicineId={selectedMedicineForStock.id}
           medicineName={selectedMedicineForStock.name}
-          currentStock={allMedicines.find(m => m.medicineId === selectedMedicineForStock.id)?.quantity || 0}
+          currentStock={medicines.find(m => m.medicineId === selectedMedicineForStock.id)?.quantity || 0}
           onClose={() => setSelectedMedicineForStock(null)}
           onSuccess={fetchInventory}
         />
