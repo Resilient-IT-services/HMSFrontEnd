@@ -8,7 +8,7 @@ import { doctorService } from '@/services/doctorService';
 import { billingService } from '@/services/billingService';
 import {
   AppointmentResponse,
-  PatientSummaryDTO,
+  PatientResponse,
   DoctorStaffResponse,
   BillingResponse,
 } from '@/types/api';
@@ -25,7 +25,7 @@ export const useReceptionBilling = () => {
   const notesParam = searchParams.get('notes');
 
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
-  const [patient, setPatient] = useState<PatientSummaryDTO | null>(null);
+  const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [doctor, setDoctor] = useState<DoctorStaffResponse | null>(null);
   const [billing, setBilling] = useState<BillingResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +51,7 @@ export const useReceptionBilling = () => {
           }
 
           const [patRes, docRes] = await Promise.all([
-            patientService.getSummary(appRes.data.patientId),
+            patientService.get(appRes.data.patientId),
             doctorService.get(appRes.data.doctorId),
           ]);
           if (patRes.success) setPatient(patRes.data || null);
@@ -59,7 +59,7 @@ export const useReceptionBilling = () => {
         }
       } else if (patientIdParam && doctorIdParam) {
         const [patRes, docRes] = await Promise.all([
-          patientService.getSummary(patientIdParam),
+          patientService.get(patientIdParam),
           doctorService.get(doctorIdParam),
         ]);
         if (patRes.success) setPatient(patRes.data || null);
