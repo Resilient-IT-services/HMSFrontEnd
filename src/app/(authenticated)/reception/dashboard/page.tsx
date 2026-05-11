@@ -9,6 +9,11 @@ import { doctorService } from '@/services/doctorService';
 import { nurseService } from '@/services/nurseService';
 import { PatientResponse, AppointmentResponse, DoctorStaffResponse, NurseStaffResponse } from '@/types/api';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { Table, Column } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 
 export default function ReceptionDashboard() {
   const router = useRouter();
@@ -51,7 +56,7 @@ export default function ReceptionDashboard() {
     fetchData();
     const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
     return () => clearInterval(interval);
-  }, []); // Run on mount only, fetchData is stable
+  }, [fetchData]);
 
   const stats = useMemo(() => {
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
@@ -74,13 +79,37 @@ export default function ReceptionDashboard() {
     };
   }, [recentPatients, appointments]);
 
+  const patientColumns: Column<PatientResponse>[] = [
+    {
+      header: 'Patient Name',
+      render: (p) => <span className="font-bold text-slate-900">{p.fullName}</span>
+    },
+    {
+      header: 'Phone',
+      key: 'phone'
+    },
+    {
+      header: 'Status',
+      render: () => <Badge variant="orange">Registered</Badge>
+    },
+    {
+      header: 'Actions',
+      render: () => (
+        <button className="p-1.5 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm">
+          <span className="material-symbols-outlined text-xl">more_vert</span>
+        </button>
+      ),
+      className: 'text-center'
+    }
+  ];
+
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
       <div className="p-8 max-w-7xl mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-manrope">
         {/* Page Title */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">Reception Dashboard</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Reception Dashboard</h2>
             <p className="text-slate-500 font-medium">Manage arrivals, patient queues, and daily operations.</p>
           </div>
           <div className="hidden sm:flex gap-3">
@@ -93,23 +122,38 @@ export default function ReceptionDashboard() {
 
         {/* Metrics Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[
-            { label: 'Total Patients Today', value: stats.totalPatients, color: 'text-orange-600', bg: 'bg-orange-50', icon: 'group' },
-            { label: 'Active Queue', value: stats.activeQueue, color: 'text-blue-600', bg: 'bg-blue-50', icon: 'hourglass_empty' },
-            { label: 'Appointments Today', value: stats.appointmentsToday, color: 'text-purple-600', bg: 'bg-purple-50', icon: 'event_available' },
-            { label: 'Nurses On Duty', value: nurses.length, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'payments' }
-          ].map((m, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-2 ${m.bg} rounded-xl ${m.color}`}>
-                  <span className="material-symbols-outlined">{m.icon}</span>
-                </div>
-                <span className="text-slate-500 bg-slate-50 px-2 py-1 rounded-lg text-[10px] font-black">Live</span>
-              </div>
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{m.label}</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">{m.value}</h3>
-            </div>
-          ))}
+          <MetricCard 
+            label="Total Patients Today" 
+            value={stats.totalPatients} 
+            variant="orange" 
+            icon="group" 
+            layout="horizontal" 
+            tag="Live"
+          />
+          <MetricCard 
+            label="Active Queue" 
+            value={stats.activeQueue} 
+            variant="blue" 
+            icon="hourglass_empty" 
+            layout="horizontal" 
+            tag="Live"
+          />
+          <MetricCard 
+            label="Appointments Today" 
+            value={stats.appointmentsToday} 
+            variant="purple" 
+            icon="event_available" 
+            layout="horizontal" 
+            tag="Live"
+          />
+          <MetricCard 
+            label="Nurses On Duty" 
+            value={nurses.length} 
+            variant="emerald" 
+            icon="payments" 
+            layout="horizontal" 
+            tag="Live"
+          />
         </div>
 
         {/* Main Section Grid */}
@@ -117,44 +161,20 @@ export default function ReceptionDashboard() {
           {/* Left Column */}
           <div className="lg:col-span-8 space-y-8">
             {/* Recent Patients Table */}
-            <section className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
-              <div className="px-6 py-5 border-b border-slate-50 flex justify-between items-center">
-                <h4 className="font-bold text-slate-900">Recent Patient Arrivals</h4>
+            <Card 
+              title="Recent Patient Arrivals" 
+              className="p-0 overflow-hidden"
+              headerActions={
                 <button onClick={() => router.push('/reception/patients')} className="text-orange-600 text-xs font-bold hover:underline">View All</button>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-50">
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Name</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {recentPatients.map((p) => (
-                      <tr 
-                        key={p.id} 
-                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                        onDoubleClick={() => router.push(`/reception/patients/${p.id}`)}
-                      >
-                        <td className="px-6 py-4 font-bold text-sm text-slate-900">{p.fullName}</td>
-                        <td className="px-6 py-4 text-xs text-slate-500 font-medium">{p.phone}</td>
-                        <td className="px-6 py-4">
-                          <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-orange-100 text-orange-700 uppercase tracking-tighter">Registered</span>
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button className="p-1.5 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm">
-                            <span className="material-symbols-outlined text-xl">more_vert</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
+              }
+            >
+              <Table 
+                columns={patientColumns} 
+                data={recentPatients} 
+                isLoading={loading}
+                onRowDoubleClick={(p) => router.push(`/reception/patients/${p.id}`)}
+              />
+            </Card>
 
             {/* Doctor Availability Grid */}
             <section className="space-y-4">
@@ -185,32 +205,30 @@ export default function ReceptionDashboard() {
             <section className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl">
               <h4 className="font-bold mb-6 uppercase text-[10px] tracking-widest opacity-50">Quick Actions</h4>
               <div className="space-y-4">
-                <button 
+                <Button 
+                  fullWidth
                   onClick={() => router.push('/reception/patients/create')}
-                  className="w-full flex items-center justify-between p-4 bg-orange-600 hover:bg-orange-700 rounded-xl transition-all active:scale-95 text-white font-bold text-sm shadow-lg shadow-orange-600/20"
+                  icon="person_add"
+                  className="justify-between"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined">person_add</span>
-                    Register Patient
-                  </div>
+                  Register Patient
                   <span className="material-symbols-outlined">chevron_right</span>
-                </button>
-                <button 
+                </Button>
+                <Button 
+                  fullWidth
+                  variant="secondary"
                   onClick={() => router.push('/reception/appointments/create')}
-                  className="w-full flex items-center justify-between p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all active:scale-95 text-white font-bold text-sm"
+                  icon="medical_services"
+                  className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 justify-between"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined">medical_services</span>
-                    Create Visit
-                  </div>
+                  Create Visit
                   <span className="material-symbols-outlined">chevron_right</span>
-                </button>
+                </Button>
               </div>
             </section>
 
             {/* Staff on Duty */}
-            <section className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-              <h4 className="font-bold text-slate-900 mb-4 uppercase text-[10px] tracking-widest text-slate-400">Nursing Staff on Duty</h4>
+            <Card title="Nursing Staff on Duty" subtitle="CURRENT SHIFT">
               <div className="space-y-4">
                 {loading && <p className="text-[10px] text-slate-400 italic">Loading staff list...</p>}
                 {nurses.map((n) => (
@@ -227,7 +245,7 @@ export default function ReceptionDashboard() {
                 ))}
                 {nurses.length === 0 && <p className="text-[10px] text-slate-400 italic">No nurses listed.</p>}
               </div>
-            </section>
+            </Card>
           </div>
         </div>
       </div>
