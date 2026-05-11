@@ -1,85 +1,36 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
-import { Table } from '@/components/ui/Table';
-import { doctorService } from '@/services/doctorService';
-import { appointmentService } from '@/services/appointmentService';
-import { DoctorStaffResponse, AppointmentResponse } from '@/types/api';
-import { Search, Calendar, Clock, Filter, Stethoscope, UserPlus, Eye } from 'lucide-react';
+import { Table, Column } from '@/components/ui/Table';
+import { DoctorStaffResponse } from '@/types/api';
+import { Search, Filter, Stethoscope, UserPlus, Eye } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import Link from 'next/link';
-import { useDebounce } from '@/hooks/useDebounce';
+import { useReceptionDoctors } from '@/modules/reception/hooks/useReceptionDoctors';
 
 export default function DoctorsPage() {
-  const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
-  const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [availability, setAvailability] = useState<import('@/types/api').SessionInfo[]>([]);
-  const [loadingSchedule, setLoadingLoadingSchedule] = useState(false);
+  const {
+    doctors,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    selectedDoctor,
+    setSelectedDoctor,
+    selectedDate,
+    setSelectedDate,
+    availability,
+    loadingSchedule,
+    dateOptions,
+    viewSchedule
+  } = useReceptionDoctors();
 
-  const fetchDoctors = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await doctorService.list(0, 100, debouncedSearchTerm);
-      if (res.success && res.data) {
-        setDoctors(res.data.content);
-      }
-    } catch (error) {
-      console.error('Failed to fetch doctors', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [debouncedSearchTerm]);
-
-  useEffect(() => {
-    fetchDoctors();
-  }, [fetchDoctors]);
-
-  const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
-    try {
-      setLoadingLoadingSchedule(true);
-      const res = await doctorService.getAvailability(doctorId, date);
-      if (res.success && res.data) {
-        setAvailability(res.data.sessions);
-      }
-    } catch (error) {
-      console.error('Failed to fetch availability', error);
-    } finally {
-      setLoadingLoadingSchedule(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (selectedDoctor) {
-      fetchAvailability(selectedDoctor.doctorId, selectedDate);
-    }
-  }, [selectedDoctor, selectedDate, fetchAvailability]);
-
-  const viewSchedule = (doctor: DoctorStaffResponse) => {
-    setSelectedDoctor(doctor);
-    setSelectedDate(new Date().toISOString().split('T')[0]);
-  };
-
-  const dateOptions = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const iso = d.toISOString().split('T')[0];
-      const label = i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' });
-      const day = d.getDate();
-      return { iso, label, day };
-    });
-  }, []);
-
-  const columns = [
+  // Define Columns for the generic Table
+  const columns: Column<DoctorStaffResponse>[] = [
     { 
       header: 'Doctor Name', 
-      accessor: (row: DoctorStaffResponse) => (
+      render: (row) => (
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black uppercase">
             {row.fullName.split(' ').map(n => n[0]).join('')}
@@ -93,17 +44,19 @@ export default function DoctorsPage() {
     },
     { 
       header: 'Department', 
-      accessor: (row: DoctorStaffResponse) => (
+      render: (row) => (
         <span className="text-sm font-medium text-[var(--text-primary)]">{row.departmentName || 'General Medicine'}</span>
       )
     },
     { 
       header: 'Contact', 
-      accessor: (row: DoctorStaffResponse) => row.phone 
+      key: 'phone' 
     },
     {
       header: 'Actions',
-      accessor: (row: DoctorStaffResponse) => (
+      headerClassName: 'text-center',
+      className: 'text-center',
+      render: (row) => (
         <div className="flex justify-center gap-2 items-center">
           <button 
             onClick={() => viewSchedule(row)}
@@ -127,8 +80,8 @@ export default function DoctorsPage() {
   return (
     <MainLayout title="Medical Staff">
       <div className="space-y-6 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-           <Card className="md:col-span-3">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+           <Card className="lg:col-span-3">
               <div className="flex flex-col lg:flex-row gap-4 mb-6">
                 <div className="flex-1 relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] size-5" />
@@ -151,10 +104,12 @@ export default function DoctorsPage() {
                 data={doctors} 
                 isLoading={loading} 
                 onRowDoubleClick={(row) => viewSchedule(row)}
+                loadingMessage="Retrieving medical staff registry..."
+                emptyMessage="No doctors found matching your criteria."
               />
            </Card>
 
-           <div className="space-y-6 lg:ml-auto lg:w-[70%]">
+           <div className="space-y-6">
               <Card className="p-4">
                  <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-4 opacity-50 text-center">Duty Overview</h3>
                  <div className="space-y-3">

@@ -1,525 +1,432 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
-import { patientService } from '@/services/patientService';
-import { appointmentService } from '@/services/appointmentService';
-import { pharmacyService } from '@/services/pharmacyService';
-import { PatientResponse, AppointmentResponse, PrescriptionResponse, AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
+import { Table, Column } from '@/components/ui/Table';
+import { AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
 import { formatToken } from '@/utils/tokenHelper';
+import { useMedicalHistory } from '@/modules/doctor/hooks/useMedicalHistory';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { Button } from '@/components/ui/Button';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { SearchInput } from '@/components/ui/SearchInput';
+import { Badge } from '@/components/ui/Badge';
+import { Pagination } from '@/components/ui/Pagination';
 
-// --- Sub-components for better complexity management ---
-
-const SearchHeader = ({ activeView, setActiveView, searchTerm, setSearchTerm, handleSearch }: any) => (
-  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-    <div className="lg:col-span-12">
-      <div className="bg-white p-2 rounded-2xl border border-slate-100 shadow-sm flex items-center">
-        <div className="flex items-center gap-2 mr-4 px-2">
-          <button 
-            onClick={() => setActiveView('APPOINTMENTS')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeView === 'APPOINTMENTS' ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
-          >
-            Visits
-          </button>
-          <button 
-            onClick={() => setActiveView('PATIENTS')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeView === 'PATIENTS' ? 'bg-orange-600 text-white' : 'text-slate-500 hover:bg-slate-50'}`}
-          >
-            Patients
-          </button>
-        </div>
-        <form onSubmit={handleSearch} className="relative flex-1">
-          <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-          <input 
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-orange-600/20 transition-all font-bold text-sm outline-none" 
-            placeholder={activeView === 'APPOINTMENTS' ? "Search by patient name, ID..." : "Search patients..."} 
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </form>
-      </div>
-    </div>
-  </div>
-);
-
-const AppointmentsTable = ({ appointments, loading, onSelect }: { appointments: AppointmentSummaryDTO[], loading: boolean, onSelect: (id: string) => void }) => (
-  <table className="w-full text-left">
-    <thead>
-      <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-        <th className="px-6 py-4">Appt Date</th>
-        <th className="px-6 py-4">Time</th>
-        <th className="px-6 py-4">Slot</th>
-        <th className="px-6 py-4">Patient</th>
-        <th className="px-6 py-4">Token</th>
-        <th className="px-6 py-4 text-center">Status</th>
-        <th className="px-6 py-4 text-center">Actions</th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-slate-50">
-      {loading ? (
-        <tr><td colSpan={7} className="px-6 py-20 text-center text-slate-400 italic font-medium">Retrieving medical history...</td></tr>
-      ) : appointments.length === 0 ? (
-        <tr><td colSpan={7} className="px-6 py-20 text-center text-slate-400 italic font-medium">No visit history found.</td></tr>
-      ) : appointments.map((row) => (
-        <tr key={row.id} className="hover:bg-slate-50/80 transition-colors group cursor-pointer" onClick={() => onSelect(row.patientId)}>
-          <td className="px-6 py-5 font-bold text-slate-900 text-sm">
-            {new Date(row.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
-          </td>
-          <td className="px-6 py-5 font-bold text-slate-700 text-sm">
-            {new Date(row.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </td>
-          <td className="px-6 py-5">
-             <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-black uppercase">
-               {new Date(row.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-
-             </span>
-          </td>
-          <td className="px-6 py-5">
-            <p className="font-bold text-slate-900 text-sm">{row.patientName}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase">Code: {row.patientCode || 'N/A'}</p>
-          </td>
-          <td className="px-6 py-5">
-             <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
-               {formatToken(row)}
-             </span>
-          </td>
-          <td className="px-6 py-5 text-center">
-             <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter bg-green-50 text-green-700 border border-green-100">
-               {row.status}
-             </span>
-          </td>
-          <td className="px-6 py-5 text-center">
-            <button className="bg-orange-50 text-orange-700 px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-orange-600 hover:text-white transition-all border border-orange-100">
-              View Record
-            </button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
-
-const PatientsTable = ({ patients, loading, onSelect }: { patients: PatientSummaryDTO[], loading: boolean, onSelect: (id: string) => void }) => (
-  <table className="w-full text-left">
-    <thead>
-      <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-        <th className="px-6 py-4">Patient Code</th>
-        <th className="px-6 py-4">Patient Profile</th>
-        <th className="px-6 py-4 text-center">Gender</th>
-        <th className="px-6 py-4 text-center">Actions</th>
-      </tr>
-    </thead>
-    <tbody className="divide-y divide-slate-50">
-      {loading ? (
-        <tr><td colSpan={4} className="px-6 py-20 text-center text-slate-400 italic font-medium">Retrieving electronic health records...</td></tr>
-      ) : patients.length === 0 ? (
-        <tr><td colSpan={4} className="px-6 py-20 text-center text-slate-400 italic font-medium">No patient records found.</td></tr>
-      ) : patients.map((row) => (
-        <tr key={row.id} className="hover:bg-slate-50/80 transition-colors group cursor-pointer" onClick={() => onSelect(row.id)}>
-          <td className="px-6 py-5">
-            <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded uppercase">
-              {row.patientCode || 'N/A'}
-            </span>
-          </td>
-          <td className="px-6 py-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 font-bold uppercase border-2 border-white shadow-sm">
-                {row.fullName.split(' ').map(n => n[0]).join('')}
-              </div>
-              <div>
-                <p className="font-bold text-slate-900 text-sm leading-none mb-1">{row.fullName}</p>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{row.phone}</p>
-              </div>
-            </div>
-          </td>
-          <td className="px-6 py-5 text-center font-bold text-xs text-slate-600 capitalize">
-            {row.gender.toLowerCase()}
-          </td>
-          <td className="px-6 py-5 text-center">
-            <button className="bg-orange-50 text-orange-700 px-4 py-2 rounded-lg text-[10px] font-black uppercase hover:bg-orange-600 hover:text-white transition-all border border-orange-100">
-              View History
-            </button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-);
-
-const MedicalHistoryPage = () => {
-  const searchParams = useSearchParams();
+export default function MedicalHistoryPage() {
   const router = useRouter();
-  const patientId = searchParams.get('patientId');
-  
-  const [patients, setPatients] = useState<PatientSummaryDTO[]>([]);
-  const [historyAppointments, setHistoryAppointments] = useState<AppointmentSummaryDTO[]>([]);
-  const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
-  const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
-  const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
-  const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeView, setActiveView] = useState<'APPOINTMENTS' | 'PATIENTS'>('APPOINTMENTS');
+  const {
+    patientId,
+    patients,
+    historyAppointments,
+    selectedPatient,
+    patientVisits,
+    selectedVisit,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    activeView,
+    setActiveView,
+    appointmentsPage,
+    setAppointmentsPage,
+    appointmentsTotalElements,
+    patientsPage,
+    setPatientsPage,
+    patientsTotalElements,
+    handleSearch,
+    selectPatient,
+    handleSelectVisit,
+    clearSelection
+  } = useMedicalHistory();
 
-  // Pagination State
-  const [appointmentsPage, setAppointmentsPage] = useState(0);
-  const [appointmentsTotalElements, setAppointmentsTotalElements] = useState(0);
-  const [patientsPage, setPatientsPage] = useState(0);
-  const [patientsTotalElements, setPatientsTotalElements] = useState(0);
-  const pageSize = 10;
+  // --- Directory View Columns ---
 
-  const fetchHistory = useCallback(async (search = '', page = 0) => {
-    try {
-      setLoading(true);
-      const res = await appointmentService.listSummary(page, pageSize, search, undefined, undefined, 'COMPLETED');
-      if (res.success && res.data) {
-        setHistoryAppointments(res.data.content);
-        setAppointmentsTotalElements(res.data.totalElements);
-        setAppointmentsPage(page);
-      }
-    } catch (error) {
-      console.error('Failed to fetch history', error);
-    } finally {
-      setLoading(false);
+  const appointmentColumns: Column<AppointmentSummaryDTO>[] = [
+    {
+      header: 'Visit Date',
+      render: (row) => (
+        <div>
+          <p className="font-bold text-slate-900 text-sm">
+            {new Date(row.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
+            {new Date(row.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        </div>
+      )
+    },
+    {
+      header: 'Patient Profile',
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs uppercase">
+            {row.patientName.split(' ').map(n => n[0]).join('')}
+          </div>
+          <div>
+            <p className="font-bold text-slate-900 text-sm leading-none mb-1">{row.patientName}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Code: {row.patientCode || 'N/A'}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Token',
+      render: (row) => (
+        <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
+          {formatToken(row)}
+        </span>
+      )
+    },
+    {
+      header: 'Status',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      render: (row) => <Badge variant="emerald">{row.status}</Badge>
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      headerClassName: 'text-right',
+      render: (row) => (
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          icon="visibility" 
+          onClick={() => selectPatient(row.patientId)}
+        >
+          View Record
+        </Button>
+      )
     }
-  }, []);
+  ];
 
-  const fetchPatients = useCallback(async (search = '', page = 0) => {
-    try {
-      setLoading(true);
-      const res = await patientService.listSummary(page, pageSize, search);
-      if (res.success && res.data) {
-        setPatients(res.data.content);
-        setPatientsTotalElements(res.data.totalElements);
-        setPatientsPage(page);
-      }
-    } catch (error) {
-      console.error('Failed to fetch patients', error);
-    } finally {
-      setLoading(false);
+  const patientColumns: Column<PatientSummaryDTO>[] = [
+    {
+      header: 'Code',
+      render: (row) => (
+        <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded uppercase">
+          {row.patientCode || 'N/A'}
+        </span>
+      )
+    },
+    {
+      header: 'Patient Profile',
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 font-bold uppercase border-2 border-white shadow-sm">
+            {row.fullName.split(' ').map(n => n[0]).join('')}
+          </div>
+          <div>
+            <p className="font-bold text-slate-900 text-sm leading-none mb-1">{row.fullName}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">{row.phone}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Gender',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      render: (row) => <span className="capitalize text-sm font-medium">{row.gender.toLowerCase()}</span>
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      headerClassName: 'text-right',
+      render: (row) => (
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          icon="history" 
+          onClick={() => selectPatient(row.id)}
+        >
+          View History
+        </Button>
+      )
     }
-  }, []);
+  ];
 
-  const fetchPatientDetails = useCallback(async (id: string) => {
-    try {
-      setLoading(true);
-      // Fetch summary first (lean)
-      const res = await patientService.getHistorySummary(id);
-
-      if (res.success && res.data) {
-        setSelectedPatient(res.data.patient as any); // Cast as any for compatibility or update types
-        const sortedVisits = (res.data.visits || []).toSorted(
-          (a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime()
-        );
-        setAppointments(sortedVisits as any);
-        
-        // If there's at least one visit, fetch its full details
-        if (sortedVisits.length > 0) {
-          const firstVisitId = sortedVisits[0].id;
-          const detailRes = await appointmentService.get(firstVisitId);
-          if (detailRes.success && detailRes.data) {
-            setSelectedAppointment(detailRes.data);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch patient details', error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // New function to handle visit selection
-  const handleSelectAppointment = async (apt: any) => {
-    if (selectedAppointment?.id === apt.id) return;
-    
-    try {
-      setLoading(true);
-      const res = await appointmentService.get(apt.id);
-      if (res.success && res.data) {
-        setSelectedAppointment(res.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch appointment details', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (patientId) {
-      fetchPatientDetails(patientId);
-    } else if (activeView === 'APPOINTMENTS') {
-      fetchHistory(searchTerm, appointmentsPage);
-    } else {
-      fetchPatients(searchTerm, patientsPage);
-    }
-  }, [patientId, activeView, appointmentsPage, patientsPage, fetchHistory, fetchPatients, fetchPatientDetails]);
-
-  // Update prescriptions whenever selectedAppointment changes
-  useEffect(() => {
-    if (selectedAppointment?.prescription) {
-      setPrescriptions([selectedAppointment.prescription]);
-    } else {
-      setPrescriptions([]);
-    }
-  }, [selectedAppointment]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (activeView === 'APPOINTMENTS') {
-      setAppointmentsPage(0);
-      fetchHistory(searchTerm, 0);
-    } else {
-      setPatientsPage(0);
-      fetchPatients(searchTerm, 0);
-    }
-  };
-
-  const selectPatient = (id: string) => {
-    router.push(`/doctor/history?patientId=${id}`);
-  };
+  // --- Main Render Logic ---
 
   if (!patientId) {
     return (
       <MainLayout title="Medical History" hideTitle>
-        <div className="p-8 max-w-none mx-auto w-full -m-4 lg:-m-gutter bg-[#f9f9ff] font-inter">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
-            <div>
-              <h2 className="font-manrope text-3xl font-black text-slate-900 tracking-tight uppercase">Medical History</h2>
-              <p className="text-slate-500 font-medium mt-1">Review past consultations and patient records.</p>
+        <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter">
+          
+          <PageHeading 
+            title="Medical History" 
+            description="Review past consultations and comprehensive patient health records."
+          />
+
+          {/* Directory Toolbar */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+            <div className="lg:col-span-12">
+              <div className="bg-white p-2 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-4">
+                <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl">
+                  <button 
+                    onClick={() => setActiveView('APPOINTMENTS')}
+                    className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeView === 'APPOINTMENTS' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                  >
+                    All Visits
+                  </button>
+                  <button 
+                    onClick={() => setActiveView('PATIENTS')}
+                    className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeView === 'PATIENTS' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                  >
+                    Patients
+                  </button>
+                </div>
+                <div className="flex-1 flex items-center gap-2">
+                  <div className="flex-1">
+                    <SearchInput 
+                      placeholder={activeView === 'APPOINTMENTS' ? "Search by patient name, ID, or token..." : "Search patients by name, code, or phone..."} 
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                  </div>
+                  <Button icon="search" onClick={() => handleSearch()} isLoading={loading}>Search</Button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <SearchHeader 
-            activeView={activeView} setActiveView={setActiveView} 
-            searchTerm={searchTerm} setSearchTerm={setSearchTerm} 
-            handleSearch={handleSearch} 
-          />
+          {/* Table Section */}
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-12">
+            <Table 
+              columns={activeView === 'APPOINTMENTS' ? appointmentColumns : patientColumns} 
+              data={activeView === 'APPOINTMENTS' ? historyAppointments : patients} 
+              isLoading={loading}
+              onRowDoubleClick={(row) => selectPatient(activeView === 'APPOINTMENTS' ? (row as AppointmentSummaryDTO).patientId : (row as PatientSummaryDTO).id)}
+              emptyMessage={activeView === 'APPOINTMENTS' ? "No visit history found." : "No patient records found."}
+            />
 
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
-            <div className="overflow-x-auto">
-              {activeView === 'APPOINTMENTS' ? (
-                <AppointmentsTable appointments={historyAppointments} loading={loading} onSelect={selectPatient} />
-              ) : (
-                <PatientsTable patients={patients} loading={loading} onSelect={selectPatient} />
-              )}
-            </div>
-
-            {/* Pagination Controls */}
-            <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {activeView === 'APPOINTMENTS' ? (
-                  `Showing ${appointmentsPage * pageSize + 1} to ${Math.min((appointmentsPage + 1) * pageSize, appointmentsTotalElements)} of ${appointmentsTotalElements} Visits`
-                ) : (
-                  `Showing ${patientsPage * pageSize + 1} to ${Math.min((patientsPage + 1) * pageSize, patientsTotalElements)} of ${patientsTotalElements} Patients`
-                )}
-              </p>
-              <div className="flex gap-2">
-                <button 
-                  onClick={() => activeView === 'APPOINTMENTS' ? setAppointmentsPage(p => Math.max(0, p - 1)) : setPatientsPage(p => Math.max(0, p - 1))}
-                  disabled={(activeView === 'APPOINTMENTS' ? appointmentsPage : patientsPage) === 0}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-400 bg-white disabled:opacity-50 hover:bg-slate-50 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-base">chevron_left</span>
-                </button>
-                <button className="px-4 py-1.5 rounded-xl bg-orange-600 text-white font-black text-xs">
-                  {(activeView === 'APPOINTMENTS' ? appointmentsPage : patientsPage) + 1}
-                </button>
-                <button 
-                  onClick={() => activeView === 'APPOINTMENTS' ? setAppointmentsPage(p => p + 1) : setPatientsPage(p => p + 1)}
-                  disabled={
-                    activeView === 'APPOINTMENTS' 
-                      ? (appointmentsPage + 1) * pageSize >= appointmentsTotalElements 
-                      : (patientsPage + 1) * pageSize >= patientsTotalElements
-                  }
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-base">chevron_right</span>
-                </button>
-              </div>
-            </div>
+            <Pagination 
+              page={activeView === 'APPOINTMENTS' ? appointmentsPage : patientsPage} 
+              totalElements={activeView === 'APPOINTMENTS' ? appointmentsTotalElements : patientsTotalElements} 
+              pageSize={10}
+              onPageChange={activeView === 'APPOINTMENTS' ? setAppointmentsPage : setPatientsPage} 
+              label={activeView === 'APPOINTMENTS' ? "visits" : "patients"}
+            />
           </div>
         </div>
       </MainLayout>
     );
   }
 
+  // --- Detail View (Patient Selected) ---
+
   return (
     <MainLayout title="Patient Medical History" hideTitle>
-      <div className="h-[calc(100vh-120px)] -m-4 lg:-m-gutter flex flex-col bg-surface overflow-hidden">
-        <div className="px-8 py-6 flex items-center justify-between border-b border-gray-100 bg-white shrink-0">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.push('/doctor/history')}
-              className="p-2 hover:bg-gray-50 rounded-full border border-gray-200 flex items-center justify-center transition-all active:scale-95"
-            >
-              <span className="material-symbols-outlined text-gray-600">arrow_back</span>
-            </button>
+      <div className="h-[calc(100vh-112px)] -m-8 flex flex-col bg-slate-50 overflow-hidden font-inter">
+        
+        {/* Detail Header */}
+        <div className="px-8 py-4 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm z-10">
+          <div className="flex items-center gap-6">
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              icon="arrow_back" 
+              onClick={clearSelection}
+              className="rounded-full w-10 h-10 p-0"
+            />
             <div>
-              <h1 className="font-headline-md text-headline-md text-on-surface">{selectedPatient?.fullName || 'Loading...'}</h1>
-              <p className="font-body-sm text-body-sm text-gray-500">
-                Patient Code: {selectedPatient?.patientCode || '...'}
-              </p>
+              <h1 className="font-manrope text-2xl font-black text-slate-900 leading-none mb-1">
+                {selectedPatient?.fullName || 'Loading Profile...'}
+              </h1>
+              <div className="flex items-center gap-3">
+                <Badge variant="orange" size="sm">Code: {selectedPatient?.patientCode || '...'}</Badge>
+                <span className="text-slate-300">|</span>
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">
+                  {selectedPatient?.gender} • {selectedPatient?.dob ? `${new Date().getFullYear() - new Date(selectedPatient.dob).getFullYear()} Years` : '...'}
+                </span>
+              </div>
             </div>
           </div>
           <div className="flex gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-outline-variant text-on-surface font-label-md text-label-md rounded-lg hover:bg-gray-50 transition-colors">
-              <span className="material-symbols-outlined text-sm">print</span>
-              Print EMR
-            </button>
-            <button 
-              onClick={() => router.push('/doctor/active-consultation')}
-              className="flex items-center gap-2 px-4 py-2 bg-primary text-white font-label-md text-label-md rounded-lg hover:bg-orange-700 transition-colors"
-            >
-              Return to Consultation
-            </button>
+            <Button variant="secondary" icon="print">Print EMR</Button>
+            <Button icon="clinical_notes" href="/doctor/active-consultation">Consultation</Button>
           </div>
         </div>
 
         <div className="flex-1 flex overflow-hidden">
-          <div className="w-1/3 border-r border-gray-200 bg-surface-container-low overflow-y-auto shrink-0">
+          
+          {/* Left Sidebar: Timeline */}
+          <div className="w-80 border-r border-slate-200 bg-white overflow-y-auto shrink-0 shadow-inner">
             <div className="p-6">
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-6">Visit Timeline</h3>
-              <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gray-200">
-                {appointments.map((apt) => (
-                  <div key={apt.id} className="relative pl-8 group cursor-pointer" onClick={() => handleSelectAppointment(apt)}>
-                    <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm z-10 transition-colors ${
-                      selectedAppointment?.id === apt.id ? 'bg-primary' : 'bg-gray-300 group-hover:bg-primary/50'
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+                <span className="material-symbols-outlined text-sm">event_repeat</span>
+                Visit Timeline
+              </h3>
+              
+              <div className="space-y-4 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
+                {patientVisits.map((visit) => (
+                  <div 
+                    key={visit.id} 
+                    className="relative pl-8 group cursor-pointer" 
+                    onClick={() => handleSelectVisit(visit)}
+                  >
+                    <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm z-10 transition-all ${
+                      selectedVisit?.id === visit.id ? 'bg-orange-600 scale-110' : 'bg-slate-200 group-hover:bg-orange-300'
                     }`}></div>
-                    <div className={`p-4 bg-white border rounded-xl shadow-sm transition-all transform hover:-translate-y-0.5 ${
-                      selectedAppointment?.id === apt.id ? 'border-2 border-primary' : 'border-outline-variant hover:shadow-md hover:border-primary/30'
+                    <div className={`p-3 rounded-xl border transition-all ${
+                      selectedVisit?.id === visit.id 
+                        ? 'bg-orange-50/50 border-orange-200 shadow-sm' 
+                        : 'bg-white border-slate-100 hover:border-slate-200'
                     }`}>
-                      <div className="flex justify-between items-start mb-1">
-                        <p className={`font-label-md text-label-md ${selectedAppointment?.id === apt.id ? 'text-primary' : 'text-gray-500'}`}>
-                          {new Date(apt.appointmentTime).toLocaleDateString()}
-                        </p>
-                        {selectedAppointment?.id === apt.id && <span className="px-2 py-0.5 bg-orange-50 text-orange-600 text-[10px] font-bold uppercase rounded">Selected</span>}
-                      </div>
-                      <p className="font-headline-sm text-headline-sm text-on-surface">Consultation</p>
-                      <p className="font-body-sm text-body-sm text-gray-500">{new Date(apt.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Dr. {apt.doctorName}</p>
+                      <p className={`text-[10px] font-black uppercase tracking-tighter mb-1 ${selectedVisit?.id === visit.id ? 'text-orange-700' : 'text-slate-400'}`}>
+                        {new Date(visit.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </p>
+                      <p className="font-bold text-slate-900 text-xs">Consultation</p>
+                      <p className="text-[10px] text-slate-500 font-medium">Dr. {visit.doctorName}</p>
                     </div>
                   </div>
                 ))}
-                {appointments.length === 0 && !loading && <p className="text-gray-500 italic pl-8">No previous visits found.</p>}
+                {patientVisits.length === 0 && !loading && (
+                  <div className="text-center py-10 opacity-50">
+                    <span className="material-symbols-outlined text-4xl mb-2 text-slate-200">history_off</span>
+                    <p className="text-xs italic font-medium">No previous visits.</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="flex-1 bg-white overflow-y-auto">
-            <div className="max-w-4xl mx-auto p-8">
-              {selectedAppointment ? (
-                <>
-                  <div className="mb-10 bg-surface-container-lowest border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
-                    <div className="bg-gray-50 px-6 py-4 border-b border-outline-variant flex justify-between items-center">
+          {/* Right Content: Visit Detail */}
+          <div className="flex-1 bg-[#fcfcfd] overflow-y-auto">
+            <div className="max-w-5xl mx-auto p-10">
+              {selectedVisit ? (
+                <div className="space-y-8 animate-fadeIn">
+                  
+                  {/* Summary Card */}
+                  <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                    <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
                       <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-primary">event_note</span>
-                        <h2 className="font-headline-md text-headline-md text-on-surface">
-                          Visit Summary: {new Date(selectedAppointment.appointmentTime).toLocaleDateString()}
+                        <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
+                          <span className="material-symbols-outlined text-lg">description</span>
+                        </div>
+                        <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">
+                          Visit Summary • {new Date(selectedVisit.appointmentTime).toLocaleDateString()}
                         </h2>
                       </div>
-                      <span className="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200 uppercase">{selectedAppointment.status}</span>
+                      <Badge variant="emerald">{selectedVisit.status}</Badge>
                     </div>
-                    <div className="p-6 grid grid-cols-1 md:grid-cols-12 gap-8">
-                      <div className="md:col-span-4">
-                        <p className="text-gray-500 font-label-sm text-label-sm mb-2 uppercase tracking-wider">Chief Complaint</p>
-                        <p className="font-body-lg text-body-lg text-on-surface">{selectedAppointment.notes || 'Routine checkup.'}</p>
+                    
+                    <div className="p-8 grid grid-cols-1 md:grid-cols-12 gap-10">
+                      <div className="md:col-span-7">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Chief Complaint / Primary Concern</p>
+                        <p className="text-lg font-bold text-slate-900 leading-tight">
+                          {selectedVisit.notes?.split('.')[0] || 'Routine checkup and general physical examination.'}
+                        </p>
                       </div>
-                      <div className="md:col-span-6">
-                        <p className="text-gray-500 font-label-sm text-label-sm mb-2 uppercase tracking-wider">Vitals & Measurements</p>
-                        <div className="flex flex-wrap gap-4 items-center mt-1">
-                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                            <span className="material-symbols-outlined text-primary text-[18px]">favorite</span>
-                            <span className="font-manrope font-bold text-sm text-on-surface">{selectedAppointment.vitals?.heartRate || '--'} bpm</span>
+                      <div className="md:col-span-5 flex flex-col justify-center border-l border-slate-100 pl-10">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center md:text-left">Recorded Vitals</p>
+                        <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                          <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                            <span className="material-symbols-outlined text-orange-600 text-sm mb-1">favorite</span>
+                            <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.heartRate || '--'}</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase">BPM</span>
                           </div>
-                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                            <span className="material-symbols-outlined text-blue-500 text-[18px]">device_thermostat</span>
-                            <span className="font-manrope font-bold text-sm text-on-surface">{selectedAppointment.vitals?.temperature || '--'}°</span>
+                          <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                            <span className="material-symbols-outlined text-blue-600 text-sm mb-1">device_thermostat</span>
+                            <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.temperature || '--'}°</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase">Temp</span>
                           </div>
-                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                            <span className="material-symbols-outlined text-green-500 text-[18px]">blood_pressure</span>
-                            <span className="font-manrope font-bold text-sm text-on-surface">{selectedAppointment.vitals?.bloodPressure || '--'}</span>
+                          <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                            <span className="material-symbols-outlined text-emerald-600 text-sm mb-1">blood_pressure</span>
+                            <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.bloodPressure || '--'}</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase">B/P</span>
                           </div>
-                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                            <span className="material-symbols-outlined text-cyan-500 text-[18px]">pulse_alert</span>
-                            <span className="font-manrope font-bold text-sm text-on-surface">{selectedAppointment.vitals?.oxygenLevel || '--'}%</span>
-                          </div>
-                          <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-gray-100 shadow-sm">
-                            <span className="material-symbols-outlined text-orange-500 text-[18px]">weight</span>
-                            <span className="font-manrope font-bold text-sm text-on-surface">{selectedAppointment.vitals?.weight || '--'} kg</span>
+                          <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                            <span className="material-symbols-outlined text-purple-600 text-sm mb-1">weight</span>
+                            <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.weight || '--'}</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase">KG</span>
                           </div>
                         </div>
-                      </div>
-                      <div className="md:col-span-2">
-                        <p className="text-gray-500 font-label-sm text-label-sm mb-2 uppercase tracking-wider">Consultation Time</p>
-                        <p className="font-body-lg text-body-lg text-on-surface">{new Date(selectedAppointment.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-12 gap-6">
-                    <div className="col-span-12 md:col-span-7 bg-white border border-outline-variant rounded-xl p-6 shadow-sm">
-                      <div className="flex items-center gap-2 mb-4">
+                  {/* Detailed Notes & Prescription */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    
+                    {/* Clinical Notes */}
+                    <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                      <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-50">
                         <span className="material-symbols-outlined text-orange-600">clinical_notes</span>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface">Diagnosis & Notes</h3>
+                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Clinical Findings & Diagnosis</h3>
                       </div>
-                      <div className="space-y-4">
-                        <div className="p-3 bg-gray-50 rounded-lg border-l-4 border-primary">
-                          <p className="font-label-sm text-label-sm text-gray-500 mb-1 uppercase tracking-widest text-[10px]">Assessment / Diagnosis</p>
-                          <p className="font-headline-sm text-headline-sm text-on-surface">{selectedAppointment.notes ? selectedAppointment.notes.split('.')[0] : 'Stable condition.'}</p>
+                      <div className="space-y-6">
+                        <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Physician's Assessment</p>
+                          <p className="text-sm font-medium text-slate-700 leading-relaxed italic">
+                            "{selectedVisit.notes || 'No detailed physician notes available for this encounter.'}"
+                          </p>
                         </div>
-                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                           <p className="text-xs font-bold text-slate-400 uppercase mb-2">Clinical Notes</p>
-                           <p className="font-body-md text-body-md text-gray-700 leading-relaxed">{selectedAppointment.notes || 'No detailed clinical notes provided for this visit.'}</p>
+                        <div className="flex items-center gap-2 text-emerald-600">
+                          <span className="material-symbols-outlined text-sm">check_circle</span>
+                          <p className="text-[10px] font-black uppercase tracking-widest">Stable / Discharged</p>
                         </div>
                       </div>
                     </div>
-                    <div className="col-span-12 md:col-span-5 bg-surface-container-low border border-outline-variant rounded-xl p-6">
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="material-symbols-outlined text-orange-600">medication</span>
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface">Prescriptions</h3>
+
+                    {/* Prescription */}
+                    <div className="bg-slate-900 text-white border border-slate-800 rounded-2xl p-8 shadow-xl shadow-slate-900/10">
+                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-orange-500">medication</span>
+                          <h3 className="text-xs font-black text-white uppercase tracking-widest">Prescribed Medication</h3>
+                        </div>
+                        <Badge variant="blue" size="sm">Active</Badge>
                       </div>
+                      
                       <div className="space-y-4">
-                        {prescriptions.length > 0 ? (
-                          <div className="space-y-3">
-                            {prescriptions.map((pr) => (
-                              <div key={pr.id} className="bg-white p-3 rounded-lg border border-outline-variant">
-                                <div className="flex justify-between items-start mb-2">
-                                  <p className="font-bold text-sm text-slate-900">{pr.createdAt ? new Date(pr.createdAt).toLocaleDateString() : 'N/A'}</p>
-                                  <span className="text-[10px] font-black text-orange-600 uppercase bg-orange-50 px-1.5 py-0.5 rounded tracking-widest">Active</span>
-                                </div>
-                                <div className="space-y-2">
-                                  {pr.items.map((item, idx) => (
-                                    <div key={idx} className="flex justify-between text-xs border-b border-slate-50 pb-1 last:border-0 last:pb-0">
-                                      <span className="font-medium text-slate-700">{item.medicineName}</span>
-                                      <span className="text-slate-500">{item.dosage} • {item.duration}</span>
-                                    </div>
-                                  ))}
-                                </div>
+                        {selectedVisit.prescription?.items && selectedVisit.prescription.items.length > 0 ? (
+                          selectedVisit.prescription.items.map((item, idx) => (
+                            <div key={idx} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
+                              <div>
+                                <p className="font-bold text-sm text-white">{item.medicineName}</p>
+                                <p className="text-[10px] text-white/50 font-medium">{item.dosage} • {item.duration}</p>
                               </div>
-                            ))}
-                          </div>
+                              <div className="text-right">
+                                <span className="material-symbols-outlined text-white/30 text-lg">medical_information</span>
+                              </div>
+                            </div>
+                          ))
                         ) : (
-                          <p className="text-gray-500 italic text-sm">No prescriptions recorded for this patient.</p>
+                          <div className="py-10 text-center opacity-30">
+                            <span className="material-symbols-outlined text-4xl mb-2">no_medication</span>
+                            <p className="text-xs font-bold uppercase">No medication prescribed</p>
+                          </div>
                         )}
                       </div>
+                      
+                      {selectedVisit.prescription && (
+                        <Button 
+                          variant="ghost" 
+                          fullWidth 
+                          size="sm" 
+                          className="mt-6 text-white/60 hover:text-white hover:bg-white/10"
+                        >
+                          View Prescription Details
+                        </Button>
+                      )}
                     </div>
+
                   </div>
-                </>
+                </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                  <span className="material-symbols-outlined text-6xl mb-4">event_busy</span>
-                  <p>No visit details available.</p>
+                <div className="flex flex-col items-center justify-center py-40 opacity-20">
+                  <span className="material-symbols-outlined text-8xl mb-4">clinical_notes</span>
+                  <p className="font-manrope text-xl font-black uppercase tracking-widest">Select a visit to view details</p>
                 </div>
               )}
             </div>
           </div>
+
         </div>
       </div>
     </MainLayout>
   );
-};
-
-export default MedicalHistoryPage;
+}

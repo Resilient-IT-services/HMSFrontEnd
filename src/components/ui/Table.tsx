@@ -1,8 +1,14 @@
 import React from 'react';
 
-interface Column<T> {
+export interface Column<T> {
   header: string;
-  accessor: keyof T | ((data: T) => React.ReactNode);
+  /** Simple key for text-based data */
+  key?: keyof T;
+  /** Custom render function for complex HTML/Components */
+  render?: (row: T) => React.ReactNode;
+  /** Custom width or alignment */
+  className?: string;
+  headerClassName?: string;
 }
 
 interface TableProps<T> {
@@ -11,55 +17,85 @@ interface TableProps<T> {
   onRowClick?: (row: T) => void;
   onRowDoubleClick?: (row: T) => void;
   isLoading?: boolean;
+  emptyMessage?: string;
+  loadingMessage?: string;
+  rowClassName?: string | ((row: T) => string);
 }
 
-export const Table = <T,>({ columns, data, onRowClick, onRowDoubleClick, isLoading }: TableProps<T>) => {
+/**
+ * A generic, high-performance DataTable component.
+ * Decouples table structure from business logic.
+ */
+export const Table = <T,>({ 
+  columns, 
+  data, 
+  onRowClick, 
+  onRowDoubleClick, 
+  isLoading,
+  emptyMessage = "No records found",
+  loadingMessage = "Retrieving records...",
+  rowClassName = ""
+}: TableProps<T>) => {
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-[var(--border)]">
+    <div className="overflow-x-auto w-full">
+      <table className="w-full text-left border-collapse">
         <thead>
-          <tr>
+          <tr className="bg-white text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100">
             {columns.map((column, index) => (
               <th
                 key={index}
-                className="px-6 py-3 bg-[var(--background)] text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider"
+                className={`px-6 py-4 font-black ${column.headerClassName || ''}`}
               >
                 {column.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="bg-[var(--surface)] divide-y divide-[var(--border)]">
-          {isLoading && (
+        <tbody className="divide-y divide-slate-100 bg-white">
+          {isLoading ? (
             <tr>
-              <td colSpan={columns.length} className="px-6 py-4 text-center">
-                Loading...
+              <td colSpan={columns.length} className="px-6 py-20 text-center text-slate-400 italic font-medium">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-700 rounded-full animate-spin"></div>
+                  {loadingMessage}
+                </div>
               </td>
             </tr>
-          )}
-          {!isLoading && data.length === 0 && (
+          ) : data.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-6 py-4 text-center">
-                No data available
+              <td colSpan={columns.length} className="px-6 py-20 text-center text-slate-400 italic font-medium">
+                {emptyMessage}
               </td>
             </tr>
+          ) : (
+            data.map((row, rowIndex) => {
+              const customRowClass = typeof rowClassName === 'function' ? rowClassName(row) : rowClassName;
+              
+              return (
+                <tr
+                  key={rowIndex}
+                  onClick={() => onRowClick?.(row)}
+                  onDoubleClick={() => onRowDoubleClick?.(row)}
+                  className={`
+                    hover:bg-slate-50/80 transition-colors group 
+                    ${onRowClick || onRowDoubleClick ? 'cursor-pointer' : ''} 
+                    ${customRowClass}
+                  `}
+                >
+                  {columns.map((column, colIndex) => (
+                    <td 
+                      key={colIndex} 
+                      className={`px-6 py-5 text-sm text-slate-600 font-medium ${column.className || ''}`}
+                    >
+                      {column.render 
+                        ? column.render(row) 
+                        : (row[column.key!] as React.ReactNode)}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })
           )}
-          {!isLoading && data.length > 0 && data.map((row, rowIndex) => (
-            <tr
-              key={rowIndex}
-              onClick={() => onRowClick?.(row)}
-              onDoubleClick={() => onRowDoubleClick?.(row)}
-              className={onRowClick || onRowDoubleClick ? 'cursor-pointer hover:bg-[var(--background)]' : ''}
-            >
-              {columns.map((column, colIndex) => (
-                <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-[var(--text-primary)]">
-                  {typeof column.accessor === 'function'
-                    ? column.accessor(row)
-                    : (row[column.accessor] as React.ReactNode)}
-                </td>
-              ))}
-            </tr>
-          ))}
         </tbody>
       </table>
     </div>

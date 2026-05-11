@@ -1,99 +1,90 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { pharmacyService } from '@/services/pharmacyService';
-import { triggerGlobalToast } from '@/components/ui/Toast';
+import React from 'react';
+import { Table, Column } from '@/components/ui/Table';
 import { MedicineResponse } from '@/types/api';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
-import { useDebounce } from '@/hooks/useDebounce';
 import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
+import { useMedicines } from '@/modules/super_admin/hooks/useMedicines';
 
 export default function MedicineMasterPage() {
-  const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
-  const [totalMedicines, setTotalMedicines] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 500);
-  const [showImportModal, setShowImportModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedMedicine, setSelectedMedicine] = useState<MedicineResponse | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const {
+    medicines,
+    totalMedicines,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    showImportModal,
+    setShowImportModal,
+    showAddModal,
+    setShowAddModal,
+    showEditModal,
+    setShowEditModal,
+    selectedMedicine,
+    setSelectedMedicine,
+    file,
+    handleFileChange,
+    handleUpload,
+    handleDeleteMedicine,
+    refresh
+  } = useMedicines();
 
-  useEffect(() => {
-    fetchMedicines();
-  }, [debouncedSearch]);
-
-  const fetchMedicines = async () => {
-    try {
-      setLoading(true);
-      const response = await pharmacyService.listMedicines({ search: debouncedSearch, size: 2000 });
-      if (response.success && response.data) {
-        setMedicines(response.data.content);
-        setTotalMedicines(response.data.totalElements);
-        if (response.data.content.length > 0 && !selectedMedicine) {
-          setSelectedMedicine(response.data.content[0]);
-        }
-      }
-    } catch (error) {
-      console.error('Fetch failed', error);
-      triggerGlobalToast('Failed to load medicines', 'error');
-    } finally {
-      setLoading(false);
+  // Define Columns for the generic Table
+  const columns: Column<MedicineResponse>[] = [
+    {
+      header: 'Medicine Details',
+      render: (m) => (
+        <div>
+          <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
+        </div>
+      )
+    },
+    {
+      header: 'Category',
+      headerClassName: 'text-center',
+      className: 'text-center',
+      render: (m) => (
+        <span className="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase">
+          {m.form || m.category}
+        </span>
+      )
+    },
+    {
+      header: 'Actions',
+      headerClassName: 'text-right',
+      className: 'text-right',
+      render: (m) => (
+        <div className="flex items-center justify-end gap-2">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedMedicine(m);
+              setShowEditModal(true);
+            }}
+            className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-primary transition-all"
+          >
+            <span className="material-symbols-outlined text-lg">edit</span>
+          </button>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDeleteMedicine(m.id, m.name);
+            }}
+            className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-red-600 transition-all"
+          >
+            <span className="material-symbols-outlined text-lg">delete</span>
+          </button>
+          <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+        </div>
+      )
     }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!file) {
-      triggerGlobalToast('Please select an Excel file', 'error');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await pharmacyService.importMaster(file);
-      if (response.success) {
-        triggerGlobalToast(`Import completed. The system is designed to skip medicines that already exist by Name and Composition.`, 'success');
-        setFile(null);
-        setShowImportModal(false);
-        fetchMedicines();
-      }
-    } catch (error) {
-      console.error('Import failed', error);
-      triggerGlobalToast('Failed to import medicines', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteMedicine = async (id: string, name: string) => {
-    if (!globalThis.confirm(`Are you sure you want to delete "${name}" from the master catalog?`)) return;
-    
-    try {
-      setLoading(true);
-      const response = await pharmacyService.deleteMedicine(id);
-      if (response.success) {
-        triggerGlobalToast('Medicine deleted successfully', 'success');
-        if (selectedMedicine?.id === id) setSelectedMedicine(null);
-        fetchMedicines();
-      }
-    } catch (error) {
-      console.error('Delete failed', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  ];
 
   return (
     <div className="p-8 space-y-8">
+      {/* Page Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
           <div>
@@ -140,62 +131,19 @@ export default function MedicineMasterPage() {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Table Container */}
           <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Medicine Details</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Category</th>
-                  <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {loading && medicines.length === 0 ? (
-                  <tr><td colSpan={3} className="p-12"><LoadingSkeleton /></td></tr>
-                ) : (
-                  medicines.map((m) => (
-                    <tr 
-                      key={m.id} 
-                      onClick={() => setSelectedMedicine(m)}
-                      className={`cursor-pointer transition-all ${selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : 'hover:bg-slate-50'}`}
-                    >
-                      <td className="px-8 py-5">
-                        <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
-                      </td>
-                      <td className="px-6 py-5 text-center">
-                        <span className="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase">
-                          {m.form || m.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5 text-right flex items-center justify-end gap-2">
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedMedicine(m);
-                            setShowEditModal(true);
-                          }}
-                          className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-primary transition-all"
-                        >
-                          <span className="material-symbols-outlined text-lg">edit</span>
-                        </button>
-                        <button 
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteMedicine(m.id, m.name);
-                          }}
-                          className="p-2 hover:bg-white rounded-lg text-slate-400 hover:text-red-600 transition-all"
-                        >
-                          <span className="material-symbols-outlined text-lg">delete</span>
-                        </button>
-                        <span className="material-symbols-outlined text-slate-300">chevron_right</span>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+            {loading && medicines.length === 0 ? (
+              <div className="p-12"><LoadingSkeleton /></div>
+            ) : (
+              <Table 
+                columns={columns} 
+                data={medicines} 
+                isLoading={loading}
+                onRowClick={(m) => setSelectedMedicine(m)}
+                rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
+              />
+            )}
           </div>
         </div>
 
@@ -265,7 +213,7 @@ export default function MedicineMasterPage() {
       {/* Import Modal */}
       {showImportModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden">
+          <div className="w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden mx-4">
             <div className="p-10">
                <div className="flex justify-between items-center mb-8">
                   <h2 className="text-2xl font-black text-slate-800">Bulk Import Medicines</h2>
@@ -297,8 +245,8 @@ export default function MedicineMasterPage() {
       )}
 
       {/* Modals */}
-      {showAddModal && <AddMedicineModal onClose={() => setShowAddModal(false)} onSuccess={fetchMedicines} />}
-      {showEditModal && selectedMedicine && <EditMedicineModal medicine={selectedMedicine} onClose={() => setShowEditModal(false)} onSuccess={fetchMedicines} />}
+      {showAddModal && <AddMedicineModal onClose={() => setShowAddModal(false)} onSuccess={refresh} />}
+      {showEditModal && selectedMedicine && <EditMedicineModal medicine={selectedMedicine} onClose={() => setShowEditModal(false)} onSuccess={refresh} />}
     </div>
   );
 }

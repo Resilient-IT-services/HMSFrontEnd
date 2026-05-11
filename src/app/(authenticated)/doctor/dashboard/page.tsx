@@ -11,6 +11,11 @@ import { AppointmentResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Table, Column } from '@/components/ui/Table';
 
 const DoctorDashboard = () => {
   const router = useRouter();
@@ -120,28 +125,72 @@ const DoctorDashboard = () => {
     handleStartConsultation(nextAppointment.id);
   };
 
+  const columns: Column<AppointmentResponse>[] = [
+    {
+      header: 'Token',
+      render: (a) => (
+        <div className={`w-20 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 shrink-0 ${a.status === 'WALK_IN' ? 'bg-orange-100 text-orange-700' : ''}`}>
+          {formatToken(a)}
+        </div>
+      )
+    },
+    {
+      header: 'Patient Details',
+      render: (a) => (
+        <div>
+          <h4 className="font-bold text-sm text-slate-900">{a.patientName}</h4>
+          <p className="text-[10px] text-slate-500 uppercase font-black">
+            Scheduled: {new Date(a.appointmentTime).toLocaleDateString()} {a.appointmentTime.split('T')[1].slice(0, 5)} • {a.notes || 'Routine Checkup'}
+          </p>
+        </div>
+      )
+    },
+    {
+      header: 'Status',
+      render: (a) => {
+        let variant: any = 'slate';
+        if (a.status === 'WALK_IN') variant = 'blue';
+        else if (a.status === 'SCHEDULED' || a.status === 'CHECKED_IN') variant = 'orange';
+        else if (a.status === 'COMPLETED') variant = 'emerald';
+        else if (a.status === 'CANCELLED') variant = 'red';
+
+        return <Badge variant={variant}>{statusCaptions[a.status] || a.status}</Badge>;
+      }
+    },
+    {
+      header: '',
+      render: () => (
+        <button className="p-2 text-slate-300 hover:text-orange-600 transition-colors">
+          <span className="material-symbols-outlined text-lg">more_vert</span>
+        </button>
+      ),
+      className: 'text-right'
+    }
+  ];
+
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
       <div className="p-4 lg:p-8 max-w-7xl mx-auto w-full bg-[#f9f9ff] min-h-screen">
+        {/* Welcome Section */}
         <section className="mb-8">
           <div className="bg-white rounded-xl border border-slate-200 p-6 lg:p-8 flex flex-col lg:flex-row justify-between items-center relative overflow-hidden shadow-sm gap-6">
             <div className="relative z-10 w-full lg:w-auto">
               <h2 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-2 font-manrope">Good morning, Dr. {user?.fullName.split(' ')[0]}</h2>
               <p className="text-slate-500 max-w-lg">You have {stats.total} consultations scheduled for today. {stats.waiting} patients are currently in the queue.</p>
               <div className="flex flex-col sm:flex-row gap-4 mt-6">
-                <button 
+                <Button 
                   onClick={handleStartNextConsultation}
-                  className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-orange-700 active:scale-95 transition-all shadow-lg shadow-orange-600/20"
+                  icon="play_arrow"
                 >
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: '\'FILL\' 1' }}>play_arrow</span>
                   Start Next Consultation
-                </button>
-                <Link href="/doctor/patient-queue" className="w-full sm:w-auto">
-                  <button className="bg-white text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-50 active:scale-95 transition-all w-full">
-                    <span className="material-symbols-outlined">list_alt</span>
-                    Go to Queue
-                  </button>
-                </Link>
+                </Button>
+                <Button 
+                  variant="secondary"
+                  href="/doctor/patient-queue"
+                  icon="list_alt"
+                >
+                  Go to Queue
+                </Button>
               </div>
             </div>
             <div className="hidden lg:block absolute right-0 top-0 h-full w-1/3 bg-gradient-to-l from-orange-100/50 to-transparent" />
@@ -153,89 +202,76 @@ const DoctorDashboard = () => {
           </div>
         </section>
 
+        {/* Stats Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6 mb-8">
-          {[
-            { label: 'Total Patients', value: stats.total, color: 'bg-orange-600', trend: '12%', icon: 'trending_up' },
-            { label: 'Waiting', value: stats.waiting, color: 'bg-orange-400', icon: 'hourglass_empty' },
-            { label: 'In Progress', value: stats.active, color: 'bg-blue-500', icon: 'clinical_notes' },
-            { label: 'Completed', value: stats.completed, color: 'bg-green-500', icon: 'check_circle' },
-            { label: "Today's Earnings", value: `₹${stats.earnings}`, color: 'bg-indigo-600', icon: 'payments' }
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 hover:shadow-md transition-all">
-              <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{stat.label}</p>
-              <div className="flex items-end justify-between">
-                <h3 className="text-2xl font-bold text-slate-900">{typeof stat.value === 'number' ? (stat.value < 10 ? `0${stat.value}` : stat.value) : stat.value}</h3>
-                {stat.trend ? (
-                  <span className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-full flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">trending_up</span> {stat.trend}
-                  </span>
-                ) : (
-                  <span className="material-symbols-outlined text-slate-300">{stat.icon}</span>
-                )}
-              </div>
-              <div className="mt-4 h-1 bg-slate-100 rounded-full overflow-hidden">
-                <div className={`h-full ${stat.color} rounded-full`} style={{ width: i === 4 ? '100%' : `${(Number(stat.value) / (stats.total || 1)) * 100}%` }} />
-              </div>
-            </div>
-          ))}
+          <MetricCard 
+            label="Total Patients" 
+            value={stats.total} 
+            variant="orange" 
+            trend="12%" 
+            icon="trending_up" 
+            layout="compact" 
+            progressBar={100}
+          />
+          <MetricCard 
+            label="Waiting" 
+            value={stats.waiting} 
+            variant="orange" 
+            icon="hourglass_empty" 
+            layout="compact" 
+            progressBar={(stats.waiting / (stats.total || 1)) * 100}
+          />
+          <MetricCard 
+            label="In Progress" 
+            value={stats.active} 
+            variant="blue" 
+            icon="clinical_notes" 
+            layout="compact" 
+            progressBar={(stats.active / (stats.total || 1)) * 100}
+          />
+          <MetricCard 
+            label="Completed" 
+            value={stats.completed} 
+            variant="emerald" 
+            icon="check_circle" 
+            layout="compact" 
+            progressBar={(stats.completed / (stats.total || 1)) * 100}
+          />
+          <MetricCard 
+            label="Today's Earnings" 
+            value={`₹${stats.earnings}`} 
+            variant="indigo" 
+            icon="payments" 
+            layout="compact" 
+            progressBar={100}
+          />
         </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <section className="lg:col-span-2">
-            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm h-full">
-              <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center">
-                <h3 className="text-lg font-bold text-slate-900 font-manrope">Upcoming Patient Queue</h3>
-                <button className="text-orange-600 text-xs font-bold hover:underline">View All</button>
-              </div>
-              <div className="divide-y divide-slate-50">
-                {queue.map((appointment) => (
-                  <div 
-                    key={appointment.id} 
-                    className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors cursor-pointer"
-                    onDoubleClick={() => handleStartConsultation(appointment.id)}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-20 h-12 rounded-lg flex items-center justify-center font-bold text-lg bg-slate-100 text-slate-400 shrink-0 ${appointment.status === 'WALK_IN' ? 'bg-orange-100 text-orange-700' : ''}`}>
-                        {formatToken(appointment)}
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-sm text-slate-900">{appointment.patientName}</h4>
-                        <p className="text-[10px] text-slate-500 uppercase font-black">
-                          Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} • {appointment.notes || 'Routine Checkup'}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold border ${
-                        appointment.status === 'WALK_IN'
-                          ? 'bg-blue-50 text-blue-700 border-blue-100'
-                          : (appointment.status === 'SCHEDULED'
-                            ? 'bg-orange-50 text-orange-700 border-orange-100'
-                            : 'bg-slate-50 text-slate-600 border-slate-100')
-                      }`}>
-                        {statusCaptions[appointment.status] || appointment.status}
-                      </span>
-                      <button className="p-2 text-slate-300 hover:text-orange-600 transition-colors">
-                        <span className="material-symbols-outlined text-lg">more_vert</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {queue.length === 0 && !loading && (
-                  <div className="p-12 text-center">
-                    <p className="text-slate-400 text-sm italic">No patients in the queue for today.</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <Card 
+              title="Upcoming Patient Queue" 
+              className="p-0 overflow-hidden h-full"
+            >
+              <Table 
+                columns={columns} 
+                data={queue} 
+                isLoading={loading}
+                onRowDoubleClick={(a) => handleStartConsultation(a.id)}
+                emptyMessage="No patients in the queue for today."
+              />
+            </Card>
           </section>
 
           <div className="flex flex-col gap-6">
+            {/* Current Visit Card */}
             <div className="bg-orange-600 text-white p-6 rounded-xl border border-orange-500 relative overflow-hidden shadow-lg shadow-orange-600/20">
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-4">
-                  <span className="bg-white/20 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider">Current Visit</span>
-                  <span className="text-[10px] font-mono font-bold">{activeAppointment ? `${new Date(activeAppointment.appointmentTime).toLocaleDateString()} ${activeAppointment.appointmentTime.split('T')[1].slice(0, 5)}` : '--:--'}</span>
+                  <Badge className="bg-white/20 text-white border-transparent">Current Visit</Badge>
+                  <span className="text-[10px] font-mono font-bold">
+                    {activeAppointment ? `${new Date(activeAppointment.appointmentTime).toLocaleDateString()} ${activeAppointment.appointmentTime.split('T')[1].slice(0, 5)}` : '--:--'}
+                  </span>
                 </div>
                 {activeAppointment ? (
                   <>
@@ -258,8 +294,8 @@ const DoctorDashboard = () => {
               <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10">person</span>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-slate-200 flex-1 shadow-sm">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-4">Today's Breakdown</h3>
+            {/* Breakdown Card */}
+            <Card title="Today's Breakdown" subtitle="DAILY PROGRESS">
               <div className="space-y-4">
                 {[
                   { title: 'Scheduled visits', sub: `${stats.waiting} appointments are queued.`, done: false },
@@ -280,7 +316,7 @@ const DoctorDashboard = () => {
               <button className="w-full mt-6 py-2 border border-dashed border-slate-200 rounded-lg text-slate-400 text-[10px] font-bold uppercase hover:bg-slate-50 transition-colors">
                 + Add new task
               </button>
-            </div>
+            </Card>
           </div>
         </div>
       </div>

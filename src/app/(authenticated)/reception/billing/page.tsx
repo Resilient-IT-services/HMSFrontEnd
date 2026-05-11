@@ -1,578 +1,257 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
-import { appointmentService } from '@/services/appointmentService';
-import { patientService } from '@/services/patientService';
-import { doctorService } from '@/services/doctorService';
-import { billingService } from '@/services/billingService';
-import {
-  AppointmentResponse,
-  PatientSummaryDTO,
-  DoctorStaffResponse,
-  BillingResponse,
-} from '@/types/api';
-import { triggerGlobalToast } from '@/components/ui/Toast';
+import { useReceptionBilling } from '@/modules/reception/hooks/useReceptionBilling';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { Button } from '@/components/ui/Button';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
 
 export default function BillingPage() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const appointmentId = searchParams.get('appointmentId');
-  const patientIdParam = searchParams.get('patientId');
-  const doctorIdParam = searchParams.get('doctorId');
-  const appointmentTimeParam = searchParams.get('appointmentTime');
-  const sessionPeriodParam = searchParams.get('sessionPeriod') as any;
-  const notesParam = searchParams.get('notes');
-
-  const [appointment, setAppointment] =
-      useState<AppointmentResponse | null>(null);
-
-  const [patient, setPatient] =
-      useState<PatientSummaryDTO | null>(null);
-
-  const [doctor, setDoctor] =
-      useState<DoctorStaffResponse | null>(null);
-
-  const [billing, setBilling] = useState<BillingResponse | null>(null);
-
-  const [loading, setLoading] = useState(true);
-
-  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
-  const [discount, setDiscount] = useState(0);
-
-  // eslint-disable-next-line sonarjs/cognitive-complexity
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (appointmentId) {
-        const [appRes, billRes] = await Promise.all([
-          appointmentService.get(appointmentId),
-          billingService.getByAppointment(appointmentId).catch(() => ({ success: false, data: null }))
-        ]);
-
-        const appData = appRes.data;
-        if (appRes.success && appData) {
-          setAppointment(appData);
-
-          if (billRes.success && billRes.data) {
-            setBilling(billRes.data);
-            setDiscount(billRes.data.discount || 0);
-            if (billRes.data.paymentMethod) {
-              setPaymentMethod(billRes.data.paymentMethod as any);
-            }
-          }
-
-          const [patRes, docRes] = await Promise.all([
-            patientService.getSummary(appData.patientId),
-            doctorService.get(appData.doctorId),
-          ]);
-          if (patRes.success) setPatient(patRes.data || null);
-          if (docRes.success && docRes.data) {
-            setDoctor(docRes.data);
-          }
-        }
-      } else if (patientIdParam && doctorIdParam) {
-        // Handle direct flow from scheduling (before appointment is created)
-        const [patRes, docRes] = await Promise.all([
-          patientService.getSummary(patientIdParam),
-          doctorService.get(doctorIdParam),
-        ]);
-        if (patRes.success) setPatient(patRes.data || null);
-        if (docRes.success && docRes.data) {
-          setDoctor(docRes.data);
-        }
-        // Mock appointment object for UI display
-        setAppointment({
-          id: 'TEMP',
-          patientId: patientIdParam,
-          patientName: patRes.data?.fullName || 'N/A',
-          doctorId: doctorIdParam,
-          doctorName: docRes.data?.fullName || 'N/A',
-          appointmentTime: appointmentTimeParam || new Date().toISOString(),
-          sessionPeriod: sessionPeriodParam,
-          status: 'PAYMENT_PENDING',
-          notes: notesParam || '',
-          createdAt: new Date().toISOString()
-        } as any);
-      }
-    } catch (error) {
-      console.error('Failed to fetch billing data', error);
-      triggerGlobalToast('Failed to load billing details', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, sessionPeriodParam, notesParam]);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const consultationFee = doctor?.consultationFee || 0;
-  const tax = 0;
-  const total = Math.max(0, consultationFee - discount + tax);
-
-  const [submittingPayment, setSubmittingPayment] = useState(false);
-
-  const handleMarkAsPaid = async () => {
-    setSubmittingPayment(true);
-    try {
-      let currentAppointmentId = appointmentId;
-      let currentAppointment = appointment;
-
-      // 1. Create appointment if it doesn't exist (new flow)
-      if (!appointmentId && patientIdParam && doctorIdParam && appointmentTimeParam) {
-        const res = await appointmentService.create({
-          patientId: patientIdParam,
-          doctorId: doctorIdParam,
-          appointmentTime: appointmentTimeParam,
-          sessionPeriod: sessionPeriodParam,
-          notes: notesParam || '',
-          status: 'PAYMENT_PENDING'
-        });
-        if (res.success && res.data) {
-          currentAppointmentId = res.data.id;
-          currentAppointment = res.data;
-        } else {
-          throw new Error('Failed to create appointment');
-        }
-      }
-
-      if (!currentAppointmentId || !currentAppointment || !patient) return;
-
-      // 2. Handle Billing
-      if (billing) {
-        // Update existing bill
-        await billingService.updateStatus(billing.id!, 'PAID', paymentMethod, discount);
-      } else {
-        // Create new bill
-        await billingService.create({
-          patientId: patient.id,
-          appointmentId: currentAppointmentId,
-          sourceType: 'APPOINTMENT',
-          status: 'PAID',
-          totalAmount: consultationFee,
-          discount: discount,
-          paymentMethod: paymentMethod,
-          items: [
-            {
-              itemName: 'Consultation Fee',
-              amount: consultationFee,
-              quantity: 1,
-              subtotal: consultationFee
-            }
-          ]
-        });
-      }
-
-      // 3. Update Appointment Status
-      const updateRes = await appointmentService.update(currentAppointmentId, {
-        ...currentAppointment,
-        status: 'ADD_VITALS'
-      });
-
-      if (updateRes.success) {
-        triggerGlobalToast('Payment confirmed successfully', 'success');
-        if (appointmentId) {
-          fetchData();
-        } else {
-          router.push(`/reception/appointments/vitals?appointmentId=${currentAppointmentId}`);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to confirm payment', error);
-      triggerGlobalToast('Failed to process payment', 'error');
-    } finally {
-      setSubmittingPayment(false);
-    }
-  };
-
-  const handleGenerateBill = () => {
-    triggerGlobalToast('Bill generated successfully', 'success');
-    globalThis.print();
-  };
-
-  const handleDownloadReceipt = () => {
-    triggerGlobalToast('Receipt download started', 'success');
-
-    const element = document.createElement('a');
-
-    const file = new Blob(['Mock Bill Content'], {
-      type: 'text/plain',
-    });
-
-    element.href = URL.createObjectURL(file);
-    element.download = `bill_${appointmentId}.txt`;
-
-    document.body.append(element);
-    element.click();
-  };
+  const {
+    appointment,
+    patient,
+    doctor,
+    loading,
+    paymentMethod,
+    setPaymentMethod,
+    discount,
+    setDiscount,
+    submittingPayment,
+    consultationFee,
+    total,
+    handleMarkAsPaid,
+    generateBill,
+    isPaid
+  } = useReceptionBilling();
 
   if (loading) {
     return (
-        <MainLayout title="Loading...">
-          <div className="p-8 text-center">
-            Loading billing details...
-          </div>
-        </MainLayout>
+      <MainLayout title="Processing Billing...">
+        <div className="p-20 flex flex-col items-center justify-center gap-4">
+          <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Retrieving billing records...</p>
+        </div>
+      </MainLayout>
     );
   }
 
   if (!appointment || !patient) {
     return (
-        <MainLayout title="Error">
-          <div className="p-8 text-center text-red-600 font-bold">
-            Appointment not found.
-          </div>
-        </MainLayout>
+      <MainLayout title="Error">
+        <div className="p-20 text-center">
+          <Badge variant="red" size="md" className="mb-4">Resource Not Found</Badge>
+          <p className="text-slate-900 font-black text-xl mb-6">Unable to locate appointment or patient record.</p>
+          <Button icon="arrow_back" onClick={() => router.back()}>Return to Dashboard</Button>
+        </div>
+      </MainLayout>
     );
   }
 
-  const isPaid = appointment.status !== 'PAYMENT_PENDING';
-
   return (
-      <MainLayout title="OP Consultation Billing" hideTitle>
-        <div className="h-screen flex flex-col bg-[#f9f9ff] font-inter overflow-hidden">
+    <MainLayout title="Consultation Billing" hideTitle>
+      <div className="p-8 max-w-[1200px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
+        
+        <PageHeading 
+          title="Consultation Billing" 
+          description="Finalize patient visit fees and process medical service payments."
+        >
+          <div className="flex items-center gap-3">
+             <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-4 py-2">
+               Status: {appointment.status.replace('_', ' ')}
+             </Badge>
+             <Badge variant="slate" className="px-4 py-2 border-slate-200">
+               ID: #INV-{appointment.id.substring(0, 8).toUpperCase()}
+             </Badge>
+          </div>
+        </PageHeading>
 
-          {/* Header */}
-          <header className="px-8 py-4 bg-white border-b border-slate-200 flex justify-between items-center shrink-0">
-            <div className="flex items-center gap-4">
-              <button
-                  onClick={() => router.back()}
-                  className="p-2 hover:bg-slate-50 rounded-full border border-slate-200"
-              >
-              <span className="material-symbols-outlined text-slate-600">
-                arrow_back
-              </span>
-              </button>
-
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                OP Consultation Billing
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="bg-slate-100 text-slate-700 px-4 py-2 rounded-xl font-bold text-xs border border-slate-200 flex items-center gap-2">
-                Status: 
-                <span className={`uppercase ${isPaid ? 'text-emerald-600' : 'text-orange-600'}`}>
-                  {appointment.status.replace('_', ' ')}
-                </span>
-              </div>
-              <div className="bg-orange-50 text-orange-700 px-4 py-2 rounded-xl font-bold text-xs border border-orange-100">
-                Bill ID: #INV-{appointmentId?.substring(0, 8).toUpperCase()}
-              </div>
-            </div>
-          </header>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto p-8 pb-32">
-            <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8">
-
-              {/* Left */}
-              <div className="md:col-span-4 space-y-6">
-
-                <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                  <div className="flex items-center gap-4 mb-6">
-
-                    <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-2xl uppercase">
-                      {patient.fullName
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
-                    </div>
-
-                    <div>
-                      <h3 className="font-bold text-slate-900 leading-tight">
-                        {patient.fullName}
-                      </h3>
-
-                      <p className="text-xs text-slate-500 font-medium">
-                        Code: {patient.patientCode || 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-
-                    <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500">
-                      Age / Gender
-                    </span>
-
-                      <span className="font-bold text-slate-900">
-                      {new Date().getFullYear() -
-                          new Date(patient.dob).getFullYear()}
-                        Y / {patient.gender}
-                    </span>
-                    </div>
-
-                    <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500">
-                      Visit Type
-                    </span>
-
-                      <span className="font-bold text-slate-900">
-                      Out-Patient
-                    </span>
-                    </div>
-
-                    <div className="flex justify-between items-center text-sm">
-                    <span className="text-slate-500">
-                      Phone
-                    </span>
-
-                      <span className="font-bold text-slate-900">
-                      {patient.phone}
-                    </span>
-                    </div>
-
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          {/* Patient Profile Card */}
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="border-none shadow-md">
+              <div className="flex flex-col items-center text-center p-4">
+                <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-3xl uppercase mb-4 border-4 border-white shadow-sm">
+                  {patient.fullName.split(' ').map(n => n[0]).join('')}
                 </div>
-
-                <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex gap-4">
-                <span className="material-symbols-outlined text-orange-600">
-                  info
-                </span>
-
-                  <p className="text-xs text-orange-800 font-medium leading-relaxed">
-                    Fees are based on standard hospital rates for
-                    general consultation. Discounts apply only to
-                    valid promo codes or follow-ups.
-                  </p>
-                </div>
-              </div>
-
-              {/* Right */}
-              <div className="md:col-span-8 space-y-6">
-
-                {/* Service Details */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-
-                  <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest text-slate-400">
-                    Service Details
-                  </h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                    <div className="md:col-span-2">
-                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">
-                        Consulting Doctor
-                      </label>
-
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 flex items-center gap-3">
-                      <span className="material-symbols-outlined text-orange-600">
-                        medical_services
-                      </span>
-
-                        {appointment.doctorName} (
-                        {doctor?.specialization || 'General'})
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">
-                        OP Token No.
-                      </label>
-
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900">
-                        {appointment.tokenDisplay ||
-                            `A-${appointment.id
-                                .substring(0, 3)
-                                .toUpperCase()}`}
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-2 uppercase">
-                        Visit Date
-                      </label>
-
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900">
-                        {new Date(
-                            appointment.appointmentTime
-                        ).toLocaleDateString()}
-                      </div>
-                    </div>
-
+                <h3 className="text-xl font-black text-slate-900 mb-1">{patient.fullName}</h3>
+                <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-6">Patient Record #{patient.patientCode || 'N/A'}</p>
+                
+                <div className="w-full space-y-4 pt-6 border-t border-slate-50">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">Age / Gender</span>
+                    <span className="font-bold text-slate-900 text-sm">
+                      {new Date().getFullYear() - new Date(patient.dob).getFullYear()}Y / {patient.gender}
+                    </span>
                   </div>
-                </div>
-
-                {/* Cost Breakdown */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-
-                  <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest text-slate-400">
-                    Cost Breakdown
-                  </h4>
-
-                  <div className="space-y-4">
-
-                    <div className="flex justify-between items-center">
-                    <span className="text-slate-600 font-medium">
-                      Consultation Fee
-                    </span>
-
-                      <span className="font-bold text-slate-900">
-                      ₹{consultationFee.toFixed(2)}
-                    </span>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-
-                    <span className="text-slate-600 font-medium">
-                      Discount
-                    </span>
-
-                      <div className="relative w-32">
-
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">
-                        ₹
-                      </span>
-
-                        <input
-                            type="number"
-                            className="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-bold text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none"
-                            value={discount}
-                            onChange={(e) =>
-                                setDiscount(Number(e.target.value))
-                            }
-                        />
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center">
-                    <span className="text-slate-600 font-medium">
-                      Tax (0%)
-                    </span>
-
-                      <span className="font-bold text-slate-900">
-                      ₹{tax.toFixed(2)}
-                    </span>
-                    </div>
-
-                    <div className="pt-6 border-t border-slate-100 mt-4 flex justify-between items-center">
-
-                    <span className="text-xl font-black text-slate-900">
-                      Total Payable Amount
-                    </span>
-
-                      <span className="text-3xl font-black text-orange-600">
-                      ₹{total.toFixed(2)}
-                    </span>
-
-                    </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">Phone Number</span>
+                    <span className="font-bold text-slate-900 text-sm">{patient.phone}</span>
                   </div>
-                </div>
-
-                {/* Payment */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-
-                  <h4 className="font-bold text-slate-900 mb-6 uppercase text-[10px] tracking-widest text-slate-400">
-                    Payment Method
-                  </h4>
-
-                  <div className="grid grid-cols-3 gap-4">
-
-                    {[
-                      {
-                        id: 'CASH',
-                        label: 'Cash',
-                        icon: 'payments',
-                      },
-                      {
-                        id: 'UPI',
-                        label: 'UPI / QR',
-                        icon: 'qr_code_2',
-                      },
-                      {
-                        id: 'CARD',
-                        label: 'Card',
-                        icon: 'credit_card',
-                      },
-                    ].map((m) => (
-                        <button
-                            key={m.id}
-                            onClick={() =>
-                                setPaymentMethod(
-                                    m.id as 'CASH' | 'UPI' | 'CARD'
-                                )
-                            }
-                            className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                                paymentMethod === m.id
-                                    ? 'border-orange-600 bg-orange-50 text-orange-600'
-                                    : 'border-slate-100 bg-white text-slate-400 hover:bg-slate-50'
-                            }`}
-                        >
-                      <span className="material-symbols-outlined text-3xl mb-2">
-                        {m.icon}
-                      </span>
-
-                          <span className="text-xs font-black uppercase tracking-widest">
-                        {m.label}
-                      </span>
-                        </button>
-                    ))}
-
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">Visit Category</span>
+                    <Badge variant="blue" size="sm">Out-Patient</Badge>
                   </div>
                 </div>
               </div>
+            </Card>
+
+            <div className="bg-orange-600 p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
+               <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12">info</span>
+               <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
+                 <span className="material-symbols-outlined text-lg">policy</span>
+                 Billing Policy
+               </h4>
+               <p className="text-[11px] font-medium leading-relaxed opacity-90">
+                 All consultation fees are non-refundable once processed. Please verify the consulting doctor and visit type before confirming the transaction.
+               </p>
             </div>
           </div>
 
-          {/* Footer */}
-          <footer className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 p-6 flex justify-between items-center z-50">
+          {/* Billing Details */}
+          <div className="lg:col-span-8 space-y-6">
+            
+            {/* Service Information */}
+            <Card title="Medical Service Details" icon="medical_services">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="md:col-span-2">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Consulting Physician</p>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined text-orange-600">person_search</span>
+                      <p className="font-bold text-slate-900">Dr. {appointment.doctorName}</p>
+                    </div>
+                    <Badge variant="slate">{doctor?.specialization || 'General Practice'}</Badge>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">OP Token No.</p>
+                  <p className="p-4 bg-slate-50 rounded-xl border border-slate-100 font-black text-slate-900">
+                    {appointment.tokenDisplay || `A-${appointment.id.substring(0, 3).toUpperCase()}`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service Date</p>
+                  <p className="p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold text-slate-900">
+                    {new Date(appointment.appointmentTime).toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
+              </div>
+            </Card>
 
-            <div className="flex flex-col">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Total Payable
-            </span>
+            {/* Cost Breakdown */}
+            <Card title="Financial Breakdown" icon="payments">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-600">Base Consultation Fee</span>
+                  <span className="font-black text-slate-900">₹{consultationFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm font-bold text-slate-600">Applied Discount</span>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">₹</span>
+                    <input 
+                      type="number"
+                      className="w-32 pl-7 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all"
+                      value={discount}
+                      onChange={(e) => setDiscount(Number(e.target.value))}
+                      disabled={isPaid}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-bold text-slate-600">Applicable Taxes (0%)</span>
+                  <span className="font-black text-slate-900">₹0.00</span>
+                </div>
+                <div className="pt-6 border-t border-slate-100 mt-6 flex justify-between items-end">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Net Payable</p>
+                    <p className="text-sm font-bold text-slate-500 italic">Inclusive of all medical charges</p>
+                  </div>
+                  <span className="text-4xl font-black text-orange-600 tracking-tighter">₹{total.toFixed(2)}</span>
+                </div>
+              </div>
+            </Card>
 
-              <span className="text-2xl font-black text-slate-900">
-              ₹{total.toFixed(2)}
-            </span>
-            </div>
+            {/* Payment Method */}
+            {!isPaid && (
+              <Card title="Select Payment Method" icon="account_balance_wallet">
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { id: 'CASH', label: 'Cash', icon: 'payments' },
+                    { id: 'UPI', label: 'UPI / QR', icon: 'qr_code_2' },
+                    { id: 'CARD', label: 'Credit Card', icon: 'credit_card' },
+                  ].map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => setPaymentMethod(m.id as any)}
+                      className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all group ${
+                        paymentMethod === m.id
+                          ? 'border-orange-600 bg-orange-50 text-orange-600 shadow-lg shadow-orange-600/10'
+                          : 'border-slate-100 bg-white text-slate-400 hover:bg-slate-50 hover:border-slate-200'
+                      }`}
+                    >
+                      <span className={`material-symbols-outlined text-3xl mb-3 transition-transform ${paymentMethod === m.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                        {m.icon}
+                      </span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{m.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </Card>
+            )}
 
-            <div className="flex items-center gap-4">
-
-              {isPaid ? (
-                <>
-                  <button
-                      onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointmentId}`)}
-                      className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-all active:scale-95"
-                  >
-                    <span className="material-symbols-outlined text-xl">
-                      vital_signs
-                    </span>
-                    Add Vitals
-                  </button>
-
-                  <button
-                      onClick={handleGenerateBill}
-                      className="px-10 py-3 bg-orange-700 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95"
-                  >
-                  <span className="material-symbols-outlined text-xl">
-                    receipt_long
-                  </span>
-
-                    Generate Bill & Print
-                  </button>
-                </>
-              ) : (
-                <button
-                    onClick={handleMarkAsPaid}
-                    disabled={submittingPayment}
-                    className="px-10 py-3 bg-primary text-white rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-orange-700/20 hover:opacity-90 transition-all active:scale-95 disabled:opacity-50"
-                >
-                <span className="material-symbols-outlined text-xl">
-                  check_circle
-                </span>
-
-                  {submittingPayment ? 'Confirming...' : 'Bill is Paid'}
-                </button>
-              )}
-
-            </div>
-          </footer>
+          </div>
         </div>
-      </MainLayout>
-      );
-      }
+      </div>
+
+      {/* Floating Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-6 z-50 flex justify-center">
+        <div className="max-w-[1200px] w-full flex justify-between items-center">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Amount Due</span>
+            <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{total.toFixed(2)}</span>
+          </div>
+          
+          <div className="flex gap-4">
+            {isPaid ? (
+              <>
+                <Button 
+                  variant="secondary" 
+                  size="xl" 
+                  icon="receipt_long" 
+                  onClick={generateBill}
+                >
+                  Download Invoice
+                </Button>
+                <Button 
+                  size="xl" 
+                  icon="vital_signs" 
+                  onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointment.id}`)}
+                >
+                  Proceed to Vitals
+                </Button>
+              </>
+            ) : (
+              <Button 
+                size="xl" 
+                icon="check_circle" 
+                fullWidth 
+                className="px-12"
+                isLoading={submittingPayment}
+                onClick={handleMarkAsPaid}
+              >
+                {submittingPayment ? 'Processing Transaction...' : 'Confirm Payment'}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </MainLayout>
+  );
+}
