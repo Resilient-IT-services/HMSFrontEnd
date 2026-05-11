@@ -3,8 +3,10 @@ import {
   ApiResponse, 
   PageResponse, 
   PrescriptionDTO, 
+  PrescriptionSummaryDTO,
   PatientResponse, 
   MedicineResponse, 
+  MedicineSummaryDTO,
   MedicineRequestDTO,
   PharmacyStockDTO,
   InventoryItemResponse,
@@ -29,6 +31,11 @@ export const pharmacyApi = {
     return response.data;
   },
 
+  getPrescriptionsSummary: async (params?: { search?: string; page?: number; size?: number }) => {
+    const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionSummaryDTO>>>('/pharmacy/prescriptions/summary', { params });
+    return response.data;
+  },
+
   markAsDispensed: async (id: string) => {
     const response = await apiClient.post<ApiResponse<void>>(`/pharmacy/prescriptions/${id}/dispense`);
     return response.data;
@@ -37,6 +44,11 @@ export const pharmacyApi = {
   // Medicine Management (Pharmacy Catalog)
   getMedicines: async (params?: { search?: string; page?: number; size?: number }) => {
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineResponse>>>('/pharmacy/medicines', { params });
+    return response.data;
+  },
+
+  getMedicinesSummary: async (params?: { search?: string; page?: number; size?: number }) => {
+    const response = await apiClient.get<ApiResponse<PageResponse<MedicineSummaryDTO>>>('/pharmacy/medicines/summary', { params });
     return response.data;
   },
 

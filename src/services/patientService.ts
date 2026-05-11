@@ -1,9 +1,16 @@
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, PatientResponse, CreatePatientRequest, PrescriptionDTO, PatientHistoryDTO } from '@/types/api';
+import { ApiResponse, PageResponse, PatientResponse, PatientSummaryDTO, CreatePatientRequest, PrescriptionDTO, PatientHistoryDTO } from '@/types/api';
 
 export const patientService = {
   async list(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<PatientResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<PatientResponse>>>('/patients', {
+      params: { page, size, search }
+    });
+    return response.data;
+  },
+
+  async listSummary(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<PatientSummaryDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<PatientSummaryDTO>>>('/patients/summary', {
       params: { page, size, search }
     });
     return response.data;

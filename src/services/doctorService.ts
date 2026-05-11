@@ -17,6 +17,11 @@ export const doctorService = {
     return response.data;
   },
 
+  async get(doctorId: string): Promise<ApiResponse<DoctorStaffResponse>> {
+    const response = await apiClient.get<ApiResponse<DoctorStaffResponse>>(`/staff/doctors/${doctorId}`);
+    return response.data;
+  },
+
   async listDoctors(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<UserSummaryDTO>>>('/doctors', {
       params: { page, size, search }

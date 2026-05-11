@@ -6,14 +6,14 @@ import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
 import { pharmacyService } from '@/services/pharmacyService';
-import { PatientResponse, AppointmentResponse, PrescriptionResponse } from '@/types/api';
+import { PatientResponse, AppointmentResponse, PrescriptionResponse, AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
 import { formatToken } from '@/utils/tokenHelper';
 
 // --- Sub-components for better complexity management ---
 
 const SearchHeader = ({ activeView, setActiveView, searchTerm, setSearchTerm, handleSearch }: any) => (
   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-    <div className="lg:col-span-8">
+    <div className="lg:col-span-12">
       <div className="bg-white p-2 rounded-2xl border border-slate-100 shadow-sm flex items-center">
         <div className="flex items-center gap-2 mr-4 px-2">
           <button 
@@ -44,7 +44,7 @@ const SearchHeader = ({ activeView, setActiveView, searchTerm, setSearchTerm, ha
   </div>
 );
 
-const AppointmentsTable = ({ appointments, loading, onSelect }: { appointments: AppointmentResponse[], loading: boolean, onSelect: (id: string) => void }) => (
+const AppointmentsTable = ({ appointments, loading, onSelect }: { appointments: AppointmentSummaryDTO[], loading: boolean, onSelect: (id: string) => void }) => (
   <table className="w-full text-left">
     <thead>
       <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
@@ -77,7 +77,7 @@ const AppointmentsTable = ({ appointments, loading, onSelect }: { appointments: 
           </td>
           <td className="px-6 py-5">
             <p className="font-bold text-slate-900 text-sm">{row.patientName}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase">ID: {row.patientId?.substring(0, 8)}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase">Code: {row.patientCode || 'N/A'}</p>
           </td>
           <td className="px-6 py-5">
              <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
@@ -100,11 +100,11 @@ const AppointmentsTable = ({ appointments, loading, onSelect }: { appointments: 
   </table>
 );
 
-const PatientsTable = ({ patients, loading, onSelect }: { patients: PatientResponse[], loading: boolean, onSelect: (id: string) => void }) => (
+const PatientsTable = ({ patients, loading, onSelect }: { patients: PatientSummaryDTO[], loading: boolean, onSelect: (id: string) => void }) => (
   <table className="w-full text-left">
     <thead>
       <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-        <th className="px-6 py-4">Patient ID</th>
+        <th className="px-6 py-4">Patient Code</th>
         <th className="px-6 py-4">Patient Profile</th>
         <th className="px-6 py-4 text-center">Gender</th>
         <th className="px-6 py-4 text-center">Actions</th>
@@ -118,8 +118,8 @@ const PatientsTable = ({ patients, loading, onSelect }: { patients: PatientRespo
       ) : patients.map((row) => (
         <tr key={row.id} className="hover:bg-slate-50/80 transition-colors group cursor-pointer" onClick={() => onSelect(row.id)}>
           <td className="px-6 py-5">
-            <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
-              #PAT-{row.id.toString().substring(0, 5)}
+            <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded uppercase">
+              {row.patientCode || 'N/A'}
             </span>
           </td>
           <td className="px-6 py-5">
@@ -152,8 +152,8 @@ const MedicalHistoryPage = () => {
   const router = useRouter();
   const patientId = searchParams.get('patientId');
   
-  const [patients, setPatients] = useState<PatientResponse[]>([]);
-  const [historyAppointments, setHistoryAppointments] = useState<AppointmentResponse[]>([]);
+  const [patients, setPatients] = useState<PatientSummaryDTO[]>([]);
+  const [historyAppointments, setHistoryAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [selectedAppointment, setSelectedAppointment] = useState<AppointmentResponse | null>(null);
@@ -162,11 +162,22 @@ const MedicalHistoryPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeView, setActiveView] = useState<'APPOINTMENTS' | 'PATIENTS'>('APPOINTMENTS');
 
-  const fetchHistory = useCallback(async (search = '') => {
+  // Pagination State
+  const [appointmentsPage, setAppointmentsPage] = useState(0);
+  const [appointmentsTotalElements, setAppointmentsTotalElements] = useState(0);
+  const [patientsPage, setPatientsPage] = useState(0);
+  const [patientsTotalElements, setPatientsTotalElements] = useState(0);
+  const pageSize = 10;
+
+  const fetchHistory = useCallback(async (search = '', page = 0) => {
     try {
       setLoading(true);
-      const res = await appointmentService.list(0, 50, search, undefined, undefined, 'COMPLETED');
-      if (res.success && res.data) setHistoryAppointments(res.data.content);
+      const res = await appointmentService.listSummary(page, pageSize, search, undefined, undefined, 'COMPLETED');
+      if (res.success && res.data) {
+        setHistoryAppointments(res.data.content);
+        setAppointmentsTotalElements(res.data.totalElements);
+        setAppointmentsPage(page);
+      }
     } catch (error) {
       console.error('Failed to fetch history', error);
     } finally {
@@ -174,11 +185,15 @@ const MedicalHistoryPage = () => {
     }
   }, []);
 
-  const fetchPatients = useCallback(async (search = '') => {
+  const fetchPatients = useCallback(async (search = '', page = 0) => {
     try {
       setLoading(true);
-      const res = await patientService.list(0, 20, search);
-      if (res.success && res.data) setPatients(res.data.content);
+      const res = await patientService.listSummary(page, pageSize, search);
+      if (res.success && res.data) {
+        setPatients(res.data.content);
+        setPatientsTotalElements(res.data.totalElements);
+        setPatientsPage(page);
+      }
     } catch (error) {
       console.error('Failed to fetch patients', error);
     } finally {
@@ -189,28 +204,15 @@ const MedicalHistoryPage = () => {
   const fetchPatientDetails = useCallback(async (id: string) => {
     try {
       setLoading(true);
-      const [pRes, aRes, prRes] = await Promise.allSettled([
-        patientService.get(id),
-        appointmentService.list(0, 100),
-        pharmacyService.listPrescriptions()
-      ]);
+      const res = await patientService.getFullHistory(id);
 
-      if (pRes.status === 'fulfilled' && pRes.value.success && pRes.value.data) {
-        setSelectedPatient(pRes.value.data);
-      }
-
-      if (aRes.status === 'fulfilled' && aRes.value.success && aRes.value.data) {
-        const patientAppointments = aRes.value.data.content
-          .filter(a => a.patientId === id)
-          .toSorted((a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime());
-        setAppointments(patientAppointments);
-        if (patientAppointments.length > 0) setSelectedAppointment(patientAppointments[0]);
-      }
-
-      if (prRes.status === 'fulfilled' && prRes.value.success && prRes.value.data && Array.isArray(prRes.value.data.content)) {
-        setPrescriptions(prRes.value.data.content.filter(p => p.patientId === id));
-      } else {
-        setPrescriptions([]);
+      if (res.success && res.data) {
+        setSelectedPatient(res.data.patient);
+        const sortedVisits = (res.data.visits || []).toSorted(
+          (a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime()
+        );
+        setAppointments(sortedVisits);
+        if (sortedVisits.length > 0) setSelectedAppointment(sortedVisits[0]);
       }
     } catch (error) {
       console.error('Failed to fetch patient details', error);
@@ -223,16 +225,30 @@ const MedicalHistoryPage = () => {
     if (patientId) {
       fetchPatientDetails(patientId);
     } else if (activeView === 'APPOINTMENTS') {
-      fetchHistory();
+      fetchHistory(searchTerm, appointmentsPage);
     } else {
-      fetchPatients();
+      fetchPatients(searchTerm, patientsPage);
     }
-  }, [patientId, activeView, fetchHistory, fetchPatients, fetchPatientDetails]);
+  }, [patientId, activeView, appointmentsPage, patientsPage, fetchHistory, fetchPatients, fetchPatientDetails]);
+
+  // Update prescriptions whenever selectedAppointment changes
+  useEffect(() => {
+    if (selectedAppointment?.prescription) {
+      setPrescriptions([selectedAppointment.prescription]);
+    } else {
+      setPrescriptions([]);
+    }
+  }, [selectedAppointment]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (activeView === 'APPOINTMENTS') fetchHistory(searchTerm);
-    else fetchPatients(searchTerm);
+    if (activeView === 'APPOINTMENTS') {
+      setAppointmentsPage(0);
+      fetchHistory(searchTerm, 0);
+    } else {
+      setPatientsPage(0);
+      fetchPatients(searchTerm, 0);
+    }
   };
 
   const selectPatient = (id: string) => {
@@ -242,7 +258,7 @@ const MedicalHistoryPage = () => {
   if (!patientId) {
     return (
       <MainLayout title="Medical History" hideTitle>
-        <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter">
+        <div className="p-8 max-w-none mx-auto w-full -m-4 lg:-m-gutter bg-[#f9f9ff] font-inter">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <h2 className="font-manrope text-3xl font-black text-slate-900 tracking-tight uppercase">Medical History</h2>
@@ -256,13 +272,47 @@ const MedicalHistoryPage = () => {
             handleSearch={handleSearch} 
           />
 
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-12">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
             <div className="overflow-x-auto">
               {activeView === 'APPOINTMENTS' ? (
                 <AppointmentsTable appointments={historyAppointments} loading={loading} onSelect={selectPatient} />
               ) : (
                 <PatientsTable patients={patients} loading={loading} onSelect={selectPatient} />
               )}
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                {activeView === 'APPOINTMENTS' ? (
+                  `Showing ${appointmentsPage * pageSize + 1} to ${Math.min((appointmentsPage + 1) * pageSize, appointmentsTotalElements)} of ${appointmentsTotalElements} Visits`
+                ) : (
+                  `Showing ${patientsPage * pageSize + 1} to ${Math.min((patientsPage + 1) * pageSize, patientsTotalElements)} of ${patientsTotalElements} Patients`
+                )}
+              </p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => activeView === 'APPOINTMENTS' ? setAppointmentsPage(p => Math.max(0, p - 1)) : setPatientsPage(p => Math.max(0, p - 1))}
+                  disabled={(activeView === 'APPOINTMENTS' ? appointmentsPage : patientsPage) === 0}
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-400 bg-white disabled:opacity-50 hover:bg-slate-50 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">chevron_left</span>
+                </button>
+                <button className="px-4 py-1.5 rounded-xl bg-orange-600 text-white font-black text-xs">
+                  {(activeView === 'APPOINTMENTS' ? appointmentsPage : patientsPage) + 1}
+                </button>
+                <button 
+                  onClick={() => activeView === 'APPOINTMENTS' ? setAppointmentsPage(p => p + 1) : setPatientsPage(p => p + 1)}
+                  disabled={
+                    activeView === 'APPOINTMENTS' 
+                      ? (appointmentsPage + 1) * pageSize >= appointmentsTotalElements 
+                      : (patientsPage + 1) * pageSize >= patientsTotalElements
+                  }
+                  className="px-3 py-1.5 rounded-xl border border-slate-200 text-slate-600 bg-white hover:bg-slate-50 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-base">chevron_right</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -272,7 +322,7 @@ const MedicalHistoryPage = () => {
 
   return (
     <MainLayout title="Patient Medical History" hideTitle>
-      <div className="h-screen -m- gutter flex flex-col bg-surface overflow-hidden">
+      <div className="h-[calc(100vh-120px)] -m-4 lg:-m-gutter flex flex-col bg-surface overflow-hidden">
         <div className="px-8 py-6 flex items-center justify-between border-b border-gray-100 bg-white shrink-0">
           <div className="flex items-center gap-4">
             <button 
@@ -284,7 +334,7 @@ const MedicalHistoryPage = () => {
             <div>
               <h1 className="font-headline-md text-headline-md text-on-surface">{selectedPatient?.fullName || 'Loading...'}</h1>
               <p className="font-body-sm text-body-sm text-gray-500">
-                Patient ID: #PAT-{selectedPatient?.id.substring(0, 8).toUpperCase() || '...'}
+                Patient Code: {selectedPatient?.patientCode || '...'}
               </p>
             </div>
           </div>

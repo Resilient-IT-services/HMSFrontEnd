@@ -256,7 +256,9 @@ export default function AppointmentScheduling() {
                           >
                             <div>
                               <p className="text-xs font-bold text-slate-900">{p.fullName}</p>
-                              <p className="text-[10px] text-slate-500 font-medium">{p.phone}</p>
+                              <p className="text-[10px] text-slate-500 font-medium">
+                                {p.patientCode || 'N/A'} • {p.phone}
+                              </p>
                             </div>
                             <span className="material-symbols-outlined text-slate-300 text-sm">chevron_right</span>
                           </div>

@@ -295,7 +295,7 @@ const PatientQueuePage = () => {
                           </div>
                           <div>
                             <p className="font-label-md text-on-surface">{appointment.patientName}</p>
-                            <p className="text-xs text-gray-500">ID: {appointment.patientId.substring(0, 8).toUpperCase()}</p>
+                            <p className="text-xs text-gray-500">Code: {(appointment as any).patientCode || 'N/A'}</p>
                           </div>
                         </div>
                       </td>

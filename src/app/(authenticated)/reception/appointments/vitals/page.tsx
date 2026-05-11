@@ -327,8 +327,8 @@ export default function VitalsEntryPage() {
                 <div className="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg">
                   <span className="material-symbols-outlined text-orange-600">fingerprint</span>
                   <div>
-                    <p className="text-label-sm text-gray-500 uppercase">Patient ID</p>
-                    <p className="font-headline-sm text-on-surface">{patient?.patientCode || appointment.patientId.substring(0, 8)}</p>
+                    <p className="text-label-sm text-gray-500 uppercase">Patient Code</p>
+                    <p className="font-headline-sm text-on-surface">{patient?.patientCode || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-surface-container-low rounded-lg">

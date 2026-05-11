@@ -3,14 +3,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
-import { PatientResponse } from '@/types/api';
+import { PatientResponse, PatientSummaryDTO } from '@/types/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
 
 export default function PatientsPage() {
   const router = useRouter();
-  const [patients, setPatients] = useState<PatientResponse[]>([]);
+  const [patients, setPatients] = useState<PatientSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
@@ -20,7 +20,7 @@ export default function PatientsPage() {
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await patientService.list(page, 20, debouncedSearchTerm);
+      const response = await patientService.listSummary(page, 20, debouncedSearchTerm);
       if (response.success && response.data) {
         setPatients(response.data.content);
         setTotalElements(response.data.totalElements);
@@ -100,7 +100,7 @@ export default function PatientsPage() {
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  <th className="px-6 py-4">Patient ID</th>
+                  <th className="px-6 py-4">Patient Code</th>
                   <th className="px-6 py-4">Patient Profile</th>
                   <th className="px-6 py-4 text-center">Gender</th>
                   <th className="px-6 py-4 text-center">Category</th>
@@ -120,7 +120,7 @@ export default function PatientsPage() {
                   >
                     <td className="px-6 py-5">
                       <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
-                        #PAT-{row.id.toString().substring(0, 5)}
+                        {row.patientCode || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-5">

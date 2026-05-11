@@ -7,12 +7,13 @@ import { MedicineResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 import { useDebounce } from '@/hooks/useDebounce';
+import { MedicineResponse, MedicineSummaryDTO } from '@/types/api';
 
 import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 
 export default function AdminMedicinePage() {
-  const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
+  const [medicines, setMedicines] = useState<MedicineSummaryDTO[]>([]);
   const [totalMedicines, setTotalMedicines] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,19 +25,28 @@ export default function AdminMedicinePage() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    fetchMedicines();
-  }, [debouncedSearch]);
+  // Pagination
+  const [page, setPage] = useState(0);
+  const pageSize = 20;
 
-  const fetchMedicines = async () => {
+  const fetchMedicines = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getMedicines({ search: debouncedSearch, size: 2000 });
+      const response = await pharmacyApi.getMedicinesSummary({ 
+        search: debouncedSearch, 
+        page: page, 
+        size: pageSize 
+      });
       if (response.success && response.data) {
         setMedicines(response.data.content);
         setTotalMedicines(response.data.totalElements);
         if (response.data.content.length > 0 && !selectedMedicine) {
-          setSelectedMedicine(response.data.content[0]);
+          // If we need initial detail, we have to fetch it explicitly now
+          const firstId = response.data.content[0].id;
+          const detailRes = await pharmacyApi.getMedicineById(firstId);
+          if (detailRes.success && detailRes.data) {
+            setSelectedMedicine(detailRes.data);
+          }
         }
       } else {
         setMedicines([]);
@@ -46,6 +56,28 @@ export default function AdminMedicinePage() {
       console.error(error);
       setMedicines([]);
       setTotalMedicines(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [debouncedSearch, page, selectedMedicine]);
+
+  useEffect(() => {
+    fetchMedicines();
+  }, [debouncedSearch, page]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch]);
+
+  const handleSelectMedicine = async (id: string) => {
+    try {
+      setLoading(true);
+      const res = await pharmacyApi.getMedicineById(id);
+      if (res.success && res.data) {
+        setSelectedMedicine(res.data);
+      }
+    } catch (error) {
+      console.error(error);
     } finally {
       setLoading(false);
     }

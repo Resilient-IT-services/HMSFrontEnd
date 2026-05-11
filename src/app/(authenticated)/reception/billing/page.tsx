@@ -65,25 +65,22 @@ export default function BillingPage() {
 
           const [patRes, docRes] = await Promise.all([
             patientService.get(appData.patientId),
-            doctorService.list(0, 100),
+            doctorService.get(appData.doctorId),
           ]);
           if (patRes.success) setPatient(patRes.data || null);
-          const docData = docRes.data;
-          if (docRes.success && docData) {
-            const doc = docData.content.find((d) => d.doctorId === appData.doctorId);
-            if (doc) setDoctor(doc);
+          if (docRes.success && docRes.data) {
+            setDoctor(docRes.data);
           }
         }
       } else if (patientIdParam && doctorIdParam) {
         // Handle direct flow from scheduling (before appointment is created)
         const [patRes, docRes] = await Promise.all([
           patientService.get(patientIdParam),
-          doctorService.list(0, 100),
+          doctorService.get(doctorIdParam),
         ]);
         if (patRes.success) setPatient(patRes.data || null);
         if (docRes.success && docRes.data) {
-          const doc = docRes.data.content.find((d) => d.doctorId === doctorIdParam);
-          if (doc) setDoctor(doc);
+          setDoctor(docRes.data);
         }
         // Mock appointment object for UI display
         setAppointment({
@@ -91,7 +88,7 @@ export default function BillingPage() {
           patientId: patientIdParam,
           patientName: patRes.data?.fullName || 'N/A',
           doctorId: doctorIdParam,
-          doctorName: docRes.data?.content.find(d => d.doctorId === doctorIdParam)?.fullName || 'N/A',
+          doctorName: docRes.data?.fullName || 'N/A',
           appointmentTime: appointmentTimeParam || new Date().toISOString(),
           sessionPeriod: sessionPeriodParam,
           status: 'PAYMENT_PENDING',
@@ -290,8 +287,7 @@ export default function BillingPage() {
                       </h3>
 
                       <p className="text-xs text-slate-500 font-medium">
-                        ID: #PAT-
-                        {patient.id.substring(0, 8).toUpperCase()}
+                        Code: {patient.patientCode || 'N/A'}
                       </p>
                     </div>
                   </div>

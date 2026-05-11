@@ -19,7 +19,7 @@ const PatientProfileModal: React.FC<PatientProfileModalProps> = ({ patient, onCl
           </div>
           <div>
             <h2 className="text-xl font-bold text-[var(--text-primary)]">{patient.fullName}</h2>
-            <p className="text-[var(--text-secondary)]">Patient ID: {patient.patientCode || patient.id}</p>
+            <p className="text-[var(--text-secondary)]">Patient Code: {patient.patientCode || 'N/A'}</p>
           </div>
         </div>
 

@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { pharmacyApi } from '../api/pharmacyApi';
-import { PrescriptionDTO } from '@/types/api';
+import { PrescriptionSummaryDTO } from '@/types/api';
 import PrescriptionTable from '../components/PrescriptionTable';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import EmptyState from '../components/EmptyState';
 
 const PrescriptionListPage: React.FC = () => {
-  const [prescriptions, setPrescriptions] = useState<PrescriptionDTO[]>([]);
+  const [prescriptions, setPrescriptions] = useState<PrescriptionSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +16,7 @@ const PrescriptionListPage: React.FC = () => {
   const fetchPrescriptions = async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getPrescriptions({ search: searchTerm });
+      const response = await pharmacyApi.getPrescriptionsSummary({ search: searchTerm });
       if (response.success && response.data) {
         setPrescriptions(response.data.content);
       } else {

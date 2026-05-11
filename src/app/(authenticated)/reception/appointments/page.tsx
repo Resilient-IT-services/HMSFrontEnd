@@ -4,7 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
-import { AppointmentResponse, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
+import { AppointmentResponse, AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
@@ -41,7 +41,7 @@ const getStatusStyles = (status: string) => {
 
 export default function TodayAppointmentsPage() {
   const router = useRouter();
-  const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
@@ -77,7 +77,7 @@ export default function TodayAppointmentsPage() {
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
 
       const [appRes, docRes, statsRes] = await Promise.all([
-        appointmentService.list(
+        appointmentService.listSummary(
           0, 100, 
           searchTerm, 
           dateToUse,
@@ -86,7 +86,7 @@ export default function TodayAppointmentsPage() {
           filters.paymentStatuses?.join(',')
         ),
         doctorService.list(0, 100),
-        appointmentService.list(0, 500)
+        appointmentService.getStats(today)
       ]);
 
       const appData = appRes.data;
@@ -99,16 +99,15 @@ export default function TodayAppointmentsPage() {
       }
 
       if (statsRes.success && statsRes.data) {
-        const allApps = statsRes.data.content;
-        const todayApps = allApps.filter(app => app.appointmentTime.split('T')[0] === today);
+        const statusStats = statsRes.data.byStatus;
         setStats({
-          total: todayApps.length,
-          walkIn: todayApps.filter(app => app.status === 'WALK_IN').length,
-          upcoming: allApps.filter(app => app.appointmentTime.split('T')[0] > today).length,
-          paymentPending: todayApps.filter(app => app.status === 'PAYMENT_PENDING').length,
-          waitingForVitals: todayApps.filter(app => app.status === 'WAITING_FOR_VITALS').length,
-          completed: todayApps.filter(app => app.status === 'COMPLETED').length,
-          cancelled: todayApps.filter(app => app.status === 'CANCELLED').length,
+          total: statsRes.data.total,
+          walkIn: (statusStats['WALK_IN'] as any) || 0,
+          upcoming: 0, // Need separate API for upcoming stats or update backend
+          paymentPending: (statusStats['PAYMENT_PENDING'] as any) || 0,
+          waitingForVitals: (statusStats['WAITING_FOR_VITALS'] as any) || 0,
+          completed: (statusStats['COMPLETED'] as any) || 0,
+          cancelled: (statusStats['CANCELLED'] as any) || 0,
         });
       }
     } catch (error) {
@@ -344,7 +343,7 @@ export default function TodayAppointmentsPage() {
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-bold text-slate-900">{app.patientName}</p>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">ID: {app.patientId?.substring(0, 8) || 'N/A'}</p>
+                    <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Code: {(app as any).patientCode || 'N/A'}</p>
                   </td>
                   <td className="px-6 py-4">
                     <p className="font-medium text-slate-700">{app.doctorName}</p>
