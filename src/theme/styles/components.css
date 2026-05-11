@@ -1,0 +1,32 @@
+/* Form Styles */
+.form-input {
+  @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-md;
+}
+
+/* Button Variants */
+.btn-primary {
+  @apply bg-primary-container text-on-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-label-md shadow-sm hover:opacity-90 transition-all active:scale-95;
+}
+
+.btn-secondary {
+  @apply px-6 py-2.5 border border-slate-200 bg-white text-on-surface font-label-md rounded-lg hover:bg-slate-50 transition-all;
+}
+
+/* Session Cards */
+.session-card {
+    transition: all 150ms ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+.session-card-default {
+    @apply bg-slate-100;
+}
+.session-card-default:hover {
+    @apply border-primary;
+}
+.session-card-selected {
+    @apply bg-primary text-white border-primary !important;
+}
+.session-card-disabled {
+    @apply opacity-40 cursor-not-allowed bg-slate-100;
+}

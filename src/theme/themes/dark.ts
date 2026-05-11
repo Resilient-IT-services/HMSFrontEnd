@@ -1,4 +1,11 @@
+import { colorTokens, spacing, radius, shadows } from '../tokens';
+
 export const darkTheme = {
+  ...colorTokens,
+  ...spacing,
+  ...radius,
+  ...shadows,
+  // Overrides for Dark Mode
   primary: '#ec5b13',
   background: '#221610',
   surface: '#2d1d15',

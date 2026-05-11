@@ -1,0 +1,89 @@
+@theme {
+  /* Brand Colors bridged from TS Tokens */
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-light: var(--primary-light);
+  
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  
+  --color-border: var(--border);
+
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-error: var(--error);
+  --color-error-light: var(--error-light);
+  --color-warning: var(--warning);
+  --color-warning-light: var(--warning-light);
+  --color-info: var(--info);
+  --color-info-light: var(--info-light);
+
+  /* Material Foundation Colors (can be added to TS tokens later) */
+  --color-surface-container-high: #e7e8ee;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-on-primary-fixed-variant: #802a00;
+  --color-on-secondary-container: #5a6579;
+  --color-outline: #8d7167;
+  --color-on-surface-variant: #594138;
+  --color-surface-dim: #d9dadf;
+  --color-inverse-surface: #2e3035;
+  --color-tertiary: #5c5f61;
+  --color-on-secondary-fixed: #111c2d;
+  --color-on-error-container: #93000a;
+  --color-surface-container: #ededf3;
+  --color-primary-container: #ff6b2b;
+  --color-primary-fixed: #ffdbce;
+  --color-on-tertiary-fixed-variant: #444749;
+  --color-on-secondary: #ffffff;
+  --color-on-surface: #191c20;
+  --color-surface-container-highest: #e2e2e8;
+  --color-secondary-fixed-dim: #bcc7de;
+  --color-on-primary-container: #5c1c00;
+  --color-on-tertiary-fixed: #191c1e;
+  --color-tertiary-fixed-dim: #c4c7c9;
+  --color-secondary-fixed: #d8e3fb;
+  --color-inverse-on-surface: #f0f0f6;
+  --color-secondary-container: #d8e3fb;
+  --color-on-primary: #ffffff;
+  --color-outline-variant: #e2bfb3;
+  --color-on-secondary-fixed-variant: #3c475a;
+  --color-on-error: #ffffff;
+  --color-surface-variant: #e2e2e8;
+  --color-error: #ba1a1a;
+  --color-tertiary-fixed: #e1e3e5;
+  --color-tertiary-container: #979a9c;
+  --color-on-background: #191c20;
+  --color-on-tertiary: #ffffff;
+  --color-primary-fixed-dim: #ffb59a;
+  --color-on-tertiary-container: #2f3234;
+  --color-secondary: #545f73;
+  --color-surface-tint: #a83900;
+  --color-error-container: #ffdad6;
+  --color-surface-container-low: #f3f3f9;
+  --color-inverse-primary: #ffb59a;
+  --color-on-primary-fixed: #380d00;
+
+  /* Spacing bridged from TS Tokens */
+  --spacing-xs: var(--spacing-xs);
+  --spacing-sm: var(--spacing-sm);
+  --spacing-md: var(--spacing-md);
+  --spacing-lg: var(--spacing-lg);
+  --spacing-xl: var(--spacing-xl);
+  --spacing-xxl: var(--spacing-xxl);
+
+  /* Legacy Spacing from Template */
+  --spacing-component-gap: 16px;
+  --spacing-gutter: 24px;
+  --spacing-section-gap: 24px;
+  --spacing-margin-page: 40px;
+  --spacing-container-padding: 32px;
+  --spacing-base: 8px;
+
+  /* Font Families */
+  --font-inter: var(--font-inter), sans-serif;
+  --font-manrope: var(--font-manrope), sans-serif;
+}
