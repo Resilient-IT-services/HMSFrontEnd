@@ -6,10 +6,12 @@ import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
 import { CreatePatientRequest } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { validateDOB } from '@/utils/dateValidator';
 
 export default function PatientRegistration() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<CreatePatientRequest & { firstName: string, lastName: string, email: string }>({
     firstName: '',
     lastName: '',
@@ -23,6 +25,16 @@ export default function PatientRegistration() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate DOB
+    const dobValidation = validateDOB(formData.dob);
+    if (!dobValidation.isValid) {
+      setErrors({ dob: dobValidation.message || 'Invalid date of birth' });
+      triggerGlobalToast(dobValidation.message || 'Invalid date of birth', 'error');
+      return;
+    }
+    
+    setErrors({});
     setLoading(true);
     try {
       const payload: CreatePatientRequest = {
@@ -107,12 +119,13 @@ export default function PatientRegistration() {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Date of Birth</label>
                   <input 
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.dob ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
                     required 
                     type="date"
                     value={formData.dob}
                     onChange={(e) => setFormData({...formData, dob: e.target.value})}
                   />
+                  {errors.dob && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.dob}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Gender</label>

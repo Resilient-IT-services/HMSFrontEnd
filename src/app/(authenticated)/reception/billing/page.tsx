@@ -14,6 +14,7 @@ import {
   BillingResponse,
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { formatToken } from '@/utils/tokenHelper';
 
 export default function BillingPage() {
   const searchParams = useSearchParams();
@@ -34,6 +35,8 @@ export default function BillingPage() {
   const [doctor, setDoctor] =
       useState<DoctorStaffResponse | null>(null);
 
+  const [estimatedToken, setEstimatedToken] = useState<string>('');
+
   const [billing, setBilling] = useState<BillingResponse | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -48,7 +51,7 @@ export default function BillingPage() {
       if (appointmentId) {
         const [appRes, billRes] = await Promise.all([
           appointmentService.get(appointmentId),
-          billingService.getByAppointment(appointmentId).catch(() => ({ success: false, data: null }))
+          billingService.getByAppointment(appointmentId)
         ]);
 
         const appData = appRes.data;
@@ -76,22 +79,35 @@ export default function BillingPage() {
         }
       } else if (patientIdParam && doctorIdParam) {
         // Handle direct flow from scheduling (before appointment is created)
-        const [patRes, docRes] = await Promise.all([
+        const [patRes, docRes, availRes] = await Promise.all([
           patientService.get(patientIdParam),
           doctorService.list(0, 100),
+          doctorService.getAvailability(doctorIdParam, appointmentTimeParam?.split('T')[0] || new Date().toISOString().split('T')[0])
         ]);
+        
         if (patRes.success) setPatient(patRes.data || null);
+        let selectedDoc: DoctorStaffResponse | null = null;
         if (docRes.success && docRes.data) {
-          const doc = docRes.data.content.find((d) => d.doctorId === doctorIdParam);
-          if (doc) setDoctor(doc);
+          selectedDoc = docRes.data.content.find((d) => d.doctorId === doctorIdParam) || null;
+          setDoctor(selectedDoc);
         }
+
+        // Estimate Token
+        if (availRes.success && availRes.data && appointmentTimeParam) {
+          const time = appointmentTimeParam.split('T')[1].substring(0, 5);
+          const session = availRes.data.sessions.find(s => time >= s.startTime && time < s.endTime);
+          if (session) {
+            setEstimatedToken(`T-${(session.currentBookings + 1).toString().padStart(3, '0')}`);
+          }
+        }
+
         // Mock appointment object for UI display
         setAppointment({
           id: 'TEMP',
           patientId: patientIdParam,
           patientName: patRes.data?.fullName || 'N/A',
           doctorId: doctorIdParam,
-          doctorName: docRes.data?.content.find(d => d.doctorId === doctorIdParam)?.fullName || 'N/A',
+          doctorName: selectedDoc?.fullName || 'N/A',
           appointmentTime: appointmentTimeParam || new Date().toISOString(),
           sessionPeriod: sessionPeriodParam,
           status: 'PAYMENT_PENDING',
@@ -379,10 +395,7 @@ export default function BillingPage() {
                       </label>
 
                       <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900">
-                        {appointment.tokenDisplay ||
-                            `A-${appointment.id
-                                .substring(0, 3)
-                                .toUpperCase()}`}
+                        {estimatedToken || formatToken(appointment)}
                       </div>
                     </div>
 

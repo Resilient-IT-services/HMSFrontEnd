@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 import { Modal } from '@/components/ui/Modal';
+import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
 
 const getStatusStyles = (status: string) => {
   switch (status) {
@@ -60,55 +61,48 @@ export default function TodayAppointmentsPage() {
     walkIn: 0,
     upcoming: 0,
     paymentPending: 0,
-    waitingForVitals: 0,
     completed: 0,
     cancelled: 0,
   });
 
-  const fetchData = useCallback(async (isBackground = false, filters = activeFilters) => {
+  const fetchData = useCallback(async (isBackground = false) => {
     if (!isBackground) setLoading(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
-      
-      const statusesToUse = filters.statuses?.length > 0 
-        ? filters.statuses.join(',') 
-        : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
+      const today = new Date().toLocaleDateString('en-CA');
+
+      // We fetch appointments for today (or all for upcoming)
+      const dateToUse = statusFilter === 'UPCOMING' ? undefined : today;
 
       const [appRes, docRes, statsRes] = await Promise.all([
         appointmentService.list(
-          0, 100, 
+          0, 500, 
           searchTerm, 
-          dateToUse,
-          undefined,
-          statusesToUse,
-          filters.paymentStatuses?.join(',')
+          dateToUse
         ),
         doctorService.list(0, 100),
-        appointmentService.list(0, 500)
+        appointmentService.getStats(today)
       ]);
 
-      const appData = appRes.data;
-      if (appRes.success && appData) {
-        setAppointments(appData.content);
+      if (appRes.success && appRes.data) {
+        const normalized = normalizeAppointmentData(appRes.data.content);
+        setAppointments(normalized);
+        syncExpiredAppointments(appRes.data.content);
       }
-      const docData = docRes.data;
-      if (docRes.success && docData) {
-        setDoctors(docData.content);
+
+      if (docRes.success && docRes.data) {
+        setDoctors(docRes.data.content);
       }
 
       if (statsRes.success && statsRes.data) {
-        const allApps = statsRes.data.content;
-        const todayApps = allApps.filter(app => app.appointmentTime.split('T')[0] === today);
+        const s = statsRes.data;
+        const byStatus = (s as any).byStatus || {};
         setStats({
-          total: todayApps.length,
-          walkIn: todayApps.filter(app => app.status === 'WALK_IN').length,
-          upcoming: allApps.filter(app => app.appointmentTime.split('T')[0] > today).length,
-          paymentPending: todayApps.filter(app => app.status === 'PAYMENT_PENDING').length,
-          waitingForVitals: todayApps.filter(app => app.status === 'WAITING_FOR_VITALS').length,
-          completed: todayApps.filter(app => app.status === 'COMPLETED').length,
-          cancelled: todayApps.filter(app => app.status === 'CANCELLED').length,
+          total: Number(s.total || 0),
+          walkIn: Number(byStatus['WALK_IN'] || 0),
+          upcoming: Number(byStatus['UPCOMING'] || 0),
+          paymentPending: Number(byStatus['PAYMENT_PENDING'] || 0),
+          completed: Number(byStatus['COMPLETED'] || 0),
+          cancelled: Number(byStatus['CANCELLED'] || 0),
         });
       }
     } catch (error) {
@@ -116,7 +110,7 @@ export default function TodayAppointmentsPage() {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [statusFilter, searchTerm, activeFilters]);
+  }, [statusFilter, searchTerm, activeFilters]); // Corrected dependencies
 
   useEffect(() => {
     fetchData();
@@ -125,7 +119,7 @@ export default function TodayAppointmentsPage() {
   }, [fetchData]);
 
   const applyFilters = () => {
-    setActiveFilters(advancedFilters);
+    setActiveFilters({ ...advancedFilters });
     setIsFilterModalOpen(false);
   };
 
@@ -137,6 +131,7 @@ export default function TodayAppointmentsPage() {
     setAdvancedFilters(reset);
     setActiveFilters(reset);
     setIsFilterModalOpen(false);
+    setStatusFilter('ALL');
   };
 
   const removeFilter = (key: string, value?: string) => {
@@ -147,27 +142,45 @@ export default function TodayAppointmentsPage() {
   };
 
   const filteredAppointments = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    
-    const base = appointments.filter(app => {
+    const today = new Date().toLocaleDateString('en-CA');
+
+    let result = appointments.filter(app => {
       const appDate = app.appointmentTime.split('T')[0];
       const isToday = appDate === today;
       const isUpcoming = appDate > today;
 
+      // 1. Tab / Quick Filter
       if (statusFilter === 'UPCOMING') {
         if (!isUpcoming) return false;
       } else if (statusFilter === 'ALL') {
         if (!isToday) return false;
       } else {
-        if (!activeFilters.statuses?.length && app.status !== statusFilter) return false;
+        // If a specific status tab is selected (e.g. PAYMENT_PENDING)
+        if (app.status !== statusFilter) return false;
+        if (!isToday) return false;
+      }
+
+      // 2. Advanced Status Filters (Checkbox selection)
+      const activeStatusFilters = activeFilters.statuses || [];
+      if (activeStatusFilters.length > 0) {
+        if (!activeStatusFilters.includes(app.status)) return false;
+      }
+
+      // 3. Search Term (local secondary check)
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        return (
+          app.patientName.toLowerCase().includes(search) || 
+          app.patientId?.toLowerCase().includes(search) ||
+          app.doctorName.toLowerCase().includes(search)
+        );
       }
 
       return true;
     });
 
-    return sortByToken(base);
-  }, [appointments, statusFilter, activeFilters]);
-
+    return sortByToken(result);
+  }, [appointments, statusFilter, activeFilters, searchTerm]);
   return (
     <MainLayout title="Appointments Dashboard" hideTitle>
       <div className="p-4 lg:p-8 space-y-6 lg:space-y-8 bg-gray-50/50 min-h-screen">
@@ -196,13 +209,12 @@ export default function TodayAppointmentsPage() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
           {[
             { label: 'Today Total', value: stats.total, color: 'text-slate-600', bg: 'bg-slate-50', filter: 'ALL' },
             { label: 'Walk-In', value: stats.walkIn, color: 'text-emerald-600', bg: 'bg-emerald-50', filter: 'WALK_IN' },
             { label: 'Upcoming', value: stats.upcoming, color: 'text-blue-600', bg: 'bg-blue-50', filter: 'UPCOMING' },
-            { label: 'Pay Pending', value: stats.paymentPending, color: 'text-amber-600', bg: 'bg-amber-50', filter: 'PAYMENT_PENDING' },
-            { label: 'Waiting Vitals', value: stats.waitingForVitals, color: 'text-purple-600', bg: 'bg-purple-50', filter: 'WAITING_FOR_VITALS' },
+            { label: 'Bill Not Paid', value: stats.paymentPending, color: 'text-amber-600', bg: 'bg-amber-50', filter: 'PAYMENT_PENDING' },
             { label: 'Completed', value: stats.completed, color: 'text-green-600', bg: 'bg-green-50', filter: 'COMPLETED' },
             { label: 'Cancelled', value: stats.cancelled, color: 'text-red-600', bg: 'bg-red-50', filter: 'CANCELLED' },
           ].map((stat, i) => (
@@ -226,7 +238,7 @@ export default function TodayAppointmentsPage() {
 
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <div className="flex flex-wrap gap-2 w-full md:w-auto">
-            {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
+            {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
               <button
                 key={status}
                 onClick={() => {
@@ -243,7 +255,7 @@ export default function TodayAppointmentsPage() {
                     : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
                 }`}
               >
-                {status === 'ALL' ? 'Today' : status.replace('_', ' ')}
+                {status === 'ALL' ? 'Today' : status === 'PAYMENT_PENDING' ? 'Bill Not Paid' : status.replace('_', ' ')}
               </button>
             ))}
           </div>
@@ -394,7 +406,7 @@ export default function TodayAppointmentsPage() {
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase text-slate-400">Appointment Status</label>
             <div className="flex flex-wrap gap-2">
-              {['SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map(s => (
+              {['SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'COMPLETED', 'CANCELLED'].map(s => (
                 <label key={s} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
                   advancedFilters.statuses.includes(s) 
                     ? 'bg-orange-700 text-white border-orange-700' 

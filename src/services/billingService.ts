@@ -18,7 +18,13 @@ export const billingService = {
   },
 
   async getByAppointment(appointmentId: string): Promise<ApiResponse<BillingDTO>> {
-    const response = await apiClient.get<ApiResponse<BillingDTO>>(`/billing/appointment/${appointmentId}`);
-    return response.data;
+    try {
+      const response = await apiClient.get<ApiResponse<BillingDTO>>(`/billing/appointment/${appointmentId}`, {
+        skipToast: true
+      });
+      return response.data;
+    } catch (error) {
+      return { success: false, data: undefined as any };
+    }
   }
 };

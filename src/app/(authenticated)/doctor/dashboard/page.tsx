@@ -10,6 +10,7 @@ import { RootState } from '@/state/store';
 import { AppointmentResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
+import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
 
 const DoctorDashboard = () => {
   const router = useRouter();
@@ -33,7 +34,9 @@ const DoctorDashboard = () => {
         return;
       }
 
-      setAppointments(response.data.content);
+      const normalized = normalizeAppointmentData(response.data.content);
+      setAppointments(normalized);
+      syncExpiredAppointments(response.data.content);
     } catch (error) {
       console.error(error);
     } finally {

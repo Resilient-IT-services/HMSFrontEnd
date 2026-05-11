@@ -11,6 +11,7 @@ import {
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { validateDOB } from '@/utils/dateValidator';
 
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
@@ -142,14 +143,9 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     }
 
     // DOB
-    if (formData.dob) {
-      const dobDate = new Date(formData.dob);
-      const today = new Date();
-      if (dobDate >= today) {
-        errors.dob = 'Date of birth cannot be in the future';
-      }
-    } else {
-      errors.dob = 'Date of birth is required';
+    const dobValidation = validateDOB(formData.dob);
+    if (!dobValidation.isValid) {
+      errors.dob = dobValidation.message || 'Invalid date of birth';
     }
     
     if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) {
