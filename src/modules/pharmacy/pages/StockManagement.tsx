@@ -8,11 +8,13 @@ import { PharmacyStockDTO } from '@/types/api';
 import { usePharmacyStock } from '@/modules/pharmacy/hooks/usePharmacyStock';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
+import { ContentPanel } from '@/components/ui/ContentPanel';
+import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 export const StockManagement = () => {
   const {
@@ -41,9 +43,12 @@ export const StockManagement = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.csv, .xlsx, .xls';
-    input.addEventListener('change', async (e: any) => {
-      const file = e.target.files[0];
-      if (file) handleImport(file);
+    input.addEventListener('change', async (event: Event) => {
+      const inputElement = event.target as HTMLInputElement;
+      const file = inputElement.files?.[0];
+      if (file) {
+        await handleImport(file);
+      }
     });
     input.click();
   };
@@ -51,15 +56,15 @@ export const StockManagement = () => {
   const columns: Column<PharmacyStockDTO>[] = [
     {
       header: 'Product Information',
-      render: (m) => (
+      render: (medicine) => (
         <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-orange-600 transition-colors">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400 transition-colors group-hover:text-orange-600">
             <span className="material-symbols-outlined text-xl">medication</span>
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-sm leading-tight group-hover:text-orange-700 transition-colors">{m.medicineName}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5 opacity-70">
-              ID: {m.medicineId.split('-')[0]}
+            <p className="text-sm font-bold leading-tight text-slate-900 transition-colors group-hover:text-orange-700">{medicine.medicineName}</p>
+            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400 opacity-70">
+              ID: {medicine.medicineId.split('-')[0]}
             </p>
           </div>
         </div>
@@ -67,15 +72,15 @@ export const StockManagement = () => {
     },
     {
       header: 'Batch & Expiry',
-      render: (m) => (
+      render: (medicine) => (
         <div className="space-y-1">
-          <p className="font-mono text-[10px] font-black text-slate-700 tracking-tighter bg-slate-100 px-2 py-0.5 rounded inline-block">
-            {m.batchNumber || 'NO_BATCH'}
+          <p className="inline-block rounded bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-black tracking-tighter text-slate-700">
+            {medicine.batchNumber || 'NO_BATCH'}
           </p>
           <div className="flex items-center gap-1 text-[10px] font-bold">
             <span className="material-symbols-outlined text-[12px] text-slate-400">calendar_today</span>
-            <span className={m.expiryDate && new Date(m.expiryDate) < new Date() ? 'text-red-600 font-black' : 'text-slate-500'}>
-              {m.expiryDate ? new Date(m.expiryDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+            <span className={medicine.expiryDate && new Date(medicine.expiryDate) < new Date() ? 'font-black text-red-600' : 'text-slate-500'}>
+              {medicine.expiryDate ? new Date(medicine.expiryDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
             </span>
           </div>
         </div>
@@ -83,17 +88,20 @@ export const StockManagement = () => {
     },
     {
       header: 'Levels',
-      render: (m) => (
-        <div className="space-y-1.5 min-w-[100px]">
+      render: (medicine) => (
+        <div className="min-w-[100px] space-y-1.5">
           <div className="flex items-end justify-between">
-            <p className="text-base font-black text-slate-900 leading-none tracking-tighter">{m.quantity || 0}</p>
-            <p className="text-[8px] text-slate-400 font-black uppercase tracking-tighter">Units</p>
+            <p className="text-base font-black leading-none tracking-tighter text-slate-900">{medicine.quantity || 0}</p>
+            <p className="text-[8px] font-black uppercase tracking-tighter text-slate-400">Units</p>
           </div>
-          <div className="w-full h-1 bg-slate-100 rounded-full overflow-hidden">
-            <div 
+          <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100">
+            <div
               className={`h-full rounded-full transition-all duration-700 ${
-                (m.quantity || 0) === 0 ? 'w-0' : 
-                (m.quantity || 0) < 50 ? 'bg-orange-500 w-1/3' : 'bg-emerald-500 w-[85%]'
+                (medicine.quantity || 0) === 0
+                  ? 'w-0'
+                  : (medicine.quantity || 0) < 50
+                    ? 'w-1/3 bg-orange-500'
+                    : 'w-[85%] bg-emerald-500'
               }`}
             />
           </div>
@@ -104,10 +112,10 @@ export const StockManagement = () => {
       header: 'Unit Price',
       className: 'text-right',
       headerClassName: 'text-right',
-      render: (m) => (
+      render: (medicine) => (
         <div>
-          <p className="text-sm font-black text-slate-900 tracking-tighter">₹ {m.price?.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
-          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-tight opacity-50">M.R.P</p>
+          <p className="text-sm font-black tracking-tighter text-slate-900">Rs. {medicine.price?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+          <p className="text-[9px] font-bold uppercase tracking-tight text-slate-400 opacity-50">M.R.P</p>
         </div>
       )
     },
@@ -115,9 +123,9 @@ export const StockManagement = () => {
       header: 'Status',
       className: 'text-center',
       headerClassName: 'text-center',
-      render: (m) => {
-        if ((m.quantity || 0) === 0) return <Badge variant="red">Out of Stock</Badge>;
-        if ((m.quantity || 0) < 50) return <Badge variant="orange">Low Stock</Badge>;
+      render: (medicine) => {
+        if ((medicine.quantity || 0) === 0) return <Badge variant="red">Out of Stock</Badge>;
+        if ((medicine.quantity || 0) < 50) return <Badge variant="orange">Low Stock</Badge>;
         return <Badge variant="emerald">In Stock</Badge>;
       }
     },
@@ -125,30 +133,30 @@ export const StockManagement = () => {
       header: 'Actions',
       className: 'text-right',
       headerClassName: 'text-right',
-      render: (m) => (
+      render: (medicine) => (
         <div className="flex items-center justify-end gap-1.5">
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            icon="add_circle" 
-            className="w-8 h-8 p-0"
-            onClick={() => setSelectedMedicineForStock({ id: m.medicineId, name: m.medicineName })}
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="add_circle"
+            className="h-8 w-8 p-0"
+            onClick={() => setSelectedMedicineForStock({ id: medicine.medicineId, name: medicine.medicineName })}
             title="Increase Stock"
           />
-          <Button 
-            variant="secondary" 
-            size="sm" 
-            icon="visibility" 
-            className="w-8 h-8 p-0"
-            onClick={() => setSelectedMedicineForView({ id: m.medicineId, name: m.medicineName })}
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="visibility"
+            className="h-8 w-8 p-0"
+            onClick={() => setSelectedMedicineForView({ id: medicine.medicineId, name: medicine.medicineName })}
             title="View Profile"
           />
-          <Button 
-            variant="danger" 
-            size="sm" 
-            icon="delete" 
-            className="w-8 h-8 p-0"
-            onClick={() => handleDelete(m.id, m.medicineName)}
+          <Button
+            variant="danger"
+            size="sm"
+            icon="delete"
+            className="h-8 w-8 p-0"
+            onClick={() => handleDelete(medicine.id, medicine.medicineName)}
             title="Remove Entry"
           />
         </div>
@@ -156,18 +164,28 @@ export const StockManagement = () => {
     }
   ];
 
+  const metricItems = [
+    { label: 'Total Batches', value: stats.totalElements, icon: 'medical_services', variant: 'slate' as const },
+    { label: 'Total Units', value: stats.totalStockUnits, icon: 'inventory', variant: 'blue' as const },
+    { label: 'Low Stock Items', value: stats.lowStockCount, icon: 'warning', variant: 'orange' as const, subValue: 'Requires Reorder' },
+    { label: 'Expiring Soon', value: stats.expiringSoonCount, icon: 'event_busy', variant: 'purple' as const, subValue: 'Next 30 Days' }
+  ];
+
   return (
     <MainLayout title="Inventory Management" hideTitle>
-      <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f8f9fc] min-h-screen font-inter">
-        
-        <PageHeading 
-          title="Stock Inventory" 
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fc]"
+        fontClassName="font-inter"
+      >
+        <PageHeading
+          title="Stock Inventory"
           description="Real-time pharmaceutical stock monitoring and batch distribution control."
         >
-          <Button 
-            variant="secondary" 
-            icon={importing ? 'sync' : 'publish'} 
-            onClick={handleImportClick} 
+          <Button
+            variant="secondary"
+            icon={importing ? 'sync' : 'publish'}
+            onClick={handleImportClick}
             disabled={importing}
             isLoading={importing}
           >
@@ -178,118 +196,102 @@ export const StockManagement = () => {
           </Button>
         </PageHeading>
 
-        {/* KPI Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricCard label="Total Batches" value={stats.totalElements} icon="medical_services" variant="slate" />
-          <MetricCard label="Total Units" value={stats.totalStockUnits} icon="inventory" variant="blue" />
-          <MetricCard label="Low Stock Items" value={stats.lowStockCount} icon="warning" variant="orange" subValue="Requires Reorder" />
-          <MetricCard label="Expiring Soon" value={stats.expiringSoonCount} icon="event_busy" variant="purple" subValue="Next 30 Days" />
-        </div>
+        <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4" />
 
-        {/* Inventory Section */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-          {/* Table Toolbar */}
-          <div className="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/30">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-full max-w-sm">
-                <SearchInput 
-                  placeholder="Search medicine name or batch..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+        <ContentPanel
+          className="mb-8"
+          toolbar={(
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-1 items-center gap-4">
+                <div className="w-full max-w-sm">
+                  <SearchInput
+                    placeholder="Search medicine name or batch..."
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                  />
+                </div>
+                <select
+                  value={statusFilter}
+                  onChange={(event) => setStatusFilter(event.target.value)}
+                  className="min-w-[160px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
+                >
+                  <option value="ALL">All Inventory</option>
+                  <option value="LOW_STOCK">Low Stock Only</option>
+                </select>
               </div>
-              <select 
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-3 border-none bg-white rounded-xl text-slate-700 font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors cursor-pointer outline-none min-w-[160px]"
-              >
-                <option value="ALL">All Inventory</option>
-                <option value="LOW_STOCK">Low Stock Only</option>
-              </select>
+              <Button variant="secondary" icon="download" onClick={handleExport}>Export CSV</Button>
             </div>
-            <Button variant="secondary" icon="download" onClick={handleExport}>Export CSV</Button>
-          </div>
-
-          <Table 
-            columns={columns} 
-            data={medicines} 
+          )}
+        >
+          <Table
+            columns={columns}
+            data={medicines}
             isLoading={loading}
             emptyMessage="No inventory found matching your criteria."
           />
 
-          <Pagination 
-            page={page} 
-            totalElements={totalElements} 
+          <Pagination
+            page={page}
+            totalElements={totalElements}
             pageSize={20}
-            onPageChange={setPage} 
+            onPageChange={setPage}
             label="batch records"
           />
-        </div>
+        </ContentPanel>
 
-        {/* Secondary Analytics */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
-          <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm">
-            <div className="flex justify-between items-center mb-8">
-              <h4 className="font-manrope text-xl font-black text-slate-900 tracking-tight">Movement Analytics</h4>
+        <div className="grid grid-cols-1 gap-6 pb-12 lg:grid-cols-2">
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <div className="mb-8 flex items-center justify-between">
+              <h4 className="font-manrope text-xl font-black tracking-tight text-slate-900">Movement Analytics</h4>
               <Badge variant="blue">Weekly View</Badge>
             </div>
-            <div className="h-48 flex items-end justify-between gap-4 px-2">
-              {[60, 85, 45, 70, 55, 95, 75].map((h, i) => (
-                <div key={i} className={`w-full rounded-xl transition-all ${i % 2 === 0 ? 'bg-slate-100 hover:bg-orange-200' : 'bg-slate-900 hover:opacity-80 shadow-lg'}`} style={{ height: `${h}%` }}></div>
+            <div className="flex h-48 items-end justify-between gap-4 px-2">
+              {[60, 85, 45, 70, 55, 95, 75].map((height, index) => (
+                <div key={index} className={`w-full rounded-xl transition-all ${index % 2 === 0 ? 'bg-slate-100 hover:bg-orange-200' : 'bg-slate-900 shadow-lg hover:opacity-80'}`} style={{ height: `${height}%` }} />
               ))}
             </div>
-            <div className="flex justify-between mt-6 font-black text-[10px] text-slate-400 uppercase tracking-widest">
+            <div className="mt-6 flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
               <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
             </div>
           </div>
-          
-          <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm">
-            <h4 className="font-manrope text-xl font-black text-slate-900 tracking-tight mb-8">Recent Activity</h4>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
+            <h4 className="mb-8 font-manrope text-xl font-black tracking-tight text-slate-900">Recent Activity</h4>
             <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-1.5 h-12 bg-emerald-500 rounded-full mt-1"></div>
-                <div>
-                  <p className="font-bold text-slate-900 text-sm">Stock replenishment successful</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Amoxicillin • Batch #AMX-01 • 5m ago</p>
+              {[
+                { title: 'Stock replenishment successful', detail: 'Amoxicillin | Batch #AMX-01 | 5m ago', color: 'bg-emerald-500' },
+                { title: 'Inventory threshold warning', detail: 'Paracetamol | 12 units left | 1h ago', color: 'bg-orange-500' },
+                { title: 'Bulk export completed', detail: 'System User | CSV Format | 3h ago', color: 'bg-blue-500', muted: true }
+              ].map((item) => (
+                <div key={item.title} className={`flex items-start gap-4 ${item.muted ? 'opacity-50' : ''}`}>
+                  <div className={`mt-1 h-12 w-1.5 rounded-full ${item.color}`} />
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">{item.title}</p>
+                    <p className="mt-1 text-[10px] font-bold uppercase text-slate-400">{item.detail}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-start gap-4">
-                <div className="w-1.5 h-12 bg-orange-500 rounded-full mt-1"></div>
-                <div>
-                  <p className="font-bold text-slate-900 text-sm">Inventory threshold warning</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Paracetamol • 12 units left • 1h ago</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-4 opacity-50">
-                <div className="w-1.5 h-12 bg-blue-500 rounded-full mt-1"></div>
-                <div>
-                  <p className="font-bold text-slate-900 text-sm">Bulk export completed</p>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">System User • CSV Format • 3h ago</p>
-                </div>
-              </div>
+              ))}
             </div>
           </div>
         </div>
-      </div>
+      </PageSurface>
 
-      {/* Quick Scan Action */}
-      <button className="fixed bottom-10 right-10 w-16 h-16 bg-slate-900 text-white rounded-3xl shadow-2xl flex items-center justify-center hover:scale-110 hover:-rotate-6 active:scale-95 transition-all z-50 group">
+      <button className="group fixed bottom-10 right-10 z-50 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-900 text-white shadow-2xl transition-all hover:-rotate-6 hover:scale-110 active:scale-95">
         <span className="material-symbols-outlined text-3xl group-hover:text-orange-500">qr_code_scanner</span>
       </button>
 
-      {/* Modals */}
       {selectedMedicineForStock && (
-        <QuickStockAddModal 
+        <QuickStockAddModal
           medicineId={selectedMedicineForStock.id}
           medicineName={selectedMedicineForStock.name}
-          currentStock={medicines.find(m => m.medicineId === selectedMedicineForStock.id)?.quantity || 0}
+          currentStock={medicines.find((medicine) => medicine.medicineId === selectedMedicineForStock.id)?.quantity || 0}
           onClose={() => setSelectedMedicineForStock(null)}
           onSuccess={refresh}
         />
       )}
 
       {selectedMedicineForView && (
-        <MedicineViewModal 
+        <MedicineViewModal
           medicineId={selectedMedicineForView.id}
           onClose={() => setSelectedMedicineForView(null)}
         />

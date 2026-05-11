@@ -11,6 +11,8 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
+import { ContentPanel } from '@/components/ui/ContentPanel';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 export const UserManagementPage = () => {
   const router = useRouter();
@@ -32,12 +34,12 @@ export const UserManagementPage = () => {
       header: 'User Details',
       render: (user) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center text-orange-700 font-black uppercase border-2 border-white shadow-sm">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-white bg-orange-100 font-black uppercase text-orange-700 shadow-sm">
             {user.fullName ? user.fullName.slice(0, 2) : user.username.slice(0, 2)}
           </div>
           <div>
-            <p className="font-bold text-slate-900 text-sm leading-tight">{user.fullName || user.username}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter mt-0.5">{user.email}</p>
+            <p className="text-sm font-bold leading-tight text-slate-900">{user.fullName || user.username}</p>
+            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{user.email}</p>
           </div>
         </div>
       )
@@ -47,11 +49,11 @@ export const UserManagementPage = () => {
       render: (user) => (
         <div className="flex flex-wrap gap-1">
           {user.roles && user.roles.length > 0 ? (
-            user.roles.slice(0, 2).map((role, idx) => (
-              <Badge key={idx} variant="orange" size="sm">{role}</Badge>
+            user.roles.slice(0, 2).map((role, index) => (
+              <Badge key={index} variant="orange" size="sm">{role}</Badge>
             ))
           ) : (
-            <span className="text-[10px] text-slate-400 italic">No Roles Assigned</span>
+            <span className="text-[10px] italic text-slate-400">No Roles Assigned</span>
           )}
           {user.roles && user.roles.length > 2 && (
             <Badge variant="slate" size="sm">+{user.roles.length - 2}</Badge>
@@ -66,11 +68,11 @@ export const UserManagementPage = () => {
         const membershipCount = user.memberships?.length ?? 0;
         const primaryHospitalName = primaryMembership?.hospitalName || 'N/A';
         const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
-        
+
         return (
           <div>
-            <p className="text-xs text-slate-700 font-bold">{primaryHospitalName}{membershipCount > 1 ? ` (+${membershipCount - 1})` : ''}</p>
-            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest">{departmentName}</p>
+            <p className="text-xs font-bold text-slate-700">{primaryHospitalName}{membershipCount > 1 ? ` (+${membershipCount - 1})` : ''}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{departmentName}</p>
           </div>
         );
       }
@@ -79,7 +81,7 @@ export const UserManagementPage = () => {
       header: 'Status',
       render: (user) => (
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${user.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-slate-300'}`}></div>
+          <div className={`h-2 w-2 rounded-full ${user.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-slate-300'}`} />
           <span className={`text-[10px] font-black uppercase tracking-widest ${user.active ? 'text-emerald-700' : 'text-slate-400'}`}>
             {user.active ? 'Active' : 'Inactive'}
           </span>
@@ -91,10 +93,10 @@ export const UserManagementPage = () => {
       className: 'text-right',
       headerClassName: 'text-right',
       render: (user) => (
-        <Button 
-          variant="secondary" 
-          size="sm" 
-          icon="edit" 
+        <Button
+          variant="secondary"
+          size="sm"
+          icon="edit"
           onClick={() => router.push(`/admin/users/${user.id}`)}
           title="Edit Permissions"
         />
@@ -104,10 +106,13 @@ export const UserManagementPage = () => {
 
   return (
     <MainLayout title="Identity & Access" hideTitle>
-      <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f8f9fb] min-h-screen font-inter">
-        
-        <PageHeading 
-          title="Identity & Access" 
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <PageHeading
+          title="Identity & Access"
           description="Manage hospital staff credentials, institutional memberships, and role-based access controls."
         >
           <Button icon="person_add" size="lg" href="/admin/users/create">
@@ -115,77 +120,78 @@ export const UserManagementPage = () => {
           </Button>
         </PageHeading>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-12">
-          {/* Toolbar */}
-          <div className="p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-4 bg-slate-50/30">
-            <div className="flex items-center gap-4 flex-1">
-              <div className="w-full max-w-xl">
-                <SearchInput 
-                  placeholder="Search staff by name, email, or username..." 
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+        <ContentPanel
+          className="mb-12"
+          toolbar={(
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-1 items-center gap-4">
+                <div className="w-full max-w-xl">
+                  <SearchInput
+                    placeholder="Search staff by name, email, or username..."
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                  />
+                </div>
+                <select
+                  value={roleFilter || ''}
+                  onChange={(event) => setRoleFilter(event.target.value || undefined)}
+                  className="min-w-[180px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
+                >
+                  <option value="">All Functional Roles</option>
+                  <option value="ADMIN">Administrator</option>
+                  <option value="DOCTOR">Medical Doctor</option>
+                  <option value="NURSE">Nursing Staff</option>
+                  <option value="RECEPTIONIST">Receptionist</option>
+                  <option value="PHARMACIST">Pharmacist</option>
+                </select>
               </div>
-              <select 
-                value={roleFilter || ''}
-                onChange={(e) => setRoleFilter(e.target.value || undefined)}
-                className="px-4 py-3 bg-white border-none rounded-xl text-slate-700 font-bold text-sm shadow-sm hover:bg-slate-50 transition-colors cursor-pointer outline-none min-w-[180px]"
-              >
-                <option value="">All Functional Roles</option>
-                <option value="ADMIN">Administrator</option>
-                <option value="DOCTOR">Medical Doctor</option>
-                <option value="NURSE">Nursing Staff</option>
-                <option value="RECEPTIONIST">Receptionist</option>
-                <option value="PHARMACIST">Pharmacist</option>
-              </select>
+              <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => refresh()} />
             </div>
-            <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => refresh()} />
-          </div>
-
-          <Table 
-            columns={columns} 
-            data={users} 
+          )}
+        >
+          <Table
+            columns={columns}
+            data={users}
             isLoading={loading}
             onRowDoubleClick={(user) => router.push(`/admin/users/${user.id}`)}
             emptyMessage="No staff members found matching your security criteria."
           />
 
-          <Pagination 
-            page={page} 
-            totalElements={totalElements} 
+          <Pagination
+            page={page}
+            totalElements={totalElements}
             pageSize={20}
-            onPageChange={setPage} 
+            onPageChange={setPage}
             label="staff members"
           />
-        </div>
+        </ContentPanel>
 
-        {/* Global Stats/Insights */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-12">
-           <div className="bg-slate-900 p-8 rounded-2xl text-white flex flex-col justify-between relative overflow-hidden shadow-xl shadow-slate-900/10">
-              <div className="relative z-10">
-                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Total Provisioned</h4>
-                <p className="text-4xl font-black">{totalElements}</p>
-              </div>
-              <div className="relative z-10 mt-8">
-                <p className="text-xs font-bold text-emerald-400 flex items-center gap-2">
-                  <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                  System Fully Operational
-                </p>
-              </div>
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-9xl text-white/5 rotate-12">shield_person</span>
-           </div>
-           
-           <div className="md:col-span-2 bg-white p-8 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-              <div>
-                <h4 className="font-manrope text-xl font-black text-slate-900 mb-2 tracking-tight">Access Control Audit</h4>
-                <p className="text-sm text-slate-500 font-medium leading-relaxed max-w-md">
-                  All user modifications are logged for compliance. Periodic review of privileged accounts (Admin/Super Admin) is recommended every 90 days.
-                </p>
-              </div>
-              <Button variant="secondary" icon="history">Security Log</Button>
-           </div>
+        <div className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+          <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-slate-900 p-8 text-white shadow-xl shadow-slate-900/10">
+            <div className="relative z-10">
+              <h4 className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Total Provisioned</h4>
+              <p className="text-4xl font-black">{totalElements}</p>
+            </div>
+            <div className="relative z-10 mt-8">
+              <p className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+                System Fully Operational
+              </p>
+            </div>
+            <span className="material-symbols-outlined absolute -bottom-4 -right-4 rotate-12 text-9xl text-white/5">shield_person</span>
+          </div>
+
+          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:col-span-2">
+            <div>
+              <h4 className="mb-2 font-manrope text-xl font-black tracking-tight text-slate-900">Access Control Audit</h4>
+              <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
+                All user modifications are logged for compliance. Periodic review of privileged accounts (Admin/Super Admin) is recommended every 90 days.
+              </p>
+            </div>
+            <Button variant="secondary" icon="history">Security Log</Button>
+          </div>
         </div>
-      </div>
+      </PageSurface>
     </MainLayout>
   );
 };

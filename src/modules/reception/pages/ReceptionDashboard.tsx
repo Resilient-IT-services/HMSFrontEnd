@@ -9,11 +9,12 @@ import { doctorService } from '@/services/doctorService';
 import { nurseService } from '@/services/nurseService';
 import { PatientResponse, AppointmentResponse, DoctorStaffResponse, NurseStaffResponse } from '@/types/api';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { Table, Column } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 export const ReceptionDashboard = () => {
   const router = useRouter();
@@ -103,9 +104,44 @@ export const ReceptionDashboard = () => {
     }
   ];
 
+  const metricItems = [
+    {
+      label: 'Total Patients Today',
+      value: stats.totalPatients,
+      variant: 'orange' as const,
+      icon: 'group',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    },
+    {
+      label: 'Active Queue',
+      value: stats.activeQueue,
+      variant: 'blue' as const,
+      icon: 'hourglass_empty',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    },
+    {
+      label: 'Appointments Today',
+      value: stats.appointmentsToday,
+      variant: 'purple' as const,
+      icon: 'event_available',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    },
+    {
+      label: 'Nurses On Duty',
+      value: nurses.length,
+      variant: 'emerald' as const,
+      icon: 'payments',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    }
+  ];
+
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
-      <div className="p-8 max-w-7xl mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-manrope">
+      <PageSurface fontClassName="font-manrope">
         {/* Page Title */}
         <div className="flex justify-between items-end mb-8">
           <div>
@@ -121,40 +157,7 @@ export const ReceptionDashboard = () => {
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <MetricCard 
-            label="Total Patients Today" 
-            value={stats.totalPatients} 
-            variant="orange" 
-            icon="group" 
-            layout="horizontal" 
-            tag="Live"
-          />
-          <MetricCard 
-            label="Active Queue" 
-            value={stats.activeQueue} 
-            variant="blue" 
-            icon="hourglass_empty" 
-            layout="horizontal" 
-            tag="Live"
-          />
-          <MetricCard 
-            label="Appointments Today" 
-            value={stats.appointmentsToday} 
-            variant="purple" 
-            icon="event_available" 
-            layout="horizontal" 
-            tag="Live"
-          />
-          <MetricCard 
-            label="Nurses On Duty" 
-            value={nurses.length} 
-            variant="emerald" 
-            icon="payments" 
-            layout="horizontal" 
-            tag="Live"
-          />
-        </div>
+        <MetricsGrid items={metricItems} className="mb-8" />
 
         {/* Main Section Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -248,7 +251,7 @@ export const ReceptionDashboard = () => {
             </Card>
           </div>
         </div>
-      </div>
+      </PageSurface>
 
       {/* Floating Action Button */}
       <button 

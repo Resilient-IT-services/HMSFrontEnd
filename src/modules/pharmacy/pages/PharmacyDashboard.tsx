@@ -5,12 +5,12 @@ import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyService } from '@/services/pharmacyService';
 import { PrescriptionResponse } from '@/types/api';
 import Link from 'next/link';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { Table, Column } from '@/components/ui/Table';
 import { Card } from '@/components/ui/Card';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { MetricsGrid } from '@/components/ui/MetricsGrid';
 
 export const PharmacyDashboard = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
@@ -119,42 +119,57 @@ export const PharmacyDashboard = () => {
     }
   ];
 
+  const metricItems = [
+    {
+      label: 'Pending Prescriptions',
+      value: stats.pendingPrescriptions,
+      variant: 'blue' as const,
+      icon: 'pending_actions',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    },
+    {
+      label: 'Filled Today',
+      value: stats.dispensedToday,
+      variant: 'emerald' as const,
+      icon: 'task_alt',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    },
+    {
+      label: 'Low Stock Alerts',
+      value: stats.lowStockCount,
+      variant: 'orange' as const,
+      icon: 'warning',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    },
+    {
+      label: 'Items in Queue',
+      value: stats.queuedItems,
+      variant: 'indigo' as const,
+      icon: 'inventory_2',
+      layout: 'horizontal' as const,
+      tag: 'Live'
+    }
+  ];
+
+  const operationalSummary = [
+    {
+      title: 'Pending prescriptions',
+      description: `${stats.pendingPrescriptions} records are waiting to be dispensed.`,
+      accentClassName: 'border-orange-600'
+    },
+    {
+      title: 'Completed prescriptions',
+      description: `${stats.dispensedToday} records are already marked as completed.`,
+      accentClassName: 'border-slate-200'
+    }
+  ];
+
   return (
     <MainLayout title="Pharmacy Overview">
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-10">
-        <MetricCard 
-          label="Pending Prescriptions" 
-          value={stats.pendingPrescriptions} 
-          variant="blue" 
-          icon="pending_actions" 
-          layout="horizontal" 
-          tag="Live"
-        />
-        <MetricCard 
-          label="Filled Today" 
-          value={stats.dispensedToday} 
-          variant="emerald" 
-          icon="task_alt" 
-          layout="horizontal" 
-          tag="Live"
-        />
-        <MetricCard 
-          label="Low Stock Alerts" 
-          value={stats.lowStockCount} 
-          variant="orange" 
-          icon="warning" 
-          layout="horizontal" 
-          tag="Live"
-        />
-        <MetricCard 
-          label="Items in Queue" 
-          value={stats.queuedItems} 
-          variant="indigo" 
-          icon="inventory_2" 
-          layout="horizontal" 
-          tag="Live"
-        />
-      </div>
+      <MetricsGrid items={metricItems} className="mb-10" />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">
@@ -178,18 +193,14 @@ export const PharmacyDashboard = () => {
 
           <Card title="Operational Summary" subtitle="DAILY MONITORING">
             <div className="space-y-6">
-              <div className="flex items-center gap-4 border-l-2 border-orange-600 pl-4">
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">Pending prescriptions</p>
-                  <p className="text-xs text-slate-500">{stats.pendingPrescriptions} records are waiting to be dispensed.</p>
+              {operationalSummary.map((item) => (
+                <div key={item.title} className={`flex items-center gap-4 border-l-2 pl-4 ${item.accentClassName}`}>
+                  <div className="flex-1">
+                    <p className="text-sm font-bold text-slate-900">{item.title}</p>
+                    <p className="text-xs text-slate-500">{item.description}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-4 border-l-2 border-slate-200 pl-4">
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-900">Completed prescriptions</p>
-                  <p className="text-xs text-slate-500">{stats.dispensedToday} records are already marked as completed.</p>
-                </div>
-              </div>
+              ))}
             </div>
           </Card>
         </div>
