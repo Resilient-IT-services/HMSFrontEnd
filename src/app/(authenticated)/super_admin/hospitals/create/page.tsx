@@ -41,7 +41,14 @@ export default function CreateHospitalPage() {
 
     if (!formData.name) newErrors.name = 'Hospital name is required';
     if (!formData.code) newErrors.code = 'Hospital code is required';
-    if (!formData.pincode) newErrors.pincode = 'Pincode is required';
+    if (!formData.city) newErrors.city = 'City is required';
+    
+    // Pincode Validation
+    if (!formData.pincode) {
+      newErrors.pincode = 'Pincode is required';
+    } else if (!/^\d{6}$/.test(formData.pincode)) {
+      newErrors.pincode = 'Pincode must be exactly 6 digits';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -183,13 +190,15 @@ export default function CreateHospitalPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">City</label>
+                      <label className="block text-[14px] font-bold text-[var(--text-secondary)] mb-2">City *</label>
                       <input 
-                        className="form-input" 
+                        className={`form-input ${errors.city ? 'border-red-500' : ''}`}
                         type="text" 
                         value={formData.city}
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        required
                       />
+                      {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -207,7 +216,13 @@ export default function CreateHospitalPage() {
                           className={`form-input ${errors.pincode ? 'border-red-500' : ''}`}
                           type="text" 
                           value={formData.pincode}
-                          onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                          maxLength={6}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val === '' || (/^\d+$/.test(val) && val.length <= 6)) {
+                              setFormData({ ...formData, pincode: val });
+                            }
+                          }}
                           required
                         />
                         {errors.pincode && <p className="text-red-500 text-xs mt-1">{errors.pincode}</p>}

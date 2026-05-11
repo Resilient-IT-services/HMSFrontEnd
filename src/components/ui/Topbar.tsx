@@ -126,8 +126,7 @@ const Topbar: React.FC = () => {
                   <p className="text-sm font-black text-[var(--text-primary)]">{user?.fullName || user?.username}</p>
                 </div>
 
-
-
+                {!user?.superuser &&
                 <div className="px-2 py-1">
                   <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
                     {user?.roles?.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => (
@@ -145,7 +144,7 @@ const Topbar: React.FC = () => {
                       )
                     )}
                 </div>
-
+            }
                 {user?.memberships && user.memberships.length > 1 && (
                   <div className="px-2 py-1 border-t border-[var(--border)] mt-1">
                     <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Hospital</p>
