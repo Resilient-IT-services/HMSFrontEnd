@@ -19,7 +19,7 @@ interface TableProps<T> {
   onRowClick?: (row: T) => void;
   onRowDoubleClick?: (row: T) => void;
   isLoading?: boolean;
-  emptyMessage?: string;
+  emptyMessage?: React.ReactNode;
   loadingMessage?: string;
   rowClassName?: string | ((row: T) => string);
 }
