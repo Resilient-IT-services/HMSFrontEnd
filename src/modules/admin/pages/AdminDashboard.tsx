@@ -2,6 +2,10 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
 import { userService } from '@/services/userService';
 import { hospitalService } from '@/services/hospitalService';
 import { UserSummaryDTO, HospitalResponse } from '@/types/api';
@@ -50,38 +54,33 @@ export const AdminDashboard = () => {
   }, [users, hospitals]);
 
   return (
-    <MainLayout title="Admin Overview" hideTitle>
-      <div className="p-8 space-y-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f7f9fb] min-h-screen font-inter">
-        {/* Welcome Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <h1 className="font-manrope text-3xl font-bold text-slate-900">Admin Overview</h1>
-            <p className="text-slate-500 mt-1">Real-time health indicators and administrative network status.</p>
-          </div>
-          <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white border border-slate-200 text-slate-600 rounded-lg font-medium text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm">
-              <span className="material-symbols-outlined text-sm">calendar_today</span>
-              Last 30 Days
-            </button>
-            <button 
-              onClick={() => router.push('/super_admin/hospitals')}
-              className="px-4 py-2 bg-orange-700 text-white rounded-lg font-medium text-sm flex items-center gap-2 hover:opacity-90 transition-opacity shadow-lg"
-            >
-              <span className="material-symbols-outlined text-sm">add</span>
-              Onboard Hospital
-            </button>
-          </div>
-        </div>
+    <MainLayout title="Admin Overview">
+      <PageSurface>
+        <PageHeading 
+          title="Admin Overview" 
+          description="Real-time health indicators and administrative network status."
+        >
+          <Button variant="secondary" icon="calendar_today">
+            Last 30 Days
+          </Button>
+          <Button 
+            onClick={() => router.push('/super_admin/hospitals')}
+            icon="add"
+          >
+            Onboard Hospital
+          </Button>
+        </PageHeading>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="space-y-8">
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
             { label: 'Total Hospitals', value: stats.totalHospitals, icon: 'apartment', color: 'text-orange-700', bg: 'bg-orange-50', trend: '+12%' },
             { label: 'Platform Users', value: stats.platformUsers, icon: 'group', color: 'text-blue-600', bg: 'bg-blue-50', trend: '+5.4%' },
             { label: 'Active Now', value: stats.activeNow, icon: 'bolt', color: 'text-emerald-600', bg: 'bg-emerald-50', pulse: true },
             { label: 'Certified Doctors', value: stats.certifiedDoctors, icon: 'medical_services', color: 'text-purple-600', bg: 'bg-purple-50', trend: 'Stable' }
           ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
+            <Card key={i} className="hover:shadow-md transition-shadow group">
               <div className="flex justify-between items-start mb-4">
                 <div className={`w-12 h-12 ${stat.bg} rounded-xl flex items-center justify-center ${stat.color} group-hover:scale-110 transition-transform`}>
                   <span className="material-symbols-outlined text-3xl">{stat.icon}</span>
@@ -97,21 +96,24 @@ export const AdminDashboard = () => {
               </div>
               <p className="text-slate-500 text-sm font-medium">{stat.label}</p>
               <h3 className="text-3xl font-extrabold text-slate-900 mt-1">{stat.value}</h3>
-            </div>
+            </Card>
           ))}
         </div>
 
         {/* Bento Layout Section */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Main Table Area */}
-          <div className="lg:col-span-8 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-slate-900 font-manrope">Network Activity</h2>
-              <button onClick={() => router.push('/super_admin/hospitals')} className="text-orange-700 text-sm font-bold hover:underline">View All Records</button>
-            </div>
-            
+          <Card 
+            title="Network Activity" 
+            className="lg:col-span-8 p-0 overflow-hidden"
+            headerActions={
+              <Button variant="ghost" size="sm" onClick={() => router.push('/super_admin/hospitals')}>
+                View All Records
+              </Button>
+            }
+          >
             {/* Mobile/Tablet Card View */}
-            <div className="lg:hidden divide-y divide-slate-100">
+            <div className="lg:hidden divide-y divide-slate-100 p-6">
               {hospitals.slice(0, 5).map((h) => (
                 <div 
                   key={h.id} 
@@ -210,13 +212,12 @@ export const AdminDashboard = () => {
                 </tbody>
               </table>
             </div>
-          </div>
+          </Card>
 
           {/* Side Actions & Metrics */}
           <div className="lg:col-span-4 space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <h2 className="text-xl font-bold text-slate-900 font-manrope mb-4">Quick Actions</h2>
+            <Card title="Quick Actions">
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'New Branch', icon: 'add_business', href: '/super_admin/hospitals' },
@@ -224,21 +225,22 @@ export const AdminDashboard = () => {
                   { label: 'Audit Logs', icon: 'analytics', href: '#' },
                   { label: 'Backups', icon: 'cloud_download', href: '#' }
                 ].map((act, i) => (
-                  <button 
+                  <Button 
                     key={i} 
+                    variant="secondary"
                     onClick={() => act.href !== '#' && router.push(act.href)}
-                    className="flex flex-col items-center justify-center p-4 rounded-xl border border-slate-100 hover:border-orange-700/30 hover:bg-orange-50 transition-all group"
+                    className="flex-col h-auto py-4 px-2"
                   >
                     <span className="material-symbols-outlined text-slate-400 group-hover:text-orange-700 mb-2">{act.icon}</span>
-                    <span className="text-xs font-bold text-slate-600">{act.label}</span>
-                  </button>
+                    <span className="text-[10px] font-bold text-slate-600">{act.label}</span>
+                  </Button>
                 ))}
               </div>
-            </div>
+            </Card>
 
             {/* System Health Card */}
-            <div className="bg-orange-700 p-6 rounded-xl shadow-lg relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent"></div>
+            <Card className="bg-orange-700 border-none shadow-lg relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent pointer-events-none"></div>
               <div className="relative z-10 text-white">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold font-manrope leading-none">System Integrity</h3>
@@ -246,13 +248,13 @@ export const AdminDashboard = () => {
                 </div>
                 <div className="space-y-4">
                   <div>
-                    <div className="flex justify-between text-xs font-bold mb-1 opacity-90 uppercase tracking-widest">Server Load</div>
+                    <div className="flex justify-between text-[10px] font-bold mb-1 opacity-90 uppercase tracking-widest">Server Load</div>
                     <div className="h-1.5 bg-white/20 rounded-full">
                       <div className="h-full bg-white rounded-full w-[42%]"></div>
                     </div>
                   </div>
                   <div>
-                    <div className="flex justify-between text-xs font-bold mb-1 opacity-90 uppercase tracking-widest">DB Latency</div>
+                    <div className="flex justify-between text-[10px] font-bold mb-1 opacity-90 uppercase tracking-widest">DB Latency</div>
                     <div className="h-1.5 bg-white/20 rounded-full">
                       <div className="h-full bg-white rounded-full w-[12%]"></div>
                     </div>
@@ -260,7 +262,7 @@ export const AdminDashboard = () => {
                 </div>
                 <p className="mt-6 text-[11px] leading-relaxed opacity-80">All clusters are performing within optimal parameters. No outages reported in the last 72 hours.</p>
               </div>
-            </div>
+            </Card>
           </div>
         </div>
 
@@ -274,6 +276,7 @@ export const AdminDashboard = () => {
           </div>
         </footer>
       </div>
+      </PageSurface>
     </MainLayout>
   );
 }

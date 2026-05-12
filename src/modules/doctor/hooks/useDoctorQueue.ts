@@ -10,6 +10,8 @@ import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { sortByToken } from '@/utils/tokenHelper';
 
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+
 export const useDoctorQueue = () => {
   const router = useRouter();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -51,23 +53,22 @@ export const useDoctorQueue = () => {
         .filter(id => !patientDetails[id]);
 
       if (patientIdsToFetch.length > 0) {
-        try {
-          const details = await Promise.all(
-            patientIdsToFetch.map(id => patientService.get(id))
-          );
-          
-          setPatientDetails(prev => {
-            const newDetails = { ...prev };
-            details.forEach(res => {
+        const details = await Promise.allSettled(
+          patientIdsToFetch.map(id => patientService.get(id))
+        );
+
+        setPatientDetails(prev => {
+          const newDetails = { ...prev };
+          details.forEach(result => {
+            if (result.status === 'fulfilled') {
+              const res = result.value;
               if (res.success && res.data) {
                 newDetails[res.data.id] = res.data;
               }
-            });
-            return newDetails;
+            }
           });
-        } catch (error) {
-          console.error('Failed to fetch patient details', error);
-        }
+          return newDetails;
+        });
       }
     };
 
@@ -78,9 +79,9 @@ export const useDoctorQueue = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000);
-    return () => clearInterval(interval);
   }, [fetchData]);
+
+  useAutoRefresh(fetchData, 30_000, !!user);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];

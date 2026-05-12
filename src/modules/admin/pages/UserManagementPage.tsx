@@ -13,6 +13,7 @@ import { Table, Column } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { Card } from '@/components/ui/Card';
 
 export const UserManagementPage = () => {
   const router = useRouter();
@@ -105,7 +106,7 @@ export const UserManagementPage = () => {
   ];
 
   return (
-    <MainLayout title="Identity & Access" hideTitle>
+    <MainLayout title="Identity & Access">
       <PageSurface
         maxWidthClassName="max-w-[1600px]"
         backgroundClassName="bg-[#f8f9fb]"
@@ -116,7 +117,7 @@ export const UserManagementPage = () => {
           description="Manage hospital staff credentials, institutional memberships, and role-based access controls."
         >
           <Button icon="person_add" size="lg" href="/admin/users/create">
-            Provision New User
+            Create User
           </Button>
         </PageHeading>
 
@@ -127,7 +128,7 @@ export const UserManagementPage = () => {
               <div className="flex flex-1 items-center gap-4">
                 <div className="w-full max-w-xl">
                   <SearchInput
-                    placeholder="Search staff by name, email, or username..."
+                    placeholder="Search by name, email, or role..."
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
                   />
@@ -167,7 +168,7 @@ export const UserManagementPage = () => {
         </ContentPanel>
 
         <div className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
-          <div className="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-slate-900 p-8 text-white shadow-xl shadow-slate-900/10">
+          <Card className="relative flex flex-col justify-between overflow-hidden bg-slate-900 border-none text-white shadow-xl shadow-slate-900/10 h-full">
             <div className="relative z-10">
               <h4 className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Total Provisioned</h4>
               <p className="text-4xl font-black">{totalElements}</p>
@@ -179,17 +180,14 @@ export const UserManagementPage = () => {
               </p>
             </div>
             <span className="material-symbols-outlined absolute -bottom-4 -right-4 rotate-12 text-9xl text-white/5">shield_person</span>
-          </div>
+          </Card>
 
-          <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-8 shadow-sm md:col-span-2">
-            <div>
-              <h4 className="mb-2 font-manrope text-xl font-black tracking-tight text-slate-900">Access Control Audit</h4>
-              <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
-                All user modifications are logged for compliance. Periodic review of privileged accounts (Admin/Super Admin) is recommended every 90 days.
-              </p>
-            </div>
-            <Button variant="secondary" icon="history">Security Log</Button>
-          </div>
+          <Card className="md:col-span-2" headerActions={<Button variant="secondary" icon="history">Security Log</Button>}>
+            <h4 className="mb-2 font-manrope text-xl font-black tracking-tight text-slate-900 uppercase">Access Control Audit</h4>
+            <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
+              All user modifications are logged for compliance. Periodic review of privileged accounts (Admin/Super Admin) is recommended every 90 days.
+            </p>
+          </Card>
         </div>
       </PageSurface>
     </MainLayout>

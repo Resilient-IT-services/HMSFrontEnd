@@ -4,6 +4,8 @@ export interface Column<T> {
   header: string;
   /** Simple key for text-based data */
   key?: keyof T;
+  /** Legacy accessor compatibility */
+  accessor?: (row: T) => React.ReactNode;
   /** Custom render function for complex HTML/Components */
   render?: (row: T) => React.ReactNode;
   /** Custom width or alignment */
@@ -57,6 +59,7 @@ export const Table = <T,>({
               <td colSpan={columns.length} className="px-6 py-20 text-center text-slate-400 italic font-medium">
                 <div className="flex flex-col items-center gap-3">
                   <div className="w-8 h-8 border-4 border-orange-200 border-t-orange-700 rounded-full animate-spin"></div>
+                  <span className="sr-only">Loading...</span>
                   {loadingMessage}
                 </div>
               </td>
@@ -87,9 +90,11 @@ export const Table = <T,>({
                       key={colIndex} 
                       className={`px-6 py-5 text-sm text-slate-600 font-medium ${column.className || ''}`}
                     >
-                      {column.render 
-                        ? column.render(row) 
-                        : (row[column.key!] as React.ReactNode)}
+                      {column.render
+                        ? column.render(row)
+                        : column.accessor
+                          ? column.accessor(row)
+                          : (row[column.key!] as React.ReactNode)}
                     </td>
                   ))}
                 </tr>

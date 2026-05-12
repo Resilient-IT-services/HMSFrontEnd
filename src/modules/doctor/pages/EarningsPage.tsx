@@ -7,6 +7,12 @@ import { appointmentService } from '@/services/appointmentService';
 import { RootState } from '@/state/store';
 import { AppointmentResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { MetricsGrid } from '@/components/ui/MetricsGrid';
 
 export const EarningsPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -89,23 +95,31 @@ export const EarningsPage = () => {
     'CHECKED_IN': 'Checked In'
   };
 
+  const metricItems = [
+    { label: 'Total Earnings', value: `₹${stats.totalEarnings}`, variant: 'indigo' as const, icon: 'payments' },
+    { label: 'Total Visits', value: stats.totalVisits, variant: 'orange' as const, icon: 'group' },
+    { label: 'Earned Visits', value: stats.earnedVisits, variant: 'emerald' as const, icon: 'check_circle' },
+    { label: 'Cancelled', value: stats.cancelled, variant: 'red' as const, icon: 'cancel' }
+  ];
+
   return (
-    <MainLayout title="My Earnings">
-      <div className="p-8 max-w-7xl mx-auto w-full">
+    <MainLayout title="My Earnings" hideTitle>
+      <PageSurface paddingClassName="p-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 font-manrope">Earnings Overview</h1>
-            <p className="text-slate-500">Track your performance and revenue for the selected period.</p>
-          </div>
+          <PageHeading 
+            title="Earnings Overview" 
+            description="Track your performance and revenue for the selected period."
+            className="mb-0"
+          />
           
-          <div className="bg-white p-2 rounded-xl border border-slate-200 flex items-center gap-2 shadow-sm">
+          <Card className="p-2 flex items-center gap-2 shadow-sm" noPadding>
             <div className="flex flex-col px-3">
               <span className="text-[10px] font-bold text-slate-400 uppercase">From</span>
               <input 
                 type="date" 
                 value={startDate} 
                 onChange={(e) => setStartDate(e.target.value)}
-                className="text-sm font-bold text-slate-700 outline-none"
+                className="text-sm font-bold text-slate-700 outline-none bg-transparent"
               />
             </div>
             <div className="h-8 w-px bg-slate-100" />
@@ -115,44 +129,20 @@ export const EarningsPage = () => {
                 type="date" 
                 value={endDate} 
                 onChange={(e) => setEndDate(e.target.value)}
-                className="text-sm font-bold text-slate-700 outline-none"
+                className="text-sm font-bold text-slate-700 outline-none bg-transparent"
               />
             </div>
-            <button 
+            <Button 
               onClick={fetchData}
-              className="bg-orange-600 text-white p-2 rounded-lg hover:bg-orange-700 transition-colors"
-            >
-              <span className="material-symbols-outlined">refresh</span>
-            </button>
-          </div>
+              icon="refresh"
+              size="sm"
+            />
+          </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[
-            { label: 'Total Earnings', value: `₹${stats.totalEarnings}`, color: 'text-indigo-600', bg: 'bg-indigo-50', icon: 'payments' },
-            { label: 'Total Visits', value: stats.totalVisits, color: 'text-orange-600', bg: 'bg-orange-50', icon: 'group' },
-            { label: 'Earned Visits', value: stats.earnedVisits, color: 'text-emerald-600', bg: 'bg-emerald-50', icon: 'check_circle' },
-            { label: 'Cancelled', value: stats.cancelled, color: 'text-rose-600', bg: 'bg-rose-50', icon: 'cancel' }
-          ].map((stat, i) => (
-            <div key={i} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`${stat.bg} ${stat.color} w-12 h-12 rounded-xl flex items-center justify-center`}>
-                  <span className="material-symbols-outlined text-2xl">{stat.icon}</span>
-                </div>
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                  <h3 className="text-2xl font-bold text-slate-900">{stat.value}</h3>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <MetricsGrid items={metricItems} className="mb-8" />
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-            <h3 className="font-bold text-slate-900">Visit History</h3>
-            <span className="text-xs text-slate-500 font-medium">{filteredAppointments.length} appointments found</span>
-          </div>
+        <Card title="Visit History" subtitle={`${filteredAppointments.length} appointments found`} noPadding>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
               <thead>
@@ -175,11 +165,16 @@ export const EarningsPage = () => {
                 ) : (
                   filteredAppointments.sort((a, b) => b.appointmentTime.localeCompare(a.appointmentTime)).map((app) => {
                     const isEarned = app.status !== 'CANCELLED' && app.status !== 'PAYMENT_PENDING';
+                    let badgeVariant: 'emerald' | 'red' | 'slate' | 'orange' | 'blue' = 'slate';
+                    if (app.status === 'COMPLETED') badgeVariant = 'emerald';
+                    else if (app.status === 'CANCELLED') badgeVariant = 'red';
+                    else if (app.status === 'WALK_IN') badgeVariant = 'blue';
+                    else if (app.status === 'SCHEDULED' || app.status === 'CHECKED_IN') badgeVariant = 'orange';
+
                     return (
                       <tr 
                         key={app.id} 
                         className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                        onDoubleClick={() => console.log('Appointment details:', app)}
                       >
                         <td className="px-6 py-4">
                           <p className="text-sm font-bold text-slate-900">{new Date(app.appointmentTime).toLocaleDateString()}</p>
@@ -187,13 +182,9 @@ export const EarningsPage = () => {
                         </td>
                         <td className="px-6 py-4 font-medium text-slate-700">{app.patientName}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold border ${
-                            app.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
-                            app.status === 'CANCELLED' ? 'bg-rose-50 text-rose-700 border-rose-100' :
-                            'bg-slate-50 text-slate-600 border-slate-100'
-                          }`}>
+                          <Badge variant={badgeVariant}>
                             {statusCaptions[app.status] || app.status}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <span className={`font-bold ${isEarned ? 'text-slate-900' : 'text-slate-300'}`}>
@@ -207,8 +198,8 @@ export const EarningsPage = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </Card>
+      </PageSurface>
     </MainLayout>
   );
 };

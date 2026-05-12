@@ -14,6 +14,10 @@ import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
 import MedicineAutocomplete from '@/modules/pharmacy/components/MedicineAutocomplete';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 
 interface PrescriptionRow {
   id: string;
@@ -198,7 +202,7 @@ export const ActiveConsultationPage = () => {
 
   return (
     <MainLayout title="Active Consultation" hideTitle>
-      <main className="p-6 lg:p-10 bg-surface min-h-[calc(100vh-64px)]">
+      <PageSurface paddingClassName="p-6 lg:p-10">
         <div className="max-w-[1440px] mx-auto">
           {/* Sub Header */}
           <div className="flex flex-col lg:flex-row justify-between items-start mb-6 gap-4">
@@ -211,7 +215,10 @@ export const ActiveConsultationPage = () => {
                 <span className="text-primary font-medium">Active Session</span>
               </nav>
               <div className="flex items-center gap-4">
-                <h2 className="font-headline-xl text-on-surface">Active Consultation</h2>
+                <PageHeading 
+                  title="Active Consultation" 
+                  className="mb-0"
+                />
                 <div className="h-8 w-[1px] bg-gray-300 hidden sm:block"></div>
                 <div className="flex items-center gap-3 text-on-surface-variant">
                   <span className="font-manrope font-bold text-lg">{patient?.fullName || 'Unknown Patient'}</span>
@@ -227,8 +234,8 @@ export const ActiveConsultationPage = () => {
               </div>
             </div>
             
-            <div className="bg-white p-3 rounded-xl border border-outline-variant shadow-sm flex items-center gap-6">
-              <div className="flex flex-col">
+            <Card className="p-3 shadow-sm" noPadding>
+              <div className="flex flex-col p-3">
                 <span className="text-[10px] uppercase font-bold text-gray-400">Vitals</span>
                 <div className="flex gap-4 items-center">
                   <div className="flex items-center gap-1">
@@ -251,38 +258,34 @@ export const ActiveConsultationPage = () => {
                   )}
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
 
           <div className="grid grid-cols-12 gap-gutter">
             {/* Left Column: Complaint & Diagnosis */}
             <div className="col-span-12 lg:col-span-5 space-y-6">
-              <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-headline-sm text-on-surface flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">record_voice_over</span> Patient Complaint
-                  </h3>
-                  <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
-                    <span className="material-symbols-outlined text-[18px]">mic</span>
-                  </button>
-                </div>
+              <Card 
+                title="Patient Complaint" 
+                icon="record_voice_over"
+                headerActions={
+                  <Button variant="ghost" size="sm" icon="mic" className="text-gray-400" />
+                }
+              >
                 <textarea 
                   className="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md leading-relaxed resize-none outline-none" 
                   placeholder="Enter patient symptoms and complaints here..."
                   value={complaint}
                   onChange={(e) => setComplaint(e.target.value)}
                 />
-              </div>
+              </Card>
 
-              <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-headline-sm text-on-surface flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">medical_information</span> Diagnosis
-                  </h3>
-                  <button className="p-1 hover:bg-gray-100 rounded text-gray-400">
-                    <span className="material-symbols-outlined text-[18px]">search</span>
-                  </button>
-                </div>
+              <Card 
+                title="Diagnosis" 
+                icon="medical_information"
+                headerActions={
+                  <Button variant="ghost" size="sm" icon="search" className="text-gray-400" />
+                }
+              >
                 <textarea 
                   className="w-full min-h-[220px] p-4 bg-gray-50/50 border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all font-body-md leading-relaxed resize-none outline-none" 
                   placeholder="Enter final clinical diagnosis and assessment..."
@@ -301,22 +304,16 @@ export const ActiveConsultationPage = () => {
                       </span>
                     </span>
                   ))}
-                  <button className="text-xs font-bold text-gray-400 hover:text-primary transition-colors flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="text-xs font-bold text-gray-400 hover:text-primary transition-colors flex items-center gap-1 p-0">
                     + Add ICD-10 Code
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             </div>
 
             {/* Right Column: Prescriptions */}
             <div className="col-span-12 lg:col-span-7">
-              <div className="bg-white rounded-2xl border border-outline-variant p-6 shadow-sm h-full flex flex-col">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="font-headline-sm text-on-surface flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">description</span> Prescriptions
-                  </h3>
-                </div>
-                
+              <Card title="Prescriptions" icon="description" className="h-full">
                 <div className="flex-1 space-y-4">
                   {prescriptions.map((row, index) => (
                     <div key={row.id} className="grid grid-cols-12 gap-3 pb-3 border-b border-gray-50 last:border-none">
@@ -368,30 +365,28 @@ export const ActiveConsultationPage = () => {
                 </div>
 
                 <div className="mt-8 flex justify-end gap-3">
-                  <button 
+                  <Button 
+                    variant="secondary"
                     onClick={() => setShowPrescription(true)}
-                    className="px-6 py-3 border border-outline-variant text-on-surface font-bold rounded-xl hover:bg-gray-50 transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs"
+                    icon="visibility"
+                    className="px-6 py-3 font-bold rounded-xl active:scale-95 uppercase tracking-wide text-xs"
                   >
-                    <span className="material-symbols-outlined text-[20px]">visibility</span> Preview
-                  </button>
-                  <button 
+                    Preview
+                  </Button>
+                  <Button 
                     onClick={handleFinishConsultation}
-                    disabled={finishing}
-                    className="px-8 py-3.5 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 hover:bg-primary-container transition-all active:scale-95 flex items-center gap-2 uppercase tracking-wide text-xs disabled:opacity-70"
+                    isLoading={finishing}
+                    icon="check_circle"
+                    className="px-8 py-3.5 font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 uppercase tracking-wide text-xs"
                   >
-                    {finishing ? (
-                      <div className="h-4 w-4 border-2 border-white/30 border-t-white animate-spin rounded-full"></div>
-                    ) : (
-                      <span className="material-symbols-outlined text-[20px]">check_circle</span>
-                    )}
                     Finish & Generate Rx
-                  </button>
+                  </Button>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         </div>
-      </main>
+      </PageSurface>
 
       <DigitalPrescription
         isOpen={showPrescription}

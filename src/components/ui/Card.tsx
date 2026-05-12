@@ -7,11 +7,20 @@ interface CardProps {
   className?: string;
   icon?: string;
   headerActions?: React.ReactNode;
+  noPadding?: boolean;
 }
 
-export const Card: React.FC<CardProps> = ({ title, subtitle, children, className = '', icon, headerActions }) => {
+export const Card: React.FC<CardProps> = ({
+  title,
+  subtitle,
+  children,
+  className = '',
+  icon,
+  headerActions,
+  noPadding = false
+}) => {
   return (
-    <section className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm transition-all hover:border-[var(--primary)]/30 ${className}`}>
+    <section className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--primary)]/30 ${noPadding ? '' : 'p-6'} ${className}`}>
       {(title || icon || headerActions) && (
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">

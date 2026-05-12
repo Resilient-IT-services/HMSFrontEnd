@@ -10,6 +10,7 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
 import { Table, Column } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
@@ -240,11 +241,10 @@ export const StockManagement = () => {
         </ContentPanel>
 
         <div className="grid grid-cols-1 gap-6 pb-12 lg:grid-cols-2">
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-            <div className="mb-8 flex items-center justify-between">
-              <h4 className="font-manrope text-xl font-black tracking-tight text-slate-900">Movement Analytics</h4>
-              <Badge variant="blue">Weekly View</Badge>
-            </div>
+          <Card 
+            title="Movement Analytics" 
+            headerActions={<Badge variant="blue">Weekly View</Badge>}
+          >
             <div className="flex h-48 items-end justify-between gap-4 px-2">
               {[60, 85, 45, 70, 55, 95, 75].map((height, index) => (
                 <div key={index} className={`w-full rounded-xl transition-all ${index % 2 === 0 ? 'bg-slate-100 hover:bg-orange-200' : 'bg-slate-900 shadow-lg hover:opacity-80'}`} style={{ height: `${height}%` }} />
@@ -253,10 +253,9 @@ export const StockManagement = () => {
             <div className="mt-6 flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
               <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-            <h4 className="mb-8 font-manrope text-xl font-black tracking-tight text-slate-900">Recent Activity</h4>
+          <Card title="Recent Activity">
             <div className="space-y-6">
               {[
                 { title: 'Stock replenishment successful', detail: 'Amoxicillin | Batch #AMX-01 | 5m ago', color: 'bg-emerald-500' },
@@ -272,13 +271,14 @@ export const StockManagement = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       </PageSurface>
 
-      <button className="group fixed bottom-10 right-10 z-50 flex h-16 w-16 items-center justify-center rounded-3xl bg-slate-900 text-white shadow-2xl transition-all hover:-rotate-6 hover:scale-110 active:scale-95">
-        <span className="material-symbols-outlined text-3xl group-hover:text-orange-500">qr_code_scanner</span>
-      </button>
+      <Button 
+        icon="qr_code_scanner" 
+        className="fixed bottom-10 right-10 z-50 h-16 w-16 !rounded-3xl bg-slate-900 !p-0 shadow-2xl hover:-rotate-6 hover:scale-110 active:scale-95"
+      />
 
       {selectedMedicineForStock && (
         <QuickStockAddModal

@@ -2,7 +2,7 @@ import React from 'react';
 
 export interface MetricCardProps {
   label: string;
-  value: string | number;
+  value: React.ReactNode;
   icon: string;
   variant?: 'slate' | 'emerald' | 'blue' | 'orange' | 'purple' | 'indigo' | 'red';
   trend?: string;
@@ -10,6 +10,7 @@ export interface MetricCardProps {
   layout?: 'centered' | 'horizontal' | 'compact';
   progressBar?: number; // percentage 0-100
   tag?: string;
+  valueTestId?: string;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -21,7 +22,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   subValue,
   layout = 'centered',
   progressBar,
-  tag
+  tag,
+  valueTestId
 }) => {
   const variants = {
     slate: { text: 'text-slate-600', bg: 'bg-slate-100', progress: 'bg-slate-600' },
@@ -41,7 +43,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{label}</p>
         <div className="flex items-end justify-between">
           <h3 className="text-2xl font-bold text-slate-900 leading-none">
-            {typeof value === 'number' && value < 10 ? `0${value}` : value}
+            <span data-testid={valueTestId}>
+              {typeof value === 'number' && value < 10 ? `0${value}` : value}
+            </span>
           </h3>
           {trend ? (
             <span className="text-[10px] font-bold px-2 py-1 bg-green-50 text-green-700 rounded-full flex items-center gap-1">
@@ -75,7 +79,9 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           )}
         </div>
         <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{label}</p>
-        <h3 className="text-3xl font-black text-slate-900 mt-1">{value}</h3>
+        <h3 className="text-3xl font-black text-slate-900 mt-1">
+          <span data-testid={valueTestId}>{value}</span>
+        </h3>
       </div>
     );
   }
@@ -87,7 +93,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         <span className="material-symbols-outlined text-2xl">{icon}</span>
       </div>
       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className="text-2xl font-black text-slate-900 leading-none">{value}</p>
+      <p className="text-2xl font-black text-slate-900 leading-none font-headline-md">
+        <span data-testid={valueTestId} className="font-headline-md">
+          {typeof value === 'number' && value < 10 ? `0${value}` : value}
+        </span>
+      </p>
       {trend && (
         <p className="text-[10px] font-bold text-emerald-600 mt-2 flex items-center gap-1">
           <span className="material-symbols-outlined text-xs">trending_up</span>

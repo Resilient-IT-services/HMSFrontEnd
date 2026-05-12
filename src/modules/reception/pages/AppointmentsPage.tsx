@@ -123,6 +123,7 @@ export const AppointmentsPage = () => {
       <div className="p-4 lg:p-8 space-y-6 lg:space-y-8 bg-gray-50/50 min-h-screen">
         
         <PageHeading 
+          level={1}
           title="Today's Appointments" 
           description="Real-time status of all patient visits for today."
         >

@@ -11,6 +11,8 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
 
 export const PharmacyDashboard = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
@@ -168,70 +170,77 @@ export const PharmacyDashboard = () => {
   ];
 
   return (
-    <MainLayout title="Pharmacy Overview">
-      <MetricsGrid items={metricItems} className="mb-10" />
+    <MainLayout title="Pharmacy Overview" hideTitle>
+      <PageSurface fontClassName="font-manrope">
+        <PageHeading 
+          title="Pharmacy Overview" 
+          description="Monitor real-time prescriptions, inventory alerts, and daily fulfillment metrics."
+        />
 
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-          <Card 
-            title="Prescription Queue" 
-            className="p-0 overflow-hidden"
-            headerActions={
-              <button className="text-sm font-semibold text-orange-600 hover:underline">Advanced Search</button>
-            }
-          >
-            <div className="p-6 pb-0">
-              <SearchInput placeholder="Search by patient name or Rx ID..." />
-            </div>
-            <Table 
-              columns={prescriptionColumns} 
-              data={prescriptions} 
-              isLoading={loading}
-              emptyMessage="No prescriptions found."
-            />
-          </Card>
+        <MetricsGrid items={metricItems} className="mb-10" />
 
-          <Card title="Operational Summary" subtitle="DAILY MONITORING">
-            <div className="space-y-6">
-              {operationalSummary.map((item) => (
-                <div key={item.title} className={`flex items-center gap-4 border-l-2 pl-4 ${item.accentClassName}`}>
-                  <div className="flex-1">
-                    <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                    <p className="text-xs text-slate-500">{item.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        <div className="space-y-8">
-          <Card title="Queue Snapshot" subtitle="VOLUME TREND">
-            <div className="h-48 w-full flex items-end gap-2 px-2">
-              {[stats.pendingPrescriptions, stats.dispensedToday, stats.lowStockCount, stats.queuedItems].map((value, index) => (
-                <div
-                  key={`${value}-${index}`}
-                  className="flex-1 rounded-t-lg bg-orange-600/20 hover:bg-orange-600 transition-all"
-                  style={{ height: `${Math.max(20, Math.min(100, value * 10 || 20))}%` }}
-                />
-              ))}
-            </div>
-          </Card>
-
-          <Card title="Inventory Status" subtitle="STOCK ALERTS">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-slate-900">Low stock medicines</p>
-                  <p className="text-xs text-slate-500 font-medium">{stats.lowStockCount} inventory records currently need attention.</p>
-                </div>
-                <span className="text-xs font-bold text-slate-900">{stats.lowStockCount}</span>
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-8">
+            <Card 
+              title="Prescription Queue" 
+              className="p-0 overflow-hidden"
+              headerActions={
+                <Button variant="ghost" size="sm" className="font-semibold text-orange-600">Advanced Search</Button>
+              }
+            >
+              <div className="p-6 pb-0">
+                <SearchInput placeholder="Search by patient name or Rx ID..." />
               </div>
-              <Button variant="secondary" fullWidth href="/pharmacy/stock">Review Stock Queue</Button>
-            </div>
-          </Card>
+              <Table 
+                columns={prescriptionColumns} 
+                data={prescriptions} 
+                isLoading={loading}
+                emptyMessage="No prescriptions found."
+              />
+            </Card>
+
+            <Card title="Operational Summary" subtitle="DAILY MONITORING">
+              <div className="space-y-6">
+                {operationalSummary.map((item) => (
+                  <div key={item.title} className={`flex items-center gap-4 border-l-2 pl-4 ${item.accentClassName}`}>
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-slate-900">{item.title}</p>
+                      <p className="text-xs text-slate-500">{item.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+
+          <div className="space-y-8">
+            <Card title="Queue Snapshot" subtitle="VOLUME TREND">
+              <div className="h-48 w-full flex items-end gap-2 px-2">
+                {[stats.pendingPrescriptions, stats.dispensedToday, stats.lowStockCount, stats.queuedItems].map((value, index) => (
+                  <div
+                    key={`${value}-${index}`}
+                    className="flex-1 rounded-t-lg bg-orange-600/20 hover:bg-orange-600 transition-all"
+                    style={{ height: `${Math.max(20, Math.min(100, value * 10 || 20))}%` }}
+                  />
+                ))}
+              </div>
+            </Card>
+
+            <Card title="Inventory Status" subtitle="STOCK ALERTS">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-slate-900">Low stock medicines</p>
+                    <p className="text-xs text-slate-500 font-medium">{stats.lowStockCount} inventory records currently need attention.</p>
+                  </div>
+                  <span className="text-xs font-bold text-slate-900">{stats.lowStockCount}</span>
+                </div>
+                <Button variant="secondary" fullWidth href="/pharmacy/stock">Review Stock Queue</Button>
+              </div>
+            </Card>
+          </div>
         </div>
-      </div>
+      </PageSurface>
     </MainLayout>
   );
 };

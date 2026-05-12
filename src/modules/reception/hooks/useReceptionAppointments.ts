@@ -6,6 +6,8 @@ import { doctorService } from '@/services/doctorService';
 import { AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
 import { sortByToken } from '@/utils/tokenHelper';
 
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+
 export const useReceptionAppointments = () => {
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
@@ -83,9 +85,9 @@ export const useReceptionAppointments = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000);
-    return () => clearInterval(interval);
   }, [fetchData]);
+
+  useAutoRefresh(fetchData, 30_000);
 
   const applyFilters = () => {
     setActiveFilters(advancedFilters);

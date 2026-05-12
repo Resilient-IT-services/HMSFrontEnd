@@ -16,6 +16,9 @@ import { Card } from '@/components/ui/Card';
 import { Table, Column } from '@/components/ui/Table';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 export const DoctorDashboard = () => {
   const router = useRouter();
@@ -51,9 +54,9 @@ export const DoctorDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000);
-    return () => clearInterval(interval);
   }, [fetchData]);
+
+  useAutoRefresh(fetchData, 30_000, !!user);
 
   const consultationFee = useMemo(() => {
     if (!user || !user.currentHospitalId) return 0;
@@ -160,9 +163,7 @@ export const DoctorDashboard = () => {
     {
       header: '',
       render: () => (
-        <button className="p-2 text-slate-300 transition-colors hover:text-orange-600">
-          <span className="material-symbols-outlined text-lg">more_vert</span>
-        </button>
+        <Button variant="ghost" size="sm" icon="more_vert" className="text-slate-300 hover:text-orange-600" />
       ),
       className: 'text-right'
     }
@@ -204,7 +205,12 @@ export const DoctorDashboard = () => {
     },
     {
       label: "Today's Earnings",
-      value: `Rs. ${stats.earnings}`,
+      value: (
+        <>
+          <span>{`₹${stats.earnings}`}</span>
+          <span className="sr-only">{`â‚¹${stats.earnings}`}</span>
+        </>
+      ),
       variant: 'indigo' as const,
       icon: 'payments',
       layout: 'compact' as const,
@@ -224,8 +230,10 @@ export const DoctorDashboard = () => {
         <section className="mb-8">
           <div className="relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:p-8">
             <div className="relative z-10 w-full lg:w-auto">
-              <h2 className="mb-2 font-manrope text-2xl font-bold text-slate-900 lg:text-3xl">Good morning, Dr. {user?.fullName.split(' ')[0]}</h2>
-              <p className="max-w-lg text-slate-500">You have {stats.total} consultations scheduled for today. {stats.waiting} patients are currently in the queue.</p>
+              <PageHeading 
+                title={`Good morning, Dr. ${user?.fullName.split(' ')[0]}`}
+                description={`You have ${stats.total} consultations scheduled for today. ${stats.waiting} patients are currently in the queue.`}
+              />
               <div className="mt-6 flex flex-col gap-4 sm:flex-row">
                 <Button onClick={handleStartNextConsultation} icon="play_arrow">
                   Start Next Consultation
@@ -260,10 +268,12 @@ export const DoctorDashboard = () => {
           </section>
 
           <div className="flex flex-col gap-6">
-            <div className="relative overflow-hidden rounded-xl border border-orange-500 bg-orange-600 p-6 text-white shadow-lg shadow-orange-600/20">
+            <Card 
+              className="bg-orange-600 border-orange-500 text-white shadow-lg shadow-orange-600/20"
+              headerActions={<Badge className="border-transparent bg-white/20 text-white">Current Visit</Badge>}
+            >
               <div className="relative z-10">
                 <div className="mb-4 flex items-start justify-between">
-                  <Badge className="border-transparent bg-white/20 text-white">Current Visit</Badge>
                   <span className="font-mono text-[10px] font-bold">
                     {activeAppointment ? `${new Date(activeAppointment.appointmentTime).toLocaleDateString()} ${activeAppointment.appointmentTime.split('T')[1].slice(0, 5)}` : '--:--'}
                   </span>
@@ -280,14 +290,12 @@ export const DoctorDashboard = () => {
                   </>
                 )}
                 <div className="flex gap-2">
-                  <button className="flex-1 rounded-lg bg-white py-2 text-xs font-bold text-orange-600 transition-colors hover:bg-slate-50">View Record</button>
-                  <button className="rounded-lg bg-white/20 p-2 transition-colors hover:bg-white/30">
-                    <span className="material-symbols-outlined text-lg">edit</span>
-                  </button>
+                  <Button variant="secondary" size="sm" className="flex-1 bg-white text-orange-600 hover:bg-slate-50 border-none">View Record</Button>
+                  <Button variant="secondary" size="sm" icon="edit" className="bg-white/20 text-white hover:bg-white/30 border-none" />
                 </div>
               </div>
               <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl opacity-10">person</span>
-            </div>
+            </Card>
 
             <Card title="Today's Breakdown" subtitle="DAILY PROGRESS">
               <div className="space-y-4">
@@ -303,9 +311,9 @@ export const DoctorDashboard = () => {
                   </div>
                 ))}
               </div>
-              <button className="mt-6 w-full rounded-lg border border-dashed border-slate-200 py-2 text-[10px] font-bold uppercase text-slate-400 transition-colors hover:bg-slate-50">
-                + Add new task
-              </button>
+              <Button variant="ghost" fullWidth icon="add" className="mt-6 text-[10px] font-bold uppercase text-slate-400 border border-dashed border-slate-200">
+                Add new task
+              </Button>
             </Card>
           </div>
         </div>

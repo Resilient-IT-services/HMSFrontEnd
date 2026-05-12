@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/Button';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { Card } from '@/components/ui/Card';
 
 export const MedicalHistoryPage = () => {
   const router = useRouter();
@@ -151,8 +153,7 @@ export const MedicalHistoryPage = () => {
   if (!patientId) {
     return (
       <MainLayout title="Medical History" hideTitle>
-        <div className="p-8 max-w-[1600px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter">
-          
+        <PageSurface paddingClassName="p-8">
           <PageHeading 
             title="Medical History" 
             description="Review past consultations and comprehensive patient health records."
@@ -163,18 +164,22 @@ export const MedicalHistoryPage = () => {
             <div className="lg:col-span-12">
               <div className="bg-white p-2 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-stretch md:items-center gap-4">
                 <div className="flex items-center gap-1 bg-slate-50 p-1 rounded-xl">
-                  <button 
+                  <Button 
+                    variant={activeView === 'APPOINTMENTS' ? 'primary' : 'ghost'}
+                    size="sm"
                     onClick={() => setActiveView('APPOINTMENTS')}
-                    className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeView === 'APPOINTMENTS' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                    className={`px-6 py-2 text-xs font-bold ${activeView === 'APPOINTMENTS' ? 'shadow-md' : 'text-slate-500'}`}
                   >
                     All Visits
-                  </button>
-                  <button 
+                  </Button>
+                  <Button 
+                    variant={activeView === 'PATIENTS' ? 'primary' : 'ghost'}
+                    size="sm"
                     onClick={() => setActiveView('PATIENTS')}
-                    className={`px-6 py-2 rounded-lg text-xs font-bold transition-all ${activeView === 'PATIENTS' ? 'bg-orange-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-100'}`}
+                    className={`px-6 py-2 text-xs font-bold ${activeView === 'PATIENTS' ? 'shadow-md' : 'text-slate-500'}`}
                   >
                     Patients
-                  </button>
+                  </Button>
                 </div>
                 <div className="flex-1 flex items-center gap-2">
                   <div className="flex-1">
@@ -192,7 +197,7 @@ export const MedicalHistoryPage = () => {
           </div>
 
           {/* Table Section */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-12">
+          <Card className="overflow-hidden mb-12" noPadding>
             {activeView === 'APPOINTMENTS' ? (
               <Table 
                 columns={appointmentColumns} 
@@ -218,8 +223,8 @@ export const MedicalHistoryPage = () => {
               onPageChange={activeView === 'APPOINTMENTS' ? setAppointmentsPage : setPatientsPage} 
               label={activeView === 'APPOINTMENTS' ? "visits" : "patients"}
             />
-          </div>
-        </div>
+          </Card>
+        </PageSurface>
       </MainLayout>
     );
   }
@@ -228,7 +233,7 @@ export const MedicalHistoryPage = () => {
 
   return (
     <MainLayout title="Patient Medical History" hideTitle>
-      <div className="h-[calc(100vh-112px)] -m-8 flex flex-col bg-slate-50 overflow-hidden font-inter">
+      <div className="h-[calc(100vh-112px)] flex flex-col bg-slate-50 overflow-hidden font-inter">
         
         {/* Detail Header */}
         <div className="px-8 py-4 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm z-10">
@@ -241,10 +246,11 @@ export const MedicalHistoryPage = () => {
               className="rounded-full w-10 h-10 p-0"
             />
             <div>
-              <h1 className="font-manrope text-2xl font-black text-slate-900 leading-none mb-1">
-                {selectedPatient?.fullName || 'Loading Profile...'}
-              </h1>
-              <div className="flex items-center gap-3">
+              <PageHeading 
+                title={selectedPatient?.fullName || 'Loading Profile...'}
+                className="mb-0"
+              />
+              <div className="flex items-center gap-3 mt-1">
                 <Badge variant="orange" size="sm">Code: {selectedPatient?.patientCode || '...'}</Badge>
                 <span className="text-slate-300">|</span>
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">
@@ -309,19 +315,12 @@ export const MedicalHistoryPage = () => {
                 <div className="space-y-8 animate-fadeIn">
                   
                   {/* Summary Card */}
-                  <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center">
-                          <span className="material-symbols-outlined text-lg">description</span>
-                        </div>
-                        <h2 className="text-sm font-black text-slate-900 uppercase tracking-tight">
-                          Visit Summary • {new Date(selectedVisit.appointmentTime).toLocaleDateString()}
-                        </h2>
-                      </div>
-                      <Badge variant="emerald">{selectedVisit.status}</Badge>
-                    </div>
-                    
+                  <Card 
+                    title={`Visit Summary • ${new Date(selectedVisit.appointmentTime).toLocaleDateString()}`}
+                    icon="description"
+                    headerActions={<Badge variant="emerald">{selectedVisit.status}</Badge>}
+                    noPadding
+                  >
                     <div className="p-8 grid grid-cols-1 md:grid-cols-12 gap-10">
                       <div className="md:col-span-7">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Chief Complaint / Primary Concern</p>
@@ -355,17 +354,13 @@ export const MedicalHistoryPage = () => {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Card>
 
                   {/* Detailed Notes & Prescription */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     
                     {/* Clinical Notes */}
-                    <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-                      <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-50">
-                        <span className="material-symbols-outlined text-orange-600">clinical_notes</span>
-                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">Clinical Findings & Diagnosis</h3>
-                      </div>
+                    <Card title="Clinical Findings & Diagnosis" icon="clinical_notes" className="shadow-sm">
                       <div className="space-y-6">
                         <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Physician's Assessment</p>
@@ -378,18 +373,15 @@ export const MedicalHistoryPage = () => {
                           <p className="text-[10px] font-black uppercase tracking-widest">Stable / Discharged</p>
                         </div>
                       </div>
-                    </div>
+                    </Card>
 
                     {/* Prescription */}
-                    <div className="bg-slate-900 text-white border border-slate-800 rounded-2xl p-8 shadow-xl shadow-slate-900/10">
-                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-orange-500">medication</span>
-                          <h3 className="text-xs font-black text-white uppercase tracking-widest">Prescribed Medication</h3>
-                        </div>
-                        <Badge variant="blue" size="sm">Active</Badge>
-                      </div>
-                      
+                    <Card 
+                      title="Prescribed Medication" 
+                      icon="medication" 
+                      className="bg-slate-900 text-white border-slate-800 shadow-xl shadow-slate-900/10"
+                      headerActions={<Badge variant="blue" size="sm">Active</Badge>}
+                    >
                       <div className="space-y-4">
                         {selectedVisit.prescription?.items && selectedVisit.prescription.items.length > 0 ? (
                           selectedVisit.prescription.items.map((item, idx) => (
@@ -421,7 +413,7 @@ export const MedicalHistoryPage = () => {
                           View Prescription Details
                         </Button>
                       )}
-                    </div>
+                    </Card>
 
                   </div>
                 </div>

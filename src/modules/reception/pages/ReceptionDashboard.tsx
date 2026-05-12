@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 export const ReceptionDashboard = () => {
   const router = useRouter();
@@ -55,9 +57,9 @@ export const ReceptionDashboard = () => {
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(() => fetchData(true), 30_000); // Auto-refresh every 30 seconds
-    return () => clearInterval(interval);
   }, [fetchData]);
+
+  useAutoRefresh(fetchData, 30_000);
 
   const stats = useMemo(() => {
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
@@ -96,9 +98,7 @@ export const ReceptionDashboard = () => {
     {
       header: 'Actions',
       render: () => (
-        <button className="p-1.5 text-slate-400 hover:text-orange-700 transition-colors border border-slate-100 rounded-lg hover:bg-white hover:shadow-sm">
-          <span className="material-symbols-outlined text-xl">more_vert</span>
-        </button>
+        <Button variant="secondary" size="sm" icon="more_vert" className="h-8 w-8 p-0" />
       ),
       className: 'text-center'
     }
@@ -142,19 +142,15 @@ export const ReceptionDashboard = () => {
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
       <PageSurface fontClassName="font-manrope">
-        {/* Page Title */}
-        <div className="flex justify-between items-end mb-8">
-          <div>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Reception Dashboard</h2>
-            <p className="text-slate-500 font-medium">Manage arrivals, patient queues, and daily operations.</p>
+        <PageHeading
+          title="Reception Dashboard"
+          description="Manage arrivals, patient queues, and daily operations."
+        >
+          <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-xs text-slate-700 shadow-sm">
+            <span className="material-symbols-outlined text-orange-600 text-sm">calendar_today</span>
+            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </div>
-          <div className="hidden sm:flex gap-3">
-            <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-xs text-slate-700 shadow-sm">
-              <span className="material-symbols-outlined text-orange-600 text-sm">calendar_today</span>
-              {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-            </div>
-          </div>
-        </div>
+        </PageHeading>
 
         {/* Metrics Grid */}
         <MetricsGrid items={metricItems} className="mb-8" />
@@ -168,7 +164,7 @@ export const ReceptionDashboard = () => {
               title="Recent Patient Arrivals" 
               className="p-0 overflow-hidden"
               headerActions={
-                <button onClick={() => router.push('/reception/patients')} className="text-orange-600 text-xs font-bold hover:underline">View All</button>
+                <Button variant="ghost" size="sm" onClick={() => router.push('/reception/patients')} className="text-orange-600 font-bold">View All</Button>
               }
             >
               <Table 
@@ -184,19 +180,19 @@ export const ReceptionDashboard = () => {
               <h4 className="font-bold text-slate-900 px-1 uppercase text-[10px] tracking-widest text-slate-400">Doctor Availability Snapshot</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {doctors.map((doc) => (
-                  <div key={doc.assignmentId} className="bg-white p-5 rounded-2xl border border-slate-100 flex items-center gap-4 shadow-sm border-l-4 border-l-emerald-500 hover:shadow-md transition-all">
-                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xl">
+                  <Card key={doc.assignmentId} className="p-5 flex items-center gap-4 border-l-4 border-l-emerald-500 hover:shadow-md transition-all">
+                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xl shrink-0">
                       {doc.fullName[0]}
                     </div>
-                    <div className="flex-1">
-                      <p className="font-bold text-sm text-slate-900">{doc.fullName}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-sm text-slate-900 truncate">{doc.fullName}</p>
                       <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">{stats.doctorQueueByName.get(doc.fullName) || 0} queued today</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-black text-slate-900">{stats.doctorQueueByName.get(doc.fullName) || 0}</p>
-                      <p className="text-[10px] uppercase text-slate-400 font-black">Queue</p>
+                      <p className="text-xl font-black text-slate-900 leading-none">{stats.doctorQueueByName.get(doc.fullName) || 0}</p>
+                      <p className="text-[10px] uppercase text-slate-400 font-black mt-1">Queue</p>
                     </div>
-                  </div>
+                  </Card>
                 ))}
               </div>
             </section>
@@ -205,7 +201,7 @@ export const ReceptionDashboard = () => {
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-8">
             {/* Quick Actions */}
-            <section className="bg-slate-900 p-6 rounded-2xl text-white shadow-xl">
+            <Card className="bg-slate-900 text-white shadow-xl border-none">
               <h4 className="font-bold mb-6 uppercase text-[10px] tracking-widest opacity-50">Quick Actions</h4>
               <div className="space-y-4">
                 <Button 
@@ -228,7 +224,7 @@ export const ReceptionDashboard = () => {
                   <span className="material-symbols-outlined">chevron_right</span>
                 </Button>
               </div>
-            </section>
+            </Card>
 
             {/* Staff on Duty */}
             <Card title="Nursing Staff on Duty" subtitle="CURRENT SHIFT">
@@ -254,12 +250,11 @@ export const ReceptionDashboard = () => {
       </PageSurface>
 
       {/* Floating Action Button */}
-      <button 
+      <Button 
         onClick={() => router.push('/reception/appointments/create')}
-        className="fixed bottom-10 right-10 bg-orange-600 text-white p-4 rounded-full shadow-2xl hover:bg-orange-700 transition-all active:scale-95 z-50 flex items-center justify-center"
-      >
-        <span className="material-symbols-outlined text-2xl">add</span>
-      </button>
+        className="fixed bottom-10 right-10 !rounded-full h-14 w-14 shadow-2xl z-50 p-0"
+        icon="add"
+      />
     </MainLayout>
   );
 };
