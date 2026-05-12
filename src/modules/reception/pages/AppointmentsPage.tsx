@@ -127,14 +127,7 @@ export const AppointmentsPage = () => {
           title="Today's Appointments" 
           description="Real-time status of all patient visits for today."
         >
-          <Button 
-            variant="secondary" 
-            icon="filter_list" 
-            onClick={() => setIsFilterModalOpen(true)}
-          >
-            Filters {(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0) > 0 && 
-              `(${(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0)})`}
-          </Button>
+
           <Button icon="add_circle" href="/reception/appointments/create">
             New Visit
           </Button>
@@ -165,41 +158,17 @@ export const AppointmentsPage = () => {
 
         {/* Toolbar */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex flex-wrap gap-2 w-full md:w-auto">
-            {['ALL', 'UPCOMING', 'SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map((status) => (
-              <button
-                key={status}
-                onClick={() => {
-                  setStatusFilter(status as any);
-                  if (activeFilters.statuses?.length) {
-                    resetFilters();
-                  }
-                }}
-                className={`flex-1 md:flex-none px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all ${
-                  statusFilter === status 
-                    ? 'bg-orange-700 text-white shadow-md' 
-                    : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                }`}
-              >
-                {status === 'ALL' ? 'Today' : status.replace('_', ' ')}
-              </button>
-            ))}
-          </div>
+
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex-1 md:w-64">
+            <div className="flex-1 md:w-350">
               <SearchInput
                 placeholder="Search patient..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button 
-              variant="secondary" 
-              icon="filter_list" 
-              onClick={() => setIsFilterModalOpen(true)}
-              className={Object.values(activeFilters).some(v => Array.isArray(v) ? v.length > 0 : !!v) ? 'bg-orange-50 border-orange-200 text-orange-700' : ''}
-            />
-            <Button 
+
+            <Button
               variant="secondary" 
               icon="refresh" 
               isLoading={loading} 
