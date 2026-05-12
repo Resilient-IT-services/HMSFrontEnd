@@ -30,6 +30,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     gender: (initialData?.gender as any) || 'MALE',
     password: '',
     superuser: initialData?.superuser || false,
+    active: initialData?.status ? initialData.status === 'ACTIVE' : initialData?.active ?? true,
+    status: initialData?.status || (initialData?.active === false ? 'INACTIVE' : 'ACTIVE'),
     memberships: initialData?.memberships || [],
     doctorInfo: initialData?.doctorInfo,
     nurseInfo: initialData?.nurseInfo,
@@ -162,6 +164,20 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       }
     }
 
+    // Nurse Specific Validation
+    if (assignedRoles.includes('NURSE') && formData.nurseInfo) {
+      if (!formData.nurseInfo.nursingLicenseNo?.trim()) {
+        errors.nursingLicenseNo = 'Nurse license number is required';
+      }
+    }
+
+    // Pharmacist Specific Validation
+    if (assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo) {
+      if (!formData.pharmacistInfo.pciRegNo?.trim()) {
+        errors.pciRegNo = 'PCI Registration number is required';
+      }
+    }
+
     setValidationErrors(errors);
     if (Object.keys(errors).length > 0) {
       triggerGlobalToast('Fill all the required details', 'error');
@@ -175,9 +191,13 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     try {
       setLoading(true);
+      const userPayload: UserRequestDTO = {
+        ...formData,
+        status: formData.active ? 'ACTIVE' : 'INACTIVE'
+      };
       const response = isEdit && initialData?.id
-        ? await userService.updateUser(initialData.id, formData)
-        : await userService.createUser(formData);
+        ? await userService.updateUser(initialData.id, userPayload)
+        : await userService.createUser(userPayload);
 
       if (response.success) {
         router.push('/admin/users');

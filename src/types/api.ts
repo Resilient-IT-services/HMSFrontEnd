@@ -1,4 +1,5 @@
 export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST' | 'PHARMACIST' | 'LAB_TECHNICIAN';
+export type UserAccountStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ApiError {
   code?: string;
@@ -160,6 +161,7 @@ export interface UserResponse {
   dob: string;
   phone: string;
   active: boolean;
+  status?: UserAccountStatus;
   deleted?: boolean;
   superuser: boolean;
   createdAt: string;
@@ -192,6 +194,7 @@ export interface UserRequestDTO {
   phone: string;
   superuser: boolean;
   active?: boolean;
+  status?: UserAccountStatus;
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
@@ -699,6 +702,7 @@ export interface UserSummaryDTO {
   dob: string;
   phone: string;
   active: boolean;
+  status?: UserAccountStatus;
   deleted?: boolean;
   superuser: boolean;
   memberships: HospitalMembershipDTO[];

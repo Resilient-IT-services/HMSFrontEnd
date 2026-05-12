@@ -13,7 +13,7 @@ export const useAdminUsers = () => {
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [roleFilter, setRoleFilter] = useState<string | undefined>();
-  const [activeFilter, setActiveFilter] = useState<boolean | undefined>(true);
+  const [activeFilter, setActiveFilter] = useState<boolean | undefined>();
 
   const fetchData = useCallback(async () => {
     try {

@@ -110,6 +110,23 @@ export const UserFormPersonalTab: React.FC<UserFormPersonalTabProps> = ({
             <label className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
               <input 
                 type="checkbox" 
+                className="w-5 h-5 accent-emerald-500"
+                checked={formData.active}
+                onChange={(e) => {
+                  const isActive = e.target.checked;
+                  setFormData({ ...formData, active: isActive, status: isActive ? 'ACTIVE' : 'INACTIVE' });
+                }}
+              />
+              <div>
+                <p className="font-bold text-sm text-on-surface">Account Status: {formData.active ? 'Active' : 'Inactive'}</p>
+                <p className="text-xs text-secondary">Toggle to enable or disable this user's access to the system.</p>
+              </div>
+            </label>
+          </div>
+          <div className="flex flex-col gap-1.5 md:col-span-2">
+            <label className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">
+              <input 
+                type="checkbox" 
                 className="w-5 h-5 accent-primary"
                 checked={formData.superuser}
                 onChange={(e) => setFormData({ ...formData, superuser: e.target.checked })}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { Role, UserSummaryDTO } from '@/types/api';
 import { useAdminUsers } from '@/modules/admin/hooks/useAdminUsers';
+import { userService } from '@/services/userService';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -27,6 +28,8 @@ export const UserManagementPage = () => {
     totalElements,
     roleFilter,
     setRoleFilter,
+    activeFilter,
+    setActiveFilter,
     refresh
   } = useAdminUsers();
 
@@ -80,14 +83,70 @@ export const UserManagementPage = () => {
     },
     {
       header: 'Status',
-      render: (user) => (
-        <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${user.active ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-slate-300'}`} />
-          <span className={`text-[10px] font-black uppercase tracking-widest ${user.active ? 'text-emerald-700' : 'text-slate-400'}`}>
-            {user.active ? 'Active' : 'Inactive'}
-          </span>
-        </div>
-      )
+      render: (user) => {
+        const currentStatus = user.status || (user.active ? 'ACTIVE' : 'INACTIVE');
+
+        return (
+          <div
+              className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded-lg transition-colors"
+              onClick={async (e) => {
+                e.stopPropagation();
+
+                try {
+                  const res = await userService.getFullProfile(user.id);
+
+                  if (res.success && res.data) {
+
+                    const newStatus =
+                        currentStatus === 'ACTIVE'
+                            ? 'INACTIVE'
+                            : 'ACTIVE';
+
+                    const updatedData = {
+                      ...res.data,
+                      status: newStatus,
+                      active: newStatus === 'ACTIVE'
+                    };
+
+                    const updateRes = await userService.updateUser(
+                        user.id,
+                        updatedData as any
+                    );
+
+                    if (updateRes.success) {
+                      refresh();
+                    }
+                  }
+                } catch (error) {
+                  console.error('Failed to toggle status', error);
+                }
+              }}
+              title={
+                currentStatus === 'ACTIVE'
+                    ? 'Click to Deactivate'
+                    : 'Click to Activate'
+              }
+          >
+            <div
+                className={`h-2 w-2 rounded-full ${
+                    currentStatus === 'ACTIVE'
+                        ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                        : 'bg-red-500'
+                }`}
+            />
+
+            <span
+                className={`text-[10px] font-black uppercase tracking-widest ${
+                    currentStatus === 'ACTIVE'
+                        ? 'text-emerald-700'
+                        : 'text-red-600'
+                }`}
+            >
+              {currentStatus}
+            </span>
+          </div>
+        );
+      }
     },
     {
       header: 'Actions',
@@ -144,6 +203,18 @@ export const UserManagementPage = () => {
                   <option value="NURSE">Nursing Staff</option>
                   <option value="RECEPTIONIST">Receptionist</option>
                   <option value="PHARMACIST">Pharmacist</option>
+                </select>
+                <select
+                  value={activeFilter === undefined ? '' : String(activeFilter)}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setActiveFilter(value === '' ? undefined : value === 'true');
+                  }}
+                  className="min-w-[150px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
                 </select>
               </div>
               <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => refresh()} />
