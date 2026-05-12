@@ -255,7 +255,7 @@ export const DoctorDashboard = () => {
         <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-6" />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <section className="lg:col-span-2">
+          <section className="lg:col-span-3">
             <Card title="Upcoming Patient Queue" className="h-full overflow-hidden p-0">
               <Table
                 columns={columns}
@@ -267,55 +267,7 @@ export const DoctorDashboard = () => {
             </Card>
           </section>
 
-          <div className="flex flex-col gap-6">
-            <Card 
-              className="bg-orange-600 border-orange-500 text-white shadow-lg shadow-orange-600/20"
-              headerActions={<Badge className="border-transparent bg-white/20 text-white">Current Visit</Badge>}
-            >
-              <div className="relative z-10">
-                <div className="mb-4 flex items-start justify-between">
-                  <span className="font-mono text-[10px] font-bold">
-                    {activeAppointment ? `${new Date(activeAppointment.appointmentTime).toLocaleDateString()} ${activeAppointment.appointmentTime.split('T')[1].slice(0, 5)}` : '--:--'}
-                  </span>
-                </div>
-                {activeAppointment ? (
-                  <>
-                    <h4 className="mb-1 text-xl font-bold">{activeAppointment.patientName}</h4>
-                    <p className="mb-4 text-xs opacity-90">Patient currently in consultation.</p>
-                  </>
-                ) : (
-                  <>
-                    <h4 className="mb-1 text-xl font-bold">No Active Patient</h4>
-                    <p className="mb-4 text-xs opacity-90">Ready for next patient</p>
-                  </>
-                )}
-                <div className="flex gap-2">
-                  <Button variant="secondary" size="sm" className="flex-1 bg-white text-orange-600 hover:bg-slate-50 border-none">View Record</Button>
-                  <Button variant="secondary" size="sm" icon="edit" className="bg-white/20 text-white hover:bg-white/30 border-none" />
-                </div>
-              </div>
-              <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-8xl opacity-10">person</span>
-            </Card>
 
-            <Card title="Today's Breakdown" subtitle="DAILY PROGRESS">
-              <div className="space-y-4">
-                {breakdownItems.map((task) => (
-                  <div key={task.title} className="flex items-start gap-3">
-                    <div className={`mt-0.5 flex h-4 w-4 items-center justify-center rounded border transition-colors ${task.done ? 'border-orange-600 bg-orange-600' : 'border-slate-300'}`}>
-                      {task.done && <span className="material-symbols-outlined text-[10px] text-white">check</span>}
-                    </div>
-                    <div>
-                      <p className={`text-xs font-bold ${task.done ? 'text-slate-400 line-through' : 'text-slate-900'}`}>{task.title}</p>
-                      <p className="text-[10px] font-medium text-slate-500">{task.sub}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="ghost" fullWidth icon="add" className="mt-6 text-[10px] font-bold uppercase text-slate-400 border border-dashed border-slate-200">
-                Add new task
-              </Button>
-            </Card>
-          </div>
         </div>
       </PageSurface>
     </MainLayout>
