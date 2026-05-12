@@ -94,13 +94,6 @@ export const ReceptionDashboard = () => {
     {
       header: 'Status',
       render: () => <Badge variant="orange">Registered</Badge>
-    },
-    {
-      header: 'Actions',
-      render: () => (
-        <Button variant="secondary" size="sm" icon="more_vert" className="h-8 w-8 p-0" />
-      ),
-      className: 'text-center'
     }
   ];
 

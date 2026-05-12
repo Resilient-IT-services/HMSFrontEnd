@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HospitalMembershipDTO, HospitalResponse, UserRequestDTO, RoleAssignmentDTO, ScheduleDTO, VitalsDTO } from '@/types/api';
+import { HospitalMembershipDTO, HospitalResponse, ScheduleDTO } from '@/types/api';
 
 interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
   setNewContract: (data: HospitalMembershipDTO) => void;
   hospitals: HospitalResponse[];
-  formData: UserRequestDTO;
   editingContractIndex: number | null;
   validationErrors: Record<string, string>;
   onCancel: () => void;
@@ -15,7 +14,7 @@ interface ContractEditorProps {
 }
 
 export const ContractEditor: React.FC<ContractEditorProps> = ({
-  newContract, setNewContract, hospitals, formData, editingContractIndex, validationErrors, onCancel, onConfirm
+  newContract, setNewContract, hospitals, editingContractIndex, validationErrors, onCancel, onConfirm
 }) => {
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const [activeDay, setActiveDay] = useState(1); // 1-7 (Mon-Sun)
@@ -24,7 +23,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 
   const handleUpdateSchedule = (raIdx: number, newSchedules: ScheduleDTO[]) => {
     const updatedAssignments = [...(newContract.roleAssignments || [])];
-    updatedAssignments[raIdx].schedules = newSchedules;
+    updatedAssignments[raIdx] = { ...updatedAssignments[raIdx], schedules: newSchedules };
     setNewContract({ ...newContract, roleAssignments: updatedAssignments });
   };
 
@@ -102,7 +101,11 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
         </section>
 
         <div className="grid grid-cols-1 gap-6">
-          {(newContract.roleAssignments || []).map((ra, raIdx) => (
+          {(newContract.roleAssignments || []).map((ra, raIdx) => {
+            const departmentErrorKey = `department_${ra.roleCode}`;
+            const feeErrorKey = `fee_${ra.roleCode}`;
+
+            return (
             <div key={ra.roleCode} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-6 border-b border-gray-50 pb-2">
                 <span className="material-symbols-outlined text-sm text-primary">settings</span>
@@ -112,31 +115,34 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-gray-700 uppercase">Department <span className="text-primary">*</span></label>
-                  <input type="text" className={`form-input ${validationErrors[`department_${ra.roleCode}`] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
+                  <input type="text" className={`form-input ${validationErrors[departmentErrorKey] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
                     const updated = [...(newContract.roleAssignments || [])];
-                    updated[raIdx].departmentName = e.target.value;
+                    updated[raIdx] = { ...updated[raIdx], departmentName: e.target.value };
                     setNewContract({ ...newContract, roleAssignments: updated });
                   }} />
-                  {renderFieldError(`department_${ra.roleCode}`)}
+                  {renderFieldError(departmentErrorKey)}
                 </div>
 
                 {ra.roleCode === 'DOCTOR' && (
                   <>
                     <div className="flex flex-col gap-1.5">
-                      <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (₹) <span className="text-primary">*</span></label>
-                      <input type="number" min="500" step="1" className={`form-input ${validationErrors[`fee_${ra.roleCode}`] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                      <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (Rs.) <span className="text-primary">*</span></label>
+                      <input type="number" min="500" step="1" className={`form-input ${validationErrors[feeErrorKey] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
                         let value = e.target.value;
                         value = value.replaceAll(/[^0-9]/g, '');
                         const val = value === '' ? 0 : Number(value);
                         const updated = [...(newContract.roleAssignments || [])];
-                        updated[raIdx].doctorDetails = {
+                        updated[raIdx] = {
+                          ...updated[raIdx],
+                          doctorDetails: {
                           ...ra.doctorDetails!,
                           consultationFee: val
+                          }
                         };
                         setNewContract({ ...newContract, roleAssignments: updated });
                       }}
                       />
-                      {renderFieldError(`fee_${ra.roleCode}`)}
+                      {renderFieldError(feeErrorKey)}
                     </div>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Follow-up Days <span className="text-primary">*</span></label>
@@ -144,10 +150,12 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         let value = e.target.value;
                         value = value.replaceAll(/\D/g, '');
                         const updated = [...(newContract.roleAssignments || [])];
-                            updated[raIdx].doctorDetails = {...ra.doctorDetails!, followUpDays: value === '' ? 0 : Number(value)
-                            };
-                            setNewContract({...newContract, roleAssignments: updated});
-                          }}
+                        updated[raIdx] = {
+                          ...updated[raIdx],
+                          doctorDetails: { ...ra.doctorDetails!, followUpDays: value === '' ? 0 : Number(value) }
+                        };
+                        setNewContract({...newContract, roleAssignments: updated});
+                      }}
                       />
                     </div>
                   </>
@@ -236,7 +244,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

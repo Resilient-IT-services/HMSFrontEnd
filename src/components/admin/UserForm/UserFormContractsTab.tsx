@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { UserRequestDTO, HospitalResponse, HospitalMembershipDTO, RoleAssignmentDTO } from '@/types/api';
+import { UserRequestDTO, HospitalResponse, HospitalMembershipDTO } from '@/types/api';
 import { ContractEditor } from './ContractEditor';
+import { cloneHospitalMembership } from './contractClone';
 
 interface UserFormContractsTabProps {
   formData: UserRequestDTO;
@@ -40,7 +41,6 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
           newContract={newContract}
           setNewContract={setNewContract}
           hospitals={hospitals}
-          formData={formData}
           editingContractIndex={editingContractIndex}
           validationErrors={validationErrors}
           onCancel={() => setIsAddingContract(false)}
@@ -90,7 +90,7 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
                       <button 
                         type="button"
                         onClick={() => {
-                          setNewContract(m);
+                          setNewContract(cloneHospitalMembership(m));
                           setEditingContractIndex(idx);
                           setIsAddingContract(true);
                         }}

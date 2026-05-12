@@ -24,7 +24,122 @@ body {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
   .no-print {
     @apply !hidden;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    background: #ffffff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .op-bill-action-bar,
+  .op-bill-payment-method,
+  .op-bill-policy,
+  .op-bill-screen-heading {
+    display: none !important;
+  }
+
+  .op-bill-print-header {
+    display: flex !important;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 5mm;
+    padding-bottom: 4mm;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .op-bill-print-page {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .op-bill-print-grid {
+    display: grid !important;
+    grid-template-columns: 34% 1fr !important;
+    gap: 5mm !important;
+    align-items: start !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .op-bill-left-column,
+  .op-bill-right-column {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4mm !important;
+  }
+
+  .op-bill-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .op-bill-print-page section {
+    margin: 0 !important;
+    padding: 4mm !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 6px !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  .op-bill-print-page section > div:first-child {
+    margin-bottom: 3mm !important;
+  }
+
+  .op-bill-print-page .rounded-2xl,
+  .op-bill-print-page .rounded-xl {
+    border-radius: 6px !important;
+  }
+
+  .op-bill-print-page .p-4 {
+    padding: 3mm !important;
+  }
+
+  .op-bill-print-page .p-6 {
+    padding: 4mm !important;
+  }
+
+  .op-bill-print-page .pt-6 {
+    padding-top: 3mm !important;
+  }
+
+  .op-bill-print-page .mt-6 {
+    margin-top: 3mm !important;
+  }
+
+  .op-bill-print-page .mb-6 {
+    margin-bottom: 3mm !important;
+  }
+
+  .op-bill-print-page input {
+    border: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+  }
+
+  .op-bill-print-page button,
+  .op-bill-print-page .material-symbols-outlined {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

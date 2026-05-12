@@ -6,7 +6,6 @@ import MainLayout from '@/components/ui/MainLayout';
 import { useReceptionBilling } from '@/modules/reception/hooks/useReceptionBilling';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 
@@ -54,27 +53,41 @@ export const BillingPage = () => {
 
   return (
     <MainLayout title="Consultation Billing" hideTitle>
-      <div className="p-8 max-w-[1200px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
+      <div className="op-bill-print-page p-8 max-w-[1200px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
         
-        <PageHeading 
-          title="Consultation Billing" 
-          description="Finalize patient visit fees and process medical service payments."
-        >
-          <div className="flex items-center gap-3">
-             <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-4 py-2">
-               Status: {appointment.status.replace('_', ' ')}
-             </Badge>
-             <Badge variant="slate" className="px-4 py-2 border-slate-200">
-               ID: #INV-{appointment.id.substring(0, 8).toUpperCase()}
-             </Badge>
-          </div>
-        </PageHeading>
+        <div className="op-bill-screen-heading">
+          <PageHeading 
+            title="Consultation Billing" 
+            description="Finalize patient visit fees and process medical service payments."
+          >
+            <div className="flex items-center gap-3">
+               <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-4 py-2">
+                 Status: {appointment.status.replace('_', ' ')}
+               </Badge>
+               <Badge variant="slate" className="px-4 py-2 border-slate-200">
+                 ID: #INV-{appointment.id.substring(0, 8).toUpperCase()}
+               </Badge>
+            </div>
+          </PageHeading>
+        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="op-bill-print-header hidden">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">OP Consultation Bill</p>
+            <h1 className="text-2xl font-black text-slate-950">Consultation Invoice</h1>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Invoice ID</p>
+            <p className="text-sm font-black text-slate-900">#INV-{appointment.id.substring(0, 8).toUpperCase()}</p>
+            <p className="mt-1 text-[10px] font-bold uppercase text-slate-500">Status: {isPaid ? 'PAID' : 'PENDING'}</p>
+          </div>
+        </div>
+
+        <div className="op-bill-print-grid grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Patient Profile Card */}
-          <div className="lg:col-span-4 space-y-6">
-            <Card className="border-none shadow-md">
+          <div className="op-bill-left-column lg:col-span-4 space-y-6">
+            <Card className="op-bill-card border-none shadow-md">
               <div className="flex flex-col items-center text-center p-4">
                 <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-3xl uppercase mb-4 border-4 border-white shadow-sm">
                   {patient.fullName.split(' ').map(n => n[0]).join('')}
@@ -101,7 +114,7 @@ export const BillingPage = () => {
               </div>
             </Card>
 
-            <div className="bg-orange-600 p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
+            <div className="op-bill-policy bg-orange-600 p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
                <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12">info</span>
                <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
                  <span className="material-symbols-outlined text-lg">policy</span>
@@ -114,10 +127,10 @@ export const BillingPage = () => {
           </div>
 
           {/* Billing Details */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="op-bill-right-column lg:col-span-8 space-y-6">
             
             {/* Service Information */}
-            <Card title="Medical Service Details" icon="medical_services">
+            <Card title="Medical Service Details" icon="medical_services" className="op-bill-card">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Consulting Physician</p>
@@ -145,7 +158,7 @@ export const BillingPage = () => {
             </Card>
 
             {/* Cost Breakdown */}
-            <Card title="Financial Breakdown" icon="payments">
+            <Card title="Financial Breakdown" icon="payments" className="op-bill-card">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-bold text-slate-600">Base Consultation Fee</span>
@@ -180,7 +193,7 @@ export const BillingPage = () => {
 
             {/* Payment Method */}
             {!isPaid && (
-              <Card title="Select Payment Method" icon="account_balance_wallet">
+              <Card title="Select Payment Method" icon="account_balance_wallet" className="op-bill-payment-method">
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { id: 'CASH', label: 'Cash', icon: 'payments' },
@@ -211,7 +224,7 @@ export const BillingPage = () => {
       </div>
 
       {/* Floating Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-6 z-50 flex justify-center">
+      <div className="op-bill-action-bar fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-6 z-50 flex justify-center">
         <div className="max-w-[1200px] w-full flex justify-between items-center">
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Amount Due</span>

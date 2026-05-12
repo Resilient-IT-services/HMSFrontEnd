@@ -12,6 +12,7 @@ import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateDOB } from '@/utils/dateValidator';
+import { cloneHospitalMembership } from './contractClone';
 
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
@@ -32,7 +33,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     superuser: initialData?.superuser || false,
     active: initialData?.status ? initialData.status === 'ACTIVE' : initialData?.active ?? true,
     status: initialData?.status || (initialData?.active === false ? 'INACTIVE' : 'ACTIVE'),
-    memberships: initialData?.memberships || [],
+    memberships: initialData?.memberships?.map(membership => cloneHospitalMembership(membership)) || [],
     doctorInfo: initialData?.doctorInfo,
     nurseInfo: initialData?.nurseInfo,
     pharmacistInfo: initialData?.pharmacistInfo,
@@ -288,7 +289,12 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     const hosp = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
     const updatedMemberships = [...(formData.memberships || [])];
-    const contractWithHospitalName = { ...newContract, hospitalName: hosp?.name || newContract.hospitalName };
+    // Keep a private copy in form state. The previous shallow copy reused nested schedule
+    // objects, so changing appointment times in one copied contract mutated the others too.
+    const contractWithHospitalName = cloneHospitalMembership({
+      ...newContract,
+      hospitalName: hosp?.name || newContract.hospitalName
+    });
 
     if (editingContractIndex === null) {
       updatedMemberships.push(contractWithHospitalName);
@@ -320,7 +326,11 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
 
   const duplicateContract = (contract: HospitalMembershipDTO) => {
-    setNewContract({ ...contract, hospitalId: '', hospitalName: undefined });
+    setNewContract({
+      ...cloneHospitalMembership(contract, { resetEntityIds: true }),
+      hospitalId: '',
+      hospitalName: undefined
+    });
     setEditingContractIndex(null);
     setIsAddingContract(true);
   };
