@@ -218,7 +218,7 @@ export const ReceptionDashboard = () => {
                   variant="secondary"
                   onClick={() => router.push('/reception/appointments/create')}
                   icon="medical_services"
-                  className="bg-slate-800 border-slate-700 text-white hover:bg-slate-700 justify-between"
+                  className="bg-slate-800 border-slate-700  justify-between"
                 >
                   Create Visit
                   <span className="material-symbols-outlined">chevron_right</span>
