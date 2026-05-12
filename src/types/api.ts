@@ -221,6 +221,14 @@ export interface PatientResponse {
   createdAt: string;
 }
 
+export interface PatientSummaryDTO {
+  id: string;
+  fullName: string;
+  patientCode: string;
+  gender: Gender;
+  phone: string;
+}
+
 export interface CreatePatientRequest {
   id?: string;
   fullName: string;
@@ -308,7 +316,6 @@ export interface AppointmentResponse {
   doctorName: string;
   doctorSpecialization?: string;
   appointmentTime: string;
-  timeSlot?: string;
   sessionPeriod?: 'MORNING' | 'AFTERNOON' | 'EVENING';
   status: AppointmentStatus;
   tokenNumber?: number;
@@ -321,6 +328,19 @@ export interface AppointmentResponse {
   vitals?: VitalsDTO;
   prescription?: PrescriptionDTO;
   createdAt: string;
+}
+
+export interface AppointmentSummaryDTO {
+  id: string;
+  patientId: string;
+  patientName: string;
+  patientCode: string;
+  doctorId: string;
+  doctorName: string;
+  doctorSpecialization: string;
+  appointmentTime: string;
+  status: AppointmentStatus;
+  tokenNumber: number;
 }
 
 export interface CreateAppointmentRequest {
@@ -424,6 +444,18 @@ export interface MedicineResponse {
 
 export type MedicineRequestDTO = Omit<MedicineResponse, 'id'> & { id?: string };
 
+export interface MedicineSummaryDTO {
+  id: string;
+  name: string;
+  genericName?: string;
+  composition?: string;
+  strength?: string;
+  form?: string;
+  category?: string;
+  manufacturer?: string;
+  currentStock?: number;
+}
+
 export interface PharmacyStockDTO {
   id: string;
   medicineId: string;
@@ -524,12 +556,26 @@ export interface PrescriptionDTO {
   id?: string;
   patientId?: string;
   patientName?: string;
+  patientCode?: string;
   doctorId?: string;
   doctorName?: string;
   appointmentId?: string;
   items: PrescriptionItemDTO[];
   status?: string;
   createdAt?: string;
+}
+
+export interface PrescriptionSummaryDTO {
+  id: string;
+  patientId: string;
+  patientName: string;
+  patientCode?: string;
+  doctorId: string;
+  doctorName: string;
+  appointmentId: string;
+  status: string;
+  createdAt: string;
+  itemCount: number;
 }
 
 // Legacy aliases
@@ -595,6 +641,11 @@ export interface PatientHistoryDTO {
   visits: AppointmentResponse[];
 }
 
+export interface PatientHistorySummaryDTO {
+  patient: PatientSummaryDTO;
+  visits: AppointmentSummaryDTO[];
+}
+
 // Doctor Slot
 export interface DoctorSlotDTO {
   startTime: string; // HH:mm
@@ -606,6 +657,7 @@ export interface DoctorSlotDTO {
 // Appointment Stats
 export interface AppointmentStatsDTO {
   total: number;
+  upcoming: number;
   byStatus: Record<string, number>;
 }
 

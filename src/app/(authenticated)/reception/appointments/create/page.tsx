@@ -132,8 +132,7 @@ export default function AppointmentScheduling() {
   // Patient Search
   useEffect(() => {
     if (debouncedSearch.length > 2) {
-      const cleanSearch = debouncedSearch.trim().replace(/^#/, '');
-      patientService.list(0, 5, cleanSearch).then(res => {
+      patientService.list(0, 5, debouncedSearch).then(res => {
         if (res.success && res.data) setSearchResults(res.data.content);
       });
     } else setSearchResults([]);

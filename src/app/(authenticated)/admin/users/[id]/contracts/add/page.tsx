@@ -48,7 +48,7 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
   
   // Role Details State
   const [doctorDetails, setDoctorDetails] = useState<Partial<DoctorHospitalDetailsDTO>>({
-    consultationFee: 500,
+    consultationFee: 0,
     commissionType: 'PERCENTAGE',
     commissionValue: 0,
     visitingConsultant: false,
@@ -116,17 +116,6 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
     if (selectedRoles.length === 0) {
       triggerGlobalToast('Please select at least one role', 'error');
       return;
-    }
-
-    if (selectedRoles.includes('DOCTOR')) {
-      if (doctorDetails.consultationFee === undefined || doctorDetails.consultationFee === null) {
-        triggerGlobalToast('Consultation fee is required', 'error');
-        return;
-      }
-      if (doctorDetails.consultationFee < 500) {
-        triggerGlobalToast('Consultation fee must be at least ₹500', 'error');
-        return;
-      }
     }
 
     try {
@@ -262,10 +251,9 @@ export default function AddContractPage({ params }: { params: Promise<{ id: stri
                   {role === 'DOCTOR' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-1.5">
-                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Consultation Fee (₹)</label>
+                        <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Consultation Fee ($)</label>
                         <input 
                           type="number" 
-                          min="500"
                           className="w-full p-3 bg-gray-50 border-2 border-transparent focus:border-[var(--primary)] rounded-xl outline-none font-bold transition-all"
                           value={doctorDetails.consultationFee}
                           onChange={e => setDoctorDetails({...doctorDetails, consultationFee: Number(e.target.value)})}

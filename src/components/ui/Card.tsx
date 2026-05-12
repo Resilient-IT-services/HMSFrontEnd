@@ -6,12 +6,13 @@ interface CardProps {
   children?: React.ReactNode;
   className?: string;
   icon?: string;
+  headerActions?: React.ReactNode;
 }
 
-export const Card: React.FC<CardProps> = ({ title, subtitle, children, className = '', icon }) => {
+export const Card: React.FC<CardProps> = ({ title, subtitle, children, className = '', icon, headerActions }) => {
   return (
     <section className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm transition-all hover:border-[var(--primary)]/30 ${className}`}>
-      {(title || icon) && (
+      {(title || icon || headerActions) && (
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {icon && (
@@ -24,6 +25,7 @@ export const Card: React.FC<CardProps> = ({ title, subtitle, children, className
               {subtitle && <p className="text-xs text-[var(--text-secondary)]">{subtitle}</p>}
             </div>
           </div>
+          {headerActions && <div>{headerActions}</div>}
         </div>
       )}
       <div>{children}</div>

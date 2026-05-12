@@ -10,7 +10,6 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 export default function PatientRegistration() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<{ phone?: string }>({});
   const [formData, setFormData] = useState<CreatePatientRequest & { firstName: string, lastName: string, email: string }>({
     firstName: '',
     lastName: '',
@@ -22,25 +21,8 @@ export default function PatientRegistration() {
     fullName: ''
   });
 
-  const phoneRegex = /^[0-9]{10}$/;
-
-  const validate = () => {
-    const errors: { phone?: string } = {};
-    if (!formData.phone.trim()) {
-      errors.phone = 'Phone number is required';
-    } else if (!phoneRegex.test(formData.phone.replaceAll(/\s/g, ''))) {
-      errors.phone = 'Invalid phone number (exactly 10 digits)';
-    }
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) {
-      triggerGlobalToast('Please fix the errors before submitting', 'error');
-      return;
-    }
     setLoading(true);
     try {
       const payload: CreatePatientRequest = {
@@ -147,17 +129,13 @@ export default function PatientRegistration() {
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Phone Number</label>
                   <input 
-                    className={`w-full px-4 py-3 border ${validationErrors.phone ? 'border-red-500 ring-1 ring-red-500/20' : 'border-slate-200'} rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm`}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
                     placeholder="e.g., +91 98765 43210" 
                     required 
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => {
-                      setFormData({...formData, phone: e.target.value});
-                      if (validationErrors.phone) setValidationErrors({...validationErrors, phone: undefined});
-                    }}
+                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
                   />
-                  {validationErrors.phone && <p className="text-[10px] text-red-500 font-bold uppercase tracking-wider">{validationErrors.phone}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Address</label>
@@ -215,12 +193,12 @@ export default function PatientRegistration() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className={`material-symbols-outlined text-sm mt-1 ${phoneRegex.test(formData.phone.replaceAll(/\s/g, '')) && formData.dob ? 'text-green-500' : 'text-orange-400'}`}>
-                    {phoneRegex.test(formData.phone.replaceAll(/\s/g, '')) && formData.dob ? 'check_circle' : 'error_outline'}
+                  <span className={`material-symbols-outlined text-sm mt-1 ${formData.phone && formData.dob ? 'text-green-500' : 'text-orange-400'}`}>
+                    {formData.phone && formData.dob ? 'check_circle' : 'error_outline'}
                   </span>
                   <div>
                     <p className="text-xs font-bold text-slate-900">Required Fields</p>
-                    <p className="text-[10px] text-slate-500 leading-tight">Phone Number (exactly 10 digits) and Date of Birth are mandatory.</p>
+                    <p className="text-[10px] text-slate-500 leading-tight">Phone Number and Date of Birth are mandatory.</p>
                   </div>
                 </li>
               </ul>

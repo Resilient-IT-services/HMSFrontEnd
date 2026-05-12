@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, AppointmentResponse, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO } from '@/types/api';
+import { ApiResponse, PageResponse, AppointmentResponse, AppointmentSummaryDTO, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO } from '@/types/api';
 
 export const appointmentService = {
   async list(
@@ -16,6 +16,35 @@ export const appointmentService = {
     timeSlot?: string
   ): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<AppointmentResponse>>>('/appointments', {
+      params: { 
+        page, 
+        size, 
+        search, 
+        date,
+        doctorId,
+        status,
+        paymentStatus,
+        vitalsStatus,
+        tokenNumber,
+        timeSlot
+      }
+    });
+    return response.data;
+  },
+
+  async listSummary(
+    page = 0, 
+    size = 20, 
+    search?: string, 
+    date?: string,
+    doctorId?: string,
+    status?: string,
+    paymentStatus?: string,
+    vitalsStatus?: string,
+    tokenNumber?: string,
+    timeSlot?: string
+  ): Promise<ApiResponse<PageResponse<AppointmentSummaryDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<AppointmentSummaryDTO>>>('/appointments/summary', {
       params: { 
         page, 
         size, 

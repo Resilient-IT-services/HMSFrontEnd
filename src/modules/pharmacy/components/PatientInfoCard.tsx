@@ -20,8 +20,8 @@ const PatientInfoCard: React.FC<PatientInfoCardProps> = ({ patient, doctorName, 
             <p className="font-headline-sm text-on-surface text-lg font-bold">{patient.fullName}</p>
           </div>
           <div>
-            <p className="text-label-sm text-gray-400 uppercase tracking-wider text-xs font-semibold">Patient ID</p>
-            <p className="font-headline-sm text-on-surface text-lg font-bold">{patient.patientCode || patient.id}</p>
+            <p className="text-label-sm text-gray-400 uppercase tracking-wider text-xs font-semibold">Patient Code</p>
+            <p className="font-headline-sm text-on-surface text-lg font-bold">{patient.patientCode || 'N/A'}</p>
           </div>
           <div>
             <p className="text-label-sm text-gray-400 uppercase tracking-wider text-xs font-semibold">Age / Gender</p>

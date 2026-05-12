@@ -9,6 +9,7 @@ import { configureStore } from '@reduxjs/toolkit';
 vi.mock('@/services/patientService', () => ({
   patientService: {
     list: vi.fn(),
+    listSummary: vi.fn(),
     create: vi.fn()
   }
 }));
@@ -33,7 +34,7 @@ vi.mock('next/navigation', () => ({
 
 const mockPatients = [
   {
-    id: 1,
+    id: '1',
     fullName: 'John Doe',
     phone: '1234567890',
     gender: 'MALE',
@@ -42,7 +43,7 @@ const mockPatients = [
     address: '123 Street'
   },
   {
-    id: 2,
+    id: '2',
     fullName: 'Jane Smith',
     phone: '0987654321',
     gender: 'FEMALE',
@@ -60,7 +61,7 @@ describe('PatientsPage', () => {
   });
 
   it('renders correctly and fetches patients', async () => {
-    (patientService.list as any).mockResolvedValue({
+    (patientService.listSummary as any).mockResolvedValue({
       success: true,
       data: {
         content: mockPatients,
@@ -87,7 +88,7 @@ describe('PatientsPage', () => {
 
   it('triggers server-side search when search term changes', async () => {
     vi.useFakeTimers();
-    (patientService.list as any).mockResolvedValue({
+    (patientService.listSummary as any).mockResolvedValue({
       success: true,
       data: {
         content: mockPatients,
@@ -107,15 +108,20 @@ describe('PatientsPage', () => {
     const searchInput = screen.getByPlaceholderText(/Search by name, ID, or phone/i);
     fireEvent.change(searchInput, { target: { value: 'Jane' } });
 
-    // Should not call list immediately due to debounce
-    expect(patientService.list).not.toHaveBeenCalledWith(0, 20, 'Jane');
+    // Should not call listSummary immediately due to debounce
+    expect(patientService.listSummary).not.toHaveBeenCalledWith(0, 20, 'Jane');
 
     // Fast-forward debounce time
     act(() => {
       vi.advanceTimersByTime(500);
     });
 
-    expect(patientService.list).toHaveBeenCalledWith(0, 20, 'Jane');
+    // Flush microtasks to allow effects and async calls to run
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(patientService.listSummary).toHaveBeenCalledWith(0, 20, 'Jane');
     vi.useRealTimers();
   });
 });

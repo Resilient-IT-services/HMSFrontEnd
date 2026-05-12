@@ -1,4 +1,4 @@
-import { AppointmentResponse } from '@/types/api';
+import { AppointmentResponse, AppointmentSummaryDTO } from '@/types/api';
 
 /**
  * Formats a token for display.
@@ -7,10 +7,10 @@ import { AppointmentResponse } from '@/types/api';
  * 2. calculated display from tokenNumber (e.g., "T-001")
  * 3. Fallback placeholder
  */
-export const formatToken = (appointment: AppointmentResponse | undefined | null): string => {
+export const formatToken = (appointment: AppointmentResponse | AppointmentSummaryDTO | undefined | null): string => {
   if (!appointment) return '---';
   
-  if (appointment.tokenDisplay) {
+  if ('tokenDisplay' in appointment && appointment.tokenDisplay) {
     return appointment.tokenDisplay;
   }
   
@@ -24,7 +24,7 @@ export const formatToken = (appointment: AppointmentResponse | undefined | null)
 /**
  * Sorts appointments by token number ascending.
  */
-export const sortByToken = (appointments: AppointmentResponse[]): AppointmentResponse[] => {
+export const sortByToken = <T extends AppointmentResponse | AppointmentSummaryDTO>(appointments: T[]): T[] => {
   return appointments.toSorted((a, b) => {
     const tokenA = a.tokenNumber ?? 999_999;
     const tokenB = b.tokenNumber ?? 999_999;

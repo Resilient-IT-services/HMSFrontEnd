@@ -1,7 +1,7 @@
 'use client';
 
-import { RoleDashboard } from "@/components/role-dashboard";
+import { NurseDashboard } from '@/modules/nurse/pages/NurseDashboard';
 
-export default function NurseDashboardPage() {
-  return <RoleDashboard title="Nurse Dashboard" />;
+export default function Page() {
+  return <NurseDashboard />;
 }

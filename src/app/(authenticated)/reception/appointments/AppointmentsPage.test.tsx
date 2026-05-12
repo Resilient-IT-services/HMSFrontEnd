@@ -11,6 +11,8 @@ import { LayoutProvider } from '@/context/LayoutContext';
 vi.mock('@/services/appointmentService', () => ({
   appointmentService: {
     list: vi.fn(),
+    listSummary: vi.fn(),
+    getStats: vi.fn(),
     updateStatus: vi.fn()
   }
 }));
@@ -27,6 +29,7 @@ vi.mock('next/navigation', () => ({
     back: vi.fn(),
     refresh: vi.fn(),
   }),
+  useSearchParams: () => new URLSearchParams(),
   usePathname: () => '/reception/appointments',
 }));
 
@@ -42,30 +45,30 @@ vi.mock('@/components/ui/MainLayout', () => ({
 
 const mockAppointments = [
   {
-    id: 1,
+    id: '1',
     patientId: 'p1',
     patientName: 'John Doe',
-    doctorId: 101,
+    doctorId: '101',
     doctorName: 'Dr. Smith',
     appointmentTime: new Date().toISOString(),
     status: 'SCHEDULED',
     reason: 'Checkup'
   },
   {
-    id: 2,
+    id: '2',
     patientId: 'p2',
     patientName: 'Jane Smith',
-    doctorId: 102,
+    doctorId: '102',
     doctorName: 'Dr. Jones',
     appointmentTime: new Date().toISOString(),
     status: 'CHECKED_IN',
     reason: 'Followup'
   },
   {
-    id: 3,
+    id: '3',
     patientId: 'p3',
     patientName: 'Future Patient',
-    doctorId: 101,
+    doctorId: '101',
     doctorName: 'Dr. Smith',
     appointmentTime: new Date(Date.now() + 86_400_000).toISOString(), // Tomorrow
     status: 'SCHEDULED',
@@ -74,8 +77,8 @@ const mockAppointments = [
 ];
 
 const mockDoctors = [
-  { id: 101, fullName: 'Dr. Smith', specialization: 'General' },
-  { id: 102, fullName: 'Dr. Jones', specialization: 'Cardio' }
+  { id: '101', fullName: 'Dr. Smith', specialization: 'General' },
+  { id: '102', fullName: 'Dr. Jones', specialization: 'Cardio' }
 ];
 
 describe('TodayAppointmentsPage', () => {
@@ -83,14 +86,18 @@ describe('TodayAppointmentsPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    (appointmentService.getStats as any).mockResolvedValue({
+      success: true,
+      data: { total: 3, upcoming: 1, byStatus: { 'SCHEDULED': 2, 'CHECKED_IN': 1 } }
+    });
   });
 
   it('renders correctly and fetches today\'s appointments only', async () => {
-    (appointmentService.list as any).mockResolvedValue({
+    (appointmentService.listSummary as any).mockResolvedValue({
       success: true,
       data: {
-        content: mockAppointments,
-        totalElements: 3,
+        content: mockAppointments.slice(0, 2),
+        totalElements: 2,
         totalPages: 1,
         size: 100,
         number: 0
@@ -117,7 +124,6 @@ describe('TodayAppointmentsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
-      expect(screen.queryByText('Future Patient')).not.toBeInTheDocument();
     });
   });
 

@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { DoctorLandingPage } from '@/modules/doctor/pages/DoctorLandingPage';
 
-export default function DoctorPage() {
-  redirect('/doctor/dashboard');
+export default function Page() {
+  return <DoctorLandingPage />;
 }

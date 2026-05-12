@@ -23,7 +23,7 @@ export default function ReceptionDashboard() {
       const today = new Date().toISOString().split('T')[0];
       
       const [patRes, appRes, docRes, nurRes] = await Promise.all([
-        patientService.list(0, 100),
+        patientService.list(0, 5),
         appointmentService.list(0, 100),
         doctorService.list(0, 6),
         nurseService.list(0, 5)
@@ -51,8 +51,6 @@ export default function ReceptionDashboard() {
   }, []); // Run on mount only, fetchData is stable
 
   const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
-    const totalPatientsToday = recentPatients.filter(p => p.createdAt?.startsWith(today)).length;
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
     const doctorQueueByName = new Map<string, number>();
 
@@ -66,7 +64,7 @@ export default function ReceptionDashboard() {
     }
 
     return {
-      totalPatients: totalPatientsToday,
+      totalPatients: recentPatients.length,
       activeQueue,
       appointmentsToday: appointments.length,
       doctorQueueByName
@@ -132,7 +130,7 @@ export default function ReceptionDashboard() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {recentPatients.slice(0, 5).map((p) => (
+                    {recentPatients.map((p) => (
                       <tr 
                         key={p.id} 
                         className="hover:bg-slate-50/50 transition-colors cursor-pointer"
@@ -230,6 +228,14 @@ export default function ReceptionDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Floating Action Button */}
+      <button 
+        onClick={() => router.push('/reception/appointments/create')}
+        className="fixed bottom-10 right-10 bg-orange-600 text-white p-4 rounded-full shadow-2xl hover:bg-orange-700 transition-all active:scale-95 z-50 flex items-center justify-center"
+      >
+        <span className="material-symbols-outlined text-2xl">add</span>
+      </button>
     </MainLayout>
   );
 }
