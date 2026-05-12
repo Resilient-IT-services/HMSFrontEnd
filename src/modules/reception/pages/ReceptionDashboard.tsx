@@ -248,13 +248,6 @@ export const ReceptionDashboard = () => {
           </div>
         </div>
       </PageSurface>
-
-      {/* Floating Action Button */}
-      <Button 
-        onClick={() => router.push('/reception/appointments/create')}
-        className="fixed bottom-10 right-10 !rounded-full h-14 w-14 shadow-2xl z-50 p-0"
-        icon="add"
-      />
     </MainLayout>
   );
 };
