@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
@@ -8,9 +8,10 @@ import { CreatePatientRequest } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateDOB } from '@/utils/dateValidator';
 
-export function PatientRegistration() {
+export function PatientRegistration({ patientId }: { patientId?: string } = {}) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(!!patientId);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<CreatePatientRequest & { firstName: string, lastName: string, email: string }>({
     firstName: '',
@@ -22,6 +23,52 @@ export function PatientRegistration() {
     email: '',
     fullName: ''
   });
+  const isEditMode = !!patientId;
+
+  useEffect(() => {
+    if (!patientId) return;
+
+    const loadPatient = async () => {
+      try {
+        setInitialLoading(true);
+        const response = await patientService.get(patientId);
+
+        if (!response.success || !response.data) {
+          triggerGlobalToast('Patient not found', 'error');
+          router.push('/reception/patients');
+          return;
+        }
+
+        const patient = response.data;
+        const nameParts = patient.fullName.trim().split(/\s+/);
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ');
+
+        setFormData({
+          id: patient.id,
+          firstName,
+          lastName,
+          fullName: patient.fullName,
+          gender: patient.gender,
+          dob: patient.dob,
+          phone: patient.phone,
+          address: patient.address,
+          email: patient.email || '',
+          patientCode: patient.patientCode,
+          bloodGroup: patient.bloodGroup,
+          medicalHistory: patient.medicalHistory
+        });
+      } catch (error) {
+        console.error(error);
+        triggerGlobalToast('Failed to load patient profile', 'error');
+        router.push('/reception/patients');
+      } finally {
+        setInitialLoading(false);
+      }
+    };
+
+    void loadPatient();
+  }, [patientId, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,17 +85,28 @@ export function PatientRegistration() {
     setLoading(true);
     try {
       const payload: CreatePatientRequest = {
+        id: patientId,
         fullName: `${formData.firstName} ${formData.lastName}`.trim(),
         gender: formData.gender,
         dob: formData.dob,
         phone: formData.phone,
-        address: formData.address || 'Not Provided'
+        address: formData.address || 'Not Provided',
+        email: formData.email || undefined,
+        patientCode: formData.patientCode,
+        bloodGroup: formData.bloodGroup,
+        medicalHistory: formData.medicalHistory
       };
 
-      const res = await patientService.create(payload);
+      const res = patientId
+        ? await patientService.update(patientId, payload)
+        : await patientService.create(payload);
+
       if (res.success) {
-        triggerGlobalToast('Patient registered successfully', 'success');
-        router.push('/reception/patients');
+        triggerGlobalToast(
+          patientId ? 'Patient profile updated successfully' : 'Patient registered successfully',
+          'success'
+        );
+        router.push(patientId ? `/reception/patients/${patientId}` : '/reception/patients');
       }
     } catch (error) {
       console.error(error);
@@ -57,26 +115,42 @@ export function PatientRegistration() {
     }
   };
 
+  if (initialLoading) {
+    return <MainLayout title="Loading..."><div className="p-8">Loading patient details...</div></MainLayout>;
+  }
+
   return (
-    <MainLayout title="Patient Registration">
+    <MainLayout title={isEditMode ? 'Edit Patient Profile' : 'Patient Registration'}>
       <div className="p-4 max-w-6xl mx-auto">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-xs mb-6 text-slate-500">
           <span className="hover:text-primary cursor-pointer" onClick={() => router.push('/reception/dashboard')}>Dashboard</span>
           <span className="material-symbols-outlined text-sm">chevron_right</span>
-          <span className="font-semibold text-slate-900">Patient Registration</span>
+          <span className="hover:text-primary cursor-pointer" onClick={() => router.push('/reception/patients')}>Patients</span>
+          <span className="material-symbols-outlined text-sm">chevron_right</span>
+          <span className="font-semibold text-slate-900">{isEditMode ? 'Edit Profile' : 'Patient Registration'}</span>
         </nav>
 
         {/* Page Header */}
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-1">New Patient Registration</h2>
-            <p className="text-slate-500">Complete the details below to initialize a new electronic health record.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-1">
+              {isEditMode ? 'Edit Patient Profile' : 'New Patient Registration'}
+            </h2>
+            <p className="text-slate-500">
+              {isEditMode
+                ? 'Update the patient record details below.'
+                : 'Complete the details below to initialize a new electronic health record.'}
+            </p>
           </div>
           <div className="bg-orange-50 border border-orange-100 px-6 py-3 rounded-xl flex items-center gap-4">
             <div className="text-right">
-              <p className="text-[10px] font-black text-primary uppercase tracking-wider">UPIN Assignment</p>
-              <p className="text-lg font-bold text-slate-900">AUTO-GENERATE</p>
+              <p className="text-[10px] font-black text-primary uppercase tracking-wider">
+                {isEditMode ? 'Patient Code' : 'UPIN Assignment'}
+              </p>
+              <p className="text-lg font-bold text-slate-900">
+                {isEditMode ? (formData.patientCode || 'UNAVAILABLE') : 'AUTO-GENERATE'}
+              </p>
             </div>
             <div className="h-10 w-px bg-orange-200"></div>
             <span className="material-symbols-outlined text-primary text-3xl">fingerprint</span>
@@ -185,7 +259,7 @@ export function PatientRegistration() {
                 ) : (
                   <span className="material-symbols-outlined text-[20px]">how_to_reg</span>
                 )}
-                Save & Register
+                {isEditMode ? 'Save Changes' : 'Save & Register'}
               </button>
             </div>
           </div>

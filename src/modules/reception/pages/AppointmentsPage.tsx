@@ -135,7 +135,7 @@ export const AppointmentsPage = () => {
             Filters {(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0) > 0 && 
               `(${(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0)})`}
           </Button>
-          <Button icon="add_circle" href="/reception/patient-registration">
+          <Button icon="add_circle" href="/reception/appointments/create">
             New Visit
           </Button>
         </PageHeading>
