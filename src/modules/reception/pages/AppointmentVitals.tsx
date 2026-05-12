@@ -67,15 +67,7 @@ export const AppointmentVitals = () => {
           title="Clinical Vitals Intake" 
           description="Capture primary physiological measurements to establish the patient's current health baseline."
         >
-          <Button 
-            icon="check_circle" 
-            size="xl" 
-            isLoading={saving} 
-            onClick={() => handleSave()}
-            className="px-10"
-          >
-            {saving ? 'Saving Data...' : 'Confirm & Submit'}
-          </Button>
+
         </PageHeading>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -269,8 +261,19 @@ export const AppointmentVitals = () => {
                     onChange={(e) => setComplaints(e.target.value)}
                    />
                 </div>
+
               </form>
+
             </Card>
+            <Button
+                icon="check_circle"
+                size="xl"
+                isLoading={saving}
+                onClick={() => handleSave()}
+                className="px-10 ml-120"
+            >
+              {saving ? 'Saving Data...' : 'Confirm & Submit'}
+            </Button>
           </div>
         </div>
       </div>
