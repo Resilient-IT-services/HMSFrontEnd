@@ -85,20 +85,32 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
     setLoading(true);
     try {
       const payload: CreatePatientRequest = {
-        id: patientId,
         fullName: `${formData.firstName} ${formData.lastName}`.trim(),
         gender: formData.gender,
         dob: formData.dob,
         phone: formData.phone,
         address: formData.address || 'Not Provided',
-        email: formData.email || undefined,
-        patientCode: formData.patientCode,
-        bloodGroup: formData.bloodGroup,
-        medicalHistory: formData.medicalHistory
+        bloodGroup: formData.bloodGroup || undefined,
+        medicalHistory: formData.medicalHistory || undefined,
       };
 
-      const res = patientId
-        ? await patientService.update(patientId, payload)
+      // Only include email if it's not empty
+      if (formData.email && formData.email.trim() !== '') {
+        payload.email = formData.email.trim();
+      }
+
+      // Only include id and patientCode if we are in edit mode
+      if (isEditMode) {
+        payload.id = patientId;
+        payload.patientCode = formData.patientCode;
+      } else {
+        // DIAGNOSTIC: Force a unique patient code to see if backend accepts it
+        // and if it bypasses the auto-generator collision.
+        payload.patientCode = `DEBUG-${Math.floor(Math.random() * 10000)}`;
+      }
+
+      const res = isEditMode
+        ? await patientService.update(patientId!, payload)
         : await patientService.create(payload);
 
       if (res.success) {

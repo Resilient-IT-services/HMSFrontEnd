@@ -230,15 +230,23 @@ export default function AdminReportsPage() {
 
   const handleExport = async (format: 'pdf' | 'excel') => {
     try {
+      if (startDate && endDate && startDate > endDate) {
+        setError('Start date cannot be greater than end date');
+        return;
+      }
+
       setExporting(format);
+      setError('');
 
       // If 'All Hospitals' is selected, handle export differently since backend requires hospital context
       if (!hospitalId) {
+        if (rows.length === 0) {
+          setError('Please generate the report first to export "All Hospitals" data.');
+          setExporting(null);
+          return;
+        }
+
         if (format === 'excel') {
-          if (rows.length === 0) {
-            setError('Please generate the report first to export "All Hospitals" data.');
-            return;
-          }
           // Generate CSV from currently loaded merged rows
           const header = columns.map(titleCase).join(',');
           const csvRows = rows.map((row) =>
@@ -253,20 +261,17 @@ export default function AdminReportsPage() {
           const csvContent = '\uFEFF' + [header, ...csvRows].join('\n');
           const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
           downloadBlob(blob, `all-hospitals-${reportType.toLowerCase()}-${startDate}-to-${endDate}.csv`);
-          return;
         } else {
           // Trigger print for PDF export of "All Hospitals"
-          if (rows.length === 0) {
-            setError('Please generate the report first to print "All Hospitals" data.');
-            return;
-          }
           globalThis.print();
-          return;
         }
+        setExporting(null);
+        return;
       }
 
       const blob = format === 'pdf' ? await reportService.exportPdf(filters) : await reportService.exportExcel(filters);
-      downloadBlob(blob, `reports-${reportType.toLowerCase()}-${startDate}-to-${endDate}.${format === 'pdf' ? 'pdf' : 'xlsx'}`);
+      const filename = `report-${reportType.toLowerCase()}-${startDate}-to-${endDate}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
+      downloadBlob(blob, filename);
     } catch (exportError) {
       console.error(exportError);
       setError(`Unable to export ${format.toUpperCase()} report.`);
@@ -400,7 +405,15 @@ export default function AdminReportsPage() {
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(event) => setStartDate(event.target.value)}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (endDate && val > endDate) {
+                      setError('Start date cannot be greater than end date');
+                      return;
+                    }
+                    setError('');
+                    setStartDate(val);
+                  }}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
                 />
               </label>
@@ -409,7 +422,15 @@ export default function AdminReportsPage() {
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(event) => setEndDate(event.target.value)}
+                  onChange={(event) => {
+                    const val = event.target.value;
+                    if (startDate && val < startDate) {
+                      setError('End date cannot be less than start date');
+                      return;
+                    }
+                    setError('');
+                    setEndDate(val);
+                  }}
                   className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
                 />
               </label>

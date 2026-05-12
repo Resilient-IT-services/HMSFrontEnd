@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
+import { useDebounce } from '@/hooks/useDebounce';
 import { PatientResponse, AppointmentResponse, PrescriptionResponse, AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
 
 export const useMedicalHistory = () => {
@@ -18,6 +19,7 @@ export const useMedicalHistory = () => {
   const [selectedVisit, setSelectedVisit] = useState<AppointmentResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [activeView, setActiveView] = useState<'APPOINTMENTS' | 'PATIENTS'>('APPOINTMENTS');
 
   // Pagination State
@@ -101,24 +103,33 @@ export const useMedicalHistory = () => {
   };
 
   useEffect(() => {
+    if (activeView === 'APPOINTMENTS') {
+      fetchHistoryList(debouncedSearchTerm, appointmentsPage);
+    } else {
+      fetchPatientsList(debouncedSearchTerm, patientsPage);
+    }
+  }, [activeView, appointmentsPage, patientsPage, debouncedSearchTerm, fetchHistoryList, fetchPatientsList]);
+
+  useEffect(() => {
     if (patientId) {
       fetchPatientDetails(patientId);
-    } else if (activeView === 'APPOINTMENTS') {
-      fetchHistoryList(searchTerm, appointmentsPage);
     } else {
-      fetchPatientsList(searchTerm, patientsPage);
+      setSelectedPatient(null);
+      setSelectedVisit(null);
+      setPatientVisits([]);
     }
-  }, [patientId, activeView, appointmentsPage, patientsPage, fetchHistoryList, fetchPatientsList, fetchPatientDetails]);
+  }, [patientId, fetchPatientDetails]);
+
+  // Reset page when search term changes
+  useEffect(() => {
+    setAppointmentsPage(0);
+    setPatientsPage(0);
+  }, [debouncedSearchTerm]);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (activeView === 'APPOINTMENTS') {
-      setAppointmentsPage(0);
-      fetchHistoryList(searchTerm, 0);
-    } else {
-      setPatientsPage(0);
-      fetchPatientsList(searchTerm, 0);
-    }
+    // Pagination is already reset by the useEffect above
+    // debouncedSearchTerm will trigger the fetch
   };
 
   const selectPatient = (id: string) => {

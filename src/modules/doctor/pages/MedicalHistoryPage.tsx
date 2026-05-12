@@ -204,7 +204,16 @@ export const MedicalHistoryPage = () => {
                 data={historyAppointments} 
                 isLoading={loading}
                 onRowDoubleClick={(row) => selectPatient((row as AppointmentSummaryDTO).patientId)}
-                emptyMessage="No visit history found."
+                emptyMessage={
+                  <div className="py-12 text-center">
+                    <p className="text-slate-400 italic mb-4">No completed visits found matching "{searchTerm}".</p>
+                    {searchTerm && (
+                      <Button variant="secondary" size="sm" onClick={() => setActiveView('PATIENTS')}>
+                        Search in All Patients
+                      </Button>
+                    )}
+                  </div>
+                }
               />
             ) : (
               <Table 
@@ -212,7 +221,11 @@ export const MedicalHistoryPage = () => {
                 data={patients} 
                 isLoading={loading}
                 onRowDoubleClick={(row) => selectPatient((row as PatientSummaryDTO).id)}
-                emptyMessage="No patient records found."
+                emptyMessage={
+                  <div className="py-12 text-center">
+                    <p className="text-slate-400 italic">No patient records found matching "{searchTerm}".</p>
+                  </div>
+                }
               />
             )}
 

@@ -18,13 +18,13 @@ export const Pagination: React.FC<PaginationProps> = ({
   onPageChange,
   label = "records"
 }) => {
-  const start = page * pageSize + 1;
+  const start = totalElements === 0 ? 0 : page * pageSize + 1;
   const end = Math.min((page + 1) * pageSize, totalElements);
 
   return (
     <div className="p-6 bg-slate-50/50 border-t border-slate-50 flex justify-between items-center">
       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-        Showing <span className="text-slate-900">{start}-{end}</span> of {totalElements} {label}
+        Showing <span className="text-slate-900">{start} to {end}</span> of {totalElements} {label}
       </p>
       <div className="flex gap-2">
         <Button

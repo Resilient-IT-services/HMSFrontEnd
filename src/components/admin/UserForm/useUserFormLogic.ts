@@ -167,21 +167,23 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     // Nurse Specific Validation
     if (assignedRoles.includes('NURSE') && formData.nurseInfo) {
-      if (!formData.nurseInfo.nursingLicenseNo?.trim()) {
+      const nurseLicense = formData.nurseInfo.nursingLicenseNo?.trim();
+      if (!nurseLicense) {
         errors.nursingLicenseNo = 'Nurse license number is required';
       }
     }
 
     // Pharmacist Specific Validation
     if (assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo) {
-      if (!formData.pharmacistInfo.pciRegNo?.trim()) {
+      const pciRegNo = formData.pharmacistInfo.pciRegNo?.trim();
+      if (!pciRegNo) {
         errors.pciRegNo = 'PCI Registration number is required';
       }
     }
 
     setValidationErrors(errors);
     if (Object.keys(errors).length > 0) {
-      triggerGlobalToast('Fill all the required details', 'error');
+      triggerGlobalToast('Please fill all required professional details', 'error');
     }
     return Object.keys(errors).length === 0;
   };
@@ -192,8 +194,29 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     try {
       setLoading(true);
+      
+      // Clean data before submission to ensure no empty unique fields are sent
+      const cleanedDoctorInfo = formData.doctorInfo ? {
+        ...formData.doctorInfo,
+        specialization: formData.doctorInfo.specialization?.trim(),
+        licenseNumber: formData.doctorInfo.licenseNumber?.trim()
+      } : undefined;
+
+      const cleanedNurseInfo = formData.nurseInfo ? {
+        ...formData.nurseInfo,
+        nursingLicenseNo: formData.nurseInfo.nursingLicenseNo?.trim()
+      } : undefined;
+
+      const cleanedPharmacistInfo = formData.pharmacistInfo ? {
+        ...formData.pharmacistInfo,
+        pciRegNo: formData.pharmacistInfo.pciRegNo?.trim()
+      } : undefined;
+
       const userPayload: UserRequestDTO = {
         ...formData,
+        doctorInfo: cleanedDoctorInfo,
+        nurseInfo: cleanedNurseInfo,
+        pharmacistInfo: cleanedPharmacistInfo,
         status: formData.active ? 'ACTIVE' : 'INACTIVE'
       };
       const response = isEdit && initialData?.id

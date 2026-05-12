@@ -25,6 +25,8 @@ export const MedicineInventory = () => {
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [medicineToDelete, setMedicineToDelete] = useState<{id: string, name: string} | null>(null);
   const [selectedMedicine, setSelectedMedicine] = useState<MedicineResponse | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -117,15 +119,17 @@ export const MedicineInventory = () => {
     }
   };
 
-  const handleDeleteMedicine = async (id: string, name: string) => {
-    if (!globalThis.confirm(`Are you sure you want to delete "${name}" from the master catalog?`)) return;
+  const handleDeleteMedicine = async () => {
+    if (!medicineToDelete) return;
     
     try {
       setLoading(true);
-      const response = await pharmacyApi.deleteMedicine(id);
+      const response = await pharmacyApi.deleteMedicine(medicineToDelete.id);
       if (response.success) {
         triggerGlobalToast('Medicine deleted successfully', 'success');
-        if (selectedMedicine?.id === id) setSelectedMedicine(null);
+        if (selectedMedicine?.id === medicineToDelete.id) setSelectedMedicine(null);
+        setShowDeleteModal(false);
+        setMedicineToDelete(null);
         fetchMedicines();
       }
     } catch (error) {
@@ -217,7 +221,8 @@ export const MedicineInventory = () => {
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeleteMedicine(m.id, m.name);
+                              setMedicineToDelete({ id: m.id, name: m.name });
+                              setShowDeleteModal(true);
                             }}
                           />
                           <span className="material-symbols-outlined text-slate-300">chevron_right</span>
@@ -354,6 +359,49 @@ export const MedicineInventory = () => {
             onClose={() => setShowEditModal(false)}
             onSuccess={fetchMedicines}
           />
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && medicineToDelete && (
+          <Modal
+            isOpen={showDeleteModal}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setMedicineToDelete(null);
+            }}
+            title="Confirm Deletion"
+          >
+            <div className="p-8 text-center">
+              <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <span className="material-symbols-outlined text-4xl">delete_forever</span>
+              </div>
+              <h3 className="text-xl font-black text-slate-800 mb-2">Delete Medicine?</h3>
+              <p className="text-slate-500 text-sm">
+                Are you sure you want to remove <span className="font-bold text-slate-800">"{medicineToDelete.name}"</span> from the master catalog? This action cannot be undone.
+              </p>
+              
+              <div className="mt-10 flex gap-4">
+                <Button 
+                  variant="secondary" 
+                  fullWidth 
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setMedicineToDelete(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  fullWidth 
+                  className="bg-red-600 hover:bg-red-700 shadow-red-200 text-white"
+                  onClick={handleDeleteMedicine}
+                  isLoading={loading}
+                >
+                  Delete Medicine
+                </Button>
+              </div>
+            </div>
+          </Modal>
         )}
       </PageSurface>
     </MainLayout>

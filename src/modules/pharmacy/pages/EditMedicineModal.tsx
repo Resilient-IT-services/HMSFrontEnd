@@ -24,6 +24,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
     category: medicine.category || 'General',
     reorderLevel: medicine.reorderLevel || 50,
     taxPercentage: medicine.taxPercentage || 12,
+    currentStock: medicine.currentStock || 0,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -46,7 +47,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
       }
     } catch (error) {
       console.error('Failed to update medicine', error);
-      triggerGlobalToast('Failed to update medicine', 'error');
+      // Removed duplicate toast as apiClient already triggers one
     } finally {
       setLoading(false);
     }
@@ -167,6 +168,30 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
                 className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
                 placeholder="e.g. PharmaCorp India" 
                 type="text"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Available Units (Current Stock)</label>
+              <input 
+                name="currentStock"
+                value={formData.currentStock}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
+                placeholder="0" 
+                type="number"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Reorder Level</label>
+              <input 
+                name="reorderLevel"
+                value={formData.reorderLevel}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
+                placeholder="50" 
+                type="number"
               />
             </div>
 

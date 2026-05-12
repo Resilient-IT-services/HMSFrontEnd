@@ -118,7 +118,14 @@ export const EarningsPage = () => {
               <input 
                 type="date" 
                 value={startDate} 
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (endDate && val > endDate) {
+                    triggerGlobalToast('Start date cannot be greater than end date', 'warning');
+                    return;
+                  }
+                  setStartDate(val);
+                }}
                 className="text-sm font-bold text-slate-700 outline-none bg-transparent"
               />
             </div>
@@ -128,7 +135,14 @@ export const EarningsPage = () => {
               <input 
                 type="date" 
                 value={endDate} 
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (startDate && val < startDate) {
+                    triggerGlobalToast('End date cannot be less than start date', 'warning');
+                    return;
+                  }
+                  setEndDate(val);
+                }}
                 className="text-sm font-bold text-slate-700 outline-none bg-transparent"
               />
             </div>

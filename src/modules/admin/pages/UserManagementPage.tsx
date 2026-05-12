@@ -96,24 +96,30 @@ export const UserManagementPage = () => {
                   const res = await userService.getFullProfile(user.id);
 
                   if (res.success && res.data) {
+                    const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+                    const fullProfile = res.data;
 
-                    const newStatus =
-                        currentStatus === 'ACTIVE'
-                            ? 'INACTIVE'
-                            : 'ACTIVE';
-
-                    const updatedData = {
-                      ...res.data,
-                      status: newStatus,
-                      active: newStatus === 'ACTIVE'
+                    const userPayload: UserRequestDTO = {
+                      id: fullProfile.id,
+                      username: fullProfile.username,
+                      email: fullProfile.email,
+                      fullName: fullProfile.fullName,
+                      gender: fullProfile.gender,
+                      dob: fullProfile.dob,
+                      phone: fullProfile.phone,
+                      superuser: fullProfile.superuser,
+                      status: newStatus as any,
+                      active: newStatus === 'ACTIVE',
+                      memberships: fullProfile.memberships,
+                      doctorInfo: fullProfile.doctorInfo,
+                      nurseInfo: fullProfile.nurseInfo,
+                      pharmacistInfo: fullProfile.pharmacistInfo,
+                      receptionistInfo: fullProfile.receptionistInfo
                     };
 
-                    const updateRes = await userService.updateUser(
-                        user.id,
-                        updatedData as any
-                    );
-
+                    const updateRes = await userService.updateUser(user.id, userPayload);
                     if (updateRes.success) {
+                      triggerGlobalToast(`User ${newStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully`, 'success');
                       refresh();
                     }
                   }
