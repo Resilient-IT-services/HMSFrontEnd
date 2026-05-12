@@ -87,13 +87,15 @@ export const AppointmentsPage = () => {
       className: 'text-center',
       render: (app) => (
         <div className="flex items-center justify-center gap-2">
-          <Button 
-            size="sm" 
-            icon="vital_signs"
-            onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
-          >
-            Vitals
-          </Button>
+          {!['SCHEDULED', 'WALK_IN', 'CHECKED_IN', 'COMPLETED', 'CANCELLED'].includes(app.status) && (
+            <Button 
+              size="sm" 
+              icon="vital_signs"
+              onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
+            >
+              Vitals
+            </Button>
+          )}
           <Button 
             variant="secondary" 
             size="sm" 

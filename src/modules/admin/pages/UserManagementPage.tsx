@@ -172,7 +172,7 @@ export const UserManagementPage = () => {
   ];
 
   return (
-    <MainLayout title="Identity & Access">
+    <MainLayout title=" Identity & Access">
       <PageSurface
         maxWidthClassName="max-w-[1600px]"
         backgroundClassName="bg-[#f8f9fb]"
