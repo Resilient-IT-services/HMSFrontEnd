@@ -92,7 +92,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     departmentName: 'General', 
                     active: true, 
                     assignmentId: '', 
-                    doctorDetails: role === 'DOCTOR' ? { consultationFee: 0, followUpDays: 0 } : undefined 
+                    doctorDetails: role === 'DOCTOR' ? { consultationFee: 500, followUpDays: 0 } : undefined 
                   } as any] });
                 }} className={`px-3 py-1.5 rounded-lg border-2 font-black text-[9px] uppercase tracking-widest transition-all ${isSelected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}>{role}</button>
               );
@@ -124,7 +124,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   <>
                     <div className="flex flex-col gap-1.5">
                       <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (₹) <span className="text-primary">*</span></label>
-                      <input type="number" min="0" step="1" className={`form-input ${validationErrors[`fee_${ra.roleCode}`] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
+                      <input type="number" min="500" step="1" className={`form-input ${validationErrors[`fee_${ra.roleCode}`] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
                         let value = e.target.value;
                         value = value.replaceAll(/[^0-9]/g, '');
                         const val = value === '' ? 0 : Number(value);

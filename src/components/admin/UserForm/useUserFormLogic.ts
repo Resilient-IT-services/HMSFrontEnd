@@ -251,8 +251,12 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
         if (!ra.departmentName?.trim()) {
           errors[`department_${ra.roleCode}`] = 'Department is required';
         }
-        if (ra.roleCode === 'DOCTOR' && (ra.doctorDetails?.consultationFee === undefined || ra.doctorDetails?.consultationFee === null)) {
-          errors[`fee_${ra.roleCode}`] = 'Consultation fee is required';
+        if (ra.roleCode === 'DOCTOR') {
+          if (ra.doctorDetails?.consultationFee === undefined || ra.doctorDetails?.consultationFee === null) {
+            errors[`fee_${ra.roleCode}`] = 'Consultation fee is required';
+          } else if (ra.doctorDetails.consultationFee < 500) {
+            errors[`fee_${ra.roleCode}`] = 'Consultation fee must be at least ₹500';
+          }
         }
       });
     }
