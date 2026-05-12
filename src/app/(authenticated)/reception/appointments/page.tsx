@@ -178,14 +178,6 @@ export default function TodayAppointmentsPage() {
           </div>
           <div className="flex w-full sm:w-auto gap-3">
             <button 
-              onClick={() => setIsFilterModalOpen(true)}
-              className="flex-1 sm:flex-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-slate-50 shadow-sm"
-            >
-              <span className="material-symbols-outlined text-lg">filter_list</span>
-              Filters {(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0) > 0 && 
-                `(${(activeFilters.statuses?.length || 0) + (activeFilters.paymentStatuses?.length || 0)})`}
-            </button>
-            <button 
               onClick={() => router.push('/reception/patient-registration')}
               className="flex-1 sm:flex-none px-6 py-2.5 bg-orange-600 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 hover:bg-orange-700 shadow-md shadow-orange-600/20 active:scale-95 transition-all"
             >

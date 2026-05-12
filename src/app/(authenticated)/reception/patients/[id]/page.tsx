@@ -98,7 +98,9 @@ export default function PatientProfilePage({ params }: PatientProfileProps) {
                     {patient.gender}
                   </span>
                 </div>
-                <p className="text-[var(--text-secondary)] font-medium">Patient ID: <span className="text-[var(--primary)] font-bold">#PAT-{patient.id.toString().padStart(5, '0')}</span></p>
+                <p className="text-[var(--text-secondary)] font-medium">Patient ID: <span className="text-[var(--primary)] font-bold">
+                  {patient.patientCode || `#PAT-${patient.id.toString().substring(0, 8).toUpperCase()}`}
+                </span></p>
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[var(--text-secondary)]">
                   <span className="flex items-center gap-1"><Cake className="size-4" /> {new Date(patient.dob).toLocaleDateString()}</span>
                   <span className="flex items-center gap-1"><MapPin className="size-4" /> {patient.address}</span>

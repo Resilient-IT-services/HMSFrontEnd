@@ -20,7 +20,9 @@ export default function PatientsPage() {
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await patientService.list(page, 20, debouncedSearchTerm);
+      // Normalize search term: trim and strip leading '#' if present
+      const cleanSearch = debouncedSearchTerm.trim().replace(/^#/, '');
+      const response = await patientService.list(page, 20, cleanSearch);
       if (response.success && response.data) {
         setPatients(response.data.content);
         setTotalElements(response.data.totalElements);
@@ -120,7 +122,7 @@ export default function PatientsPage() {
                   >
                     <td className="px-6 py-5">
                       <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
-                        #PAT-{row.id.toString().substring(0, 5)}
+                        {row.patientCode || `#PAT-${row.id.toString().substring(0, 8).toUpperCase()}`}
                       </span>
                     </td>
                     <td className="px-6 py-5">

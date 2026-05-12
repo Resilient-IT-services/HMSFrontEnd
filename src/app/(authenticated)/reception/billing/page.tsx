@@ -7,6 +7,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { doctorService } from '@/services/doctorService';
 import { billingService } from '@/services/billingService';
+import { userService } from '@/services/userService';
 import {
   AppointmentResponse,
   PatientResponse,
@@ -37,6 +38,8 @@ export default function BillingPage() {
   const [billing, setBilling] = useState<BillingResponse | null>(null);
 
   const [loading, setLoading] = useState(true);
+  const [isFollowUp, setIsFollowUp] = useState(false);
+  const [followUpDays, setFollowUpDays] = useState(7);
 
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [discount, setDiscount] = useState(0);
@@ -45,6 +48,10 @@ export default function BillingPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
+      let patData: PatientResponse | null = null;
+      let docDataFound: DoctorStaffResponse | null = null;
+      let appointmentTime: string | null = null;
+
       if (appointmentId) {
         const [appRes, billRes] = await Promise.all([
           appointmentService.get(appointmentId),
@@ -54,6 +61,7 @@ export default function BillingPage() {
         const appData = appRes.data;
         if (appRes.success && appData) {
           setAppointment(appData);
+          appointmentTime = appData.appointmentTime;
 
           if (billRes.success && billRes.data) {
             setBilling(billRes.data);
@@ -67,11 +75,14 @@ export default function BillingPage() {
             patientService.get(appData.patientId),
             doctorService.list(0, 100),
           ]);
-          if (patRes.success) setPatient(patRes.data || null);
-          const docData = docRes.data;
-          if (docRes.success && docData) {
-            const doc = docData.content.find((d) => d.doctorId === appData.doctorId);
-            if (doc) setDoctor(doc);
+          if (patRes.success) {
+            patData = patRes.data || null;
+            setPatient(patData);
+          }
+          const doctorsList = docRes.data;
+          if (docRes.success && doctorsList) {
+            docDataFound = doctorsList.content.find((d) => d.doctorId === appData.doctorId) || null;
+            if (docDataFound) setDoctor(docDataFound);
           }
         }
       } else if (patientIdParam && doctorIdParam) {
@@ -80,11 +91,15 @@ export default function BillingPage() {
           patientService.get(patientIdParam),
           doctorService.list(0, 100),
         ]);
-        if (patRes.success) setPatient(patRes.data || null);
-        if (docRes.success && docRes.data) {
-          const doc = docRes.data.content.find((d) => d.doctorId === doctorIdParam);
-          if (doc) setDoctor(doc);
+        if (patRes.success) {
+          patData = patRes.data || null;
+          setPatient(patData);
         }
+        if (docRes.success && docRes.data) {
+          docDataFound = docRes.data.content.find((d) => d.doctorId === doctorIdParam) || null;
+          if (docDataFound) setDoctor(docDataFound);
+        }
+        appointmentTime = appointmentTimeParam;
         // Mock appointment object for UI display
         setAppointment({
           id: 'TEMP',
@@ -98,6 +113,49 @@ export default function BillingPage() {
           notes: notesParam || '',
           createdAt: new Date().toISOString()
         } as any);
+      }
+
+      // Check for follow-up eligibility
+      if (patData && docDataFound && appointmentTime) {
+        try {
+          const [prevAppsRes, docFullRes] = await Promise.all([
+            appointmentService.list(0, 10, patData.id, undefined, docDataFound.doctorId),
+            userService.getFullProfile(docDataFound.userId)
+          ]);
+
+          let docFollowUpDays = 7;
+          if (docFullRes.success && docFullRes.data) {
+            const membership = docFullRes.data.memberships?.find(m => 
+              m.roleAssignments?.some(ra => ra.roleCode === 'DOCTOR')
+            );
+            const ra = membership?.roleAssignments?.find(ra => ra.roleCode === 'DOCTOR');
+            docFollowUpDays = ra?.doctorDetails?.followUpDays ?? 7;
+            setFollowUpDays(docFollowUpDays);
+          }
+
+          if (prevAppsRes.success && prevAppsRes.data && prevAppsRes.data.content.length > 0) {
+            const currentAppDate = new Date(appointmentTime);
+            const pastApps = prevAppsRes.data.content
+              .filter(a => a.id !== appointmentId && new Date(a.appointmentTime) < currentAppDate && a.status === 'COMPLETED')
+              .sort((a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime());
+            
+            if (pastApps.length > 0) {
+              const lastAppDate = new Date(pastApps[0].appointmentTime);
+              const diffTime = currentAppDate.getTime() - lastAppDate.getTime();
+              const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+              
+              if (diffDays <= docFollowUpDays) {
+                setIsFollowUp(true);
+                // If it's a new billing, auto-apply the discount
+                if (!billing) {
+                  setDiscount(docDataFound.consultationFee);
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Follow-up check failed', err);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch billing data', error);
@@ -275,6 +333,7 @@ export default function BillingPage() {
               <div className="md:col-span-4 space-y-6">
 
                 <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                  {/* ... patient info content ... */}
                   <div className="flex items-center gap-4 mb-6">
 
                     <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-2xl uppercase">
@@ -332,6 +391,20 @@ export default function BillingPage() {
 
                   </div>
                 </div>
+
+                {isFollowUp && (
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6 flex gap-4 animate-in fade-in zoom-in-95 duration-500">
+                    <span className="material-symbols-outlined text-emerald-600">
+                      verified
+                    </span>
+                    <div>
+                      <p className="text-xs text-emerald-800 font-bold uppercase tracking-widest mb-1">Follow-up Discount Eligible</p>
+                      <p className="text-[10px] text-emerald-700 font-medium leading-relaxed">
+                        Last visit was within {followUpDays} days. Consultation fee has been waived.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-orange-50 border border-orange-100 rounded-2xl p-6 flex gap-4">
                 <span className="material-symbols-outlined text-orange-600">
