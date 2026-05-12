@@ -8,6 +8,7 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { formatToken } from '@/utils/tokenHelper';
 
 export const BillingPage = () => {
   const router = useRouter();
@@ -16,6 +17,7 @@ export const BillingPage = () => {
     patient,
     doctor,
     loading,
+    predictedToken,
     paymentMethod,
     setPaymentMethod,
     discount,
@@ -144,9 +146,14 @@ export const BillingPage = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">OP Token No.</p>
-                  <p className="p-4 bg-slate-50 rounded-xl border border-slate-100 font-black text-slate-900">
-                    {appointment.tokenDisplay || `A-${appointment.id.substring(0, 3).toUpperCase()}`}
-                  </p>
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-center">
+                    <p className="font-black text-slate-900 leading-none">
+                      {formatToken(appointment) !== '---' ? formatToken(appointment) : (predictedToken || 'PENDING')}
+                    </p>
+                    {!isPaid && !appointment.tokenDisplay && (
+                      <span className="text-[9px] font-bold text-orange-600 uppercase mt-1">Expected Token</span>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service Date</p>

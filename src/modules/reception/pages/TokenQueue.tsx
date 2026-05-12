@@ -5,6 +5,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { AppointmentSummaryDTO } from '@/types/api';
 import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
+import { formatToken } from '@/utils/tokenHelper';
 
 export function TokenQueue() {
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
@@ -65,7 +66,7 @@ export function TokenQueue() {
             <div className="p-8 flex flex-col items-center justify-center border-b border-[var(--border)]">
               <p className="text-[var(--text-secondary)] text-sm font-bold uppercase tracking-widest mb-2 opacity-50">Now Serving</p>
               <div className="text-8xl font-black text-[var(--primary)] tracking-tighter">
-                {opdQueue[0] ? `A-${opdQueue[0].id}` : '---'}
+                {opdQueue[0] ? formatToken(opdQueue[0]) : '---'}
               </div>
             </div>
 
@@ -78,13 +79,13 @@ export function TokenQueue() {
                 <div className="flex flex-col flex-1 items-center bg-[var(--surface)] p-3 rounded-lg border border-[var(--border)] shadow-sm">
                   <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase opacity-50">Next</span>
                   <span className="text-2xl font-black text-[var(--text-primary)]">
-                    {opdQueue[1] ? `A-${opdQueue[1].id}` : '--'}
+                    {opdQueue[1] ? formatToken(opdQueue[1]) : '--'}
                   </span>
                 </div>
                 <div className="flex flex-col flex-1 items-center bg-[var(--surface)] p-3 rounded-lg border border-[var(--border)] shadow-sm">
                   <span className="text-[10px] text-[var(--text-secondary)] font-bold uppercase opacity-50">Followed By</span>
                   <span className="text-2xl font-black text-[var(--text-secondary)] opacity-50">
-                    {opdQueue[2] ? `A-${opdQueue[2].id}` : '--'}
+                    {opdQueue[2] ? formatToken(opdQueue[2]) : '--'}
                   </span>
                 </div>
               </div>

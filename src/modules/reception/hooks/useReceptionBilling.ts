@@ -29,6 +29,7 @@ export const useReceptionBilling = () => {
   const [doctor, setDoctor] = useState<DoctorStaffResponse | null>(null);
   const [billing, setBilling] = useState<BillingResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [predictedToken, setPredictedToken] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [discount, setDiscount] = useState(0);
   const [submittingPayment, setSubmittingPayment] = useState(false);
@@ -77,6 +78,14 @@ export const useReceptionBilling = () => {
           notes: notesParam || '',
           createdAt: new Date().toISOString()
         } as any);
+
+        // Fetch predicted token
+        const date = appointmentTimeParam?.split('T')[0] || new Date().toISOString().split('T')[0];
+        const statsRes = await appointmentService.listSummary(0, 1, undefined, date, doctorIdParam);
+        if (statsRes.success && statsRes.data) {
+          const nextNum = statsRes.data.totalElements + 1;
+          setPredictedToken(`T-${nextNum.toString().padStart(3, '0')}`);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch billing data', error);
@@ -171,6 +180,7 @@ export const useReceptionBilling = () => {
     doctor,
     billing,
     loading,
+    predictedToken,
     paymentMethod,
     setPaymentMethod,
     discount,
