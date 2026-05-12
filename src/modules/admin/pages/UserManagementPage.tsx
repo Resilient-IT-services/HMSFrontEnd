@@ -194,7 +194,7 @@ export const UserManagementPage = () => {
               <div className="flex flex-1 items-center gap-4">
                 <div className="w-full max-w-xl">
                   <SearchInput
-                    placeholder="Search by name, email, or role..."
+                    placeholder="Search by name, email..."
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
                   />
