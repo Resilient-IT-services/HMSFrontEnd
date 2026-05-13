@@ -27,7 +27,7 @@ export const useMedicalHistory = () => {
   const [appointmentsTotalElements, setAppointmentsTotalElements] = useState(0);
   const [patientsPage, setPatientsPage] = useState(0);
   const [patientsTotalElements, setPatientsTotalElements] = useState(0);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchHistoryList = useCallback(async (search = '', page = 0) => {
     try {
@@ -43,7 +43,7 @@ export const useMedicalHistory = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [pageSize]);
 
   const fetchPatientsList = useCallback(async (search = '', page = 0) => {
     try {
@@ -59,7 +59,7 @@ export const useMedicalHistory = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [pageSize]);
 
   const fetchPatientDetails = useCallback(async (id: string) => {
     try {
@@ -120,11 +120,11 @@ export const useMedicalHistory = () => {
     }
   }, [patientId, fetchPatientDetails]);
 
-  // Reset page when search term changes
+  // Reset page when search term or page size changes
   useEffect(() => {
     setAppointmentsPage(0);
     setPatientsPage(0);
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, pageSize]);
 
   const handleSearch = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -161,6 +161,8 @@ export const useMedicalHistory = () => {
     patientsPage,
     setPatientsPage,
     patientsTotalElements,
+    pageSize,
+    setPageSize,
     handleSearch,
     selectPatient,
     handleSelectVisit,

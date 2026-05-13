@@ -35,6 +35,8 @@ export const MedicalHistoryPage = () => {
     patientsPage,
     setPatientsPage,
     patientsTotalElements,
+    pageSize,
+    setPageSize,
     handleSearch,
     selectPatient,
     handleSelectVisit,
@@ -232,8 +234,9 @@ export const MedicalHistoryPage = () => {
             <Pagination 
               page={activeView === 'APPOINTMENTS' ? appointmentsPage : patientsPage} 
               totalElements={activeView === 'APPOINTMENTS' ? appointmentsTotalElements : patientsTotalElements} 
-              pageSize={10}
+              pageSize={pageSize}
               onPageChange={activeView === 'APPOINTMENTS' ? setAppointmentsPage : setPatientsPage} 
+              onPageSizeChange={setPageSize}
               label={activeView === 'APPOINTMENTS' ? "visits" : "patients"}
             />
           </Card>
