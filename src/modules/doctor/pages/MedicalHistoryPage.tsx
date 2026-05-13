@@ -186,7 +186,7 @@ export const MedicalHistoryPage = () => {
                 <div className="flex-1 flex items-center gap-2">
                   <div className="flex-1">
                     <SearchInput 
-                      placeholder={activeView === 'APPOINTMENTS' ? "Search by patient name, ID, or token..." : "Search patients by name, code, or phone..."} 
+                      placeholder={activeView === 'APPOINTMENTS' ? "Search by patient name, ID..." : "Search patients by name, code, or phone..."}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && handleSearch()}

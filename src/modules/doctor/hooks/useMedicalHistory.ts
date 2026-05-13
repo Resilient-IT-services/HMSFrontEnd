@@ -181,6 +181,8 @@ export const useMedicalHistory = () => {
     patientsPage,
     setPatientsPage,
     patientsTotalElements,
+    pageSize,
+    setPageSize: () => {}, // Placeholder as pageSize is currently fixed
     handleSearch,
     selectPatient,
     handleSelectVisit,
