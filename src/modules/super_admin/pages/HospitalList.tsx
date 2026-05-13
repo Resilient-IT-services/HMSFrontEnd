@@ -24,6 +24,8 @@ export function HospitalList() {
     totalElements,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     searchTerm,
     setSearchTerm,
     statusFilter,
@@ -171,7 +173,9 @@ export function HospitalList() {
           <Pagination
             page={page}
             totalElements={totalElements}
+            pageSize={pageSize}
             onPageChange={setPage}
+            onPageSizeChange={setPageSize}
             label="facilities"
           />
         </ContentPanel>

@@ -16,6 +16,9 @@ export function DoctorList() {
     loading,
     searchTerm,
     setSearchTerm,
+    selectedDepartment,
+    setSelectedDepartment,
+    departmentOptions,
     selectedDoctor,
     setSelectedDoctor,
     selectedDate,
@@ -93,10 +96,25 @@ export function DoctorList() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <button className="px-6 py-3 bg-[var(--surface)] border border-[var(--border)] rounded-xl flex items-center gap-2 font-bold text-[var(--text-secondary)] hover:border-[var(--primary)] transition-all no-scrollbar">
-                   <Filter className="size-4" />
-                   All Departments
-                </button>
+                <div className="relative min-w-full lg:min-w-64">
+                  <Filter className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-[var(--text-secondary)]" />
+                  <select
+                    className="w-full appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface)] py-3 pl-12 pr-10 font-bold uppercase text-[var(--text-secondary)] outline-none transition-all hover:border-[var(--primary)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20"
+                    value={selectedDepartment}
+                    onChange={(event) => setSelectedDepartment(event.target.value)}
+                    aria-label="Filter doctors by department"
+                  >
+                    <option value="">ALL DEPARTMENTS</option>
+                    {departmentOptions.map((department) => (
+                      <option key={department} value={department}>
+                        {department.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="material-symbols-outlined pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-base text-[var(--text-secondary)]">
+                    expand_more
+                  </span>
+                </div>
               </div>
 
               <Table 

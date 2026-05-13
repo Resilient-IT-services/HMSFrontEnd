@@ -15,6 +15,7 @@ export const useHospitals = () => {
   const [staffCount, setStaffCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
 
   const [selectedHospital, setSelectedHospital] = useState<HospitalResponse | null>(null);
@@ -24,7 +25,7 @@ export const useHospitals = () => {
     try {
       setLoading(true);
       const [hospRes, userRes] = await Promise.all([
-        hospitalService.list(page, 20, debouncedSearch, statusFilter === 'ALL' ? undefined : statusFilter),
+        hospitalService.list(page, pageSize, debouncedSearch, statusFilter === 'ALL' ? undefined : statusFilter),
         userService.listUsers(0, 1)
       ]);
 
@@ -40,16 +41,16 @@ export const useHospitals = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, statusFilter]);
+  }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     fetchHospitals();
   }, [fetchHospitals]);
 
-  // Reset page on search or filter change
+  // Reset page on search, filter or page size change
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter, pageSize]);
 
   const stats = useMemo(() => ({
     totalFacilities: totalElements,
@@ -70,6 +71,8 @@ export const useHospitals = () => {
     totalElements,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     searchTerm,
     setSearchTerm,
     statusFilter,

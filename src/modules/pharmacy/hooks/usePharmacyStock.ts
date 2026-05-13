@@ -13,6 +13,7 @@ export const usePharmacyStock = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [selectedMedicineForStock, setSelectedMedicineForStock] = useState<{ id: string; name: string } | null>(null);
@@ -22,7 +23,7 @@ export const usePharmacyStock = () => {
     try {
       setLoading(true);
       const response = await pharmacyApi.getMedicineStock({ 
-        size: 20, 
+        size: pageSize, 
         page, 
         search: debouncedSearch,
         lowStock: statusFilter === 'LOW_STOCK'
@@ -40,7 +41,7 @@ export const usePharmacyStock = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, statusFilter]);
+  }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     fetchInventory();
@@ -48,7 +49,7 @@ export const usePharmacyStock = () => {
 
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, statusFilter]);
+  }, [debouncedSearch, statusFilter, pageSize]);
 
   const handleExport = () => {
     if (medicines.length === 0) {
@@ -131,6 +132,8 @@ export const usePharmacyStock = () => {
     setStatusFilter,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements,
     selectedMedicineForStock,
     setSelectedMedicineForStock,

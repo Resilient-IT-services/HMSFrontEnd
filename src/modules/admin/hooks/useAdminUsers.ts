@@ -11,6 +11,7 @@ export const useAdminUsers = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
   const [roleFilter, setRoleFilter] = useState<string | undefined>();
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>();
@@ -18,7 +19,7 @@ export const useAdminUsers = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const userRes = await userService.listUsers(page, 20, debouncedSearch, roleFilter, activeFilter);
+      const userRes = await userService.listUsers(page, pageSize, debouncedSearch, roleFilter, activeFilter);
       if (userRes.success && userRes.data) {
         const usersWithRoles = (userRes.data.content || []).map(u => {
           const allRoles = new Set<string>();
@@ -45,7 +46,7 @@ export const useAdminUsers = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, roleFilter, activeFilter]);
+  }, [page, pageSize, debouncedSearch, roleFilter, activeFilter]);
 
   useEffect(() => {
     fetchData();
@@ -53,7 +54,7 @@ export const useAdminUsers = () => {
 
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearch, roleFilter, activeFilter]);
+  }, [debouncedSearch, roleFilter, activeFilter, pageSize]);
 
   return {
     users,
@@ -62,6 +63,8 @@ export const useAdminUsers = () => {
     setSearchTerm,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements,
     roleFilter,
     setRoleFilter,

@@ -5,10 +5,25 @@ import { doctorService } from '@/services/doctorService';
 import { DoctorStaffResponse, SessionInfo } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 
+const defaultDepartmentOptions = [
+  'Cardiology',
+  'Neurology',
+  'Orthopedics',
+  'Pediatrics',
+  'Gynecology',
+  'Obstetrics',
+  'Dermatology',
+  'Ophthalmology',
+  'ENT (Ear, Nose, Throat)',
+  'General Medicine',
+];
+
 export const useReceptionDoctors = () => {
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
+  const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
@@ -19,20 +34,50 @@ export const useReceptionDoctors = () => {
   const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await doctorService.list(0, 100, debouncedSearchTerm);
+      const department = selectedDepartment || undefined;
+      const res = await doctorService.list(0, 100, debouncedSearchTerm, department);
       if (res.success && res.data) {
-        setDoctors(res.data.content);
+        const content = res.data.content;
+        const filteredDoctors = department
+          ? content.filter((doctor) => doctor.departmentName.toLowerCase() === department.toLowerCase())
+          : content;
+        setDoctors(filteredDoctors);
       }
     } catch (error) {
       console.error('Failed to fetch doctors', error);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, selectedDepartment]);
+
+  const fetchDepartmentOptions = useCallback(async () => {
+    try {
+      const res = await doctorService.list(0, 100);
+      if (res.success && res.data) {
+        const departments = [
+          ...new Set(
+            [
+              ...defaultDepartmentOptions,
+              ...res.data.content
+              .map((doctor) => doctor.departmentName)
+              .filter(Boolean),
+            ]
+          )
+        ].toSorted((a, b) => a.localeCompare(b));
+        setDepartmentOptions(departments);
+      }
+    } catch (error) {
+      console.error('Failed to fetch doctor departments', error);
+    }
+  }, []);
 
   useEffect(() => {
     fetchDoctors();
   }, [fetchDoctors]);
+
+  useEffect(() => {
+    fetchDepartmentOptions();
+  }, [fetchDepartmentOptions]);
 
   const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
     try {
@@ -75,6 +120,9 @@ export const useReceptionDoctors = () => {
     loading,
     searchTerm,
     setSearchTerm,
+    selectedDepartment,
+    setSelectedDepartment,
+    departmentOptions,
     selectedDoctor,
     setSelectedDoctor,
     selectedDate,
