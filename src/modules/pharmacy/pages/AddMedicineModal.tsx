@@ -26,16 +26,33 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
     currentStock: 0,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = 'Medicine name is required';
+    if (formData.currentStock < 0) newErrors.currentStock = 'Initial stock cannot be negative';
+    if (formData.reorderLevel < 0) newErrors.reorderLevel = 'Reorder level cannot be negative';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? Number.parseFloat(value) || 0 : value
     }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) {
+      triggerGlobalToast('Please correct form errors', 'error');
+      return;
+    }
     try {
       setLoading(true);
       const response = await pharmacyApi.addMedicine(formData);
@@ -77,14 +94,14 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
             <div className="md:col-span-2">
               <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Medicine Name</label>
               <input 
-                required
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+                className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.name ? 'border-red-500' : 'border-slate-200'}`} 
                 placeholder="e.g. Paracetamol 500mg" 
                 type="text"
               />
+              {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.name}</p>}
             </div>
 
             <div>
@@ -176,10 +193,11 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
                 name="currentStock"
                 value={formData.currentStock}
                 onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+                className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.currentStock ? 'border-red-500' : 'border-slate-200'}`} 
                 placeholder="0" 
                 type="number"
               />
+              {errors.currentStock && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.currentStock}</p>}
             </div>
 
             <div>
@@ -188,10 +206,11 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
                 name="reorderLevel"
                 value={formData.reorderLevel}
                 onChange={handleChange}
-                className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+                className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.reorderLevel ? 'border-red-500' : 'border-slate-200'}`} 
                 placeholder="50" 
                 type="number"
               />
+              {errors.reorderLevel && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.reorderLevel}</p>}
             </div>
 
           </div>

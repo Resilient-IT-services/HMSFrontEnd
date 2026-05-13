@@ -70,18 +70,37 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
     void loadPatient();
   }, [patientId, router]);
 
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number must be exactly 10 digits';
+    }
+    
+    const dobValidation = validateDOB(formData.dob);
+    if (!dobValidation.isValid) {
+      newErrors.dob = dobValidation.message || 'Invalid date of birth';
+    }
+
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate DOB
-    const dobValidation = validateDOB(formData.dob);
-    if (!dobValidation.isValid) {
-      setErrors({ dob: dobValidation.message || 'Invalid date of birth' });
-      triggerGlobalToast(dobValidation.message || 'Invalid date of birth', 'error');
+    if (!validate()) {
+      triggerGlobalToast('Please correct the errors in the form', 'error');
       return;
     }
     
-    setErrors({});
     setLoading(true);
     try {
       const payload: CreatePatientRequest = {
@@ -183,33 +202,41 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">First Name</label>
                   <input 
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.firstName ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
                     placeholder="e.g., Jonathan" 
-                    required 
                     type="text"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, firstName: e.target.value});
+                      if (errors.firstName) setErrors(prev => ({ ...prev, firstName: '' }));
+                    }}
                   />
+                  {errors.firstName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.firstName}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Last Name</label>
                   <input 
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.lastName ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
                     placeholder="e.g., Doe" 
-                    required 
                     type="text"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, lastName: e.target.value});
+                      if (errors.lastName) setErrors(prev => ({ ...prev, lastName: '' }));
+                    }}
                   />
+                  {errors.lastName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.lastName}</p>}
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Date of Birth</label>
                   <input 
-                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.dob ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
-                    required 
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.dob ? 'border-red-500 focus:border-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
                     type="date"
                     value={formData.dob}
-                    onChange={(e) => setFormData({...formData, dob: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, dob: e.target.value});
+                      if (errors.dob) setErrors(prev => ({ ...prev, dob: '' }));
+                    }}
                   />
                   {errors.dob && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.dob}</p>}
                 </div>
@@ -228,20 +255,36 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Phone Number</label>
                   <input 
-                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
-                    placeholder="e.g., +91 98765 43210" 
-                    required 
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.phone ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
+                    placeholder="e.g., 9876543210" 
                     type="tel"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => {
+                      setFormData({...formData, phone: e.target.value});
+                      if (errors.phone) setErrors(prev => ({ ...prev, phone: '' }));
+                    }}
                   />
+                  {errors.phone && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.phone}</p>}
                 </div>
                 <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Email Address (Optional)</label>
+                  <input 
+                    className={`w-full px-4 py-3 border rounded-xl focus:ring-2 transition-all bg-slate-50/50 text-sm ${errors.email ? 'border-red-500 focus:ring-red-500/20' : 'border-slate-200 focus:border-primary focus:ring-primary/20'}`} 
+                    placeholder="e.g., patient@example.com" 
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => {
+                      setFormData({...formData, email: e.target.value});
+                      if (errors.email) setErrors(prev => ({ ...prev, email: '' }));
+                    }}
+                  />
+                  {errors.email && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.email}</p>}
+                </div>
+                <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Address</label>
                   <input 
                     className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm" 
                     placeholder="e.g., 123 Main St, New York, NY" 
-                    required 
                     type="text"
                     value={formData.address}
                     onChange={(e) => setFormData({...formData, address: e.target.value})}

@@ -89,7 +89,11 @@ export const DoctorDashboard = () => {
 
   const queue = useMemo(() => {
     const base = appointments.filter(
-      (appointment) => appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED'
+      (appointment) => 
+        appointment.status !== 'COMPLETED' && 
+        appointment.status !== 'CANCELLED' &&
+        appointment.status !== 'WAITING_FOR_VITALS' &&
+        appointment.status !== 'ADD_VITALS'
     );
     return sortByToken(base);
   }, [appointments]);

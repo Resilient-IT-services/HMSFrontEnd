@@ -19,12 +19,26 @@ const AddInventoryItemModal: React.FC<AddInventoryItemModalProps> = ({ onClose, 
     unit: 'pcs'
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = 'Item name is required';
+    if (!formData.unit.trim()) newErrors.unit = 'Unit is required';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     try {
       setLoading(true);
       const response = await pharmacyApi.defineInventoryItem(formData);
@@ -46,13 +60,13 @@ const AddInventoryItemModal: React.FC<AddInventoryItemModalProps> = ({ onClose, 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Item Name</label>
           <input 
-            required
             name="name"
             value={formData.name}
             onChange={handleChange}
             placeholder="e.g. Syringe, Cotton, Gloves"
-            className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
+            className={`w-full px-4 py-2 border rounded-xl focus:ring-2 outline-none ${errors.name ? 'border-red-500 focus:ring-red-500' : 'focus:ring-orange-500'}`}
           />
+          {errors.name && <p className="text-xs text-red-500 mt-1 font-bold uppercase">{errors.name}</p>}
         </div>
         
         <div>
@@ -73,13 +87,13 @@ const AddInventoryItemModal: React.FC<AddInventoryItemModalProps> = ({ onClose, 
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Unit of Measure</label>
           <input 
-            required
             name="unit"
             value={formData.unit}
             onChange={handleChange}
             placeholder="e.g. pcs, box, pkt"
-            className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-orange-500 outline-none"
+            className={`w-full px-4 py-2 border rounded-xl focus:ring-2 outline-none ${errors.unit ? 'border-red-500 focus:ring-red-500' : 'focus:ring-orange-500'}`}
           />
+          {errors.unit && <p className="text-xs text-red-500 mt-1 font-bold uppercase">{errors.unit}</p>}
         </div>
 
         <div className="flex justify-end gap-3 pt-6 border-t">
