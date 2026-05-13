@@ -53,8 +53,29 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
       triggerGlobalToast('Please correct form errors', 'error');
       return;
     }
+    
     try {
       setLoading(true);
+
+      // Check for duplicate in master catalog (Name + Composition check)
+      const existingRes = await pharmacyApi.getMedicines({ 
+        search: formData.name,
+        size: 50 
+      });
+
+      if (existingRes.success && existingRes.data) {
+        const isDuplicate = existingRes.data.content.some(m => 
+          m.name.toLowerCase().trim() === formData.name.toLowerCase().trim() && 
+          (m.composition || '').toLowerCase().trim() === (formData.composition || '').toLowerCase().trim()
+        );
+
+        if (isDuplicate) {
+          triggerGlobalToast('Medicine with this name and composition already exists in the catalog', 'warning');
+          setLoading(false);
+          return;
+        }
+      }
+
       const response = await pharmacyApi.addMedicine(formData);
       if (response.success) {
         triggerGlobalToast('Medicine added to master catalog successfully', 'success');
@@ -63,7 +84,6 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
       }
     } catch (error) {
       console.error('Failed to add medicine', error);
-      // Removed duplicate toast as apiClient already triggers one
     } finally {
       setLoading(false);
     }
