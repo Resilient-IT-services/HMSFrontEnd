@@ -42,9 +42,15 @@ export const DoctorDashboard = () => {
         return;
       }
 
-      const normalized = normalizeAppointmentData(response.data.content);
+      // Safety filter for doctor's own data
+      const filtered = response.data.content.filter(app => 
+        app.doctorId === user.id || 
+        app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+      );
+
+      const normalized = normalizeAppointmentData(filtered);
       setAppointments(normalized);
-      syncExpiredAppointments(response.data.content);
+      syncExpiredAppointments(filtered);
     } catch (error) {
       console.error(error);
     } finally {

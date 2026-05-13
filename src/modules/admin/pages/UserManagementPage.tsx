@@ -239,7 +239,7 @@ export const UserManagementPage = () => {
           <Pagination
             page={page}
             totalElements={totalElements}
-            pageSize={20}
+            pageSize={10}
             onPageChange={setPage}
             label="staff members"
           />

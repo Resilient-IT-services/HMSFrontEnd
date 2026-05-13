@@ -41,7 +41,12 @@ export const EarningsPage = () => {
         return;
       }
 
-      setAppointments(response.data.content);
+      // Safety filter for doctor's own data
+      const doctorAppointments = response.data.content.filter(app => 
+        app.doctorId === user.id || 
+        app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+      );
+      setAppointments(doctorAppointments);
     } catch (error) {
       console.error(error);
       triggerGlobalToast('Failed to fetch appointments', 'error');
