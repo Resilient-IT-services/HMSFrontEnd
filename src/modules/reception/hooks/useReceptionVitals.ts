@@ -111,13 +111,13 @@ export const useReceptionVitals = () => {
     let label;
     let required = true;
     switch (field) {
-      case 'temperature': range = vitalRanges.BODY_TEMPERATURE; label = 'Temperature'; break;
-      case 'weight': range = vitalRanges.WEIGHT; label = 'Weight'; break;
-      case 'oxygenLevel': range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break;
-      case 'systolic': range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break;
-      case 'diastolic': range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break;
-      case 'heartRate': range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break;
-      case 'respiratoryRate': range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break;
+      case 'temperature': { range = vitalRanges.BODY_TEMPERATURE; label = 'Temperature'; break; }
+      case 'weight': { range = vitalRanges.WEIGHT; label = 'Weight'; break; }
+      case 'oxygenLevel': { range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break; }
+      case 'systolic': { range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break; }
+      case 'diastolic': { range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break; }
+      case 'heartRate': { range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break; }
+      case 'respiratoryRate': { range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break; }
     }
     const error = validateVital(value, range, label || field, required);
     setFieldErrors(prev => ({ ...prev, [field]: error || '' }));
