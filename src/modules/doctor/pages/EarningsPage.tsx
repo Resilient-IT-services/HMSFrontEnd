@@ -203,16 +203,10 @@ export const EarningsPage = () => {
         <MetricsGrid items={metricItems} className="mb-8" />
 
         <Card 
-          title="Revenue Breakdown" 
+          title="Revenue Breakdown  "
           noPadding
-          headerActions={
-            <div className="flex items-center gap-3">
-              <Badge variant="blue" size="sm">
-                {filteredAppointments.length} encounters
-              </Badge>
-            </div>
-          }
-          className="overflow-hidden mb-12"
+
+          className="overflow-hidden mb-12 p-4"
         >
           <EarningsVisitHistory 
             loading={loading}
