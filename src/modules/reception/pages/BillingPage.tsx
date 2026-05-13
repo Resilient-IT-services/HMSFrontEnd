@@ -55,9 +55,9 @@ export const BillingPage = () => {
 
   return (
     <MainLayout title="Consultation Billing" hideTitle>
-      <div className="op-bill-print-page p-8 max-w-[1200px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
+      <div className="invoice-print-container op-bill-print-page p-8 max-w-[1200px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
         
-        <div className="op-bill-screen-heading">
+        <div className="op-bill-screen-heading no-print">
           <PageHeading 
             title="Consultation Billing" 
             description="Finalize patient visit fees and process medical service payments."
@@ -200,7 +200,7 @@ export const BillingPage = () => {
 
             {/* Payment Method */}
             {!isPaid && (
-              <Card title="Select Payment Method" icon="account_balance_wallet" className="op-bill-payment-method">
+              <Card title="Select Payment Method" icon="account_balance_wallet" className="op-bill-payment-method no-print">
                 <div className="grid grid-cols-3 gap-4">
                   {[
                     { id: 'CASH', label: 'Cash', icon: 'payments' },
@@ -231,7 +231,7 @@ export const BillingPage = () => {
       </div>
 
       {/* Floating Action Bar */}
-      <div className="op-bill-action-bar fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-6 z-50 flex justify-center">
+      <div className="op-bill-action-bar no-print fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-6 z-50 flex justify-center">
         <div className="max-w-[1200px] w-full flex justify-between items-center">
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Amount Due</span>
