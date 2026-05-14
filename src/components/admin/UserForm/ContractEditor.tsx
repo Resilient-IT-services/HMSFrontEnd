@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { HospitalMembershipDTO, HospitalResponse, ScheduleDTO } from '@/types/api';
+import { MobileSelector } from '@/components/ui/MobileSelector';
 
 interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
@@ -68,15 +69,16 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
       <div className="space-y-4 md:space-y-6">
         <section className={`bg-gray-50 border ${validationErrors.contractHospital || validationErrors.contractRoles ? 'border-error ring-1 ring-error/10' : 'border-gray-200'} rounded-xl p-4 md:p-6`}>
           <label className="block text-[10px] font-black text-gray-700 uppercase mb-3 md:mb-4">Facility & Roles <span className="text-primary">*</span></label>
-          <select 
-            className={`form-input mb-4 ${validationErrors.contractHospital ? 'border-error ring-1 ring-error/20' : ''}`} 
-            value={newContract.hospitalId} 
-            onChange={(e) => setNewContract({ ...newContract, hospitalId: e.target.value })} 
+          <MobileSelector
+            label="Facility"
+            options={hospitals.map(h => ({ id: h.id, name: h.name, icon: 'location_city' }))}
+            value={newContract.hospitalId || ''}
+            onChange={(val) => setNewContract({ ...newContract, hospitalId: val })}
+            placeholder="Select Facility..."
             disabled={editingContractIndex !== null}
-          >
-            <option value="">Select Facility...</option>
-            {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-          </select>
+            error={validationErrors.contractHospital}
+            className="mb-4"
+          />
           {renderFieldError('contractHospital')}
           
           <div className="flex flex-wrap gap-1.5 md:gap-2 mt-2 md:mt-4">

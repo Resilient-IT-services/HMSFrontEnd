@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
@@ -172,7 +173,54 @@ export const ReceptionDashboard = () => {
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
       <PageSurface fontClassName="font-manrope">
-        <div className="flex items-center gap-2 mb-2 opacity-40 group/date cursor-default">
+        {/* Info Pills Row - Visible on all screens for quick glance */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+          <MetricCard 
+            label="Queue Load" 
+            value={stats.activeQueue} 
+            icon="timer" 
+            variant="orange" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Check-ins" 
+            value={stats.appointmentsToday} 
+            icon="login" 
+            variant="blue" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Doctors" 
+            value={doctors.length} 
+            icon="stethoscope" 
+            variant="emerald" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Support" 
+            value="Online" 
+            icon="support_agent" 
+            variant="purple" 
+            layout="pill" 
+          />
+        </div>
+
+        {/* Mobile Header - Visible only on small screens */}
+        <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-700">
+                <span className="material-symbols-outlined">desk</span>
+              </div>
+              <div>
+                <h1 className="font-headline-md text-slate-900 leading-tight">Reception</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arrivals & Queue Management</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 mb-2 opacity-40 group/date cursor-default hidden md:flex">
           <span className="material-symbols-outlined text-xs group-hover/date:text-orange-600 transition-colors">calendar_today</span>
           <span className="text-[9px] font-black uppercase tracking-[0.2em]">
             {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -181,10 +229,39 @@ export const ReceptionDashboard = () => {
         <PageHeading
           title="Reception Dashboard"
           description="Manage arrivals, patient queues, and daily operations."
+          className="hidden md:flex"
         />
 
-        {/* Metrics Grid */}
-        <MetricsGrid items={metricItems} className="mb-8" />
+        {/* Mobile Stats Cards */}
+        <div className="md:hidden space-y-4 mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Arrivals</h3>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase">Live</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-slate-900 p-4 rounded-2xl text-white shadow-lg flex flex-col justify-between h-32">
+              <span className="material-symbols-outlined text-white/50 text-xl">hourglass_empty</span>
+              <div>
+                <p className="text-[32px] font-extrabold leading-none mb-1">{stats.activeQueue}</p>
+                <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Active Queue</p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32">
+              <span className="material-symbols-outlined text-orange-500 text-xl">group</span>
+              <div>
+                <p className="text-[32px] font-extrabold text-slate-900 leading-none mb-1">{stats.totalPatients}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Patients</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Metrics Grid - Hidden on Mobile */}
+        <MetricsGrid items={metricItems} className="mb-8 hidden md:grid" />
 
         {/* Main Section Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

@@ -48,13 +48,105 @@ export const SuperAdminDashboard = () => {
   return (
     <MainLayout title="System Administration">
       <PageSurface>
+        {/* Info Pills Row - Visible on all screens for quick glance */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+          <MetricCard 
+            label="Live Nodes" 
+            value={hospitals.length} 
+            icon="hub" 
+            variant="orange" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="System Load" 
+            value="42%" 
+            icon="speed" 
+            variant="blue" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Global Sessions" 
+            value={users.length} 
+            icon="sensors" 
+            variant="emerald" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Security" 
+            value="Active" 
+            icon="verified_user" 
+            variant="purple" 
+            layout="pill" 
+          />
+        </div>
+
+        {/* Mobile Header - Visible only on small screens */}
+        <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-700 rounded-full flex items-center justify-center text-white shadow-lg">
+                <span className="material-symbols-outlined">shield_person</span>
+              </div>
+              <div>
+                <h1 className="font-headline-md text-slate-900 leading-tight">Super Admin</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Global System Control</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <PageHeading
           title="Admin Overview"
           description="System-wide monitoring and management dashboard."
+          className="hidden md:flex"
         />
 
-        {/* Dynamic Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Mobile Specific Stats Section - Only visible on small screens */}
+        <div className="md:hidden space-y-4 mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Global Network Pulse</h3>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase">Live</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-orange-700 p-4 rounded-2xl text-white shadow-lg shadow-orange-700/20 flex flex-col justify-between h-32">
+              <span className="material-symbols-outlined text-white/50 text-xl">apartment</span>
+              <div>
+                <p className="text-[32px] font-extrabold leading-none mb-1">{loading ? '...' : hospitals.length}</p>
+                <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Hospitals</p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32">
+              <span className="material-symbols-outlined text-blue-500 text-xl">group</span>
+              <div>
+                <p className="text-[32px] font-extrabold text-slate-900 leading-none mb-1">{loading ? '...' : users.length}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Users</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 p-5 rounded-2xl text-white flex items-center justify-between shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                <span className="material-symbols-outlined text-emerald-400">check_circle</span>
+              </div>
+              <div>
+                <p className="text-xl font-black leading-none mb-1">Healthy</p>
+                <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest">System Status</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black text-emerald-400 uppercase mb-1">Uptime</p>
+              <p className="text-xs font-bold text-white">100%</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Dynamic Stats Cards - Hidden on Mobile */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <MetricCard 
             label="Total Hospitals" 
             value={loading ? '...' : hospitals.length} 

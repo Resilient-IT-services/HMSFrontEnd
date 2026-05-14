@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { UserRequestDTO } from '@/types/api';
+import { MobileSelector } from '@/components/ui/MobileSelector';
 
 interface UserFormProfileTabProps {
   formData: UserRequestDTO;
@@ -88,12 +89,18 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="flex flex-col gap-1.5">
                     <label className="font-label-sm text-gray-700 uppercase">Certification Level</label>
-                    <select className="form-input" value={formData.nurseInfo.certificationLevel} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, certificationLevel: e.target.value as any } })}>
-                        <option value="RN">Registered Nurse (RN)</option>
-                        <option value="LPN">Licensed Practical Nurse (LPN)</option>
-                        <option value="NP">Nurse Practitioner (NP)</option>
-                        <option value="CNA">Certified Nursing Assistant (CNA)</option>
-                    </select>
+                    <MobileSelector
+                        label="Certification"
+                        options={[
+                            { id: 'RN', name: 'Registered Nurse (RN)', icon: 'badge' },
+                            { id: 'LPN', name: 'Licensed Practical Nurse (LPN)', icon: 'badge' },
+                            { id: 'NP', name: 'Nurse Practitioner (NP)', icon: 'badge' },
+                            { id: 'CNA', name: 'Certified Nursing Assistant (CNA)', icon: 'badge' }
+                        ]}
+                        value={formData.nurseInfo.certificationLevel || ''}
+                        onChange={(val) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, certificationLevel: val as any } })}
+                        placeholder="Select Level..."
+                    />
                 </div>
                 <div className="flex flex-col gap-1.5">
                     <label className="font-label-sm text-gray-700 uppercase">Nursing License No.</label>
@@ -106,81 +113,81 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
 
       {/* 2. Full Summary UI */}
       <div className="space-y-4 md:space-y-6">
-        <div className="flex items-center gap-2 mb-4 md:mb-6 border-b border-gray-100 pb-4">
-          <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-[10px] md:text-xs font-black">Final Review Summary</h3>
+        <div className="flex items-center gap-2 mb-2 md:mb-6 border-b border-gray-100 pb-4">
+          <h3 className="font-bold text-[11px] md:text-xs text-on-surface uppercase tracking-wider">Final Review Summary</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             {/* Identity Card */}
-            <div className="bg-gray-50/50 border border-gray-200 rounded-2xl p-4 md:p-6 space-y-4">
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
                 <div className="flex items-center gap-2 text-primary">
                     <span className="material-symbols-outlined text-sm font-bold">person</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Identity & Access</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Identity & Access</span>
                 </div>
                 <div className="space-y-3">
-                    <div className="flex justify-between border-b border-gray-100 pb-2 gap-4">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase shrink-0">Full Name</span>
-                        <span className="text-[10px] md:text-xs font-black text-on-surface text-right truncate">{formData.fullName || '—'}</span>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Full Name</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right truncate">{formData.fullName || '—'}</span>
                     </div>
-                    <div className="flex justify-between border-b border-gray-100 pb-2 gap-4">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase shrink-0">Username</span>
-                        <span className="text-[10px] md:text-xs font-black text-on-surface text-right truncate">{formData.username || '—'}</span>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Username</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right truncate">{formData.username || '—'}</span>
                     </div>
-                    <div className="flex justify-between border-b border-gray-100 pb-2 gap-4">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase shrink-0">DOB</span>
-                        <span className="text-[10px] md:text-xs font-black text-on-surface text-right">{formData.dob || '—'}</span>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">DOB</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right">{formData.dob || '—'}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase">Superuser</span>
-                        <span className={`text-[9px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${formData.superuser ? 'bg-red-100 text-red-700' : 'bg-gray-200 text-gray-600'}`}>{formData.superuser ? 'YES' : 'NO'}</span>
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase">Superuser</span>
+                        <span className={`text-[9px] md:text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full ${formData.superuser ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500'}`}>{formData.superuser ? 'YES' : 'NO'}</span>
                     </div>
                 </div>
             </div>
 
             {/* Contact Card */}
-            <div className="bg-gray-50/50 border border-gray-200 rounded-2xl p-4 md:p-6 space-y-4">
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
                 <div className="flex items-center gap-2 text-primary">
                     <span className="material-symbols-outlined text-sm font-bold">contact_page</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Contact Information</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Contact Information</span>
                 </div>
                 <div className="space-y-3">
-                    <div className="flex justify-between border-b border-gray-100 pb-2 gap-4">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase shrink-0">Email</span>
-                        <span className="text-[10px] md:text-xs font-black text-on-surface text-right truncate">{formData.email || '—'}</span>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Email</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right truncate">{formData.email || '—'}</span>
                     </div>
-                    <div className="flex justify-between border-b border-gray-100 pb-2 gap-4">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase shrink-0">Phone</span>
-                        <span className="text-[10px] md:text-xs font-black text-on-surface text-right">{formData.phone || '—'}</span>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Phone</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right">{formData.phone || '—'}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-[10px] md:text-xs text-gray-500 font-bold uppercase">Gender</span>
-                        <span className="text-[10px] md:text-xs font-black text-on-surface text-right">{formData.gender}</span>
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase">Gender</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right">{formData.gender}</span>
                     </div>
                 </div>
             </div>
         </div>
 
         {/* Facility & Roles Card */}
-        <div className="bg-gray-50/50 border border-gray-200 rounded-2xl p-4 md:p-6 space-y-4">
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-2 text-primary">
                 <span className="material-symbols-outlined text-sm font-bold">domain</span>
-                <span className="text-[10px] font-black uppercase tracking-widest">Assigned Facilities & Roles</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Assigned Facilities & Roles</span>
             </div>
             {formData.memberships && formData.memberships.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                     {formData.memberships.map((m, idx) => (
-                        <div key={idx} className="p-3 md:p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
-                            <p className="text-[10px] md:text-xs font-black text-on-surface mb-2 truncate">{m.hospitalName || 'Facility ID: ' + m.hospitalId}</p>
+                        <div key={idx} className="p-3 md:p-4 bg-slate-50/50 border border-slate-100 rounded-xl">
+                            <p className="text-[10px] md:text-xs font-bold text-on-surface mb-2 truncate">{m.hospitalName || 'Facility ID: ' + m.hospitalId}</p>
                             <div className="flex flex-wrap gap-1">
                                 {m.roleAssignments?.map(ra => (
-                                    <span key={ra.roleCode} className="text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 bg-orange-50 text-primary border border-orange-100 rounded uppercase">{ra.roleCode}</span>
+                                    <span key={ra.roleCode} className="text-[8px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-white text-primary border border-orange-100 rounded uppercase tracking-tighter">{ra.roleCode}</span>
                                 ))}
                             </div>
                         </div>
                     ))}
                 </div>
             ) : (
-                <p className="text-[10px] md:text-xs text-gray-400 italic">No facility memberships assigned.</p>
+                <p className="text-[10px] md:text-xs text-gray-400 font-medium italic">No facility memberships assigned.</p>
             )}
         </div>
       </div>
