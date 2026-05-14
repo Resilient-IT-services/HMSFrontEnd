@@ -13,6 +13,7 @@ import { MetricCard } from '@/components/ui/MetricCard';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
+import { cn } from '@/lib/cn';
 
 export const AppointmentsPage = () => {
   const router = useRouter();
@@ -142,24 +143,44 @@ export const AppointmentsPage = () => {
         </PageHeading>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-2 lg:grid lg:grid-cols-7 lg:gap-3 mb-6">
           {statConfig.map((stat, i) => (
             <div 
               key={i} 
-              onClick={() => {
-                setStatusFilter(stat.filter as any);
-                if (activeFilters.statuses?.length) {
-                  resetFilters();
-                }
-              }}
-              className={`cursor-pointer transition-all active:scale-95 ${statusFilter === stat.filter ? 'ring-2 ring-orange-500 ring-offset-2' : ''}`}
+              className={cn(
+                "transition-all",
+                statusFilter === stat.filter ? 'ring-2 ring-orange-500 ring-offset-2 rounded-full lg:rounded-2xl' : ''
+              )}
             >
-              <MetricCard 
-                label={stat.label} 
-                value={stat.value} 
-                icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'} 
-                variant={stat.variant as any} 
-              />
+              <div className="lg:hidden">
+                <MetricCard 
+                  label={stat.label} 
+                  value={stat.value} 
+                  icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'} 
+                  variant={stat.variant as any}
+                  layout="pill"
+                  onClick={() => {
+                    setStatusFilter(stat.filter as any);
+                    if (activeFilters.statuses?.length) {
+                      resetFilters();
+                    }
+                  }}
+                />
+              </div>
+              <div className="hidden lg:block h-full">
+                <MetricCard 
+                  label={stat.label} 
+                  value={stat.value} 
+                  icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'} 
+                  variant={stat.variant as any} 
+                  onClick={() => {
+                    setStatusFilter(stat.filter as any);
+                    if (activeFilters.statuses?.length) {
+                      resetFilters();
+                    }
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>
