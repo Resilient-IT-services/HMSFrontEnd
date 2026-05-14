@@ -72,6 +72,10 @@ describe('PatientsPage', () => {
         number: 0
       }
     });
+    (patientService.getDashboardStats as any).mockResolvedValue({
+      success: true,
+      data: { totalPatients: 2, newToday: 1, activeToday: 1 }
+    });
 
     render(
       <Provider store={store}>
@@ -98,6 +102,10 @@ describe('PatientsPage', () => {
         size: 20,
         number: 0
       }
+    });
+    (patientService.getDashboardStats as any).mockResolvedValue({
+      success: true,
+      data: { totalPatients: 2, newToday: 1, activeToday: 1 }
     });
 
     render(

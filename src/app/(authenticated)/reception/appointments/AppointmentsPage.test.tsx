@@ -149,7 +149,7 @@ describe('TodayAppointmentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
     });
 
     const upcomingTab = screen.getByText('Upcoming');
@@ -182,14 +182,14 @@ describe('TodayAppointmentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
     });
 
     const searchInput = screen.getByPlaceholderText('Search patient...');
     fireEvent.change(searchInput, { target: { value: 'Jane' } });
 
     expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
   });
 
   it('filters appointments by status', async () => {
