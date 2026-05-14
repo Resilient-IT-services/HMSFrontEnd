@@ -24,6 +24,8 @@ export function PatientList() {
     setSearchTerm,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements
   } = useReceptionPatients();
 
@@ -171,13 +173,14 @@ export function PatientList() {
             onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
             emptyMessage="No patient records found."
           />
-
-          <Pagination
-            page={page}
-            totalElements={totalElements}
-            onPageChange={setPage}
-            label="patients"
-          />
+<Pagination
+  page={page}
+  totalElements={totalElements}
+  pageSize={pageSize}
+  onPageChange={setPage}
+  onPageSizeChange={setPageSize}
+  label="patients"
+/>
         </ContentPanel>
       </PageSurface>
     </MainLayout>

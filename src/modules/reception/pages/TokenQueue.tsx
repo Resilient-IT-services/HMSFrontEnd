@@ -13,7 +13,8 @@ export function TokenQueue() {
 
   const fetchQueue = useCallback(async () => {
     try {
-      const res = await appointmentService.listSummary(0, 100);
+      const today = new Date().toISOString().split('T')[0];
+      const res = await appointmentService.listSummary(0, 100, undefined, today);
       if (res.success && res.data) {
         setAppointments(res.data.content);
       }

@@ -58,8 +58,11 @@ apiClient.interceptors.response.use(
       // Trigger global toast for any error unless skipToast is set
       if (!error.config?.skipToast) {
         const apiData = error.response?.data as any;
-        const message = apiData?.error?.message || apiData?.message || error.message || 'An unexpected error occurred';
-        triggerToast(message, 'error');
+        const message = apiData?.error?.message || apiData?.message || error.message || 'Something went wrong. Please try again.';
+        
+        // Use a more user-friendly type for validation errors (400)
+        const type = error.response?.status === 400 ? 'warning' : 'error';
+        triggerToast(message, type);
       }
 
       return Promise.reject(error);

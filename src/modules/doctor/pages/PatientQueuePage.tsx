@@ -107,7 +107,13 @@ export const PatientQueuePage = () => {
           ) : (
             <Button variant="secondary" size="sm" onClick={() => handleStartConsultation(appointment.id)}>Start Consultation</Button>
           )}
-          <Button variant="ghost" size="sm" icon="history" title="View History" />
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            icon="history" 
+            title="View History" 
+            onClick={() => router.push(`/doctor/history?patientId=${appointment.patientId}`)}
+          />
         </div>
       )
     }

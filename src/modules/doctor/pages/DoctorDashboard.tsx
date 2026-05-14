@@ -42,9 +42,15 @@ export const DoctorDashboard = () => {
         return;
       }
 
-      const normalized = normalizeAppointmentData(response.data.content);
+      // Safety filter for doctor's own data
+      const filtered = response.data.content.filter(app => 
+        app.doctorId === user.id || 
+        app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+      );
+
+      const normalized = normalizeAppointmentData(filtered);
       setAppointments(normalized);
-      syncExpiredAppointments(response.data.content);
+      syncExpiredAppointments(filtered);
     } catch (error) {
       console.error(error);
     } finally {
@@ -83,7 +89,11 @@ export const DoctorDashboard = () => {
 
   const queue = useMemo(() => {
     const base = appointments.filter(
-      (appointment) => appointment.status !== 'COMPLETED' && appointment.status !== 'CANCELLED'
+      (appointment) => 
+        appointment.status !== 'COMPLETED' && 
+        appointment.status !== 'CANCELLED' &&
+        appointment.status !== 'WAITING_FOR_VITALS' &&
+        appointment.status !== 'ADD_VITALS'
     );
     return sortByToken(base);
   }, [appointments]);

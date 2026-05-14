@@ -11,12 +11,13 @@ export const useReceptionPatients = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearchTerm = useDebounce(searchTerm, 500);
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalElements, setTotalElements] = useState(0);
 
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await patientService.listSummary(page, 20, debouncedSearchTerm);
+      const response = await patientService.listSummary(page, pageSize, debouncedSearchTerm);
       if (response.success && response.data) {
         setPatients(response.data.content);
         setTotalElements(response.data.totalElements);
@@ -26,16 +27,16 @@ export const useReceptionPatients = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearchTerm]);
+  }, [page, pageSize, debouncedSearchTerm]);
 
   useEffect(() => {
     fetchPatients();
   }, [fetchPatients]);
 
-  // Reset page when search term changes
+  // Reset page when search term or page size changes
   useEffect(() => {
     setPage(0);
-  }, [debouncedSearchTerm]);
+  }, [debouncedSearchTerm, pageSize]);
 
   return {
     patients,
@@ -44,6 +45,8 @@ export const useReceptionPatients = () => {
     setSearchTerm,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements,
     refresh: fetchPatients
   };

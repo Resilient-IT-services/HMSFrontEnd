@@ -29,12 +29,14 @@ export const useDoctorQueue = () => {
 
     try {
       if (!isBackground) setLoading(true);
-      const response = await appointmentService.list(0, 100);
+      const today = new Date().toISOString().split('T')[0];
+      const response = await appointmentService.list(0, 100, undefined, today, user.id);
 
       if (response.success && response.data) {
-        // Filter by current doctor
+        // Filter by current doctor as a safety measure
         const doctorAppointments = response.data.content.filter((appointment) => {
-          return appointment.doctorId === user.id || appointment.doctorName === user.fullName;
+          return appointment.doctorId === user.id || 
+                 appointment.doctorName.toLowerCase().includes(user.fullName.toLowerCase());
         });
 
         setAppointments(doctorAppointments);

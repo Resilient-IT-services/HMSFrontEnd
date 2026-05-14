@@ -70,7 +70,7 @@ describe('UserManagement', () => {
       </Provider>
     );
 
-    expect(screen.getByPlaceholderText(/Search by name, email, or role.../i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search by name, email.../i)).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getAllByText('user1').length).toBeGreaterThan(0);
     });

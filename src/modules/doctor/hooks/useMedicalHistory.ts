@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
+import { RootState } from '@/state/store';
 import { useDebounce } from '@/hooks/useDebounce';
 import { PatientResponse, AppointmentResponse, PrescriptionResponse, AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
 
@@ -11,6 +13,7 @@ export const useMedicalHistory = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const patientId = searchParams.get('patientId');
+  const { user } = useSelector((state: RootState) => state.auth);
   
   const [patients, setPatients] = useState<PatientSummaryDTO[]>([]);
   const [historyAppointments, setHistoryAppointments] = useState<AppointmentSummaryDTO[]>([]);
@@ -30,11 +33,17 @@ export const useMedicalHistory = () => {
   const pageSize = 10;
 
   const fetchHistoryList = useCallback(async (search = '', page = 0) => {
+    if (!user) return;
     try {
       setLoading(true);
-      const res = await appointmentService.listSummary(page, pageSize, search, undefined, undefined, 'COMPLETED');
+      const res = await appointmentService.listSummary(page, pageSize, search, undefined, user.id, 'COMPLETED');
       if (res.success && res.data) {
-        setHistoryAppointments(res.data.content);
+        // Safety filter for doctor's own data
+        const filtered = res.data.content.filter(app => 
+          app.doctorId === user.id || 
+          app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+        );
+        setHistoryAppointments(filtered);
         setAppointmentsTotalElements(res.data.totalElements);
         setAppointmentsPage(page);
       }
@@ -43,7 +52,7 @@ export const useMedicalHistory = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const fetchPatientsList = useCallback(async (search = '', page = 0) => {
     try {
@@ -62,13 +71,22 @@ export const useMedicalHistory = () => {
   }, []);
 
   const fetchPatientDetails = useCallback(async (id: string) => {
+    if (!user) return;
     try {
       setLoading(true);
       const res = await patientService.getHistorySummary(id);
 
       if (res.success && res.data) {
         setSelectedPatient(res.data.patient as any);
-        const sortedVisits = (res.data.visits || []).toSorted(
+        
+        // Filter visits by logged in doctor
+        const allVisits = res.data.visits || [];
+        const myVisits = allVisits.filter(visit => 
+          visit.doctorId === user.id || 
+          visit.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+        );
+
+        const sortedVisits = myVisits.toSorted(
           (a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime()
         );
         setPatientVisits(sortedVisits as any);
@@ -78,6 +96,8 @@ export const useMedicalHistory = () => {
           if (detailRes.success && detailRes.data) {
             setSelectedVisit(detailRes.data);
           }
+        } else {
+          setSelectedVisit(null);
         }
       }
     } catch (error) {
@@ -85,7 +105,7 @@ export const useMedicalHistory = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const handleSelectVisit = async (visit: any) => {
     if (selectedVisit?.id === visit.id) return;
@@ -161,6 +181,8 @@ export const useMedicalHistory = () => {
     patientsPage,
     setPatientsPage,
     patientsTotalElements,
+    pageSize,
+    setPageSize: () => {}, // Placeholder as pageSize is currently fixed
     handleSearch,
     selectPatient,
     handleSelectVisit,

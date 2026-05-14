@@ -14,8 +14,25 @@ const LoginPage = () => {
   const [isHelpOpen, setIsHelpOpen] = useState(false);
   const dispatch = useDispatch();
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!username.trim()) {
+      newErrors.username = 'Username is required';
+    }
+    if (!password) {
+      newErrors.password = 'Password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
     setLocalError(null);
 
@@ -104,15 +121,18 @@ const LoginPage = () => {
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-xl">person</span>
                     <input 
-                      className="w-full pl-12 pr-4 py-3.5 bg-[var(--background)] border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" 
+                      className={`w-full pl-12 pr-4 py-3.5 bg-[var(--background)] border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] ${errors.username ? 'border-[var(--error)] ring-1 ring-[var(--error)]' : ''}`} 
                       id="identifier" 
                       placeholder="Enter your username" 
                       type="text"
                       value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
+                      onChange={(e) => {
+                        setUsername(e.target.value);
+                        if (errors.username) setErrors(prev => ({ ...prev, username: '' }));
+                      }}
                     />
                   </div>
+                  {errors.username && <p className="text-[var(--error)] text-xs font-bold mt-1 ml-1">{errors.username}</p>}
                 </div>
 
                 {/* Password Field */}
@@ -126,13 +146,15 @@ const LoginPage = () => {
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] text-xl">lock</span>
                     <input 
-                      className="w-full pl-12 pr-12 py-3.5 bg-[var(--background)] border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" 
+                      className={`w-full pl-12 pr-12 py-3.5 bg-[var(--background)] border-[var(--border)] rounded-lg focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] transition-all text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] ${errors.password ? 'border-[var(--error)] ring-1 ring-[var(--error)]' : ''}`} 
                       id="password" 
                       placeholder="••••••••" 
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (errors.password) setErrors(prev => ({ ...prev, password: '' }));
+                      }}
                     />
                     <button 
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]" 
@@ -144,6 +166,7 @@ const LoginPage = () => {
                       </span>
                     </button>
                   </div>
+                  {errors.password && <p className="text-[var(--error)] text-xs font-bold mt-1 ml-1">{errors.password}</p>}
                 </div>
 
                 {localError && (

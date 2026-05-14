@@ -28,6 +28,8 @@ export const StockManagement = () => {
     setStatusFilter,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements,
     selectedMedicineForStock,
     setSelectedMedicineForStock,
@@ -234,9 +236,10 @@ export const StockManagement = () => {
           <Pagination
             page={page}
             totalElements={totalElements}
-            pageSize={20}
+            pageSize={pageSize}
             onPageChange={setPage}
-            label="batch records"
+            onPageSizeChange={setPageSize}
+            label="medicines"
           />
         </ContentPanel>
 

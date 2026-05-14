@@ -11,29 +11,71 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { Badge } from '@/components/ui/Badge';
+import { Pagination } from '@/components/ui/Pagination';
+import { EarningsVisitHistory } from '../components/Earnings/EarningsVisitHistory';
 
 export const EarningsPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const today = new Date().toISOString().split('T')[0];
-  const lastMonth = new Date();
-  lastMonth.setMonth(lastMonth.getMonth() - 1);
-  const lastMonthStr = lastMonth.toISOString().split('T')[0];
+  // Pagination State
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+
+  const today = useMemo(() => {
+    const now = new Date();
+    const offset = now.getTimezoneOffset();
+    const localDate = new Date(now.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().split('T')[0];
+  }, []);
+
+  const lastMonthStr = useMemo(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    const offset = d.getTimezoneOffset();
+    const localDate = new Date(d.getTime() - (offset * 60 * 1000));
+    return localDate.toISOString().split('T')[0];
+  }, []);
 
   const [startDate, setStartDate] = useState(lastMonthStr);
   const [endDate, setEndDate] = useState(today);
+
+  const handleStartDateChange = (val: string) => {
+    if (!val) return;
+    if (val > today) {
+      triggerGlobalToast('Start date cannot be in the future', 'warning');
+      return;
+    }
+    setStartDate(val);
+    // If new start date is after current end date, push end date forward
+    if (endDate && val > endDate) {
+      setEndDate(val);
+    }
+    setPage(0); // Reset page on filter change
+  };
+
+  const handleEndDateChange = (val: string) => {
+    if (!val) return;
+    if (val > today) {
+      triggerGlobalToast('End date cannot be in the future', 'warning');
+      return;
+    }
+    setEndDate(val);
+    // If new end date is before current start date, pull start date backward
+    if (startDate && val < startDate) {
+      setStartDate(val);
+    }
+    setPage(0); // Reset page on filter change
+  };
 
   const fetchData = useCallback(async () => {
     if (!user) return;
 
     try {
       setLoading(true);
-      // Fetching a larger set of appointments to filter on frontend 
-      // since backend doesn't support date range directly in list_7
       const response = await appointmentService.list(0, 1000, undefined, undefined, user.id);
 
       if (!response.success || !response.data) {
@@ -41,7 +83,11 @@ export const EarningsPage = () => {
         return;
       }
 
-      setAppointments(response.data.content);
+      const doctorAppointments = response.data.content.filter(app =>
+        app.doctorId === user.id ||
+        app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+      );
+      setAppointments(doctorAppointments);
     } catch (error) {
       console.error(error);
       triggerGlobalToast('Failed to fetch appointments', 'error');
@@ -63,23 +109,28 @@ export const EarningsPage = () => {
   }, [user]);
 
   const filteredAppointments = useMemo(() => {
-    return appointments.filter(app => {
-      const appDate = app.appointmentTime.split('T')[0];
-      return appDate >= startDate && appDate <= endDate;
-    });
+    return appointments
+      .filter(app => {
+        const appDate = app.appointmentTime.split('T')[0];
+        return appDate >= startDate && appDate <= endDate;
+      })
+      .toSorted((a, b) => b.appointmentTime.localeCompare(a.appointmentTime));
   }, [appointments, startDate, endDate]);
+
+  const paginatedAppointments = useMemo(() => {
+    const start = page * pageSize;
+    return filteredAppointments.slice(start, start + pageSize);
+  }, [filteredAppointments, page, pageSize]);
 
   const stats = useMemo(() => {
     const earnedAppointments = filteredAppointments.filter(
       app => app.status !== 'CANCELLED' && app.status !== 'PAYMENT_PENDING'
     );
-    
-    const totalEarnings = earnedAppointments.length * consultationFee;
-    
+
     return {
       totalVisits: filteredAppointments.length,
       earnedVisits: earnedAppointments.length,
-      totalEarnings,
+      totalEarnings: earnedAppointments.length * consultationFee,
       cancelled: filteredAppointments.filter(app => app.status === 'CANCELLED').length,
     };
   }, [filteredAppointments, consultationFee]);
@@ -96,124 +147,83 @@ export const EarningsPage = () => {
   };
 
   const metricItems = [
-    { label: 'Total Earnings', value: `₹${stats.totalEarnings}`, variant: 'indigo' as const, icon: 'payments' },
-    { label: 'Total Visits', value: stats.totalVisits, variant: 'orange' as const, icon: 'group' },
-    { label: 'Earned Visits', value: stats.earnedVisits, variant: 'emerald' as const, icon: 'check_circle' },
-    { label: 'Cancelled', value: stats.cancelled, variant: 'red' as const, icon: 'cancel' }
+    { label: 'Total Earnings', value: `₹${stats.totalEarnings.toLocaleString()}`, variant: 'indigo' as const, icon: 'payments' },
+    { label: 'Total Visits', value: stats.totalVisits.toString(), variant: 'orange' as const, icon: 'group' },
+    { label: 'Earned Visits', value: stats.earnedVisits.toString(), variant: 'emerald' as const, icon: 'check_circle' },
+    { label: 'Cancelled', value: stats.cancelled.toString(), variant: 'red' as const, icon: 'cancel' }
   ];
 
   return (
     <MainLayout title="My Earnings" hideTitle>
       <PageSurface paddingClassName="p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <PageHeading 
-            title="Earnings Overview" 
-            description="Track your performance and revenue for the selected period."
+        <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 mb-8">
+          <PageHeading
+            title="Earnings Analytics"
+            description="Detailed breakdown of your revenue and patient encounters."
             className="mb-0"
           />
-          
-          <Card className="p-2 flex items-center gap-2 shadow-sm" noPadding>
-            <div className="flex flex-col px-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">From</span>
-              <input 
-                type="date" 
-                value={startDate} 
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (endDate && val > endDate) {
-                    triggerGlobalToast('Start date cannot be greater than end date', 'warning');
-                    return;
-                  }
-                  setStartDate(val);
-                }}
-                className="text-sm font-bold text-slate-700 outline-none bg-transparent"
-              />
+
+          <div className="flex items-center gap-3 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-4 px-4 py-2 bg-slate-50/80 rounded-xl border border-slate-100">
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Start Date</span>
+                <input 
+                  type="date" 
+                  value={startDate} 
+                  max={today}
+                  onChange={(e) => handleStartDateChange(e.target.value)}
+                  className="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer"
+                />
+              </div>
+              <div className="h-6 w-px bg-slate-200" />
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-0.5">End Date</span>
+                <input 
+                  type="date" 
+                  value={endDate} 
+                  max={today}
+                  onChange={(e) => handleEndDateChange(e.target.value)}
+                  className="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer"
+                />
+              </div>
             </div>
-            <div className="h-8 w-px bg-slate-100" />
-            <div className="flex flex-col px-3">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">To</span>
-              <input 
-                type="date" 
-                value={endDate} 
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (startDate && val < startDate) {
-                    triggerGlobalToast('End date cannot be less than start date', 'warning');
-                    return;
-                  }
-                  setEndDate(val);
-                }}
-                className="text-sm font-bold text-slate-700 outline-none bg-transparent"
-              />
-            </div>
-            <Button 
+            <Button
               onClick={fetchData}
-              icon="refresh"
+              icon="sync"
+              variant="primary"
               size="sm"
-            />
-          </Card>
+              className="rounded-xl shadow-md shadow-orange-600/10"
+              isLoading={loading}
+            >
+              Update
+            </Button>
+          </div>
         </div>
 
         <MetricsGrid items={metricItems} className="mb-8" />
 
-        <Card title="Visit History" subtitle={`${filteredAppointments.length} appointments found`} noPadding>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-slate-50 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  <th className="px-6 py-4">Date & Time</th>
-                  <th className="px-6 py-4">Patient Name</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-right">Earning</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {loading ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400">Loading records...</td>
-                  </tr>
-                ) : filteredAppointments.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">No appointments found for the selected period.</td>
-                  </tr>
-                ) : (
-                  filteredAppointments.sort((a, b) => b.appointmentTime.localeCompare(a.appointmentTime)).map((app) => {
-                    const isEarned = app.status !== 'CANCELLED' && app.status !== 'PAYMENT_PENDING';
-                    let badgeVariant: 'emerald' | 'red' | 'slate' | 'orange' | 'blue' = 'slate';
-                    if (app.status === 'COMPLETED') badgeVariant = 'emerald';
-                    else if (app.status === 'CANCELLED') badgeVariant = 'red';
-                    else if (app.status === 'WALK_IN') badgeVariant = 'blue';
-                    else if (app.status === 'SCHEDULED' || app.status === 'CHECKED_IN') badgeVariant = 'orange';
+        <Card 
+          title="Revenue Breakdown  "
+          noPadding
 
-                    return (
-                      <tr 
-                        key={app.id} 
-                        className="hover:bg-slate-50/50 transition-colors cursor-pointer"
-                      >
-                        <td className="px-6 py-4">
-                          <p className="text-sm font-bold text-slate-900">{new Date(app.appointmentTime).toLocaleDateString()}</p>
-                          <p className="text-[10px] text-slate-500">{new Date(app.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
-                        </td>
-                        <td className="px-6 py-4 font-medium text-slate-700">{app.patientName}</td>
-                        <td className="px-6 py-4">
-                          <Badge variant={badgeVariant}>
-                            {statusCaptions[app.status] || app.status}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <span className={`font-bold ${isEarned ? 'text-slate-900' : 'text-slate-300'}`}>
-                            ₹{isEarned ? consultationFee : 0}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+          className="overflow-hidden mb-12 p-4"
+        >
+          <EarningsVisitHistory 
+            loading={loading}
+            filteredAppointments={paginatedAppointments}
+            consultationFee={consultationFee}
+            statusCaptions={statusCaptions}
+          />
+          
+          <Pagination
+            page={page}
+            totalElements={filteredAppointments.length}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            label="encounters"
+          />
         </Card>
       </PageSurface>
     </MainLayout>
-  );
-};
+  );};
