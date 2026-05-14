@@ -33,27 +33,33 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto pb-20">
+    <div className="max-w-6xl mx-auto pb-24 md:pb-20 px-4 md:px-0">
       <form onSubmit={logic.handleSubmit}>
-        <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-6">
+        <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 md:mb-8">
+          <div className="flex items-center gap-4 md:gap-6">
+            <Avatar 
+              name={logic.formData.fullName} 
+              size="lg"
+              className="md:hidden"
+            />
             <Avatar 
               name={logic.formData.fullName} 
               size="xl" 
+              className="hidden md:flex"
             />
             <div>
-              <h1 className="font-headline-xl text-on-surface">{isEdit ? 'Edit User Profile' : 'Create New User'}</h1>
-              <p className="font-body-lg text-gray-500">{logic.formData.fullName || 'New Staff Member'}</p>
+              <h1 className="font-headline-md md:font-headline-xl text-on-surface">{isEdit ? 'Edit User Profile' : 'Create New User'}</h1>
+              <p className="font-body-md md:font-body-lg text-gray-500">{logic.formData.fullName || 'New Staff Member'}</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             {canChangePassword && (
               <button 
                 type="button" 
                 onClick={() => setIsPasswordModalOpen(true)}
-                className="px-6 py-2.5 bg-white border-2 border-orange-200 text-orange-700 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-orange-50 transition-all shadow-sm"
+                className="w-full md:w-auto px-4 md:px-6 py-2.5 bg-white border-2 border-orange-200 text-orange-700 rounded-xl font-black text-[10px] md:text-xs flex items-center justify-center gap-2 hover:bg-orange-50 transition-all shadow-sm"
               >
-                <span className="material-symbols-outlined text-lg">lock_reset</span>
+                <span className="material-symbols-outlined text-base md:text-lg">lock_reset</span>
                 CHANGE PASSWORD
               </button>
             )}
@@ -79,10 +85,10 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
           {logic.activeTab === 'profile' && <UserFormProfileTab formData={logic.formData} setFormData={logic.setFormData} assignedRoles={logic.assignedRoles} validationErrors={logic.validationErrors} />}
         </Tabs>
 
-        <div className="fixed bottom-0 right-0 left-64 bg-white/95 backdrop-blur-md border-t border-gray-200 px-8 py-4 flex justify-end items-center z-40">
-          <div className="flex gap-3">
-            <button type="button" onClick={() => logic.router.back()} className="btn-secondary">Discard</button>
-            <button type="submit" disabled={logic.loading} className="btn-primary">Save Changes</button>
+        <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-white/95 backdrop-blur-md border-t border-gray-200 px-4 md:px-8 py-3 md:py-4 flex justify-end items-center z-40">
+          <div className="flex gap-3 w-full md:w-auto">
+            <button type="button" onClick={() => logic.router.back()} className="btn-secondary flex-1 md:flex-none py-2 md:py-2.5 text-xs md:text-sm">Discard</button>
+            <button type="submit" disabled={logic.loading} className="btn-primary flex-1 md:flex-none py-2 md:py-3 text-xs md:text-sm">Save Changes</button>
           </div>
         </div>
       </form>

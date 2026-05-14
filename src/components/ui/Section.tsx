@@ -62,7 +62,7 @@ export const Section: React.FC<SectionProps> = ({
       </div>
       <div className={cn(
         grid ? "grid gap-x-8 gap-y-6" : "block",
-        // @ts-ignore
+        // @ts-expect-error
         grid && (gridCols[cols] || gridCols[2])
       )}>
         {children}
