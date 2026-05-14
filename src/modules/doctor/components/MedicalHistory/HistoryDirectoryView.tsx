@@ -54,6 +54,7 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
   const appointmentColumns: Column<AppointmentSummaryDTO>[] = [
     {
       header: 'Visit Date',
+      mobilePosition: 'title',
       render: (row) => (
         <div>
           <p className="font-bold text-slate-900 text-sm">
@@ -67,6 +68,7 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
     },
     {
       header: 'Patient Profile',
+      mobilePosition: 'subtitle',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs uppercase">
@@ -81,6 +83,7 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
     },
     {
       header: 'Token',
+      mobilePosition: 'meta',
       render: (row) => (
         <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded">
           {formatToken(row)}
@@ -91,12 +94,14 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
       header: 'Status',
       className: 'text-center',
       headerClassName: 'text-center',
+      mobilePosition: 'meta',
       render: (row) => <Badge variant="emerald">{row.status}</Badge>
     },
     {
       header: 'Actions',
       className: 'text-right',
       headerClassName: 'text-right',
+      mobilePosition: 'action',
       render: (row) => (
         <Button 
           variant="secondary" 
@@ -113,6 +118,7 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
   const patientColumns: Column<PatientSummaryDTO>[] = [
     {
       header: 'Code',
+      mobilePosition: 'meta',
       render: (row) => (
         <span className="font-mono text-xs font-bold text-orange-700 bg-orange-50 px-2 py-1 rounded uppercase">
           {row.patientCode || 'N/A'}
@@ -121,6 +127,7 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
     },
     {
       header: 'Patient Profile',
+      mobilePosition: 'title',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 font-bold uppercase border-2 border-white shadow-sm">
@@ -137,12 +144,14 @@ export const HistoryDirectoryView: React.FC<HistoryDirectoryViewProps> = ({
       header: 'Gender',
       className: 'text-center',
       headerClassName: 'text-center',
+      mobilePosition: 'subtitle',
       render: (row) => <span className="capitalize text-sm font-medium">{row.gender.toLowerCase()}</span>
     },
     {
       header: 'Actions',
       className: 'text-right',
       headerClassName: 'text-right',
+      mobilePosition: 'action',
       render: (row) => (
         <Button 
           variant="secondary" 

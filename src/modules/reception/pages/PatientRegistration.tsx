@@ -163,28 +163,28 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
         </nav>
 
         {/* Page Header */}
-        <div className="flex justify-between items-end mb-8">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-end mb-8 gap-6">
           <div>
-            <h2 className="text-3xl font-bold text-slate-900 mb-1">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1">
               {isEditMode ? 'Edit Patient Profile' : 'New Patient Registration'}
             </h2>
-            <p className="text-slate-500">
+            <p className="text-sm text-slate-500">
               {isEditMode
                 ? 'Update the patient record details below.'
                 : 'Complete the details below to initialize a new electronic health record.'}
             </p>
           </div>
-          <div className="bg-orange-50 border border-orange-100 px-6 py-3 rounded-xl flex items-center gap-4">
-            <div className="text-right">
+          <div className="bg-orange-50 border border-orange-100 px-4 py-3 sm:px-6 rounded-xl flex items-center gap-4 self-start md:self-auto w-full md:w-auto">
+            <div className="flex-1 md:text-right">
               <p className="text-[10px] font-black text-primary uppercase tracking-wider">
                 {isEditMode ? 'Patient Code' : 'UPIN Assignment'}
               </p>
-              <p className="text-lg font-bold text-slate-900">
+              <p className="text-base sm:text-lg font-bold text-slate-900">
                 {isEditMode ? (formData.patientCode || 'UNAVAILABLE') : 'AUTO-GENERATE'}
               </p>
             </div>
             <div className="h-10 w-px bg-orange-200"></div>
-            <span className="material-symbols-outlined text-primary text-3xl">fingerprint</span>
+            <span className="material-symbols-outlined text-primary text-2xl sm:text-3xl">fingerprint</span>
           </div>
         </div>
 
@@ -192,13 +192,13 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form Canvas */}
           <div className="lg:col-span-2 space-y-8">
-            <section className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
-              <div className="flex items-center gap-2 mb-8 pb-4 border-b border-slate-100">
+            <section className="bg-white border border-slate-200 rounded-2xl p-4 sm:p-8 shadow-sm">
+              <div className="flex items-center gap-2 mb-6 sm:mb-8 pb-4 border-b border-slate-100">
                 <span className="material-symbols-outlined text-primary">person</span>
-                <h3 className="text-xl font-bold text-slate-900">Personal Information</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-slate-900">Personal Information</h3>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 sm:gap-y-6">
                 <div className="space-y-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">First Name</label>
                   <input 

@@ -113,14 +113,17 @@ export const ReceptionDashboard = () => {
   const patientColumns: Column<PatientResponse>[] = [
     {
       header: 'Patient Name',
+      mobilePosition: 'title',
       render: (p) => <span className="font-bold text-slate-900">{p.fullName}</span>
     },
     {
       header: 'Phone',
+      mobilePosition: 'subtitle',
       key: 'phone'
     },
     {
       header: 'Status',
+      mobilePosition: 'meta',
       render: () => <Badge variant="orange">Registered</Badge>
     }
   ];

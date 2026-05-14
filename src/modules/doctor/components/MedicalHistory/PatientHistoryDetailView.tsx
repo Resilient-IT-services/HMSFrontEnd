@@ -25,59 +25,61 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
   handleSelectVisit,
 }) => {
   return (
-    <div className="h-[calc(100vh-112px)] flex flex-col bg-slate-50 overflow-hidden font-inter">
+    <div className="min-h-[calc(100vh-112px)] flex flex-col bg-slate-50 font-inter">
       
       {/* Detail Header */}
-      <div className="px-8 py-4 flex items-center justify-between border-b border-slate-200 bg-white shadow-sm z-10">
-        <div className="flex items-center gap-6">
+      <div className="px-4 py-4 sm:px-8 flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200 bg-white shadow-sm z-10 gap-4">
+        <div className="flex items-center gap-4 sm:gap-6">
           <Button 
             variant="secondary" 
             size="sm" 
             icon="arrow_back" 
             onClick={clearSelection}
-            className="rounded-full w-10 h-10 p-0"
+            className="rounded-full w-10 h-10 p-0 shrink-0"
           />
-          <div>
+          <div className="min-w-0">
             <PageHeading 
               title={selectedPatient?.fullName || 'Loading Profile...'}
-              className="mb-0"
+              className="mb-0 text-lg sm:text-2xl truncate"
             />
-            <div className="flex items-center gap-3 mt-1">
-              <Badge variant="orange" size="sm">Code: {selectedPatient?.patientCode || '...'}</Badge>
-              <span className="text-slate-300">|</span>
-              <span className="text-xs font-bold text-slate-500 uppercase tracking-tighter">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+              <Badge variant="orange" size="sm" className="whitespace-nowrap">Code: {selectedPatient?.patientCode || '...'}</Badge>
+              <span className="hidden sm:inline text-slate-300">|</span>
+              <span className="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-tighter">
                 {selectedPatient?.gender} • {selectedPatient?.dob ? `${new Date().getFullYear() - new Date(selectedPatient.dob).getFullYear()} Years` : '...'}
               </span>
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
-          <Button variant="secondary" icon="print">Print EMR</Button>
-          <Button icon="clinical_notes" href="/doctor/active-consultation">Consultation</Button>
+        <div className="flex gap-2 sm:gap-3">
+          <Button variant="secondary" icon="print" size="sm" className="flex-1 sm:flex-none text-[10px] sm:text-xs">Print EMR</Button>
+          <Button icon="clinical_notes" href="/doctor/active-consultation" size="sm" className="flex-1 sm:flex-none text-[10px] sm:text-xs">Consultation</Button>
         </div>
       </div>
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden lg:overflow-visible">
         
-        {/* Left Sidebar: Timeline */}
-        <div className="w-80 border-r border-slate-200 bg-white overflow-y-auto shrink-0 shadow-inner">
-          <div className="p-6">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 flex items-center gap-2">
+        {/* Left Sidebar: Timeline - Scrollable on desktop, horizontal or collapsible on mobile? 
+            Let's make it a scrollable top bar or side bar that stays above content on mobile.
+        */}
+        <div className="w-full lg:w-80 border-b lg:border-b-0 lg:border-r border-slate-200 bg-white overflow-x-auto lg:overflow-y-auto shrink-0 shadow-inner">
+          <div className="p-4 sm:p-6 flex lg:flex-col gap-4">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 whitespace-nowrap lg:mb-6">
               <span className="material-symbols-outlined text-sm">event_repeat</span>
               Visit Timeline
             </h3>
             
-            <div className="space-y-4 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100">
+            <div className="flex lg:flex-col gap-4 relative lg:before:absolute lg:before:left-[11px] lg:before:top-2 lg:before:bottom-2 lg:before:w-[2px] lg:before:bg-slate-100">
               {patientVisits.map((visit) => (
                 <div 
                   key={visit.id} 
-                  className="relative pl-8 group cursor-pointer" 
+                  className="relative lg:pl-8 group cursor-pointer shrink-0 w-48 lg:w-full" 
                   onClick={() => handleSelectVisit(visit)}
                 >
-                  <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm z-10 transition-all ${
+                  <div className={`hidden lg:block absolute left-0 top-1 w-6 h-6 rounded-full border-4 border-white shadow-sm z-10 transition-all ${
                     selectedVisit?.id === visit.id ? 'bg-orange-600 scale-110' : 'bg-slate-200 group-hover:bg-orange-300'
                   }`}></div>
-                  <div className={`p-3 rounded-xl border transition-all ${
+                  <div className={`p-3 rounded-xl border transition-all h-full ${
                     selectedVisit?.id === visit.id 
                       ? 'bg-orange-50/50 border-orange-200 shadow-sm' 
                       : 'bg-white border-slate-100 hover:border-slate-200'
@@ -86,14 +88,14 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
                       {new Date(visit.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </p>
                     <p className="font-bold text-slate-900 text-xs">Consultation</p>
-                    <p className="text-[10px] text-slate-500 font-medium">Dr. {visit.doctorName}</p>
+                    <p className="text-[10px] text-slate-500 font-medium truncate">Dr. {visit.doctorName}</p>
                   </div>
                 </div>
               ))}
               {patientVisits.length === 0 && !loading && (
-                <div className="text-center py-10 opacity-50">
-                  <span className="material-symbols-outlined text-4xl mb-2 text-slate-200">history_off</span>
-                  <p className="text-xs italic font-medium">No previous visits.</p>
+                <div className="text-center py-4 lg:py-10 opacity-50 w-full">
+                  <span className="material-symbols-outlined text-2xl lg:text-4xl mb-2 text-slate-200">history_off</span>
+                  <p className="text-[10px] lg:text-xs italic font-medium">No previous visits.</p>
                 </div>
               )}
             </div>
@@ -102,9 +104,9 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
 
         {/* Right Content: Visit Detail */}
         <div className="flex-1 bg-[#fcfcfd] overflow-y-auto">
-          <div className="max-w-5xl mx-auto p-10">
+          <div className="max-w-5xl mx-auto p-4 sm:p-10">
             {selectedVisit ? (
-              <div className="space-y-8 animate-fadeIn">
+              <div className="space-y-6 sm:space-y-8 animate-fadeIn">
                 
                 {/* Summary Card */}
                 <Card 
@@ -112,35 +114,36 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
                   icon="description"
                   headerActions={<Badge variant="emerald">{selectedVisit.status}</Badge>}
                   noPadding
+                  className="overflow-hidden"
                 >
-                  <div className="p-8 grid grid-cols-1 md:grid-cols-12 gap-10">
+                  <div className="p-4 sm:p-8 flex flex-col md:grid md:grid-cols-12 gap-6 sm:gap-10">
                     <div className="md:col-span-7">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Chief Complaint / Primary Concern</p>
-                      <p className="text-lg font-bold text-slate-900 leading-tight">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 sm:mb-3">Chief Complaint / Primary Concern</p>
+                      <p className="text-base sm:text-lg font-bold text-slate-900 leading-tight">
                         {selectedVisit.notes?.split('.')[0] || 'Routine checkup and general physical examination.'}
                       </p>
                     </div>
-                    <div className="md:col-span-5 flex flex-col justify-center border-l border-slate-100 pl-10">
+                    <div className="md:col-span-5 flex flex-col justify-center md:border-l border-slate-100 md:pl-10 pt-4 md:pt-0 border-t md:border-t-0">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 text-center md:text-left">Recorded Vitals</p>
-                      <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                        <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                      <div className="grid grid-cols-2 xs:grid-cols-4 sm:flex sm:flex-wrap gap-2 sm:gap-3 justify-center md:justify-start">
+                        <div className="flex flex-col items-center bg-slate-50 px-2 py-2 sm:px-3 sm:py-2 rounded-xl border border-slate-100 min-w-[60px] sm:min-w-[70px]">
                           <span className="material-symbols-outlined text-orange-600 text-sm mb-1">favorite</span>
-                          <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.heartRate || '--'}</span>
+                          <span className="font-black text-slate-900 text-xs sm:text-sm">{selectedVisit.vitals?.heartRate || '--'}</span>
                           <span className="text-[8px] font-bold text-slate-400 uppercase">BPM</span>
                         </div>
-                        <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                        <div className="flex flex-col items-center bg-slate-50 px-2 py-2 sm:px-3 sm:py-2 rounded-xl border border-slate-100 min-w-[60px] sm:min-w-[70px]">
                           <span className="material-symbols-outlined text-blue-600 text-sm mb-1">device_thermostat</span>
-                          <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.temperature || '--'}°</span>
+                          <span className="font-black text-slate-900 text-xs sm:text-sm">{selectedVisit.vitals?.temperature || '--'}°</span>
                           <span className="text-[8px] font-bold text-slate-400 uppercase">Temp</span>
                         </div>
-                        <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                        <div className="flex flex-col items-center bg-slate-50 px-2 py-2 sm:px-3 sm:py-2 rounded-xl border border-slate-100 min-w-[60px] sm:min-w-[70px]">
                           <span className="material-symbols-outlined text-emerald-600 text-sm mb-1">blood_pressure</span>
-                          <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.bloodPressure || '--'}</span>
+                          <span className="font-black text-slate-900 text-xs sm:text-sm">{selectedVisit.vitals?.bloodPressure || '--'}</span>
                           <span className="text-[8px] font-bold text-slate-400 uppercase">B/P</span>
                         </div>
-                        <div className="flex flex-col items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 min-w-[70px]">
+                        <div className="flex flex-col items-center bg-slate-50 px-2 py-2 sm:px-3 sm:py-2 rounded-xl border border-slate-100 min-w-[60px] sm:min-w-[70px]">
                           <span className="material-symbols-outlined text-purple-600 text-sm mb-1">weight</span>
-                          <span className="font-black text-slate-900 text-sm">{selectedVisit.vitals?.weight || '--'}</span>
+                          <span className="font-black text-slate-900 text-xs sm:text-sm">{selectedVisit.vitals?.weight || '--'}</span>
                           <span className="text-[8px] font-bold text-slate-400 uppercase">KG</span>
                         </div>
                       </div>
@@ -149,12 +152,12 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
                 </Card>
 
                 {/* Detailed Notes & Prescription */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                   
                   {/* Clinical Notes */}
                   <Card title="Clinical Findings & Diagnosis" icon="clinical_notes" className="shadow-sm">
                     <div className="space-y-6">
-                      <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+                      <div className="bg-slate-50/50 p-4 sm:p-6 rounded-2xl border border-slate-100">
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Physician's Assessment</p>
                         <p className="text-sm font-medium text-slate-700 leading-relaxed italic">
                           "{selectedVisit.notes || 'No detailed physician notes available for this encounter.'}"
@@ -178,11 +181,11 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
                       {selectedVisit.prescription?.items && selectedVisit.prescription.items.length > 0 ? (
                         selectedVisit.prescription.items.map((item, idx) => (
                           <div key={idx} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors">
-                            <div>
-                              <p className="font-bold text-sm text-white">{item.medicineName}</p>
-                              <p className="text-[10px] text-white/50 font-medium">{item.dosage} • {item.duration}</p>
+                            <div className="min-w-0">
+                              <p className="font-bold text-sm text-white truncate">{item.medicineName}</p>
+                              <p className="text-[10px] text-white/50 font-medium truncate">{item.dosage} • {item.duration}</p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right shrink-0 ml-2">
                               <span className="material-symbols-outlined text-white/30 text-lg">medical_information</span>
                             </div>
                           </div>
@@ -200,7 +203,7 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
                         variant="ghost" 
                         fullWidth 
                         size="sm" 
-                        className="mt-6 text-white/60 hover:text-white hover:bg-white/10"
+                        className="mt-6 text-white/60 hover:text-white hover:bg-white/10 text-[10px] uppercase font-black tracking-widest"
                       >
                         View Prescription Details
                       </Button>
@@ -210,9 +213,9 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-40 opacity-20">
-                <span className="material-symbols-outlined text-8xl mb-4">clinical_notes</span>
-                <p className="font-manrope text-xl font-black uppercase tracking-widest">Select a visit to view details</p>
+              <div className="flex flex-col items-center justify-center py-20 sm:py-40 opacity-20">
+                <span className="material-symbols-outlined text-6xl sm:text-8xl mb-4">clinical_notes</span>
+                <p className="font-manrope text-sm sm:text-xl font-black uppercase tracking-widest text-center px-4">Select a visit to view details</p>
               </div>
             )}
           </div>

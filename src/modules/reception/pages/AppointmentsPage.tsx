@@ -38,10 +38,12 @@ export const AppointmentsPage = () => {
   const columns: Column<AppointmentSummaryDTO>[] = [
     {
       header: 'Token',
+      mobilePosition: 'meta',
       render: (app) => <span className="font-bold text-slate-900">{formatToken(app)}</span>
     },
     {
       header: 'Time',
+      mobilePosition: 'title',
       render: (app) => (
         <span className="font-bold text-slate-900">
           {new Date(app.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -50,6 +52,7 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Patient',
+      mobilePosition: 'subtitle',
       render: (app) => (
         <div>
           <p className="font-bold text-slate-900">{app.patientName}</p>
@@ -59,6 +62,7 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Doctor',
+      mobilePosition: 'body',
       render: (app) => (
         <div>
           <p className="font-medium text-slate-700">{app.doctorName}</p>
@@ -68,6 +72,7 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Status',
+      mobilePosition: 'meta',
       render: (app) => {
         const variants: Record<string, any> = {
           WALK_IN: 'emerald',
@@ -85,6 +90,7 @@ export const AppointmentsPage = () => {
       header: 'Actions',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'action',
       render: (app) => (
         <div className="flex items-center justify-center gap-2">
           {!['SCHEDULED', 'WALK_IN', 'CHECKED_IN', 'COMPLETED', 'CANCELLED'].includes(app.status) && (
