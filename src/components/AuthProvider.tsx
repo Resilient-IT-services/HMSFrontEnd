@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { hydrateAuth, setUser, setLoading, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
@@ -15,21 +15,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
+  const checkInProgress = useRef(false);
 
   // 1. Initial hydration on mount
   useEffect(() => {
     dispatch(hydrateAuth());
   }, [dispatch]);
 
-  // 2. Fetch user profile if missing and not on public route
+  // 2. Fetch user profile if missing
   useEffect(() => {
-    // If we're already loading or authenticated, or on a public route, skip
-    if (isLoading || isAuthenticated || PUBLIC_ROUTES.has(pathname)) {
-      return;
-    }
-
     const checkAuth = async () => {
+      if (checkInProgress.current) return;
+      
       try {
+        checkInProgress.current = true;
         dispatch(setLoading(true));
         const response = await authService.me();
 
@@ -42,11 +41,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         dispatch(setUser(null));
       } finally {
         dispatch(setLoading(false));
+        checkInProgress.current = false;
       }
     };
 
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+    if (isAuthenticated) {
+      if (isLoading) dispatch(setLoading(false));
+      return;
+    }
+
+    // On public routes, only check auth if we have a token
+    if (PUBLIC_ROUTES.has(pathname)) {
+      if (token) {
+        checkAuth();
+      } else {
+        if (isLoading) dispatch(setLoading(false));
+      }
+      return;
+    }
+
+    // On private routes, always attempt to check auth
     checkAuth();
-  }, [dispatch, isAuthenticated, isLoading, pathname]);
+  }, [dispatch, isAuthenticated, pathname]);
 
   const handleUnauthenticated = useCallback(() => {
     if (!PUBLIC_ROUTES.has(pathname)) {
