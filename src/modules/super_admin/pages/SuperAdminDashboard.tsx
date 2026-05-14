@@ -61,7 +61,7 @@ export const SuperAdminDashboard = () => {
             variant="orange" 
             icon="apartment" 
             layout="horizontal" 
-            trend="404%" // TODO: derive from API
+            trend="404%" // TO DO: derive from API
             valueTestId="hospitals-count"
           />
           <MetricCard 

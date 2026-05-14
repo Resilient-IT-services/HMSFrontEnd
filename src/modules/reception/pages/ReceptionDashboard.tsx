@@ -41,10 +41,12 @@ const getPatientCreatedDateKey = (createdAt?: string) => {
 export const ReceptionDashboard = () => {
   const router = useRouter();
   const [recentPatients, setRecentPatients] = useState<PatientResponse[]>([]);
-  const [patientsRegisteredToday, setPatientsRegisteredToday] = useState(0);
+  const [totalPatients, setTotalPatients] = useState(0);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [totalAppointmentsToday, setTotalAppointmentsToday] = useState(0);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [nurses, setNurses] = useState<NurseStaffResponse[]>([]);
+  const [totalNurses, setTotalNurses] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showFabMenu, setShowFabMenu] = useState(false);
 
@@ -55,25 +57,27 @@ export const ReceptionDashboard = () => {
       
       const [patRes, appRes, docRes, nurRes] = await Promise.all([
         patientService.list(0, 500),
-        appointmentService.list(0, 100),
-        doctorService.list(0, 6),
-        nurseService.list(0, 5)
+        appointmentService.list(0, 500, undefined, today),
+        doctorService.list(0, 10),
+        nurseService.list(0, 10)
       ]);
 
       if (patRes.success && patRes.data) {
         const patients = patRes.data.content || [];
-        const todaysPatients = patients.filter((patient) => getPatientCreatedDateKey(patient.createdAt) === today);
         setRecentPatients(patients.slice(0, 5));
-        setPatientsRegisteredToday(todaysPatients.length);
+        setTotalPatients(patRes.data.totalElements);
       }
       if (appRes.success && appRes.data) {
         const normalized = normalizeAppointmentData(appRes.data.content || []);
-        const todayApps = normalized.filter(a => a.appointmentTime.startsWith(today)) || [];
-        setAppointments(todayApps);
+        setAppointments(normalized);
+        setTotalAppointmentsToday(appRes.data.totalElements);
         syncExpiredAppointments(appRes.data.content || []);
       }
       if (docRes.success && docRes.data) setDoctors(docRes.data.content || []);
-      if (nurRes.success && nurRes.data) setNurses(nurRes.data.content || []);
+      if (nurRes.success && nurRes.data) {
+        setNurses(nurRes.data.content || []);
+        setTotalNurses(nurRes.data.totalElements);
+      }
 
     } catch (error) {
       console.error('Operation fetchData in ReceptionDashboard failed:', error);
@@ -105,12 +109,12 @@ export const ReceptionDashboard = () => {
     }
 
     return {
-      totalPatients: patientsRegisteredToday,
+      totalPatients,
       activeQueue,
-      appointmentsToday: appointments.length,
+      appointmentsToday: totalAppointmentsToday,
       doctorQueueByName
     };
-  }, [patientsRegisteredToday, appointments]);
+  }, [totalPatients, appointments, totalAppointmentsToday]);
 
   const patientColumns: Column<PatientResponse>[] = [
     {
@@ -132,12 +136,12 @@ export const ReceptionDashboard = () => {
 
   const metricItems = [
     {
-      label: 'Total Patients Today',
+      label: 'Total Patients',
       value: stats.totalPatients,
       variant: 'orange' as const,
       icon: 'group',
       layout: 'horizontal' as const,
-      tag: 'Live'
+      tag: 'All Time'
     },
     {
       label: 'Active Queue',
@@ -145,7 +149,7 @@ export const ReceptionDashboard = () => {
       variant: 'blue' as const,
       icon: 'hourglass_empty',
       layout: 'horizontal' as const,
-      tag: 'Live'
+      tag: 'Today'
     },
     {
       label: 'Appointments Today',
@@ -153,11 +157,11 @@ export const ReceptionDashboard = () => {
       variant: 'purple' as const,
       icon: 'event_available',
       layout: 'horizontal' as const,
-      tag: 'Live'
+      tag: 'Today'
     },
     {
       label: 'Nurses On Duty',
-      value: nurses.length,
+      value: totalNurses,
       variant: 'emerald' as const,
       icon: 'payments',
       layout: 'horizontal' as const,
