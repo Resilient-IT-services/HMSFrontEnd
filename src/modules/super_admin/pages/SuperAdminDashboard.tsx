@@ -174,31 +174,39 @@ export const SuperAdminDashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <Card className="flex flex-col justify-center items-center text-center py-12">
-            <div className="max-w-md mx-auto">
-              <span className="material-symbols-outlined text-6xl text-orange-600 opacity-20 mb-4">shield_person</span>
-              <h2 className="text-2xl font-black text-slate-900 mb-2">Welcome, Super Administrator</h2>
-              <p className="text-slate-500 mb-6">
-                Use the sidebar to manage hospitals, global users, and system-wide settings.
-              </p>
-              <div className="flex flex-wrap gap-3 justify-center">
-                <Button href="/super_admin/hospitals">Manage Hospitals</Button>
-                <Button variant="secondary" href="/admin/medicines">Medicine Master</Button>
-                <Button variant="secondary" href="/admin/users">Manage Users</Button>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+          <Card className="flex flex-col md:justify-center md:items-center md:text-center py-6 md:py-12">
+            <div className="md:max-w-md md:mx-auto">
+              <div className="flex items-center gap-4 mb-4 md:flex-col md:text-center">
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 md:w-16 md:h-16 md:bg-transparent md:opacity-20 md:mb-4">
+                  <span className="material-symbols-outlined text-2xl text-orange-600 md:text-6xl">shield_person</span>
+                </div>
+                <div>
+                  <h2 className="text-lg md:text-2xl font-black text-slate-900 mb-1 leading-tight">Welcome, Super Admin</h2>
+                  <p className="text-xs md:text-slate-500 font-medium md:mb-6">
+                    Manage nodes, global users, and core system parameters.
+                  </p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 md:gap-3 md:justify-center mt-4">
+                <Button href="/super_admin/hospitals" className="h-10 text-xs md:text-sm md:h-auto">Manage Hospitals</Button>
+                <Button variant="secondary" href="/admin/medicines" className="h-10 text-xs md:text-sm md:h-auto">Medicine Master</Button>
+                <Button variant="secondary" href="/admin/users" className="h-10 text-xs md:text-sm md:h-auto">Manage Users</Button>
               </div>
             </div>
           </Card>
 
-          <Card className="relative overflow-hidden bg-orange-600 border-none text-white p-8 min-h-[250px] flex flex-col justify-end shadow-lg shadow-orange-600/20 group">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <span className="material-symbols-outlined text-[120px]">health_and_safety</span>
+          <Card className="relative overflow-hidden bg-orange-600 border-none text-white p-6 md:p-8 min-h-[160px] md:min-h-[250px] flex flex-col justify-end shadow-lg shadow-orange-600/20 group">
+            <div className="absolute top-0 right-0 p-6 md:p-8 opacity-10">
+              <span className="material-symbols-outlined text-6xl md:text-[120px]">health_and_safety</span>
             </div>
-            <h4 className="text-2xl font-black text-white mb-2">Hospital Network Expansion</h4>
-            <p className="text-sm text-white opacity-90 max-w-sm mb-4">Adding new facilities requires verification of medical licenses and local compliance standards.</p>
-            <Button variant="ghost" size="sm" href="/super_admin/hospitals" className="text-white hover:bg-white/10 w-fit p-0">
-              View Documentation <span className="material-symbols-outlined ml-1 text-sm">arrow_forward</span>
-            </Button>
+            <div className="relative z-10">
+              <h4 className="text-lg md:text-2xl font-black text-white mb-1 leading-tight">Network Expansion</h4>
+              <p className="text-[10px] md:text-sm text-white opacity-90 max-w-sm mb-4 leading-relaxed line-clamp-2">Adding new facilities requires verification of medical licenses and local compliance standards.</p>
+              <Button variant="ghost" size="sm" href="/super_admin/hospitals" className="text-white hover:bg-white/10 w-fit p-0 h-auto text-xs md:text-sm">
+                View Documentation <span className="material-symbols-outlined ml-1 text-xs md:text-sm">arrow_forward</span>
+              </Button>
+            </div>
           </Card>
         </div>
       </PageSurface>

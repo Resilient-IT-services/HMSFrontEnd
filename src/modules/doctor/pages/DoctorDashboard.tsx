@@ -320,7 +320,7 @@ export const DoctorDashboard = () => {
           </div>
         </div>
 
-        <section className="mb-8 hidden md:block">
+        <section className="mb-6 hidden md:block">
           <div className="relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:p-8">
             <div className="relative z-10 w-full lg:w-auto">
               <PageHeading 
@@ -344,6 +344,18 @@ export const DoctorDashboard = () => {
             </div>
           </div>
         </section>
+
+        {/* Mobile Action Section - Compact replacement for the above */}
+        <div className="md:hidden flex flex-col gap-3 mb-8">
+          <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+             <h2 className="text-lg font-black text-slate-900 leading-tight">Dr. {user?.fullName.split(' ')[0]}</h2>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Clinical Operations</p>
+             <div className="grid grid-cols-2 gap-2 mt-4">
+                <Button onClick={handleStartNextConsultation} className="h-10 text-xs px-2" icon="play_arrow">Start Next</Button>
+                <Button variant="secondary" href="/doctor/patient-queue" className="h-10 text-xs px-2" icon="list_alt">Go to Queue</Button>
+             </div>
+          </div>
+        </div>
 
         <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-6 hidden md:grid" />
 

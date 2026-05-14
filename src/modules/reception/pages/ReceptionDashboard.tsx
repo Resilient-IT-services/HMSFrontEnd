@@ -209,12 +209,12 @@ export const ReceptionDashboard = () => {
         <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-700">
+              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-700 shrink-0">
                 <span className="material-symbols-outlined">desk</span>
               </div>
               <div>
-                <h1 className="font-headline-md text-slate-900 leading-tight">Reception</h1>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Arrivals & Queue Management</p>
+                <h1 className="text-lg font-black text-slate-900 leading-tight">Reception</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Arrivals & Queue</p>
               </div>
             </div>
           </div>
