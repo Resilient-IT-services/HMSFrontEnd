@@ -6,7 +6,6 @@ import MainLayout from '@/components/ui/MainLayout';
 import { useReceptionVitals } from '@/modules/reception/hooks/useReceptionVitals';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
-import { MetricCard } from '@/components/ui/MetricCard';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { FormField } from '@/components/ui/FormField';

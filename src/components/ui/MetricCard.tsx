@@ -8,10 +8,11 @@ export interface MetricCardProps {
   variant?: 'slate' | 'emerald' | 'blue' | 'orange' | 'purple' | 'indigo' | 'red';
   trend?: string;
   subValue?: string;
-  layout?: 'centered' | 'horizontal' | 'compact';
+  layout?: 'centered' | 'horizontal' | 'compact' | 'pill';
   progressBar?: number; // percentage 0-100
   tag?: string;
   valueTestId?: string;
+  onClick?: () => void;
 }
 
 export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
@@ -25,7 +26,8 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
   progressBar,
   tag,
   valueTestId,
-  pulse
+  pulse,
+  onClick
 }) => {
   const variants = {
     slate: { text: 'text-slate-600', bg: 'bg-slate-100', progress: 'bg-slate-600' },
@@ -46,9 +48,45 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
     return val;
   };
 
+  const commonProps = {
+    onClick,
+    className: cn(
+      onClick && "cursor-pointer transition-all active:scale-95"
+    )
+  };
+
+  if (layout === 'pill') {
+    return (
+      <div 
+        {...commonProps}
+        className={cn(
+          "flex items-center gap-2.5 px-4 py-2 rounded-full border border-slate-200 bg-white hover:border-slate-300 transition-all shadow-sm shrink-0 group",
+          v.bg,
+          commonProps.className
+        )}
+      >
+        <span className={cn("material-symbols-outlined text-lg transition-transform group-hover:scale-110", v.text)}>{icon}</span>
+        <div className="flex items-center gap-2">
+          <span className="text-base font-black text-slate-900 leading-none">
+            <span data-testid={valueTestId}>{formatValue(value)}</span>
+          </span>
+          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
+            {label}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   if (layout === 'compact') {
     return (
-      <div className="bg-white p-6 rounded-xl border border-slate-200 hover:shadow-md transition-all">
+      <div 
+        {...commonProps}
+        className={cn(
+          "bg-white p-6 rounded-xl border border-slate-200 hover:shadow-md transition-all",
+          commonProps.className
+        )}
+      >
         <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">{label}</p>
         <div className="flex items-end justify-between">
           <h3 className="text-2xl font-bold text-slate-900 leading-none">
@@ -78,7 +116,13 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
 
   if (layout === 'horizontal') {
     return (
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
+      <div 
+        {...commonProps}
+        className={cn(
+          "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group",
+          commonProps.className
+        )}
+      >
         <div className="flex justify-between items-start mb-4">
           <div className={cn("p-3 rounded-xl transition-transform group-hover:scale-110", v.bg, v.text)}>
             <span className="material-symbols-outlined text-2xl">{icon}</span>
@@ -111,7 +155,13 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
 
   // Default Centered Layout
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow">
+    <div 
+      {...commonProps}
+      className={cn(
+        "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow",
+        commonProps.className
+      )}
+    >
       <div className={`p-3 ${v.bg} ${v.text} rounded-xl mb-3`}>
         <span className="material-symbols-outlined text-2xl">{icon}</span>
       </div>
