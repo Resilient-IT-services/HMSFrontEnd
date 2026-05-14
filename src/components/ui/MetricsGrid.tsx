@@ -15,17 +15,14 @@ export const MetricsGrid: React.FC<MetricsGridProps> = ({
 }) => {
   return (
     <div className={cn(
-      'flex flex-wrap items-center gap-3',
-      usePillsOnMobile ? 'sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6' : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6',
+      'flex flex-wrap items-center gap-2',
       className
     )}>
       {items.map((item) => (
-        <div key={`${item.label}-${item.icon}-${item.variant ?? 'slate'}`} className={cn(usePillsOnMobile ? 'contents sm:block' : 'block w-full')}>
-          {usePillsOnMobile && (
-            <div className="sm:hidden">
-              <MetricCard {...item} layout="pill" />
-            </div>
-          )}
+        <div key={`${item.label}-${item.icon}-${item.variant ?? 'slate'}`} className="shrink-0">
+          <div className={cn(usePillsOnMobile ? 'sm:hidden' : 'hidden')}>
+            <MetricCard {...item} layout="pill" />
+          </div>
           <div className={cn(usePillsOnMobile ? 'hidden sm:block' : 'block')}>
             <MetricCard {...item} />
           </div>
