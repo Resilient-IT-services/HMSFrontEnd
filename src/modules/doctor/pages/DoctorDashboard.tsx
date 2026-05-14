@@ -17,6 +17,9 @@ import { Table, Column } from '@/components/ui/Table';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { Avatar } from '@/components/ui/Avatar';
+import { StatusIndicator, StatusVariant } from '@/components/ui/StatusIndicator';
+import { cn } from '@/lib/cn';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -142,7 +145,10 @@ export const DoctorDashboard = () => {
     {
       header: 'Token',
       render: (appointment) => (
-        <div className={`h-12 w-20 shrink-0 rounded-lg bg-slate-100 text-center text-lg font-bold leading-[3rem] text-slate-400 ${appointment.status === 'WALK_IN' ? 'bg-orange-100 text-orange-700' : ''}`}>
+        <div className={cn(
+          "h-12 w-20 shrink-0 rounded-lg bg-slate-100 text-center text-lg font-bold leading-[3rem] text-slate-400",
+          appointment.status === 'WALK_IN' && "bg-orange-100 text-orange-700"
+        )}>
           {formatToken(appointment)}
         </div>
       )
@@ -150,24 +156,33 @@ export const DoctorDashboard = () => {
     {
       header: 'Patient Details',
       render: (appointment) => (
-        <div>
-          <h4 className="text-sm font-bold text-slate-900">{appointment.patientName}</h4>
-          <p className="text-[10px] font-black uppercase text-slate-500">
-            Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} | {appointment.notes || 'Routine Checkup'}
-          </p>
+        <div className="flex items-center gap-3">
+          <Avatar name={appointment.patientName} size="sm" variant="slate" />
+          <div>
+            <h4 className="text-sm font-bold text-slate-900">{appointment.patientName}</h4>
+            <p className="text-[10px] font-black uppercase text-slate-500">
+              Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} | {appointment.notes || 'Routine Checkup'}
+            </p>
+          </div>
         </div>
       )
     },
     {
       header: 'Status',
       render: (appointment) => {
-        let variant: 'slate' | 'blue' | 'orange' | 'emerald' | 'red' = 'slate';
+        let variant: StatusVariant = 'slate';
         if (appointment.status === 'WALK_IN') variant = 'blue';
         else if (appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN') variant = 'orange';
         else if (appointment.status === 'COMPLETED') variant = 'emerald';
         else if (appointment.status === 'CANCELLED') variant = 'red';
 
-        return <Badge variant={variant}>{statusCaptions[appointment.status] || appointment.status}</Badge>;
+        return (
+          <StatusIndicator 
+            status={statusCaptions[appointment.status] || appointment.status}
+            variant={variant}
+            pulse={appointment.status === 'WALK_IN'}
+          />
+        );
       }
     },
     {

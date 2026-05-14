@@ -16,6 +16,9 @@ import {
   FileText
 } from 'lucide-react';
 
+import { Avatar } from '@/components/ui/Avatar';
+import { Tabs } from '@/components/ui/Tabs';
+
 export function PatientProfile({ id }: { id: string }) {
   const router = useRouter();
   const [patient, setPatient] = useState<PatientResponse | null>(null);
@@ -52,6 +55,12 @@ export function PatientProfile({ id }: { id: string }) {
   if (loading) return <MainLayout title="Loading..."><div className="p-8">Loading patient profile...</div></MainLayout>;
   if (!patient) return <MainLayout title="Not Found"><div className="p-8">Patient not found.</div></MainLayout>;
 
+  const tabs = [
+    { id: 'Overview', label: 'Overview' },
+    { id: 'Visit History', label: 'Visit History' },
+    { id: 'Prescriptions', label: 'Prescriptions' }
+  ];
+
   return (
     <MainLayout title={`Profile: ${patient.fullName}`}>
       <div className="max-w-6xl mx-auto space-y-6">
@@ -70,11 +79,11 @@ export function PatientProfile({ id }: { id: string }) {
           <div className="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-6">
               <div className="relative">
-                <div className="size-24 md:size-32 rounded-2xl bg-[var(--background)] overflow-hidden border-4 border-white dark:border-slate-800 shadow-md flex items-center justify-center">
-                  <span className="text-4xl font-black text-[var(--primary)] opacity-20">
-                    {patient.fullName.split(' ').map(n => n[0]).join('')}
-                  </span>
-                </div>
+                <Avatar 
+                  name={patient.fullName} 
+                  className="size-24 md:size-32 rounded-2xl border-4 border-white dark:border-slate-800 shadow-md !text-4xl opacity-80"
+                  variant="slate"
+                />
                 <div className="absolute -bottom-2 -right-2 bg-green-500 border-4 border-white dark:border-slate-900 size-8 rounded-full flex items-center justify-center text-white">
                   <span className="material-symbols-outlined text-xs">check</span>
                 </div>
@@ -110,86 +119,74 @@ export function PatientProfile({ id }: { id: string }) {
           </div>
         </div>
 
-        {/* Tabs Navigation */}
-        <div className="border-b border-[var(--border)]">
-          <nav className="flex gap-8 px-2 overflow-x-auto no-scrollbar">
-            {['Overview', 'Visit History', 'Prescriptions'].map(tab => (
-              <button 
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`py-4 px-1 text-sm font-bold whitespace-nowrap transition-all border-b-2 ${
-                  activeTab === tab 
-                  ? 'border-[var(--primary)] text-[var(--primary)]' 
-                  : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </nav>
-        </div>
-
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-3 space-y-6">
-            {activeTab === 'Overview' && (
-              <>
-                {/* Timeline Component */}
+        <Tabs 
+          tabs={tabs} 
+          activeTab={activeTab} 
+          onChange={setActiveTab}
+          className="bg-transparent border-none shadow-none"
+          contentClassName="px-0 py-6"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-3 space-y-6">
+              {activeTab === 'Overview' && (
+                <>
+                  {/* Timeline Component */}
+                  <Card>
+                    <h3 className="text-lg font-bold mb-6 text-[var(--text-primary)]">Medical Timeline</h3>
+                    <div className="space-y-0">
+                      {appointments.length === 0 && <p className="text-[var(--text-secondary)] italic">No medical activity recorded.</p>}
+                      {appointments.map((apt, index) => (
+                        <div key={apt.id} className="flex gap-4 pb-6 relative">
+                          {index !== appointments.length - 1 && (
+                            <div className="absolute left-[19px] top-10 bottom-0 w-px bg-[var(--border)]"></div>
+                          )}
+                          <div className="size-10 rounded-full bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center shrink-0 z-10">
+                            <FileText className="size-5" />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <div className="flex justify-between items-start">
+                              <h4 className="text-sm font-bold text-[var(--text-primary)]">{apt.status === 'COMPLETED' ? 'Visit' : 'Appointment'} - {apt.doctorName}</h4>
+                              <span className="text-xs text-[var(--text-secondary)] font-medium">{new Date(apt.appointmentTime).toLocaleDateString()}</span>
+                            </div>
+                            <p className="text-sm text-[var(--text-secondary)]">{apt.notes || 'Routine checkup and consultation.'}</p>
+                            <div className="flex gap-2 pt-2">
+                              <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
+                                apt.status === 'COMPLETED' ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-[var(--primary-light)] text-[var(--primary)]'
+                              }`}>
+                                {apt.status}
+                              </span>
+                              <span className="px-2 py-1 rounded bg-[var(--background)] text-[10px] font-bold text-[var(--text-secondary)] uppercase border border-[var(--border)]">
+                                {apt.doctorSpecialization || 'General'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </>
+              )}
+              
+              {activeTab === 'Visit History' && (
                 <Card>
-                  <h3 className="text-lg font-bold mb-6 text-[var(--text-primary)]">Medical Timeline</h3>
-                  <div className="space-y-0">
-                    {appointments.length === 0 && <p className="text-[var(--text-secondary)] italic">No medical activity recorded.</p>}
-                    {appointments.map((apt, index) => (
-                      <div key={apt.id} className="flex gap-4 pb-6 relative">
-                        {index !== appointments.length - 1 && (
-                          <div className="absolute left-[19px] top-10 bottom-0 w-px bg-[var(--border)]"></div>
-                        )}
-                        <div className="size-10 rounded-full bg-[var(--primary-light)] text-[var(--primary)] flex items-center justify-center shrink-0 z-10">
-                          <FileText className="size-5" />
+                  <h3 className="text-lg font-bold mb-4 text-[var(--text-primary)]">All Visits</h3>
+                  <div className="space-y-4">
+                    {appointments.filter(a => a.status === 'COMPLETED').map(visit => (
+                      <div key={visit.id} className="p-4 rounded-xl border border-[var(--border)] bg-[var(--background)]">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold text-[var(--text-primary)]">{new Date(visit.appointmentTime).toLocaleDateString()}</span>
+                          <span className="text-xs text-[var(--text-secondary)]">{new Date(visit.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
-                        <div className="flex-1 space-y-1">
-                          <div className="flex justify-between items-start">
-                            <h4 className="text-sm font-bold text-[var(--text-primary)]">{apt.status === 'COMPLETED' ? 'Visit' : 'Appointment'} - {apt.doctorName}</h4>
-                            <span className="text-xs text-[var(--text-secondary)] font-medium">{new Date(apt.appointmentTime).toLocaleDateString()}</span>
-                          </div>
-                          <p className="text-sm text-[var(--text-secondary)]">{apt.notes || 'Routine checkup and consultation.'}</p>
-                          <div className="flex gap-2 pt-2">
-                            <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${
-                              apt.status === 'COMPLETED' ? 'bg-[var(--success-light)] text-[var(--success)]' : 'bg-[var(--primary-light)] text-[var(--primary)]'
-                            }`}>
-                              {apt.status}
-                            </span>
-                            <span className="px-2 py-1 rounded bg-[var(--background)] text-[10px] font-bold text-[var(--text-secondary)] uppercase border border-[var(--border)]">
-                              {apt.doctorSpecialization || 'General'}
-                            </span>
-                          </div>
-                        </div>
+                        <p className="text-sm text-[var(--text-primary)] font-medium">Doctor: {visit.doctorName}</p>
+                        <p className="text-xs text-[var(--text-secondary)] mt-1">{visit.notes}</p>
                       </div>
                     ))}
                   </div>
                 </Card>
-              </>
-            )}
-            
-            {activeTab === 'Visit History' && (
-              <Card>
-                <h3 className="text-lg font-bold mb-4 text-[var(--text-primary)]">All Visits</h3>
-                <div className="space-y-4">
-                  {appointments.filter(a => a.status === 'COMPLETED').map(visit => (
-                    <div key={visit.id} className="p-4 rounded-xl border border-[var(--border)] bg-[var(--background)]">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-bold text-[var(--text-primary)]">{new Date(visit.appointmentTime).toLocaleDateString()}</span>
-                        <span className="text-xs text-[var(--text-secondary)]">{new Date(visit.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                      </div>
-                      <p className="text-sm text-[var(--text-primary)] font-medium">Doctor: {visit.doctorName}</p>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1">{visit.notes}</p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
+              )}
+            </div>
           </div>
-        </div>
+        </Tabs>
       </div>
     </MainLayout>
   );

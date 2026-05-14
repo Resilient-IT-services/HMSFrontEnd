@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/cn';
 
 export interface MetricCardProps {
   label: string;
@@ -13,7 +14,7 @@ export interface MetricCardProps {
   valueTestId?: string;
 }
 
-export const MetricCard: React.FC<MetricCardProps> = ({
+export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
   label,
   value,
   icon,
@@ -23,7 +24,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   layout = 'centered',
   progressBar,
   tag,
-  valueTestId
+  valueTestId,
+  pulse
 }) => {
   const variants = {
     slate: { text: 'text-slate-600', bg: 'bg-slate-100', progress: 'bg-slate-600' },
@@ -44,7 +46,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         <div className="flex items-end justify-between">
           <h3 className="text-2xl font-bold text-slate-900 leading-none">
             <span data-testid={valueTestId}>
-              {typeof value === 'number' && value < 10 ? `0${value}` : value}
+              {/* @ts-ignore */}
+              {typeof value === 'number' && value < 10 && value >= 0 ? `0${value}` : value}
             </span>
           </h3>
           {trend ? (
@@ -69,17 +72,31 @@ export const MetricCard: React.FC<MetricCardProps> = ({
 
   if (layout === 'horizontal') {
     return (
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
         <div className="flex justify-between items-start mb-4">
-          <div className={`p-2 ${v.bg} rounded-xl ${v.text}`}>
-            <span className="material-symbols-outlined">{icon}</span>
+          <div className={cn("p-3 rounded-xl transition-transform group-hover:scale-110", v.bg, v.text)}>
+            <span className="material-symbols-outlined text-2xl">{icon}</span>
           </div>
-          {tag && (
-            <span className="text-slate-500 bg-slate-50 px-2 py-1 rounded-lg text-[10px] font-black">{tag}</span>
-          )}
+          <div className="flex flex-col items-end gap-2">
+            {pulse && (
+              <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
+            )}
+            {trend && (
+              <span className={cn(
+                "flex items-center text-xs font-bold px-2 py-1 rounded",
+                trend === 'Stable' ? 'text-slate-400 bg-slate-50' : 'text-emerald-600 bg-emerald-50'
+              )}>
+                {trend !== 'Stable' && <span className="material-symbols-outlined text-xs mr-1">trending_up</span>}
+                {trend}
+              </span>
+            )}
+            {tag && (
+              <span className="text-slate-500 bg-slate-50 px-2 py-1 rounded-lg text-[10px] font-black">{tag}</span>
+            )}
+          </div>
         </div>
-        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{label}</p>
-        <h3 className="text-3xl font-black text-slate-900 mt-1">
+        <p className="text-slate-500 text-sm font-medium">{label}</p>
+        <h3 className="text-3xl font-extrabold text-slate-900 mt-1">
           <span data-testid={valueTestId}>{value}</span>
         </h3>
       </div>

@@ -16,6 +16,10 @@ import { Modal } from '@/components/ui/Modal';
 import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 
+import { Table, Column } from '@/components/ui/Table';
+import { Avatar } from '@/components/ui/Avatar';
+import { InfoRow } from '@/components/ui/InfoRow';
+
 export const MedicineInventory = () => {
   const [medicines, setMedicines] = useState<MedicineSummaryDTO[]>([]);
   const [totalMedicines, setTotalMedicines] = useState(0);
@@ -47,7 +51,6 @@ export const MedicineInventory = () => {
         setMedicines(response.data.content);
         setTotalMedicines(response.data.totalElements);
         if (response.data.content.length > 0 && !selectedMedicine) {
-          // If we need initial detail, we have to fetch it explicitly now
           const firstId = response.data.content[0].id;
           const detailRes = await pharmacyApi.getMedicineById(firstId);
           if (detailRes.success && detailRes.data) {
@@ -139,6 +142,61 @@ export const MedicineInventory = () => {
     }
   };
 
+  const columns: Column<MedicineSummaryDTO>[] = [
+    {
+      header: 'Medicine Details',
+      render: (m) => (
+        <div className="flex items-center gap-3">
+          <Avatar name={m.name} variant="slate" className="rounded-lg" />
+          <div>
+            <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Category',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      render: (m) => (
+        <span className="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase">
+          {m.form || m.category}
+        </span>
+      )
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      headerClassName: 'text-right',
+      render: (m) => (
+        <div className="flex justify-end items-center gap-2">
+          <Button 
+            variant="ghost"
+            size="sm"
+            icon="edit"
+            onClick={(e) => {
+              e.stopPropagation();
+              void openEditModal(m.id);
+            }}
+          />
+          <Button 
+            variant="ghost"
+            size="sm"
+            icon="delete"
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMedicineToDelete({ id: m.id, name: m.name });
+              setShowDeleteModal(true);
+            }}
+          />
+          <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+        </div>
+      )
+    }
+  ];
+
   return (
     <MainLayout title="Medicine Master Catalog">
       <PageSurface>
@@ -175,63 +233,14 @@ export const MedicineInventory = () => {
               </div>
             </Card>
 
-            {/* Table */}
             <Card className="p-0 overflow-hidden">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Medicine Details</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Category</th>
-                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {loading ? (
-                    <tr><td colSpan={3} className="p-12"><LoadingSkeleton /></td></tr>
-                  ) : (
-                    medicines.map((m) => (
-                      <tr 
-                        key={m.id} 
-                        onClick={() => void handleSelectMedicine(m.id)}
-                        className={`cursor-pointer transition-all ${selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : 'hover:bg-slate-50'}`}
-                      >
-                        <td className="px-8 py-5">
-                          <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
-                        </td>
-                        <td className="px-6 py-5 text-center">
-                          <span className="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase">
-                            {m.form || m.category}
-                          </span>
-                        </td>
-                        <td className="px-6 py-5 text-right flex items-center justify-end gap-2">
-                          <Button 
-                            variant="ghost"
-                            size="sm"
-                            icon="edit"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              void openEditModal(m.id);
-                            }}
-                          />
-                          <Button 
-                            variant="ghost"
-                            size="sm"
-                            icon="delete"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setMedicineToDelete({ id: m.id, name: m.name });
-                              setShowDeleteModal(true);
-                            }}
-                          />
-                          <span className="material-symbols-outlined text-slate-300">chevron_right</span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+              <Table 
+                columns={columns}
+                data={medicines}
+                isLoading={loading}
+                onRowClick={(m) => void handleSelectMedicine(m.id)}
+                rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : ''}
+              />
             </Card>
           </div>
 
@@ -268,18 +277,9 @@ export const MedicineInventory = () => {
                     </p>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
-                    <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                      <span className="text-xs text-slate-400 font-bold uppercase">Generic Name</span>
-                      <span className="text-sm font-black text-slate-800">{selectedMedicine.genericName}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                      <span className="text-xs text-slate-400 font-bold uppercase">Form Factor</span>
-                      <span className="text-sm font-black text-slate-800">{selectedMedicine.form || selectedMedicine.category}</span>
-                    </div>
-                    <div className="flex justify-between items-center py-3">
-                      <span className="text-xs text-slate-400 font-bold uppercase">Current Stock</span>
-                      <span className="text-sm font-black text-emerald-600">{selectedMedicine.currentStock} Units</span>
-                    </div>
+                    <InfoRow label="Generic Name" value={selectedMedicine.genericName} className="py-3 border-b border-slate-50 flex-row justify-between items-center" />
+                    <InfoRow label="Form Factor" value={selectedMedicine.form || selectedMedicine.category} className="py-3 border-b border-slate-50 flex-row justify-between items-center" />
+                    <InfoRow label="Current Stock" value={`${selectedMedicine.currentStock} Units`} valueClassName="text-emerald-600" className="py-3 flex-row justify-between items-center" />
                   </div>
                   <Button 
                     variant="secondary"
