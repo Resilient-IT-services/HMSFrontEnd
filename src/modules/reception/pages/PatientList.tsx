@@ -34,6 +34,7 @@ export function PatientList() {
   const columns: Column<PatientSummaryDTO>[] = [
     {
       header: 'Patient Code',
+      mobilePosition: 'meta',
       render: (row) => (
         <span className="rounded bg-orange-50 px-2 py-1 font-mono text-xs font-bold text-orange-700">
           {row.patientCode || 'N/A'}
@@ -42,6 +43,7 @@ export function PatientList() {
     },
     {
       header: 'Patient Profile',
+      mobilePosition: 'title',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white bg-slate-100 font-bold uppercase text-slate-400 shadow-sm">
@@ -58,12 +60,14 @@ export function PatientList() {
       header: 'Gender',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'subtitle',
       render: (row) => <span className="capitalize">{row.gender.toLowerCase()}</span>
     },
     {
       header: 'Actions',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'action',
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
           <Button
