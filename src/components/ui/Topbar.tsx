@@ -1,21 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setSuperMode, setActiveRole, setUser, setCurrentHospitalId } from '@/state/authSlice';
+import { setActiveRole, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { Role } from '@/types/api';
 import GlobalSearch from './GlobalSearch';
+import { cn } from '@/lib/cn';
 
 import { useLayout } from '@/context/LayoutContext';
 
-const Topbar: React.FC = () => {
-  const { title, headerActions, toggleSidebar } = useLayout();
+const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
+  const { headerActions } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const isSuperUser = user?.roles?.includes('SUPER_ADMIN');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -35,17 +34,8 @@ const Topbar: React.FC = () => {
 
   const handleRoleSwitch = (role: Role) => {
     dispatch(setActiveRole(role));
-    dispatch(setSuperMode(false)); // Switching to a normal role turns off super mode
     setIsProfileOpen(false);
     globalThis.location.reload();
-  };
-
-  const toggleSuperMode = () => {
-    dispatch(setSuperMode(!isSuperMode));
-    if (!isSuperMode) {
-      dispatch(setActiveRole(null)); // Clear active role when entering super mode
-    }
-    setIsProfileOpen(false);
   };
   const currentHospitalName = user?.memberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
 
@@ -71,15 +61,12 @@ const Topbar: React.FC = () => {
   };
 
   return (
-    <header className="bg-white flex justify-between items-center h-16 w-full sticky top-0 z-[60] border-b border-gray-200 shadow-sm font-manrope antialiased">
+    <header className={cn(
+      "bg-white flex justify-between items-center h-16 w-full sticky top-0 z-[60] border-b border-gray-200 shadow-sm font-manrope transition-all duration-500",
+      !isVisible && "lg:translate-y-0 -translate-y-full"
+    )}>
       <div className="flex items-center h-full">
         <div className="lg:w-64 px-4 lg:px-6 flex items-center gap-3">
-          <button 
-            onClick={toggleSidebar}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/20 shrink-0">
               <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>medical_services</span>
