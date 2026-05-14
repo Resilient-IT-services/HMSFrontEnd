@@ -5,13 +5,14 @@ import { useRouter } from 'next/navigation';
 import { searchService } from '@/services/searchService';
 import { SearchResultDTO as SearchResult } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 const GlobalSearch: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const debouncedQuery = useDebounce(query, 300);
+  const debouncedQuery = useDebounce(query, DEFAULT_DEBOUNCE_MS);
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
 

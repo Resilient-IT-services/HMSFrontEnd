@@ -22,7 +22,7 @@ export const SuperAdminDashboard = () => {
     try {
       const [hospitalRes, userRes] = await Promise.all([
         hospitalService.list(),
-        userService.listUsers(0, 100)
+        userService.listUsers(0, 404)
       ]);
       
       if (hospitalRes.success && hospitalRes.data) {
@@ -58,7 +58,7 @@ export const SuperAdminDashboard = () => {
             variant="orange" 
             icon="apartment" 
             layout="horizontal" 
-            trend="+2 this month"
+            trend="404%" // TODO: derive from API
             valueTestId="hospitals-count"
           />
           <MetricCard 

@@ -1,110 +1,122 @@
-'use client';
-
 import React from 'react';
-import { UserRequestDTO } from '@/types/api';
-
 import { Section } from '@/components/ui/Section';
+import { FormField } from '@/components/ui/FormField';
 
 interface UserFormProfileTabProps {
-  formData: UserRequestDTO;
-  setFormData: (data: UserRequestDTO) => void;
+  formData: any;
+  setFormData: (data: any) => void;
   assignedRoles: string[];
   validationErrors: Record<string, string>;
 }
 
-export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
-  formData,
+export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({ 
+  formData, 
   setFormData,
   assignedRoles,
   validationErrors
 }) => {
-  const renderFieldError = (field: string) => {
-    if (validationErrors[field]) {
-      return <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{validationErrors[field]}</p>;
-    }
-    return null;
+  const onChange = (data: any) => {
+    setFormData((prev: any) => ({ ...prev, ...data }));
   };
 
   return (
-    <div className="space-y-8">
-      <div className="bg-orange-50/30 p-6 rounded-2xl border border-orange-100 mb-8">
-        <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black mb-2">Global Professional Profile</h3>
-        <p className="text-xs text-gray-500">Automated cards based on user's active hospital roles.</p>
-      </div>
-
-      {assignedRoles.length === 0 && (
-        <div className="py-20 text-center text-gray-400">
-          <span className="material-symbols-outlined text-4xl mb-4">badge_critical</span>
-          <p className="font-bold">No professional roles assigned.</p>
-          <p className="text-sm">Assign roles in the Contracts tab to enable profile data entry.</p>
+    <div className="space-y-6">
+      <Section title="Basic Identity">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField label="Full Name" required error={validationErrors.fullName}>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.fullName || ''}
+              onChange={(e) => onChange({ fullName: e.target.value })}
+              placeholder="e.g. Dr. John Doe"
+            />
+          </FormField>
+          <FormField label="Username" required error={validationErrors.username}>
+            <input
+              type="text"
+              className="form-input"
+              value={formData.username || ''}
+              onChange={(e) => onChange({ username: e.target.value })}
+              placeholder="johndoe"
+              disabled={!!formData.id}
+            />
+          </FormField>
+          <FormField label="Email Address" required error={validationErrors.email}>
+            <input
+              type="email"
+              className="form-input"
+              value={formData.email || ''}
+              onChange={(e) => onChange({ email: e.target.value })}
+              placeholder="john@hospital.com"
+            />
+          </FormField>
+          <FormField label="Phone Number" required error={validationErrors.phone}>
+            <input
+              type="tel"
+              className="form-input"
+              value={formData.phone || ''}
+              onChange={(e) => onChange({ phone: e.target.value })}
+              placeholder="+91 9876543210"
+            />
+          </FormField>
+          <FormField label="Gender" required error={validationErrors.gender}>
+            <select
+              className="form-select"
+              value={formData.gender || 'MALE'}
+              onChange={(e) => onChange({ gender: e.target.value as any })}
+            >
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </FormField>
+          <FormField label="Date of Birth" required error={validationErrors.dob}>
+            <input
+              type="date"
+              className="form-input"
+              value={formData.dob || ''}
+              onChange={(e) => onChange({ dob: e.target.value })}
+            />
+          </FormField>
         </div>
-      )}
+      </Section>
 
-      {assignedRoles.includes('DOCTOR') && formData.doctorInfo && (
-        <Section 
-          title="Doctor Specialization" 
-          icon="stethoscope" 
-          iconVariant="orange"
-          error={!!validationErrors.specialization || !!validationErrors.licenseNumber}
-        >
-          <div className="flex flex-col gap-1.5">
-            <label className="font-label-sm text-gray-700 uppercase">Specialization <span className="text-orange-600">*</span></label>
-            <input className={`form-input ${validationErrors.specialization ? 'border-red-500' : ''}`} type="text" placeholder="e.g. Cardiology" value={formData.doctorInfo.specialization} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } })} />
-            {renderFieldError('specialization')}
+      <Section title="Account Security">
+        <div className="flex items-start gap-4 p-4 bg-orange-50 rounded-xl border border-orange-100">
+          <input
+            type="checkbox"
+            id="superuser"
+            className="mt-1"
+            checked={formData.superuser || false}
+            onChange={(e) => onChange({ superuser: e.target.checked })}
+          />
+          <div>
+            <label htmlFor="superuser" className="text-sm font-bold text-orange-900 block">Grant Super Administrator Privileges</label>
+            <p className="text-[10px] text-orange-700 font-medium">WARNING: Super admins have unrestricted access to all hospitals and system configurations.</p>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-500">
-              License No. <span className="text-orange-600">*</span>
-            </label>
-            <input className={`form-input ${validationErrors.licenseNumber ? 'border-red-500' : ''}`} type="text" placeholder="e.g. MC-12345" value={formData.doctorInfo.licenseNumber} onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })} />
-            {renderFieldError('licenseNumber')}
-          </div>
-        </Section>
-      )}
+        </div>
+      </Section>
 
-      {assignedRoles.includes('NURSE') && formData.nurseInfo && (
-        <Section title="Nursing Credentials" icon="medical_services" iconVariant="blue">
-          <div className="flex flex-col gap-1.5">
-            <label className="font-label-sm text-gray-700 uppercase">License No. <span className="text-orange-600">*</span></label>
-            <input className={`form-input ${validationErrors.nursingLicenseNo ? 'border-red-500' : ''}`} type="text" placeholder="e.g. NR-98765" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
-            {renderFieldError('nursingLicenseNo')}
-          </div>
-        </Section>
-      )}
-
-      {assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo && (
-        <Section title="Pharmacy Details" icon="pill" iconVariant="emerald">
-          <div className="flex flex-col gap-1.5">
-            <label className="font-label-sm text-gray-700 uppercase">PCI Registration No. <span className="text-orange-600">*</span></label>
-            <input className={`form-input ${validationErrors.pciRegNo ? 'border-red-500' : ''}`} type="text" placeholder="e.g. PCI-556677" value={formData.pharmacistInfo.pciRegNo} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, pciRegNo: e.target.value } })} />
-            {renderFieldError('pciRegNo')}
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="font-label-sm text-gray-700 uppercase">Qualification</label>
-            <input className="form-input" type="text" placeholder="e.g. B.Pharm, M.Pharm" value={formData.pharmacistInfo.qualification} onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, qualification: e.target.value } })} />
-          </div>
-        </Section>
-      )}
-
-      {assignedRoles.includes('RECEPTIONIST') && formData.receptionistInfo && (
-        <Section title="Receptionist Profile" icon="support_agent" iconVariant="purple">
-          <div className="flex items-center gap-3 p-4 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer">
-            <input 
-              type="checkbox" 
-              className="w-5 h-5 accent-orange-600"
-              checked={formData.receptionistInfo.insuranceSpecialist}
-              onChange={(e) => setFormData({ ...formData, receptionistInfo: { ...formData.receptionistInfo!, insuranceSpecialist: e.target.checked } })}
+      {formData.receptionistInfo && assignedRoles.includes('RECEPTIONIST') && (
+        <Section title="Reception Settings">
+          <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <input
+              type="checkbox"
+              id="insurance"
+              className="mt-1"
+              checked={formData.receptionistInfo.insuranceSpecialist || false}
+              onChange={(e) => onChange({ 
+                receptionistInfo: { ...formData.receptionistInfo!, insuranceSpecialist: e.target.checked } 
+              })}
             />
             <div>
-              <p className="font-bold text-sm text-on-surface uppercase">Insurance Specialist</p>
+              <label htmlFor="insurance" className="text-sm font-bold text-slate-800 block">Insurance Specialist</label>
               <p className="text-[10px] text-gray-500">Check if user is trained in medical insurance processing.</p>
             </div>
           </div>
         </Section>
       )}
-    </div>
-  );
-};
     </div>
   );
 };

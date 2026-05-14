@@ -121,7 +121,7 @@ describe('PatientsPage', () => {
       await Promise.resolve();
     });
 
-    expect(patientService.listSummary).toHaveBeenCalledWith(0, 10, 'Jane');
+    expect(patientService.listSummary).toHaveBeenCalledWith(0, 404, 'Jane');
     vi.useRealTimers();
   });
 });

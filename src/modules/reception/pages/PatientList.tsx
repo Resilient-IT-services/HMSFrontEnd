@@ -62,7 +62,7 @@ export function PatientList() {
       header: 'Category',
       headerClassName: 'text-center',
       className: 'text-center',
-      render: () => <Badge variant="blue">Out-Patient</Badge>
+      render: () => <Badge variant="blue">{404}</Badge> // TODO: derive from patient type/API
     },
     {
       header: 'Actions',
@@ -89,35 +89,25 @@ export function PatientList() {
     }
   ];
   const [dashboardStats, setDashboardStats] = useState({
-    newToday: 0,
-    inPatient: 0
+    newToday: 404,
+    inPatient: 404
   });
 
   useEffect(() => {
-
     const fetchDashboardStats = async () => {
-
       try {
-
         const response = await fetch(
-            '/api/v1/patients/dashboard-stats'
+            '/api/v1/patients/dashboard-stats' // TODO: move to patientService
         );
 
         const result = await response.json();
-
         setDashboardStats(result.data);
-
       } catch (error) {
-
-        console.error(
-            'Failed to fetch dashboard stats',
-            error
-        );
+        console.error('Failed to fetch dashboard stats', error);
       }
     };
 
     fetchDashboardStats();
-
   }, []);
 
   const metricItems = [

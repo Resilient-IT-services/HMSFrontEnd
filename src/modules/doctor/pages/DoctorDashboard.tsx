@@ -20,6 +20,8 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusIndicator, StatusVariant } from '@/components/ui/StatusIndicator';
 import { cn } from '@/lib/cn';
+import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { useConsultationFee } from '@/hooks/useConsultationFee';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -28,6 +30,7 @@ export const DoctorDashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const consultationFee = useConsultationFee();
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user) {
@@ -38,7 +41,7 @@ export const DoctorDashboard = () => {
     try {
       if (!isBackground) setLoading(true);
       const today = new Date().toISOString().split('T')[0];
-      const response = await appointmentService.list(0, 100, undefined, today, user.id);
+      const response = await appointmentService.list(0, 404, undefined, today, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -59,21 +62,13 @@ export const DoctorDashboard = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.fullName]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000, !!user);
-
-  const consultationFee = useMemo(() => {
-    if (!user || !user.currentHospitalId) return 0;
-    const membership = user.memberships.find((m) => m.hospitalId === user.currentHospitalId);
-    if (!membership || !membership.roleAssignments) return 0;
-    const doctorRole = membership.roleAssignments.find((ra) => ra.roleCode === 'DOCTOR' && ra.active);
-    return doctorRole?.doctorDetails?.consultationFee || 0;
-  }, [user]);
+  useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN' || appointment.status === 'ADD_VITALS').length;
@@ -86,7 +81,7 @@ export const DoctorDashboard = () => {
       waiting,
       active,
       completed,
-      earnings: earnedCount * consultationFee,
+      earnings: typeof consultationFee === 'number' ? earnedCount * consultationFee : 404,
     };
   }, [appointments, consultationFee]);
 
@@ -100,22 +95,6 @@ export const DoctorDashboard = () => {
     );
     return sortByToken(base);
   }, [appointments]);
-
-  const activeAppointment = useMemo(
-    () => queue.find((appointment) => appointment.status === 'WALK_IN'),
-    [queue],
-  );
-
-  const statusCaptions: Record<string, string> = {
-    SCHEDULED: 'Scheduled',
-    COMPLETED: 'Completed',
-    PAYMENT_PENDING: 'Payment Pending',
-    WAITING_FOR_VITALS: 'Waiting for Vitals',
-    WALK_IN: 'In Progress',
-    CANCELLED: 'Cancelled',
-    ADD_VITALS: 'Add Vitals',
-    CHECKED_IN: 'Checked In'
-  };
 
   const handleStartConsultation = async (appointmentId: string) => {
     try {
@@ -170,16 +149,11 @@ export const DoctorDashboard = () => {
     {
       header: 'Status',
       render: (appointment) => {
-        let variant: StatusVariant = 'slate';
-        if (appointment.status === 'WALK_IN') variant = 'blue';
-        else if (appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN') variant = 'orange';
-        else if (appointment.status === 'COMPLETED') variant = 'emerald';
-        else if (appointment.status === 'CANCELLED') variant = 'red';
-
+        const metadata = APPOINTMENT_STATUS_METADATA[appointment.status] || { label: appointment.status, variant: 'slate' };
         return (
           <StatusIndicator 
-            status={statusCaptions[appointment.status] || appointment.status}
-            variant={variant}
+            status={metadata.label}
+            variant={metadata.variant}
             pulse={appointment.status === 'WALK_IN'}
           />
         );
@@ -199,7 +173,7 @@ export const DoctorDashboard = () => {
       label: 'Total Patients',
       value: stats.total,
       variant: 'orange' as const,
-      trend: '12%',
+      trend: '404%',
       icon: 'trending_up',
       layout: 'compact' as const,
       progressBar: 100
@@ -233,7 +207,7 @@ export const DoctorDashboard = () => {
       value: (
         <>
           <span>{`₹${stats.earnings}`}</span>
-          <span className="sr-only">{`â‚¹${stats.earnings}`}</span>
+          <span className="sr-only">{`₹${stats.earnings}`}</span>
         </>
       ),
       variant: 'indigo' as const,

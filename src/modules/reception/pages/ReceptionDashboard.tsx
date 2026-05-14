@@ -17,6 +17,7 @@ import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 
 const getLocalDateKey = (date: Date) => {
   const year = date.getFullYear();
@@ -73,7 +74,7 @@ export const ReceptionDashboard = () => {
       if (nurRes.success && nurRes.data) setNurses(nurRes.data.content || []);
 
     } catch (error) {
-      console.error(error);
+      console.error('Operation fetchData in ReceptionDashboard failed:', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
@@ -83,7 +84,7 @@ export const ReceptionDashboard = () => {
     fetchData();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000);
+  useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL);
 
   const stats = useMemo(() => {
     const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;

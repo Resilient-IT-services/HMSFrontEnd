@@ -9,6 +9,7 @@ import { RootState } from '@/state/store';
 import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { sortByToken } from '@/utils/tokenHelper';
+import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -83,7 +84,7 @@ export const useDoctorQueue = () => {
     fetchData();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000, !!user);
+  useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];

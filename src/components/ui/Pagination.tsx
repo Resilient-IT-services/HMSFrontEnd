@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Button } from './Button';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 interface PaginationProps {
   page: number;
@@ -15,7 +16,7 @@ interface PaginationProps {
 export const Pagination: React.FC<PaginationProps> = ({
   page,
   totalElements,
-  pageSize = 10,
+  pageSize = DEFAULT_PAGE_SIZE,
   onPageChange,
   onPageSizeChange,
   label = "records"

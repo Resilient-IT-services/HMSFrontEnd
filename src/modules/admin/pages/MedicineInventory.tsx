@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 import { useDebounce } from '@/hooks/useDebounce';
 import { MedicineResponse, MedicineSummaryDTO } from '@/types/api';
 import { PageSurface } from '@/components/ui/PageSurface';
@@ -19,13 +18,14 @@ import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 import { Table, Column } from '@/components/ui/Table';
 import { Avatar } from '@/components/ui/Avatar';
 import { InfoRow } from '@/components/ui/InfoRow';
+import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export const MedicineInventory = () => {
   const [medicines, setMedicines] = useState<MedicineSummaryDTO[]>([]);
   const [totalMedicines, setTotalMedicines] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -37,7 +37,7 @@ export const MedicineInventory = () => {
 
   // Pagination
   const [page, setPage] = useState(0);
-  const pageSize = 20;
+  const pageSize = DEFAULT_PAGE_SIZE;
 
   const fetchMedicines = useCallback(async () => {
     try {
@@ -62,17 +62,17 @@ export const MedicineInventory = () => {
         setTotalMedicines(0);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Failed to fetch medicines:', error);
       setMedicines([]);
       setTotalMedicines(0);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, selectedMedicine]);
+  }, [debouncedSearch, page, selectedMedicine, pageSize]);
 
   useEffect(() => {
     fetchMedicines();
-  }, [debouncedSearch, page]);
+  }, [fetchMedicines]);
 
   useEffect(() => {
     setPage(0);
@@ -86,7 +86,7 @@ export const MedicineInventory = () => {
         setSelectedMedicine(res.data);
       }
     } catch (error) {
-      console.error(error);
+      console.error('Failed to select medicine:', error);
     } finally {
       setLoading(false);
     }
@@ -115,7 +115,8 @@ export const MedicineInventory = () => {
         setImportFile(null);
         fetchMedicines();
       }
-    } catch {
+    } catch (error) {
+      console.error('Failed to import medicines:', error);
       triggerGlobalToast('Failed to import data', 'error');
     } finally {
       setLoading(false);
@@ -136,7 +137,7 @@ export const MedicineInventory = () => {
         fetchMedicines();
       }
     } catch (error) {
-      console.error('Delete failed', error);
+      console.error('Failed to delete medicine:', error);
     } finally {
       setLoading(false);
     }

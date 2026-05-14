@@ -18,6 +18,7 @@ import {
   PharmacyReturnRequest,
   PharmacyReturnResponse
 } from '@/types/api';
+import { LOW_STOCK_THRESHOLD, EXPIRY_ALERT_DAYS } from '@/utils/constants';
 
 export const pharmacyApi = {
   // Prescription Management
@@ -125,14 +126,14 @@ export const pharmacyApi = {
   },
 
   // Alerts
-  getLowStockAlerts: async (threshold: number = 20) => {
+  getLowStockAlerts: async (threshold: number = LOW_STOCK_THRESHOLD) => {
     const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/alerts/low-stock', {
       params: { threshold }
     });
     return response.data;
   },
 
-  getExpiryAlerts: async (days: number = 30) => {
+  getExpiryAlerts: async (days: number = EXPIRY_ALERT_DAYS) => {
     const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/alerts/expiry', {
       params: { days }
     });

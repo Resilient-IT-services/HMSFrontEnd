@@ -6,6 +6,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { AppointmentSummaryDTO } from '@/types/api';
 import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
 import { formatToken } from '@/utils/tokenHelper';
+import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 
 export function TokenQueue() {
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
@@ -27,7 +28,7 @@ export function TokenQueue() {
 
   useEffect(() => {
     fetchQueue();
-    const interval = setInterval(fetchQueue, 10_000); // Poll every 10 seconds
+    const interval = setInterval(fetchQueue, DASHBOARD_REFRESH_INTERVAL); // Poll at dashboard refresh interval
     return () => clearInterval(interval);
   }, [fetchQueue]);
 

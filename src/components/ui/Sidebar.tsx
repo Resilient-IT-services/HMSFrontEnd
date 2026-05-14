@@ -8,6 +8,7 @@ import { RootState } from '@/state/store';
 import { logout } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { useLayout } from '@/context/LayoutContext';
+import { ROLE_PATH_MAP, MOBILE_BREAKPOINT } from '@/utils/constants';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -22,28 +23,19 @@ const Sidebar = () => {
       dispatch(logout());
       router.push('/login');
     } catch (error) {
-      console.error('Logout failed', error);
+      // Error handled by interceptor
     }
   };
 
   const handleLinkClick = () => {
-    if (globalThis.innerWidth < 1024) {
+    if (globalThis.innerWidth < MOBILE_BREAKPOINT) {
       setIsSidebarOpen(false);
     }
   };
 
-  const rolePathMap: Record<string, string> = {
-    'RECEPTIONIST': 'reception',
-    'DOCTOR': 'doctor',
-    'PHARMACIST': 'pharmacy',
-    'ADMIN': 'admin',
-    'SUPER_ADMIN': 'super_admin',
-    'NURSE': 'nurse'
-  };
-
   // If in super mode, we act as super admin regardless of activeRole
   const effectiveRole = isSuperMode ? 'SUPER_ADMIN' : activeRole;
-  const dashboardPath = effectiveRole ? (rolePathMap[effectiveRole] || effectiveRole.toLowerCase()) : 'unauthorized';
+  const dashboardPath = effectiveRole ? (ROLE_PATH_MAP[effectiveRole] || effectiveRole.toLowerCase()) : 'unauthorized';
 
   const menuItems = [
     { name: 'Dashboard', icon: 'dashboard', href: `/${dashboardPath}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] },

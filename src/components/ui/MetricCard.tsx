@@ -39,6 +39,13 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
 
   const v = variants[variant] || variants.slate;
 
+  const formatValue = (val: React.ReactNode) => {
+    if (typeof val === 'number') {
+      return val < 10 && val >= 0 ? `0${val}` : val;
+    }
+    return val;
+  };
+
   if (layout === 'compact') {
     return (
       <div className="bg-white p-6 rounded-xl border border-slate-200 hover:shadow-md transition-all">
@@ -46,8 +53,7 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
         <div className="flex items-end justify-between">
           <h3 className="text-2xl font-bold text-slate-900 leading-none">
             <span data-testid={valueTestId}>
-              {/* @ts-ignore */}
-              {typeof value === 'number' && value < 10 && value >= 0 ? `0${value}` : value}
+              {formatValue(value)}
             </span>
           </h3>
           {trend ? (
@@ -97,7 +103,7 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
         </div>
         <p className="text-slate-500 text-sm font-medium">{label}</p>
         <h3 className="text-3xl font-extrabold text-slate-900 mt-1">
-          <span data-testid={valueTestId}>{value}</span>
+          <span data-testid={valueTestId}>{formatValue(value)}</span>
         </h3>
       </div>
     );
@@ -112,7 +118,7 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
       <p className="text-2xl font-black text-slate-900 leading-none font-headline-md">
         <span data-testid={valueTestId} className="font-headline-md">
-          {typeof value === 'number' && value < 10 ? `0${value}` : value}
+          {formatValue(value)}
         </span>
       </p>
       {trend && (

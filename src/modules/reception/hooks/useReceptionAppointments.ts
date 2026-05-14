@@ -5,6 +5,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
 import { sortByToken } from '@/utils/tokenHelper';
+import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -87,7 +88,7 @@ export const useReceptionAppointments = () => {
     fetchData();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000);
+  useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL);
 
   const applyFilters = () => {
     setActiveFilters(advancedFilters);

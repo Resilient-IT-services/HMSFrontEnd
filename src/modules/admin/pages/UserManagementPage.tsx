@@ -16,6 +16,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { Card } from '@/components/ui/Card';
+import { Avatar } from '@/components/ui/Avatar';
+import { StatusIndicator } from '@/components/ui/StatusIndicator';
 
 export const UserManagementPage = () => {
   const router = useRouter();

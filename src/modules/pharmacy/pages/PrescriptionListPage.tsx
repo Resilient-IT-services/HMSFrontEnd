@@ -28,7 +28,6 @@ const PrescriptionListPage: React.FC = () => {
       }
     } catch (error_) {
       setError('An unexpected error occurred');
-      console.error(error_);
     } finally {
       setLoading(false);
     }

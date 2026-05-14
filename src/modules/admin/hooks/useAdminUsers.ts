@@ -4,14 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { userService } from '@/services/userService';
 import { Role, UserSummaryDTO } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 export const useAdminUsers = () => {
   const [users, setUsers] = useState<(UserSummaryDTO & { roles: Role[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
   const [roleFilter, setRoleFilter] = useState<string | undefined>();
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>();
