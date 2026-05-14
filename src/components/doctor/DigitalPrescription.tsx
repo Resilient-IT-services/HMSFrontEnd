@@ -44,10 +44,9 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   date,
   tokenDisplay,
 }) => {
-  const [followUpDate, setFollowUpDate] = React.useState<string>('');
-  React.useEffect(() => {
-    setFollowUpDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
-  }, []);
+  const [followUpDate] = React.useState<string>(() => 
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  );
 
   if (!isOpen) return null;
 

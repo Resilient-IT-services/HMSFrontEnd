@@ -72,11 +72,17 @@ export const useReceptionDoctors = () => {
   }, []);
 
   useEffect(() => {
-    fetchDoctors();
+    const trigger = async () => {
+      await fetchDoctors();
+    };
+    void trigger();
   }, [fetchDoctors]);
 
   useEffect(() => {
-    fetchDepartmentOptions();
+    const trigger = async () => {
+      await fetchDepartmentOptions();
+    };
+    void trigger();
   }, [fetchDepartmentOptions]);
 
   const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
@@ -94,9 +100,12 @@ export const useReceptionDoctors = () => {
   }, []);
 
   useEffect(() => {
-    if (selectedDoctor) {
-      fetchAvailability(selectedDoctor.doctorId, selectedDate);
-    }
+    const trigger = async () => {
+      if (selectedDoctor) {
+        await fetchAvailability(selectedDoctor.doctorId, selectedDate);
+      }
+    };
+    void trigger();
   }, [selectedDoctor, selectedDate, fetchAvailability]);
 
   const viewSchedule = (doctor: DoctorStaffResponse) => {

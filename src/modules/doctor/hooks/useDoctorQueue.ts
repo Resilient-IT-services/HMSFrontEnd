@@ -47,7 +47,7 @@ export const useDoctorQueue = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id, user?.fullName]);
+  }, [user]);
 
   // Fetch missing patient details
   useEffect(() => {
@@ -76,12 +76,18 @@ export const useDoctorQueue = () => {
     };
 
     if (appointments.length > 0) {
-      fetchMissingPatients();
+      const trigger = async () => {
+        await fetchMissingPatients();
+      };
+      void trigger();
     }
   }, [appointments, patientDetails]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);

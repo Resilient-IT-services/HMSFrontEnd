@@ -69,7 +69,8 @@ export function AppointmentScheduling() {
 
   // Fetch Doctors
   useEffect(() => {
-    doctorService.list(0, 100).then(res => {
+    const trigger = async () => {
+      const res = await doctorService.list(0, 100);
       if (res.success && res.data) {
         setDoctors(res.data.content);
         if (preselectedDoctorId) {
@@ -80,24 +81,28 @@ export function AppointmentScheduling() {
         }
       }
       setLoadingDoctors(false);
-    });
+    };
+    void trigger();
   }, [preselectedDoctorId]);
 
   // Fetch Preselected Patient
   useEffect(() => {
-    if (preselectedPatientId) {
-      patientService.get(preselectedPatientId).then(res => {
+    const trigger = async () => {
+      if (preselectedPatientId) {
+        const res = await patientService.get(preselectedPatientId);
         if (res.success && res.data) setSelectedPatient(res.data);
-      });
-    }
+      }
+    };
+    void trigger();
   }, [preselectedPatientId]);
 
   // Fetch Availability
   useEffect(() => {
-    if (!selectedDoctor) return;
-    setFetchingAvailability(true);
-    setSelectedSession(null);
-    doctorService.getAvailability(selectedDoctor.doctorId, selectedDate).then(res => {
+    const trigger = async () => {
+      if (!selectedDoctor) return;
+      setFetchingAvailability(true);
+      setSelectedSession(null);
+      const res = await doctorService.getAvailability(selectedDoctor.doctorId, selectedDate);
       if (res.success && res.data) {
         let sessions = res.data.sessions;
         
@@ -115,25 +120,31 @@ export function AppointmentScheduling() {
         setAvailability(sessions);
       }
       setFetchingAvailability(false);
-    });
+    };
+    void trigger();
   }, [selectedDoctor, selectedDate]);
 
   // Handle Suggested Time
   useEffect(() => {
-    if (selectedSession) {
-      setEditableTime(calculateSuggestedTime(selectedSession, selectedDate));
-    } else {
-      setEditableTime('');
-    }
+    const trigger = async () => {
+      if (selectedSession) {
+        setEditableTime(calculateSuggestedTime(selectedSession, selectedDate));
+      } else {
+        setEditableTime('');
+      }
+    };
+    void trigger();
   }, [selectedSession, selectedDate]);
 
   // Patient Search
   useEffect(() => {
-    if (debouncedSearch.length > 2) {
-      patientService.list(0, 5, debouncedSearch).then(res => {
+    const trigger = async () => {
+      if (debouncedSearch.length > 2) {
+        const res = await patientService.list(0, 5, debouncedSearch);
         if (res.success && res.data) setSearchResults(res.data.content);
-      });
-    } else setSearchResults([]);
+      } else setSearchResults([]);
+    };
+    void trigger();
   }, [debouncedSearch]);
 
   const handleConfirm = async () => {

@@ -100,7 +100,10 @@ export const EarningsPage = () => {
   }, [user]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   const filteredAppointments = useMemo(() => {

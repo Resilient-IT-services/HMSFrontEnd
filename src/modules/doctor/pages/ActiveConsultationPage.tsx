@@ -38,7 +38,10 @@ export const ActiveConsultationPage = () => {
   }, [appointmentId]);
 
   useEffect(() => {
-    fetchAppointment();
+    const trigger = async () => {
+      await fetchAppointment();
+    };
+    void trigger();
   }, [fetchAppointment]);
 
   const handleComplete = async () => {

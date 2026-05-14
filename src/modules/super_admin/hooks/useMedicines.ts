@@ -39,7 +39,10 @@ export const useMedicines = () => {
   }, [debouncedSearch, selectedMedicine]);
 
   useEffect(() => {
-    fetchMedicines();
+    const trigger = async () => {
+      await fetchMedicines();
+    };
+    void trigger();
   }, [fetchMedicines]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

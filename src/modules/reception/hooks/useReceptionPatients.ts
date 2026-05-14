@@ -31,7 +31,10 @@ export const useReceptionPatients = () => {
   }, [page, pageSize, debouncedSearchTerm]);
 
   useEffect(() => {
-    fetchPatients();
+    const trigger = async () => {
+      await fetchPatients();
+    };
+    void trigger();
   }, [fetchPatients]);
 
   const handleSearchTermChange = (term: string) => {

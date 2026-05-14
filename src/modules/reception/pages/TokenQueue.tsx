@@ -27,8 +27,13 @@ export function TokenQueue() {
   }, []);
 
   useEffect(() => {
-    fetchQueue();
-    const interval = setInterval(fetchQueue, DASHBOARD_REFRESH_INTERVAL); // Poll at dashboard refresh interval
+    const trigger = async () => {
+      await fetchQueue();
+    };
+    void trigger();
+    const interval = setInterval(() => {
+      void trigger();
+    }, DASHBOARD_REFRESH_INTERVAL); // Poll at dashboard refresh interval
     return () => clearInterval(interval);
   }, [fetchQueue]);
 

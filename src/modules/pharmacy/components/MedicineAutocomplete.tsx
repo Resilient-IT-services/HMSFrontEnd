@@ -28,7 +28,10 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setSearchTerm(defaultValue);
+    const trigger = async () => {
+      setSearchTerm(defaultValue);
+    };
+    void trigger();
   }, [defaultValue]);
 
   useEffect(() => {
@@ -59,7 +62,10 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       }
     };
 
-    fetchResults();
+    const trigger = async () => {
+      await fetchResults();
+    };
+    void trigger();
   }, [debouncedSearch, defaultValue, stockOnly]);
 
   useEffect(() => {

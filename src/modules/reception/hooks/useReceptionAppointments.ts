@@ -85,7 +85,10 @@ export const useReceptionAppointments = () => {
   }, [statusFilter, searchTerm, activeFilters]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL);

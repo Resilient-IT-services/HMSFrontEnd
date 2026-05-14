@@ -68,10 +68,13 @@ export const MedicineInventory = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, pageSize]); // Removed selectedMedicine from dependencies
+  }, [debouncedSearch, page, pageSize, selectedMedicine]); // Added selectedMedicine to dependencies
 
   useEffect(() => {
-    fetchMedicines();
+    const trigger = async () => {
+      await fetchMedicines();
+    };
+    void trigger();
   }, [fetchMedicines]);
 
   const handleSearchChange = (val: string) => {

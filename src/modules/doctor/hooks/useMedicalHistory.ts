@@ -124,27 +124,36 @@ export const useMedicalHistory = () => {
   };
 
   useEffect(() => {
-    if (activeView === 'APPOINTMENTS') {
-      fetchHistoryList(debouncedSearchTerm, appointmentsPage);
-    } else {
-      fetchPatientsList(debouncedSearchTerm, patientsPage);
-    }
+    const trigger = async () => {
+      if (activeView === 'APPOINTMENTS') {
+        await fetchHistoryList(debouncedSearchTerm, appointmentsPage);
+      } else {
+        await fetchPatientsList(debouncedSearchTerm, patientsPage);
+      }
+    };
+    void trigger();
   }, [activeView, appointmentsPage, patientsPage, debouncedSearchTerm, fetchHistoryList, fetchPatientsList]);
 
   useEffect(() => {
-    if (patientId) {
-      fetchPatientDetails(patientId);
-    } else {
-      setSelectedPatient(null);
-      setSelectedVisit(null);
-      setPatientVisits([]);
-    }
+    const trigger = async () => {
+      if (patientId) {
+        await fetchPatientDetails(patientId);
+      } else {
+        setSelectedPatient(null);
+        setSelectedVisit(null);
+        setPatientVisits([]);
+      }
+    };
+    void trigger();
   }, [patientId, fetchPatientDetails]);
 
   // Reset page when search term changes
   useEffect(() => {
-    setAppointmentsPage(0);
-    setPatientsPage(0);
+    const trigger = async () => {
+      setAppointmentsPage(0);
+      setPatientsPage(0);
+    };
+    void trigger();
   }, [debouncedSearchTerm]);
 
   const handleSearch = (e?: React.FormEvent) => {

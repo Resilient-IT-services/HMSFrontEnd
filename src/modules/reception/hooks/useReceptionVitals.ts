@@ -145,15 +145,15 @@ export const useReceptionVitals = () => {
     try {
       const vitals: VitalsDTO = {
         bloodPressure: `${systolic}/${diastolic}`,
-        systolic: parseInt(systolic) || 0,
-        diastolic: parseInt(diastolic) || 0,
-        heartRate: parseInt(heartRate) || 0,
-        temperature: parseFloat(temperature) || 0,
+        systolic: Number.parseInt(systolic) || 0,
+        diastolic: Number.parseInt(diastolic) || 0,
+        heartRate: Number.parseInt(heartRate) || 0,
+        temperature: Number.parseFloat(temperature) || 0,
         temperatureUnit: tempUnit,
-        weight: parseFloat(weight) || 0,
+        weight: Number.parseFloat(weight) || 0,
         weightUnit: weightUnit,
-        oxygenLevel: parseFloat(oxygenLevel) || 0,
-        respiratoryRate: parseFloat(respiratoryRate) || 0,
+        oxygenLevel: Number.parseFloat(oxygenLevel) || 0,
+        respiratoryRate: Number.parseFloat(respiratoryRate) || 0,
       };
 
       const res = await appointmentService.update(appointment.id, { 

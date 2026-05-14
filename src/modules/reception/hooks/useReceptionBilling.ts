@@ -96,7 +96,10 @@ export const useReceptionBilling = () => {
   }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, sessionPeriodParam, notesParam]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   const consultationFee = doctor?.consultationFee || 0;

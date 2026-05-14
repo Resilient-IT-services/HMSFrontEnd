@@ -45,11 +45,17 @@ export const usePharmacyStock = () => {
   }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
-    fetchInventory();
+    const trigger = async () => {
+      await fetchInventory();
+    };
+    void trigger();
   }, [fetchInventory]);
 
   useEffect(() => {
-    setPage(0);
+    const trigger = async () => {
+      setPage(0);
+    };
+    void trigger();
   }, [debouncedSearch, statusFilter, pageSize]);
 
   const handleExport = () => {

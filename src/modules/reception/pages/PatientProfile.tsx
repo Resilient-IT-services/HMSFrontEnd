@@ -49,7 +49,10 @@ export function PatientProfile({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [id, fetchData]);
 
   if (loading) return <MainLayout title="Loading..."><div className="p-8">Loading patient profile...</div></MainLayout>;

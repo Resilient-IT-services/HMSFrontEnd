@@ -17,7 +17,7 @@ const PrescriptionListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  const fetchPrescriptions = async () => {
+  const fetchPrescriptions = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await pharmacyApi.getPrescriptionsSummary({ search: debouncedSearch });
@@ -31,11 +31,14 @@ const PrescriptionListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [debouncedSearch]);
 
   useEffect(() => {
-    fetchPrescriptions();
-  }, [debouncedSearch]);
+    const trigger = async () => {
+      await fetchPrescriptions();
+    };
+    void trigger();
+  }, [fetchPrescriptions]);
 
   return (
     <MainLayout title="Prescriptions">

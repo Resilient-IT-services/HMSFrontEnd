@@ -39,7 +39,10 @@ export const SuperAdminDashboard = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   return (

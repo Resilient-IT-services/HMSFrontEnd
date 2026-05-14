@@ -50,7 +50,10 @@ export const useAdminUsers = () => {
   }, [page, pageSize, debouncedSearch, roleFilter, activeFilter]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   const handleSearchTermChange = (term: string) => {
