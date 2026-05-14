@@ -18,9 +18,28 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
+const getLocalDateKey = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const getPatientCreatedDateKey = (createdAt?: string) => {
+  if (!createdAt) return '';
+
+  const parsedDate = new Date(createdAt);
+  if (Number.isNaN(parsedDate.getTime())) {
+    return createdAt.slice(0, 10);
+  }
+
+  return getLocalDateKey(parsedDate);
+};
+
 export const ReceptionDashboard = () => {
   const router = useRouter();
   const [recentPatients, setRecentPatients] = useState<PatientResponse[]>([]);
+  const [patientsRegisteredToday, setPatientsRegisteredToday] = useState(0);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [nurses, setNurses] = useState<NurseStaffResponse[]>([]);
@@ -29,16 +48,21 @@ export const ReceptionDashboard = () => {
   const fetchData = useCallback(async (isBackground = false) => {
     try {
       if (!isBackground) setLoading(true);
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateKey(new Date());
       
       const [patRes, appRes, docRes, nurRes] = await Promise.all([
-        patientService.list(0, 5),
+        patientService.list(0, 500),
         appointmentService.list(0, 100),
         doctorService.list(0, 6),
         nurseService.list(0, 5)
       ]);
 
-      if (patRes.success && patRes.data) setRecentPatients(patRes.data.content || []);
+      if (patRes.success && patRes.data) {
+        const patients = patRes.data.content || [];
+        const todaysPatients = patients.filter((patient) => getPatientCreatedDateKey(patient.createdAt) === today);
+        setRecentPatients(patients.slice(0, 5));
+        setPatientsRegisteredToday(todaysPatients.length);
+      }
       if (appRes.success && appRes.data) {
         const normalized = normalizeAppointmentData(appRes.data.content || []);
         const todayApps = normalized.filter(a => a.appointmentTime.startsWith(today)) || [];
@@ -75,12 +99,12 @@ export const ReceptionDashboard = () => {
     }
 
     return {
-      totalPatients: recentPatients.length,
+      totalPatients: patientsRegisteredToday,
       activeQueue,
       appointmentsToday: appointments.length,
       doctorQueueByName
     };
-  }, [recentPatients, appointments]);
+  }, [patientsRegisteredToday, appointments]);
 
   const patientColumns: Column<PatientResponse>[] = [
     {

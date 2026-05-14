@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { useRouter } from 'next/navigation';
 import { Table, Column } from '@/components/ui/Table';
@@ -86,13 +86,58 @@ export function PatientList() {
       )
     }
   ];
+  const [dashboardStats, setDashboardStats] = useState({
+    newToday: 0,
+    inPatient: 0
+  });
+
+  useEffect(() => {
+
+    const fetchDashboardStats = async () => {
+
+      try {
+
+        const response = await fetch(
+            '/api/v1/patients/dashboard-stats'
+        );
+
+        const result = await response.json();
+
+        setDashboardStats(result.data);
+
+      } catch (error) {
+
+        console.error(
+            'Failed to fetch dashboard stats',
+            error
+        );
+      }
+    };
+
+    fetchDashboardStats();
+
+  }, []);
 
   const metricItems = [
-    { label: 'Total Records', value: totalElements, icon: 'group', variant: 'slate' as const },
-    { label: 'New Today', value: '04', icon: 'how_to_reg', variant: 'emerald' as const },
-    { label: 'In-Patient', value: '12', icon: 'bed', variant: 'blue' as const }
+    {
+      label: 'Total Records',
+      value: totalElements,
+      icon: 'group',
+      variant: 'slate' as const
+    },
+    {
+      label: 'New Today',
+      value: dashboardStats.newToday,
+      icon: 'how_to_reg',
+      variant: 'emerald' as const
+    },
+    {
+      label: 'In-Patient',
+      value: dashboardStats.inPatient,
+      icon: 'bed',
+      variant: 'blue' as const
+    }
   ];
-
   return (
     <MainLayout title="Patient Directory" hideTitle>
       <PageSurface maxWidthClassName="max-w-[1600px]" fontClassName="font-inter">
