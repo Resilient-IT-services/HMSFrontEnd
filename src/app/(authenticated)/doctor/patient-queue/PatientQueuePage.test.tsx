@@ -81,8 +81,8 @@ describe('PatientQueuePage', () => {
     expect(screen.getByText('Patient Queue')).toBeInTheDocument();
     
     await waitFor(() => {
-      expect(screen.getByText('Alice Smith')).toBeInTheDocument();
-      expect(screen.getByText('Bob Jones')).toBeInTheDocument();
+      expect(screen.getAllByText('Alice Smith')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Bob Jones')[0]).toBeInTheDocument();
     });
 
     // Check stats
@@ -128,12 +128,12 @@ describe('PatientQueuePage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('Alice Smith')).toBeInTheDocument();
+      expect(screen.getAllByText('Alice Smith')[0]).toBeInTheDocument();
       expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
     });
 
     // Stats should still show completed count
-    expect(screen.getByText('Completed')).toBeInTheDocument();
+    expect(screen.getAllByText('Completed')[0]).toBeInTheDocument();
     const stats01 = screen.getAllByText('01', { selector: '.font-headline-md' });
     expect(stats01.length).toBeGreaterThanOrEqual(2); // One for Waiting, one for Completed
   });

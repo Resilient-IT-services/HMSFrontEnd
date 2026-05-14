@@ -151,10 +151,12 @@ describe('ReceptionDashboard', () => {
     expect(screen.getByText(/Recent Patient Arrivals/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText('Asha')).toBeInTheDocument();
+      expect(screen.getAllByText('Asha')[0]).toBeInTheDocument();
       expect(screen.getByText('Dr Khan')).toBeInTheDocument();
       expect(screen.getByText('1 queued today')).toBeInTheDocument();
       expect(screen.getByText('Nurse Reena')).toBeInTheDocument();
+      expect(screen.getByText('All Time')).toBeInTheDocument();
+      expect(screen.getAllByText('Today').length).toBeGreaterThanOrEqual(2);
     });
   });
 });

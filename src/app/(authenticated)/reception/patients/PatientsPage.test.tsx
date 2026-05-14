@@ -10,7 +10,8 @@ vi.mock('@/services/patientService', () => ({
   patientService: {
     list: vi.fn(),
     listSummary: vi.fn(),
-    create: vi.fn()
+    create: vi.fn(),
+    getDashboardStats: vi.fn()
   }
 }));
 
@@ -71,6 +72,10 @@ describe('PatientsPage', () => {
         number: 0
       }
     });
+    (patientService.getDashboardStats as any).mockResolvedValue({
+      success: true,
+      data: { totalPatients: 2, newToday: 1, activeToday: 1 }
+    });
 
     render(
       <Provider store={store}>
@@ -81,8 +86,8 @@ describe('PatientsPage', () => {
     expect(screen.getByRole('heading', { name: 'Patient Directory', level: 1 })).toBeInTheDocument();
     
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
     });
   });
 
@@ -97,6 +102,10 @@ describe('PatientsPage', () => {
         size: 20,
         number: 0
       }
+    });
+    (patientService.getDashboardStats as any).mockResolvedValue({
+      success: true,
+      data: { totalPatients: 2, newToday: 1, activeToday: 1 }
     });
 
     render(
