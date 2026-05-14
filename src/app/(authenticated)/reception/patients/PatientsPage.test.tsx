@@ -10,7 +10,8 @@ vi.mock('@/services/patientService', () => ({
   patientService: {
     list: vi.fn(),
     listSummary: vi.fn(),
-    create: vi.fn()
+    create: vi.fn(),
+    getDashboardStats: vi.fn()
   }
 }));
 
@@ -81,8 +82,8 @@ describe('PatientsPage', () => {
     expect(screen.getByRole('heading', { name: 'Patient Directory', level: 1 })).toBeInTheDocument();
     
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
     });
   });
 

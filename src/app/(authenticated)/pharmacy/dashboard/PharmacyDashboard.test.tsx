@@ -74,8 +74,8 @@ describe('PharmacyDashboard', () => {
     await waitFor(() => {
       expect(pharmacyService.listPrescriptions).toHaveBeenCalled();
       expect(pharmacyService.getLowStockCount).toHaveBeenCalled();
-      expect(screen.getByText('Amit Sharma')).toBeInTheDocument();
-      expect(screen.getByText('Meera Singh')).toBeInTheDocument();
+      expect(screen.getAllByText('Amit Sharma')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Meera Singh')[0]).toBeInTheDocument();
       expect(screen.getByText('3 inventory records currently need attention.')).toBeInTheDocument();
     });
   });

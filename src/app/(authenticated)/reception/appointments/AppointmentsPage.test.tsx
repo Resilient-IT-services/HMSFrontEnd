@@ -122,8 +122,8 @@ describe('TodayAppointmentsPage', () => {
     expect(screen.getByRole('heading', { name: "Today's Appointments", level: 1 })).toBeInTheDocument();
     
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
     });
   });
 
@@ -214,17 +214,17 @@ describe('TodayAppointmentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
     });
 
     // Status filter is usually in a select or custom dropdown now
     // If there is no specific checked-in button, we'll click on the summary card
-    const todayTotalCard = screen.getByText('Today Total');
+    const todayTotalCard = screen.getAllByText('Today Total')[0];
     fireEvent.click(todayTotalCard);
 
     // This test might need more involved updates based on the exact filter implementation
     // For now, we assume clicking 'Today Total' resets/shows all today's 
     // And we'll just check if Jane Smith is there.
-    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
   });
 });
