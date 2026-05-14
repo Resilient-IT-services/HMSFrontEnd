@@ -59,21 +59,24 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
     return (
       <div 
         {...commonProps}
+        tabIndex={0}
         className={cn(
-          "flex items-center gap-2.5 px-4 py-2 rounded-full border border-slate-200 bg-white hover:border-slate-300 transition-all shadow-sm shrink-0 group",
-          v.bg,
+          "relative flex items-center gap-1 px-2.5 py-0.5 rounded-full border transition-all shadow-sm shrink-0 group/pill outline-none focus:ring-1 focus:ring-orange-500/30",
+          variant === 'slate' ? "bg-slate-50 border-slate-200" : cn(v.bg, "border-transparent"),
+          onClick && "cursor-pointer active:scale-95",
           commonProps.className
         )}
       >
-        <span className={cn("material-symbols-outlined text-lg transition-transform group-hover:scale-110", v.text)}>{icon}</span>
-        <div className="flex items-center gap-2">
-          <span className="text-base font-black text-slate-900 leading-none">
-            <span data-testid={valueTestId}>{formatValue(value)}</span>
-          </span>
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest whitespace-nowrap">
-            {label}
-          </span>
+        {/* Tooltip */}
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-900 text-white text-[10px] font-bold rounded shadow-xl opacity-0 group-hover/pill:opacity-100 group-focus/pill:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+          {label}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
         </div>
+
+        <span className={cn("material-symbols-outlined text-[14px] transition-transform group-hover/pill:scale-110", v.text)}>{icon}</span>
+        <span className="text-[11px] font-extrabold text-slate-900 leading-none">
+          <span data-testid={valueTestId}>{formatValue(value)}</span>
+        </span>
       </div>
     );
   }

@@ -18,6 +18,7 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { cn } from '@/lib/cn';
 
 const getLocalDateKey = (date: Date) => {
   const year = date.getFullYear();
@@ -45,6 +46,7 @@ export const ReceptionDashboard = () => {
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [nurses, setNurses] = useState<NurseStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
   const fetchData = useCallback(async (isBackground = false) => {
     try {
@@ -166,15 +168,16 @@ export const ReceptionDashboard = () => {
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
       <PageSurface fontClassName="font-manrope">
+        <div className="flex items-center gap-2 mb-2 opacity-40 group/date cursor-default">
+          <span className="material-symbols-outlined text-xs group-hover/date:text-orange-600 transition-colors">calendar_today</span>
+          <span className="text-[9px] font-black uppercase tracking-[0.2em]">
+            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          </span>
+        </div>
         <PageHeading
           title="Reception Dashboard"
           description="Manage arrivals, patient queues, and daily operations."
-        >
-          <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-xs text-slate-700 shadow-sm">
-            <span className="material-symbols-outlined text-orange-600 text-sm">calendar_today</span>
-            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </div>
-        </PageHeading>
+        />
 
         {/* Metrics Grid */}
         <MetricsGrid items={metricItems} className="mb-8" />
@@ -225,7 +228,7 @@ export const ReceptionDashboard = () => {
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-8">
             {/* Quick Actions */}
-            <Card className="bg-slate-900 text-white shadow-xl border-none">
+            <Card className="bg-slate-900 text-white shadow-xl border-none hidden lg:block">
               <h4 className="font-bold mb-6 uppercase text-[10px] tracking-widest opacity-50">Quick Actions</h4>
               <div className="space-y-4">
                 <Button 
@@ -272,6 +275,54 @@ export const ReceptionDashboard = () => {
           </div>
         </div>
       </PageSurface>
+
+      {/* Mobile Floating Action Button */}
+      {showFabMenu && (
+        <div 
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setShowFabMenu(false)}
+        />
+      )}
+      
+      <div className="lg:hidden fixed bottom-8 right-6 z-50 flex flex-col items-end gap-3">
+        {showFabMenu && (
+          <div className="flex flex-col items-end gap-3 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            <button
+              onClick={() => {
+                setShowFabMenu(false);
+                router.push('/reception/appointments/create');
+              }}
+              className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-xl border border-slate-100 active:scale-95 transition-all"
+            >
+              <span className="text-sm font-bold text-slate-900">Create Visit</span>
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
+                <span className="material-symbols-outlined text-xl">medical_services</span>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setShowFabMenu(false);
+                router.push('/reception/patients/create');
+              }}
+              className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-xl border border-slate-100 active:scale-95 transition-all"
+            >
+              <span className="text-sm font-bold text-slate-900">Register Patient</span>
+              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shadow-inner">
+                <span className="material-symbols-outlined text-xl">person_add</span>
+              </div>
+            </button>
+          </div>
+        )}
+        <button
+          onClick={() => setShowFabMenu(!showFabMenu)}
+          className={cn(
+            "w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl flex items-center justify-center transition-all active:scale-90 duration-300",
+            showFabMenu ? "rotate-45 bg-red-600" : ""
+          )}
+        >
+          <span className="material-symbols-outlined text-2xl font-bold">add</span>
+        </button>
+      </div>
     </MainLayout>
   );
 };

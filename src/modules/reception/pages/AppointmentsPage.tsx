@@ -143,13 +143,13 @@ export const AppointmentsPage = () => {
         </PageHeading>
 
         {/* Stats Grid */}
-        <div className="flex flex-wrap items-center gap-2 lg:grid lg:grid-cols-7 lg:gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           {statConfig.map((stat, i) => (
             <div 
               key={i} 
               className={cn(
-                "transition-all",
-                statusFilter === stat.filter ? 'ring-2 ring-orange-500 ring-offset-2 rounded-full lg:rounded-2xl' : ''
+                "transition-all shrink-0",
+                statusFilter === stat.filter ? 'ring-1 ring-orange-500 ring-offset-1 rounded-full lg:rounded-2xl' : ''
               )}
             >
               <div className="lg:hidden">
