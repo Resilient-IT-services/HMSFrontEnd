@@ -23,7 +23,7 @@ export const useReceptionAppointments = () => {
     paymentStatuses: [] as string[]
   });
 
-  const [activeFilters, setActiveFilters] = useState<any>({});
+  const [activeFilters, setActiveFilters] = useState<{ statuses?: string[]; paymentStatuses?: string[] }>({});
   const [stats, setStats] = useState({
     total: 0,
     walkIn: 0,
@@ -41,7 +41,7 @@ export const useReceptionAppointments = () => {
       
       const dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
       
-      const statusesToUse = filters.statuses?.length > 0 
+      const statusesToUse = filters.statuses && filters.statuses.length > 0 
         ? filters.statuses.join(',') 
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
 
@@ -69,12 +69,12 @@ export const useReceptionAppointments = () => {
         const statusStats = statsRes.data.byStatus;
         setStats({
           total: statsRes.data.total,
-          walkIn: (statusStats['WALK_IN'] as any) || 0,
+          walkIn: statusStats['WALK_IN'] || 0,
           upcoming: statsRes.data.upcoming || 0,
-          paymentPending: (statusStats['PAYMENT_PENDING'] as any) || 0,
-          waitingForVitals: (statusStats['WAITING_FOR_VITALS'] as any) || 0,
-          completed: (statusStats['COMPLETED'] as any) || 0,
-          cancelled: (statusStats['CANCELLED'] as any) || 0,
+          paymentPending: statusStats['PAYMENT_PENDING'] || 0,
+          waitingForVitals: statusStats['WAITING_FOR_VITALS'] || 0,
+          completed: statusStats['COMPLETED'] || 0,
+          cancelled: statusStats['CANCELLED'] || 0,
         });
       }
     } catch (error) {
@@ -107,9 +107,15 @@ export const useReceptionAppointments = () => {
 
   const removeFilter = (key: string, value?: string) => {
     const updated = { ...activeFilters };
-    updated[key] = Array.isArray(updated[key]) ? updated[key].filter((v: string) => v !== value) : '';
+    if (key === 'statuses' || key === 'paymentStatuses') {
+      const arr = updated[key] || [];
+      updated[key] = arr.filter((v: string) => v !== value);
+    }
     setActiveFilters(updated);
-    setAdvancedFilters(updated);
+    setAdvancedFilters({
+      statuses: updated.statuses || [],
+      paymentStatuses: updated.paymentStatuses || []
+    });
   };
 
   const filteredAppointments = useMemo(() => {

@@ -53,24 +53,40 @@ export const useAdminUsers = () => {
     fetchData();
   }, [fetchData]);
 
-  useEffect(() => {
+  const handleSearchTermChange = (term: string) => {
+    setSearchTerm(term);
     setPage(0);
-  }, [debouncedSearch, roleFilter, activeFilter, pageSize]);
+  };
+
+  const handleRoleFilterChange = (role?: string) => {
+    setRoleFilter(role);
+    setPage(0);
+  };
+
+  const handleActiveFilterChange = (active?: boolean) => {
+    setActiveFilter(active);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return {
     users,
     loading,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: handleSearchTermChange,
     page,
     setPage,
     pageSize,
-    setPageSize,
+    setPageSize: handlePageSizeChange,
     totalElements,
     roleFilter,
-    setRoleFilter,
+    setRoleFilter: handleRoleFilterChange,
     activeFilter,
-    setActiveFilter,
+    setActiveFilter: handleActiveFilterChange,
     refresh: fetchData
   };
 };

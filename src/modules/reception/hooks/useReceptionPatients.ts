@@ -34,20 +34,25 @@ export const useReceptionPatients = () => {
     fetchPatients();
   }, [fetchPatients]);
 
-  // Reset page when search term or page size changes
-  useEffect(() => {
+  const handleSearchTermChange = (term: string) => {
+    setSearchTerm(term);
     setPage(0);
-  }, [debouncedSearchTerm, pageSize]);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return {
     patients,
     loading,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: handleSearchTermChange,
     page,
     setPage,
     pageSize,
-    setPageSize,
+    setPageSize: handlePageSizeChange,
     totalElements,
     refresh: fetchPatients
   };

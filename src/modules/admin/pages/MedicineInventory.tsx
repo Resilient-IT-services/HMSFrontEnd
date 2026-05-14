@@ -68,15 +68,16 @@ export const MedicineInventory = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, selectedMedicine, pageSize]);
+  }, [debouncedSearch, page, pageSize]); // Removed selectedMedicine from dependencies
 
   useEffect(() => {
     fetchMedicines();
   }, [fetchMedicines]);
 
-  useEffect(() => {
+  const handleSearchChange = (val: string) => {
+    setSearchTerm(val);
     setPage(0);
-  }, [debouncedSearch]);
+  };
 
   const handleSelectMedicine = async (id: string) => {
     try {
@@ -222,7 +223,7 @@ export const MedicineInventory = () => {
                     placeholder="Search catalog..." 
                     type="text"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={(e) => handleSearchChange(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-2">

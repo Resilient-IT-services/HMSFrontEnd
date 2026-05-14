@@ -3,10 +3,12 @@
 import React, { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
-import { hydrateAuth, setUser, setLoading, setError, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
+import { hydrateAuth, setUser, setLoading, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { usePathname, useRouter } from 'next/navigation';
 import { Role } from '@/types/api';
+
+const PUBLIC_ROUTES = new Set(['/login', '/privacy', '/terms', '/forgot-password']);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
@@ -14,21 +16,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pathname = usePathname();
   const { user, isAuthenticated, isLoading, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
 
-  const publicRoutes = new Set(['/login', '/privacy', '/terms','/forgot-password']);
-
-  // ✅ FIXED AUTH CHECK: Only run on mount or if we lose authentication
+  // 1. Initial hydration on mount
   useEffect(() => {
     dispatch(hydrateAuth());
+  }, [dispatch]);
 
-    // Skip if already authenticated and we have user data
-    if (isAuthenticated && user) {
-      dispatch(setLoading(false));
-      return;
-    }
-
-    // Skip for public routes
-    if (publicRoutes.has(pathname)) {
-      dispatch(setLoading(false));
+  // 2. Fetch user profile if missing and not on public route
+  useEffect(() => {
+    // If we're already loading or authenticated, or on a public route, skip
+    if (isLoading || isAuthenticated || PUBLIC_ROUTES.has(pathname)) {
       return;
     }
 
@@ -50,10 +46,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     checkAuth();
-  }, [dispatch]); // Removed pathname dependency to stop /me calls on every navigation
+  }, [dispatch, isAuthenticated, isLoading, pathname]);
 
   const handleUnauthenticated = useCallback(() => {
-    if (!publicRoutes.has(pathname)) {
+    if (!PUBLIC_ROUTES.has(pathname)) {
       router.push('/login');
     }
   }, [pathname, router]);
@@ -133,7 +129,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isLoading) return;
 
     if (!isAuthenticated) {
-      if (!publicRoutes.has(pathname)) {
+      if (!PUBLIC_ROUTES.has(pathname)) {
         handleUnauthenticated();
       }
       return;
@@ -162,11 +158,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated,
     user,
     activeRole,
+    isSuperMode,
     handleUnauthenticated,
     handleSuperUserFlow,
     handleHospitalSelection,
     handleRoleSelection,
-    handleAuthenticatedRedirect
+    handleAuthenticatedRedirect,
+    pathname
   ]);
 
   if (isLoading) {

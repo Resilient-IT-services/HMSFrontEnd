@@ -11,9 +11,10 @@ interface UserFormContractsTabProps {
   hospitals: HospitalResponse[];
   validationErrors: Record<string, string>;
   isAddingContract: boolean;
+  openAddContract: () => void;
+  openEditContract: (index: number, contract: HospitalMembershipDTO) => void;
   setIsAddingContract: (val: boolean) => void;
   editingContractIndex: number | null;
-  setEditingContractIndex: (val: number | null) => void;
   newContract: HospitalMembershipDTO;
   setNewContract: (data: HospitalMembershipDTO) => void;
   confirmAddContract: () => void;
@@ -26,9 +27,10 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
   hospitals,
   validationErrors,
   isAddingContract,
+  openAddContract,
+  openEditContract,
   setIsAddingContract,
   editingContractIndex,
-  setEditingContractIndex,
   newContract,
   setNewContract,
   confirmAddContract,
@@ -55,7 +57,7 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
             </div>
             <button 
               type="button" 
-              onClick={() => setIsAddingContract(true)}
+              onClick={openAddContract}
               className="bg-primary-container text-white px-4 py-2 rounded-lg text-sm font-bold transition-all hover:opacity-90 active:scale-95 flex items-center gap-2"
             >
               <span className="material-symbols-outlined text-lg">add_business</span>
@@ -89,11 +91,7 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
                       </button>
                       <button 
                         type="button"
-                        onClick={() => {
-                          setNewContract(cloneHospitalMembership(m));
-                          setEditingContractIndex(idx);
-                          setIsAddingContract(true);
-                        }}
+                        onClick={() => openEditContract(idx, m)}
                         className="text-gray-400 hover:text-primary opacity-0 group-hover:opacity-100 transition-all"
                       >
                         <span className="material-symbols-outlined text-lg">edit</span>
@@ -126,7 +124,7 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
               <div className="md:col-span-2 py-12 text-center bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex flex-col items-center gap-4">
                 <span className="material-symbols-outlined text-4xl text-gray-300">description</span>
                 <p className="text-gray-500 font-bold">No hospital contracts found.</p>
-                <button type="button" onClick={() => setIsAddingContract(true)} className="btn-secondary text-xs">Assign First Hospital</button>
+                <button type="button" onClick={openAddContract} className="btn-secondary text-xs">Assign First Hospital</button>
               </div>
             )}
           </div>

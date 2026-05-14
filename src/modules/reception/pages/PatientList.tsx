@@ -15,6 +15,8 @@ import { ContentPanel } from '@/components/ui/ContentPanel';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
 
+import { patientService } from '@/services/patientService';
+
 export function PatientList() {
   const router = useRouter();
   const {
@@ -59,12 +61,6 @@ export function PatientList() {
       render: (row) => <span className="capitalize">{row.gender.toLowerCase()}</span>
     },
     {
-      header: 'Category',
-      headerClassName: 'text-center',
-      className: 'text-center',
-      render: () => <Badge variant="blue">{404}</Badge> // TODO: derive from patient type/API
-    },
-    {
       header: 'Actions',
       headerClassName: 'text-center',
       className: 'text-center',
@@ -89,25 +85,26 @@ export function PatientList() {
     }
   ];
   const [dashboardStats, setDashboardStats] = useState({
-    newToday: 404,
-    inPatient: 404
+    newToday: 0,
+    inPatient: 0
   });
 
   useEffect(() => {
     const fetchDashboardStats = async () => {
       try {
-        const response = await fetch(
-            '/api/v1/patients/dashboard-stats' // TODO: move to patientService
-        );
-
-        const result = await response.json();
-        setDashboardStats(result.data);
+        const res = await patientService.getDashboardStats();
+        if (res.success && res.data) {
+          setDashboardStats({
+            newToday: res.data.newToday,
+            inPatient: res.data.inPatient
+          });
+        }
       } catch (error) {
         console.error('Failed to fetch dashboard stats', error);
       }
     };
 
-    fetchDashboardStats();
+    void fetchDashboardStats();
   }, []);
 
   const metricItems = [
