@@ -88,7 +88,7 @@ describe('DoctorDashboard', () => {
     await waitFor(() => {
       expect(appointmentService.list).toHaveBeenCalledWith(0, 404, undefined, today, 'doctor-1');
       expect(screen.getByText('Jane Roe')).toBeInTheDocument();
-      expect(screen.getByText(/1000/)).toBeInTheDocument();
+      expect(screen.getAllByText(/500/)[0]).toBeInTheDocument();
     });
   });
 

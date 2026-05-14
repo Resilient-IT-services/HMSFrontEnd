@@ -110,7 +110,7 @@ describe('LoginPage', () => {
     );
 
     fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'user' } });
-    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'pass' } });
+    fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
     fireEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
