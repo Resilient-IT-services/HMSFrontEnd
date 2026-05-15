@@ -127,8 +127,26 @@ export const StockManagement = () => {
       className: 'text-center',
       headerClassName: 'text-center',
       render: (medicine) => {
-        if ((medicine.quantity || 0) === 0) return <Badge variant="red">Out of Stock</Badge>;
-        if ((medicine.quantity || 0) < 50) return <Badge variant="orange">Low Stock</Badge>;
+        const qty = medicine.quantity || 0;
+        const isOutOfStock = qty === 0;
+        const isLowStock = qty < 50 && qty > 0;
+        
+        const expiryDate = medicine.expiryDate ? new Date(medicine.expiryDate) : null;
+        const today = new Date();
+        const thirtyDaysFromNow = new Date(today);
+        thirtyDaysFromNow.setDate(today.getDate() + 30);
+        
+        const isExpired = expiryDate ? expiryDate < today : false;
+        const isExpiringSoon = expiryDate ? (expiryDate >= today && expiryDate < thirtyDaysFromNow) : false;
+
+        if (isExpired && isLowStock) return <Badge variant="red">Expired & Low Stock</Badge>;
+        if (isExpired) return <Badge variant="red">Expired</Badge>;
+        if (isOutOfStock) return <Badge variant="red">Out of Stock</Badge>;
+        
+        if (isExpiringSoon && isLowStock) return <Badge variant="orange">Expiring Soon & Low Stock</Badge>;
+        if (isExpiringSoon) return <Badge variant="purple">Expiring Soon</Badge>;
+        if (isLowStock) return <Badge variant="orange">Low Stock</Badge>;
+        
         return <Badge variant="emerald">In Stock</Badge>;
       }
     },
@@ -220,6 +238,8 @@ export const StockManagement = () => {
                 >
                   <option value="ALL">All Inventory</option>
                   <option value="LOW_STOCK">Low Stock Only</option>
+                  <option value="EXPIRED">Expired Medicine</option>
+                  <option value="EXPIRING_SOON">Expiring Soon</option>
                 </select>
               </div>
               <Button variant="secondary" icon="download" onClick={handleExport}>Export CSV</Button>

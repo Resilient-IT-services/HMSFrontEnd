@@ -285,10 +285,10 @@ export const MedicineInventory = () => {
                       {selectedMedicine.composition || 'No composition data recorded.'}
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-4">
+                  <div className="grid grid-cols-1 gap-6">
                     <InfoRow label="Generic Name" value={selectedMedicine.genericName} className="py-3 border-b border-slate-50 flex-row justify-between items-center" />
                     <InfoRow label="Form Factor" value={selectedMedicine.form || selectedMedicine.category} className="py-3 border-b border-slate-50 flex-row justify-between items-center" />
-                    <InfoRow label="Current Stock" value={`${selectedMedicine.currentStock} Units`} valueClassName="text-emerald-600" className="py-3 flex-row justify-between items-center" />
+
                   </div>
                   <Button 
                     variant="secondary"

@@ -484,9 +484,13 @@ export interface StockRequest {
   medicineId: string;
   batchNumber: string;
   expiryDate?: string;
+  manufacturingDate?: string;
   quantity: number;
   purchasePrice: number;
   sellingPrice: number;
+  supplier?: string;
+  gst?: number;
+  rackLocation?: string;
 }
 
 export interface PharmacySaleItem {
