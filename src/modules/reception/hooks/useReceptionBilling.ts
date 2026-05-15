@@ -121,7 +121,10 @@ export const useReceptionBilling = () => {
   }, [appointmentId, doctorIdParam, loadExistingAppointmentBilling, loadNewAppointmentBilling, patientIdParam]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
   const consultationFee = doctor?.consultationFee || 0;

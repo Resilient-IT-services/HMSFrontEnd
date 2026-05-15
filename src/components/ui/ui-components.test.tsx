@@ -88,13 +88,13 @@ describe('UI Components', () => {
       render(<Table columns={columns} data={data} />);
       expect(screen.getByText('Name')).toBeInTheDocument();
       expect(screen.getByText('Age')).toBeInTheDocument();
-      expect(screen.getByText('Alice')).toBeInTheDocument();
-      expect(screen.getByText('Bob')).toBeInTheDocument();
+      expect(screen.getAllByText('Alice').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('Bob').length).toBeGreaterThan(0);
     });
 
     it('shows loading state', () => {
       render(<Table columns={columns} data={[]} isLoading={true} />);
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(screen.getAllByText('Loading...').length).toBeGreaterThan(0);
     });
   });
 });

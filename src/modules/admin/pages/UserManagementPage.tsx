@@ -16,6 +16,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { Card } from '@/components/ui/Card';
+import { Avatar } from '@/components/ui/Avatar';
+import { StatusIndicator } from '@/components/ui/StatusIndicator';
 
 export const UserManagementPage = () => {
   const router = useRouter();
@@ -39,9 +41,7 @@ export const UserManagementPage = () => {
       header: 'User Details',
       render: (user) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-white bg-orange-100 font-black uppercase text-orange-700 shadow-sm">
-            {user.fullName ? user.fullName.slice(0, 2) : user.username.slice(0, 2)}
-          </div>
+          <Avatar name={user.fullName || user.username} />
           <div>
             <p className="text-sm font-bold leading-tight text-slate-900">{user.fullName || user.username}</p>
             <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{user.email}</p>
@@ -88,70 +88,49 @@ export const UserManagementPage = () => {
         const currentStatus = user.status || (user.active ? 'ACTIVE' : 'INACTIVE');
 
         return (
-          <div
-              className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded-lg transition-colors"
-              onClick={async (e) => {
-                e.stopPropagation();
+          <StatusIndicator
+            status={currentStatus}
+            variant={currentStatus === 'ACTIVE' ? 'emerald' : 'red'}
+            title={currentStatus === 'ACTIVE' ? 'Click to Deactivate' : 'Click to Activate'}
+            onClick={async (e) => {
+              e.stopPropagation();
 
-                try {
-                  const res = await userService.getFullProfile(user.id);
+              try {
+                const res = await userService.getFullProfile(user.id);
 
-                  if (res.success && res.data) {
-                    const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-                    const fullProfile = res.data;
+                if (res.success && res.data) {
+                  const newStatus = currentStatus === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+                  const fullProfile = res.data;
 
-                    const userPayload: UserRequestDTO = {
-                      id: fullProfile.id,
-                      username: fullProfile.username,
-                      email: fullProfile.email,
-                      fullName: fullProfile.fullName,
-                      gender: fullProfile.gender,
-                      dob: fullProfile.dob,
-                      phone: fullProfile.phone,
-                      superuser: fullProfile.superuser,
-                      status: newStatus as any,
-                      active: newStatus === 'ACTIVE',
-                      memberships: fullProfile.memberships,
-                      doctorInfo: fullProfile.doctorInfo,
-                      nurseInfo: fullProfile.nurseInfo,
-                      pharmacistInfo: fullProfile.pharmacistInfo,
-                      receptionistInfo: fullProfile.receptionistInfo
-                    };
+                  const userPayload: UserRequestDTO = {
+                    id: fullProfile.id,
+                    username: fullProfile.username,
+                    email: fullProfile.email,
+                    fullName: fullProfile.fullName,
+                    gender: fullProfile.gender,
+                    dob: fullProfile.dob,
+                    phone: fullProfile.phone,
+                    superuser: fullProfile.superuser,
+                    status: newStatus as any,
+                    active: newStatus === 'ACTIVE',
+                    memberships: fullProfile.memberships,
+                    doctorInfo: fullProfile.doctorInfo,
+                    nurseInfo: fullProfile.nurseInfo,
+                    pharmacistInfo: fullProfile.pharmacistInfo,
+                    receptionistInfo: fullProfile.receptionistInfo
+                  };
 
-                    const updateRes = await userService.updateUser(user.id, userPayload);
-                    if (updateRes.success) {
-                      triggerGlobalToast(`User ${newStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully`, 'success');
-                      refresh();
-                    }
+                  const updateRes = await userService.updateUser(user.id, userPayload);
+                  if (updateRes.success) {
+                    triggerGlobalToast(`User ${newStatus === 'ACTIVE' ? 'activated' : 'deactivated'} successfully`, 'success');
+                    refresh();
                   }
-                } catch (error) {
-                  console.error('Failed to toggle status', error);
                 }
-              }}
-              title={
-                currentStatus === 'ACTIVE'
-                    ? 'Click to Deactivate'
-                    : 'Click to Activate'
+              } catch (error) {
+                console.error('Failed to toggle status', error);
               }
-          >
-            <div
-                className={`h-2 w-2 rounded-full ${
-                    currentStatus === 'ACTIVE'
-                        ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                        : 'bg-red-500'
-                }`}
-            />
-
-            <span
-                className={`text-[10px] font-black uppercase tracking-widest ${
-                    currentStatus === 'ACTIVE'
-                        ? 'text-emerald-700'
-                        : 'text-red-600'
-                }`}
-            >
-              {currentStatus}
-            </span>
-          </div>
+            }}
+          />
         );
       }
     },

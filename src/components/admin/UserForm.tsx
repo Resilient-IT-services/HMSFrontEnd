@@ -10,6 +10,9 @@ import { UserFormContractsTab } from './UserForm/UserFormContractsTab';
 import { UserFormProfileTab } from './UserForm/UserFormProfileTab';
 import ChangePasswordModal from './ChangePasswordModal';
 
+import { Avatar } from '@/components/ui/Avatar';
+import { Tabs } from '@/components/ui/Tabs';
+
 interface UserFormProps {
   initialData?: UserFullProfileDTO;
   isEdit?: boolean;
@@ -23,19 +26,37 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
   const isSuperUser = currentUser?.superuser || currentUser?.roles?.includes('SUPER_ADMIN') || isSuperMode;
   const canChangePassword = isEdit && logic.formData.id && isSuperUser;
 
-  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const tabs = [
+    { id: 'personal', label: 'Personal Info' },
+    { id: 'contracts', label: 'Contracts Info' },
+    { id: 'profile', label: 'Profile Info' }
+  ];
+
+  const activeTabId = tabs.findIndex(t => t.id === logic.activeTab);
+  const stepLabel = tabs[activeTabId].label;
 
   return (
-    <div className="max-w-6xl mx-auto pb-20">
+    <div className="max-w-6xl mx-auto pb-32 md:pb-20 px-0 md:px-0">
       <form onSubmit={logic.handleSubmit}>
-        <div className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-6">
-            <div className="w-20 h-20 rounded-2xl bg-orange-50 flex items-center justify-center text-primary text-2xl font-bold border-4 border-orange-100">
-              {logic.formData.fullName ? getInitials(logic.formData.fullName) : '?'}
-            </div>
+        {/* Header - Sticky on Mobile */}
+        <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 md:py-6 md:px-6 flex items-center justify-between gap-4 mb-4 md:mb-8 md:static md:bg-white md:rounded-xl md:border md:shadow-sm">
+          <div className="flex items-center gap-3 md:gap-6">
+            <button type="button" onClick={() => logic.router.back()} className="p-2 -ml-2 rounded-full active:bg-gray-100 transition-colors md:hidden">
+              <span className="material-symbols-outlined text-on-surface">arrow_back</span>
+            </button>
+            <Avatar 
+              name={logic.formData.fullName} 
+              size="md"
+              className="md:hidden"
+            />
+            <Avatar 
+              name={logic.formData.fullName} 
+              size="xl" 
+              className="hidden md:flex"
+            />
             <div>
-              <h1 className="font-headline-xl text-on-surface">{isEdit ? 'Edit User Profile' : 'Create New User'}</h1>
-              <p className="font-body-lg text-gray-500">{logic.formData.fullName || 'New Staff Member'}</p>
+              <h1 className="font-bold text-lg md:text-headline-xl text-on-surface leading-tight">{isEdit ? 'Edit Profile' : 'Add New User'}</h1>
+              <p className="hidden md:block font-body-md md:font-body-lg text-gray-500">{logic.formData.fullName || 'New Staff Member'}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -43,45 +64,58 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
               <button 
                 type="button" 
                 onClick={() => setIsPasswordModalOpen(true)}
-                className="px-6 py-2.5 bg-white border-2 border-orange-200 text-orange-700 rounded-xl font-black text-xs flex items-center gap-2 hover:bg-orange-50 transition-all shadow-sm"
+                className="px-4 md:px-6 py-2 bg-white border border-orange-200 text-orange-700 rounded-xl font-bold text-[10px] md:text-xs flex items-center justify-center gap-2 hover:bg-orange-50 transition-all shadow-sm"
               >
-                <span className="material-symbols-outlined text-lg">lock_reset</span>
-                CHANGE PASSWORD
+                <span className="material-symbols-outlined text-base">lock_reset</span>
+                <span className="hidden md:inline text-xs">CHANGE PASSWORD</span>
               </button>
             )}
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="flex border-b border-gray-100 bg-gray-50/30">
-            {['personal', 'contracts', 'profile'].map((tab) => (
-              <button 
-                key={tab} type="button" onClick={() => logic.setActiveTab(tab as any)}
-                className={`px-8 py-4 font-bold text-sm capitalize border-b-2 ${logic.activeTab === tab ? 'border-primary text-primary bg-white' : 'border-transparent text-gray-500'}`}
-              >
-                {tab} Info
-              </button>
-            ))}
+        {/* Progress Indicator - Mobile Only */}
+        <div className="px-4 mb-6 md:hidden">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">STEP {activeTabId + 1} OF {tabs.length}</span>
+            <span className="text-[10px] font-bold text-secondary uppercase tracking-wider">{stepLabel}</span>
           </div>
+          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-primary-container transition-all duration-500 rounded-full" 
+              style={{ width: `${((activeTabId + 1) / tabs.length) * 100}%` }}
+            ></div>
+          </div>
+        </div>
 
-          <div className="p-8">
+        <div className="px-0 md:px-0">
+          <Tabs 
+            tabs={tabs} 
+            activeTab={logic.activeTab} 
+            onChange={(id) => logic.setActiveTab(id as any)}
+            className="md:border md:rounded-xl"
+          >
             {logic.activeTab === 'personal' && <UserFormPersonalTab formData={logic.formData} setFormData={logic.setFormData} isEdit={isEdit} validationErrors={logic.validationErrors} />}
             {logic.activeTab === 'contracts' && (
               <UserFormContractsTab 
                 formData={logic.formData} setFormData={logic.setFormData} hospitals={logic.hospitals} 
-                validationErrors={logic.validationErrors} isAddingContract={logic.isAddingContract} setIsAddingContract={logic.setIsAddingContract}
-                editingContractIndex={logic.editingContractIndex} setEditingContractIndex={logic.setEditingContractIndex}
+                validationErrors={logic.validationErrors} isAddingContract={logic.isAddingContract} 
+                openAddContract={logic.openAddContract} openEditContract={logic.openEditContract}
+                setIsAddingContract={logic.setIsAddingContract}
+                editingContractIndex={logic.editingContractIndex}
                 newContract={logic.newContract} setNewContract={logic.setNewContract} confirmAddContract={logic.confirmAddContract} duplicateContract={logic.duplicateContract}
               />
             )}
             {logic.activeTab === 'profile' && <UserFormProfileTab formData={logic.formData} setFormData={logic.setFormData} assignedRoles={logic.assignedRoles} validationErrors={logic.validationErrors} />}
-          </div>
+          </Tabs>
         </div>
 
-        <div className="fixed bottom-0 right-0 left-64 bg-white/95 backdrop-blur-md border-t border-gray-200 px-8 py-4 flex justify-end items-center z-40">
-          <div className="flex gap-3">
-            <button type="button" onClick={() => logic.router.back()} className="btn-secondary">Discard</button>
-            <button type="submit" disabled={logic.loading} className="btn-primary">Save Changes</button>
+        <div className="fixed bottom-0 right-0 left-0 md:left-64 bg-white/90 backdrop-blur-xl border-t border-gray-100 px-4 py-4 flex justify-end items-center z-40 md:bg-white/95">
+          <div className="flex gap-3 w-full md:w-auto max-w-lg mx-auto md:mx-0">
+            <button type="button" onClick={() => logic.router.back()} className="btn-secondary flex-1 md:flex-none md:h-12">Discard</button>
+            <button type="submit" disabled={logic.loading} className="btn-primary flex-1 md:flex-none md:h-12 min-w-[140px]">
+              <span className="material-symbols-outlined md:hidden">save</span>
+              {isEdit ? 'Save Changes' : 'Create User'}
+            </button>
           </div>
         </div>
       </form>

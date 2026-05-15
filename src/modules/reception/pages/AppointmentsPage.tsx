@@ -13,6 +13,7 @@ import { MetricCard } from '@/components/ui/MetricCard';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
+import { cn } from '@/lib/cn';
 
 export const AppointmentsPage = () => {
   const router = useRouter();
@@ -38,10 +39,12 @@ export const AppointmentsPage = () => {
   const columns: Column<AppointmentSummaryDTO>[] = [
     {
       header: 'Token',
+      mobilePosition: 'meta',
       render: (app) => <span className="font-bold text-slate-900">{formatToken(app)}</span>
     },
     {
       header: 'Time',
+      mobilePosition: 'title',
       render: (app) => (
         <span className="font-bold text-slate-900">
           {new Date(app.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -50,6 +53,7 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Patient',
+      mobilePosition: 'subtitle',
       render: (app) => (
         <div>
           <p className="font-bold text-slate-900">{app.patientName}</p>
@@ -59,6 +63,7 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Doctor',
+      mobilePosition: 'body',
       render: (app) => (
         <div>
           <p className="font-medium text-slate-700">{app.doctorName}</p>
@@ -68,6 +73,7 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Status',
+      mobilePosition: 'meta',
       render: (app) => {
         const variants: Record<string, any> = {
           WALK_IN: 'emerald',
@@ -85,6 +91,7 @@ export const AppointmentsPage = () => {
       header: 'Actions',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'action',
       render: (app) => (
         <div className="flex items-center justify-center gap-2">
           {!['SCHEDULED', 'WALK_IN', 'CHECKED_IN', 'COMPLETED', 'CANCELLED'].includes(app.status) && (
@@ -136,24 +143,44 @@ export const AppointmentsPage = () => {
         </PageHeading>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           {statConfig.map((stat, i) => (
             <div 
               key={i} 
-              onClick={() => {
-                setStatusFilter(stat.filter as any);
-                if (activeFilters.statuses?.length) {
-                  resetFilters();
-                }
-              }}
-              className={`cursor-pointer transition-all active:scale-95 ${statusFilter === stat.filter ? 'ring-2 ring-orange-500 ring-offset-2' : ''}`}
+              className={cn(
+                "transition-all shrink-0",
+                statusFilter === stat.filter ? 'ring-1 ring-orange-500 ring-offset-1 rounded-full lg:rounded-2xl' : ''
+              )}
             >
-              <MetricCard 
-                label={stat.label} 
-                value={stat.value} 
-                icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'} 
-                variant={stat.variant as any} 
-              />
+              <div className="lg:hidden">
+                <MetricCard 
+                  label={stat.label} 
+                  value={stat.value} 
+                  icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'} 
+                  variant={stat.variant as any}
+                  layout="pill"
+                  onClick={() => {
+                    setStatusFilter(stat.filter as any);
+                    if (activeFilters.statuses?.length) {
+                      resetFilters();
+                    }
+                  }}
+                />
+              </div>
+              <div className="hidden lg:block h-full">
+                <MetricCard 
+                  label={stat.label} 
+                  value={stat.value} 
+                  icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'} 
+                  variant={stat.variant as any} 
+                  onClick={() => {
+                    setStatusFilter(stat.filter as any);
+                    if (activeFilters.statuses?.length) {
+                      resetFilters();
+                    }
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>

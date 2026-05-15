@@ -5,6 +5,7 @@ import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { PharmacyStockDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
+import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 export const usePharmacyStock = () => {
   const [medicines, setMedicines] = useState<PharmacyStockDTO[]>([]);
@@ -13,9 +14,9 @@ export const usePharmacyStock = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const [selectedMedicineForStock, setSelectedMedicineForStock] = useState<{ id: string; name: string } | null>(null);
   const [selectedMedicineForView, setSelectedMedicineForView] = useState<{ id: string; name: string } | null>(null);
 
@@ -44,11 +45,17 @@ export const usePharmacyStock = () => {
   }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
-    fetchInventory();
+    const trigger = async () => {
+      await fetchInventory();
+    };
+    void trigger();
   }, [fetchInventory]);
 
   useEffect(() => {
-    setPage(0);
+    const trigger = async () => {
+      setPage(0);
+    };
+    void trigger();
   }, [debouncedSearch, statusFilter, pageSize]);
 
   const handleExport = () => {

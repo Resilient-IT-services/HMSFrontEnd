@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { store } from '@/state/store';
 import { logout } from '@/state/authSlice';
+import { CONFIG } from '@/utils/config';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -10,7 +11,7 @@ declare module 'axios' {
 }
 
 const apiClient = axios.create({
-  baseURL: '/api/v1',
+  baseURL: CONFIG.API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

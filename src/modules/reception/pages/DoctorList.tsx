@@ -33,6 +33,7 @@ export function DoctorList() {
   const columns: Column<DoctorStaffResponse>[] = [
     { 
       header: 'Doctor Name', 
+      mobilePosition: 'title',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black uppercase">
@@ -47,18 +48,21 @@ export function DoctorList() {
     },
     { 
       header: 'Department', 
+      mobilePosition: 'subtitle',
       render: (row) => (
         <span className="text-sm font-medium text-[var(--text-primary)]">{row.departmentName || 'General Medicine'}</span>
       )
     },
     { 
       header: 'Contact', 
+      mobilePosition: 'body',
       key: 'phone' 
     },
     {
       header: 'Actions',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'action',
       render: (row) => (
         <div className="flex justify-center gap-2 items-center">
           <button 

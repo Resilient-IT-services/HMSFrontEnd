@@ -169,7 +169,10 @@ export default function AdminReportsPage() {
   }, [filters, hospitalId, hospitals]);
 
   useEffect(() => {
-    fetchPreview();
+    const trigger = async () => {
+      await fetchPreview();
+    };
+    void trigger();
   }, [fetchPreview]);
 
   useEffect(() => {
@@ -187,7 +190,10 @@ export default function AdminReportsPage() {
       }
     };
 
-    fetchHospitals();
+    const trigger = async () => {
+      await fetchHospitals();
+    };
+    void trigger();
   }, []);
 
   useEffect(() => {
@@ -225,7 +231,10 @@ export default function AdminReportsPage() {
       }
     };
 
-    fetchDoctors();
+    const trigger = async () => {
+      await fetchDoctors();
+    };
+    void trigger();
   }, [hospitalId, hospitals]);
 
   const handleExport = async (format: 'pdf' | 'excel') => {

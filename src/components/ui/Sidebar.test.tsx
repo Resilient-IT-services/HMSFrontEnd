@@ -50,12 +50,12 @@ describe('Sidebar', () => {
     );
     
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Patient Queue')).toBeInTheDocument();
+    expect(screen.getByText('Queue')).toBeInTheDocument();
     expect(screen.getByText('History')).toBeInTheDocument();
     expect(screen.queryByText('Token Queue')).not.toBeInTheDocument();
     expect(screen.queryByText('Patients')).not.toBeInTheDocument();
     expect(screen.queryByText('Doctors')).not.toBeInTheDocument();
-    expect(screen.queryByText('User Management')).not.toBeInTheDocument();
+    expect(screen.queryByText('Users')).not.toBeInTheDocument();
   });
 
   it('renders super admin items in super mode', () => {

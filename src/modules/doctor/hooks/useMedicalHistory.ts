@@ -8,6 +8,7 @@ import { appointmentService } from '@/services/appointmentService';
 import { RootState } from '@/state/store';
 import { useDebounce } from '@/hooks/useDebounce';
 import { PatientResponse, AppointmentResponse, PrescriptionResponse, AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
+import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 export const useMedicalHistory = () => {
   const searchParams = useSearchParams();
@@ -22,7 +23,7 @@ export const useMedicalHistory = () => {
   const [selectedVisit, setSelectedVisit] = useState<AppointmentResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const [activeView, setActiveView] = useState<'APPOINTMENTS' | 'PATIENTS'>('APPOINTMENTS');
 
   // Pagination State
@@ -30,7 +31,7 @@ export const useMedicalHistory = () => {
   const [appointmentsTotalElements, setAppointmentsTotalElements] = useState(0);
   const [patientsPage, setPatientsPage] = useState(0);
   const [patientsTotalElements, setPatientsTotalElements] = useState(0);
-  const pageSize = 10;
+  const pageSize = DEFAULT_PAGE_SIZE;
 
   const fetchHistoryList = useCallback(async (search = '', page = 0) => {
     if (!user) return;
@@ -123,27 +124,36 @@ export const useMedicalHistory = () => {
   };
 
   useEffect(() => {
-    if (activeView === 'APPOINTMENTS') {
-      fetchHistoryList(debouncedSearchTerm, appointmentsPage);
-    } else {
-      fetchPatientsList(debouncedSearchTerm, patientsPage);
-    }
+    const trigger = async () => {
+      if (activeView === 'APPOINTMENTS') {
+        await fetchHistoryList(debouncedSearchTerm, appointmentsPage);
+      } else {
+        await fetchPatientsList(debouncedSearchTerm, patientsPage);
+      }
+    };
+    void trigger();
   }, [activeView, appointmentsPage, patientsPage, debouncedSearchTerm, fetchHistoryList, fetchPatientsList]);
 
   useEffect(() => {
-    if (patientId) {
-      fetchPatientDetails(patientId);
-    } else {
-      setSelectedPatient(null);
-      setSelectedVisit(null);
-      setPatientVisits([]);
-    }
+    const trigger = async () => {
+      if (patientId) {
+        await fetchPatientDetails(patientId);
+      } else {
+        setSelectedPatient(null);
+        setSelectedVisit(null);
+        setPatientVisits([]);
+      }
+    };
+    void trigger();
   }, [patientId, fetchPatientDetails]);
 
   // Reset page when search term changes
   useEffect(() => {
-    setAppointmentsPage(0);
-    setPatientsPage(0);
+    const trigger = async () => {
+      setAppointmentsPage(0);
+      setPatientsPage(0);
+    };
+    void trigger();
   }, [debouncedSearchTerm]);
 
   const handleSearch = (e?: React.FormEvent) => {

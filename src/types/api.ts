@@ -253,9 +253,15 @@ export interface UpdateBillingStatusRequest {
   discount?: number;
 }
 
+export interface PatientDashboardStatsDTO {
+  totalRecords: number;
+  newToday: number;
+  inPatient: number;
+}
+
 // Hospital types
 export interface HospitalSettings {
-  configurations?: Record<string, any>;
+  configurations?: Record<string, unknown>;
   timezone?: string;
   currency?: string;
   opdEnabled?: boolean;
@@ -615,8 +621,8 @@ export type BillingResponse = BillingDTO;
 
 // Audit types
 export interface AuditDetail {
-  before?: Record<string, any>;
-  after?: Record<string, any>;
+  before?: Record<string, unknown>;
+  after?: Record<string, unknown>;
 }
 
 export interface AuditLogResponse {

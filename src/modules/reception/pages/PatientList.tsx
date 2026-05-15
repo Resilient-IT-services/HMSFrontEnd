@@ -15,6 +15,8 @@ import { ContentPanel } from '@/components/ui/ContentPanel';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
 
+import { patientService } from '@/services/patientService';
+
 export function PatientList() {
   const router = useRouter();
   const {
@@ -32,6 +34,7 @@ export function PatientList() {
   const columns: Column<PatientSummaryDTO>[] = [
     {
       header: 'Patient Code',
+      mobilePosition: 'meta',
       render: (row) => (
         <span className="rounded bg-orange-50 px-2 py-1 font-mono text-xs font-bold text-orange-700">
           {row.patientCode || 'N/A'}
@@ -40,6 +43,7 @@ export function PatientList() {
     },
     {
       header: 'Patient Profile',
+      mobilePosition: 'title',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white bg-slate-100 font-bold uppercase text-slate-400 shadow-sm">
@@ -56,18 +60,14 @@ export function PatientList() {
       header: 'Gender',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'subtitle',
       render: (row) => <span className="capitalize">{row.gender.toLowerCase()}</span>
-    },
-    {
-      header: 'Category',
-      headerClassName: 'text-center',
-      className: 'text-center',
-      render: () => <Badge variant="blue">Out-Patient</Badge>
     },
     {
       header: 'Actions',
       headerClassName: 'text-center',
       className: 'text-center',
+      mobilePosition: 'action',
       render: (row) => (
         <div className="flex items-center justify-center gap-2">
           <Button
@@ -94,30 +94,21 @@ export function PatientList() {
   });
 
   useEffect(() => {
-
     const fetchDashboardStats = async () => {
-
       try {
-
-        const response = await fetch(
-            '/api/v1/patients/dashboard-stats'
-        );
-
-        const result = await response.json();
-
-        setDashboardStats(result.data);
-
+        const res = await patientService.getDashboardStats();
+        if (res.success && res.data) {
+          setDashboardStats({
+            newToday: res.data.newToday,
+            inPatient: res.data.inPatient
+          });
+        }
       } catch (error) {
-
-        console.error(
-            'Failed to fetch dashboard stats',
-            error
-        );
+        console.error('Failed to fetch dashboard stats', error);
       }
     };
 
-    fetchDashboardStats();
-
+    void fetchDashboardStats();
   }, []);
 
   const metricItems = [

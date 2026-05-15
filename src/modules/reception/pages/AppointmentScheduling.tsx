@@ -69,7 +69,8 @@ export function AppointmentScheduling() {
 
   // Fetch Doctors
   useEffect(() => {
-    doctorService.list(0, 100).then(res => {
+    const trigger = async () => {
+      const res = await doctorService.list(0, 100);
       if (res.success && res.data) {
         setDoctors(res.data.content);
         if (preselectedDoctorId) {
@@ -80,24 +81,28 @@ export function AppointmentScheduling() {
         }
       }
       setLoadingDoctors(false);
-    });
+    };
+    void trigger();
   }, [preselectedDoctorId]);
 
   // Fetch Preselected Patient
   useEffect(() => {
-    if (preselectedPatientId) {
-      patientService.get(preselectedPatientId).then(res => {
+    const trigger = async () => {
+      if (preselectedPatientId) {
+        const res = await patientService.get(preselectedPatientId);
         if (res.success && res.data) setSelectedPatient(res.data);
-      });
-    }
+      }
+    };
+    void trigger();
   }, [preselectedPatientId]);
 
   // Fetch Availability
   useEffect(() => {
-    if (!selectedDoctor) return;
-    setFetchingAvailability(true);
-    setSelectedSession(null);
-    doctorService.getAvailability(selectedDoctor.doctorId, selectedDate).then(res => {
+    const trigger = async () => {
+      if (!selectedDoctor) return;
+      setFetchingAvailability(true);
+      setSelectedSession(null);
+      const res = await doctorService.getAvailability(selectedDoctor.doctorId, selectedDate);
       if (res.success && res.data) {
         let sessions = res.data.sessions;
         
@@ -115,25 +120,31 @@ export function AppointmentScheduling() {
         setAvailability(sessions);
       }
       setFetchingAvailability(false);
-    });
+    };
+    void trigger();
   }, [selectedDoctor, selectedDate]);
 
   // Handle Suggested Time
   useEffect(() => {
-    if (selectedSession) {
-      setEditableTime(calculateSuggestedTime(selectedSession, selectedDate));
-    } else {
-      setEditableTime('');
-    }
+    const trigger = async () => {
+      if (selectedSession) {
+        setEditableTime(calculateSuggestedTime(selectedSession, selectedDate));
+      } else {
+        setEditableTime('');
+      }
+    };
+    void trigger();
   }, [selectedSession, selectedDate]);
 
   // Patient Search
   useEffect(() => {
-    if (debouncedSearch.length > 2) {
-      patientService.list(0, 5, debouncedSearch).then(res => {
+    const trigger = async () => {
+      if (debouncedSearch.length > 2) {
+        const res = await patientService.list(0, 5, debouncedSearch);
         if (res.success && res.data) setSearchResults(res.data.content);
-      });
-    } else setSearchResults([]);
+      } else setSearchResults([]);
+    };
+    void trigger();
   }, [debouncedSearch]);
 
   const handleConfirm = async () => {
@@ -196,28 +207,28 @@ export function AppointmentScheduling() {
 
   return (
     <MainLayout title="Fast-Track Appointment" hideTitle>
-      <div className="max-w-6xl mx-auto px-8 py-4 font-inter">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-4 font-inter pb-20 sm:pb-8">
         {/* Compact Page Header */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center shadow-lg shadow-orange-200">
               <span className="material-symbols-outlined text-xl">bolt</span>
             </div>
             <div>
-              <h1 className="font-manrope text-2xl font-black text-slate-900 tracking-tight">Fast-Track Appointment</h1>
-              <p className="text-slate-500 text-xs font-medium">Instantly book a consultation for today or this week.</p>
+              <h1 className="font-manrope text-xl sm:text-2xl font-black text-slate-900 tracking-tight">Fast-Track Appointment</h1>
+              <p className="text-slate-500 text-[10px] sm:text-xs font-medium">Instantly book a consultation for today or this week.</p>
             </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm self-start sm:self-auto">
             <span className="material-symbols-outlined text-slate-400 text-sm">event</span>
-            <span className="font-bold text-slate-700 text-xs">Today, {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            <span className="font-bold text-slate-700 text-[10px] sm:text-xs">Today, {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* Left Column: Form Fields */}
-          <div className="col-span-12 lg:col-span-8 space-y-4">
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-6">
+          <div className="lg:col-span-8 space-y-4">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6 shadow-sm space-y-6">
               
               {/* Patient & Doctor Selection Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -316,7 +327,7 @@ export function AppointmentScheduling() {
           </div>
 
           {/* Right Column: Visit Summary Sidebar */}
-          <div className="col-span-12 lg:col-span-4 sticky top-20">
+          <div className="lg:col-span-4 lg:sticky lg:top-20">
             <ConfirmationPanel 
               selectedPatient={selectedPatient}
               selectedDoctor={selectedDoctor}

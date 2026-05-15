@@ -4,14 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { patientService } from '@/services/patientService';
 import { PatientSummaryDTO } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export const useReceptionPatients = () => {
   const [patients, setPatients] = useState<PatientSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
 
   const fetchPatients = useCallback(async () => {
@@ -30,23 +31,31 @@ export const useReceptionPatients = () => {
   }, [page, pageSize, debouncedSearchTerm]);
 
   useEffect(() => {
-    fetchPatients();
+    const trigger = async () => {
+      await fetchPatients();
+    };
+    void trigger();
   }, [fetchPatients]);
 
-  // Reset page when search term or page size changes
-  useEffect(() => {
+  const handleSearchTermChange = (term: string) => {
+    setSearchTerm(term);
     setPage(0);
-  }, [debouncedSearchTerm, pageSize]);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return {
     patients,
     loading,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: handleSearchTermChange,
     page,
     setPage,
     pageSize,
-    setPageSize,
+    setPageSize: handlePageSizeChange,
     totalElements,
     refresh: fetchPatients
   };

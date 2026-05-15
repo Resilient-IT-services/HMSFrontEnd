@@ -44,59 +44,63 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const [editingContractIndex, setEditingContractIndex] = useState<number | null>(null);
   const [newContract, setNewContract] = useState<HospitalMembershipDTO>({ hospitalId: '', roleAssignments: [] });
 
-  // Clear contract-related errors when editor is opened
-  useEffect(() => {
-    if (isAddingContract) {
-      setValidationErrors(prev => {
-        const next = { ...prev };
-        delete next.contractHospital;
-        delete next.contractRoles;
-        Object.keys(next).forEach(key => {
-          if (key.startsWith('department_') || key.startsWith('fee_')) {
-            delete next[key];
-          }
-        });
-        return next;
-      });
-    }
-  }, [isAddingContract]);
-
-  const assignedRoles = useMemo(() => {
+  const getAssignedRoles = (memberships: HospitalMembershipDTO[]) => {
     const roles = new Set<string>();
-    if (formData.memberships) for (const m of formData.memberships) {
+    if (memberships) for (const m of memberships) {
       if (m.roleAssignments) for (const ra of m.roleAssignments) roles.add(ra.roleCode);
-      // Also check direct roles array if present (matches API response)
       if ((m as any).roles) (m as any).roles.forEach((r: string) => roles.add(r));
     }
     return [...roles];
-  }, [formData.memberships]);
+  };
 
-  // Automatically initialize profile info objects when roles are assigned
-  useEffect(() => {
-    const updatedInfo: Partial<UserRequestDTO> = {};
-    let changed = false;
+  const assignedRoles = useMemo(() => getAssignedRoles(formData.memberships || []), [formData.memberships]);
 
-    if (assignedRoles.includes('DOCTOR') && !formData.doctorInfo) {
-      updatedInfo.doctorInfo = { specialization: '', licenseNumber: '', bio: '', education: { qualifications: [] } };
-      changed = true;
+  const getProfileInfoUpdates = (memberships: HospitalMembershipDTO[], currentFormData: UserRequestDTO) => {
+    const roles = getAssignedRoles(memberships);
+    const updates: Partial<UserRequestDTO> = {};
+    
+    if (roles.includes('DOCTOR') && !currentFormData.doctorInfo) {
+      updates.doctorInfo = { specialization: '', licenseNumber: '', bio: '', education: { qualifications: [] } };
     }
-    if (assignedRoles.includes('NURSE') && !formData.nurseInfo) {
-      updatedInfo.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
-      changed = true;
+    if (roles.includes('NURSE') && !currentFormData.nurseInfo) {
+      updates.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
     }
-    if (assignedRoles.includes('PHARMACIST') && !formData.pharmacistInfo) {
-      updatedInfo.pharmacistInfo = { pciRegNo: '', qualification: '' };
-      changed = true;
+    if (roles.includes('PHARMACIST') && !currentFormData.pharmacistInfo) {
+      updates.pharmacistInfo = { pciRegNo: '', qualification: '' };
     }
-    if (assignedRoles.includes('RECEPTIONIST') && !formData.receptionistInfo) {
-      updatedInfo.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
-      changed = true;
+    if (roles.includes('RECEPTIONIST') && !currentFormData.receptionistInfo) {
+      updates.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
     }
+    return updates;
+  };
 
-    if (changed) {
-      setFormData(prev => ({ ...prev, ...updatedInfo }));
-    }
-  }, [assignedRoles, formData.doctorInfo, formData.nurseInfo, formData.pharmacistInfo, formData.receptionistInfo]);
+  const clearContractErrors = () => {
+    setValidationErrors(prev => {
+      const next = { ...prev };
+      delete next.contractHospital;
+      delete next.contractRoles;
+      Object.keys(next).forEach(key => {
+        if (key.startsWith('department_') || key.startsWith('fee_')) {
+          delete next[key];
+        }
+      });
+      return next;
+    });
+  };
+
+  const openAddContract = () => {
+    clearContractErrors();
+    setNewContract({ hospitalId: '', roleAssignments: [] });
+    setEditingContractIndex(null);
+    setIsAddingContract(true);
+  };
+
+  const openEditContract = (index: number, contract: HospitalMembershipDTO) => {
+    clearContractErrors();
+    setNewContract(cloneHospitalMembership(contract));
+    setEditingContractIndex(index);
+    setIsAddingContract(true);
+  };
 
   useEffect(() => {
     hospitalService.list().then(res => {
@@ -327,7 +331,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     if (checkScheduleOverlaps(updatedMemberships)) return;
 
-    setFormData({ ...formData, memberships: updatedMemberships });
+    const profileUpdates = getProfileInfoUpdates(updatedMemberships, formData);
+    setFormData({ ...formData, memberships: updatedMemberships, ...profileUpdates });
 
     setValidationErrors(prev => {
       const next = { ...prev };
@@ -349,6 +354,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
 
   const duplicateContract = (contract: HospitalMembershipDTO) => {
+    clearContractErrors();
     setNewContract({
       ...cloneHospitalMembership(contract, { resetEntityIds: true }),
       hospitalId: '',
@@ -360,7 +366,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
   return {
     formData, setFormData, activeTab, setActiveTab, loading, validationErrors,
-    hospitals, isAddingContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
+    hospitals, isAddingContract, openAddContract, openEditContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
     newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract, duplicateContract, router
   };
 };

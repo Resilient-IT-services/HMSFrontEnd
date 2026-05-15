@@ -9,6 +9,7 @@ import { RootState } from '@/state/store';
 import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { sortByToken } from '@/utils/tokenHelper';
+import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -46,7 +47,7 @@ export const useDoctorQueue = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id, user?.fullName]);
+  }, [user]);
 
   // Fetch missing patient details
   useEffect(() => {
@@ -75,15 +76,21 @@ export const useDoctorQueue = () => {
     };
 
     if (appointments.length > 0) {
-      fetchMissingPatients();
+      const trigger = async () => {
+        await fetchMissingPatients();
+      };
+      void trigger();
     }
   }, [appointments, patientDetails]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000, !!user);
+  useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];

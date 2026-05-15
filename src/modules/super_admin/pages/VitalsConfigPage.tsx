@@ -49,7 +49,7 @@ export function VitalsConfigPage() {
     }
   };
 
-  const fetchSettings = async () => {
+  const fetchSettings = React.useCallback(async () => {
     if (!currentHospitalId) {
       setLoading(false);
       return;
@@ -65,15 +65,21 @@ export function VitalsConfigPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentHospitalId]);
 
   useEffect(() => {
-    fetchHospitals();
+    const trigger = async () => {
+      await fetchHospitals();
+    };
+    void trigger();
   }, []);
 
   useEffect(() => {
-    fetchSettings();
-  }, [currentHospitalId]);
+    const trigger = async () => {
+      await fetchSettings();
+    };
+    void trigger();
+  }, [currentHospitalId, fetchSettings]);
 
   const handleHospitalChange = (id: string) => {
     dispatch(setCurrentHospitalId(id));

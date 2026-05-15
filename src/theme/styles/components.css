@@ -1,15 +1,15 @@
 /* Form Styles */
 .form-input {
-  @apply w-full px-4 py-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container transition-all text-body-md;
+  @apply w-full h-14 px-4 bg-surface border border-slate-200 md:border-slate-200 rounded-xl md:rounded-lg focus:ring-2 focus:ring-primary-container/20 focus:border-primary-container transition-all text-body-lg md:text-body-md outline-none;
 }
 
 /* Button Variants */
 .btn-primary {
-  @apply bg-primary-container text-on-primary inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg font-label-md shadow-sm hover:opacity-90 transition-all active:scale-95;
+  @apply h-14 bg-primary-container text-on-primary inline-flex items-center justify-center gap-2 px-6 rounded-xl md:rounded-lg font-bold text-sm shadow-lg shadow-primary-container/20 hover:opacity-95 transition-all active:scale-[0.98] select-none;
 }
 
 .btn-secondary {
-  @apply px-6 py-2.5 border border-slate-200 bg-white text-on-surface font-label-md rounded-lg hover:bg-slate-50 transition-all;
+  @apply h-14 md:h-12 px-6 border border-slate-200 bg-white text-on-surface font-bold text-sm rounded-xl md:rounded-lg hover:bg-slate-50 transition-all active:scale-[0.98] select-none;
 }
 
 /* Session Cards */

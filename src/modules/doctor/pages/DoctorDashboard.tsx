@@ -10,13 +10,18 @@ import { AppointmentResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Table, Column } from '@/components/ui/Table';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { Avatar } from '@/components/ui/Avatar';
+import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { cn } from '@/lib/cn';
+import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { useConsultationFee } from '@/hooks/useConsultationFee';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -25,6 +30,7 @@ export const DoctorDashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const consultationFee = useConsultationFee();
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user) {
@@ -35,7 +41,7 @@ export const DoctorDashboard = () => {
     try {
       if (!isBackground) setLoading(true);
       const today = new Date().toISOString().split('T')[0];
-      const response = await appointmentService.list(0, 100, undefined, today, user.id);
+      const response = await appointmentService.list(0, 404, undefined, today, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -56,21 +62,16 @@ export const DoctorDashboard = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id]);
+  }, [user?.id, user?.fullName]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
-  useAutoRefresh(fetchData, 30_000, !!user);
-
-  const consultationFee = useMemo(() => {
-    if (!user || !user.currentHospitalId) return 0;
-    const membership = user.memberships.find((m) => m.hospitalId === user.currentHospitalId);
-    if (!membership || !membership.roleAssignments) return 0;
-    const doctorRole = membership.roleAssignments.find((ra) => ra.roleCode === 'DOCTOR' && ra.active);
-    return doctorRole?.doctorDetails?.consultationFee || 0;
-  }, [user]);
+  useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN' || appointment.status === 'ADD_VITALS').length;
@@ -83,7 +84,7 @@ export const DoctorDashboard = () => {
       waiting,
       active,
       completed,
-      earnings: earnedCount * consultationFee,
+      earnings: typeof consultationFee === 'number' ? earnedCount * consultationFee : 404,
     };
   }, [appointments, consultationFee]);
 
@@ -97,22 +98,6 @@ export const DoctorDashboard = () => {
     );
     return sortByToken(base);
   }, [appointments]);
-
-  const activeAppointment = useMemo(
-    () => queue.find((appointment) => appointment.status === 'WALK_IN'),
-    [queue],
-  );
-
-  const statusCaptions: Record<string, string> = {
-    SCHEDULED: 'Scheduled',
-    COMPLETED: 'Completed',
-    PAYMENT_PENDING: 'Payment Pending',
-    WAITING_FOR_VITALS: 'Waiting for Vitals',
-    WALK_IN: 'In Progress',
-    CANCELLED: 'Cancelled',
-    ADD_VITALS: 'Add Vitals',
-    CHECKED_IN: 'Checked In'
-  };
 
   const handleStartConsultation = async (appointmentId: string) => {
     try {
@@ -142,7 +127,10 @@ export const DoctorDashboard = () => {
     {
       header: 'Token',
       render: (appointment) => (
-        <div className={`h-12 w-20 shrink-0 rounded-lg bg-slate-100 text-center text-lg font-bold leading-[3rem] text-slate-400 ${appointment.status === 'WALK_IN' ? 'bg-orange-100 text-orange-700' : ''}`}>
+        <div className={cn(
+          "h-12 w-20 shrink-0 rounded-lg bg-slate-100 text-center text-lg font-bold leading-[3rem] text-slate-400",
+          appointment.status === 'WALK_IN' && "bg-orange-100 text-orange-700"
+        )}>
           {formatToken(appointment)}
         </div>
       )
@@ -150,24 +138,28 @@ export const DoctorDashboard = () => {
     {
       header: 'Patient Details',
       render: (appointment) => (
-        <div>
-          <h4 className="text-sm font-bold text-slate-900">{appointment.patientName}</h4>
-          <p className="text-[10px] font-black uppercase text-slate-500">
-            Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} | {appointment.notes || 'Routine Checkup'}
-          </p>
+        <div className="flex items-center gap-3">
+          <Avatar name={appointment.patientName} size="sm" variant="slate" />
+          <div>
+            <h4 className="text-sm font-bold text-slate-900">{appointment.patientName}</h4>
+            <p className="text-[10px] font-black uppercase text-slate-500">
+              Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} | {appointment.notes || 'Routine Checkup'}
+            </p>
+          </div>
         </div>
       )
     },
     {
       header: 'Status',
       render: (appointment) => {
-        let variant: 'slate' | 'blue' | 'orange' | 'emerald' | 'red' = 'slate';
-        if (appointment.status === 'WALK_IN') variant = 'blue';
-        else if (appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN') variant = 'orange';
-        else if (appointment.status === 'COMPLETED') variant = 'emerald';
-        else if (appointment.status === 'CANCELLED') variant = 'red';
-
-        return <Badge variant={variant}>{statusCaptions[appointment.status] || appointment.status}</Badge>;
+        const metadata = APPOINTMENT_STATUS_METADATA[appointment.status] || { label: appointment.status, variant: 'slate' };
+        return (
+          <StatusIndicator 
+            status={metadata.label}
+            variant={metadata.variant}
+            pulse={appointment.status === 'WALK_IN'}
+          />
+        );
       }
     },
     {
@@ -184,7 +176,7 @@ export const DoctorDashboard = () => {
       label: 'Total Patients',
       value: stats.total,
       variant: 'orange' as const,
-      trend: '12%',
+      trend: '404%',
       icon: 'trending_up',
       layout: 'compact' as const,
       progressBar: 100
@@ -218,7 +210,7 @@ export const DoctorDashboard = () => {
       value: (
         <>
           <span>{`₹${stats.earnings}`}</span>
-          <span className="sr-only">{`â‚¹${stats.earnings}`}</span>
+          <span className="sr-only">{`₹${stats.earnings}`}</span>
         </>
       ),
       variant: 'indigo' as const,
@@ -237,7 +229,98 @@ export const DoctorDashboard = () => {
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
       <PageSurface paddingClassName="p-4 lg:p-8">
-        <section className="mb-8">
+        {/* Info Pills Row - Visible on all screens for quick glance */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+          <MetricCard 
+            label="Daily Load" 
+            value={stats.total} 
+            icon="event_note" 
+            variant="orange" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Waiting" 
+            value={stats.waiting} 
+            icon="timer" 
+            variant="blue" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="In Progress" 
+            value={stats.active} 
+            icon="clinical_notes" 
+            variant="emerald" 
+            layout="pill" 
+          />
+          <MetricCard 
+            label="Earnings" 
+            value={`₹${stats.earnings}`} 
+            icon="payments" 
+            variant="purple" 
+            layout="pill" 
+          />
+        </div>
+
+        {/* Mobile Header - Visible only on small screens */}
+        <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-700">
+                <span className="material-symbols-outlined">stethoscope</span>
+              </div>
+              <div>
+                <h1 className="font-headline-md text-slate-900 leading-tight">Doctor Console</h1>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Daily Clinical Queue</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Specific Stats Section - Only visible on small screens */}
+        <div className="md:hidden space-y-4 mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Queue Pulse</h3>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase">Active</span>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-orange-700 p-4 rounded-2xl text-white shadow-lg shadow-orange-700/20 flex flex-col justify-between h-32">
+              <span className="material-symbols-outlined text-white/50 text-xl">hourglass_empty</span>
+              <div>
+                <p className="text-[32px] font-extrabold leading-none mb-1">{stats.waiting}</p>
+                <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Waiting</p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32">
+              <span className="material-symbols-outlined text-blue-500 text-xl">clinical_notes</span>
+              <div>
+                <p className="text-[32px] font-extrabold text-slate-900 leading-none mb-1">{stats.active}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">In Progress</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-slate-900 p-5 rounded-2xl text-white flex items-center justify-between shadow-xl">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
+                <span className="material-symbols-outlined text-emerald-400">payments</span>
+              </div>
+              <div>
+                <p className="text-xl font-black leading-none mb-1">₹{stats.earnings}</p>
+                <p className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Today's Revenue</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black text-emerald-400 uppercase mb-1">Status</p>
+              <p className="text-xs font-bold text-white">Verified</p>
+            </div>
+          </div>
+        </div>
+
+        <section className="mb-6 hidden md:block">
           <div className="relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:p-8">
             <div className="relative z-10 w-full lg:w-auto">
               <PageHeading 
@@ -262,7 +345,19 @@ export const DoctorDashboard = () => {
           </div>
         </section>
 
-        <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-6" />
+        {/* Mobile Action Section - Compact replacement for the above */}
+        <div className="md:hidden flex flex-col gap-3 mb-8">
+          <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+             <h2 className="text-lg font-black text-slate-900 leading-tight">Dr. {user?.fullName.split(' ')[0]}</h2>
+             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Clinical Operations</p>
+             <div className="grid grid-cols-2 gap-2 mt-4">
+                <Button onClick={handleStartNextConsultation} className="h-10 text-xs px-2" icon="play_arrow">Start Next</Button>
+                <Button variant="secondary" href="/doctor/patient-queue" className="h-10 text-xs px-2" icon="list_alt">Go to Queue</Button>
+             </div>
+          </div>
+        </div>
+
+        <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-6 hidden md:grid" />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <section className="lg:col-span-3">

@@ -44,10 +44,9 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   date,
   tokenDisplay,
 }) => {
-  const [followUpDate, setFollowUpDate] = React.useState<string>('');
-  React.useEffect(() => {
-    setFollowUpDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
-  }, []);
+  const [followUpDate] = React.useState<string>(() => 
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  );
 
   if (!isOpen) return null;
 
@@ -84,50 +83,51 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-black/60 backdrop-blur-sm overflow-y-auto pt-10 pb-12 prescription-modal-overlay">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-black/60 backdrop-blur-sm overflow-y-auto pt-4 sm:pt-10 pb-12 prescription-modal-overlay">
       {/* Backdrop for closing */}
       <div className="fixed inset-0 no-print" onClick={onClose}></div>
       
-      {/* Floating Action Button for Printing - Visible only on screen */}
-      <div className="fixed top-6 right-10 z-[110] flex gap-3 no-print">
+      {/* Floating Action Buttons - Improved for mobile */}
+      <div className="fixed top-4 sm:top-6 right-4 sm:right-10 z-[110] flex gap-2 sm:gap-3 no-print">
         <button 
           onClick={handlePrint}
-          className="flex items-center gap-2 bg-primary-container text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-all shadow-xl active:scale-95"
+          className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-bold hover:bg-orange-700 transition-all shadow-xl active:scale-95 text-xs sm:text-base"
         >
-          <span className="material-symbols-outlined">print</span>
-          Print PDF
+          <span className="material-symbols-outlined text-sm sm:text-base">print</span>
+          <span className="hidden xs:inline">Print PDF</span>
+          <span className="xs:hidden">Print</span>
         </button>
         <button 
           onClick={onClose}
-          className="bg-white text-gray-700 p-3 rounded-xl shadow-xl hover:bg-gray-50 transition-all border border-gray-200"
+          className="bg-white text-gray-700 p-2 sm:p-3 rounded-xl shadow-xl hover:bg-gray-50 transition-all border border-gray-200"
         >
-          <span className="material-symbols-outlined">close</span>
+          <span className="material-symbols-outlined text-sm sm:text-base">close</span>
         </button>
       </div>
 
       {/* Pages Wrapper */}
-      <div className="flex flex-col gap-8 items-center prescription-pages-container">
+      <div className="flex flex-col gap-6 sm:gap-8 items-center w-full px-4 sm:px-0 prescription-pages-container">
         {prescriptionPages.map((pageRows, index) => (
           <div 
             key={index} 
-            className="relative w-[210mm] h-[297mm] bg-white shadow-2xl p-[15mm] flex flex-col print-page animate-in fade-in zoom-in duration-300"
+            className="relative w-full max-w-[210mm] min-h-[auto] lg:min-h-[297mm] bg-white shadow-2xl p-6 sm:p-[15mm] flex flex-col print-page animate-in fade-in zoom-in duration-300 rounded-2xl lg:rounded-none"
           >
             {/* Header: Branding & Address */}
-            <div className="flex justify-between items-start border-b-2 border-primary-container pb-8 mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start border-b-2 border-orange-600 pb-6 sm:pb-8 mb-6 sm:mb-8 gap-4 sm:gap-0">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-white font-extrabold text-xl">C</div>
-                  <h1 className="font-headline-xl text-primary leading-tight">{hospital?.name || 'CareFlow Hospital'}</h1>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white font-extrabold text-lg sm:text-xl">C</div>
+                  <h1 className="text-xl sm:text-3xl font-black text-orange-700 leading-tight">{hospital?.name || 'CareFlow Hospital'}</h1>
                 </div>
-                <div className="font-body-md text-on-surface-variant max-w-xs pt-2">
+                <div className="text-xs sm:text-sm text-slate-500 max-w-xs pt-2">
                   {hospital?.address && <p>{hospital.address}</p>}
                   <p>{hospital?.city}{hospital?.state ? `, ${hospital.state}` : ''} {hospital?.pincode}</p>
                 </div>
               </div>
-              <div className="text-right space-y-1">
-                <p className="font-label-md text-primary">Contact Details</p>
-                <p className="font-body-sm text-on-surface-variant">emergency@careflow.health</p>
-                <p className="font-body-sm text-on-surface-variant">www.careflow.health</p>
+              <div className="sm:text-right space-y-1">
+                <p className="text-xs sm:text-sm font-bold text-orange-600 uppercase tracking-widest">Contact Details</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-medium">emergency@careflow.health</p>
+                <p className="text-[10px] sm:text-xs text-slate-500 font-medium">www.careflow.health</p>
               </div>
             </div>
 
@@ -135,56 +135,56 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             <div className="flex-1 flex flex-col">
               {index === 0 && (
                 <>
-                  <div className="border border-gray-400 rounded-lg px-5 py-4 flex justify-between items-center mb-6 bg-gray-50">
+                  <div className="border border-slate-200 rounded-xl px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row justify-between sm:items-center mb-6 bg-slate-50 gap-4">
 
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] uppercase text-gray-500 font-bold">
+                        <span className="text-[9px] sm:text-[10px] uppercase text-slate-400 font-black tracking-widest">
                             Patient
                         </span>
                         {tokenDisplay && (
-                          <span className="bg-primary/10 text-primary text-[9px] font-black px-1.5 py-0.5 rounded border border-primary/20">
+                          <span className="bg-orange-600/10 text-orange-700 text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded border border-orange-600/20 uppercase">
                             {tokenDisplay}
                           </span>
                         )}
                       </div>
-                      <span className="font-semibold">
-            {patient?.fullName} / {patientAge()} yrs / {vitals.weight} kg
-        </span>
+                      <span className="font-bold text-slate-900 text-sm sm:text-base">
+                        {patient?.fullName} / {patientAge()} yrs / {vitals.weight} kg
+                      </span>
                     </div>
 
-                    <div className="flex gap-6 items-center text-sm">
-                      <span>❤️ {vitals.heartRate} bpm</span>
-                      <span>🌡 {vitals.temp}</span>
-                      <span>🩸 {vitals.bp}</span>
-                      {vitals.spo2 && <span>🫁 {vitals.spo2}%</span>}
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 items-center text-[10px] sm:text-sm font-bold text-slate-600">
+                      <span className="flex items-center gap-1.5"><span className="text-orange-600 text-sm">favorite</span> {vitals.heartRate} <span className="text-[8px] text-slate-400">BPM</span></span>
+                      <span className="flex items-center gap-1.5"><span className="text-blue-600 text-sm">device_thermostat</span> {vitals.temp}</span>
+                      <span className="flex items-center gap-1.5"><span className="text-emerald-600 text-sm">blood_pressure</span> {vitals.bp}</span>
+                      {vitals.spo2 && <span className="flex items-center gap-1.5"><span className="text-purple-600 text-sm">air</span> {vitals.spo2}%</span>}
                     </div>
 
-                    <div className="text-right">
-        <span className="text-[10px] uppercase text-gray-500 font-bold">
-            Date
-        </span>
-                      <p className="font-semibold">{date}</p>
+                    <div className="sm:text-right border-t sm:border-t-0 pt-3 sm:pt-0">
+                      <span className="text-[9px] sm:text-[10px] uppercase text-slate-400 font-black tracking-widest">
+                          Date
+                      </span>
+                      <p className="font-bold text-slate-900 text-sm sm:text-base">{date}</p>
                     </div>
                   </div>
 
                   {/* Clinical Observations - Only on Page 1 */}
                   <div className="flex flex-col gap-6 mb-10">
 
-                    <div className="border-l-4 border-outline-variant pl-4 py-2">
-                      <h3 className="font-label-sm text-tertiary mb-2 uppercase tracking-wider">
+                    <div className="border-l-4 border-slate-200 pl-4 py-2">
+                      <h3 className="text-[9px] sm:text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">
                         Chief Complaints
                       </h3>
-                      <p className="font-body-lg text-on-surface italic">
+                      <p className="text-sm sm:text-lg font-medium text-slate-700 italic leading-relaxed">
                         "{complaints || 'No complaints recorded'}"
                       </p>
                     </div>
 
-                    <div className="border-l-4 border-primary pl-4 py-2">
-                      <h3 className="font-label-sm text-primary mb-2 uppercase tracking-wider">
+                    <div className="border-l-4 border-orange-600 pl-4 py-2">
+                      <h3 className="text-[9px] sm:text-[10px] font-black text-orange-600 mb-2 uppercase tracking-widest">
                         Diagnosis
                       </h3>
-                      <p className="font-headline-sm text-on-surface">
+                      <p className="text-base sm:text-xl font-bold text-slate-900">
                         {diagnosis || 'General Checkup'}
                       </p>
                     </div>
@@ -195,45 +195,43 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
 
               {/* Prescription Table */}
               <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-primary text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>prescriptions</span>
-                <h2 className="font-headline-md">
+                <span className="material-symbols-outlined text-orange-600 text-2xl sm:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>prescriptions</span>
+                <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tight">
                   Medication Plan {prescriptionPages.length > 1 ? `(Page ${index + 1})` : ''}
                 </h2>
               </div>
-              <div className="overflow-hidden border border-gray-200 rounded-lg">
-                <table className="w-full text-left border-collapse">
-                  <thead className="bg-surface-container-high border-b border-gray-200">
+              <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                <table className="w-full text-left border-collapse min-w-[500px] sm:min-w-0">
+                  <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="p-4 font-label-md text-on-surface">Medicine Name & Dosage</th>
-                      <th className="p-4 font-label-md text-on-surface text-center">Frequency</th>
-                      <th className="p-4 font-label-md text-on-surface">Instructions</th>
+                      <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Medicine & Dosage</th>
+                      <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Frequency</th>
+                      <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Instructions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
+                  <tbody className="divide-y divide-slate-100">
                     {pageRows.map((p) => (
                       <tr key={p.id}>
-                        <td className="p-4">
-                          <p className="font-headline-sm">{p.medicine}</p>
+                        <td className="p-3 sm:p-4">
+                          <p className="font-bold text-slate-900 text-sm sm:text-base">{p.medicine}</p>
                           {p.composition && (
-                            <p className="text-[10px] text-primary font-bold italic mb-1 uppercase tracking-tight">
+                            <p className="text-[9px] text-orange-600 font-black italic mb-1 uppercase tracking-tight">
                               Salts: {p.composition}
                             </p>
                           )}
-                          <p className="text-body-sm text-tertiary">Prescribed Medicine</p>
+                          <p className="text-[10px] text-slate-400 font-medium">Prescribed Medicine</p>
                         </td>
-                        <td className="p-4 text-center">
-                          <div className="inline-flex flex-col items-center">
-                            <span className="font-body-md font-bold">{p.frequency}</span>
-                          </div>
+                        <td className="p-3 sm:p-4 text-center">
+                          <span className="font-bold text-slate-700 text-xs sm:text-sm whitespace-nowrap">{p.frequency}</span>
                         </td>
-                        <td className="p-4">
-                          <p className="font-body-md">{p.instructions}</p>
+                        <td className="p-3 sm:p-4">
+                          <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">{p.instructions}</p>
                         </td>
                       </tr>
                     ))}
                     {pageRows.length === 0 && index === 0 && (
                       <tr>
-                        <td colSpan={3} className="p-4 text-center text-tertiary">No medications prescribed</td>
+                        <td colSpan={3} className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No medications prescribed</td>
                       </tr>
                     )}
                   </tbody>
@@ -242,40 +240,38 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             </div>
 
             {/* Footer: Signatures & QR */}
-            <div className="mt-auto pt-8 border-t border-gray-200">
-              <div className="grid grid-cols-3 items-end gap-12">
-                <div className="space-y-4">
-                  <p className="font-label-sm text-tertiary">FOLLOW-UP APPOINTMENT</p>
-                  <div className="flex items-center gap-2 text-primary font-bold">
-                    <span className="material-symbols-outlined">calendar_today</span>
+            <div className="mt-auto pt-8 border-t border-slate-200">
+              <div className="flex flex-col sm:flex-row items-end gap-8 sm:gap-12">
+                <div className="w-full sm:w-auto space-y-3 sm:space-y-4">
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">FOLLOW-UP APPOINTMENT</p>
+                  <div className="flex items-center gap-2 text-orange-600 font-black text-sm sm:text-base">
+                    <span className="material-symbols-outlined text-sm sm:text-base">calendar_today</span>
                     <span>{followUpDate}</span>
                   </div>
-                  <p className="text-body-sm text-on-surface-variant">Please bring this document for the next visit.</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium">Please bring this document for the next visit.</p>
                 </div>
-                <div className="text-center">
+                
+                <div className="flex-1 hidden sm:block"></div>
 
-                </div>
-                <div className="text-right flex flex-col items-end">
-                  <div className="mb-2">
-                  </div>
-                  <div className="border-t border-on-surface w-full pt-2">
-                    <p className="font-headline-sm">Dr. {doctor?.fullName || 'Marcus Sterling'}</p>
-                    <p className="text-body-sm text-tertiary">{doctor?.doctorInfo?.specialization || 'Senior Consultant'}</p>
-                    <p className="text-body-sm text-tertiary">Reg No: {doctor?.doctorInfo?.licenseNumber || 'MED-88291-S'}</p>
+                <div className="w-full sm:w-auto text-right flex flex-col items-end">
+                  <div className="border-t border-slate-900 w-full pt-3">
+                    <p className="text-sm sm:text-base font-black text-slate-900">Dr. {doctor?.fullName || 'Marcus Sterling'}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider">{doctor?.doctorInfo?.specialization || 'Senior Consultant'}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase">Reg No: {doctor?.doctorInfo?.licenseNumber || 'MED-88291-S'}</p>
                   </div>
                 </div>
               </div>
             </div>
             
             {/* Page Number Indicator */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-tertiary font-mono uppercase tracking-widest">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em]">
               Page {index + 1} of {prescriptionPages.length}
             </div>
 
             {/* Print Note - Only on the last page */}
             {index === prescriptionPages.length - 1 && (
-              <div className="mt-8 text-center text-[10px] text-tertiary font-medium uppercase tracking-widest no-print">
-                This is a digital document generated by CareFlow Medical Systems.
+              <div className="mt-8 text-center text-[8px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] no-print">
+                Generated by CareFlow Medical Systems
               </div>
             )}
           </div>
@@ -309,7 +305,6 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             print-color-adjust: exact !important;
           }
 
-          /* The main fixed wrapper of the modal */
           .prescription-modal-overlay {
             position: absolute !important;
             left: 0 !important;
@@ -328,6 +323,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
           .prescription-pages-container {
             display: block !important;
             gap: 0 !important;
+            padding: 0 !important;
           }
 
           .print-page {
@@ -343,6 +339,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             background: white !important;
             page-break-after: always !important;
             break-after: page !important;
+            border-radius: 0 !important;
           }
 
           .print-page * {

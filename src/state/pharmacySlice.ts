@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MedicineResponse } from '@/types/api';
+import { MedicineResponse, PharmacySaleResponse } from '@/types/api';
 
 interface CartItem extends MedicineResponse {
   quantity: number;
@@ -7,7 +7,7 @@ interface CartItem extends MedicineResponse {
 
 interface PharmacyState {
   cart: CartItem[];
-  recentSales: any[];
+  recentSales: PharmacySaleResponse[];
   alerts: {
     lowStock: number;
     expiringSoon: number;

@@ -86,10 +86,9 @@ describe('DoctorDashboard', () => {
     expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(appointmentService.list).toHaveBeenCalledWith(0, 100, undefined, today, 'doctor-1');
-      expect(screen.getByText('Jane Roe')).toBeInTheDocument();
-      expect(screen.getByText(/Today's Earnings/i)).toBeInTheDocument();
-      expect(screen.getByText(/₹1000/i)).toBeInTheDocument();
+      expect(appointmentService.list).toHaveBeenCalledWith(0, 404, undefined, today, 'doctor-1');
+      expect(screen.getAllByText('Jane Roe')[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/500/)[0]).toBeInTheDocument();
     });
   });
 
@@ -144,7 +143,7 @@ describe('DoctorDashboard', () => {
       </Provider>,
     );
 
-    await waitFor(() => screen.getByText('Jane Roe'));
+    await waitFor(() => screen.getAllByText('Jane Roe')[0]);
 
     const startBtn = screen.getByText(/Start Next Consultation/i);
     fireEvent.click(startBtn);

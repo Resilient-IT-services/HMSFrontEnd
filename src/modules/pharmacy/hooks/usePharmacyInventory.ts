@@ -35,7 +35,10 @@ export const usePharmacyInventory = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    fetchItems();
+    const trigger = async () => {
+      await fetchItems();
+    };
+    void trigger();
   }, [fetchItems]);
 
   return {

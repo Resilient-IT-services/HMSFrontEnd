@@ -44,12 +44,18 @@ export const useHospitals = () => {
   }, [page, pageSize, debouncedSearch, statusFilter]);
 
   useEffect(() => {
-    fetchHospitals();
+    const trigger = async () => {
+      await fetchHospitals();
+    };
+    void trigger();
   }, [fetchHospitals]);
 
   // Reset page on search, filter or page size change
   useEffect(() => {
-    setPage(0);
+    const trigger = async () => {
+      setPage(0);
+    };
+    void trigger();
   }, [debouncedSearch, statusFilter, pageSize]);
 
   const stats = useMemo(() => ({

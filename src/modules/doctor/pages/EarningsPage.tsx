@@ -15,15 +15,18 @@ import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { EarningsVisitHistory } from '../components/Earnings/EarningsVisitHistory';
+import { useConsultationFee } from '@/hooks/useConsultationFee';
+import { APPOINTMENT_STATUS_METADATA, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export const EarningsPage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const consultationFee = useConsultationFee();
   
   // Pagination State
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const today = useMemo(() => {
     const now = new Date();
@@ -76,7 +79,7 @@ export const EarningsPage = () => {
 
     try {
       setLoading(true);
-      const response = await appointmentService.list(0, 1000, undefined, undefined, user.id);
+      const response = await appointmentService.list(0, 404, undefined, undefined, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -97,16 +100,11 @@ export const EarningsPage = () => {
   }, [user]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
-
-  const consultationFee = useMemo(() => {
-    if (!user || !user.currentHospitalId) return 0;
-    const membership = user.memberships.find(m => m.hospitalId === user.currentHospitalId);
-    if (!membership || !membership.roleAssignments) return 0;
-    const doctorRole = membership.roleAssignments.find(ra => ra.roleCode === 'DOCTOR' && ra.active);
-    return doctorRole?.doctorDetails?.consultationFee || 0;
-  }, [user]);
 
   const filteredAppointments = useMemo(() => {
     return appointments
@@ -130,24 +128,21 @@ export const EarningsPage = () => {
     return {
       totalVisits: filteredAppointments.length,
       earnedVisits: earnedAppointments.length,
-      totalEarnings: earnedAppointments.length * consultationFee,
+      totalEarnings: typeof consultationFee === 'number' ? earnedAppointments.length * consultationFee : 404,
       cancelled: filteredAppointments.filter(app => app.status === 'CANCELLED').length,
     };
   }, [filteredAppointments, consultationFee]);
 
-  const statusCaptions: Record<string, string> = {
-    'SCHEDULED': 'Scheduled',
-    'COMPLETED': 'Completed',
-    'PAYMENT_PENDING': 'Payment Pending',
-    'WAITING_FOR_VITALS': 'Waiting for Vitals',
-    'WALK_IN': 'In Progress',
-    'CANCELLED': 'Cancelled',
-    'ADD_VITALS': 'Add Vitals',
-    'CHECKED_IN': 'Checked In'
-  };
+  const statusCaptions = useMemo(() => {
+    const captions: Record<string, string> = {};
+    Object.entries(APPOINTMENT_STATUS_METADATA).forEach(([key, value]) => {
+      captions[key] = value.label;
+    });
+    return captions;
+  }, []);
 
   const metricItems = [
-    { label: 'Total Earnings', value: `₹${stats.totalEarnings.toLocaleString()}`, variant: 'indigo' as const, icon: 'payments' },
+    { label: 'Total Earnings', value: stats.totalEarnings === 404 ? '404' : `₹${stats.totalEarnings.toLocaleString()}`, variant: 'indigo' as const, icon: 'payments' },
     { label: 'Total Visits', value: stats.totalVisits.toString(), variant: 'orange' as const, icon: 'group' },
     { label: 'Earned Visits', value: stats.earnedVisits.toString(), variant: 'emerald' as const, icon: 'check_circle' },
     { label: 'Cancelled', value: stats.cancelled.toString(), variant: 'red' as const, icon: 'cancel' }
@@ -204,8 +199,6 @@ export const EarningsPage = () => {
 
         <Card 
           title="Revenue Breakdown  "
-          noPadding
-
           className="overflow-hidden mb-12 p-4"
         >
           <EarningsVisitHistory 

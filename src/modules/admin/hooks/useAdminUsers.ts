@@ -4,14 +4,15 @@ import { useState, useEffect, useCallback } from 'react';
 import { userService } from '@/services/userService';
 import { Role, UserSummaryDTO } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 export const useAdminUsers = () => {
   const [users, setUsers] = useState<(UserSummaryDTO & { roles: Role[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
   const [roleFilter, setRoleFilter] = useState<string | undefined>();
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>();
@@ -49,27 +50,46 @@ export const useAdminUsers = () => {
   }, [page, pageSize, debouncedSearch, roleFilter, activeFilter]);
 
   useEffect(() => {
-    fetchData();
+    const trigger = async () => {
+      await fetchData();
+    };
+    void trigger();
   }, [fetchData]);
 
-  useEffect(() => {
+  const handleSearchTermChange = (term: string) => {
+    setSearchTerm(term);
     setPage(0);
-  }, [debouncedSearch, roleFilter, activeFilter, pageSize]);
+  };
+
+  const handleRoleFilterChange = (role?: string) => {
+    setRoleFilter(role);
+    setPage(0);
+  };
+
+  const handleActiveFilterChange = (active?: boolean) => {
+    setActiveFilter(active);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   return {
     users,
     loading,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: handleSearchTermChange,
     page,
     setPage,
     pageSize,
-    setPageSize,
+    setPageSize: handlePageSizeChange,
     totalElements,
     roleFilter,
-    setRoleFilter,
+    setRoleFilter: handleRoleFilterChange,
     activeFilter,
-    setActiveFilter,
+    setActiveFilter: handleActiveFilterChange,
     refresh: fetchData
   };
 };

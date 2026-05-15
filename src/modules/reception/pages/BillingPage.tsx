@@ -55,18 +55,18 @@ export const BillingPage = () => {
 
   return (
     <MainLayout title="Consultation Billing" hideTitle>
-      <div className="invoice-print-container op-bill-print-page p-8 max-w-[1200px] mx-auto w-full -m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
+      <div className="invoice-print-container op-bill-print-page p-4 sm:p-8 max-w-[1200px] mx-auto w-full -m-4 sm:-m-8 bg-[#f9f9ff] min-h-screen font-inter pb-40 sm:pb-32">
         
         <div className="op-bill-screen-heading no-print">
           <PageHeading 
             title="Consultation Billing" 
             description="Finalize patient visit fees and process medical service payments."
           >
-            <div className="flex items-center gap-3">
-               <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-4 py-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+               <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs">
                  Status: {appointment.status.replace('_', ' ')}
                </Badge>
-               <Badge variant="slate" className="px-4 py-2 border-slate-200">
+               <Badge variant="slate" className="px-3 py-1.5 sm:px-4 sm:py-2 border-slate-200 text-[10px] sm:text-xs">
                  ID: #INV-{appointment.id.substring(0, 8).toUpperCase()}
                </Badge>
             </div>
@@ -85,44 +85,44 @@ export const BillingPage = () => {
           </div>
         </div>
 
-        <div className="op-bill-print-grid grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="op-bill-print-grid grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
           
           {/* Patient Profile Card */}
           <div className="op-bill-left-column lg:col-span-4 space-y-6">
-            <Card className="op-bill-card border-none shadow-md">
+            <Card className="op-bill-card border-none shadow-md overflow-hidden">
               <div className="flex flex-col items-center text-center p-4">
-                <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-3xl uppercase mb-4 border-4 border-white shadow-sm">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 font-black text-2xl sm:text-3xl uppercase mb-4 border-4 border-white shadow-sm">
                   {patient.fullName.split(' ').map(n => n[0]).join('')}
                 </div>
-                <h3 className="text-xl font-black text-slate-900 mb-1">{patient.fullName}</h3>
-                <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-6">Patient Record #{patient.patientCode || 'N/A'}</p>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 mb-1">{patient.fullName}</h3>
+                <p className="text-[9px] sm:text-[10px] font-black text-orange-600 uppercase tracking-widest mb-6">Patient Record #{patient.patientCode || 'N/A'}</p>
                 
-                <div className="w-full space-y-4 pt-6 border-t border-slate-50">
+                <div className="w-full space-y-3 sm:space-y-4 pt-6 border-t border-slate-50">
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">Age / Gender</span>
-                    <span className="font-bold text-slate-900 text-sm">
+                    <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-tight">Age / Gender</span>
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm">
                       {new Date().getFullYear() - new Date(patient.dob).getFullYear()}Y / {patient.gender}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">Phone Number</span>
-                    <span className="font-bold text-slate-900 text-sm">{patient.phone}</span>
+                    <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-tight">Phone Number</span>
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm">{patient.phone}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tight">Visit Category</span>
+                    <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-tight">Visit Category</span>
                     <Badge variant="blue" size="sm">Out-Patient</Badge>
                   </div>
                 </div>
               </div>
             </Card>
 
-            <div className="op-bill-policy bg-orange-600 p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
-               <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 rotate-12">info</span>
-               <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
-                 <span className="material-symbols-outlined text-lg">policy</span>
+            <div className="op-bill-policy bg-orange-600 p-4 sm:p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
+               <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-6xl sm:text-8xl opacity-10 rotate-12">info</span>
+               <h4 className="font-bold text-xs sm:text-sm mb-2 flex items-center gap-2">
+                 <span className="material-symbols-outlined text-base sm:text-lg">policy</span>
                  Billing Policy
                </h4>
-               <p className="text-[11px] font-medium leading-relaxed opacity-90">
+               <p className="text-[10px] sm:text-[11px] font-medium leading-relaxed opacity-90">
                  All consultation fees are non-refundable once processed. Please verify the consulting doctor and visit type before confirming the transaction.
                </p>
             </div>
@@ -133,31 +133,31 @@ export const BillingPage = () => {
             
             {/* Service Information */}
             <Card title="Medical Service Details" icon="medical_services" className="op-bill-card">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <div className="md:col-span-2">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Consulting Physician</p>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-orange-600">person_search</span>
-                      <p className="font-bold text-slate-900">Dr. {appointment.doctorName}</p>
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Consulting Physician</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <span className="material-symbols-outlined text-orange-600 text-base sm:text-xl shrink-0">person_search</span>
+                      <p className="font-bold text-slate-900 text-sm sm:text-base truncate">Dr. {appointment.doctorName}</p>
                     </div>
-                    <Badge variant="slate">{doctor?.specialization || 'General Practice'}</Badge>
+                    <Badge variant="slate" className="shrink-0 text-[8px] sm:text-[10px]">{doctor?.specialization || 'General Practice'}</Badge>
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">OP Token No.</p>
-                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-center">
-                    <p className="font-black text-slate-900 leading-none">
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">OP Token No.</p>
+                  <div className="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-center h-[72px] sm:h-auto">
+                    <p className="font-black text-slate-900 text-base sm:text-xl leading-none">
                       {formatToken(appointment) !== '---' ? formatToken(appointment) : (predictedToken || 'PENDING')}
                     </p>
                     {!isPaid && !appointment.tokenDisplay && (
-                      <span className="text-[9px] font-bold text-orange-600 uppercase mt-1">Expected Token</span>
+                      <span className="text-[8px] sm:text-[9px] font-bold text-orange-600 uppercase mt-1">Expected Token</span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service Date</p>
-                  <p className="p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold text-slate-900">
+                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Service Date</p>
+                  <p className="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold text-slate-900 text-sm sm:text-base h-[72px] sm:h-auto flex items-center">
                     {new Date(appointment.appointmentTime).toLocaleDateString(undefined, { day: '2-digit', month: 'long', year: 'numeric' })}
                   </p>
                 </div>
@@ -168,16 +168,16 @@ export const BillingPage = () => {
             <Card title="Financial Breakdown" icon="payments" className="op-bill-card">
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-600">Base Consultation Fee</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-600">Base Fee</span>
                   <span className="font-black text-slate-900">₹{consultationFee.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-sm font-bold text-slate-600">Applied Discount</span>
+                <div className="flex justify-between items-center py-1 sm:py-2">
+                  <span className="text-xs sm:text-sm font-bold text-slate-600">Discount</span>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">₹</span>
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px]">₹</span>
                     <input 
                       type="number"
-                      className="w-32 pl-7 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all"
+                      className="w-24 sm:w-32 pl-6 sm:pl-7 pr-2 sm:pr-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all text-sm"
                       value={discount}
                       onChange={(e) => setDiscount(Number(e.target.value))}
                       disabled={isPaid}
@@ -185,15 +185,15 @@ export const BillingPage = () => {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-slate-600">Applicable Taxes (0%)</span>
+                  <span className="text-xs sm:text-sm font-bold text-slate-600">Taxes (0%)</span>
                   <span className="font-black text-slate-900">₹0.00</span>
                 </div>
-                <div className="pt-6 border-t border-slate-100 mt-6 flex justify-between items-end">
+                <div className="pt-4 sm:pt-6 border-t border-slate-100 mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
                   <div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Net Payable</p>
-                    <p className="text-sm font-bold text-slate-500 italic">Inclusive of all medical charges</p>
+                    <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Net Payable</p>
+                    <p className="text-[10px] sm:text-sm font-bold text-slate-500 italic">Inclusive of all medical charges</p>
                   </div>
-                  <span className="text-4xl font-black text-orange-600 tracking-tighter">₹{total.toFixed(2)}</span>
+                  <span className="text-3xl sm:text-4xl font-black text-orange-600 tracking-tighter">₹{total.toFixed(2)}</span>
                 </div>
               </div>
             </Card>
@@ -201,22 +201,22 @@ export const BillingPage = () => {
             {/* Payment Method */}
             {!isPaid && (
               <Card title="Select Payment Method" icon="account_balance_wallet" className="op-bill-payment-method no-print">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
                   {[
                     { id: 'CASH', label: 'Cash', icon: 'payments' },
                     { id: 'UPI', label: 'UPI / QR', icon: 'qr_code_2' },
-                    { id: 'CARD', label: 'Credit Card', icon: 'credit_card' },
+                    { id: 'CARD', label: 'Card', icon: 'credit_card' },
                   ].map((m) => (
                     <button
                       key={m.id}
                       onClick={() => setPaymentMethod(m.id as any)}
-                      className={`flex flex-col items-center justify-center p-6 rounded-2xl border-2 transition-all group ${
+                      className={`flex flex-row xs:flex-col items-center justify-center p-4 sm:p-6 rounded-2xl border-2 transition-all group gap-4 xs:gap-0 ${
                         paymentMethod === m.id
                           ? 'border-orange-600 bg-orange-50 text-orange-600 shadow-lg shadow-orange-600/10'
                           : 'border-slate-100 bg-white text-slate-400 hover:bg-slate-50 hover:border-slate-200'
                       }`}
                     >
-                      <span className={`material-symbols-outlined text-3xl mb-3 transition-transform ${paymentMethod === m.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                      <span className={`material-symbols-outlined text-2xl sm:text-3xl mb-0 xs:mb-3 transition-transform ${paymentMethod === m.id ? 'scale-110' : 'group-hover:scale-110'}`}>
                         {m.icon}
                       </span>
                       <span className="text-[10px] font-black uppercase tracking-widest">{m.label}</span>
@@ -231,28 +231,30 @@ export const BillingPage = () => {
       </div>
 
       {/* Floating Action Bar */}
-      <div className="op-bill-action-bar no-print fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-slate-200 p-6 z-50 flex justify-center">
-        <div className="max-w-[1200px] w-full flex justify-between items-center">
-          <div className="flex flex-col">
+      <div className="op-bill-action-bar no-print fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 p-4 sm:p-6 z-50 flex justify-center">
+        <div className="max-w-[1200px] w-full flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+          <div className="flex flex-col items-center sm:items-start">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Amount Due</span>
-            <span className="text-3xl font-black text-slate-900 tracking-tighter">₹{total.toFixed(2)}</span>
+            <span className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tighter">₹{total.toFixed(2)}</span>
           </div>
           
-          <div className="flex gap-4">
+          <div className="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
             {isPaid ? (
               <>
                 <Button 
                   variant="secondary" 
-                  size="xl" 
+                  size="lg" 
                   icon="receipt_long" 
                   onClick={generateBill}
+                  className="flex-1 sm:flex-none text-[10px] uppercase font-black"
                 >
                   Download Invoice
                 </Button>
                 <Button 
-                  size="xl" 
+                  size="lg" 
                   icon="vital_signs" 
                   onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointment.id}`)}
+                  className="flex-1 sm:flex-none text-[10px] uppercase font-black"
                 >
                   Proceed to Vitals
                 </Button>
@@ -262,11 +264,11 @@ export const BillingPage = () => {
                 size="xl" 
                 icon="check_circle" 
                 fullWidth 
-                className="px-12"
+                className="px-6 sm:px-12 text-sm uppercase font-black"
                 isLoading={submittingPayment}
                 onClick={handleMarkAsPaid}
               >
-                {submittingPayment ? 'Processing Transaction...' : 'Confirm Payment'}
+                {submittingPayment ? 'Processing...' : 'Confirm Payment'}
               </Button>
             )}
           </div>
