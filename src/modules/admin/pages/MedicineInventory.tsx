@@ -38,7 +38,7 @@ export const MedicineInventory = () => {
 
   // Pagination
   const [page, setPage] = useState(0);
-  const pageSize = DEFAULT_PAGE_SIZE;
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const fetchMedicines = useCallback(async () => {
     try {
@@ -80,6 +80,11 @@ export const MedicineInventory = () => {
 
   const handleSearchChange = (val: string) => {
     setSearchTerm(val);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setPage(0);
   };
 
@@ -248,6 +253,7 @@ export const MedicineInventory = () => {
                 totalElements={totalMedicines}
                 pageSize={pageSize}
                 onPageChange={setPage}
+                onPageSizeChange={handlePageSizeChange}
                 label="medicines"
               />
             </Card>
