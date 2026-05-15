@@ -18,6 +18,7 @@ import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 import { Table, Column } from '@/components/ui/Table';
 import { Avatar } from '@/components/ui/Avatar';
 import { InfoRow } from '@/components/ui/InfoRow';
+import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export const MedicineInventory = () => {
@@ -37,7 +38,7 @@ export const MedicineInventory = () => {
 
   // Pagination
   const [page, setPage] = useState(0);
-  const pageSize = DEFAULT_PAGE_SIZE;
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const fetchMedicines = useCallback(async () => {
     try {
@@ -79,6 +80,11 @@ export const MedicineInventory = () => {
 
   const handleSearchChange = (val: string) => {
     setSearchTerm(val);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
     setPage(0);
   };
 
@@ -215,10 +221,6 @@ export const MedicineInventory = () => {
             {/* Stats & Actions */}
             <Card className="p-4">
               <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="bg-orange-100 text-orange-700 px-6 py-3 rounded-2xl flex items-center gap-3 whitespace-nowrap">
-                  <span className="material-symbols-outlined font-black">inventory</span>
-                  <span className="text-sm font-black uppercase tracking-widest">Total {totalMedicines} Medicines</span>
-                </div>
                 <div className="flex-1 relative w-full">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                   <input 
@@ -245,6 +247,14 @@ export const MedicineInventory = () => {
                 isLoading={loading}
                 onRowClick={(m) => void handleSelectMedicine(m.id)}
                 rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : ''}
+              />
+              <Pagination
+                page={page}
+                totalElements={totalMedicines}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={handlePageSizeChange}
+                label="medicines"
               />
             </Card>
           </div>
