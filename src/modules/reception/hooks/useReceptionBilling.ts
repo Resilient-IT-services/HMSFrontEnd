@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { isAxiosError } from 'axios';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { doctorService } from '@/services/doctorService';
@@ -13,6 +14,17 @@ import {
   BillingResponse,
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+
+const APPOINTMENT_CONFLICT_MESSAGE = 'Appointment already exists for this patient with the same doctor at the selected time';
+
+const getAppointmentSubmitErrorMessage = (error: unknown) => {
+  if (isAxiosError(error) && error.response?.status === 409) {
+    const apiData = error.response.data as any;
+    return apiData?.error?.message || apiData?.message || APPOINTMENT_CONFLICT_MESSAGE;
+  }
+
+  return 'Failed to process payment';
+};
 
 export const useReceptionBilling = () => {
   const searchParams = useSearchParams();
@@ -34,58 +46,71 @@ export const useReceptionBilling = () => {
   const [discount, setDiscount] = useState(0);
   const [submittingPayment, setSubmittingPayment] = useState(false);
 
+  const applyBillingData = useCallback((billData: BillingResponse | null) => {
+    if (!billData) return;
+
+    setBilling(billData);
+    setDiscount(billData.discount || 0);
+    if (billData.paymentMethod) setPaymentMethod(billData.paymentMethod as any);
+  }, []);
+
+  const loadExistingAppointmentBilling = useCallback(async (id: string) => {
+    const [appRes, billRes] = await Promise.all([
+      appointmentService.get(id),
+      billingService.getByAppointment(id).catch(() => ({ success: false, data: null }))
+    ]);
+
+    if (!appRes.success || !appRes.data) return;
+
+    setAppointment(appRes.data);
+    if (billRes.success) applyBillingData(billRes.data || null);
+
+    const [patRes, docRes] = await Promise.all([
+      patientService.get(appRes.data.patientId),
+      doctorService.get(appRes.data.doctorId),
+    ]);
+    if (patRes.success) setPatient(patRes.data || null);
+    if (docRes.success) setDoctor(docRes.data || null);
+  }, [applyBillingData]);
+
+  const loadNewAppointmentBilling = useCallback(async () => {
+    if (!patientIdParam || !doctorIdParam) return;
+
+    const [patRes, docRes] = await Promise.all([
+      patientService.get(patientIdParam),
+      doctorService.get(doctorIdParam),
+    ]);
+    if (patRes.success) setPatient(patRes.data || null);
+    if (docRes.success) setDoctor(docRes.data || null);
+
+    setAppointment({
+      id: 'TEMP',
+      patientId: patientIdParam,
+      patientName: patRes.data?.fullName || 'N/A',
+      doctorId: doctorIdParam,
+      doctorName: docRes.data?.fullName || 'N/A',
+      appointmentTime: appointmentTimeParam || new Date().toISOString(),
+      sessionPeriod: sessionPeriodParam,
+      status: 'PAYMENT_PENDING',
+      notes: notesParam || '',
+      createdAt: new Date().toISOString()
+    } as any);
+
+    const date = appointmentTimeParam?.split('T')[0] || new Date().toISOString().split('T')[0];
+    const statsRes = await appointmentService.listSummary(0, 1, undefined, date, doctorIdParam);
+    if (statsRes.success && statsRes.data) {
+      const nextNum = statsRes.data.totalElements + 1;
+      setPredictedToken(`T-${nextNum.toString().padStart(3, '0')}`);
+    }
+  }, [appointmentTimeParam, doctorIdParam, notesParam, patientIdParam, sessionPeriodParam]);
+
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       if (appointmentId) {
-        const [appRes, billRes] = await Promise.all([
-          appointmentService.get(appointmentId),
-          billingService.getByAppointment(appointmentId).catch(() => ({ success: false, data: null }))
-        ]);
-
-        if (appRes.success && appRes.data) {
-          setAppointment(appRes.data);
-          if (billRes.success && billRes.data) {
-            setBilling(billRes.data);
-            setDiscount(billRes.data.discount || 0);
-            if (billRes.data.paymentMethod) setPaymentMethod(billRes.data.paymentMethod as any);
-          }
-
-          const [patRes, docRes] = await Promise.all([
-            patientService.get(appRes.data.patientId),
-            doctorService.get(appRes.data.doctorId),
-          ]);
-          if (patRes.success) setPatient(patRes.data || null);
-          if (docRes.success) setDoctor(docRes.data || null);
-        }
+        await loadExistingAppointmentBilling(appointmentId);
       } else if (patientIdParam && doctorIdParam) {
-        const [patRes, docRes] = await Promise.all([
-          patientService.get(patientIdParam),
-          doctorService.get(doctorIdParam),
-        ]);
-        if (patRes.success) setPatient(patRes.data || null);
-        if (docRes.success) setDoctor(docRes.data || null);
-        
-        setAppointment({
-          id: 'TEMP',
-          patientId: patientIdParam,
-          patientName: patRes.data?.fullName || 'N/A',
-          doctorId: doctorIdParam,
-          doctorName: docRes.data?.fullName || 'N/A',
-          appointmentTime: appointmentTimeParam || new Date().toISOString(),
-          sessionPeriod: sessionPeriodParam,
-          status: 'PAYMENT_PENDING',
-          notes: notesParam || '',
-          createdAt: new Date().toISOString()
-        } as any);
-
-        // Fetch predicted token
-        const date = appointmentTimeParam?.split('T')[0] || new Date().toISOString().split('T')[0];
-        const statsRes = await appointmentService.listSummary(0, 1, undefined, date, doctorIdParam);
-        if (statsRes.success && statsRes.data) {
-          const nextNum = statsRes.data.totalElements + 1;
-          setPredictedToken(`T-${nextNum.toString().padStart(3, '0')}`);
-        }
+        await loadNewAppointmentBilling();
       }
     } catch (error) {
       console.error('Failed to fetch billing data', error);
@@ -93,7 +118,7 @@ export const useReceptionBilling = () => {
     } finally {
       setLoading(false);
     }
-  }, [appointmentId, patientIdParam, doctorIdParam, appointmentTimeParam, sessionPeriodParam, notesParam]);
+  }, [appointmentId, doctorIdParam, loadExistingAppointmentBilling, loadNewAppointmentBilling, patientIdParam]);
 
   useEffect(() => {
     fetchData();
@@ -117,7 +142,7 @@ export const useReceptionBilling = () => {
           sessionPeriod: sessionPeriodParam,
           notes: notesParam || '',
           status: 'PAYMENT_PENDING'
-        });
+        }, { skipToast: true });
         if (res.success && res.data) {
           currentAppointmentId = res.data.id;
           currentAppointment = res.data;
@@ -126,10 +151,9 @@ export const useReceptionBilling = () => {
 
       if (!currentAppointmentId || !currentAppointment || !patient) return;
 
-      if (billing) {
-        await billingService.updateStatus(billing.id!, 'PAID', paymentMethod, discount);
-      } else {
-        await billingService.create({
+      await (billing
+        ? billingService.updateStatus(billing.id!, 'PAID', paymentMethod, discount)
+        : billingService.create({
           patientId: patient.id,
           appointmentId: currentAppointmentId,
           sourceType: 'APPOINTMENT',
@@ -138,13 +162,12 @@ export const useReceptionBilling = () => {
           discount: discount,
           paymentMethod: paymentMethod,
           items: [{ itemName: 'Consultation Fee', amount: consultationFee, quantity: 1, subtotal: consultationFee }]
-        });
-      }
+        }));
 
       const updateRes = await appointmentService.update(currentAppointmentId, {
         ...currentAppointment,
         status: 'ADD_VITALS'
-      });
+      }, { skipToast: true });
 
       if (updateRes.success) {
         triggerGlobalToast('Payment confirmed successfully', 'success');
@@ -153,7 +176,7 @@ export const useReceptionBilling = () => {
       }
     } catch (error) {
       console.error('Payment Error:', error);
-      triggerGlobalToast('Failed to process payment', 'error');
+      triggerGlobalToast(getAppointmentSubmitErrorMessage(error), 'error');
     } finally {
       setSubmittingPayment(false);
     }
