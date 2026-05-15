@@ -27,11 +27,42 @@ export const usePharmacyStock = () => {
         size: pageSize, 
         page, 
         search: debouncedSearch,
-        lowStock: statusFilter === 'LOW_STOCK'
+        lowStock: statusFilter === 'LOW_STOCK',
+        expired: statusFilter === 'EXPIRED',
+        expiringSoon: statusFilter === 'EXPIRING_SOON'
       });
       if (response.success && response.data) {
-        setMedicines(response.data.content || []);
-        setTotalElements(response.data.totalElements);
+        let content = response.data.content || [];
+
+        // Client-side filtering fallback for filters not supported by backend
+        const today = new Date();
+        const thirtyDaysFromNow = new Date();
+        thirtyDaysFromNow.setDate(today.getDate() + 30);
+
+        if (statusFilter === 'EXPIRED') {
+          content = content.filter(m => m.expiryDate && new Date(m.expiryDate) < today);
+        } else if (statusFilter === 'EXPIRING_SOON') {
+          content = content.filter(m => {
+            if (!m.expiryDate) return false;
+            const expDate = new Date(m.expiryDate);
+            return expDate >= today && expDate < thirtyDaysFromNow;
+          });
+        } else if (statusFilter === 'LOW_STOCK') {
+          // Backend might already handle this, but ensuring consistency
+          content = content.filter(m => (m.quantity || 0) < 50);
+        }
+
+        // Client-side search fallback
+        if (debouncedSearch) {
+          const searchLower = debouncedSearch.toLowerCase();
+          content = content.filter(m => 
+            m.medicineName.toLowerCase().includes(searchLower) || 
+            (m.batchNumber?.toLowerCase().includes(searchLower))
+          );
+        }
+
+        setMedicines(content);
+        setTotalElements(statusFilter === 'ALL' && !debouncedSearch ? response.data.totalElements : content.length);
       } else {
         setMedicines([]);
         setTotalElements(0);

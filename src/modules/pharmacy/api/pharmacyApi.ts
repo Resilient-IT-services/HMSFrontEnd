@@ -69,7 +69,7 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  getMedicineStock: async (params?: { search?: string; page?: number; size?: number; lowStock?: boolean }) => {
+  getMedicineStock: async (params?: { search?: string; page?: number; size?: number; lowStock?: boolean; expired?: boolean; expiringSoon?: boolean }) => {
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params });
     return response.data;
   },
