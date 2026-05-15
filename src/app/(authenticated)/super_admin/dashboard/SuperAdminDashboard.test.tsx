@@ -49,7 +49,7 @@ describe('SuperAdminDashboard', () => {
     await waitFor(() => {
       expect(screen.getByTestId('hospitals-count')).toHaveTextContent('5');
       expect(screen.getByTestId('users-count')).toHaveTextContent('10');
-      expect(screen.getByText(/Welcome, Super Administrator/i)).toBeInTheDocument();
+      expect(screen.getByText(/Welcome, Super Admin/i)).toBeInTheDocument();
     });
   });
 });

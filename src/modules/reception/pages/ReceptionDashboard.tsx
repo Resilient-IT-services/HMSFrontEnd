@@ -13,6 +13,7 @@ import { Table, Column } from '@/components/ui/Table';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { SearchInput } from '@/components/ui/SearchInput';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { MetricCard } from '@/components/ui/MetricCard';
 import { PageSurface } from '@/components/ui/PageSurface';
@@ -173,8 +174,8 @@ export const ReceptionDashboard = () => {
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
       <PageSurface fontClassName="font-manrope">
-        {/* Info Pills Row - Visible on all screens for quick glance */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+        {/* Info Pills Row - Visible only on mobile */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 
             label="Queue Load" 
             value={stats.activeQueue} 
@@ -261,7 +262,7 @@ export const ReceptionDashboard = () => {
         </div>
 
         {/* Metrics Grid - Hidden on Mobile */}
-        <MetricsGrid items={metricItems} className="mb-8 hidden md:grid" />
+        <MetricsGrid items={metricItems} className="mb-8 hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6" />
 
         {/* Main Section Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -312,6 +313,12 @@ export const ReceptionDashboard = () => {
             <Card className="bg-slate-900 text-white shadow-xl border-none hidden lg:block">
               <h4 className="font-bold mb-6 uppercase text-[10px] tracking-widest opacity-50">Quick Actions</h4>
               <div className="space-y-4">
+                <div className="mb-4">
+                  <SearchInput 
+                    placeholder="Search arrivals..." 
+                    className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
+                  />
+                </div>
                 <Button 
                   fullWidth
                   onClick={() => router.push('/reception/patients/create')}

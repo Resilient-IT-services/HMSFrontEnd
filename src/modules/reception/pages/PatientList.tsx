@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { useRouter } from 'next/navigation';
 import { Table, Column } from '@/components/ui/Table';
@@ -9,13 +9,9 @@ import { useReceptionPatients } from '@/modules/reception/hooks/useReceptionPati
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { SearchInput } from '@/components/ui/SearchInput';
-import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
-import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
-
-import { patientService } from '@/services/patientService';
 
 export function PatientList() {
   const router = useRouter();
@@ -88,49 +84,7 @@ export function PatientList() {
       )
     }
   ];
-  const [dashboardStats, setDashboardStats] = useState({
-    newToday: 0,
-    inPatient: 0
-  });
 
-  useEffect(() => {
-    const fetchDashboardStats = async () => {
-      try {
-        const res = await patientService.getDashboardStats();
-        if (res.success && res.data) {
-          setDashboardStats({
-            newToday: res.data.newToday,
-            inPatient: res.data.inPatient
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard stats', error);
-      }
-    };
-
-    void fetchDashboardStats();
-  }, []);
-
-  const metricItems = [
-    {
-      label: 'Total Records',
-      value: totalElements,
-      icon: 'group',
-      variant: 'slate' as const
-    },
-    {
-      label: 'New Today',
-      value: dashboardStats.newToday,
-      icon: 'how_to_reg',
-      variant: 'emerald' as const
-    },
-    {
-      label: 'In-Patient',
-      value: dashboardStats.inPatient,
-      icon: 'bed',
-      variant: 'blue' as const
-    }
-  ];
   return (
     <MainLayout title="Patient Directory" hideTitle>
       <PageSurface maxWidthClassName="max-w-[1600px]" fontClassName="font-inter">
@@ -143,16 +97,13 @@ export function PatientList() {
           </Button>
         </PageHeading>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-12">
-          <MetricsGrid items={metricItems} className="grid-cols-2 gap-4 lg:col-span-7 sm:grid-cols-3" />
-          <div className="flex items-stretch lg:col-span-5">
-            <div className="flex w-full items-center rounded-2xl border border-slate-100 bg-white p-2 shadow-sm">
-              <SearchInput
-                placeholder="Search by name, ID, or phone..."
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-              />
-            </div>
+        <div className="mb-8">
+          <div className="flex w-full items-center rounded-2xl border border-slate-100 bg-white p-2 shadow-sm max-w-md">
+            <SearchInput
+              placeholder="Search by name, ID, or phone..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
           </div>
         </div>
 
@@ -164,14 +115,14 @@ export function PatientList() {
             onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
             emptyMessage="No patient records found."
           />
-<Pagination
-  page={page}
-  totalElements={totalElements}
-  pageSize={pageSize}
-  onPageChange={setPage}
-  onPageSizeChange={setPageSize}
-  label="patients"
-/>
+          <Pagination
+            page={page}
+            totalElements={totalElements}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={setPageSize}
+            label="patients"
+          />
         </ContentPanel>
       </PageSurface>
     </MainLayout>

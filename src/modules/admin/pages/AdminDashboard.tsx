@@ -105,8 +105,8 @@ export const AdminDashboard = () => {
   return (
     <MainLayout title="Admin Overview">
       <PageSurface>
-        {/* Info Pills Row - Visible on all screens for quick glance */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+        {/* Info Pills Row - Visible only on mobile */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 
             label="Network Nodes" 
             value={hospitals.length} 

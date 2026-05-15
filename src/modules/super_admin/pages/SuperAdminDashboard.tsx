@@ -48,8 +48,8 @@ export const SuperAdminDashboard = () => {
   return (
     <MainLayout title="System Administration">
       <PageSurface>
-        {/* Info Pills Row - Visible on all screens for quick glance */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+        {/* Info Pills Row - Visible only on mobile */}
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 
             label="Live Nodes" 
             value={hospitals.length} 

@@ -143,16 +143,16 @@ export const AppointmentsPage = () => {
         </PageHeading>
 
         {/* Stats Grid */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
           {statConfig.map((stat, i) => (
             <div 
               key={i} 
               className={cn(
-                "transition-all shrink-0",
-                statusFilter === stat.filter ? 'ring-1 ring-orange-500 ring-offset-1 rounded-full lg:rounded-2xl' : ''
+                "transition-all h-full",
+                statusFilter === stat.filter ? 'ring-2 ring-orange-500 ring-offset-2 rounded-2xl' : ''
               )}
             >
-              <div className="lg:hidden">
+              <div className="sm:hidden">
                 <MetricCard 
                   label={stat.label} 
                   value={stat.value} 
@@ -167,7 +167,7 @@ export const AppointmentsPage = () => {
                   }}
                 />
               </div>
-              <div className="hidden lg:block h-full">
+              <div className="hidden sm:block h-full">
                 <MetricCard 
                   label={stat.label} 
                   value={stat.value} 
@@ -186,10 +186,9 @@ export const AppointmentsPage = () => {
         </div>
 
         {/* Toolbar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <div className="flex-1 md:w-350">
+        <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3 w-full md:max-w-md">
+            <div className="flex-1">
               <SearchInput
                 placeholder="Search patient..."
                 value={searchTerm}
@@ -202,6 +201,7 @@ export const AppointmentsPage = () => {
               icon="refresh" 
               isLoading={loading} 
               onClick={() => refresh()} 
+              className="shrink-0"
             />
           </div>
         </div>
