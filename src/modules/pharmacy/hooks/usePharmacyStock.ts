@@ -150,6 +150,7 @@ export const usePharmacyStock = () => {
   };
 
   // KPI Calculations
+  const uniqueMedicinesCount = new Set(medicines.map(m => m.medicineId)).size;
   const totalStockUnits = medicines.reduce((acc, m) => acc + (m.quantity || 0), 0);
   const lowStockCount = medicines.filter(m => (m.quantity || 0) > 0 && (m.quantity || 0) < 50).length;
   const expiringSoonCount = medicines.filter(m => {
@@ -183,6 +184,7 @@ export const usePharmacyStock = () => {
     refresh: fetchInventory,
     stats: {
       totalElements,
+      uniqueMedicinesCount,
       totalStockUnits,
       lowStockCount,
       expiringSoonCount

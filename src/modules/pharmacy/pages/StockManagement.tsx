@@ -187,7 +187,7 @@ export const StockManagement = () => {
 
   const metricItems = [
     { label: 'Total Batches', value: stats.totalElements, icon: 'medical_services', variant: 'slate' as const },
-    { label: 'Total Units', value: stats.totalStockUnits, icon: 'inventory', variant: 'blue' as const },
+    { label: 'Total Medicines', value: stats.uniqueMedicinesCount, icon: 'inventory', variant: 'blue' as const },
     { label: 'Low Stock Items', value: stats.lowStockCount, icon: 'warning', variant: 'orange' as const, subValue: 'Requires Reorder' },
     { label: 'Expiring Soon', value: stats.expiringSoonCount, icon: 'event_busy', variant: 'purple' as const, subValue: 'Next 30 Days' }
   ];
