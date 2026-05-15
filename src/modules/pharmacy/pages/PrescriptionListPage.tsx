@@ -9,6 +9,7 @@ import EmptyState from '../components/EmptyState';
 import { useDebounce } from '@/hooks/useDebounce';
 
 import MainLayout from '@/components/ui/MainLayout';
+import Link from 'next/link';
 
 const PrescriptionListPage: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionSummaryDTO[]>([]);
@@ -59,6 +60,13 @@ const PrescriptionListPage: React.FC = () => {
               <span className="material-symbols-outlined mr-2">filter_list</span>
               Filters
             </button>
+            <Link 
+              href="/pharmacy/sales"
+              className="flex items-center px-6 py-3.5 bg-orange-700 text-white font-bold rounded-xl hover:bg-orange-800 transition-all shadow-lg shadow-orange-700/20 active:scale-95"
+            >
+              <span className="material-symbols-outlined mr-2 text-xl">point_of_sale</span>
+              Walk-in Billing
+            </Link>
           </div>
 
           {loading ? (
