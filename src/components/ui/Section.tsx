@@ -45,24 +45,24 @@ export const Section: React.FC<SectionProps> = ({
 
   return (
     <div className={cn(
-      "bg-white border border-gray-200 rounded-xl p-8 space-y-6 shadow-sm transition-all",
-      error ? "ring-2 ring-red-500/20 border-red-200" : "",
+      "bg-white border md:border-gray-200 rounded-xl p-6 md:p-8 space-y-5 md:space-y-6 shadow-sm transition-all",
+      error ? "ring-2 ring-red-500/20 border-red-200" : "border-slate-100",
       className
     )}>
-      <div className={cn("flex items-center gap-3 border-b border-gray-100 pb-4", headerClassName)}>
+      <div className={cn("flex items-center gap-3 border-b border-gray-50 md:border-gray-100 pb-4", headerClassName)}>
         {icon && (
-          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shrink-0", iconVariants[iconVariant])}>
-            <span className="material-symbols-outlined">{icon}</span>
+          <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0", iconVariants[iconVariant])}>
+            <span className="material-symbols-outlined text-xl md:text-2xl">{icon}</span>
           </div>
         )}
         <div>
-          <h3 className="font-headline-sm text-on-surface uppercase tracking-widest text-xs font-black">{title}</h3>
-          {description && <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter mt-0.5">{description}</p>}
+          <h3 className="font-bold text-[13px] md:text-sm text-on-surface uppercase tracking-wider">{title}</h3>
+          {description && <p className="text-[10px] text-gray-400 font-medium uppercase tracking-tight mt-0.5">{description}</p>}
         </div>
       </div>
       <div className={cn(
-        grid ? "grid gap-x-8 gap-y-6" : "block",
-        // @ts-ignore
+        grid ? "grid gap-x-6 md:gap-x-8 gap-y-4 md:gap-y-6" : "block",
+        // @ts-expect-error
         grid && (gridCols[cols] || gridCols[2])
       )}>
         {children}

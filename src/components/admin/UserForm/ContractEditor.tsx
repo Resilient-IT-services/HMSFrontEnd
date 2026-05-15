@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { HospitalMembershipDTO, HospitalResponse, ScheduleDTO } from '@/types/api';
+import { MobileSelector } from '@/components/ui/MobileSelector';
 
 interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
@@ -56,30 +57,31 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-between items-center">
-        <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-xs font-black">Assign Hospital & Roles</h3>
-        <div className="flex gap-3">
-          <button type="button" onClick={onCancel} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-bold border border-gray-200 text-xs">Cancel</button>
-          <button type="button" onClick={onConfirm} className="bg-primary-container text-white px-5 py-2 rounded-lg font-bold text-xs">Confirm</button>
+    <div className="flex flex-col gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-[10px] md:text-xs font-black">Assign Hospital & Roles</h3>
+        <div className="flex gap-2 md:gap-3">
+          <button type="button" onClick={onCancel} className="flex-1 md:flex-none px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-bold border border-gray-200 text-[10px] md:text-xs">Cancel</button>
+          <button type="button" onClick={onConfirm} className="flex-1 md:flex-none bg-primary-container text-white px-5 py-2 rounded-lg font-bold text-[10px] md:text-xs">Confirm</button>
         </div>
       </div>
 
-      <div className="space-y-6">
-        <section className={`bg-gray-50 border ${validationErrors.contractHospital || validationErrors.contractRoles ? 'border-error ring-1 ring-error/10' : 'border-gray-200'} rounded-xl p-6`}>
-          <label className="block text-[10px] font-black text-gray-700 uppercase mb-4">Facility & Roles <span className="text-primary">*</span></label>
-          <select 
-            className={`form-input mb-4 ${validationErrors.contractHospital ? 'border-error ring-1 ring-error/20' : ''}`} 
-            value={newContract.hospitalId} 
-            onChange={(e) => setNewContract({ ...newContract, hospitalId: e.target.value })} 
+      <div className="space-y-4 md:space-y-6">
+        <section className={`bg-gray-50 border ${validationErrors.contractHospital || validationErrors.contractRoles ? 'border-error ring-1 ring-error/10' : 'border-gray-200'} rounded-xl p-4 md:p-6`}>
+          <label className="block text-[10px] font-black text-gray-700 uppercase mb-3 md:mb-4">Facility & Roles <span className="text-primary">*</span></label>
+          <MobileSelector
+            label="Facility"
+            options={hospitals.map(h => ({ id: h.id, name: h.name, icon: 'location_city' }))}
+            value={newContract.hospitalId || ''}
+            onChange={(val) => setNewContract({ ...newContract, hospitalId: val })}
+            placeholder="Select Facility..."
             disabled={editingContractIndex !== null}
-          >
-            <option value="">Select Facility...</option>
-            {hospitals.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-          </select>
+            error={validationErrors.contractHospital}
+            className="mb-4"
+          />
           {renderFieldError('contractHospital')}
           
-          <div className="flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-1.5 md:gap-2 mt-2 md:mt-4">
             {['DOCTOR', 'NURSE', 'RECEPTIONIST', 'PHARMACIST', 'ADMIN'].map(role => {
               const isSelected = !!newContract.roleAssignments?.find(r => r.roleCode === role);
               return (
@@ -93,26 +95,26 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                     assignmentId: '', 
                     doctorDetails: role === 'DOCTOR' ? { consultationFee: 500, followUpDays: 0 } : undefined 
                   } as any] });
-                }} className={`px-3 py-1.5 rounded-lg border-2 font-black text-[9px] uppercase tracking-widest transition-all ${isSelected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}>{role}</button>
+                }} className={`px-2 md:px-3 py-1.5 rounded-lg border-2 font-black text-[8px] md:text-[9px] uppercase tracking-widest transition-all ${isSelected ? 'bg-primary border-primary text-white' : 'bg-white border-gray-200 text-gray-400'}`}>{role}</button>
               );
             })}
           </div>
           {renderFieldError('contractRoles')}
         </section>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
           {(newContract.roleAssignments || []).map((ra, raIdx) => {
             const departmentErrorKey = `department_${ra.roleCode}`;
             const feeErrorKey = `fee_${ra.roleCode}`;
 
             return (
-            <div key={ra.roleCode} className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-6 border-b border-gray-50 pb-2">
-                <span className="material-symbols-outlined text-sm text-primary">settings</span>
+            <div key={ra.roleCode} className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 shadow-sm">
+              <div className="flex items-center gap-2 mb-4 md:mb-6 border-b border-gray-50 pb-2">
+                <span className="material-symbols-outlined text-xs md:text-sm text-primary">settings</span>
                 <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode}  CONFIGURATION</span>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 md:gap-y-6 mb-4 md:mb-6">
                 <div className="flex flex-col gap-1.5">
                   <label className="font-label-sm text-gray-700 uppercase">Department <span className="text-primary">*</span></label>
                   <input type="text" className={`form-input ${validationErrors[departmentErrorKey] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
@@ -164,33 +166,33 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 
               {(ra.roleCode === 'DOCTOR' || ra.roleCode === 'NURSE') && (
                 <div className="space-y-4">
-                  <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200">
+                  <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200 overflow-x-auto scrollbar-hide">
                     {dayNames.map((day, idx) => {
                       const dayNum = idx + 1;
                       const count = ra.schedules?.filter(s => s.dayOfWeek === dayNum).length || 0;
                       return (
-                        <button key={day} type="button" onClick={() => setActiveDay(dayNum)} className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${activeDay === dayNum ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
+                        <button key={day} type="button" onClick={() => setActiveDay(dayNum)} className={`flex-1 min-w-[50px] py-2 rounded-lg text-[8px] md:text-[9px] font-black uppercase transition-all whitespace-nowrap ${activeDay === dayNum ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
                           {day.slice(0, 3)} {count > 0 && `(${count})`}
                         </button>
                       );
                     })}
                   </div>
                   
-                  <div className="space-y-3 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                  <div className="space-y-3 p-3 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[10px] font-black text-slate-400 uppercase">Daily Slots ({dayNames[activeDay-1]})</span>
-                      <div className="flex gap-4">
-                        <button type="button" onClick={() => setShowCopyUI(showCopyUI === raIdx ? null : raIdx)} className="text-slate-400 text-[9px] font-black uppercase flex items-center gap-1 hover:text-primary">
-                          <span className="material-symbols-outlined text-xs">content_copy</span> Copy to...
+                      <div className="flex gap-3 md:gap-4">
+                        <button type="button" onClick={() => setShowCopyUI(showCopyUI === raIdx ? null : raIdx)} className="text-slate-400 text-[8px] md:text-[9px] font-black uppercase flex items-center gap-1 hover:text-primary">
+                          <span className="material-symbols-outlined text-xs">content_copy</span> <span className="hidden md:inline">Copy to...</span>
                         </button>
-                        <button type="button" onClick={() => addSlot(raIdx)} className="text-primary text-[9px] font-black uppercase flex items-center gap-1">
+                        <button type="button" onClick={() => addSlot(raIdx)} className="text-primary text-[8px] md:text-[9px] font-black uppercase flex items-center gap-1">
                           <span className="material-symbols-outlined text-xs">add</span> Add Slot
                         </button>
                       </div>
                     </div>
 
                     {showCopyUI === raIdx && (
-                      <div className="p-4 bg-white rounded-xl border-2 border-primary/20 mb-4 animate-in zoom-in-95">
+                      <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-primary/20 mb-4 animate-in zoom-in-95">
                         <p className="text-[10px] font-black text-primary uppercase mb-3 tracking-widest">Select target days to copy {dayNames[activeDay-1]} slots:</p>
                         <div className="flex flex-wrap gap-2 mb-4">
                           {dayNames.map((day, idx) => {
@@ -201,7 +203,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                               <button
                                 key={day} type="button"
                                 onClick={() => setCopyTargets(prev => isSelected ? prev.filter(d => d !== dayNum) : [...prev, dayNum])}
-                                className={`px-3 py-1.5 rounded-lg border-2 text-[9px] font-black uppercase transition-all ${isSelected ? 'bg-primary border-primary text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
+                                className={`px-2 md:px-3 py-1.5 rounded-lg border-2 text-[8px] md:text-[9px] font-black uppercase transition-all ${isSelected ? 'bg-primary border-primary text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                               >
                                 {day.slice(0, 3)}
                               </button>
@@ -215,30 +217,36 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                       </div>
                     )}
 
-                    {ra.schedules?.filter(s => s.dayOfWeek === activeDay).map((slot, sIdx) => (
-                      <div key={sIdx} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 group">
-                        <input type="time" className="form-input py-1 text-[10px] h-8" value={slot.startTime} onChange={(e) => {
-                          const schedules = [...(ra.schedules || [])];
-                          const realIdx = ra.schedules!.indexOf(slot);
-                          schedules[realIdx] = { ...slot, startTime: e.target.value };
-                          handleUpdateSchedule(raIdx, schedules);
-                        }} />
-                        <span className="text-slate-300">→</span>
-                        <input type="time" className="form-input py-1 text-[10px] h-8" value={slot.endTime} onChange={(e) => {
-                          const schedules = [...(ra.schedules || [])];
-                          const realIdx = ra.schedules!.indexOf(slot);
-                          schedules[realIdx] = { ...slot, endTime: e.target.value };
-                          handleUpdateSchedule(raIdx, schedules);
-                        }} />
-                        <input type="number" className="form-input py-1 text-[10px] h-8 w-20" placeholder="Max Pts" value={slot.maxPatients} onChange={(e) => {
-                          const schedules = [...(ra.schedules || [])];
-                          const realIdx = ra.schedules!.indexOf(slot);
-                          schedules[realIdx] = { ...slot, maxPatients: Number(e.target.value) };
-                          handleUpdateSchedule(raIdx, schedules);
-                        }} />
-                        <button type="button" onClick={() => handleUpdateSchedule(raIdx, ra.schedules!.filter(s => s !== slot))} className="text-slate-300 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-sm">delete</span></button>
-                      </div>
-                    ))}
+                    <div className="space-y-3">
+                      {ra.schedules?.filter(s => s.dayOfWeek === activeDay).map((slot, sIdx) => (
+                        <div key={sIdx} className="flex flex-wrap items-center gap-2 md:gap-3 bg-white p-3 rounded-lg border border-slate-200 group">
+                          <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                            <input type="time" className="form-input py-1 px-2 text-[10px] h-8 flex-1" value={slot.startTime} onChange={(e) => {
+                              const schedules = [...(ra.schedules || [])];
+                              const realIdx = ra.schedules!.indexOf(slot);
+                              schedules[realIdx] = { ...slot, startTime: e.target.value };
+                              handleUpdateSchedule(raIdx, schedules);
+                            }} />
+                            <span className="text-slate-300">→</span>
+                            <input type="time" className="form-input py-1 px-2 text-[10px] h-8 flex-1" value={slot.endTime} onChange={(e) => {
+                              const schedules = [...(ra.schedules || [])];
+                              const realIdx = ra.schedules!.indexOf(slot);
+                              schedules[realIdx] = { ...slot, endTime: e.target.value };
+                              handleUpdateSchedule(raIdx, schedules);
+                            }} />
+                          </div>
+                          <div className="flex items-center gap-2 w-full md:w-auto">
+                            <input type="number" className="form-input py-1 px-2 text-[10px] h-8 flex-1 md:w-20" placeholder="Max Pts" value={slot.maxPatients} onChange={(e) => {
+                              const schedules = [...(ra.schedules || [])];
+                              const realIdx = ra.schedules!.indexOf(slot);
+                              schedules[realIdx] = { ...slot, maxPatients: Number(e.target.value) };
+                              handleUpdateSchedule(raIdx, schedules);
+                            }} />
+                            <button type="button" onClick={() => handleUpdateSchedule(raIdx, ra.schedules!.filter(s => s !== slot))} className="text-slate-300 hover:text-red-500 transition-colors p-1"><span className="material-symbols-outlined text-base md:text-sm">delete</span></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                     {(!ra.schedules || ra.schedules.filter(s => s.dayOfWeek === activeDay).length === 0) && <p className="text-[10px] text-slate-400 italic text-center py-4">No slots defined for this day.</p>}
                   </div>
                 </div>

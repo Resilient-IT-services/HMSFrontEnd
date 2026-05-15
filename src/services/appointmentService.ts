@@ -73,8 +73,8 @@ export const appointmentService = {
     return response.data;
   },
 
-  async create(request: CreateAppointmentRequest): Promise<ApiResponse<AppointmentResponse>> {
-    const response = await apiClient.post<ApiResponse<AppointmentResponse>>('/appointments', request);
+  async create(request: CreateAppointmentRequest, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.post<ApiResponse<AppointmentResponse>>('/appointments', request, config);
     return response.data;
   },
 

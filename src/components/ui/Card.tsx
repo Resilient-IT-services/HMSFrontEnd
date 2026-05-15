@@ -20,24 +20,24 @@ export const Card: React.FC<CardProps> = ({
   noPadding = false
 }) => {
   return (
-    <section className={`rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--primary)]/30 ${noPadding ? '' : 'p-6'} ${className}`}>
+    <section className={`rounded-xl md:rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--primary)]/30 ${noPadding ? '' : 'p-4 md:p-6'} ${className}`}>
       {(title || icon || headerActions) && (
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="mb-4 md:mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 md:gap-3">
             {icon && (
-              <div className="rounded-xl bg-[var(--primary-light)] p-2 text-[var(--primary)]">
-                <span className="material-symbols-outlined">{icon}</span>
+              <div className="rounded-lg md:rounded-xl bg-[var(--primary-light)] p-1.5 md:p-2 text-[var(--primary)] shrink-0">
+                <span className="material-symbols-outlined text-lg md:text-2xl">{icon}</span>
               </div>
             )}
-            <div>
-              {title && <h2 className="text-xl font-bold text-[var(--text-primary)]">{title}</h2>}
-              {subtitle && <p className="text-xs text-[var(--text-secondary)]">{subtitle}</p>}
+            <div className="min-w-0">
+              {title && <h2 className="text-base md:text-xl font-bold text-[var(--text-primary)] truncate">{title}</h2>}
+              {subtitle && <p className="text-[10px] md:text-xs text-[var(--text-secondary)] truncate uppercase font-medium tracking-wider">{subtitle}</p>}
             </div>
           </div>
-          {headerActions && <div>{headerActions}</div>}
+          {headerActions && <div className="shrink-0">{headerActions}</div>}
         </div>
       )}
-      <div>{children}</div>
+      <div className="text-sm md:text-base">{children}</div>
     </section>
   );
 };

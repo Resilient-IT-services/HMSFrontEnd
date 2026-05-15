@@ -195,7 +195,7 @@ export const EarningsPage = () => {
           </div>
         </div>
 
-        <MetricsGrid items={metricItems} className="mb-8" />
+        <MetricsGrid items={metricItems} className="mb-8 hidden md:grid" />
 
         <Card 
           title="Revenue Breakdown  "

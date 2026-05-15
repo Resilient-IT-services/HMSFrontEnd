@@ -1,122 +1,196 @@
+'use client';
+
 import React from 'react';
-import { Section } from '@/components/ui/Section';
-import { FormField } from '@/components/ui/FormField';
+import { UserRequestDTO } from '@/types/api';
+import { MobileSelector } from '@/components/ui/MobileSelector';
 
 interface UserFormProfileTabProps {
-  formData: any;
-  setFormData: (data: any) => void;
+  formData: UserRequestDTO;
+  setFormData: (data: UserRequestDTO) => void;
   assignedRoles: string[];
   validationErrors: Record<string, string>;
 }
 
-export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({ 
-  formData, 
+export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
+  formData,
   setFormData,
   assignedRoles,
   validationErrors
 }) => {
-  const onChange = (data: any) => {
-    setFormData((prev: any) => ({ ...prev, ...data }));
+  const renderFieldError = (field: string) => {
+    if (validationErrors[field]) {
+      return <p className="text-red-500 text-[10px] font-bold mt-1 uppercase tracking-tight">{validationErrors[field]}</p>;
+    }
+    return null;
   };
 
   return (
-    <div className="space-y-6">
-      <Section title="Basic Identity">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField label="Full Name" required error={validationErrors.fullName}>
-            <input
-              type="text"
-              className="form-input"
-              value={formData.fullName || ''}
-              onChange={(e) => onChange({ fullName: e.target.value })}
-              placeholder="e.g. Dr. John Doe"
-            />
-          </FormField>
-          <FormField label="Username" required error={validationErrors.username}>
-            <input
-              type="text"
-              className="form-input"
-              value={formData.username || ''}
-              onChange={(e) => onChange({ username: e.target.value })}
-              placeholder="johndoe"
-              disabled={!!formData.id}
-            />
-          </FormField>
-          <FormField label="Email Address" required error={validationErrors.email}>
-            <input
-              type="email"
-              className="form-input"
-              value={formData.email || ''}
-              onChange={(e) => onChange({ email: e.target.value })}
-              placeholder="john@hospital.com"
-            />
-          </FormField>
-          <FormField label="Phone Number" required error={validationErrors.phone}>
-            <input
-              type="tel"
-              className="form-input"
-              value={formData.phone || ''}
-              onChange={(e) => onChange({ phone: e.target.value })}
-              placeholder="+91 9876543210"
-            />
-          </FormField>
-          <FormField label="Gender" required error={validationErrors.gender}>
-            <select
-              className="form-select"
-              value={formData.gender || 'MALE'}
-              onChange={(e) => onChange({ gender: e.target.value as any })}
-            >
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </FormField>
-          <FormField label="Date of Birth" required error={validationErrors.dob}>
-            <input
-              type="date"
-              className="form-input"
-              value={formData.dob || ''}
-              onChange={(e) => onChange({ dob: e.target.value })}
-            />
-          </FormField>
+    <div className="space-y-8 md:space-y-12">
+      {/* 1. Dynamic Role-Based Inputs */}
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-2 mb-4 md:mb-6 border-b border-gray-100 pb-4">
+          <h3 className="font-headline-sm text-on-surface uppercase tracking-wide text-[10px] md:text-xs font-black">Professional Credentials</h3>
         </div>
-      </Section>
 
-      <Section title="Account Security">
-        <div className="flex items-start gap-4 p-4 bg-orange-50 rounded-xl border border-orange-100">
-          <input
-            type="checkbox"
-            id="superuser"
-            className="mt-1"
-            checked={formData.superuser || false}
-            onChange={(e) => onChange({ superuser: e.target.checked })}
-          />
-          <div>
-            <label htmlFor="superuser" className="text-sm font-bold text-orange-900 block">Grant Super Administrator Privileges</label>
-            <p className="text-[10px] text-orange-700 font-medium">WARNING: Super admins have unrestricted access to all hospitals and system configurations.</p>
-          </div>
-        </div>
-      </Section>
+        {assignedRoles.length === 0 && !formData.superuser && (
+            <div className="p-6 md:p-8 bg-gray-50 border border-dashed border-gray-200 rounded-2xl text-center">
+                <p className="text-xs md:text-sm text-gray-500 font-bold italic">No specific professional roles assigned yet.</p>
+            </div>
+        )}
 
-      {formData.receptionistInfo && assignedRoles.includes('RECEPTIONIST') && (
-        <Section title="Reception Settings">
-          <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-            <input
-              type="checkbox"
-              id="insurance"
-              className="mt-1"
-              checked={formData.receptionistInfo.insuranceSpecialist || false}
-              onChange={(e) => onChange({ 
-                receptionistInfo: { ...formData.receptionistInfo!, insuranceSpecialist: e.target.checked } 
-              })}
-            />
-            <div>
-              <label htmlFor="insurance" className="text-sm font-bold text-slate-800 block">Insurance Specialist</label>
-              <p className="text-[10px] text-gray-500">Check if user is trained in medical insurance processing.</p>
+        {assignedRoles.includes('DOCTOR') && formData.doctorInfo && (
+          <div className={`bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4 shadow-sm ${validationErrors.specialization ? 'ring-2 ring-error/50' : ''}`}>
+            <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
+              <span className="material-symbols-outlined text-primary text-xl">stethoscope</span>
+              <h4 className="text-[10px] font-black text-on-surface uppercase tracking-widest">Doctor Profile Details</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-gray-700 uppercase">Specialization <span className="text-primary">*</span></label>
+                <input
+                    className={`form-input ${validationErrors.specialization ? 'border-error' : ''}`}
+                    type="text"
+                    placeholder="e.g. Cardiologist, Orthopedic..."
+                    value={formData.doctorInfo.specialization}
+                    onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, specialization: e.target.value } })}
+                />
+                {renderFieldError('specialization')}
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-gray-700 uppercase">License Number</label>
+                <input
+                    className="form-input"
+                    type="text"
+                    placeholder="e.g. MED-12345678"
+                    value={formData.doctorInfo.licenseNumber}
+                    onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, licenseNumber: e.target.value } })}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <label className="font-label-sm text-gray-700 uppercase">Years of Experience</label>
+                <input
+                    className="form-input"
+                    type="number"
+                    placeholder="e.g. 10"
+                    value={formData.doctorInfo.bio ? formData.doctorInfo.bio.match(/Exp: (\d+)/)?.[1] || '' : ''}
+                    onChange={(e) => setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, bio: `Exp: ${e.target.value} years` } })}
+                />
+              </div>
             </div>
           </div>
-        </Section>
-      )}
+        )}
+
+        {assignedRoles.includes('NURSE') && formData.nurseInfo && (
+          <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
+              <span className="material-symbols-outlined text-blue-600 text-xl">medical_services</span>
+              <h4 className="text-[10px] font-black text-on-surface uppercase tracking-widest">Nursing Credentials</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Certification Level</label>
+                    <MobileSelector
+                        label="Certification"
+                        options={[
+                            { id: 'RN', name: 'Registered Nurse (RN)', icon: 'badge' },
+                            { id: 'LPN', name: 'Licensed Practical Nurse (LPN)', icon: 'badge' },
+                            { id: 'NP', name: 'Nurse Practitioner (NP)', icon: 'badge' },
+                            { id: 'CNA', name: 'Certified Nursing Assistant (CNA)', icon: 'badge' }
+                        ]}
+                        value={formData.nurseInfo.certificationLevel || ''}
+                        onChange={(val) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, certificationLevel: val as any } })}
+                        placeholder="Select Level..."
+                    />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Nursing License No.</label>
+                    <input className="form-input" type="text" placeholder="e.g. RN-98765432" value={formData.nurseInfo.nursingLicenseNo} onChange={(e) => setFormData({ ...formData, nurseInfo: { ...formData.nurseInfo!, nursingLicenseNo: e.target.value } })} />
+                </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* 2. Full Summary UI */}
+      <div className="space-y-4 md:space-y-6">
+        <div className="flex items-center gap-2 mb-2 md:mb-6 border-b border-gray-100 pb-4">
+          <h3 className="font-bold text-[11px] md:text-xs text-on-surface uppercase tracking-wider">Final Review Summary</h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* Identity Card */}
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-sm font-bold">person</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Identity & Access</span>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Full Name</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right truncate">{formData.fullName || '—'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Username</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right truncate">{formData.username || '—'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">DOB</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right">{formData.dob || '—'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase">Superuser</span>
+                        <span className={`text-[9px] md:text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full ${formData.superuser ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-500'}`}>{formData.superuser ? 'YES' : 'NO'}</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Contact Card */}
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-sm font-bold">contact_page</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Contact Information</span>
+                </div>
+                <div className="space-y-3">
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Email</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right truncate">{formData.email || '—'}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2 gap-4">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase shrink-0">Phone</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right">{formData.phone || '—'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-[10px] md:text-xs text-gray-400 font-bold uppercase">Gender</span>
+                        <span className="text-[10px] md:text-xs font-bold text-on-surface text-right">{formData.gender}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {/* Facility & Roles Card */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-4 shadow-sm">
+            <div className="flex items-center gap-2 text-primary">
+                <span className="material-symbols-outlined text-sm font-bold">domain</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Assigned Facilities & Roles</span>
+            </div>
+            {formData.memberships && formData.memberships.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                    {formData.memberships.map((m, idx) => (
+                        <div key={idx} className="p-3 md:p-4 bg-slate-50/50 border border-slate-100 rounded-xl">
+                            <p className="text-[10px] md:text-xs font-bold text-on-surface mb-2 truncate">{m.hospitalName || 'Facility ID: ' + m.hospitalId}</p>
+                            <div className="flex flex-wrap gap-1">
+                                {m.roleAssignments?.map(ra => (
+                                    <span key={ra.roleCode} className="text-[8px] md:text-[9px] font-bold px-1.5 md:px-2 py-0.5 bg-white text-primary border border-orange-100 rounded uppercase tracking-tighter">{ra.roleCode}</span>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-[10px] md:text-xs text-gray-400 font-medium italic">No facility memberships assigned.</p>
+            )}
+        </div>
+      </div>
     </div>
   );
 };
