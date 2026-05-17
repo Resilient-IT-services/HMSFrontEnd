@@ -11,10 +11,7 @@ export const searchService = {
           totalElements: 0,
           totalPages: 0,
           size: size,
-          number: page,
-          first: true,
-          last: true,
-          empty: true
+          page: page
         }
       };
     }

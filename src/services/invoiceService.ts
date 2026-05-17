@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, InvoiceDTO } from '@/types/api';
+import { ApiResponse, InvoiceDTO, RecordPaymentRequest, PaymentDTO } from '@/types/api';
 
 export const invoiceService = {
   async getByVisit(visitId: string): Promise<ApiResponse<InvoiceDTO>> {

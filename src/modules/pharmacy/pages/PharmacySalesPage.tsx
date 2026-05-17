@@ -6,11 +6,10 @@ import MedicineAutocomplete from '@/modules/pharmacy/components/MedicineAutocomp
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { addToCart, removeFromCart, updateCartQuantity, clearCart } from '@/state/pharmacySlice';
-import { MedicineResponse } from '@/types/api';
+import { PatientResponse, MedicineResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { patientService } from '@/services/patientService';
-import { PatientResponse, MedicineResponse } from '@/types/api';
 import { useSearchParams } from 'next/navigation';
 
 export const PharmacySalesPage = () => {

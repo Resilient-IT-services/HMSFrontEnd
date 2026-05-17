@@ -1,6 +1,6 @@
 import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, AppointmentResponse, AppointmentSummaryDTO, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO } from '@/types/api';
+import { ApiResponse, PageResponse, AppointmentResponse, AppointmentSummaryDTO, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO, OPDEncounterRequest } from '@/types/api';
 
 export const appointmentService = {
   async list(

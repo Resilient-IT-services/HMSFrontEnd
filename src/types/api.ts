@@ -351,6 +351,7 @@ export interface AppointmentResponse {
   icdCodes?: string[];
   notes?: string;
   vitals?: VitalsDTO;
+  visitId?: string;
   prescription?: PrescriptionDTO;
   createdAt: string;
 }
@@ -366,6 +367,7 @@ export interface AppointmentSummaryDTO {
   appointmentTime: string;
   status: AppointmentStatus;
   tokenNumber: number;
+  visitId?: string;
 }
 
 export interface CreateAppointmentRequest {
