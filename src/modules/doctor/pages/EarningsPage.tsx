@@ -79,7 +79,7 @@ export const EarningsPage = () => {
 
     try {
       setLoading(true);
-      const response = await appointmentService.list(0, 404, undefined, undefined, user.id);
+      const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, undefined, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -128,7 +128,7 @@ export const EarningsPage = () => {
     return {
       totalVisits: filteredAppointments.length,
       earnedVisits: earnedAppointments.length,
-      totalEarnings: typeof consultationFee === 'number' ? earnedAppointments.length * consultationFee : 404,
+      totalEarnings: typeof consultationFee === 'number' ? earnedAppointments.length * consultationFee : 0,
       cancelled: filteredAppointments.filter(app => app.status === 'CANCELLED').length,
     };
   }, [filteredAppointments, consultationFee]);
@@ -142,7 +142,7 @@ export const EarningsPage = () => {
   }, []);
 
   const metricItems = [
-    { label: 'Total Earnings', value: stats.totalEarnings === 404 ? '404' : `₹${stats.totalEarnings.toLocaleString()}`, variant: 'indigo' as const, icon: 'payments' },
+    { label: 'Total Earnings', value: stats.totalEarnings === 0 ? '0' : `₹${stats.totalEarnings.toLocaleString()}`, variant: 'indigo' as const, icon: 'payments' },
     { label: 'Total Visits', value: stats.totalVisits.toString(), variant: 'orange' as const, icon: 'group' },
     { label: 'Earned Visits', value: stats.earnedVisits.toString(), variant: 'emerald' as const, icon: 'check_circle' },
     { label: 'Cancelled', value: stats.cancelled.toString(), variant: 'red' as const, icon: 'cancel' }

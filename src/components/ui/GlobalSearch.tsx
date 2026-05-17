@@ -18,7 +18,7 @@ const GlobalSearch: React.FC = () => {
 
   useEffect(() => {
     const handleSearch = async () => {
-      if (debouncedQuery.length < 2) {
+      if (debouncedQuery.trim().length < 2) {
         setResults([]);
         setIsOpen(false);
         return;

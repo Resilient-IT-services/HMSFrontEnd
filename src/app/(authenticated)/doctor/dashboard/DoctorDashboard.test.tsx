@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import DoctorDashboard from './page';
 import { appointmentService } from '@/services/appointmentService';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 const mockPush = vi.fn();
 vi.mock('next/navigation', () => ({
@@ -86,7 +87,7 @@ describe('DoctorDashboard', () => {
     expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(appointmentService.list).toHaveBeenCalledWith(0, 404, undefined, today, 'doctor-1');
+      expect(appointmentService.list).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, undefined, today, 'doctor-1');
       expect(screen.getAllByText('Jane Roe')[0]).toBeInTheDocument();
       expect(screen.getAllByText(/500/)[0]).toBeInTheDocument();
     });

@@ -1,7 +1,7 @@
 import apiClient from './apiClient';
 import { ApiResponse, DoctorStaffResponse, PageResponse } from '@/types/api';
 
-export type ReportType = 'DOCTOR_REVENUE' | 'PAYMENT_SUMMARY';
+export type ReportType = 'DOCTOR_REVENUE' | 'PHARMACY_REVENUE' | 'PAYMENT_SUMMARY' | 'PAYMENT_COLLECTOR_SUMMARY';
 export type ReportRow = Record<string, unknown>;
 
 export interface ReportFilters {

@@ -15,7 +15,7 @@ export const DoctorMedicineSearchPage = () => {
 
   useEffect(() => {
     const searchMedicines = async () => {
-      if (debouncedSearch.length < 2) {
+      if (debouncedSearch.trim().length < 2) {
         setResults([]);
         return;
       }

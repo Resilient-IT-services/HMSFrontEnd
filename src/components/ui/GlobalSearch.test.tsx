@@ -1,14 +1,12 @@
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import GlobalSearch from './GlobalSearch';
 import { searchService } from '@/services/searchService';
 import { useRouter } from 'next/navigation';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-// Mock navigation and services
 vi.mock('next/navigation', () => ({
-  useRouter: vi.fn(() => ({
-    push: vi.fn(),
-  })),
+  useRouter: vi.fn(),
 }));
 
 vi.mock('@/services/searchService', () => ({
@@ -23,6 +21,15 @@ describe('GlobalSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useRouter as any).mockReturnValue({ push: mockPush });
+  });
+
+  it('does not trigger search on mount when query is empty', async () => {
+    render(<GlobalSearch />);
+    
+    // Wait a bit to ensure debounce timeout would have fired
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    expect(searchService.search).not.toHaveBeenCalled();
   });
 
   it('triggers search after debounce when typing', async () => {
@@ -42,6 +49,8 @@ describe('GlobalSearch', () => {
     await waitFor(() => {
       expect(screen.getByText('Test Hospital')).toBeInTheDocument();
     }, { timeout: 3000 });
+    
+    expect(searchService.search).toHaveBeenCalledWith('Test');
   });
 
   it('navigates to link when clicking a result', async () => {

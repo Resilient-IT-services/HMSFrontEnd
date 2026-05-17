@@ -9,11 +9,46 @@ import { addToCart, removeFromCart, updateCartQuantity, clearCart } from '@/stat
 import { MedicineResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
+import { patientService } from '@/services/patientService';
+import { PatientResponse, MedicineResponse } from '@/types/api';
+import { useSearchParams } from 'next/navigation';
 
 export const PharmacySalesPage = () => {
   const dispatch = useDispatch();
+  const searchParams = useSearchParams();
   const cart = useSelector((state: RootState) => state.pharmacy.cart);
   const [loading, setLoading] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
+  const [patientSearch, setPatientSearch] = useState('');
+  const [patientResults, setPatientSearchState] = useState<PatientResponse[]>([]);
+  const [searchingPatient, setSearchingPatient] = useState(false);
+
+  // Pre-load from URL if provided
+  const patientIdParam = searchParams.get('patientId');
+  const visitIdParam = searchParams.get('visitId');
+
+  React.useEffect(() => {
+    if (patientIdParam) {
+      void patientService.get(patientIdParam).then(res => {
+        if (res.success && res.data) setSelectedPatient(res.data);
+      });
+    }
+  }, [patientIdParam]);
+
+  const handlePatientSearch = async (val: string) => {
+    setPatientSearch(val);
+    if (val.length < 3) {
+      setPatientSearchState([]);
+      return;
+    }
+    setSearchingPatient(true);
+    try {
+      const res = await patientService.list(0, 5, val);
+      if (res.success && res.data) setPatientSearchState(res.data.content);
+    } finally {
+      setSearchingPatient(false);
+    }
+  };
 
   const subtotal = cart.reduce((acc, item) => acc + (Number(item.sellingPrice || 0) * Number(item.quantity || 0)), 0);
   const tax = subtotal * 0.12;
@@ -87,23 +122,33 @@ export const PharmacySalesPage = () => {
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
+    if (!selectedPatient) {
+      triggerGlobalToast('Please select a patient before checkout', 'warning');
+      return;
+    }
     
     setLoading(true);
     try {
       const saleItems = cart.map(item => ({
         medicineId: item.id,
-        quantity: item.quantity,
-        price: item.sellingPrice
+        quantity: item.quantity
       }));
 
-      const response = await pharmacyApi.createSale({ items: saleItems });
+      const response = await pharmacyApi.createSale({ 
+        patientId: selectedPatient.id,
+        visitId: visitIdParam || undefined,
+        items: saleItems 
+      });
       
       if (response.success) {
         triggerGlobalToast('Sale completed and bill generated', 'success');
         dispatch(clearCart());
+        setSelectedPatient(null);
+        setPatientSearch('');
       }
     } catch (error) {
       console.error(error);
+      triggerGlobalToast('Failed to complete sale', 'error');
     } finally {
       setLoading(false);
     }
@@ -151,8 +196,66 @@ export const PharmacySalesPage = () => {
         </div>
 
         {/* Right Side: Cart & Summary */}
-        <div className="w-full lg:w-[480px] flex flex-col h-full">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col h-full overflow-hidden">
+        <div className="w-full lg:w-[480px] flex flex-col h-full gap-6">
+          {/* Patient Selector */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="material-symbols-outlined text-orange-600">person_search</span>
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-tight">Patient Information</h2>
+            </div>
+            
+            {selectedPatient ? (
+              <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-slate-900">{selectedPatient.fullName}</p>
+                  <p className="text-[10px] font-black text-orange-700 uppercase tracking-widest">ID: {selectedPatient.patientCode || selectedPatient.id.substring(0,8)}</p>
+                </div>
+                <button 
+                  onClick={() => setSelectedPatient(null)}
+                  className="w-8 h-8 rounded-full bg-white text-slate-400 hover:text-red-600 transition-all flex items-center justify-center shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-lg">close</span>
+                </button>
+              </div>
+            ) : (
+              <div className="relative">
+                <input 
+                  type="text"
+                  placeholder="Search by name or code..."
+                  value={patientSearch}
+                  onChange={(e) => handlePatientSearch(e.target.value)}
+                  className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-lg">
+                  {searchingPatient ? 'sync' : 'search'}
+                </span>
+                
+                {patientResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    {patientResults.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          setSelectedPatient(p);
+                          setPatientSearchState([]);
+                          setPatientSearch('');
+                        }}
+                        className="w-full p-4 text-left hover:bg-slate-50 flex items-center justify-between border-b border-slate-50 last:border-none"
+                      >
+                        <div>
+                          <p className="font-bold text-slate-800 text-sm">{p.fullName}</p>
+                          <p className="text-[10px] font-medium text-slate-500 uppercase">{p.patientCode || 'No Code'}</p>
+                        </div>
+                        <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col h-full overflow-hidden min-h-0">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <div className="relative">

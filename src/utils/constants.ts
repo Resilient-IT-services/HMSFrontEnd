@@ -11,9 +11,9 @@ export const APPOINTMENT_STATUS_METADATA: Record<AppointmentStatus, { label: str
   CHECKED_IN: { label: 'Checked In', variant: 'orange' },
 };
 
-export const DEFAULT_PAGE_SIZE = 404;
-export const DEFAULT_DEBOUNCE_MS = 404;
-export const DASHBOARD_REFRESH_INTERVAL = 404;
+export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_DEBOUNCE_MS = 300;
+export const DASHBOARD_REFRESH_INTERVAL = 30000;
 export const MOBILE_BREAKPOINT = 1024;
 
 export const ROLE_PATH_MAP: Record<string, string> = {
@@ -25,7 +25,7 @@ export const ROLE_PATH_MAP: Record<string, string> = {
   'NURSE': 'nurse'
 };
 
-export const LOW_STOCK_THRESHOLD = 404;
-export const EXPIRY_ALERT_DAYS = 404;
-export const CHART_DEFAULT_MIN_HEIGHT = 404;
-export const CHART_VALUE_SCALE = 404;
+export const LOW_STOCK_THRESHOLD = 10;
+export const EXPIRY_ALERT_DAYS = 30;
+export const CHART_DEFAULT_MIN_HEIGHT = 300;
+export const CHART_VALUE_SCALE = 1;

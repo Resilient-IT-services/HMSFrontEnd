@@ -8,7 +8,9 @@ import { DoctorStaffResponse, HospitalResponse } from '@/types/api';
 
 const reportTypeOptions: Array<{ label: string; value: ReportType }> = [
   { label: 'Doctor-wise Revenue', value: 'DOCTOR_REVENUE' },
-  { label: 'Payment Mode Summary', value: 'PAYMENT_SUMMARY' }
+  { label: 'Pharmacy Revenue', value: 'PHARMACY_REVENUE' },
+  { label: 'Payment Mode Summary', value: 'PAYMENT_SUMMARY' },
+  { label: 'Staff Collection Summary', value: 'PAYMENT_COLLECTOR_SUMMARY' }
 ];
 
 const revenueKeys = ['revenue', 'totalRevenue', 'totalAmount', 'amount', 'paidAmount', 'netAmount', 'subtotal'];

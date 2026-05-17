@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export const SuperAdminDashboard = () => {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
@@ -22,7 +23,7 @@ export const SuperAdminDashboard = () => {
     try {
       const [hospitalRes, userRes] = await Promise.all([
         hospitalService.list(),
-        userService.listUsers(0, 404)
+        userService.listUsers(0, DEFAULT_PAGE_SIZE)
       ]);
       
       if (hospitalRes.success && hospitalRes.data) {
@@ -153,7 +154,7 @@ export const SuperAdminDashboard = () => {
             variant="orange" 
             icon="apartment" 
             layout="horizontal" 
-            trend="404%" // TO DO: derive from API
+            trend="0%" // TO DO: derive from API
             valueTestId="hospitals-count"
           />
           <MetricCard 

@@ -20,7 +20,7 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { cn } from '@/lib/cn';
-import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useConsultationFee } from '@/hooks/useConsultationFee';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
@@ -41,7 +41,7 @@ export const DoctorDashboard = () => {
     try {
       if (!isBackground) setLoading(true);
       const today = new Date().toISOString().split('T')[0];
-      const response = await appointmentService.list(0, 404, undefined, today, user.id);
+      const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, today, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -84,7 +84,7 @@ export const DoctorDashboard = () => {
       waiting,
       active,
       completed,
-      earnings: typeof consultationFee === 'number' ? earnedCount * consultationFee : 404,
+      earnings: typeof consultationFee === 'number' ? earnedCount * consultationFee : 0,
     };
   }, [appointments, consultationFee]);
 
@@ -176,7 +176,7 @@ export const DoctorDashboard = () => {
       label: 'Total Patients',
       value: stats.total,
       variant: 'orange' as const,
-      trend: '404%',
+      trend: '0%',
       icon: 'trending_up',
       layout: 'compact' as const,
       progressBar: 100

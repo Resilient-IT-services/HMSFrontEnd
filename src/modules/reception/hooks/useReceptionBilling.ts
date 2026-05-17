@@ -6,12 +6,12 @@ import { isAxiosError } from 'axios';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { doctorService } from '@/services/doctorService';
-import { billingService } from '@/services/billingService';
+import { invoiceService } from '@/services/invoiceService';
 import {
   AppointmentResponse,
   PatientResponse,
   DoctorStaffResponse,
-  BillingResponse,
+  InvoiceDTO,
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
@@ -39,39 +39,38 @@ export const useReceptionBilling = () => {
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [doctor, setDoctor] = useState<DoctorStaffResponse | null>(null);
-  const [billing, setBilling] = useState<BillingResponse | null>(null);
+  const [invoice, setInvoice] = useState<InvoiceDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [predictedToken, setPredictedToken] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [discount, setDiscount] = useState(0);
   const [submittingPayment, setSubmittingPayment] = useState(false);
 
-  const applyBillingData = useCallback((billData: BillingResponse | null) => {
-    if (!billData) return;
+  const applyInvoiceData = useCallback((invoiceData: InvoiceDTO | null) => {
+    if (!invoiceData) return;
 
-    setBilling(billData);
-    setDiscount(billData.discount || 0);
-    if (billData.paymentMethod) setPaymentMethod(billData.paymentMethod as any);
+    setInvoice(invoiceData);
+    setDiscount(invoiceData.discountAmount || 0);
+    // Since InvoiceDTO doesn't have a single payment method (it can have multiple payments), 
+    // we just keep the default or use the first payment's mode if needed.
   }, []);
 
   const loadExistingAppointmentBilling = useCallback(async (id: string) => {
-    const [appRes, billRes] = await Promise.all([
-      appointmentService.get(id),
-      billingService.getByAppointment(id).catch(() => ({ success: false, data: null }))
-    ]);
-
+    const appRes = await appointmentService.get(id);
     if (!appRes.success || !appRes.data) return;
 
     setAppointment(appRes.data);
-    if (billRes.success) applyBillingData(billRes.data || null);
-
-    const [patRes, docRes] = await Promise.all([
+    
+    const [invRes, patRes, docRes] = await Promise.all([
+      invoiceService.getByVisit(appRes.data.visitId!).catch(() => ({ success: false, data: null })),
       patientService.get(appRes.data.patientId),
       doctorService.get(appRes.data.doctorId),
     ]);
+
+    if (invRes.success) applyInvoiceData(invRes.data || null);
     if (patRes.success) setPatient(patRes.data || null);
     if (docRes.success) setDoctor(docRes.data || null);
-  }, [applyBillingData]);
+  }, [applyInvoiceData]);
 
   const loadNewAppointmentBilling = useCallback(async () => {
     if (!patientIdParam || !doctorIdParam) return;
@@ -134,48 +133,46 @@ export const useReceptionBilling = () => {
   const handleMarkAsPaid = async () => {
     setSubmittingPayment(true);
     try {
-      let currentAppointmentId = appointmentId;
-      let currentAppointment = appointment;
+      // Scenario 1: Paying for an EXISTING appointment (Invoice already exists)
+      if (appointmentId && appointment && invoice) {
+        const res = await invoiceService.recordPayment({
+          patientId: appointment.patientId,
+          visitId: appointment.visitId,
+          amount: total,
+          paymentMode: paymentMethod,
+          invoiceId: invoice.id,
+          referenceNumber: `BILL-${Date.now()}`
+        });
 
-      if (!appointmentId && patientIdParam && doctorIdParam && appointmentTimeParam) {
-        const res = await appointmentService.create({
-          patientId: patientIdParam,
-          doctorId: doctorIdParam,
-          appointmentTime: appointmentTimeParam,
-          sessionPeriod: sessionPeriodParam,
-          notes: notesParam || '',
-          status: 'PAYMENT_PENDING'
-        }, { skipToast: true });
-        if (res.success && res.data) {
-          currentAppointmentId = res.data.id;
-          currentAppointment = res.data;
+        if (res.success) {
+          triggerGlobalToast('Payment recorded successfully', 'success');
+          // Refresh data to show PAID status
+          void fetchData();
         }
+        return;
       }
 
-      if (!currentAppointmentId || !currentAppointment || !patient) return;
+      // Scenario 2: NEW Booking (Atomic Book + Pay)
+      if (!patientIdParam || !doctorIdParam || !appointmentTimeParam || !patient) {
+         triggerGlobalToast('Missing required booking information', 'error');
+         return;
+      }
 
-      await (billing
-        ? billingService.updateStatus(billing.id!, 'PAID', paymentMethod, discount)
-        : billingService.create({
-          patientId: patient.id,
-          appointmentId: currentAppointmentId,
-          sourceType: 'APPOINTMENT',
-          status: 'PAID',
-          totalAmount: consultationFee,
-          discount: discount,
-          paymentMethod: paymentMethod,
-          items: [{ itemName: 'Consultation Fee', amount: consultationFee, quantity: 1, subtotal: consultationFee }]
-        }));
+      const res = await appointmentService.bookConsultation({
+        patientId: patientIdParam,
+        doctorId: doctorIdParam,
+        appointmentTime: appointmentTimeParam,
+        notes: notesParam || '',
+        payment: {
+          amount: total,
+          mode: paymentMethod,
+          referenceNumber: `BILL-${Date.now()}`
+        }
+      });
 
-      const updateRes = await appointmentService.update(currentAppointmentId, {
-        ...currentAppointment,
-        status: 'ADD_VITALS'
-      }, { skipToast: true });
-
-      if (updateRes.success) {
-        triggerGlobalToast('Payment confirmed successfully', 'success');
-        if (appointmentId) fetchData();
-        else router.push(`/reception/appointments/vitals?appointmentId=${currentAppointmentId}`);
+      if (res.success && res.data) {
+        triggerGlobalToast('Consultation booked and payment confirmed successfully', 'success');
+        router.push(`/reception/appointments/vitals?appointmentId=${res.data.id}`);
       }
     } catch (error) {
       console.error('Payment Error:', error);
@@ -204,7 +201,7 @@ export const useReceptionBilling = () => {
     appointment,
     patient,
     doctor,
-    billing,
+    invoice,
     loading,
     predictedToken,
     paymentMethod,

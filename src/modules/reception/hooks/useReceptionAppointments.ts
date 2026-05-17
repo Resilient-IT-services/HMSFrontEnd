@@ -5,9 +5,10 @@ import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
 import { sortByToken } from '@/utils/tokenHelper';
-import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export const useReceptionAppointments = () => {
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
@@ -15,6 +16,7 @@ export const useReceptionAppointments = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearchTerm = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
 
   // Advanced Filter State
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
@@ -48,7 +50,7 @@ export const useReceptionAppointments = () => {
       const [appRes, docRes, statsRes] = await Promise.all([
         appointmentService.listSummary(
           0, 100, 
-          searchTerm, 
+          debouncedSearchTerm, 
           dateToUse,
           undefined,
           statusesToUse,
@@ -82,7 +84,7 @@ export const useReceptionAppointments = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [statusFilter, searchTerm, activeFilters]);
+  }, [statusFilter, debouncedSearchTerm, activeFilters]);
 
   useEffect(() => {
     const trigger = async () => {

@@ -11,8 +11,15 @@ export const doctorService = {
     minFee?: number,
     maxFee?: number
   ): Promise<ApiResponse<PageResponse<DoctorStaffResponse>>> {
+    const params: any = { page, size };
+    if (name && name.trim()) params.name = name;
+    if (department) params.department = department;
+    if (specialization) params.specialization = specialization;
+    if (minFee !== undefined) params.minFee = minFee;
+    if (maxFee !== undefined) params.maxFee = maxFee;
+
     const response = await apiClient.get<ApiResponse<PageResponse<DoctorStaffResponse>>>('/staff/doctors', {
-      params: { page, size, name, department, specialization, minFee, maxFee }
+      params
     });
     return response.data;
   },
@@ -23,8 +30,10 @@ export const doctorService = {
   },
 
   async listDoctors(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
+    const params: any = { page, size };
+    if (search && search.trim()) params.search = search;
     const response = await apiClient.get<ApiResponse<PageResponse<UserSummaryDTO>>>('/doctors', {
-      params: { page, size, search }
+      params
     });
     return response.data;
   },

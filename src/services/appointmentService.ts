@@ -90,6 +90,11 @@ export const appointmentService = {
     return this.create(data);
   },
 
+  async bookConsultation(request: OPDEncounterRequest, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.post<ApiResponse<AppointmentResponse>>('/appointments/book-consultation', request, config);
+    return response.data;
+  },
+
   async updateStatus(appointmentId: string, request: UpdateAppointmentStatusRequest, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
     const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/status`, request, config);
     return response.data;

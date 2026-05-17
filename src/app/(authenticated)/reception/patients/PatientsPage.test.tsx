@@ -4,6 +4,7 @@ import PatientsPage from './page';
 import { patientService } from '@/services/patientService';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 // Mock the services
 vi.mock('@/services/patientService', () => ({
@@ -130,7 +131,7 @@ describe('PatientsPage', () => {
       await Promise.resolve();
     });
 
-    expect(patientService.listSummary).toHaveBeenCalledWith(0, 404, 'Jane');
+    expect(patientService.listSummary).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, 'Jane');
     vi.useRealTimers();
   });
 });

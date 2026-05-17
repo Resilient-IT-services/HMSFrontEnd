@@ -245,6 +245,22 @@ export interface CreatePatientRequest {
   medicalHistory?: string;
 }
 
+export type ReportType = 'DOCTOR_REVENUE' | 'PHARMACY_REVENUE' | 'PAYMENT_SUMMARY' | 'PAYMENT_COLLECTOR_SUMMARY';
+
+export interface OPDPaymentInfo {
+  amount: number;
+  mode: 'CASH' | 'UPI' | 'CARD';
+  referenceNumber?: string;
+}
+
+export interface OPDEncounterRequest {
+  patientId: string;
+  doctorId: string;
+  appointmentTime: string;
+  notes?: string;
+  payment?: OPDPaymentInfo;
+}
+
 // ... other types ...
 
 export interface UpdateBillingStatusRequest {
@@ -501,6 +517,7 @@ export interface PharmacySaleItem {
 export interface PharmacySaleRequest {
   patientId?: string;
   prescriptionId?: string;
+  visitId?: string;
   items: PharmacySaleItem[];
 }
 
@@ -508,6 +525,7 @@ export interface PharmacySaleResponse {
   id: string;
   patientId?: string;
   prescriptionId?: string;
+  visitId?: string;
   totalAmount: number;
   items: PharmacySaleItem[];
 }
@@ -596,32 +614,71 @@ export type PrescriptionItemResponse = PrescriptionItemDTO;
 export type PrescriptionResponse = PrescriptionDTO;
 
 
-// Billing types
-export interface BillingItemDTO {
-  id?: string;
-  itemName: string;
-  amount: number;
+// Finance types
+export type InvoiceStatus = 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCELLED';
+export type InvoiceItemCategory = 'CONSULTATION' | 'PHARMACY' | 'LAB' | 'PROCEDURE' | 'OTHERS';
+
+export interface InvoiceItemDTO {
+  id: string;
+  itemDescription: string;
+  category: InvoiceItemCategory;
   quantity: number;
+  unitPrice: number;
   subtotal: number;
+  taxAmount: number;
+  discountAmount: number;
+  netTotal: number;
+  sourceType: string;
+  sourceId: string;
+  doctorId?: string;
+  doctorName?: string;
 }
 
-export interface BillingDTO {
-  id?: string;
+export interface InvoiceDTO {
+  id: string;
   patientId: string;
   patientName?: string;
-  appointmentId?: string;
-  sourceType: 'OPD' | 'IPD' | 'PHARMACY' | 'LAB' | 'EMERGENCY' | 'APPOINTMENT';
-  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'PARTIALLY_PAID';
+  visitId: string;
+  invoiceNumber: string;
+  status: InvoiceStatus;
+  subtotalAmount: number;
+  taxAmount: number;
+  discountAmount: number;
   totalAmount: number;
-  discount?: number;
-  paymentMethod?: string;
-  createdAt?: string;
-  items: BillingItemDTO[];
+  amountPaid: number;
+  amountDue: number;
+  dueDate?: string;
+  createdAt: string;
+  items: InvoiceItemDTO[];
 }
 
-// Legacy aliases
-export type BillingItemResponse = BillingItemDTO;
-export type BillingResponse = BillingDTO;
+export interface PaymentDTO {
+  id: string;
+  hospitalId: string;
+  patientId: string;
+  visitId?: string;
+  amount: number;
+  paymentMode: 'CASH' | 'UPI' | 'CARD';
+  referenceNumber?: string;
+  status: 'SUCCESS' | 'FAILED' | 'REFUNDED';
+  paymentDate: string;
+  collectedBy: string;
+  receiptNumber: string;
+}
+
+export interface RecordPaymentRequest {
+  patientId: string;
+  visitId?: string;
+  amount: number;
+  paymentMode: 'CASH' | 'UPI' | 'CARD';
+  referenceNumber?: string;
+  invoiceId?: string;
+}
+
+// Legacy compatibility (to be removed)
+export type BillingDTO = InvoiceDTO;
+export type BillingItemDTO = InvoiceItemDTO;
+export type BillingResponse = InvoiceDTO;
 
 // Audit types
 export interface AuditDetail {

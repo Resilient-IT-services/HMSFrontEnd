@@ -36,7 +36,7 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (debouncedSearch.length < 2 || debouncedSearch === defaultValue) {
+      if (debouncedSearch.trim().length < 2 || debouncedSearch === defaultValue) {
         setResults([]);
         return;
       }

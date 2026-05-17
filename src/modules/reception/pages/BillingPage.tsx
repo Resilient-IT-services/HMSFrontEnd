@@ -27,7 +27,8 @@ export const BillingPage = () => {
     total,
     handleMarkAsPaid,
     generateBill,
-    isPaid
+    isPaid,
+    invoice
   } = useReceptionBilling();
 
   if (loading) {
@@ -62,12 +63,12 @@ export const BillingPage = () => {
             title="Consultation Billing" 
             description="Finalize patient visit fees and process medical service payments."
           >
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs">
-                 Status: {appointment.status.replace('_', ' ')}
+                 Status: {isPaid ? 'PAID' : 'PAYMENT PENDING'}
                </Badge>
                <Badge variant="slate" className="px-3 py-1.5 sm:px-4 sm:py-2 border-slate-200 text-[10px] sm:text-xs">
-                 ID: #INV-{appointment.id.substring(0, 8).toUpperCase()}
+                 {invoice ? `Invoice: ${invoice.invoiceNumber}` : `ID: #INV-${appointment.id.substring(0, 8).toUpperCase()}`}
                </Badge>
             </div>
           </PageHeading>
@@ -169,31 +170,40 @@ export const BillingPage = () => {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xs sm:text-sm font-bold text-slate-600">Base Fee</span>
-                  <span className="font-black text-slate-900">₹{consultationFee.toFixed(2)}</span>
+                  <span className="font-black text-slate-900">₹{(invoice?.subtotalAmount ?? consultationFee).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center py-1 sm:py-2">
                   <span className="text-xs sm:text-sm font-bold text-slate-600">Discount</span>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px]">₹</span>
-                    <input 
-                      type="number"
-                      className="w-24 sm:w-32 pl-6 sm:pl-7 pr-2 sm:pr-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all text-sm"
-                      value={discount}
-                      onChange={(e) => setDiscount(Number(e.target.value))}
-                      disabled={isPaid}
-                    />
-                  </div>
+                  {isPaid ? (
+                    <span className="font-black text-emerald-600">- ₹{(invoice?.discountAmount ?? discount).toFixed(2)}</span>
+                  ) : (
+                    <div className="relative">
+                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px]">₹</span>
+                      <input 
+                        type="number"
+                        className="w-24 sm:w-32 pl-6 sm:pl-7 pr-2 sm:pr-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all text-sm"
+                        value={discount}
+                        onChange={(e) => setDiscount(Number(e.target.value))}
+                      />
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm font-bold text-slate-600">Taxes (0%)</span>
-                  <span className="font-black text-slate-900">₹0.00</span>
-                </div>
+                {isPaid && (
+                   <div className="flex justify-between items-center py-1 border-t border-slate-50 pt-3">
+                     <span className="text-xs sm:text-sm font-bold text-slate-500">Amount Paid</span>
+                     <span className="font-black text-emerald-700">₹{(invoice?.amountPaid ?? total).toFixed(2)}</span>
+                   </div>
+                )}
                 <div className="pt-4 sm:pt-6 border-t border-slate-100 mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
                   <div>
-                    <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Total Net Payable</p>
+                    <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                      {isPaid ? 'Balance Due' : 'Total Net Payable'}
+                    </p>
                     <p className="text-[10px] sm:text-sm font-bold text-slate-500 italic">Inclusive of all medical charges</p>
                   </div>
-                  <span className="text-3xl sm:text-4xl font-black text-orange-600 tracking-tighter">₹{total.toFixed(2)}</span>
+                  <span className={`text-3xl sm:text-4xl font-black tracking-tighter ${isPaid && (invoice?.amountDue ?? 0) <= 0 ? 'text-emerald-600' : 'text-orange-600'}`}>
+                    ₹{(isPaid ? (invoice?.amountDue ?? 0) : total).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </Card>
@@ -201,7 +211,7 @@ export const BillingPage = () => {
             {/* Payment Method */}
             {!isPaid && (
               <Card title="Select Payment Method" icon="account_balance_wallet" className="op-bill-payment-method no-print">
-                <div className="grid grid-cols-1 xs:grid-cols-3 gap-3 sm:gap-4">
+                <div className="grid grid-cols-3 gap-3 sm:gap-4">
                   {[
                     { id: 'CASH', label: 'Cash', icon: 'payments' },
                     { id: 'UPI', label: 'UPI / QR', icon: 'qr_code_2' },
@@ -210,13 +220,13 @@ export const BillingPage = () => {
                     <button
                       key={m.id}
                       onClick={() => setPaymentMethod(m.id as any)}
-                      className={`flex flex-row xs:flex-col items-center justify-center p-4 sm:p-6 rounded-2xl border-2 transition-all group gap-4 xs:gap-0 ${
+                      className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-2xl border-2 transition-all group ${
                         paymentMethod === m.id
                           ? 'border-orange-600 bg-orange-50 text-orange-600 shadow-lg shadow-orange-600/10'
                           : 'border-slate-100 bg-white text-slate-400 hover:bg-slate-50 hover:border-slate-200'
                       }`}
                     >
-                      <span className={`material-symbols-outlined text-2xl sm:text-3xl mb-0 xs:mb-3 transition-transform ${paymentMethod === m.id ? 'scale-110' : 'group-hover:scale-110'}`}>
+                      <span className={`material-symbols-outlined text-2xl sm:text-3xl mb-2 transition-transform ${paymentMethod === m.id ? 'scale-110' : 'group-hover:scale-110'}`}>
                         {m.icon}
                       </span>
                       <span className="text-[10px] font-black uppercase tracking-widest">{m.label}</span>
