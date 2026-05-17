@@ -3,21 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/state/store';
 import { adminService } from '@/services/adminService';
-import { hospitalService } from '@/services/hospitalService';
-import { setCurrentHospitalId } from '@/state/authSlice';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { HospitalResponse } from '@/types/api';
 
 export function VitalsConfigPage() {
-  const dispatch = useDispatch();
-  const { user } = useSelector((state: RootState) => state.auth);
-  const currentHospitalId = user?.currentHospitalId;
-
-  const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [settings, setSettings] = useState<Record<string, {minValue: number, maxValue: number, unit: string}>>({});
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,22 +28,7 @@ export function VitalsConfigPage() {
     { value: 'WEIGHT', label: 'Weight' },
   ];
 
-  const fetchHospitals = async () => {
-    try {
-      const res = await hospitalService.list(0, 100);
-      if (res.success && res.data) {
-        setHospitals(res.data.content);
-      }
-    } catch (error) {
-      console.error('Failed to fetch hospitals', error);
-    }
-  };
-
   const fetchSettings = React.useCallback(async () => {
-    if (!currentHospitalId) {
-      setLoading(false);
-      return;
-    }
     setLoading(true);
     try {
       const res = await adminService.getVitalRanges();
@@ -65,25 +40,11 @@ export function VitalsConfigPage() {
     } finally {
       setLoading(false);
     }
-  }, [currentHospitalId]);
-
-  useEffect(() => {
-    const trigger = async () => {
-      await fetchHospitals();
-    };
-    void trigger();
   }, []);
 
   useEffect(() => {
-    const trigger = async () => {
-      await fetchSettings();
-    };
-    void trigger();
-  }, [currentHospitalId, fetchSettings]);
-
-  const handleHospitalChange = (id: string) => {
-    dispatch(setCurrentHospitalId(id));
-  };
+    void fetchSettings();
+  }, [fetchSettings]);
 
   const handleOpenModal = (type: string, currentRange?: any) => {
     setEditingType(type);
@@ -170,122 +131,100 @@ export function VitalsConfigPage() {
   };
 
   return (
-    <MainLayout title="Vitals Configuration">
+    <MainLayout title="Global Vitals Configuration">
       <div className="space-y-6 max-w-5xl mx-auto">
-        {/* Hospital Context Selector */}
         <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600">
-              <span className="material-symbols-outlined text-3xl">local_hospital</span>
+              <span className="material-symbols-outlined text-3xl">health_metrics</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800 uppercase tracking-tight">Hospital Configuration Context</h2>
-              <p className="text-sm text-slate-500 italic">Select a hospital to manage its specific clinical vital thresholds.</p>
+              <h2 className="text-lg font-bold text-slate-800 uppercase tracking-tight">Global Clinical Standard</h2>
+              <p className="text-sm text-slate-500 italic">Configure standard medical vital thresholds applied across all hospitals in the system.</p>
             </div>
           </div>
-          <div className="w-full md:w-72">
-            <select 
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 font-bold text-slate-700 outline-none focus:ring-2 focus:ring-orange-200"
-              value={currentHospitalId || ''}
-              onChange={(e) => handleHospitalChange(e.target.value)}
-            >
-              <option value="">Select Hospital...</option>
-              {hospitals.map(h => (
-                <option key={h.id} value={h.id}>{h.name} ({h.hospitalCode})</option>
-              ))}
-            </select>
-          </div>
+          <span className="text-[10px] bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-green-100">Active Enforcement</span>
         </div>
 
-        {currentHospitalId ? (
-          <Card>
-            <div className="p-4 border-b border-gray-50 flex justify-between items-center">
-              <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                <span className="material-symbols-outlined text-orange-600">health_metrics</span>
-                Vital Safety Ranges for {hospitals.find(h => h.id === currentHospitalId)?.name}
-              </h3>
-              <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-bold uppercase">Dynamic Backend Enforcement</span>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-slate-50">
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vital Metric</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Safety Range (Min - Max)</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Measurement Unit</th>
-                    <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {loading ? (
-                    <tr><td colSpan={4} className="px-6 py-10 text-center text-slate-400 italic">Loading configuration...</td></tr>
-                  ) : VITAL_TYPES.map((type) => {
-                    const range = settings[type.value];
-                    return (
-                      <tr 
-                        key={type.value} 
-                        className="hover:bg-slate-50 transition-colors group cursor-pointer"
-                        onDoubleClick={() => handleOpenModal(type.value, range)}
-                      >
-                        <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
-                        <td className="px-6 py-4">
-                          {range ? (
-                            <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                              {range.minValue} — {range.maxValue}
-                            </span>
-                          ) : (
-                            <span className="text-gray-300 italic text-xs">Awaiting Initialization...</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4">
-                          {range ? (
-                            <span className="text-sm font-bold text-slate-600 tracking-tight">{range.unit}</span>
-                          ) : (
-                            <span className="text-gray-300">--</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-center">
-                          <button 
-                            onClick={() => handleOpenModal(type.value, range)} 
-                            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
-                          >
-                            <span className="material-symbols-outlined text-sm">settings</span>
-                            Configure
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        ) : (
-          <div className="bg-white p-12 rounded-xl border border-dashed border-gray-200 text-center">
-            <span className="material-symbols-outlined text-6xl text-gray-200 mb-4">clinical_notes</span>
-            <h3 className="text-xl font-bold text-gray-400 italic">No Hospital Context Selected</h3>
-            <p className="text-gray-400 mt-2">Please select a hospital above to view and configure patient safety ranges.</p>
+        <Card>
+          <div className="p-4 border-b border-gray-50">
+            <h3 className="font-bold text-slate-700 flex items-center gap-2 uppercase text-xs tracking-tighter">
+              Standard Safety Ranges
+            </h3>
           </div>
-        )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-50">
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vital Metric</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Safety Range (Min - Max)</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Measurement Unit</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {loading ? (
+                  <tr><td colSpan={4} className="px-6 py-10 text-center text-slate-400 italic">Loading global medical policies...</td></tr>
+                ) : VITAL_TYPES.map((type) => {
+                  const range = settings[type.value];
+                  return (
+                    <tr 
+                      key={type.value} 
+                      className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                      onDoubleClick={() => handleOpenModal(type.value, range)}
+                    >
+                      <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
+                      <td className="px-6 py-4">
+                        {range ? (
+                          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                            {range.minValue} — {range.maxValue}
+                          </span>
+                        ) : (
+                          <span className="text-gray-300 italic text-xs">Awaiting Initialization...</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {range ? (
+                          <span className="text-sm font-bold text-slate-600 tracking-tight">{range.unit}</span>
+                        ) : (
+                          <span className="text-gray-300">--</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button 
+                          onClick={() => handleOpenModal(type.value, range)} 
+                          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
+                        >
+                          <span className="material-symbols-outlined text-sm">settings</span>
+                          Configure
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
 
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
-        title={editingType ? `Configure ${getVitalLabel(editingType)} Thresholds` : 'Config'}
+        title={editingType ? `Update Global Medical Policy: ${getVitalLabel(editingType)}` : 'Config'}
       >
         <div className="p-6 space-y-6">
           <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 flex gap-3">
-            <span className="material-symbols-outlined text-orange-600">info</span>
-            <p className="text-xs text-orange-800 italic leading-relaxed">
-              Updating these values will immediately affect all clinical data entry for this hospital. 
-              Values outside this range will be blocked by the backend.
+            <span className="material-symbols-outlined text-orange-600">policy</span>
+            <p className="text-xs text-orange-800 italic leading-relaxed font-medium">
+              You are modifying a <span className="font-black underline">SYSTEM-WIDE POLICY</span>. 
+              Changes will immediately affect clinical intake and validation across all hospitals.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-6">
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Safety Minimum</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Policy Minimum</label>
               <input 
                 type="number" 
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 font-bold focus:ring-2 focus:ring-orange-200 outline-none transition-all shadow-sm"
@@ -294,7 +233,7 @@ export function VitalsConfigPage() {
               />
             </div>
             <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Safety Maximum</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Policy Maximum</label>
               <input 
                 type="number" 
                 className={`w-full bg-slate-50 border ${fieldErrors.maxValue ? 'border-red-500' : 'border-slate-200'} rounded-lg px-4 py-2.5 font-bold focus:ring-2 focus:ring-orange-200 outline-none transition-all shadow-sm`}
@@ -304,7 +243,7 @@ export function VitalsConfigPage() {
               {fieldErrors.maxValue && <p className="text-red-500 text-[9px] mt-1 font-bold uppercase tracking-tighter animate-bounce">{fieldErrors.maxValue}</p>}
             </div>
             <div className="col-span-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Primary Measurement Unit</label>
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Global Standard Unit</label>
               {renderUnitSelection()}
               {fieldErrors.unit && <p className="text-red-500 text-[9px] mt-1 font-bold uppercase tracking-tighter">{fieldErrors.unit}</p>}
             </div>
@@ -312,7 +251,7 @@ export function VitalsConfigPage() {
 
           <div className="flex justify-end gap-3 pt-6 border-t border-slate-50">
             <button onClick={() => setIsModalOpen(false)} className="px-6 py-2.5 border border-slate-200 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-all active:scale-95">Cancel</button>
-            <button onClick={handleSave} className="px-10 py-2.5 bg-orange-700 text-white rounded-xl font-bold hover:bg-orange-800 shadow-lg shadow-orange-700/20 transition-all active:scale-95">Update Safety Policy</button>
+            <button onClick={handleSave} className="px-10 py-2.5 bg-orange-700 text-white rounded-xl font-bold hover:bg-orange-800 shadow-lg shadow-orange-700/20 transition-all active:scale-95 text-xs uppercase">Commit Global Policy</button>
           </div>
         </div>
       </Modal>

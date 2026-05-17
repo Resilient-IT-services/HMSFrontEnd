@@ -1,17 +1,17 @@
 import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
-import { ApiResponse, VitalSetting, VitalRangesResponse, VitalRange } from '@/types/api';
+import { ApiResponse, VitalRangesResponse, VitalRange, VitalRangeConfigDTO } from '@/types/api';
 
 
 
 export const adminService = {
-  async listVitalSettings(config?: AxiosRequestConfig): Promise<ApiResponse<VitalSetting[]>> {
-    const response = await apiClient.get<ApiResponse<VitalSetting[]>>('/admin/vital-settings', config);
+  async listVitalSettings(config?: AxiosRequestConfig): Promise<ApiResponse<VitalRangeConfigDTO[]>> {
+    const response = await apiClient.get<ApiResponse<VitalRangeConfigDTO[]>>('/admin/vital-ranges', config);
     return response.data;
   },
 
-  async saveVitalSetting(setting: VitalSetting): Promise<ApiResponse<VitalSetting>> {
-    const response = await apiClient.post<ApiResponse<VitalSetting>>('/admin/vital-settings', setting);
+  async saveVitalSetting(setting: VitalRangeConfigDTO): Promise<ApiResponse<VitalRangeConfigDTO>> {
+    const response = await apiClient.put<ApiResponse<VitalRangeConfigDTO>>(`/admin/vital-ranges/${setting.vitalType}`, setting);
     return response.data;
   },
 
