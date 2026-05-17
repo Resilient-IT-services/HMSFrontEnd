@@ -16,7 +16,9 @@ import {
   PharmacySaleRequest,
   PharmacySaleResponse,
   PharmacyReturnRequest,
-  PharmacyReturnResponse
+  PharmacyReturnResponse,
+  QuickPharmacySaleRequest,
+  QuickPharmacySaleResponse
 } from '@/types/api';
 import { LOW_STOCK_THRESHOLD, EXPIRY_ALERT_DAYS } from '@/utils/constants';
 
@@ -41,11 +43,6 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  markAsDispensed: async (id: string) => {
-    const response = await apiClient.post<ApiResponse<void>>(`/pharmacy/prescriptions/${id}/dispense`);
-    return response.data;
-  },
-
   // Medicine Management (Pharmacy Catalog)
   getMedicines: async (params?: { search?: string; page?: number; size?: number }) => {
     const queryParams: any = { ...params };
@@ -66,15 +63,6 @@ export const pharmacyApi = {
     formData.append('file', file);
     const response = await apiClient.post<ApiResponse<void>>('/pharmacy/medicines/import', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
-    });
-    return response.data;
-  },
-
-  getAvailableMedicines: async (search: string) => {
-    const params: any = {};
-    if (search && search.trim()) params.search = search;
-    const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/medicines/available', {
-      params
     });
     return response.data;
   },
@@ -173,6 +161,28 @@ export const pharmacyApi = {
 
   defineInventoryItem: async (data: InventoryItemRequestDTO) => {
     const response = await apiClient.post<ApiResponse<InventoryItemResponse>>('/inventory/items', data);
+    return response.data;
+  },
+
+  createQuickSale: async (data: QuickPharmacySaleRequest) => {
+    const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>('/pharmacy/quick-sale', data);
+    return response.data;
+  },
+
+  getSale: async (id: string) => {
+    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/quick-sale/${id}`);
+    return response.data;
+  },
+
+  getSaleByPrescription: async (prescriptionId: string) => {
+    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/quick-sale/prescription/${prescriptionId}`);
+    return response.data;
+  },
+
+  searchRecentCustomers: async (search: string) => {
+    const response = await apiClient.get<ApiResponse<any[]>>(`/pharmacy/quick-sale/recent-customers`, {
+      params: { search }
+    });
     return response.data;
   }
 };

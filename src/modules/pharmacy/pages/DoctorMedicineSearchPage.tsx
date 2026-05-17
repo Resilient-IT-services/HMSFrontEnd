@@ -22,15 +22,16 @@ export const DoctorMedicineSearchPage = () => {
       
       setLoading(true);
       try {
-        const response = await pharmacyApi.getAvailableMedicines(debouncedSearch);
+        const response = await pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 20 });
         if (response.success && response.data) {
-          setResults(response.data);
+          setResults(response.data.content || []);
         }
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
+
     };
 
     searchMedicines();

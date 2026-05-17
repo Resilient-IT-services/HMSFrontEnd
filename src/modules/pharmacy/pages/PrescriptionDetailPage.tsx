@@ -157,20 +157,12 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
 
   const handleDispense = async () => {
     if (!id) return;
-    setDispensing(true);
-    try {
-      const response = await pharmacyApi.markAsDispensed(id);
-      if (response.success) {
-        triggerGlobalToast('Dispensed successfully', 'success');
-        sessionStorage.removeItem(`rx_draft_${id}`);
-        router.push('/pharmacy/dashboard');
-      }
-    } catch (error) {
-      console.error(error);
-      triggerGlobalToast('Dispensing failed', 'error');
-    } finally {
-      setDispensing(false);
-    }
+    router.push(`/pharmacy/sales?prescriptionId=${id}`);
+  };
+
+  const handlePrintInvoice = () => {
+    if (!id) return;
+    router.push(`/pharmacy/sales/prescription/${id}`);
   };
 
   if (loading) return <MainLayout title="Loading..."><LoadingSkeleton /></MainLayout>;
@@ -302,14 +294,24 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               </div>
             </div>
             
-            <button 
-              onClick={handleDispense}
-              disabled={dispensing || billItems.length === 0}
-              className="w-full py-4 bg-orange-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined">payments</span>
-              {dispensing ? 'Finalizing...' : 'Complete Dispensing'}
-            </button>
+            {prescription.status !== 'DISPENSED' ? (
+              <button 
+                onClick={handleDispense}
+                disabled={dispensing || billItems.length === 0}
+                className="w-full py-4 bg-orange-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">payments</span>
+                {dispensing ? 'Finalizing...' : 'Complete Dispensing'}
+              </button>
+            ) : (
+              <button 
+                onClick={handlePrintInvoice}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">print</span>
+                Print Invoice
+              </button>
+            )}
             
             <button 
               onClick={() => globalThis.print()}

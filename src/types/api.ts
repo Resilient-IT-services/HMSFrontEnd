@@ -521,6 +521,58 @@ export interface PharmacySaleRequest {
   items: PharmacySaleItem[];
 }
 
+export interface QuickPharmacySaleRequest {
+  saleType: 'WALKIN' | 'VISIT';
+  patientId?: string;
+  visitId?: string;
+  prescriptionId?: string;
+  doctorId?: string;
+  externalDoctorName?: string;
+  customerName?: string;
+  customerPhone?: string;
+  items: {
+    medicineId: string;
+    medicineBatchId: string;
+    quantity: number;
+    unitPrice: number;
+    discountAmount?: number;
+    taxAmount?: number;
+  }[];
+  payment?: {
+    mode: string;
+    amount: number;
+    referenceNumber?: string;
+  };
+  notes?: string;
+}
+
+export interface QuickPharmacySaleItem {
+  id: string;
+  medicineName: string;
+  batchNumber: string;
+  quantity: number;
+  unitPrice: number;
+  subtotal: number;
+  discountAmount: number;
+  netAmount: number;
+}
+
+export interface QuickPharmacySaleResponse {
+  saleId: string;
+  saleNumber: string;
+  invoiceId: string;
+  invoiceNumber: string;
+  totalAmount: number;
+  status: string;
+  paymentId?: string;
+  receiptNumber?: string;
+  customerName?: string;
+  customerPhone?: string;
+  externalDoctorName?: string;
+  createdAt: string;
+  items: QuickPharmacySaleItem[];
+}
+
 export interface PharmacySaleResponse {
   id: string;
   patientId?: string;
@@ -591,6 +643,7 @@ export interface PrescriptionDTO {
   doctorId?: string;
   doctorName?: string;
   appointmentId?: string;
+  visitId?: string;
   items: PrescriptionItemDTO[];
   status?: string;
   createdAt?: string;
@@ -604,11 +657,11 @@ export interface PrescriptionSummaryDTO {
   doctorId: string;
   doctorName: string;
   appointmentId: string;
+  visitId?: string;
   status: string;
   createdAt: string;
   itemCount: number;
 }
-
 // Legacy aliases
 export type PrescriptionItemResponse = PrescriptionItemDTO;
 export type PrescriptionResponse = PrescriptionDTO;

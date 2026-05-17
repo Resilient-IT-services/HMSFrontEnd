@@ -58,23 +58,7 @@ const PrescriptionDetailsPage: React.FC = () => {
 
   const handleDispense = async () => {
     if (!prescription?.id) return;
-    try {
-      setDispensing(true);
-      // Simulating API call as per instructions
-      const response = await pharmacyApi.markAsDispensed(prescription.id);
-      if (response.success) {
-        showToast('Prescription marked as dispensed', 'success');
-        setPrescription({ ...prescription, status: 'COMPLETED' });
-      } else {
-        // Fallback for frontend state if API fails or doesn't exist
-        setPrescription({ ...prescription, status: 'COMPLETED' });
-        showToast('Prescription dispensed (Frontend Update)', 'success');
-      }
-    } catch {
-      showToast('Failed to dispense prescription', 'error');
-    } finally {
-      setDispensing(false);
-    }
+    router.push(`/pharmacy/sales?prescriptionId=${prescription.id}`);
   };
 
   const handlePrint = () => {

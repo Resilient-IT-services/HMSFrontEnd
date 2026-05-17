@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { pharmacyApi } from '../api/pharmacyApi';
-import { MedicineResponse, MedicineSummaryDTO } from '@/types/api';
+import { MedicineResponse } from '@/types/api';
 import useDebounce from '@/hooks/useDebounce';
 
 interface MedicineAutocompleteProps {
@@ -28,10 +28,7 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const trigger = async () => {
-      setSearchTerm(defaultValue);
-    };
-    void trigger();
+    setSearchTerm(defaultValue);
   }, [defaultValue]);
 
   useEffect(() => {
@@ -43,17 +40,9 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       
       setLoading(true);
       try {
-        let response;
-        if (stockOnly) {
-          response = await pharmacyApi.getAvailableMedicines(debouncedSearch);
-        } else {
-          response = await pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 });
-        }
-
+        const response = await pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 });
         if (response.success && response.data) {
-          // Response for getAvailableMedicines is PageResponse<MedicineDTO> or similar?
-          // Wait, getAvailableMedicines returns ApiResponse<MedicineResponse[]> in api.ts
-          setResults(Array.isArray(response.data) ? response.data : (response.data as any).content || []);
+          setResults(response.data.content || []);
         }
       } catch (error) {
         console.error(error);
@@ -62,10 +51,7 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       }
     };
 
-    const trigger = async () => {
-      await fetchResults();
-    };
-    void trigger();
+    fetchResults();
   }, [debouncedSearch, defaultValue, stockOnly]);
 
   useEffect(() => {

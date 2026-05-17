@@ -1,5 +1,5 @@
-import PharmacySalesPage from '@/modules/pharmacy/pages/PharmacySalesPage';
+import QuickPharmacyBillingPage from '@/modules/pharmacy/pages/QuickPharmacyBillingPage';
 
 export default function Page() {
-  return <PharmacySalesPage />;
+  return <QuickPharmacyBillingPage />;
 }
