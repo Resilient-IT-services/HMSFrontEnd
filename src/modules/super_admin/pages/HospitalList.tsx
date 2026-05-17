@@ -214,7 +214,12 @@ export function HospitalList() {
       </PageSurface>
 
       {isModalOpen && selectedHospital && (
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Hospital Details" maxWidth="max-w-lg">
+        <Modal 
+          isOpen={isModalOpen} 
+          onClose={() => setIsModalOpen(false)} 
+          title="Hospital Details" 
+          size="lg"
+        >
           <div className="space-y-5 p-6">
             {[
               { label: 'Name', value: selectedHospital.name },

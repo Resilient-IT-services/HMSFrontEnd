@@ -44,7 +44,7 @@ const PatientHistoryModal: React.FC<PatientHistoryModalProps> = ({ patientId, on
   }, [patientId]);
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Patient Medical History">
+    <Modal isOpen={true} onClose={onClose} title="Patient Medical History" size="lg">
       <div className="py-4 max-h-[70vh] overflow-y-auto pr-2">
         {loading ? (
           <LoadingSkeleton />

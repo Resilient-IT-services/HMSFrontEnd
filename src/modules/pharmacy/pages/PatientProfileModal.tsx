@@ -11,7 +11,7 @@ interface PatientProfileModalProps {
 
 const PatientProfileModal: React.FC<PatientProfileModalProps> = ({ patient, onClose }) => {
   return (
-    <Modal isOpen={true} onClose={onClose} title="Patient Profile">
+    <Modal isOpen={true} onClose={onClose} title="Patient Profile" size="lg">
       <div className="space-y-6 py-4">
         <div className="flex items-center gap-4">
           <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-3xl font-bold">

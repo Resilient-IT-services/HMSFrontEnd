@@ -55,8 +55,8 @@ const AddInventoryItemModal: React.FC<AddInventoryItemModalProps> = ({ onClose, 
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title="Define New Inventory Item">
-      <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <Modal isOpen={true} onClose={onClose} title="Define New Inventory Item" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6 p-8">
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Item Name</label>
           <input 

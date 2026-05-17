@@ -66,16 +66,16 @@ const MedicineViewModal: React.FC<MedicineViewModalProps> = ({
       isOpen={true}
       onClose={onClose}
       title="Medicine Information"
-      maxWidth="max-w-6xl"
+      size="2xl"
     >
-      <div className="bg-white rounded-xl overflow-hidden">
-        {/* Header */}
-
-
+      <div className="bg-white min-h-[500px]">
         {loading ? (
-          <div className="py-20"><LoadingSkeleton /></div>
+          <div className="py-32 flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-slate-400 font-bold uppercase tracking-widest text-xs">Analyzing product profile...</p>
+          </div>
         ) : medicine ? (
-          <div className="p-8 space-y-8 max-h-[80vh] overflow-y-auto">
+          <div className="p-10 space-y-10">
             
             {/* KPI Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">

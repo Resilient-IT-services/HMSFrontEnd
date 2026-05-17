@@ -247,11 +247,13 @@ export const AppointmentsPage = () => {
         </div>
       </div>
 
-      <Modal 
-        isOpen={isFilterModalOpen} 
-        onClose={() => setIsFilterModalOpen(false)} 
-        title="Advanced Filters"
+      <Modal
+        isOpen={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        title="Filter Appointments"
+        size="lg"
       >
+
         <div className="p-6 space-y-4">
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase text-slate-400">Appointment Status</label>

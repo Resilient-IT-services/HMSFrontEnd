@@ -19,7 +19,7 @@ export function VitalsConfigPage() {
   });
 
   const VITAL_TYPES = [
-    { value: 'BODY_TEMPERATURE', label: 'Body Temperature (°C)' },
+    { value: 'BODY_TEMPERATURE', label: 'Body Temperature (°F)' },
     { value: 'SYSTOLIC_BP', label: 'Systolic BP (mmHg)' },
     { value: 'DIASTOLIC_BP', label: 'Diastolic BP (mmHg)' },
     { value: 'HEART_RATE', label: 'Heart Rate (bpm)' },
@@ -168,6 +168,7 @@ export function VitalsConfigPage() {
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
         title={editingType ? `Update Global Medical Policy: ${getVitalLabel(editingType)}` : 'Config'}
+        size="lg"
       >
         <div className="p-6 space-y-6">
           <div className="bg-orange-50 p-4 rounded-lg border border-orange-100 flex gap-3">

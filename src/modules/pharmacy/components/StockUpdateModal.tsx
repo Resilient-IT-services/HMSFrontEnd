@@ -53,8 +53,8 @@ const StockUpdateModal: React.FC<StockUpdateModalProps> = ({ itemId, itemName, o
   };
 
   return (
-    <Modal isOpen={true} onClose={onClose} title={`Update Stock: ${itemName}`}>
-      <form onSubmit={handleSubmit} className="space-y-4 py-4">
+    <Modal isOpen={true} onClose={onClose} title={`Update Stock: ${itemName}`} size="lg">
+      <form onSubmit={handleSubmit} className="space-y-6 p-8">
         <div>
           <label className="block text-sm font-bold text-gray-700 mb-1">Transaction Type</label>
           <select 

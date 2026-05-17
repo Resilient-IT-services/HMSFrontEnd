@@ -385,6 +385,7 @@ export const MedicineInventory = () => {
               setMedicineToDelete(null);
             }}
             title="Confirm Deletion"
+            size="sm"
           >
             <div className="p-8 text-center">
               <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">

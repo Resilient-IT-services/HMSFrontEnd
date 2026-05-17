@@ -7,6 +7,7 @@ import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 import { useMedicines } from '@/modules/super_admin/hooks/useMedicines';
+import { Modal } from '@/components/ui/Modal';
 
 export function MedicineList() {
   const {
@@ -211,38 +212,43 @@ export function MedicineList() {
       </div>
 
       {/* Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
-          <div className="w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl border border-slate-200 overflow-hidden mx-4">
-            <div className="p-10">
-               <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-2xl font-black text-slate-800">Bulk Import Medicines</h2>
-                  <button onClick={() => setShowImportModal(false)} className="text-slate-400 hover:text-slate-600">
-                    <span className="material-symbols-outlined">close</span>
-                  </button>
-               </div>
-               
-               <div className="border-2 border-dashed border-slate-200 rounded-2xl p-12 flex flex-col items-center justify-center gap-4 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative">
-                  <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-                  <span className="material-symbols-outlined text-5xl text-slate-300">cloud_upload</span>
-                  <p className="font-bold text-slate-600">{file ? file.name : 'Select Excel File'}</p>
-               </div>
-
-               <div className="mt-8 bg-slate-900 text-white p-6 rounded-2xl space-y-4">
-                  <h3 className="font-bold text-sm uppercase tracking-widest text-primary">Instructions</h3>
-                  <p className="text-xs text-slate-400">Excel columns: Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category.</p>
-               </div>
-
-               <div className="mt-8 flex gap-4">
-                  <button onClick={() => setShowImportModal(false)} className="flex-1 py-4 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest">Cancel</button>
-                  <button onClick={handleUpload} disabled={!file || loading} className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20">
-                    {loading ? 'Processing...' : 'Start Import'}
-                  </button>
-               </div>
+      <Modal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        title="Bulk Import Medicines"
+        size="2xl"
+      >
+        <div className="p-8 space-y-8">
+          <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-12 flex flex-col items-center justify-center gap-4 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative group">
+            <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+            <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:text-primary transition-all duration-300">
+              <span className="material-symbols-outlined text-4xl">cloud_upload</span>
             </div>
+            <p className="font-black text-slate-600 text-sm uppercase tracking-tight">{file ? file.name : 'Click or Drag Excel File'}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Supported formats: .xlsx, .xls</p>
+          </div>
+
+          <div className="bg-slate-900 text-white p-6 rounded-[1.5rem] space-y-3 relative overflow-hidden shadow-xl shadow-slate-900/10">
+            <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 -rotate-12">info</span>
+            <h3 className="font-black text-xs uppercase tracking-widest text-primary leading-none mb-2">Requirement Protocol</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Your Excel sheet must contain the following columns in order:
+              <span className="block mt-2 font-bold text-white/80">Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category.</span>
+            </p>
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button onClick={() => setShowImportModal(false)} className="flex-1 py-4 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all active:scale-95">Cancel</button>
+            <button 
+              onClick={handleUpload} 
+              disabled={!file || loading} 
+              className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-40"
+            >
+              {loading ? 'Processing Batch...' : 'Begin Bulk Import'}
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
 
       {/* Modals */}
       {showAddModal && <AddMedicineModal onClose={() => setShowAddModal(false)} onSuccess={refresh} />}
