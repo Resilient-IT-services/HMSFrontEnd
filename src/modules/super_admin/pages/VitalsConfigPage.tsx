@@ -179,8 +179,8 @@ export function VitalsConfigPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="max-w-[50%]">
               <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Policy Minimum</label>
               <input 
                 type="number" 
@@ -189,7 +189,7 @@ export function VitalsConfigPage() {
                 onChange={(e) => setFormData({...formData, minValue: Number(e.target.value)})}
               />
             </div>
-            <div>
+            <div className="max-w-[50%]">
               <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Policy Maximum</label>
               <input 
                 type="number" 
