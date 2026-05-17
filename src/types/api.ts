@@ -324,9 +324,7 @@ export interface VitalsDTO {
   heartRate: number;
   pulseRate?: number;
   temperature: number;
-  temperatureUnit?: 'CELSIUS' | 'FAHRENHEIT';
   weight: number;
-  weightUnit?: 'KG' | 'LB';
   oxygenLevel?: number;
   respiratoryRate?: number;
 }
@@ -748,7 +746,6 @@ export interface VitalSetting {
 export interface VitalRange {
   minValue: number;
   maxValue: number;
-  unit: string;
 }
 
 export interface VitalRangeConfigDTO {
@@ -756,7 +753,6 @@ export interface VitalRangeConfigDTO {
   vitalType: 'BODY_TEMPERATURE' | 'SYSTOLIC_BP' | 'DIASTOLIC_BP' | 'OXYGEN_LEVEL' | 'WEIGHT' | 'HEART_RATE';
   minValue: number;
   maxValue: number;
-  unit: string;
 }
 
 export type VitalRangesResponse = Record<string, VitalRange>;
