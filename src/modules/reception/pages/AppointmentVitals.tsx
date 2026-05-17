@@ -32,7 +32,8 @@ export const AppointmentVitals = () => {
     vitalRanges,
     fieldErrors,
     validateField,
-    handleSave
+    handleSave,
+    formatRangeInSelectedUnit
   } = useReceptionVitals();
 
   if (loading) {
@@ -115,8 +116,11 @@ export const AppointmentVitals = () => {
               <form className="space-y-6 sm:space-y-8" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
                 
                 {/* Blood Pressure Row */}
-                <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arterial Blood Pressure (mmHg)</label>
+                <FormField 
+                  label="Arterial Blood Pressure (mmHg)" 
+                  error={fieldErrors.systolic || fieldErrors.diastolic}
+                  className="mb-6"
+                >
                   <div className="flex items-center gap-2 sm:gap-4">
                     <div className="flex-1">
                       <div className="relative">
@@ -124,7 +128,7 @@ export const AppointmentVitals = () => {
                           type="text"
                           inputMode="numeric"
                           placeholder="Systolic"
-                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.systolic ? 'border-red-500' : 'border-slate-100'}`}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.systolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
                           value={systolic}
                           onChange={(e) => { setSystolic(e.target.value); validateField('systolic', e.target.value); }}
                         />
@@ -140,7 +144,7 @@ export const AppointmentVitals = () => {
                           type="text"
                           inputMode="numeric"
                           placeholder="Diastolic"
-                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.diastolic ? 'border-red-500' : 'border-slate-100'}`}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.diastolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
                           value={diastolic}
                           onChange={(e) => { setDiastolic(e.target.value); validateField('diastolic', e.target.value); }}
                         />
@@ -148,19 +152,21 @@ export const AppointmentVitals = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-col gap-1">
-                    {fieldErrors.systolic && <p className="text-[9px] sm:text-[10px] text-red-500 font-bold uppercase tracking-tight">Systolic: {fieldErrors.systolic}</p>}
-                    {fieldErrors.diastolic && <p className="text-[9px] sm:text-[10px] text-red-500 font-bold uppercase tracking-tight">Diastolic: {fieldErrors.diastolic}</p>}
-                    <p className="text-[9px] sm:text-[10px] text-slate-400 italic">Normal: {formatRangeHelper(vitalRanges.SYSTOLIC_BP)} / {formatRangeHelper(vitalRanges.DIASTOLIC_BP)}</p>
+                  <div className="mt-2 space-y-1">
+                    {fieldErrors.systolic && <p className="text-[11px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> Systolic: {fieldErrors.systolic}</p>}
+                    {fieldErrors.diastolic && <p className="text-[11px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> Diastolic: {fieldErrors.diastolic}</p>}
+                    <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">info</span>
+                      Normal Range: {formatRangeInSelectedUnit('SYSTOLIC_BP')} / {formatRangeInSelectedUnit('DIASTOLIC_BP')}
+                    </p>
                   </div>
-                </div>
+                </FormField>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                   
                   {/* Heart Rate */}
                   <FormField 
                     label="Heart Rate (BPM)" 
-                    error={fieldErrors.heartRate}
                     className="mb-0"
                   >
                     <div className="relative">
@@ -168,19 +174,22 @@ export const AppointmentVitals = () => {
                         type="text"
                         inputMode="numeric"
                         placeholder="e.g. 72"
-                        className="w-full p-3 sm:p-4 bg-slate-50 border border-slate-100 rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none"
+                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
                         value={heartRate}
                         onChange={(e) => { setHeartRate(e.target.value); validateField('heartRate', e.target.value); }}
                       />
                       <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-orange-600 text-xl sm:text-2xl">favorite</span>
                     </div>
-                    <p className="text-[9px] sm:text-[10px] text-slate-400 italic mt-1">Range: {formatRangeHelper(vitalRanges.HEART_RATE)}</p>
+                    {fieldErrors.heartRate && <p className="text-[11px] text-red-600 font-bold mt-1 uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> {fieldErrors.heartRate}</p>}
+                    <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold mt-2 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">info</span>
+                      Allowed Range: {formatRangeInSelectedUnit('HEART_RATE')}
+                    </p>
                   </FormField>
 
                   {/* Oxygen Level */}
                   <FormField 
                     label="Oxygen Level (SpO2 %)" 
-                    error={fieldErrors.oxygenLevel}
                     className="mb-0"
                   >
                     <div className="relative">
@@ -188,70 +197,90 @@ export const AppointmentVitals = () => {
                         type="text"
                         inputMode="numeric"
                         placeholder="e.g. 98"
-                        className="w-full p-3 sm:p-4 bg-slate-50 border border-slate-100 rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none"
+                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.oxygenLevel ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
                         value={oxygenLevel}
                         onChange={(e) => { setOxygenLevel(e.target.value); validateField('oxygenLevel', e.target.value); }}
                       />
                       <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-blue-600 text-xl sm:text-2xl">pulse_alert</span>
                     </div>
-                    <p className="text-[9px] sm:text-[10px] text-slate-400 italic mt-1">Range: {formatRangeHelper(vitalRanges.OXYGEN_LEVEL)}</p>
+                    {fieldErrors.oxygenLevel && <p className="text-[11px] text-red-600 font-bold mt-1 uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> {fieldErrors.oxygenLevel}</p>}
+                    <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold mt-2 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">info</span>
+                      Allowed Range: {formatRangeInSelectedUnit('OXYGEN_LEVEL')}
+                    </p>
                   </FormField>
 
                   {/* Body Temperature */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Body Temperature</label>
-                      <select 
-                        className="text-[9px] sm:text-[10px] font-black bg-slate-100 border-none rounded px-2 py-1 uppercase tracking-tight outline-none"
-                        value={displayTempUnit}
-                        onChange={(e) => setDisplayTempUnit(e.target.value as any)}
-                      >
-                        <option value="C">°C</option>
-                        <option value="F">°F</option>
-                      </select>
+                  <FormField
+                    label="Body Temperature"
+                    className="mb-0"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-black text-slate-400 uppercase">Unit System</span>
+                        <select 
+                          className="text-[9px] sm:text-[10px] font-black bg-slate-100 border-none rounded px-2 py-1 uppercase tracking-tight outline-none"
+                          value={displayTempUnit}
+                          onChange={(e) => setDisplayTempUnit(e.target.value as any)}
+                        >
+                          <option value="C">°C</option>
+                          <option value="F">°F</option>
+                        </select>
+                      </div>
+                      <div className="relative">
+                        <input 
+                          type="text"
+                          inputMode="decimal"
+                          placeholder={displayTempUnit === 'C' ? 'e.g. 36.6' : 'e.g. 98.6'}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.temperature ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                          value={temperature}
+                          onChange={(e) => { setTemperature(e.target.value); validateField('temperature', e.target.value); }}
+                        />
+                        <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm sm:text-base">{displayTempUnit === 'C' ? '°C' : '°F'}</span>
+                      </div>
                     </div>
-                    <div className="relative">
-                      <input 
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={displayTempUnit === 'C' ? 'e.g. 36.6' : 'e.g. 98.6'}
-                        className="w-full p-3 sm:p-4 bg-slate-50 border border-slate-100 rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none"
-                        value={temperature}
-                        onChange={(e) => { setTemperature(e.target.value); validateField('temperature', e.target.value); }}
-                      />
-                      <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm sm:text-base">{displayTempUnit === 'C' ? '°C' : '°F'}</span>
-                    </div>
-                    {fieldErrors.temperature && <p className="text-[9px] sm:text-[10px] text-red-500 font-bold mt-1 uppercase tracking-tight">{fieldErrors.temperature}</p>}
-                    <p className="text-[9px] sm:text-[10px] text-slate-400 italic mt-1">Range: {formatRangeHelper(vitalRanges.BODY_TEMPERATURE)}</p>
-                  </div>
+                    {fieldErrors.temperature && <p className="text-[11px] text-red-600 font-bold mt-1 uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> {fieldErrors.temperature}</p>}
+                    <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold mt-2 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">info</span>
+                      Allowed Range: {formatRangeInSelectedUnit('BODY_TEMPERATURE')}
+                    </p>
+                  </FormField>
 
                   {/* Weight */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient Weight</label>
-                      <select 
-                        className="text-[9px] sm:text-[10px] font-black bg-slate-100 border-none rounded px-2 py-1 uppercase tracking-tight outline-none"
-                        value={displayWeightUnit}
-                        onChange={(e) => setDisplayWeightUnit(e.target.value as any)}
-                      >
-                        <option value="KG">KG</option>
-                        <option value="LB">LB</option>
-                      </select>
+                  <FormField
+                    label="Patient Weight"
+                    className="mb-0"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-black text-slate-400 uppercase">Unit System</span>
+                        <select 
+                          className="text-[9px] sm:text-[10px] font-black bg-slate-100 border-none rounded px-2 py-1 uppercase tracking-tight outline-none"
+                          value={displayWeightUnit}
+                          onChange={(e) => setDisplayWeightUnit(e.target.value as any)}
+                        >
+                          <option value="KG">KG</option>
+                          <option value="LB">LB</option>
+                        </select>
+                      </div>
+                      <div className="relative">
+                        <input 
+                          type="text"
+                          inputMode="decimal"
+                          placeholder={displayWeightUnit === 'KG' ? 'e.g. 75.0' : 'e.g. 165.3'}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.weight ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                          value={weight}
+                          onChange={(e) => { setWeight(e.target.value); validateField('weight', e.target.value); }}
+                        />
+                        <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold lowercase text-sm sm:text-base">{displayWeightUnit}</span>
+                      </div>
                     </div>
-                    <div className="relative">
-                      <input 
-                        type="text"
-                        inputMode="decimal"
-                        placeholder={displayWeightUnit === 'KG' ? 'e.g. 75.0' : 'e.g. 165.3'}
-                        className="w-full p-3 sm:p-4 bg-slate-50 border border-slate-100 rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none"
-                        value={weight}
-                        onChange={(e) => { setWeight(e.target.value); validateField('weight', e.target.value); }}
-                      />
-                      <span className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold lowercase text-sm sm:text-base">{displayWeightUnit}</span>
-                    </div>
-                    {fieldErrors.weight && <p className="text-[9px] sm:text-[10px] text-red-500 font-bold mt-1 uppercase tracking-tight">{fieldErrors.weight}</p>}
-                    <p className="text-[9px] sm:text-[10px] text-slate-400 italic mt-1">Range: {formatRangeHelper(vitalRanges.WEIGHT)}</p>
-                  </div>
+                    {fieldErrors.weight && <p className="text-[11px] text-red-600 font-bold mt-1 uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> {fieldErrors.weight}</p>}
+                    <p className="text-[9px] sm:text-[10px] text-slate-500 font-bold mt-2 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">info</span>
+                      Allowed Range: {formatRangeInSelectedUnit('WEIGHT')}
+                    </p>
+                  </FormField>
 
                 </div>
 

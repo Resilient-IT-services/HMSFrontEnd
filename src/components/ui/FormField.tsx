@@ -21,7 +21,7 @@ export const FormField: React.FC<FormFieldProps> = ({
         {label} {required && <span className="text-[var(--error)]">*</span>}
       </label>
       {children}
-      {error && <p className="mt-1 text-sm text-[var(--error)]">{error}</p>}
+      {error && <p className="mt-1 text-sm text-red-500 font-bold">{error}</p>}
     </div>
   );
 };

@@ -29,17 +29,32 @@ export const useReceptionVitals = () => {
   const [respiratoryRate, setRespiratoryRate] = useState(''); 
   const [complaints, setComplaints] = useState('');
 
-  const [displayTempUnit, setDisplayTempUnitState] = useState<'C' | 'F'>('C');
-  const [displayWeightUnit, setDisplayWeightUnitState] = useState<'KG' | 'LB'>('KG');
+  // UI state for local conversion with persistence
+  const [displayTempUnit, setDisplayTempUnitState] = useState<'C' | 'F'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('hms_vitals_temp_unit') as 'C' | 'F') || 'C';
+    }
+    return 'C';
+  });
+
+  const [displayWeightUnit, setDisplayWeightUnitState] = useState<'KG' | 'LB'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('hms_vitals_weight_unit') as 'KG' | 'LB') || 'KG';
+    }
+    return 'KG';
+  });
 
   const setDisplayTempUnit = (unit: 'C' | 'F') => {
     if (unit === displayTempUnit) return;
     setDisplayTempUnitState(unit);
+    localStorage.setItem('hms_vitals_temp_unit', unit);
     if (temperature) {
       const val = Number.parseFloat(temperature);
       if (unit === 'F') {
+        // Converting C -> F
         setTemperature((val * 9 / 5 + 32).toFixed(1));
       } else {
+        // Converting F -> C
         setTemperature(((val - 32) * 5 / 9).toFixed(1));
       }
     }
@@ -48,14 +63,54 @@ export const useReceptionVitals = () => {
   const setDisplayWeightUnit = (unit: 'KG' | 'LB') => {
     if (unit === displayWeightUnit) return;
     setDisplayWeightUnitState(unit);
+    localStorage.setItem('hms_vitals_weight_unit', unit);
     if (weight) {
       const val = Number.parseFloat(weight);
       if (unit === 'LB') {
+        // Converting KG -> LB
         setWeight((val * 2.20462).toFixed(1));
       } else {
+        // Converting LB -> KG
         setWeight((val / 2.20462).toFixed(1));
       }
     }
+  };
+
+  /**
+   * Helper to format ranges in the currently selected display unit
+   */
+  const formatRangeInSelectedUnit = (type: string) => {
+    const range = vitalRanges[type];
+    if (!range) return '--';
+
+    let min = range.minValue;
+    let max = range.maxValue;
+    let unitLabel = '';
+
+    if (type === 'BODY_TEMPERATURE') {
+      unitLabel = `°${displayTempUnit}`;
+      // Backend is F
+      if (displayTempUnit === 'C') {
+        min = ((min - 32) * 5 / 9);
+        max = ((max - 32) * 5 / 9);
+      }
+    } else if (type === 'WEIGHT') {
+      unitLabel = displayWeightUnit.toLowerCase();
+      // Backend is KG
+      if (displayWeightUnit === 'LB') {
+        min = min * 2.20462;
+        max = max * 2.20462;
+      }
+    } else {
+      switch (type) {
+        case 'SYSTOLIC_BP':
+        case 'DIASTOLIC_BP': unitLabel = 'mmHg'; break;
+        case 'HEART_RATE': unitLabel = 'bpm'; break;
+        case 'OXYGEN_LEVEL': unitLabel = '%'; break;
+      }
+    }
+
+    return `${min.toFixed(type === 'BODY_TEMPERATURE' || type === 'WEIGHT' ? 1 : 0)} - ${max.toFixed(type === 'BODY_TEMPERATURE' || type === 'WEIGHT' ? 1 : 0)} ${unitLabel}`;
   };
 
   const [vitalRanges, setVitalRanges] = useState<VitalRangesResponse>({});
@@ -64,9 +119,16 @@ export const useReceptionVitals = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const rangeRes = await adminService.getVitalRanges({ skipToast: true });
+        const rangeRes = await adminService.listVitalSettings({ skipToast: true });
         if (rangeRes.success && rangeRes.data) {
-          setVitalRanges(rangeRes.data);
+          const configMap: VitalRangesResponse = {};
+          rangeRes.data.forEach(item => {
+            configMap[item.vitalType] = {
+              minValue: item.minValue,
+              maxValue: item.maxValue
+            };
+          });
+          setVitalRanges(configMap);
         }
       } catch (error) {
         console.error('Failed to load vitals config', error);
@@ -80,11 +142,34 @@ export const useReceptionVitals = () => {
     setSystolic(vitals.systolic?.toString() || vitals.bloodPressure?.split('/')[0] || '');
     setDiastolic(vitals.diastolic?.toString() || vitals.bloodPressure?.split('/')[1] || '');
     setHeartRate(vitals.heartRate?.toString() || '');
-    setTemperature(vitals.temperature?.toString() || '');
-    setWeight(vitals.weight?.toString() || '');
+    
+    // Temperature conversion for display (Backend is F)
+    if (vitals.temperature !== undefined && vitals.temperature !== null) {
+      let temp = Number(vitals.temperature);
+      if (displayTempUnit === 'C') {
+        // F -> C
+        temp = (temp - 32) * 5 / 9;
+      }
+      setTemperature(temp.toFixed(1));
+    } else {
+      setTemperature('');
+    }
+
+    // Weight conversion for display (Backend is KG)
+    if (vitals.weight !== undefined && vitals.weight !== null) {
+      let w = Number(vitals.weight);
+      if (displayWeightUnit === 'LB') {
+        // KG -> LB
+        w = w * 2.20462;
+      }
+      setWeight(w.toFixed(1));
+    } else {
+      setWeight('');
+    }
+
     setOxygenLevel(vitals.oxygenLevel?.toString() || '');
     setRespiratoryRate(vitals.respiratoryRate?.toString() || '');
-  }, []);
+  }, [displayTempUnit, displayWeightUnit]);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -121,7 +206,7 @@ export const useReceptionVitals = () => {
     return age;
   }, [patient]);
 
-  const validateField = (field: string, value: any) => {
+  const getFieldError = (field: string, value: any) => {
     let range;
     let label;
     let required = true;
@@ -135,29 +220,45 @@ export const useReceptionVitals = () => {
       case 'respiratoryRate': { range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break; }
     }
     
-    // For validation, we convert local display value to metric if needed
-    let valueToValidate = Number.parseFloat(value);
-    if (field === 'temperature' && displayTempUnit === 'F') {
-      valueToValidate = (valueToValidate - 32) * 5 / 9;
-    } else if (field === 'weight' && displayWeightUnit === 'LB') {
-      valueToValidate = valueToValidate / 2.20462;
+    let valueToValidate = value;
+    if (value !== '' && value !== null && value !== undefined) {
+      const num = Number.parseFloat(value);
+      if (!Number.isNaN(num)) {
+        valueToValidate = num;
+        if (field === 'temperature' && displayTempUnit === 'C') {
+          // Convert C to F to validate against backend range
+          valueToValidate = (num * 9 / 5 + 32);
+        } else if (field === 'weight' && displayWeightUnit === 'LB') {
+          // Convert LB to KG to validate against backend range
+          valueToValidate = num / 2.20462;
+        }
+      }
     }
 
-    const error = validateVital(valueToValidate, range, label || field, required);
+    return validateVital(valueToValidate, range, label || field, required);
+  };
+
+  const validateField = (field: string, value: any) => {
+    const error = getFieldError(field, value);
     setFieldErrors(prev => ({ ...prev, [field]: error || '' }));
     return !error;
   };
 
   const validateAll = () => {
-    const errors: Record<string, string> = {};
+    const newErrors: Record<string, string> = {};
     const checks = [
       { f: 'temperature', v: temperature }, { f: 'weight', v: weight }, { f: 'oxygenLevel', v: oxygenLevel },
       { f: 'systolic', v: systolic }, { f: 'diastolic', v: diastolic }, { f: 'heartRate', v: heartRate },
       { f: 'respiratoryRate', v: respiratoryRate }
     ];
-    let isValid = true;
-    checks.forEach(c => { if (!validateField(c.f, c.v)) isValid = false; });
-    return isValid;
+    
+    checks.forEach(c => {
+      const error = getFieldError(c.f, c.v);
+      if (error) newErrors[c.f] = error;
+    });
+
+    setFieldErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
@@ -168,12 +269,14 @@ export const useReceptionVitals = () => {
     setSaving(true);
     try {
       let finalTemp = Number.parseFloat(temperature) || 0;
-      if (displayTempUnit === 'F') {
-        finalTemp = (finalTemp - 32) * 5 / 9;
+      if (displayTempUnit === 'C') {
+        // Convert C to F for backend
+        finalTemp = (finalTemp * 9 / 5 + 32);
       }
 
       let finalWeight = Number.parseFloat(weight) || 0;
       if (displayWeightUnit === 'LB') {
+        // Convert LB to KG for backend
         finalWeight = finalWeight / 2.20462;
       }
 
@@ -223,6 +326,7 @@ export const useReceptionVitals = () => {
     vitalRanges,
     fieldErrors,
     validateField,
-    handleSave
+    handleSave,
+    formatRangeInSelectedUnit
   };
 };
