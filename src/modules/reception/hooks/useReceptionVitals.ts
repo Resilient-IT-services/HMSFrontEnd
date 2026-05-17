@@ -29,9 +29,34 @@ export const useReceptionVitals = () => {
   const [respiratoryRate, setRespiratoryRate] = useState(''); 
   const [complaints, setComplaints] = useState('');
 
-  // UI state for local conversion
-  const [displayTempUnit, setDisplayTempUnit] = useState<'C' | 'F'>('C');
-  const [displayWeightUnit, setDisplayWeightUnit] = useState<'KG' | 'LB'>('KG');
+  const [displayTempUnit, setDisplayTempUnitState] = useState<'C' | 'F'>('C');
+  const [displayWeightUnit, setDisplayWeightUnitState] = useState<'KG' | 'LB'>('KG');
+
+  const setDisplayTempUnit = (unit: 'C' | 'F') => {
+    if (unit === displayTempUnit) return;
+    setDisplayTempUnitState(unit);
+    if (temperature) {
+      const val = Number.parseFloat(temperature);
+      if (unit === 'F') {
+        setTemperature((val * 9 / 5 + 32).toFixed(1));
+      } else {
+        setTemperature(((val - 32) * 5 / 9).toFixed(1));
+      }
+    }
+  };
+
+  const setDisplayWeightUnit = (unit: 'KG' | 'LB') => {
+    if (unit === displayWeightUnit) return;
+    setDisplayWeightUnitState(unit);
+    if (weight) {
+      const val = Number.parseFloat(weight);
+      if (unit === 'LB') {
+        setWeight((val * 2.20462).toFixed(1));
+      } else {
+        setWeight((val / 2.20462).toFixed(1));
+      }
+    }
+  };
 
   const [vitalRanges, setVitalRanges] = useState<VitalRangesResponse>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
