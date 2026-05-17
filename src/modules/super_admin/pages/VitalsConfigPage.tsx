@@ -8,32 +8,35 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
 
 export function VitalsConfigPage() {
-  const [settings, setSettings] = useState<Record<string, {minValue: number, maxValue: number, unit: string}>>({});
+  const [settings, setSettings] = useState<Record<string, {minValue: number, maxValue: number}>>({});
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     minValue: 0,
-    maxValue: 0,
-    unit: ''
+    maxValue: 0
   });
 
   const VITAL_TYPES = [
-    { value: 'BODY_TEMPERATURE', label: 'Body Temperature' },
-    { value: 'SYSTOLIC_BP', label: 'Systolic BP' },
-    { value: 'DIASTOLIC_BP', label: 'Diastolic BP' },
-    { value: 'HEART_RATE', label: 'Heart Rate' },
-    { value: 'OXYGEN_LEVEL', label: 'Oxygen Level (SpO2)' },
-    { value: 'WEIGHT', label: 'Weight' },
+    { value: 'BODY_TEMPERATURE', label: 'Body Temperature (°C)' },
+    { value: 'SYSTOLIC_BP', label: 'Systolic BP (mmHg)' },
+    { value: 'DIASTOLIC_BP', label: 'Diastolic BP (mmHg)' },
+    { value: 'HEART_RATE', label: 'Heart Rate (bpm)' },
+    { value: 'OXYGEN_LEVEL', label: 'Oxygen Level (%)' },
+    { value: 'WEIGHT', label: 'Weight (kg)' },
   ];
 
   const fetchSettings = React.useCallback(async () => {
     setLoading(true);
     try {
-      const res = await adminService.getVitalRanges();
+      const res = await adminService.listVitalSettings();
       if (res.success && res.data) {
-        setSettings(res.data);
+        const configMap: any = {};
+        res.data.forEach((item: any) => {
+          configMap[item.vitalType] = item;
+        });
+        setSettings(configMap);
       }
     } catch (error) {
       console.error('Failed to fetch vital settings', error);
@@ -50,8 +53,7 @@ export function VitalsConfigPage() {
     setEditingType(type);
     setFormData({
       minValue: currentRange?.minValue || 0,
-      maxValue: currentRange?.maxValue || 0,
-      unit: currentRange?.unit || ''
+      maxValue: currentRange?.maxValue || 0
     });
     setFieldErrors({});
     setIsModalOpen(true);
@@ -62,7 +64,6 @@ export function VitalsConfigPage() {
   const validate = () => {
     const errors: Record<string, string> = {};
     if (formData.minValue >= formData.maxValue) errors.maxValue = 'Max must be greater than min';
-    if (!formData.unit) errors.unit = 'Unit is required';
     
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
@@ -73,10 +74,11 @@ export function VitalsConfigPage() {
       return;
     }
     try {
-      const res = await adminService.updateVitalRange(editingType, {
+      const res = await adminService.saveVitalSetting({
+        id: (settings[editingType] as any)?.id,
+        vitalType: editingType as any,
         minValue: formData.minValue,
-        maxValue: formData.maxValue,
-        unit: formData.unit
+        maxValue: formData.maxValue
       });
       if (res.success) {
         triggerGlobalToast(`${getVitalLabel(editingType)} updated successfully`, 'success');
@@ -90,44 +92,6 @@ export function VitalsConfigPage() {
 
   const getVitalLabel = (value: string) => {
     return VITAL_TYPES.find(t => t.value === value)?.label || value;
-  };
-
-  const renderUnitSelection = () => {
-    if (editingType === 'BODY_TEMPERATURE') {
-      return (
-        <select 
-          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 font-bold focus:ring-2 focus:ring-orange-200 outline-none"
-          value={formData.unit}
-          onChange={(e) => setFormData({...formData, unit: e.target.value})}
-        >
-          <option value="">Select Unit...</option>
-          <option value="CELSIUS">CELSIUS (°C)</option>
-          <option value="FAHRENHEIT">FAHRENHEIT (°F)</option>
-        </select>
-      );
-    }
-    if (editingType === 'WEIGHT') {
-      return (
-        <select 
-          className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 font-bold focus:ring-2 focus:ring-orange-200 outline-none"
-          value={formData.unit}
-          onChange={(e) => setFormData({...formData, unit: e.target.value})}
-        >
-          <option value="">Select Unit...</option>
-          <option value="KG">KG (Kilograms)</option>
-          <option value="LB">LB (Pounds)</option>
-        </select>
-      );
-    }
-    return (
-      <input 
-        type="text" 
-        className={`w-full bg-slate-50 border ${fieldErrors.unit ? 'border-red-500' : 'border-slate-200'} rounded-lg px-4 py-2.5 font-bold focus:ring-2 focus:ring-orange-200 outline-none`}
-        placeholder="e.g. mmHg, bpm, %"
-        value={formData.unit}
-        onChange={(e) => setFormData({...formData, unit: e.target.value})}
-      />
-    );
   };
 
   return (
@@ -157,14 +121,13 @@ export function VitalsConfigPage() {
               <thead>
                 <tr className="border-b border-slate-50">
                   <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vital Metric</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Safety Range (Min - Max)</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Measurement Unit</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Safety Range (Min - Max)</th>
                   <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {loading ? (
-                  <tr><td colSpan={4} className="px-6 py-10 text-center text-slate-400 italic">Loading global medical policies...</td></tr>
+                  <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400 italic">Loading global medical policies...</td></tr>
                 ) : VITAL_TYPES.map((type) => {
                   const range = settings[type.value];
                   return (
@@ -174,20 +137,13 @@ export function VitalsConfigPage() {
                       onDoubleClick={() => handleOpenModal(type.value, range)}
                     >
                       <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-center">
                         {range ? (
                           <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                             {range.minValue} — {range.maxValue}
                           </span>
                         ) : (
                           <span className="text-gray-300 italic text-xs">Awaiting Initialization...</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {range ? (
-                          <span className="text-sm font-bold text-slate-600 tracking-tight">{range.unit}</span>
-                        ) : (
-                          <span className="text-gray-300">--</span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-center">
@@ -241,11 +197,6 @@ export function VitalsConfigPage() {
                 onChange={(e) => setFormData({...formData, maxValue: Number(e.target.value)})}
               />
               {fieldErrors.maxValue && <p className="text-red-500 text-[9px] mt-1 font-bold uppercase tracking-tighter animate-bounce">{fieldErrors.maxValue}</p>}
-            </div>
-            <div className="col-span-2">
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Global Standard Unit</label>
-              {renderUnitSelection()}
-              {fieldErrors.unit && <p className="text-red-500 text-[9px] mt-1 font-bold uppercase tracking-tighter">{fieldErrors.unit}</p>}
             </div>
           </div>
 

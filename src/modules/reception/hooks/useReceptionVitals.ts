@@ -24,12 +24,14 @@ export const useReceptionVitals = () => {
   const [diastolic, setDiastolic] = useState('');
   const [heartRate, setHeartRate] = useState('');
   const [temperature, setTemperature] = useState('');
-  const [tempUnit, setTempUnit] = useState<'CELSIUS' | 'FAHRENHEIT'>('CELSIUS');
   const [weight, setWeight] = useState('');
-  const [weightUnit, setWeightUnit] = useState<'KG' | 'LB'>('KG');
   const [oxygenLevel, setOxygenLevel] = useState('');
   const [respiratoryRate, setRespiratoryRate] = useState(''); 
   const [complaints, setComplaints] = useState('');
+
+  // UI state for local conversion
+  const [displayTempUnit, setDisplayTempUnit] = useState<'C' | 'F'>('C');
+  const [displayWeightUnit, setDisplayWeightUnit] = useState<'KG' | 'LB'>('KG');
 
   const [vitalRanges, setVitalRanges] = useState<VitalRangesResponse>({});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -40,14 +42,6 @@ export const useReceptionVitals = () => {
         const rangeRes = await adminService.getVitalRanges({ skipToast: true });
         if (rangeRes.success && rangeRes.data) {
           setVitalRanges(rangeRes.data);
-          if (rangeRes.data.BODY_TEMPERATURE?.unit) {
-            const unit = rangeRes.data.BODY_TEMPERATURE.unit;
-            setTempUnit(unit === 'F' || unit === 'FAHRENHEIT' ? 'FAHRENHEIT' : 'CELSIUS');
-          }
-          if (rangeRes.data.WEIGHT?.unit) {
-            const unit = rangeRes.data.WEIGHT.unit;
-            setWeightUnit(unit.toUpperCase() === 'LB' ? 'LB' : 'KG');
-          }
         }
       } catch (error) {
         console.error('Failed to load vitals config', error);
@@ -62,11 +56,7 @@ export const useReceptionVitals = () => {
     setDiastolic(vitals.diastolic?.toString() || vitals.bloodPressure?.split('/')[1] || '');
     setHeartRate(vitals.heartRate?.toString() || '');
     setTemperature(vitals.temperature?.toString() || '');
-    const tUnit = (vitals.temperatureUnit as string);
-    setTempUnit(tUnit === '°C' || tUnit === 'CELSIUS' ? 'CELSIUS' : 'FAHRENHEIT');
     setWeight(vitals.weight?.toString() || '');
-    const wUnit = (vitals.weightUnit as string);
-    setWeightUnit(wUnit === 'kg' || wUnit === 'KG' ? 'KG' : 'LB');
     setOxygenLevel(vitals.oxygenLevel?.toString() || '');
     setRespiratoryRate(vitals.respiratoryRate?.toString() || '');
   }, []);
@@ -119,7 +109,16 @@ export const useReceptionVitals = () => {
       case 'heartRate': { range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break; }
       case 'respiratoryRate': { range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break; }
     }
-    const error = validateVital(value, range, label || field, required);
+    
+    // For validation, we convert local display value to metric if needed
+    let valueToValidate = Number.parseFloat(value);
+    if (field === 'temperature' && displayTempUnit === 'F') {
+      valueToValidate = (valueToValidate - 32) * 5 / 9;
+    } else if (field === 'weight' && displayWeightUnit === 'LB') {
+      valueToValidate = valueToValidate / 2.20462;
+    }
+
+    const error = validateVital(valueToValidate, range, label || field, required);
     setFieldErrors(prev => ({ ...prev, [field]: error || '' }));
     return !error;
   };
@@ -143,15 +142,23 @@ export const useReceptionVitals = () => {
     }
     setSaving(true);
     try {
+      let finalTemp = Number.parseFloat(temperature) || 0;
+      if (displayTempUnit === 'F') {
+        finalTemp = (finalTemp - 32) * 5 / 9;
+      }
+
+      let finalWeight = Number.parseFloat(weight) || 0;
+      if (displayWeightUnit === 'LB') {
+        finalWeight = finalWeight / 2.20462;
+      }
+
       const vitals: VitalsDTO = {
         bloodPressure: `${systolic}/${diastolic}`,
         systolic: Number.parseInt(systolic) || 0,
         diastolic: Number.parseInt(diastolic) || 0,
         heartRate: Number.parseInt(heartRate) || 0,
-        temperature: Number.parseFloat(temperature) || 0,
-        temperatureUnit: tempUnit,
-        weight: Number.parseFloat(weight) || 0,
-        weightUnit: weightUnit,
+        temperature: finalTemp,
+        weight: finalWeight,
         oxygenLevel: Number.parseFloat(oxygenLevel) || 0,
         respiratoryRate: Number.parseFloat(respiratoryRate) || 0,
       };
@@ -182,9 +189,9 @@ export const useReceptionVitals = () => {
     diastolic, setDiastolic,
     heartRate, setHeartRate,
     temperature, setTemperature,
-    tempUnit, setTempUnit,
+    displayTempUnit, setDisplayTempUnit,
     weight, setWeight,
-    weightUnit, setWeightUnit,
+    displayWeightUnit, setDisplayWeightUnit,
     oxygenLevel, setOxygenLevel,
     respiratoryRate, setRespiratoryRate,
     complaints, setComplaints,
