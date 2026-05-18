@@ -43,12 +43,25 @@ export const AppointmentsPage = () => {
       render: (app) => <span className="font-bold text-slate-900">{formatToken(app)}</span>
     },
     {
-      header: 'Time',
+      header: 'VISIT DATE & TIME',
       mobilePosition: 'title',
       render: (app) => (
-        <span className="font-bold text-slate-900">
-          {new Date(app.appointmentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
+        <div className="flex flex-col">
+          <span className="font-medium text-slate-900">
+            {new Date(app.appointmentTime).toLocaleDateString("en-GB", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+          <span className="text-xs text-slate-500">
+            {new Date(app.appointmentTime).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })}
+          </span>
+        </div>
       )
     },
     {

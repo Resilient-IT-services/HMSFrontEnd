@@ -197,16 +197,41 @@ export const SuperAdminDashboard = () => {
             </div>
           </Card>
 
-          <Card className="relative overflow-hidden bg-orange-600 border-none text-white p-6 md:p-8 min-h-[160px] md:min-h-[250px] flex flex-col justify-end shadow-lg shadow-orange-600/20 group">
-            <div className="absolute top-0 right-0 p-6 md:p-8 opacity-10">
-              <span className="material-symbols-outlined text-6xl md:text-[120px]">health_and_safety</span>
-            </div>
-            <div className="relative z-10">
-              <h4 className="text-lg md:text-2xl font-black text-white mb-1 leading-tight">Network Expansion</h4>
-              <p className="text-[10px] md:text-sm text-white opacity-90 max-w-sm mb-4 leading-relaxed line-clamp-2">Adding new facilities requires verification of medical licenses and local compliance standards.</p>
-              <Button variant="ghost" size="sm" href="/super_admin/hospitals" className="text-white hover:bg-white/10 w-fit p-0 h-auto text-xs md:text-sm">
-                View Documentation <span className="material-symbols-outlined ml-1 text-xs md:text-sm">arrow_forward</span>
-              </Button>
+          <Card className="relative overflow-hidden rounded-3xl border-none min-h-[420px] shadow-xl">
+
+            {/* Background Image */}
+            <img
+                src="/images/healthcare-banner.jpg"
+                alt="Healthcare Banner"
+                className="absolute inset-0 w-full h-full object-cover"
+            />
+
+            {/* Dark/Light Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent"></div>
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col justify-center h-full p-10 max-w-[55%]">
+
+              <h2 className="text-5xl font-black text-slate-900 leading-tight mb-6">
+                Better Care.
+                <br />
+                Smarter Systems.
+                <br />
+                Stronger Tomorrow.
+              </h2>
+
+              <p className="text-lg text-slate-700 leading-relaxed mb-8">
+                Empowering healthcare with technology that connects,
+                simplifies, and saves lives.
+              </p>
+
+              <div className="flex flex-wrap gap-6 text-sm font-semibold text-slate-700">
+                <span>✔ Secure</span>
+                <span>✔ Connected</span>
+                <span>✔ Reliable</span>
+                <span>✔ Scalable</span>
+              </div>
+
             </div>
           </Card>
         </div>
