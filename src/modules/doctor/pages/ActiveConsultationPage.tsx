@@ -148,6 +148,7 @@ export const ActiveConsultationPage = () => {
   const [diagnosis, setDiagnosis] = useState('');
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
 
   const fetchAppointment = useCallback(async () => {
     if (!appointmentId) return;
@@ -162,13 +163,14 @@ export const ActiveConsultationPage = () => {
         if (res.data.prescription?.items) {
           setPrescriptions(res.data.prescription.items.map((item, idx) => ({
             id: item.id || `existing-${idx}`,
+            medicineId: item.medicineId,
             medicine: item.medicineName,
             frequency: item.dosage,
             instructions: item.duration,
             inStock: true // Default for existing items
           })));
         } else {
-          setPrescriptions([{ id: '1', medicine: '', frequency: '', instructions: '', inStock: true }]);
+          setPrescriptions([{ id: '1', medicineId: '', medicine: '', frequency: '', instructions: '', inStock: true }]);
         }
 
         const pRes = await patientService.get(res.data.patientId);
@@ -201,6 +203,7 @@ export const ActiveConsultationPage = () => {
   const addPrescriptionRow = () => {
     setPrescriptions([...prescriptions, { 
       id: Date.now().toString(), 
+      medicineId: '',
       medicine: '', 
       frequency: '', 
       instructions: '',
@@ -210,31 +213,72 @@ export const ActiveConsultationPage = () => {
 
   const removePrescriptionRow = (id: string) => {
     setPrescriptions(prescriptions.filter(p => p.id !== id));
+    // Clear validation errors for this row
+    const newErrors = { ...validationErrors };
+    delete newErrors[`${id}-frequency`];
+    delete newErrors[`${id}-instructions`];
+    setValidationErrors(newErrors);
   };
 
   const updatePrescriptionRow = (id: string, field: string, value: string) => {
     setPrescriptions(prescriptions.map(p => p.id === id ? { ...p, [field]: value } : p));
+    // Clear validation error when user types
+    if (validationErrors[`${id}-${field}`]) {
+      setValidationErrors(prev => ({ ...prev, [`${id}-${field}`]: false }));
+    }
   };
 
   const selectMedicine = (id: string, med: MedicineResponse) => {
     setPrescriptions(prescriptions.map(p => p.id === id ? { 
       ...p, 
       medicine: med.name,
+      medicineId: med.id,
       inStock: (med.currentStock || 0) > 0,
-      composition: med.composition
+      composition: med.composition,
+      frequency: p.frequency || '',
+      instructions: p.instructions || ''
     } : p));
   };
 
   const saveConsultation = async (silent = false) => {
     if (!appointmentId || !appointment) return false;
+
+    // Validation
+    const errors: Record<string, boolean> = {};
+    let hasError = false;
+
+    prescriptions.forEach(p => {
+      if (p.medicine) {
+        if (!p.frequency) {
+          errors[`${p.id}-frequency`] = true;
+          hasError = true;
+        }
+        if (!p.instructions) {
+          errors[`${p.id}-instructions`] = true;
+          hasError = true;
+        }
+      }
+    });
+
+    if (hasError) {
+      setValidationErrors(errors);
+      triggerGlobalToast('Please fill frequency and duration for all prescribed medicines', 'error');
+      return false;
+    }
+
     try {
       const updateData = {
+        patientId: appointment.patientId,
+        doctorId: appointment.doctorId,
+        appointmentTime: appointment.appointmentTime,
         chiefComplaints: complaints,
         diagnosis: diagnosis,
         prescription: {
           appointmentId: appointmentId,
           patientId: appointment.patientId,
+          doctorId: appointment.doctorId,
           items: prescriptions.filter(p => p.medicine).map(p => ({
+            medicineId: p.medicineId,
             medicineName: p.medicine,
             dosage: p.frequency,
             duration: p.instructions
@@ -454,7 +498,9 @@ export const ActiveConsultationPage = () => {
                             <label className="sm:hidden block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Frequency</label>
                             <input
                               type="text"
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                              className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none transition-all ${
+                                validationErrors[`${p.id}-frequency`] ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
+                              }`}
                               placeholder="1-0-1"
                               value={p.frequency}
                               onChange={(e) => updatePrescriptionRow(p.id, 'frequency', e.target.value)}
@@ -464,7 +510,9 @@ export const ActiveConsultationPage = () => {
                             <label className="sm:hidden block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Duration</label>
                             <input
                               type="text"
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 focus:ring-2 focus:ring-orange-500 outline-none transition-all"
+                              className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-medium text-slate-600 focus:ring-2 focus:ring-orange-500 outline-none transition-all ${
+                                validationErrors[`${p.id}-instructions`] ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
+                              }`}
                               placeholder="5 days"
                               value={p.instructions}
                               onChange={(e) => updatePrescriptionRow(p.id, 'instructions', e.target.value)}
