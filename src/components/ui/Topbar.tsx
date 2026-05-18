@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn';
 import { useLayout } from '@/context/LayoutContext';
 
 const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
-  const { headerActions, isSidebarOpen } = useLayout();
+  const { headerActions, isSidebarOpen, isCompressed, toggleCompressed } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -115,7 +115,24 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
 
                 {!user?.superuser &&
                 <div className="px-2 py-1">
-                  <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
+                  <div className="flex items-center justify-between px-3 py-2">
+                    <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleCompressed();
+                      }}
+                      className={cn(
+                        "flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-all",
+                        isCompressed 
+                          ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/20" 
+                          : "bg-white border-slate-200 text-slate-400 hover:border-orange-200 hover:text-orange-600"
+                      )}
+                    >
+                      <span className="material-symbols-outlined text-[14px]">density_medium</span>
+                      <span className="text-[9px] font-black uppercase tracking-tighter">Compressed</span>
+                    </button>
+                  </div>
                     {user?.roles?.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => (
                         <button
                           key={role}

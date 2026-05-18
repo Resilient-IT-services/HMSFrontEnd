@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 interface LayoutContextType {
   title: string;
@@ -12,6 +12,8 @@ interface LayoutContextType {
   toggleSidebar: () => void;
   hideGlobalSearch: boolean;
   setHideGlobalSearch: (hide: boolean) => void;
+  isCompressed: boolean;
+  toggleCompressed: () => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -21,10 +23,19 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [headerActions, setHeaderActions] = useState<React.ReactNode | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hideGlobalSearch, setHideGlobalSearch] = useState(false);
+  const [isCompressed, setIsCompressed] = useState(false);
+
+  // Initialize from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('ui_compressed');
+    if (saved === 'true') {
+      setIsCompressed(true);
+      document.documentElement.classList.add('ui-compressed');
+    }
+  }, []);
 
   const setTitle = useCallback((newTitle: string) => {
     setTitleState(newTitle);
-    // Also update document title
     if (typeof document !== 'undefined') {
       document.title = `${newTitle} | CareFlow`;
     }
@@ -32,6 +43,19 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const toggleSidebar = useCallback(() => {
     setIsSidebarOpen(prev => !prev);
+  }, []);
+
+  const toggleCompressed = useCallback(() => {
+    setIsCompressed(prev => {
+      const newValue = !prev;
+      localStorage.setItem('ui_compressed', String(newValue));
+      if (newValue) {
+        document.documentElement.classList.add('ui-compressed');
+      } else {
+        document.documentElement.classList.remove('ui-compressed');
+      }
+      return newValue;
+    });
   }, []);
 
   return (
@@ -44,7 +68,9 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setIsSidebarOpen,
       toggleSidebar,
       hideGlobalSearch,
-      setHideGlobalSearch
+      setHideGlobalSearch,
+      isCompressed,
+      toggleCompressed
     }}>
       {children}
     </LayoutContext.Provider>
