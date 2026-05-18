@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn';
 import { useLayout } from '@/context/LayoutContext';
 
 const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
-  const { headerActions } = useLayout();
+  const { headerActions, hideGlobalSearch } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -78,7 +78,7 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
           </div>
         </div>
         <div className="hidden md:flex items-center h-full">
-          <GlobalSearch />
+          {!hideGlobalSearch && <GlobalSearch />}
           <div className="h-8 w-px bg-gray-200 mx-6"></div>
           <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-[10px] font-black max-w-[150px] lg:max-w-[300px] truncate">{currentHospitalName}</h2>
         </div>

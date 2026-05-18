@@ -10,6 +10,8 @@ interface LayoutContextType {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (isOpen: boolean) => void;
   toggleSidebar: () => void;
+  hideGlobalSearch: boolean;
+  setHideGlobalSearch: (hide: boolean) => void;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -18,6 +20,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [title, setTitleState] = useState('CareFlow');
   const [headerActions, setHeaderActions] = useState<React.ReactNode | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hideGlobalSearch, setHideGlobalSearch] = useState(false);
 
   const setTitle = useCallback((newTitle: string) => {
     setTitleState(newTitle);
@@ -39,7 +42,9 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       setHeaderActions,
       isSidebarOpen,
       setIsSidebarOpen,
-      toggleSidebar
+      toggleSidebar,
+      hideGlobalSearch,
+      setHideGlobalSearch
     }}>
       {children}
     </LayoutContext.Provider>

@@ -104,7 +104,7 @@ export function EditHospital({ id }: { id: string }) {
   }
 
   return (
-    <MainLayout title="Configure Hospital">
+    <MainLayout title="Configure Hospital" hideGlobalSearch={true}>
       <div className="max-w-6xl mx-auto">
         <form onSubmit={handleSubmit}>
           <div className="flex justify-between items-end mb-8">
