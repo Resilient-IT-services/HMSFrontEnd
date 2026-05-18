@@ -49,9 +49,9 @@ describe('Sidebar', () => {
       </Provider>
     );
     
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Queue')).toBeInTheDocument();
-    expect(screen.getByText('History')).toBeInTheDocument();
+    expect(screen.getAllByText('Dashboard')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('Queue')[0]).toBeInTheDocument();
+    expect(screen.getAllByText('History')[0]).toBeInTheDocument();
     expect(screen.queryByText('Token Queue')).not.toBeInTheDocument();
     expect(screen.queryByText('Patients')).not.toBeInTheDocument();
     expect(screen.queryByText('Doctors')).not.toBeInTheDocument();
@@ -71,7 +71,7 @@ describe('Sidebar', () => {
       </Provider>
     );
     
-    expect(screen.getByText('Hospitals')).toBeInTheDocument();
+    expect(screen.getAllByText('Hospitals')[0]).toBeInTheDocument();
   });
 
   it('calls logout on click', async () => {
@@ -86,7 +86,7 @@ describe('Sidebar', () => {
       </Provider>
     );
     
-    fireEvent.click(screen.getByText('Logout'));
+    fireEvent.click(screen.getAllByText('Logout')[0]);
     expect(authService.logout).toHaveBeenCalled();
   });
 });

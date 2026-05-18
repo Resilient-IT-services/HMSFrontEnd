@@ -302,7 +302,7 @@ export const ActiveConsultationPage = () => {
           
           <div className="flex items-center gap-3 w-full sm:w-auto">
             <Button 
-              variant="outline"
+              variant="secondary"
               onClick={() => saveConsultation()}
               icon="save"
               className="hidden sm:flex"
@@ -310,7 +310,7 @@ export const ActiveConsultationPage = () => {
               Save Progress
             </Button>
             <Button 
-              variant="outline"
+              variant="secondary"
               onClick={() => setShowPreview(true)}
               icon="visibility"
               className="flex-1 sm:flex-none"
