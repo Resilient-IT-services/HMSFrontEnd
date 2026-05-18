@@ -8,12 +8,13 @@ interface MainLayoutProps {
   title: string;
   headerActions?: React.ReactNode;
   hideTitle?: boolean;
+  hideGlobalSearch?: boolean;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, title, headerActions, hideTitle }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, title, headerActions, hideTitle, hideGlobalSearch }) => {
   return (
     <>
-      <PageHeader title={title} headerActions={headerActions} />
+      <PageHeader title={title} headerActions={headerActions} hideGlobalSearch={hideGlobalSearch} />
       {children}
     </>
   );
