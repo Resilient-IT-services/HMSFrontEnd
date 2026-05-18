@@ -4,11 +4,13 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
+import { catalogService } from '@/services/catalogService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 
 export function CreateHospital() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     name: '',
@@ -19,8 +21,15 @@ export function CreateHospital() {
     city: '',
     state: '',
     pincode: '',
-    status: 'ACTIVE'
+    status: 'ACTIVE',
+    departments: [] as string[]
   });
+
+  React.useEffect(() => {
+    catalogService.getDepartments().then(res => {
+      if (res.success && res.data) setDepartments(res.data);
+    });
+  }, []);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -229,6 +238,51 @@ export function CreateHospital() {
                       </div>
                     </div>
                   </div>
+                </div>
+              </section>
+
+              {/* Department Management */}
+              <section className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                <div className="p-6 border-b border-gray-100 bg-slate-50/50">
+                  <h3 className="font-headline-sm text-[var(--on-surface)] flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[var(--primary)]">hub</span>
+                    Departments & Services
+                  </h3>
+                </div>
+                <div className="p-8">
+                  <p className="font-label-md text-[var(--on-surface-variant)] mb-4">Select departments enabled for this facility:</p>
+                  <div className="flex flex-wrap gap-2">
+                    {departments.map(dept => {
+                      const isSelected = formData.departments.includes(dept);
+                      return (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => {
+                            const current = formData.departments;
+                            setFormData({ 
+                              ...formData, 
+                              departments: isSelected 
+                                ? current.filter(d => d !== dept) 
+                                : [...current, dept] 
+                            });
+                          }}
+                          className={`px-4 py-2 rounded-xl border-2 font-bold text-xs uppercase tracking-tight transition-all ${
+                            isSelected 
+                              ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-md scale-105' 
+                              : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                          }`}
+                        >
+                          {dept}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {departments.length === 0 && (
+                    <div className="py-8 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                      <p className="text-sm text-slate-400 italic">No departments found in the master catalog.</p>
+                    </div>
+                  )}
                 </div>
               </section>
             </div>

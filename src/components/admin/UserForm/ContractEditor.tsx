@@ -8,6 +8,7 @@ interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
   setNewContract: (data: HospitalMembershipDTO) => void;
   hospitals: HospitalResponse[];
+  departments: string[];
   editingContractIndex: number | null;
   validationErrors: Record<string, string>;
   onCancel: () => void;
@@ -15,7 +16,7 @@ interface ContractEditorProps {
 }
 
 export const ContractEditor: React.FC<ContractEditorProps> = ({
-  newContract, setNewContract, hospitals, editingContractIndex, validationErrors, onCancel, onConfirm
+  newContract, setNewContract, hospitals, departments, editingContractIndex, validationErrors, onCancel, onConfirm
 }) => {
   const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const [activeDay, setActiveDay] = useState(1); // 1-7 (Mon-Sun)
@@ -90,7 +91,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   if (isSelected) setNewContract({ ...newContract, roleAssignments: assignments.filter(r => r.roleCode !== role) });
                   else setNewContract({ ...newContract, roleAssignments: [...assignments, { 
                     roleCode: role,
-                    departmentName: 'General', 
+                    departments: [], 
                     active: true, 
                     assignmentId: '', 
                     doctorDetails: role === 'DOCTOR' ? { consultationFee: 500, followUpDays: 0 } : undefined 
@@ -104,31 +105,57 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 
         <div className="grid grid-cols-1 gap-4 md:gap-6">
           {(newContract.roleAssignments || []).map((ra, raIdx) => {
-            const departmentErrorKey = `department_${ra.roleCode}`;
+            const departmentsErrorKey = `departments_${ra.roleCode}`;
             const feeErrorKey = `fee_${ra.roleCode}`;
 
             return (
             <div key={ra.roleCode} className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4 md:mb-6 border-b border-gray-50 pb-2">
                 <span className="material-symbols-outlined text-xs md:text-sm text-primary">settings</span>
-                <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode}  CONFIGURATION</span>
+                <span className="text-[10px] font-black text-primary uppercase">{ra.roleCode} CONFIGURATION</span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 md:gap-y-6 mb-4 md:mb-6">
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-gray-700 uppercase">Department <span className="text-primary">*</span></label>
-                  <input type="text" className={`form-input ${validationErrors[departmentErrorKey] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. Cardiology, Outpatient" value={ra.departmentName} onChange={(e) => {
-                    const updated = [...(newContract.roleAssignments || [])];
-                    updated[raIdx] = { ...updated[raIdx], departmentName: e.target.value };
-                    setNewContract({ ...newContract, roleAssignments: updated });
-                  }} />
-                  {renderFieldError(departmentErrorKey)}
+                {/* Department Selection */}
+                <div className="flex flex-col gap-1.5 md:col-span-2">
+                  <label className="font-label-sm text-gray-700 uppercase">Hospital Departments <span className="text-primary">*</span></label>
+                  <div className={`flex flex-wrap gap-2 p-3 bg-gray-50/50 border rounded-xl min-h-[50px] ${validationErrors[departmentsErrorKey] ? 'border-error ring-1 ring-error/10' : 'border-gray-200'}`}>
+                    {departments.map(dept => {
+                      const isDeptSelected = ra.departments?.includes(dept);
+                      return (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => {
+                            const updated = [...(newContract.roleAssignments || [])];
+                            const currentDepts = ra.departments || [];
+                            updated[raIdx] = { 
+                              ...updated[raIdx], 
+                              departments: isDeptSelected 
+                                ? currentDepts.filter(d => d !== dept) 
+                                : [...currentDepts, dept] 
+                            };
+                            setNewContract({ ...newContract, roleAssignments: updated });
+                          }}
+                          className={`px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-tighter transition-all ${
+                            isDeptSelected 
+                              ? 'bg-primary border-primary text-white shadow-sm' 
+                              : 'bg-white border-gray-200 text-slate-500 hover:border-slate-300'
+                          }`}
+                        >
+                          {dept}
+                        </button>
+                      );
+                    })}
+                    {departments.length === 0 && <p className="text-[10px] text-slate-400 italic font-medium">No departments available in catalog.</p>}
+                  </div>
+                  {renderFieldError(departmentsErrorKey)}
                 </div>
 
                 {ra.roleCode === 'DOCTOR' && (
                   <>
                     <div className="flex flex-col gap-1.5">
-                      <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (Rs.) <span className="text-primary">*</span></label>
+                      <label className="font-label-sm text-gray-700 uppercase">Consultation Fee (₹) <span className="text-primary">*</span></label>
                       <input type="number" min="500" step="1" className={`form-input ${validationErrors[feeErrorKey] ? 'border-error ring-1 ring-error/20' : ''}`} placeholder="e.g. 500" value={ra.doctorDetails?.consultationFee} onChange={(e) => {
                         let value = e.target.value;
                         value = value.replaceAll(/[^0-9]/g, '');

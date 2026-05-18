@@ -10,6 +10,7 @@ import {
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
+import { catalogService } from '@/services/catalogService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateDOB } from '@/utils/dateValidator';
 import { cloneHospitalMembership } from './contractClone';
@@ -18,6 +19,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'personal' | 'contracts' | 'profile'>('personal');
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
+  const [departments, setDepartments] = useState<string[]>([]);
+  const [specializations, setSpecializations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   
@@ -34,10 +37,22 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     active: initialData?.status ? initialData.status === 'ACTIVE' : initialData?.active ?? true,
     status: initialData?.status || (initialData?.active === false ? 'INACTIVE' : 'ACTIVE'),
     memberships: initialData?.memberships?.map(membership => cloneHospitalMembership(membership)) || [],
-    doctorInfo: initialData?.doctorInfo,
+    doctorInfo: initialData?.doctorInfo ? {
+        ...initialData.doctorInfo,
+        specialization: initialData.doctorInfo.specializations?.[0] || initialData.doctorInfo.specialization || '',
+        specializations: initialData.doctorInfo.specializations || [],
+        education: {
+          qualifications: initialData.doctorInfo.education?.qualifications || []
+        }
+    } : undefined,
     nurseInfo: initialData?.nurseInfo,
     pharmacistInfo: initialData?.pharmacistInfo,
-    receptionistInfo: initialData?.receptionistInfo,
+    receptionistInfo: initialData?.receptionistInfo ? {
+      ...initialData.receptionistInfo,
+      languagesSpoken: {
+        fluencies: initialData.receptionistInfo.languagesSpoken?.fluencies || []
+      }
+    } : undefined,
   });
 
   const [isAddingContract, setIsAddingContract] = useState(false);
@@ -60,7 +75,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     const updates: Partial<UserRequestDTO> = {};
     
     if (roles.includes('DOCTOR') && !currentFormData.doctorInfo) {
-      updates.doctorInfo = { specialization: '', licenseNumber: '', bio: '', education: { qualifications: [] } };
+      updates.doctorInfo = { specialization: '', specializations: [], licenseNumber: '', bio: '', education: { qualifications: [] } };
     }
     if (roles.includes('NURSE') && !currentFormData.nurseInfo) {
       updates.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
@@ -80,7 +95,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       delete next.contractHospital;
       delete next.contractRoles;
       Object.keys(next).forEach(key => {
-        if (key.startsWith('department_') || key.startsWith('fee_')) {
+        if (key.startsWith('department_') || key.startsWith('departments_') || key.startsWith('fee_')) {
           delete next[key];
         }
       });
@@ -105,6 +120,12 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   useEffect(() => {
     hospitalService.list().then(res => {
       if (res.success && res.data) setHospitals(res.data.content || []);
+    });
+    catalogService.getDepartments().then(res => {
+      if (res.success && res.data) setDepartments(res.data);
+    });
+    catalogService.getSpecializations().then(res => {
+      if (res.success && res.data) setSpecializations(res.data);
     });
   }, []);
 
@@ -161,8 +182,10 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     // Doctor Specific Validation
     if (assignedRoles.includes('DOCTOR') && formData.doctorInfo) {
-      if (!formData.doctorInfo.specialization?.trim()) {
-        errors.specialization = 'Specialization is required';
+      if (!formData.doctorInfo.specializations || formData.doctorInfo.specializations.length === 0) {
+          if (!formData.doctorInfo.specialization?.trim()) {
+            errors.specialization = 'Specialization is required';
+          }
       }
       if (!formData.doctorInfo.licenseNumber?.trim()) {
         errors.licenseNumber = 'License number is required';
@@ -202,8 +225,27 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       // Clean data before submission to ensure no empty unique fields are sent
       const cleanedDoctorInfo = formData.doctorInfo ? {
         ...formData.doctorInfo,
+        specializations: formData.doctorInfo.specializations?.length ? formData.doctorInfo.specializations : (formData.doctorInfo.specialization ? [formData.doctorInfo.specialization] : []),
         specialization: formData.doctorInfo.specialization?.trim(),
-        licenseNumber: formData.doctorInfo.licenseNumber?.trim()
+        licenseNumber: formData.doctorInfo.licenseNumber?.trim(),
+        registrationNumber: formData.doctorInfo.registrationNumber?.trim() || undefined,
+        bio: formData.doctorInfo.bio?.trim() || '',
+        education: {
+          qualifications: (formData.doctorInfo.education?.qualifications || [])
+            .map((qualification) => ({
+              degree: qualification.degree?.trim(),
+              institution: qualification.institution?.trim(),
+              year: qualification.year,
+              specialization: qualification.specialization?.trim(),
+            }))
+            .filter((qualification) => qualification.degree || qualification.institution || qualification.specialization || qualification.year)
+            .map((qualification) => ({
+              degree: qualification.degree || '',
+              institution: qualification.institution || '',
+              year: qualification.year || 0,
+              specialization: qualification.specialization || '',
+            }))
+        }
       } : undefined;
 
       const cleanedNurseInfo = formData.nurseInfo ? {
@@ -216,11 +258,28 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
         pciRegNo: formData.pharmacistInfo.pciRegNo?.trim()
       } : undefined;
 
+      const cleanedReceptionistInfo = formData.receptionistInfo ? {
+        ...formData.receptionistInfo,
+        languagesSpoken: {
+          fluencies: (formData.receptionistInfo.languagesSpoken?.fluencies || [])
+            .map((fluency) => ({
+              language: fluency.language?.trim(),
+              proficiency: fluency.proficiency
+            }))
+            .filter((fluency) => fluency.language)
+            .map((fluency) => ({
+              language: fluency.language || '',
+              proficiency: fluency.proficiency || 'BASIC'
+            }))
+        }
+      } : undefined;
+
       const userPayload: UserRequestDTO = {
         ...formData,
         doctorInfo: cleanedDoctorInfo,
         nurseInfo: cleanedNurseInfo,
         pharmacistInfo: cleanedPharmacistInfo,
+        receptionistInfo: cleanedReceptionistInfo,
         status: formData.active ? 'ACTIVE' : 'INACTIVE'
       };
       const response = isEdit && initialData?.id
@@ -296,8 +355,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       errors.contractRoles = 'Please select at least one role for this contract';
     } else {
       newContract.roleAssignments.forEach((ra) => {
-        if (!ra.departmentName?.trim()) {
-          errors[`department_${ra.roleCode}`] = 'Department is required';
+        if (!ra.departments || ra.departments.length === 0) {
+          errors[`departments_${ra.roleCode}`] = 'At least one department is required';
         }
         if (ra.roleCode === 'DOCTOR') {
           if (ra.doctorDetails?.consultationFee === undefined || ra.doctorDetails?.consultationFee === null) {
@@ -340,7 +399,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       delete next.contractRoles;
       // Clear all department and fee errors
       Object.keys(next).forEach(key => {
-        if (key.startsWith('department_') || key.startsWith('fee_')) {
+        if (key.startsWith('department_') || key.startsWith('departments_') || key.startsWith('fee_')) {
           delete next[key];
         }
       });
@@ -366,7 +425,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
   return {
     formData, setFormData, activeTab, setActiveTab, loading, validationErrors,
-    hospitals, isAddingContract, openAddContract, openEditContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
+    hospitals, departments, specializations, isAddingContract, openAddContract, openEditContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
     newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract, duplicateContract, router
   };
 };

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { doctorService } from '@/services/doctorService';
 import { DoctorStaffResponse, SessionInfo } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getDepartmentLabel, hasDepartment } from '@/utils/staffDisplay';
 
 const defaultDepartmentOptions = [
   'Cardiology',
@@ -38,9 +39,7 @@ export const useReceptionDoctors = () => {
       const res = await doctorService.list(0, 100, debouncedSearchTerm, department);
       if (res.success && res.data) {
         const content = res.data.content;
-        const filteredDoctors = department
-          ? content.filter((doctor) => doctor.departmentName.toLowerCase() === department.toLowerCase())
-          : content;
+        const filteredDoctors = department ? content.filter((doctor) => hasDepartment(doctor, department)) : content;
         setDoctors(filteredDoctors);
       }
     } catch (error) {
@@ -58,9 +57,7 @@ export const useReceptionDoctors = () => {
           ...new Set(
             [
               ...defaultDepartmentOptions,
-              ...res.data.content
-              .map((doctor) => doctor.departmentName)
-              .filter(Boolean),
+              ...res.data.content.map((doctor) => getDepartmentLabel(doctor, '')).filter(Boolean),
             ]
           )
         ].toSorted((a, b) => a.localeCompare(b));

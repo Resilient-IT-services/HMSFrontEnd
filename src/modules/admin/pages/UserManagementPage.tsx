@@ -18,6 +18,7 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { Card } from '@/components/ui/Card';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
+import { getDepartmentLabel } from '@/utils/staffDisplay';
 
 export const UserManagementPage = () => {
   const router = useRouter();
@@ -72,7 +73,7 @@ export const UserManagementPage = () => {
         const primaryMembership = user.memberships?.[0];
         const membershipCount = user.memberships?.length ?? 0;
         const primaryHospitalName = primaryMembership?.hospitalName || 'N/A';
-        const departmentName = primaryMembership?.roleAssignments?.[0]?.departmentName || 'General';
+        const departmentName = getDepartmentLabel(primaryMembership?.roleAssignments?.[0], 'General');
 
         return (
           <div>

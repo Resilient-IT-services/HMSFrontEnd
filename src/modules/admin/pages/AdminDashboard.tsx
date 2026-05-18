@@ -208,7 +208,7 @@ export const AdminDashboard = () => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black text-emerald-400 uppercase mb-1">Health</p>
-                <p className="text-xs font-bold text-white">99.9%</p>
+                <p className="text-xs font-bold text-white">Pending</p>
               </div>
             </div>
           </div>

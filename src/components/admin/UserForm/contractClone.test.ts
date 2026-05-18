@@ -11,7 +11,7 @@ describe('cloneHospitalMembership', () => {
       {
         assignmentId: 'assignment-1',
         roleCode: 'DOCTOR',
-        departmentName: 'Cardiology',
+        departments: ['Cardiology'],
         active: true,
         schedules: [
           {

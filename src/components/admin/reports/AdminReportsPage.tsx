@@ -389,9 +389,10 @@ export default function AdminReportsPage() {
                   <option value="">All Doctors</option>
                   {doctorOptions.map((doctor) => {
                     const value = doctor.doctorId || doctor.userId;
+                    const departmentLabel = doctor.departments?.filter(Boolean).join(', ');
                     return (
                       <option key={value} value={value}>
-                        {doctor.fullName} {doctor.departmentName ? `(${doctor.departmentName})` : ''}
+                        {doctor.fullName} {departmentLabel ? `(${departmentLabel})` : ''}
                       </option>
                     );
                   })}

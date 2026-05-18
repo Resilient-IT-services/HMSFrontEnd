@@ -47,10 +47,18 @@ export interface ReceptionistFluency {
 
 export interface DoctorInfo {
   id?: string;
-  specialization: string;
+  specialization?: string; // UI compatibility
+  specializations: string[];
   education: DoctorEducation;
   bio: string;
   licenseNumber: string;
+  registrationNumber?: string;
+  experienceYears?: number;
+  awards?: string[];
+  languages?: LanguageEntry[];
+  signature?: string;
+  consultationFee?: number;
+  metadata?: Record<string, unknown>;
 }
 
 export interface NurseInfo {
@@ -133,7 +141,7 @@ export interface RoleAssignmentDTO {
   assignmentId: string;
   hospitalId?: string;
   roleCode: string;
-  departmentName: string;
+  departments: string[];
   active: boolean;
   schedules?: ScheduleDTO[];
   availabilityExceptions?: AvailabilityExceptionDTO[];
@@ -297,6 +305,7 @@ export interface HospitalResponse {
   registrationNo?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'ONBOARDING';
   settings?: HospitalSettings;
+  departments?: string[];
   createdAt: string;
 }
 
@@ -312,10 +321,23 @@ export interface CreateHospitalRequest {
   registrationNo?: string;
   status?: string;
   settings?: HospitalSettings;
+  departments?: string[];
 }
 
 // Appointment types
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'PAYMENT_PENDING' | 'WAITING_FOR_VITALS' | 'WALK_IN' | 'CANCELLED' | 'ADD_VITALS' | 'CHECKED_IN';
+export type AppointmentStatus =
+  | 'SCHEDULED'
+  | 'PAYMENT_PENDING'
+  | 'PAID'
+  | 'VITALS_RECORDED'
+  | 'CONSULTATION_STARTED'
+  | 'PRESCRIPTION_FINALIZED'
+  | 'COMPLETED'
+  | 'CANCELLED'
+  | 'WAITING_FOR_VITALS'
+  | 'WALK_IN'
+  | 'ADD_VITALS'
+  | 'CHECKED_IN';
 
 export interface VitalsDTO {
   bloodPressure: string; // Combined for legacy or display
@@ -411,8 +433,8 @@ export interface DoctorStaffResponse {
   fullName: string;
   phone: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
-  departmentName: string;
-  specialization: string;
+  departments: string[];
+  specializations: string[];
   consultationFee: number;
 }
 
@@ -423,7 +445,7 @@ export interface NurseStaffResponse {
   fullName: string;
   phone: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
-  departmentName: string;
+  departments: string[];
   certificationLevel: 'RN' | 'LPN' | 'NP' | 'CNA';
   shiftType: 'DAY' | 'NIGHT' | 'ROTATIONAL';
 }

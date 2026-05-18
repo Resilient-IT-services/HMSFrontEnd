@@ -118,13 +118,11 @@ export const AppointmentsPage = () => {
   ];
 
   const statConfig = [
-    { label: 'Today Total', value: stats.total, variant: 'slate', filter: 'ALL' },
+    { label: 'Total Today', value: stats.total, variant: 'slate', filter: 'ALL' },
     { label: 'Walk-In', value: stats.walkIn, variant: 'emerald', filter: 'WALK_IN' },
-    { label: 'Upcoming', value: stats.upcoming, variant: 'blue', filter: 'UPCOMING' },
     { label: 'Pay Pending', value: stats.paymentPending, variant: 'orange', filter: 'PAYMENT_PENDING' },
     { label: 'Waiting Vitals', value: stats.waitingForVitals, variant: 'purple', filter: 'WAITING_FOR_VITALS' },
     { label: 'Completed', value: stats.completed, variant: 'emerald', filter: 'COMPLETED' },
-    { label: 'Cancelled', value: stats.cancelled, variant: 'red', filter: 'CANCELLED' },
   ];
 
   return (

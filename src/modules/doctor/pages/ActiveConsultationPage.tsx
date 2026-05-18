@@ -320,6 +320,8 @@ export const ActiveConsultationPage = () => {
   if (loading) return <MainLayout title="Active Consultation">Loading...</MainLayout>;
   if (!appointment) return <MainLayout title="Active Consultation">Appointment not found</MainLayout>;
 
+  const isReadOnly = appointment.status === 'COMPLETED';
+
   return (
     <MainLayout title={`Consultation: ${appointment.patientName}`}>
       <div className="flex flex-col h-full">
@@ -510,9 +512,10 @@ export const ActiveConsultationPage = () => {
                             <label className="sm:hidden block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Duration</label>
                             <input
                               type="text"
+                              disabled={isReadOnly}
                               className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-medium text-slate-600 focus:ring-2 focus:ring-orange-500 outline-none transition-all ${
                                 validationErrors[`${p.id}-instructions`] ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
-                              }`}
+                              } ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                               placeholder="5 days"
                               value={p.instructions}
                               onChange={(e) => updatePrescriptionRow(p.id, 'instructions', e.target.value)}
@@ -537,7 +540,7 @@ export const ActiveConsultationPage = () => {
                       <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 border-2 border-dashed border-slate-100 rounded-2xl text-slate-400">
                         <span className="material-symbols-outlined text-4xl mb-2 opacity-20">prescriptions</span>
                         <p className="text-sm font-medium">No medications prescribed yet.</p>
-                        <button onClick={addPrescriptionRow} className="text-xs font-black text-orange-600 mt-3 uppercase tracking-widest hover:underline">+ Start Prescription</button>
+                        {!isReadOnly && <button onClick={addPrescriptionRow} className="text-xs font-black text-orange-600 mt-3 uppercase tracking-widest hover:underline">+ Start Prescription</button>}
                       </div>
                     )}
                   </div>

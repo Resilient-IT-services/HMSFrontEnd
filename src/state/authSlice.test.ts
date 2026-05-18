@@ -23,8 +23,8 @@ describe('authSlice', () => {
         hospitalName: 'Hospital A', 
         hospitalCode: 'HA', 
         roleAssignments: [
-          { assignmentId: 'a1', roleCode: 'DOCTOR', departmentName: 'OPD', active: true },
-          { assignmentId: 'a2', roleCode: 'ADMIN', departmentName: 'Admin', active: true }
+          { assignmentId: 'a1', roleCode: 'DOCTOR', departments: ['OPD'], active: true },
+          { assignmentId: 'a2', roleCode: 'ADMIN', departments: ['Admin'], active: true }
         ] 
       }
     ]
@@ -92,7 +92,7 @@ describe('authSlice', () => {
         hospitalId: "hosp-1", 
         hospitalName: 'Hospital A', 
         hospitalCode: 'HA', 
-        roleAssignments: [{ assignmentId: 'a1', roleCode: 'RECEPTIONIST', departmentName: 'Front', active: true }]
+        roleAssignments: [{ assignmentId: 'a1', roleCode: 'RECEPTIONIST', departments: ['Front'], active: true }]
       }] 
     };
     const state = authReducer(undefined, setUser(singleRoleUser));

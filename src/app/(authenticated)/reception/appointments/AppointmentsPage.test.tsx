@@ -77,8 +77,8 @@ const mockAppointments = [
 ];
 
 const mockDoctors = [
-  { id: '101', fullName: 'Dr. Smith', specialization: 'General' },
-  { id: '102', fullName: 'Dr. Jones', specialization: 'Cardio' }
+  { id: '101', fullName: 'Dr. Smith', specializations: ['General'] },
+  { id: '102', fullName: 'Dr. Jones', specializations: ['Cardio'] }
 ];
 
 describe('TodayAppointmentsPage', () => {
@@ -217,14 +217,9 @@ describe('TodayAppointmentsPage', () => {
       expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
     });
 
-    // Status filter is usually in a select or custom dropdown now
-    // If there is no specific checked-in button, we'll click on the summary card
-    const todayTotalCard = screen.getAllByText('Today Total')[0];
+    const todayTotalCard = screen.getAllByText('Total Today')[0];
     fireEvent.click(todayTotalCard);
 
-    // This test might need more involved updates based on the exact filter implementation
-    // For now, we assume clicking 'Today Total' resets/shows all today's 
-    // And we'll just check if Jane Smith is there.
     expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
   });
 });

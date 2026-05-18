@@ -73,7 +73,33 @@ export const useReceptionBilling = () => {
   }, [applyInvoiceData]);
 
   const loadNewAppointmentBilling = useCallback(async () => {
-    if (!patientIdParam || !doctorIdParam) return;
+    if (!patientIdParam || !doctorIdParam || !appointmentTimeParam) return;
+
+    // Check if an appointment already exists for this patient/time
+    // to handle "back" navigation or duplicate submissions gracefully
+    const existingRes = await appointmentService.list(0, 1, undefined, appointmentTimeParam.split('T')[0], doctorIdParam);
+    if (existingRes.success && existingRes.data && existingRes.data.content.length > 0) {
+      const existing = existingRes.data.content.find(a => 
+        a.patientId === patientIdParam && 
+        a.appointmentTime.startsWith(appointmentTimeParam) &&
+        a.status !== 'CANCELLED'
+      );
+      
+      if (existing) {
+        setAppointment(existing);
+        
+        const [invRes, patRes, docRes] = await Promise.all([
+          invoiceService.getByVisit(existing.visitId!).catch(() => ({ success: false, data: null })),
+          patientService.get(existing.patientId),
+          doctorService.get(existing.doctorId),
+        ]);
+
+        if (invRes.success) applyInvoiceData(invRes.data || null);
+        if (patRes.success) setPatient(patRes.data || null);
+        if (docRes.success) setDoctor(docRes.data || null);
+        return;
+      }
+    }
 
     const [patRes, docRes] = await Promise.all([
       patientService.get(patientIdParam),
@@ -101,7 +127,7 @@ export const useReceptionBilling = () => {
       const nextNum = statsRes.data.totalElements + 1;
       setPredictedToken(`T-${nextNum.toString().padStart(3, '0')}`);
     }
-  }, [appointmentTimeParam, doctorIdParam, notesParam, patientIdParam, sessionPeriodParam]);
+  }, [appointmentTimeParam, doctorIdParam, notesParam, patientIdParam, sessionPeriodParam, applyInvoiceData]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);

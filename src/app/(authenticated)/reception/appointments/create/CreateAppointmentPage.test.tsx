@@ -46,7 +46,17 @@ const mockPush = vi.fn();
 const mockBack = vi.fn();
 
 const mockDoctors = [
-  { doctorId: 'doctor-1', fullName: 'Dr. Smith', specialization: 'Cardiology', userId: 'user-1', consultationFee: 500 },
+  {
+    doctorId: 'doctor-1',
+    userId: 'user-1',
+    assignmentId: 'assignment-1',
+    fullName: 'Dr. Smith',
+    phone: '9999999999',
+    gender: 'MALE',
+    departments: ['Cardiology'],
+    specializations: ['Cardiology'],
+    consultationFee: 500,
+  },
 ];
 
 const mockAvailability = {

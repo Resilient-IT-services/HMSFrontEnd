@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { doctorService } from '@/services/doctorService';
 import { DoctorStaffResponse } from '@/types/api';
 import useDebounce from '@/hooks/useDebounce';
+import { getPrimaryDepartment, getPrimarySpecialization } from '@/utils/staffDisplay';
 
 interface DoctorSearchProps {
   onSelect: (doctor: DoctorStaffResponse) => void;
@@ -93,7 +94,7 @@ const DoctorSearch: React.FC<DoctorSearchProps> = ({ onSelect, defaultValue = ''
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-bold text-on-surface group-hover:text-primary">{doctor.fullName}</p>
-                  <p className="text-[10px] text-gray-500">{doctor.specialization} • {doctor.departmentName}</p>
+                  <p className="text-[10px] text-gray-500">{getPrimarySpecialization(doctor)} • {getPrimaryDepartment(doctor)}</p>
                 </div>
                 <span className="px-1.5 py-0.5 bg-gray-100 text-[9px] font-black uppercase rounded text-gray-400">Doctor</span>
               </div>

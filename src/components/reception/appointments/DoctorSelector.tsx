@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { DoctorStaffResponse } from '@/types/api';
+import { getPrimarySpecialization } from '@/utils/staffDisplay';
 
 interface DoctorSelectorProps {
   doctors: DoctorStaffResponse[];
@@ -59,7 +60,7 @@ export const DoctorSelector: React.FC<DoctorSelectorProps> = ({
                   <p className={`text-sm font-bold ${isSelected ? 'text-slate-900' : 'text-slate-700'}`}>
                     {doc.fullName}
                   </p>
-                  <p className="text-[11px] text-slate-500">{doc.specialization}</p>
+                  <p className="text-[11px] text-slate-500">{getPrimarySpecialization(doc)}</p>
                 </div>
               </div>
             );

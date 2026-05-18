@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
+import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { patientService } from '@/services/patientService';
 import { DoctorStaffResponse, PatientResponse, SessionInfo } from '@/types/api';
@@ -10,6 +11,7 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { SessionGrid } from '@/components/reception/appointments/SessionGrid';
 import { ConfirmationPanel } from '@/components/reception/appointments/ConfirmationPanel';
+import { getPrimarySpecialization } from '@/utils/staffDisplay';
 
 const getLocalDateString = (date: Date) => {
   const year = date.getFullYear();
@@ -175,10 +177,27 @@ export function AppointmentScheduling() {
 
     setSubmitting(true);
     try {
+      const appointmentTime = `${selectedDate}T${editableTime}:00`;
+      
+      // Quick check for existing appointment to prevent duplicates and enable resume
+      const res = await appointmentService.list(0, 50, undefined, selectedDate, selectedDoctor.doctorId);
+      if (res.success && res.data) {
+        const existing = res.data.content.find(a => 
+          a.patientId === selectedPatient.id && 
+          a.appointmentTime.startsWith(appointmentTime) &&
+          a.status !== 'CANCELLED'
+        );
+        if (existing) {
+          triggerGlobalToast('Existing appointment found. Redirecting...', 'warning');
+          router.push(`/reception/billing?appointmentId=${existing.id}`);
+          return;
+        }
+      }
+
       const params = new URLSearchParams({
         patientId: selectedPatient.id,
         doctorId: selectedDoctor.doctorId,
-        appointmentTime: `${selectedDate}T${editableTime}:00`,
+        appointmentTime: appointmentTime,
         sessionPeriod: getSessionPeriod(editableTime),
         notes
       });
@@ -296,7 +315,7 @@ export function AppointmentScheduling() {
                       <option value="" disabled>Choose doctor...</option>
                       {doctors.map(doc => (
                         <option key={doc.doctorId} value={doc.doctorId}>
-                          {doc.fullName} ({doc.specialization})
+                          {doc.fullName} ({getPrimarySpecialization(doc)})
                         </option>
                       ))}
                     </select>

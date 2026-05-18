@@ -4,9 +4,29 @@ import { DoctorSelector } from './DoctorSelector';
 import { DoctorStaffResponse } from '@/types/api';
 
 const mockDoctors: DoctorStaffResponse[] = [
-  { userId: '1', fullName: 'Dr. Smith', specialization: 'General', departmentName: 'OPD' },
-  { userId: '2', fullName: 'Dr. Jones', specialization: 'Cardiology', departmentName: 'Cardio' },
-] as any;
+  {
+    userId: '1',
+    doctorId: 'doctor-1',
+    assignmentId: 'assignment-1',
+    fullName: 'Dr. Smith',
+    phone: '1111111111',
+    gender: 'MALE',
+    departments: ['OPD'],
+    specializations: ['General'],
+    consultationFee: 500,
+  },
+  {
+    userId: '2',
+    doctorId: 'doctor-2',
+    assignmentId: 'assignment-2',
+    fullName: 'Dr. Jones',
+    phone: '2222222222',
+    gender: 'FEMALE',
+    departments: ['Cardio'],
+    specializations: ['Cardiology'],
+    consultationFee: 700,
+  },
+];
 
 describe('DoctorSelector', () => {
   it('renders loading state', () => {

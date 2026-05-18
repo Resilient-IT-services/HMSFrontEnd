@@ -101,7 +101,7 @@ export const DoctorDashboard = () => {
 
   const handleStartConsultation = async (appointmentId: string) => {
     try {
-      const res = await appointmentService.updateStatus(appointmentId, { status: 'WALK_IN' });
+      const res = await appointmentService.updateStatus(appointmentId, { status: 'CONSULTATION_STARTED' });
       if (res.success) {
         router.push(`/doctor/active-consultation?appointmentId=${appointmentId}`);
       } else {

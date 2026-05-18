@@ -767,6 +767,36 @@
         }
       }
     },
+    "/api/v1/pharmacy/quick-sale": {
+      "post": {
+        "tags": [
+          "pharmacy-quick-sale-controller"
+        ],
+        "operationId": "createQuickSale",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuickPharmacySaleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseQuickPharmacySaleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/pharmacy/prescriptions": {
       "get": {
         "tags": [
@@ -1233,6 +1263,36 @@
         }
       }
     },
+    "/api/v1/finance/payments": {
+      "post": {
+        "tags": [
+          "payment-controller"
+        ],
+        "operationId": "recordPayment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordPaymentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePaymentDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/logout": {
       "post": {
         "tags": [
@@ -1442,6 +1502,37 @@
         }
       }
     },
+    "/api/v1/appointments/{appointmentId}/reset-prescription": {
+      "post": {
+        "tags": [
+          "Appointments"
+        ],
+        "operationId": "resetPrescription",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/appointments/book-consultation": {
       "post": {
         "tags": [
@@ -1465,54 +1556,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseAppointmentDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/admin/vital-settings": {
-      "get": {
-        "tags": [
-          "Vital Settings"
-        ],
-        "operationId": "list_8",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseListVitalSettingDTO"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Vital Settings"
-        ],
-        "operationId": "save",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VitalSettingDTO"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseVitalSettingDTO"
                 }
               }
             }
@@ -1835,6 +1878,26 @@
         }
       }
     },
+    "/api/v1/specializations": {
+      "get": {
+        "tags": [
+          "specialization-controller"
+        ],
+        "operationId": "listAll",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListString"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/search": {
       "get": {
         "tags": [
@@ -2082,6 +2145,98 @@
         }
       }
     },
+    "/api/v1/pharmacy/quick-sale/{id}": {
+      "get": {
+        "tags": [
+          "pharmacy-quick-sale-controller"
+        ],
+        "operationId": "getSale",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseQuickPharmacySaleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pharmacy/quick-sale/recent-customers": {
+      "get": {
+        "tags": [
+          "pharmacy-quick-sale-controller"
+        ],
+        "operationId": "searchRecentCustomers",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListObject[]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pharmacy/quick-sale/prescription/{prescriptionId}": {
+      "get": {
+        "tags": [
+          "pharmacy-quick-sale-controller"
+        ],
+        "operationId": "getSaleByPrescription",
+        "parameters": [
+          {
+            "name": "prescriptionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseQuickPharmacySaleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/pharmacy/prescriptions/{id}": {
       "get": {
         "tags": [
@@ -2206,57 +2361,6 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePageResponseMedicineSummaryDTO"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/pharmacy/medicines/available": {
-      "get": {
-        "tags": [
-          "Pharmacy"
-        ],
-        "operationId": "searchAvailable",
-        "parameters": [
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          },
-          {
-            "name": "search",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "default": ""
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponsePageResponseMedicineDTO"
                 }
               }
             }
@@ -2542,6 +2646,68 @@
         }
       }
     },
+    "/api/v1/finance/invoices/{id}": {
+      "get": {
+        "tags": [
+          "invoice-controller"
+        ],
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInvoiceDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/invoices/visit/{visitId}": {
+      "get": {
+        "tags": [
+          "invoice-controller"
+        ],
+        "operationId": "getByVisit",
+        "parameters": [
+          {
+            "name": "visitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseInvoiceDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/doctors": {
       "get": {
         "tags": [
@@ -2667,6 +2833,26 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseDoctorAvailabilityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/departments": {
+      "get": {
+        "tags": [
+          "department-controller"
+        ],
+        "operationId": "listAll_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListString"
                 }
               }
             }
@@ -2833,7 +3019,7 @@
         "tags": [
           "Vital Range Config"
         ],
-        "operationId": "list_9",
+        "operationId": "list_8",
         "responses": {
           "200": {
             "description": "OK",
@@ -2942,8 +3128,11 @@
             "type": "string",
             "format": "uuid"
           },
-          "specialization": {
-            "type": "string"
+          "specializations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "education": {
             "$ref": "#/components/schemas/DoctorEducation"
@@ -2953,6 +3142,37 @@
           },
           "licenseNumber": {
             "type": "string"
+          },
+          "registrationNumber": {
+            "type": "string"
+          },
+          "experienceYears": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "awards": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "languages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signature": {
+            "type": "string"
+          },
+          "consultationFee": {
+            "type": "number"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
           }
         }
       },
@@ -3132,8 +3352,11 @@
           "roleCode": {
             "type": "string"
           },
-          "departmentName": {
-            "type": "string"
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "active": {
             "type": "boolean"
@@ -3489,6 +3712,12 @@
           },
           "settings": {
             "$ref": "#/components/schemas/HospitalSettings"
+          },
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -3563,12 +3792,13 @@
             "type": "string",
             "enum": [
               "SCHEDULED",
-              "COMPLETED",
               "PAYMENT_PENDING",
-              "WAITING_FOR_VITALS",
-              "WALK_IN",
-              "CANCELLED",
-              "ADD_VITALS"
+              "PAID",
+              "VITALS_RECORDED",
+              "CONSULTATION_STARTED",
+              "PRESCRIPTION_FINALIZED",
+              "COMPLETED",
+              "CANCELLED"
             ]
           },
           "tokenNumber": {
@@ -3638,6 +3868,10 @@
             "type": "string",
             "format": "uuid"
           },
+          "visitId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -3694,22 +3928,8 @@
           "oxygenLevel": {
             "type": "number"
           },
-          "temperatureUnit": {
-            "type": "string",
-            "enum": [
-              "CELSIUS",
-              "FAHRENHEIT"
-            ]
-          },
           "temperature": {
             "type": "number"
-          },
-          "weightUnit": {
-            "type": "string",
-            "enum": [
-              "KG",
-              "LB"
-            ]
           },
           "weight": {
             "type": "number"
@@ -3753,9 +3973,6 @@
           },
           "maxValue": {
             "type": "number"
-          },
-          "unit": {
-            "type": "string"
           }
         }
       },
@@ -4077,6 +4294,137 @@
           }
         }
       },
+      "PaymentInfo": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "CASH",
+              "CARD",
+              "UPI",
+              "NEFT",
+              "INSURANCE"
+            ]
+          },
+          "amount": {
+            "type": "number"
+          },
+          "referenceNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "QuickPharmacySaleRequest": {
+        "type": "object",
+        "properties": {
+          "saleType": {
+            "type": "string"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "visitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "prescriptionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "doctorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalDoctorName": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerPhone": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "payment": {
+            "$ref": "#/components/schemas/PaymentInfo"
+          }
+        }
+      },
+      "ApiResponseQuickPharmacySaleResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/QuickPharmacySaleResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "QuickPharmacySaleResponse": {
+        "type": "object",
+        "properties": {
+          "saleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "saleNumber": {
+            "type": "string"
+          },
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "paymentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNumber": {
+            "type": "string"
+          },
+          "customerName": {
+            "type": "string"
+          },
+          "customerPhone": {
+            "type": "string"
+          },
+          "externalDoctorName": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        }
+      },
       "ApiResponsePrescriptionDTO": {
         "type": "object",
         "properties": {
@@ -4219,6 +4567,107 @@
           }
         }
       },
+      "RecordPaymentRequest": {
+        "required": [
+          "amount",
+          "patientId",
+          "paymentMode"
+        ],
+        "type": "object",
+        "properties": {
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "visitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "minimum": 0,
+            "type": "number"
+          },
+          "paymentMode": {
+            "type": "string",
+            "enum": [
+              "CASH",
+              "CARD",
+              "UPI",
+              "NEFT",
+              "INSURANCE"
+            ]
+          },
+          "referenceNumber": {
+            "type": "string"
+          },
+          "invoiceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ApiResponsePaymentDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PaymentDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "PaymentDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "receiptNumber": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "paymentMode": {
+            "type": "string",
+            "enum": [
+              "CASH",
+              "CARD",
+              "UPI",
+              "NEFT",
+              "INSURANCE"
+            ]
+          },
+          "referenceNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "FAILED",
+              "REFUNDED"
+            ]
+          },
+          "paymentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "collectedBy": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "LoginRequest": {
         "required": [
           "password",
@@ -4261,12 +4710,13 @@
             "type": "string",
             "enum": [
               "SCHEDULED",
-              "COMPLETED",
               "PAYMENT_PENDING",
-              "WAITING_FOR_VITALS",
-              "WALK_IN",
-              "CANCELLED",
-              "ADD_VITALS"
+              "PAID",
+              "VITALS_RECORDED",
+              "CONSULTATION_STARTED",
+              "PRESCRIPTION_FINALIZED",
+              "COMPLETED",
+              "CANCELLED"
             ]
           }
         }
@@ -4294,68 +4744,11 @@
           "notes": {
             "type": "string"
           },
+          "vitals": {
+            "$ref": "#/components/schemas/VitalsDTO"
+          },
           "payment": {
             "$ref": "#/components/schemas/PaymentInfo"
-          }
-        }
-      },
-      "PaymentInfo": {
-        "required": [
-          "amount",
-          "mode"
-        ],
-        "type": "object",
-        "properties": {
-          "amount": {
-            "type": "number"
-          },
-          "mode": {
-            "type": "string",
-            "enum": [
-              "CASH",
-              "CARD",
-              "UPI",
-              "NEFT",
-              "INSURANCE"
-            ]
-          },
-          "referenceNumber": {
-            "type": "string"
-          }
-        }
-      },
-      "VitalSettingDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "vitalName": {
-            "type": "string"
-          },
-          "minValue": {
-            "type": "number"
-          },
-          "maxValue": {
-            "type": "number"
-          },
-          "unit": {
-            "type": "string"
-          }
-        }
-      },
-      "ApiResponseVitalSettingDTO": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "$ref": "#/components/schemas/VitalSettingDTO"
-          },
-          "error": {
-            "$ref": "#/components/schemas/ApiError"
           }
         }
       },
@@ -4492,8 +4885,11 @@
               "OTHER"
             ]
           },
-          "departmentName": {
-            "type": "string"
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "certificationLevel": {
             "type": "string",
@@ -4598,11 +4994,17 @@
               "OTHER"
             ]
           },
-          "departmentName": {
-            "type": "string"
+          "departments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
-          "specialization": {
-            "type": "string"
+          "specializations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "consultationFee": {
             "type": "number"
@@ -4644,6 +5046,23 @@
           },
           "data": {
             "$ref": "#/components/schemas/DoctorStaffResponse"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "ApiResponseListString": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
@@ -4770,6 +5189,26 @@
           }
         }
       },
+      "ApiResponseListObject[]": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
       "ApiResponsePageResponsePrescriptionDTO": {
         "type": "object",
         "properties": {
@@ -4877,6 +5316,10 @@
             "type": "string"
           },
           "appointmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "visitId": {
             "type": "string",
             "format": "uuid"
           },
@@ -5178,12 +5621,13 @@
             "type": "string",
             "enum": [
               "SCHEDULED",
-              "COMPLETED",
               "PAYMENT_PENDING",
-              "WAITING_FOR_VITALS",
-              "WALK_IN",
-              "CANCELLED",
-              "ADD_VITALS"
+              "PAID",
+              "VITALS_RECORDED",
+              "CONSULTATION_STARTED",
+              "PRESCRIPTION_FINALIZED",
+              "COMPLETED",
+              "CANCELLED"
             ]
           },
           "tokenNumber": {
@@ -5385,6 +5829,131 @@
           "totalPages": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ApiResponseInvoiceDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/InvoiceDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "InvoiceDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "patientName": {
+            "type": "string"
+          },
+          "visitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "invoiceNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "UNPAID",
+              "PARTIAL",
+              "PAID",
+              "CANCELLED"
+            ]
+          },
+          "subtotalAmount": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "amountPaid": {
+            "type": "number"
+          },
+          "amountDue": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvoiceItemDTO"
+            }
+          }
+        }
+      },
+      "InvoiceItemDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemDescription": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "CONSULTATION",
+              "PHARMACY",
+              "LAB",
+              "PROCEDURE"
+            ]
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          },
+          "discountAmount": {
+            "type": "number"
+          },
+          "netTotal": {
+            "type": "number"
+          },
+          "sourceType": {
+            "type": "string"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -5691,23 +6260,6 @@
               "type": "integer",
               "format": "int64"
             }
-          }
-        }
-      },
-      "ApiResponseListVitalSettingDTO": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VitalSettingDTO"
-            }
-          },
-          "error": {
-            "$ref": "#/components/schemas/ApiError"
           }
         }
       },

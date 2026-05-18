@@ -119,7 +119,7 @@ export const AddContractPage = ({ id }: { id: string }) => {
       const roleAssignments: RoleAssignmentDTO[] = selectedRoles.map(role => ({
         assignmentId: '', // Server will generate
         roleCode: role,
-        departmentName: 'General',
+        departments: [],
         active: true,
         doctorDetails: role === 'DOCTOR' ? doctorDetails as DoctorHospitalDetailsDTO : undefined,
         nurseDetails: role === 'NURSE' ? nurseDetails as NurseHospitalDetailsDTO : undefined,

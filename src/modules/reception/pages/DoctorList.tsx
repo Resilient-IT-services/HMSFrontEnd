@@ -9,6 +9,7 @@ import { Search, Filter, Stethoscope, UserPlus, Eye } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
 import Link from 'next/link';
 import { useReceptionDoctors } from '@/modules/reception/hooks/useReceptionDoctors';
+import { getPrimaryDepartment, getPrimarySpecialization } from '@/utils/staffDisplay';
 
 export function DoctorList() {
   const {
@@ -41,7 +42,7 @@ export function DoctorList() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold text-[var(--text-primary)]">{row.fullName}</span>
-            <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-bold">{row.specialization}</span>
+            <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-bold">{getPrimarySpecialization(row)}</span>
           </div>
         </div>
       )
@@ -50,7 +51,7 @@ export function DoctorList() {
       header: 'Department', 
       mobilePosition: 'subtitle',
       render: (row) => (
-        <span className="text-sm font-medium text-[var(--text-primary)]">{row.departmentName || 'General Medicine'}</span>
+        <span className="text-sm font-medium text-[var(--text-primary)]">{getPrimaryDepartment(row)}</span>
       )
     },
     { 
@@ -172,7 +173,7 @@ export function DoctorList() {
            <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Department</p>
-                <p className="text-sm font-bold text-[var(--text-primary)]">{selectedDoctor?.departmentName || 'General Medicine'}</p>
+                <p className="text-sm font-bold text-[var(--text-primary)]">{getPrimaryDepartment(selectedDoctor)}</p>
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Consultation Fee</p>

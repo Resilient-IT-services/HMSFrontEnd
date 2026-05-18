@@ -150,7 +150,7 @@ describe('DoctorDashboard', () => {
     fireEvent.click(startBtn);
 
     await waitFor(() => {
-      expect(appointmentService.updateStatus).toHaveBeenCalledWith('app-1', { status: 'WALK_IN' });
+      expect(appointmentService.updateStatus).toHaveBeenCalledWith('app-1', { status: 'CONSULTATION_STARTED' });
       expect(mockPush).toHaveBeenCalledWith('/doctor/active-consultation?appointmentId=app-1');
     });
   });

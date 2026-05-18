@@ -59,6 +59,8 @@ export const AppointmentVitals = () => {
     );
   }
 
+  const isReadOnly = appointment.status === 'COMPLETED';
+
   return (
     <MainLayout title="Capture Vitals" hideTitle>
       <div className="p-4 sm:p-8 max-w-[1200px] mx-auto w-full -m-4 sm:-m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
@@ -174,7 +176,8 @@ export const AppointmentVitals = () => {
                         type="text"
                         inputMode="numeric"
                         placeholder="e.g. 72"
-                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                        disabled={isReadOnly}
+                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
                         value={heartRate}
                         onChange={(e) => { setHeartRate(e.target.value); validateField('heartRate', e.target.value); }}
                       />

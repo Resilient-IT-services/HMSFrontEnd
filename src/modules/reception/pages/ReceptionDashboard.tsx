@@ -21,6 +21,7 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 import { cn } from '@/lib/cn';
+import { getPrimaryDepartment } from '@/utils/staffDisplay';
 
 const getLocalDateKey = (date: Date) => {
   const year = date.getFullYear();
@@ -313,14 +314,7 @@ export const ReceptionDashboard = () => {
             <Card className="bg-slate-900 text-white shadow-xl border-none hidden lg:block">
               <h4 className="font-bold mb-6 uppercase text-[10px] tracking-widest opacity-50">Quick Actions</h4>
               <div className="space-y-4">
-                <div className="mb-4">
-                  <SearchInput 
-                    placeholder="Search arrivals..." 
-                    className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
-                  />
-                </div>
-                <Button 
-                  fullWidth
+                <Button                  fullWidth
                   onClick={() => router.push('/reception/patients/create')}
                   icon="person_add"
                   className="justify-between"
@@ -352,7 +346,7 @@ export const ReceptionDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <p className="text-xs font-bold text-slate-900">{n.fullName}</p>
-                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{n.departmentName}</p>
+                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{getPrimaryDepartment(n)}</p>
                     </div>
                     <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   </div>

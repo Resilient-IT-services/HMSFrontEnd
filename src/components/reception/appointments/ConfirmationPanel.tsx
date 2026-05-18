@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { PatientResponse, DoctorStaffResponse, SessionInfo } from '@/types/api';
+import { getPrimarySpecialization } from '@/utils/staffDisplay';
 
 interface ConfirmationPanelProps {
   selectedPatient: PatientResponse | null;
@@ -50,7 +51,7 @@ export const ConfirmationPanel: React.FC<ConfirmationPanelProps> = ({
               {selectedDoctor?.fullName || 'No Doctor Selected'}
             </p>
             <p className="text-[10px] text-slate-500 truncate">
-              {selectedDoctor?.specialization || 'Select doctor first'}
+              {selectedDoctor ? getPrimarySpecialization(selectedDoctor) : 'Select doctor first'}
             </p>
           </div>
         </div>

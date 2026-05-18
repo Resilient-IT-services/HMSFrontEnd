@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { formatToken } from '@/utils/tokenHelper';
+import { getPrimarySpecialization } from '@/utils/staffDisplay';
 
 export const BillingPage = () => {
   const router = useRouter();
@@ -27,8 +28,8 @@ export const BillingPage = () => {
     total,
     handleMarkAsPaid,
     generateBill,
-    isPaid,
-    invoice
+    invoice,
+    isPaid
   } = useReceptionBilling();
 
   if (loading) {
@@ -142,7 +143,7 @@ export const BillingPage = () => {
                       <span className="material-symbols-outlined text-orange-600 text-base sm:text-xl shrink-0">person_search</span>
                       <p className="font-bold text-slate-900 text-sm sm:text-base truncate">Dr. {appointment.doctorName}</p>
                     </div>
-                    <Badge variant="slate" className="shrink-0 text-[8px] sm:text-[10px]">{doctor?.specialization || 'General Practice'}</Badge>
+                    <Badge variant="slate" className="shrink-0 text-[8px] sm:text-[10px]">{getPrimarySpecialization(doctor)}</Badge>
                   </div>
                 </div>
                 <div>
@@ -174,7 +175,7 @@ export const BillingPage = () => {
                 </div>
                 <div className="flex justify-between items-center py-1 sm:py-2">
                   <span className="text-xs sm:text-sm font-bold text-slate-600">Discount</span>
-                  {isPaid ? (
+                  {appointment.status !== 'PAYMENT_PENDING' ? (
                     <span className="font-black text-emerald-600">- ₹{(invoice?.discountAmount ?? discount).toFixed(2)}</span>
                   ) : (
                     <div className="relative">
@@ -249,7 +250,7 @@ export const BillingPage = () => {
           </div>
           
           <div className="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-            {isPaid ? (
+            {appointment.status !== 'PAYMENT_PENDING' ? (
               <>
                 <Button 
                   variant="secondary" 

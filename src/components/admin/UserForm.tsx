@@ -98,6 +98,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
             {logic.activeTab === 'contracts' && (
               <UserFormContractsTab 
                 formData={logic.formData} setFormData={logic.setFormData} hospitals={logic.hospitals} 
+                departments={logic.departments}
                 validationErrors={logic.validationErrors} isAddingContract={logic.isAddingContract} 
                 openAddContract={logic.openAddContract} openEditContract={logic.openEditContract}
                 setIsAddingContract={logic.setIsAddingContract}
@@ -105,7 +106,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
                 newContract={logic.newContract} setNewContract={logic.setNewContract} confirmAddContract={logic.confirmAddContract} duplicateContract={logic.duplicateContract}
               />
             )}
-            {logic.activeTab === 'profile' && <UserFormProfileTab formData={logic.formData} setFormData={logic.setFormData} assignedRoles={logic.assignedRoles} validationErrors={logic.validationErrors} />}
+            {logic.activeTab === 'profile' && <UserFormProfileTab formData={logic.formData} setFormData={logic.setFormData} specializations={logic.specializations} assignedRoles={logic.assignedRoles} validationErrors={logic.validationErrors} />}
           </Tabs>
         </div>
 
