@@ -19,8 +19,6 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
   assignedRoles,
   validationErrors
 }) => {
-  const customSpecialization = formData.doctorInfo?.specialization || '';
-
   const updateDoctorInfo = (updates: Partial<NonNullable<UserRequestDTO['doctorInfo']>>) => {
     setFormData({ ...formData, doctorInfo: { ...formData.doctorInfo!, ...updates } });
   };
@@ -87,35 +85,6 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
                 </div>
                 {renderFieldError('specialization')}
                 {renderFieldError('specializations')}
-              </div>
-              <div className="flex flex-col gap-1.5 md:col-span-3">
-                <label className="font-label-sm text-gray-700 uppercase">Add Custom Specialization</label>
-                <div className="flex flex-col gap-2 md:flex-row">
-                  <input
-                    className="form-input flex-1"
-                    type="text"
-                    placeholder="e.g. Interventional Cardiology"
-                    value={customSpecialization}
-                    onChange={(e) => updateDoctorInfo({ specialization: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const next = customSpecialization.trim();
-                      if (!next) return;
-                      const current = formData.doctorInfo?.specializations || [];
-                      if (!current.includes(next)) {
-                        updateDoctorInfo({ specializations: [...current, next], specialization: '' });
-                      } else {
-                        updateDoctorInfo({ specialization: '' });
-                      }
-                    }}
-                    className="px-4 py-2 rounded-lg bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider"
-                  >
-                    Add Specialization
-                  </button>
-                </div>
-                <p className="text-[10px] text-slate-400 font-medium">This adds the specialization to the doctor profile even if it is not in the master catalog.</p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <label className="font-label-sm text-gray-700 uppercase">License Number</label>

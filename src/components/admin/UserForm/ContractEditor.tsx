@@ -23,6 +23,13 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   const [showCopyUI, setShowCopyUI] = useState<number | null>(null); // raIdx
   const [copyTargets, setCopyTargets] = useState<number[]>([]);
 
+  const selectedHospital = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
+  const availableDepartments = React.useMemo(() => {
+    const hospDepts = selectedHospital?.departments || [];
+    // Merge with global departments, unique
+    return Array.from(new Set([...departments, ...hospDepts]));
+  }, [departments, selectedHospital]);
+
   const handleUpdateSchedule = (raIdx: number, newSchedules: ScheduleDTO[]) => {
     const updatedAssignments = [...(newContract.roleAssignments || [])];
     updatedAssignments[raIdx] = { ...updatedAssignments[raIdx], schedules: newSchedules };
@@ -120,7 +127,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                 <div className="flex flex-col gap-1.5 md:col-span-2">
                   <label className="font-label-sm text-gray-700 uppercase">Hospital Departments <span className="text-primary">*</span></label>
                   <div className={`flex flex-wrap gap-2 p-3 bg-gray-50/50 border rounded-xl min-h-[50px] ${validationErrors[departmentsErrorKey] ? 'border-error ring-1 ring-error/10' : 'border-gray-200'}`}>
-                    {departments.map(dept => {
+                    {availableDepartments.map(dept => {
                       const isDeptSelected = ra.departments?.includes(dept);
                       return (
                         <button
@@ -147,7 +154,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         </button>
                       );
                     })}
-                    {departments.length === 0 && <p className="text-[10px] text-slate-400 italic font-medium">No departments available in catalog.</p>}
+                    {availableDepartments.length === 0 && <p className="text-[10px] text-slate-400 italic font-medium">No departments available in catalog.</p>}
                   </div>
                   {renderFieldError(departmentsErrorKey)}
                 </div>

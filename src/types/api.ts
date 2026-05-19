@@ -832,6 +832,20 @@ export interface VitalRangeConfigDTO {
 
 export type VitalRangesResponse = Record<string, VitalRange>;
 
+export interface Department {
+  id: string;
+  name: string;
+  description?: string;
+  active: boolean;
+}
+
+export interface Specialization {
+  id: string;
+  name: string;
+  description?: string;
+  active: boolean;
+}
+
 // User Summary
 export interface UserSummaryDTO {
   id: string;

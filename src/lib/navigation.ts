@@ -32,6 +32,7 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
     { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'Users', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },
     { name: 'Hospitals', icon: 'apartment', href: '/super_admin/hospitals', roles: ['SUPER_ADMIN'] },
+    { name: 'Master Catalog', icon: 'list_alt', href: '/super_admin/catalog', roles: ['SUPER_ADMIN'] },
     { name: 'Vitals', icon: 'monitoring', href: '/super_admin/vitals', roles: ['SUPER_ADMIN'] },
     { name: 'Reports', icon: 'query_stats', href: '/super_admin/reports', roles: ['SUPER_ADMIN'] },
     { name: 'Earnings', icon: 'payments', href: '/doctor/earnings', roles: ['DOCTOR'] },
