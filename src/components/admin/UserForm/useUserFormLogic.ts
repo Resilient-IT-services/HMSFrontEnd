@@ -14,6 +14,7 @@ import { catalogService } from '@/services/catalogService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateDOB } from '@/utils/dateValidator';
 import { cloneHospitalMembership } from './contractClone';
+import { DAY_OF_WEEK_OPTIONS } from '@/utils/enumOptions';
 
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
@@ -305,7 +306,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   };
 
   const checkScheduleOverlaps = (memberships: HospitalMembershipDTO[]) => {
-    const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
+    const dayNames = DAY_OF_WEEK_OPTIONS.map((option) => option.value) as Array<NonNullable<ScheduleDTO['dayOfWeek']>>;
     const dayOrder: Record<string, number> = {
       MONDAY: 1,
       TUESDAY: 2,

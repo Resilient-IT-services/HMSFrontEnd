@@ -7,6 +7,7 @@ import { hospitalService } from '@/services/hospitalService';
 import { catalogService } from '@/services/catalogService';
 import { HospitalResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { HOSPITAL_STATUS_OPTIONS } from '@/utils/enumOptions';
 
 export function EditHospital({ id }: { id: string }) {
   const router = useRouter();
@@ -342,10 +343,9 @@ export function EditHospital({ id }: { id: string }) {
                         value={formData.status}
                         onChange={(e) => setFormData({ ...formData, status: e.target.value as typeof formData.status })}
                       >
-                        <option value="ACTIVE">Active</option>
-                        <option value="INACTIVE">Inactive</option>
-                        <option value="SUSPENDED">Suspended</option>
-                        <option value="ONBOARDING">Onboarding</option>
+                        {HOSPITAL_STATUS_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
