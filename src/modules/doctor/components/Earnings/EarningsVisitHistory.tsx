@@ -22,9 +22,8 @@ export const EarningsVisitHistory: React.FC<EarningsVisitHistoryProps> = ({
     switch (status) {
       case 'COMPLETED': { return 'emerald'; }
       case 'CANCELLED': { return 'red'; }
-      case 'WALK_IN': { return 'blue'; }
-      case 'SCHEDULED':
-      case 'CHECKED_IN': { return 'orange'; }
+      case 'CONSULTATION_STARTED': { return 'blue'; }
+      case 'SCHEDULED': { return 'orange'; }
       default: { return 'slate'; }
     }
   };

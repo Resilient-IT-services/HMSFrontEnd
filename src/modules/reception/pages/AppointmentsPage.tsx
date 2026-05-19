@@ -133,7 +133,7 @@ export const AppointmentsPage = () => {
 
   const statConfig = [
     { label: 'Total Today', value: stats.total, variant: 'slate', filter: 'ALL' },
-    { label: 'In Progress', value: stats.walkIn, variant: 'emerald', filter: 'CONSULTATION_STARTED' },
+    { label: 'In Progress', value: stats.inProgress, variant: 'emerald', filter: 'CONSULTATION_STARTED' },
     { label: 'Pay Pending', value: stats.paymentPending, variant: 'orange', filter: 'PAYMENT_PENDING' },
     { label: 'Waiting Vitals', value: stats.waitingForVitals, variant: 'purple', filter: 'PAID' },
     { label: 'Completed', value: stats.completed, variant: 'emerald', filter: 'COMPLETED' },

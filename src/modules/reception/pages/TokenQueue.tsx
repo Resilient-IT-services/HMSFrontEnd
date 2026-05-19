@@ -39,7 +39,7 @@ export function TokenQueue() {
 
   const getDepartmentQueue = (dept: string) => {
     // For now, filtering by specialization if available or just mocking grouping
-    return appointments.filter(a => a.status === 'SCHEDULED' || a.status === 'WALK_IN');
+    return appointments.filter(a => a.status === 'SCHEDULED');
   };
 
   const opdQueue = getDepartmentQueue('OPD');

@@ -28,7 +28,7 @@ export const useReceptionAppointments = () => {
   const [activeFilters, setActiveFilters] = useState<{ statuses?: string[]; paymentStatuses?: string[] }>({});
   const [stats, setStats] = useState({
     total: 0,
-    walkIn: 0,
+    inProgress: 0,
     upcoming: 0,
     paymentPending: 0,
     waitingForVitals: 0,
@@ -71,7 +71,7 @@ export const useReceptionAppointments = () => {
         const statusStats = statsRes.data.byStatus;
         setStats({
           total: statsRes.data.total,
-          walkIn: statusStats['CONSULTATION_STARTED'] || 0,
+          inProgress: statusStats['CONSULTATION_STARTED'] || 0,
           upcoming: statsRes.data.upcoming || 0,
           paymentPending: statusStats['PAYMENT_PENDING'] || 0,
           waitingForVitals: statusStats['PAID'] || 0,

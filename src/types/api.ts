@@ -538,7 +538,7 @@ export interface PharmacySaleRequest {
 }
 
 export interface QuickPharmacySaleRequest {
-  saleType: 'WALKIN' | 'VISIT';
+  saleType: string;
   patientId?: string;
   visitId?: string;
   prescriptionId?: string;
@@ -546,16 +546,9 @@ export interface QuickPharmacySaleRequest {
   externalDoctorName?: string;
   customerName?: string;
   customerPhone?: string;
-  items: {
-    medicineId: string;
-    medicineBatchId: string;
-    quantity: number;
-    unitPrice: number;
-    discountAmount?: number;
-    taxAmount?: number;
-  }[];
+  items: PharmacySaleItem[];
   payment?: {
-    mode: string;
+    mode: 'CASH' | 'CARD' | 'UPI' | 'NEFT' | 'INSURANCE';
     amount: number;
     referenceNumber?: string;
   };
@@ -563,14 +556,8 @@ export interface QuickPharmacySaleRequest {
 }
 
 export interface QuickPharmacySaleItem {
-  id: string;
-  medicineName: string;
-  batchNumber: string;
+  medicineId: string;
   quantity: number;
-  unitPrice: number;
-  subtotal: number;
-  discountAmount: number;
-  netAmount: number;
 }
 
 export interface QuickPharmacySaleResponse {

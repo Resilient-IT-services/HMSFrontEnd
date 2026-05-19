@@ -222,16 +222,14 @@ export default function QuickPharmacyBillingPage() {
         customerPhone: saleType === 'WALKIN' ? customerPhone : selectedPatient?.phone,
         items: cart.map(item => ({
           medicineId: item.medicineId,
-          medicineBatchId: item.id,
           quantity: item.selectedQuantity,
-          unitPrice: item.sellingPrice!,
-          discountAmount: item.discount
         })),
         payment: {
-          mode: paymentMode,
+          mode: paymentMode as any,
           amount: amountPaid,
           referenceNumber
-        }
+        },
+        notes: ''
       };
 
       const response = await pharmacyApi.createQuickSale(payload);
