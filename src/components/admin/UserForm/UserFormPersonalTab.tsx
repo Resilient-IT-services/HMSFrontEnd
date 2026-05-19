@@ -5,6 +5,7 @@ import { UserRequestDTO } from '@/types/api';
 
 import { Section } from '@/components/ui/Section';
 import { MobileSelector } from '@/components/ui/MobileSelector';
+import { GENDER_OPTIONS } from '@/utils/enumOptions';
 
 interface UserFormPersonalTabProps {
   formData: UserRequestDTO;
@@ -102,11 +103,11 @@ export const UserFormPersonalTab: React.FC<UserFormPersonalTabProps> = ({
             <label className="block text-sm font-medium text-slate-600 mb-1.5 ml-1">Gender Identity</label>
             <MobileSelector
               label="Gender"
-              options={[
-                { id: 'MALE', name: 'Male', icon: 'male' },
-                { id: 'FEMALE', name: 'Female', icon: 'female' },
-                { id: 'OTHER', name: 'Other', icon: 'transgender' }
-              ]}
+              options={GENDER_OPTIONS.map((option) => ({
+                id: option.value,
+                name: option.label,
+                icon: option.value === 'MALE' ? 'male' : option.value === 'FEMALE' ? 'female' : 'transgender'
+              }))}
               value={formData.gender || ''}
               onChange={(val) => setFormData({ ...formData, gender: val as any })}
               placeholder="Select Gender..."

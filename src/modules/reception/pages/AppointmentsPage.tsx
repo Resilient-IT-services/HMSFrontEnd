@@ -14,6 +14,7 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
 import { cn } from '@/lib/cn';
+import { APPOINTMENT_STATUS_OPTIONS } from '@/utils/enumOptions';
 
 export const AppointmentsPage = () => {
   const router = useRouter();
@@ -270,24 +271,24 @@ export const AppointmentsPage = () => {
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase text-slate-400">Appointment Status</label>
             <div className="flex flex-wrap gap-2">
-              {['SCHEDULED', 'PAYMENT_PENDING', 'PAID', 'VITALS_RECORDED', 'CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED', 'CANCELLED'].map(s => (
-                <label key={s} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
-                  advancedFilters.statuses.includes(s) 
+              {APPOINTMENT_STATUS_OPTIONS.map((option) => (
+                <label key={option.value} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
+                  advancedFilters.statuses.includes(option.value) 
                     ? 'bg-orange-700 text-white border-orange-700' 
                     : 'bg-white text-slate-600 border-slate-200 hover:border-orange-300'
                 }`}>
                   <input 
                     type="checkbox" 
                     hidden
-                    checked={advancedFilters.statuses.includes(s)}
+                    checked={advancedFilters.statuses.includes(option.value)}
                     onChange={(e) => {
                       const items = e.target.checked 
-                        ? [...advancedFilters.statuses, s]
-                        : advancedFilters.statuses.filter(i => i !== s);
+                        ? [...advancedFilters.statuses, option.value]
+                        : advancedFilters.statuses.filter(i => i !== option.value);
                       setAdvancedFilters({...advancedFilters, statuses: items});
                     }}
                   />
-                  <span className="text-[10px] font-bold">{s.replace('_', ' ')}</span>
+                  <span className="text-[10px] font-bold">{option.label}</span>
                 </label>
               ))}
             </div>

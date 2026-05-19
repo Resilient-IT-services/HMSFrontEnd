@@ -10,6 +10,7 @@ import type {
   InvoiceStatus,
   MedicineForm,
   MedicineScheduleType,
+  HospitalResponse,
   PharmacySaleStatus,
   PharmacySaleType,
   PrescriptionStatus,
@@ -35,6 +36,13 @@ export const ROLE_OPTIONS: Option<Role>[] = [
 export const USER_ACCOUNT_STATUS_OPTIONS: Option<UserAccountStatus>[] = [
   { value: 'ACTIVE', label: 'Active' },
   { value: 'INACTIVE', label: 'Inactive' }
+];
+
+export const HOSPITAL_STATUS_OPTIONS: Option<HospitalResponse['status']>[] = [
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'INACTIVE', label: 'Inactive' },
+  { value: 'SUSPENDED', label: 'Suspended' },
+  { value: 'ONBOARDING', label: 'Onboarding' }
 ];
 
 export const GENDER_OPTIONS: Option<Gender>[] = [
