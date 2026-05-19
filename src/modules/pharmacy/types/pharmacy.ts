@@ -10,7 +10,7 @@ export interface PrescriptionItem extends PrescriptionDTO {
 }
 
 export interface PharmacyPrescription extends PrescriptionDTO {
-  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+  status: 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'DISPENSED';
   totalMedicines?: number;
 }
 

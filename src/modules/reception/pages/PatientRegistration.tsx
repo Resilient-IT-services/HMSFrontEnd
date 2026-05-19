@@ -7,6 +7,7 @@ import { patientService } from '@/services/patientService';
 import { CreatePatientRequest } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateDOB } from '@/utils/dateValidator';
+import { BLOOD_GROUP_OPTIONS } from '@/utils/enumOptions';
 
 export function PatientRegistration({ patientId }: { patientId?: string } = {}) {
   const router = useRouter();
@@ -279,6 +280,19 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
                     }}
                   />
                   {errors.email && <p className="text-[10px] font-bold text-red-500 uppercase mt-1">{errors.email}</p>}
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase block">Blood Group</label>
+                  <select
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all bg-slate-50/50 text-sm appearance-none"
+                    value={formData.bloodGroup || ''}
+                    onChange={(e) => setFormData({ ...formData, bloodGroup: (e.target.value || undefined) as CreatePatientRequest['bloodGroup'] })}
+                  >
+                    <option value="">Select Blood Group</option>
+                    {BLOOD_GROUP_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-xs font-bold text-slate-500 uppercase block">Address</label>

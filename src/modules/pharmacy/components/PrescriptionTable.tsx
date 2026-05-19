@@ -78,7 +78,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 >
                   View details
                 </Link>
-                {prescription.status === 'COMPLETED' ? (
+                {prescription.status === 'COMPLETED' || prescription.status === 'DISPENSED' ? (
                   <Link 
                     href={`/pharmacy/sales/prescription/${prescription.id}`}
                     className="px-4 py-2 bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-800/20 hover:bg-black transition-all active:scale-95 flex items-center gap-2"

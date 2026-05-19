@@ -17,6 +17,7 @@ import MedicineStockSearch from '../components/MedicineStockSearch';
 import PatientSearch from '../components/PatientSearch'; 
 import DoctorSearch from '../components/DoctorSearch';
 import MainLayout from '@/components/ui/MainLayout';
+import { PHARMACY_SALE_TYPE_OPTIONS } from '@/utils/enumOptions';
 
 interface CartItem extends PharmacyStockDTO {
   selectedQuantity: number;
@@ -262,18 +263,15 @@ export default function QuickPharmacyBillingPage() {
             )}
           </div>
           <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-inner">
-            <button 
-              onClick={() => setSaleType('WALKIN')}
-              className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${saleType === 'WALKIN' ? 'bg-white shadow-xl text-primary' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              WALK-IN
-            </button>
-            <button 
-              onClick={() => setSaleType('VISIT')}
-              className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${saleType === 'VISIT' ? 'bg-white shadow-xl text-primary' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              PATIENT VISIT
-            </button>
+            {PHARMACY_SALE_TYPE_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => setSaleType(option.value)}
+                className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${saleType === option.value ? 'bg-white shadow-xl text-primary' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
 

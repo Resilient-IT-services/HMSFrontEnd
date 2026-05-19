@@ -5,6 +5,7 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { pharmacyApi } from '../api/pharmacyApi';
 import { MedicineRequestDTO } from '@/types/api';
 import { Modal } from '@/components/ui/Modal';
+import { MEDICINE_FORM_OPTIONS, MEDICINE_SCHEDULE_OPTIONS } from '@/utils/enumOptions';
 
 interface AddMedicineModalProps {
   onClose: () => void;
@@ -166,14 +167,9 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               onChange={handleChange}
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
-              <option value="TABLET">Tablet</option>
-              <option value="SYRUP">Syrup</option>
-              <option value="INJECTION">Injection</option>
-              <option value="CAPSULE">Capsule</option>
-              <option value="OINTMENT">Ointment</option>
-              <option value="CREAM">Cream</option>
-              <option value="DROPS">Drops</option>
-              <option value="INHALER">Inhaler</option>
+              {MEDICINE_FORM_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </div>
 
@@ -185,10 +181,9 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               onChange={handleChange}
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
-              <option value="OTC">OTC</option>
-              <option value="SCHEDULE_H">SCHEDULE_H</option>
-              <option value="SCHEDULE_G">SCHEDULE_G</option>
-              <option value="SCHEDULE_X">SCHEDULE_X</option>
+              {MEDICINE_SCHEDULE_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
             </select>
           </div>
 

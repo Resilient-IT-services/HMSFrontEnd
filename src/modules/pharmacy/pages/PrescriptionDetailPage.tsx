@@ -208,6 +208,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
 
   if (loading) return <MainLayout title="Loading..."><LoadingSkeleton /></MainLayout>;
   if (!prescription) return <MainLayout title="Not Found"><div>Prescription not found</div></MainLayout>;
+  const isFinalized = prescription.status === 'COMPLETED' || prescription.status === 'DISPENSED';
 
   return (
     <MainLayout title={`Dispense Order: #RX-${id}`}>
@@ -335,7 +336,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               </div>
             </div>
 
-            {prescription.status !== 'COMPLETED' && (
+            {!isFinalized && (
               <div className="mb-6">
                 <p className="text-[10px] font-black uppercase text-slate-400 mb-3">Payment Method</p>
                 <div className="grid grid-cols-3 gap-2">
@@ -356,7 +357,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               </div>
             )}
             
-            {prescription.status === 'COMPLETED' ? (
+            {isFinalized ? (
               <button 
                 onClick={handlePrintInvoice}
                 className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"

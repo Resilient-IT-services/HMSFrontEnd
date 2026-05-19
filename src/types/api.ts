@@ -57,7 +57,7 @@ export type AuditEntityName =
   | 'HOSPITAL'
   | 'USER_ACCOUNT'
   | 'USER_CONTRACT';
-export type PrescriptionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type PrescriptionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'DISPENSED';
 
 // Global User Info Types
 export interface Qualification {

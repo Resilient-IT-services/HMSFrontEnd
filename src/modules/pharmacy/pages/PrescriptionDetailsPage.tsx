@@ -67,6 +67,7 @@ const PrescriptionDetailsPage: React.FC = () => {
 
   if (loading) return <div className="p-8"><LoadingSkeleton /></div>;
   if (error || !prescription) return <div className="p-8"><EmptyState message={error || 'Not found'} icon="error" /></div>;
+  const isFinalized = prescription.status === 'COMPLETED' || prescription.status === 'DISPENSED';
 
   return (
     <div className="space-y-8">
@@ -116,7 +117,7 @@ const PrescriptionDetailsPage: React.FC = () => {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">Status</span>
-                <span className={`font-bold ${prescription.status === 'COMPLETED' ? 'text-[var(--success)]' : 'text-[var(--warning)]'}`}>
+                <span className={`font-bold ${isFinalized ? 'text-[var(--success)]' : 'text-[var(--warning)]'}`}>
                   {prescription.status || 'ACTIVE'}
                 </span>
               </div>
@@ -124,15 +125,15 @@ const PrescriptionDetailsPage: React.FC = () => {
             
             <button 
               onClick={handleDispense}
-              disabled={dispensing || prescription.status === 'COMPLETED'}
+              disabled={dispensing || isFinalized}
               className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
-                prescription.status === 'COMPLETED' 
+                isFinalized 
                 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                 : 'bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.98]'
               }`}
             >
               <span className="material-symbols-outlined">medication_liquid</span>
-              {prescription.status === 'COMPLETED' ? 'Already Dispensed' : dispensing ? 'Processing...' : 'Dispense & Mark Complete'}
+              {isFinalized ? 'Already Dispensed' : dispensing ? 'Processing...' : 'Dispense & Mark Complete'}
             </button>
           </div>
 

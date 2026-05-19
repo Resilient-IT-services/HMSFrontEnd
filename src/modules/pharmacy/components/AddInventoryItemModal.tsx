@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useToast } from '@/components/ui/Toast';
 import { pharmacyApi } from '../api/pharmacyApi';
 import { InventoryItemRequestDTO } from '@/types/api';
+import { INVENTORY_UNIT_OPTIONS } from '@/utils/enumOptions';
 
 interface AddInventoryItemModalProps {
   onClose: () => void;
@@ -93,13 +94,9 @@ const AddInventoryItemModal: React.FC<AddInventoryItemModalProps> = ({ onClose, 
             onChange={handleChange}
             className={`w-full px-4 py-2 border rounded-xl focus:ring-2 outline-none ${errors.unit ? 'border-red-500 focus:ring-red-500' : 'focus:ring-orange-500'}`}
           >
-            <option value="PIECE">PIECE</option>
-            <option value="BOX">BOX</option>
-            <option value="STRIP">STRIP</option>
-            <option value="BOTTLE">BOTTLE</option>
-            <option value="PACK">PACK</option>
-            <option value="VIAL">VIAL</option>
-            <option value="AMPULE">AMPULE</option>
+            {INVENTORY_UNIT_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
           </select>
           {errors.unit && <p className="text-xs text-red-500 mt-1 font-bold uppercase">{errors.unit}</p>}
         </div>

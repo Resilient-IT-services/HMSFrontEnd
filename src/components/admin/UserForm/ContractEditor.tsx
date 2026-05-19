@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { HospitalMembershipDTO, HospitalResponse, ScheduleDTO } from '@/types/api';
 import { MobileSelector } from '@/components/ui/MobileSelector';
+import { DAY_OF_WEEK_OPTIONS } from '@/utils/enumOptions';
 
 interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
@@ -18,10 +19,10 @@ interface ContractEditorProps {
 export const ContractEditor: React.FC<ContractEditorProps> = ({
   newContract, setNewContract, hospitals, departments, editingContractIndex, validationErrors, onCancel, onConfirm
 }) => {
-  const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
-  const [activeDay, setActiveDay] = useState<typeof dayNames[number]>('MONDAY');
+  const dayValues = DAY_OF_WEEK_OPTIONS.map((option) => option.value);
+  const [activeDay, setActiveDay] = useState<typeof dayValues[number]>('MONDAY');
   const [showCopyUI, setShowCopyUI] = useState<number | null>(null); // raIdx
-  const [copyTargets, setCopyTargets] = useState<Array<typeof dayNames[number]>>([]);
+  const [copyTargets, setCopyTargets] = useState<Array<typeof dayValues[number]>>([]);
 
   const selectedHospital = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
   const availableDepartments = React.useMemo(() => {
@@ -201,11 +202,12 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
               {(ra.roleCode === 'DOCTOR' || ra.roleCode === 'NURSE') && (
                 <div className="space-y-4">
                   <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200 overflow-x-auto scrollbar-hide">
-                    {dayNames.map((day) => {
+                    {DAY_OF_WEEK_OPTIONS.map((option) => {
+                      const day = option.value;
                       const count = ra.schedules?.filter(s => s.dayOfWeek === day).length || 0;
                       return (
                         <button key={day} type="button" onClick={() => setActiveDay(day)} className={`flex-1 min-w-[50px] py-2 rounded-lg text-[8px] md:text-[9px] font-black uppercase transition-all whitespace-nowrap ${activeDay === day ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
-                          {day.slice(0, 3)} {count > 0 && `(${count})`}
+                          {option.label.slice(0, 3)} {count > 0 && `(${count})`}
                         </button>
                       );
                     })}
@@ -228,7 +230,8 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                       <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-primary/20 mb-4 animate-in zoom-in-95">
                         <p className="text-[10px] font-black text-primary uppercase mb-3 tracking-widest">Select target days to copy {activeDay} slots:</p>
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {dayNames.map((day) => {
+                          {DAY_OF_WEEK_OPTIONS.map((option) => {
+                            const day = option.value;
                             if (day === activeDay) return null;
                             const isSelected = copyTargets.includes(day);
                             return (
@@ -237,7 +240,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                                 onClick={() => setCopyTargets(prev => isSelected ? prev.filter(d => d !== day) : [...prev, day])}
                                 className={`px-2 md:px-3 py-1.5 rounded-lg border-2 text-[8px] md:text-[9px] font-black uppercase transition-all ${isSelected ? 'bg-primary border-primary text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                               >
-                                {day.slice(0, 3)}
+                                {option.label.slice(0, 3)}
                               </button>
                             );
                           })}
