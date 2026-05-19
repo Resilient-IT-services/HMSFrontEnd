@@ -10,6 +10,7 @@ import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { sortByToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -30,7 +31,7 @@ export const useDoctorQueue = () => {
 
     try {
       if (!isBackground) setLoading(true);
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalStartOfDayISO();
       const response = await appointmentService.list(0, 100, undefined, today, user.id);
 
       if (response.success && response.data) {
@@ -93,7 +94,7 @@ export const useDoctorQueue = () => {
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalStartOfDayISO().split('T')[0];
     const todayApps = appointments.filter(a => a.appointmentTime.startsWith(today));
 
     const waiting = todayApps.filter((a) => a.status === 'SCHEDULED').length;
@@ -123,7 +124,7 @@ export const useDoctorQueue = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalStartOfDayISO().split('T')[0];
     
     let base = appointments;
     base = activeTab === 'TODAY' ? appointments.filter(a => 

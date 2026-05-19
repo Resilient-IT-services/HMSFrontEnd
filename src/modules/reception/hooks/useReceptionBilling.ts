@@ -14,6 +14,7 @@ import {
   InvoiceDTO,
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 const APPOINTMENT_CONFLICT_MESSAGE = 'Appointment already exists for this patient with the same doctor at the selected time';
 
@@ -77,11 +78,12 @@ export const useReceptionBilling = () => {
 
     // Check if an appointment already exists for this patient/time
     // to handle "back" navigation or duplicate submissions gracefully
-    const existingRes = await appointmentService.list(0, 1, undefined, appointmentTimeParam.split('T')[0], doctorIdParam);
+    const searchDate = getLocalStartOfDayISO(appointmentTimeParam || undefined);
+    const existingRes = await appointmentService.list(0, 1, undefined, searchDate, doctorIdParam);
     if (existingRes.success && existingRes.data && existingRes.data.content.length > 0) {
       const existing = existingRes.data.content.find(a => 
         a.patientId === patientIdParam && 
-        a.appointmentTime.startsWith(appointmentTimeParam) &&
+        a.appointmentTime.startsWith(appointmentTimeParam!) &&
         a.status !== 'CANCELLED'
       );
       
@@ -121,8 +123,7 @@ export const useReceptionBilling = () => {
       createdAt: new Date().toISOString()
     } as any);
 
-    const date = appointmentTimeParam?.split('T')[0] || new Date().toISOString().split('T')[0];
-    const statsRes = await appointmentService.listSummary(0, 1, undefined, date, doctorIdParam);
+    const statsRes = await appointmentService.listSummary(0, 1, undefined, searchDate, doctorIdParam);
     if (statsRes.success && statsRes.data) {
       const nextNum = statsRes.data.totalElements + 1;
       setPredictedToken(`T-${nextNum.toString().padStart(3, '0')}`);
@@ -174,14 +175,15 @@ export const useReceptionBilling = () => {
           triggerGlobalToast('Payment recorded successfully', 'success');
           // Refresh data to show PAID status
           void fetchData();
+          return appointment;
         }
-        return;
+        return null;
       }
 
       // Scenario 2: NEW Booking (Atomic Book + Pay)
       if (!patientIdParam || !doctorIdParam || !appointmentTimeParam || !patient) {
          triggerGlobalToast('Missing required booking information', 'error');
-         return;
+         return null;
       }
 
       const res = await appointmentService.bookConsultation({
@@ -198,11 +200,13 @@ export const useReceptionBilling = () => {
 
       if (res.success && res.data) {
         triggerGlobalToast('Consultation booked and payment confirmed successfully', 'success');
-        router.push(`/reception/appointments/vitals?appointmentId=${res.data.id}`);
+        return res.data;
       }
+      return null;
     } catch (error) {
       console.error('Payment Error:', error);
       triggerGlobalToast(getAppointmentSubmitErrorMessage(error), 'error');
+      return null;
     } finally {
       setSubmittingPayment(false);
     }

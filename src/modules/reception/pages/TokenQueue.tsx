@@ -7,6 +7,7 @@ import { AppointmentSummaryDTO } from '@/types/api';
 import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
 import { formatToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 export function TokenQueue() {
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
@@ -14,7 +15,7 @@ export function TokenQueue() {
 
   const fetchQueue = useCallback(async () => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalStartOfDayISO();
       const res = await appointmentService.listSummary(0, 100, undefined, today);
       if (res.success && res.data) {
         setAppointments(res.data.content);

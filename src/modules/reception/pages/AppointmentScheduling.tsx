@@ -12,6 +12,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { SessionGrid } from '@/components/reception/appointments/SessionGrid';
 import { ConfirmationPanel } from '@/components/reception/appointments/ConfirmationPanel';
 import { getPrimarySpecialization } from '@/utils/staffDisplay';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 const getLocalDateString = (date: Date) => {
   const year = date.getFullYear();
@@ -104,7 +105,8 @@ export function AppointmentScheduling() {
       if (!selectedDoctor) return;
       setFetchingAvailability(true);
       setSelectedSession(null);
-      const res = await doctorService.getAvailability(selectedDoctor.doctorId, selectedDate);
+      const searchDate = getLocalStartOfDayISO(selectedDate);
+      const res = await doctorService.getAvailability(selectedDoctor.doctorId, searchDate);
       if (res.success && res.data) {
         let sessions = res.data.sessions;
         
@@ -178,9 +180,10 @@ export function AppointmentScheduling() {
     setSubmitting(true);
     try {
       const appointmentTime = `${selectedDate}T${editableTime}:00`;
+      const searchDate = getLocalStartOfDayISO(selectedDate);
       
       // Quick check for existing appointment to prevent duplicates and enable resume
-      const res = await appointmentService.list(0, 50, undefined, selectedDate, selectedDoctor.doctorId);
+      const res = await appointmentService.list(0, 50, undefined, searchDate, selectedDoctor.doctorId);
       if (res.success && res.data) {
         const existing = res.data.content.find(a => 
           a.patientId === selectedPatient.id && 

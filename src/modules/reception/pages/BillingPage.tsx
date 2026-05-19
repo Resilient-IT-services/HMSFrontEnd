@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { useReceptionBilling } from '@/modules/reception/hooks/useReceptionBilling';
@@ -8,11 +8,15 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { Modal } from '@/components/ui/Modal';
 import { formatToken } from '@/utils/tokenHelper';
 import { getPrimarySpecialization } from '@/utils/staffDisplay';
 
 export const BillingPage = () => {
   const router = useRouter();
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [bookedAppointmentId, setBookedAppointmentId] = useState<string | null>(null);
+
   const {
     appointment,
     patient,
@@ -31,6 +35,14 @@ export const BillingPage = () => {
     invoice,
     isPaid
   } = useReceptionBilling();
+
+  const onConfirmPayment = async () => {
+    const result = await handleMarkAsPaid();
+    if (result) {
+      setBookedAppointmentId(result.id);
+      setShowSuccessModal(true);
+    }
+  };
 
   if (loading) {
     return (
@@ -55,6 +67,9 @@ export const BillingPage = () => {
     );
   }
 
+  const isVitalsEnabled = appointment.status === 'PAID' || appointment.status === 'VITALS_RECORDED' || appointment.status === 'SCHEDULED';
+  const isReadOnly = ['CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED'].includes(appointment.status);
+
   return (
     <MainLayout title="Consultation Billing" hideTitle>
       <div className="invoice-print-container op-bill-print-page p-4 sm:p-8 max-w-[1200px] mx-auto w-full -m-4 sm:-m-8 bg-[#f9f9ff] min-h-screen font-inter pb-40 sm:pb-32">
@@ -62,11 +77,11 @@ export const BillingPage = () => {
         <div className="op-bill-screen-heading no-print">
           <PageHeading 
             title="Consultation Billing" 
-            description="Finalize patient visit fees and process medical service payments."
+            description={isReadOnly ? "View finalized consultation billing and transaction details." : "Finalize patient visit fees and process medical service payments."}
           >
              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                <Badge variant={isPaid ? 'emerald' : 'orange'} className="px-3 py-1.5 sm:px-4 sm:py-2 text-[10px] sm:text-xs">
-                 Status: {isPaid ? 'PAID' : 'PAYMENT PENDING'}
+                 Status: {isPaid ? (isReadOnly ? appointment.status.replace('_', ' ') : 'PAID') : 'PAYMENT PENDING'}
                </Badge>
                <Badge variant="slate" className="px-3 py-1.5 sm:px-4 sm:py-2 border-slate-200 text-[10px] sm:text-xs">
                  {invoice ? `Invoice: ${invoice.invoiceNumber}` : `ID: #INV-${appointment.id.substring(0, 8).toUpperCase()}`}
@@ -118,16 +133,18 @@ export const BillingPage = () => {
               </div>
             </Card>
 
-            <div className="op-bill-policy bg-orange-600 p-4 sm:p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
-               <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-6xl sm:text-8xl opacity-10 rotate-12">info</span>
-               <h4 className="font-bold text-xs sm:text-sm mb-2 flex items-center gap-2">
-                 <span className="material-symbols-outlined text-base sm:text-lg">policy</span>
-                 Billing Policy
-               </h4>
-               <p className="text-[10px] sm:text-[11px] font-medium leading-relaxed opacity-90">
-                 All consultation fees are non-refundable once processed. Please verify the consulting doctor and visit type before confirming the transaction.
-               </p>
-            </div>
+            {!isReadOnly && (
+              <div className="op-bill-policy bg-orange-600 p-4 sm:p-6 rounded-2xl text-white shadow-lg shadow-orange-600/20 relative overflow-hidden">
+                <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-6xl sm:text-8xl opacity-10 rotate-12">info</span>
+                <h4 className="font-bold text-xs sm:text-sm mb-2 flex items-center gap-2">
+                  <span className="material-symbols-outlined text-base sm:text-lg">policy</span>
+                  Billing Policy
+                </h4>
+                <p className="text-[10px] sm:text-[11px] font-medium leading-relaxed opacity-90">
+                  All consultation fees are non-refundable once processed. Please verify the consulting doctor and visit type before confirming the transaction.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Billing Details */}
@@ -257,7 +274,7 @@ export const BillingPage = () => {
                 fullWidth 
                 className="px-6 sm:px-12 text-sm uppercase font-black"
                 isLoading={submittingPayment}
-                onClick={handleMarkAsPaid}
+                onClick={onConfirmPayment}
               >
                 {submittingPayment ? 'Processing...' : 'Confirm Payment'}
               </Button>
@@ -272,19 +289,72 @@ export const BillingPage = () => {
                 >
                   Download Invoice
                 </Button>
-                <Button 
-                  size="lg" 
-                  icon="vital_signs" 
-                  onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointment.id}`)}
-                  className="flex-1 sm:flex-none text-[10px] uppercase font-black"
-                >
-                  Proceed to Vitals
-                </Button>
+                {isVitalsEnabled && !isReadOnly && (
+                  <Button 
+                    size="lg" 
+                    icon="vital_signs" 
+                    onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointment.id}`)}
+                    className="flex-1 sm:flex-none text-[10px] uppercase font-black"
+                  >
+                    {appointment.status === 'VITALS_RECORDED' ? 'Edit Vitals' : 'Proceed to Vitals'}
+                  </Button>
+                )}
+                {isReadOnly && (
+                   <Button 
+                    variant="slate"
+                    size="lg" 
+                    icon="close" 
+                    onClick={() => router.push('/reception/appointments')}
+                    className="flex-1 sm:flex-none text-[10px] uppercase font-black"
+                  >
+                    Close
+                  </Button>
+                )}
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Success Notification Modal */}
+      <Modal 
+        isOpen={showSuccessModal} 
+        onClose={() => setShowSuccessModal(false)}
+        title="Payment Confirmed"
+        className="max-w-md"
+      >
+        <div className="p-8 text-center">
+          <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="material-symbols-outlined text-5xl">check_circle</span>
+          </div>
+          <h3 className="text-xl font-black text-slate-900 mb-2">Transaction Successful!</h3>
+          <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed">
+            The consultation for <span className="text-slate-900 font-bold">{patient.fullName}</span> has been confirmed. You can now proceed to record vitals or book another appointment.
+          </p>
+          
+          <div className="flex flex-col gap-3">
+            <Button 
+              size="lg" 
+              fullWidth 
+              icon="vital_signs"
+              onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${bookedAppointmentId || appointment.id}`)}
+              className="text-xs font-black uppercase tracking-widest"
+            >
+              Proceed to Vitals
+            </Button>
+            <Button 
+              variant="secondary" 
+              size="lg" 
+              fullWidth 
+              icon="person_add"
+              onClick={() => router.push('/reception/appointments/create')}
+              className="text-xs font-black uppercase tracking-widest"
+            >
+              Book Next Appointment
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </MainLayout>
   );
 };

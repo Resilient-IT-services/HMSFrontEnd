@@ -9,6 +9,7 @@ import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_DEBOUNCE_MS } from '@/utils/constan
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { useDebounce } from '@/hooks/useDebounce';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 export const useReceptionAppointments = () => {
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
@@ -39,7 +40,7 @@ export const useReceptionAppointments = () => {
   const fetchData = useCallback(async (isBackground = false, filters = activeFilters) => {
     if (!isBackground) setLoading(true);
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalStartOfDayISO();
       
       const dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
       
@@ -124,7 +125,7 @@ export const useReceptionAppointments = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = getLocalStartOfDayISO().split('T')[0];
     
     const base = appointments.filter(app => {
       const appDate = app.appointmentTime.split('T')[0];

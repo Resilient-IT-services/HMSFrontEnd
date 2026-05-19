@@ -295,7 +295,7 @@ export const useReceptionVitals = () => {
       };
 
       const res = await appointmentService.update(appointment.id, { 
-        ...appointment, vitals, notes: complaints, status: 'SCHEDULED'
+        ...appointment, vitals, notes: complaints, status: 'VITALS_RECORDED'
       }, { skipToast: true });
 
       if (res.success) {

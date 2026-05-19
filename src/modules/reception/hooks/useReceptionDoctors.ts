@@ -2,22 +2,11 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { doctorService } from '@/services/doctorService';
+import { catalogService } from '@/services/catalogService';
 import { DoctorStaffResponse, SessionInfo } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getDepartmentLabel, hasDepartment } from '@/utils/staffDisplay';
-
-const defaultDepartmentOptions = [
-  'Cardiology',
-  'Neurology',
-  'Orthopedics',
-  'Pediatrics',
-  'Gynecology',
-  'Obstetrics',
-  'Dermatology',
-  'Ophthalmology',
-  'ENT (Ear, Nose, Throat)',
-  'General Medicine',
-];
+import { hasDepartment } from '@/utils/staffDisplay';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 export const useReceptionDoctors = () => {
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
@@ -25,10 +14,10 @@ export const useReceptionDoctors = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(getLocalStartOfDayISO());
   const [availability, setAvailability] = useState<SessionInfo[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
 
@@ -39,6 +28,9 @@ export const useReceptionDoctors = () => {
       const res = await doctorService.list(0, 100, debouncedSearchTerm, department);
       if (res.success && res.data) {
         const content = res.data.content;
+        // The backend filters by name and department if provided. 
+        // We keep the client-side filter as a fallback for complex multi-department matching
+        // if the backend only matches primary department.
         const filteredDoctors = department ? content.filter((doctor) => hasDepartment(doctor, department)) : content;
         setDoctors(filteredDoctors);
       }
@@ -51,17 +43,9 @@ export const useReceptionDoctors = () => {
 
   const fetchDepartmentOptions = useCallback(async () => {
     try {
-      const res = await doctorService.list(0, 100);
+      const res = await catalogService.getDepartments();
       if (res.success && res.data) {
-        const departments = [
-          ...new Set(
-            [
-              ...defaultDepartmentOptions,
-              ...res.data.content.map((doctor) => getDepartmentLabel(doctor, '')).filter(Boolean),
-            ]
-          )
-        ].toSorted((a, b) => a.localeCompare(b));
-        setDepartmentOptions(departments);
+        setDepartmentOptions(res.data.sort((a, b) => a.localeCompare(b)));
       }
     } catch (error) {
       console.error('Failed to fetch doctor departments', error);
@@ -85,7 +69,8 @@ export const useReceptionDoctors = () => {
   const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
     try {
       setLoadingSchedule(true);
-      const res = await doctorService.getAvailability(doctorId, date);
+      const searchDate = getLocalStartOfDayISO(date);
+      const res = await doctorService.getAvailability(doctorId, searchDate);
       if (res.success && res.data) {
         setAvailability(res.data.sessions);
       }
@@ -107,14 +92,14 @@ export const useReceptionDoctors = () => {
 
   const viewSchedule = (doctor: DoctorStaffResponse) => {
     setSelectedDoctor(doctor);
-    setSelectedDate(new Date().toISOString().split('T')[0]);
+    setSelectedDate(getLocalStartOfDayISO());
   };
 
   const dateOptions = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() + i);
-      const iso = d.toISOString().split('T')[0];
+      const iso = getLocalStartOfDayISO(d);
       const label = i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' });
       const day = d.getDate();
       return { iso, label, day };

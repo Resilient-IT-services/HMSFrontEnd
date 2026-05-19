@@ -32,3 +32,24 @@ export const validateDOB = (dob: string, maxAge: number = 110): { isValid: boole
 
   return { isValid: true };
 };
+
+/**
+ * Returns the local start of the day in ISO 8601 format (UTC).
+ * If a string is provided, it assumes it's a YYYY-MM-DD local date and returns its start of day.
+ * @param date Optional date or date string
+ * @returns ISO string (e.g., "2026-05-18T18:30:00.000Z")
+ */
+export const getLocalStartOfDayISO = (date?: Date | string): string => {
+  const d = date ? new Date(date) : new Date();
+  
+  // If it's a string like "2026-05-19", new Date(date) creates it in UTC 00:00:00.
+  // We want the LOCAL start of that day.
+  if (typeof date === 'string' && date.length === 10) {
+    const [year, month, day] = date.split('-').map(Number);
+    d.setFullYear(year, month - 1, day);
+  }
+  
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+};
+

@@ -59,15 +59,15 @@ export const AppointmentVitals = () => {
     );
   }
 
-  const isReadOnly = appointment.status === 'COMPLETED';
+  const isReadOnly = ['CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED', 'CANCELLED'].includes(appointment.status);
 
   return (
     <MainLayout title="Capture Vitals" hideTitle>
       <div className="p-4 sm:p-8 max-w-[1200px] mx-auto w-full -m-4 sm:-m-8 bg-[#f9f9ff] min-h-screen font-inter pb-32">
         
         <PageHeading 
-          title="Clinical Vitals Intake" 
-          description="Capture primary physiological measurements to establish the patient's current health baseline."
+          title={isReadOnly ? "View Clinical Vitals" : "Clinical Vitals Intake"} 
+          description={isReadOnly ? "View recorded physiological measurements for this finalized visit." : "Capture primary physiological measurements to establish the patient's current health baseline."}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
@@ -130,7 +130,8 @@ export const AppointmentVitals = () => {
                           type="text"
                           inputMode="numeric"
                           placeholder="Systolic"
-                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.systolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                          disabled={isReadOnly}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.systolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                           value={systolic}
                           onChange={(e) => { setSystolic(e.target.value); validateField('systolic', e.target.value); }}
                         />
@@ -146,7 +147,8 @@ export const AppointmentVitals = () => {
                           type="text"
                           inputMode="numeric"
                           placeholder="Diastolic"
-                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.diastolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                          disabled={isReadOnly}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.diastolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                           value={diastolic}
                           onChange={(e) => { setDiastolic(e.target.value); validateField('diastolic', e.target.value); }}
                         />
@@ -177,7 +179,7 @@ export const AppointmentVitals = () => {
                         inputMode="numeric"
                         placeholder="e.g. 72"
                         disabled={isReadOnly}
-                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                         value={heartRate}
                         onChange={(e) => { setHeartRate(e.target.value); validateField('heartRate', e.target.value); }}
                       />
@@ -200,7 +202,8 @@ export const AppointmentVitals = () => {
                         type="text"
                         inputMode="numeric"
                         placeholder="e.g. 98"
-                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.oxygenLevel ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                        disabled={isReadOnly}
+                        className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.oxygenLevel ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                         value={oxygenLevel}
                         onChange={(e) => { setOxygenLevel(e.target.value); validateField('oxygenLevel', e.target.value); }}
                       />
@@ -224,6 +227,7 @@ export const AppointmentVitals = () => {
                         <select 
                           className="text-[9px] sm:text-[10px] font-black bg-slate-100 border-none rounded px-2 py-1 uppercase tracking-tight outline-none"
                           value={displayTempUnit}
+                          disabled={isReadOnly}
                           onChange={(e) => setDisplayTempUnit(e.target.value as any)}
                         >
                           <option value="C">°C</option>
@@ -235,7 +239,8 @@ export const AppointmentVitals = () => {
                           type="text"
                           inputMode="decimal"
                           placeholder={displayTempUnit === 'C' ? 'e.g. 36.6' : 'e.g. 98.6'}
-                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.temperature ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                          disabled={isReadOnly}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.temperature ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                           value={temperature}
                           onChange={(e) => { setTemperature(e.target.value); validateField('temperature', e.target.value); }}
                         />
@@ -260,6 +265,7 @@ export const AppointmentVitals = () => {
                         <select 
                           className="text-[9px] sm:text-[10px] font-black bg-slate-100 border-none rounded px-2 py-1 uppercase tracking-tight outline-none"
                           value={displayWeightUnit}
+                          disabled={isReadOnly}
                           onChange={(e) => setDisplayWeightUnit(e.target.value as any)}
                         >
                           <option value="KG">KG</option>
@@ -271,7 +277,8 @@ export const AppointmentVitals = () => {
                           type="text"
                           inputMode="decimal"
                           placeholder={displayWeightUnit === 'KG' ? 'e.g. 75.0' : 'e.g. 165.3'}
-                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.weight ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'}`}
+                          disabled={isReadOnly}
+                          className={`w-full p-3 sm:p-4 bg-slate-50 border rounded-xl font-black text-lg sm:text-xl text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none ${fieldErrors.weight ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-100'} ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                           value={weight}
                           onChange={(e) => { setWeight(e.target.value); validateField('weight', e.target.value); }}
                         />
@@ -291,10 +298,11 @@ export const AppointmentVitals = () => {
                 <div className="pt-4 border-t border-slate-50">
                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">Patient Symptoms & Complaints</label>
                    <textarea 
-                    className="w-full p-4 sm:p-6 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none resize-none text-sm sm:text-base"
+                    className={`w-full p-4 sm:p-6 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none resize-none text-sm sm:text-base ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                     placeholder="Document current symptoms, duration, and patient's primary concern..."
                     rows={4}
                     value={complaints}
+                    disabled={isReadOnly}
                     onChange={(e) => setComplaints(e.target.value)}
                    />
                 </div>
@@ -303,15 +311,27 @@ export const AppointmentVitals = () => {
 
             </Card>
             <div className="flex justify-center sm:justify-end pb-8">
-              <Button
-                  icon="check_circle"
+              {isReadOnly ? (
+                <Button
+                  variant="slate"
+                  icon="close"
                   size="xl"
-                  isLoading={saving}
-                  onClick={() => handleSave()}
+                  onClick={() => router.push('/reception/appointments')}
                   className="w-full sm:w-auto px-10 text-sm font-black uppercase tracking-widest"
-              >
-                {saving ? 'Saving...' : 'Confirm & Submit'}
-              </Button>
+                >
+                  Close
+                </Button>
+              ) : (
+                <Button
+                    icon="check_circle"
+                    size="xl"
+                    isLoading={saving}
+                    onClick={() => handleSave()}
+                    className="w-full sm:w-auto px-10 text-sm font-black uppercase tracking-widest"
+                >
+                  {saving ? 'Saving...' : 'Confirm & Submit'}
+                </Button>
+              )}
             </div>
           </div>
         </div>

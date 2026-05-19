@@ -22,12 +22,10 @@ import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 import { cn } from '@/lib/cn';
 import { getPrimaryDepartment } from '@/utils/staffDisplay';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 const getLocalDateKey = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+  return getLocalStartOfDayISO(date);
 };
 
 const getPatientCreatedDateKey = (createdAt?: string) => {
@@ -152,7 +150,8 @@ export const ReceptionDashboard = () => {
       variant: 'blue' as const,
       icon: 'hourglass_empty',
       layout: 'horizontal' as const,
-      tag: 'Today'
+      tag: 'Today',
+      onClick: () => router.push('/reception/appointments')
     },
     {
       label: 'Appointments Today',
@@ -160,7 +159,8 @@ export const ReceptionDashboard = () => {
       variant: 'purple' as const,
       icon: 'event_available',
       layout: 'horizontal' as const,
-      tag: 'Today'
+      tag: 'Today',
+      onClick: () => router.push('/reception/appointments')
     },
     {
       label: 'Nurses On Duty',
@@ -169,6 +169,34 @@ export const ReceptionDashboard = () => {
       icon: 'payments',
       layout: 'horizontal' as const,
       tag: 'Live'
+    }
+  ];
+
+  const appointmentColumns: Column<AppointmentResponse>[] = [
+    {
+      header: 'Patient',
+      mobilePosition: 'title',
+      render: (a) => <span className="font-bold text-slate-900">{a.patientName}</span>
+    },
+    {
+      header: 'Doctor',
+      mobilePosition: 'subtitle',
+      render: (a) => <span className="text-slate-600 font-medium">{a.doctorName}</span>
+    },
+    {
+      header: 'Status',
+      mobilePosition: 'meta',
+      render: (a) => {
+        const variants: Record<string, any> = {
+          SCHEDULED: 'blue',
+          PAYMENT_PENDING: 'orange',
+          PAID: 'emerald',
+          VITALS_RECORDED: 'purple',
+          COMPLETED: 'emerald',
+          CANCELLED: 'red'
+        };
+        return <Badge variant={variants[a.status] || 'slate'}>{a.status.replace('_', ' ')}</Badge>;
+      }
     }
   ];
 
@@ -183,6 +211,7 @@ export const ReceptionDashboard = () => {
             icon="timer" 
             variant="orange" 
             layout="pill" 
+            onClick={() => router.push('/reception/appointments')}
           />
           <MetricCard 
             label="Check-ins" 
@@ -190,6 +219,7 @@ export const ReceptionDashboard = () => {
             icon="login" 
             variant="blue" 
             layout="pill" 
+            onClick={() => router.push('/reception/appointments')}
           />
           <MetricCard 
             label="Doctors" 
@@ -197,6 +227,7 @@ export const ReceptionDashboard = () => {
             icon="stethoscope" 
             variant="emerald" 
             layout="pill" 
+            onClick={() => router.push('/reception/doctors')}
           />
           <MetricCard 
             label="Support" 
@@ -245,14 +276,20 @@ export const ReceptionDashboard = () => {
           </div>
           
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-900 p-4 rounded-2xl text-white shadow-lg flex flex-col justify-between h-32">
+            <div 
+              className="bg-slate-900 p-4 rounded-2xl text-white shadow-lg flex flex-col justify-between h-32 cursor-pointer active:scale-95 transition-all"
+              onClick={() => router.push('/reception/appointments')}
+            >
               <span className="material-symbols-outlined text-white/50 text-xl">hourglass_empty</span>
               <div>
                 <p className="text-[32px] font-extrabold leading-none mb-1">{stats.activeQueue}</p>
                 <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Active Queue</p>
               </div>
             </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32">
+            <div 
+              className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 cursor-pointer active:scale-95 transition-all"
+              onClick={() => router.push('/reception/patients')}
+            >
               <span className="material-symbols-outlined text-orange-500 text-xl">group</span>
               <div>
                 <p className="text-[32px] font-extrabold text-slate-900 leading-none mb-1">{stats.totalPatients}</p>
@@ -269,6 +306,22 @@ export const ReceptionDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column */}
           <div className="lg:col-span-8 space-y-8">
+            {/* Recent Appointments Table */}
+            <Card 
+              title="Recent Appointments" 
+              className="p-0 overflow-hidden"
+              headerActions={
+                <Button variant="ghost" size="sm" onClick={() => router.push('/reception/appointments')} className="text-orange-600 font-bold">View All</Button>
+              }
+            >
+              <Table 
+                columns={appointmentColumns} 
+                data={appointments.slice(0, 5)} 
+                isLoading={loading}
+                onRowDoubleClick={(a) => router.push(`/reception/billing?appointmentId=${a.id}`)}
+              />
+            </Card>
+
             {/* Recent Patients Table */}
             <Card 
               title="Recent Patient Arrivals" 

@@ -95,7 +95,7 @@ export function DoctorList() {
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] size-5" />
                   <input 
                     className="w-full pl-12 pr-4 py-3 bg-[var(--background)] border border-[var(--border)] rounded-xl outline-none focus:ring-2 focus:ring-[var(--primary)] transition-all font-medium" 
-                    placeholder="Search by Doctor Name, Specialization, or Department..." 
+                    placeholder="Search by Doctor Name"
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}

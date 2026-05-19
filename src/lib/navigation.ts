@@ -19,7 +19,8 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
     },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { name: 'Schedule', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
+    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
+    { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST', 'ADMIN'] },
     {
       name: 'History',
       icon: 'history_edu',

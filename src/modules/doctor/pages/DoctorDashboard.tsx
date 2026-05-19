@@ -22,6 +22,7 @@ import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { cn } from '@/lib/cn';
 import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useConsultationFee } from '@/hooks/useConsultationFee';
+import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
@@ -40,7 +41,7 @@ export const DoctorDashboard = () => {
 
     try {
       if (!isBackground) setLoading(true);
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalStartOfDayISO();
       const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, today, user.id);
 
       if (!response.success || !response.data) {
@@ -93,8 +94,10 @@ export const DoctorDashboard = () => {
   }, [appointments, consultationFee]);
 
   const queue = useMemo(() => {
+    const today = getLocalStartOfDayISO().split('T')[0];
     const base = appointments.filter(
       (appointment) => 
+        appointment.appointmentTime.startsWith(today) &&
         appointment.status !== 'COMPLETED' && 
         appointment.status !== 'CANCELLED'
     );
