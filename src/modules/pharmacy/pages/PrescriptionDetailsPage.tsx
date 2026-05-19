@@ -117,7 +117,7 @@ const PrescriptionDetailsPage: React.FC = () => {
               <div className="flex justify-between text-sm">
                 <span className="text-[var(--text-secondary)]">Status</span>
                 <span className={`font-bold ${prescription.status === 'COMPLETED' ? 'text-[var(--success)]' : 'text-[var(--warning)]'}`}>
-                  {prescription.status || 'PENDING'}
+                  {prescription.status || 'ACTIVE'}
                 </span>
               </div>
             </div>

@@ -8,6 +8,8 @@
 
 :root {
   color-scheme: light;
+  --font-inter: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-manrope: "Manrope", "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   /* Base Fallbacks (in case JS hasn't loaded yet) */
   --primary: #FF6B2B;
   --primary-container: #FF6B2B;

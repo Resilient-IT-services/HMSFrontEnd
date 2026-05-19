@@ -18,9 +18,9 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
     genericName: '',
     composition: '',
     strength: '',
-    form: 'Tablet',
+    form: 'TABLET',
     manufacturer: '',
-    scheduleType: 'None',
+    scheduleType: 'OTC',
     category: 'General',
     reorderLevel: 50,
     taxPercentage: 12,
@@ -166,13 +166,14 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               onChange={handleChange}
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
-              <option value="Tablet">Tablet</option>
-              <option value="Syrup">Syrup</option>
-              <option value="Injection">Injection</option>
-              <option value="Capsule">Capsule</option>
-              <option value="Ointment">Ointment</option>
-              <option value="Drops">Drops</option>
-              <option value="Inhaler">Inhaler</option>
+              <option value="TABLET">Tablet</option>
+              <option value="SYRUP">Syrup</option>
+              <option value="INJECTION">Injection</option>
+              <option value="CAPSULE">Capsule</option>
+              <option value="OINTMENT">Ointment</option>
+              <option value="CREAM">Cream</option>
+              <option value="DROPS">Drops</option>
+              <option value="INHALER">Inhaler</option>
             </select>
           </div>
 
@@ -184,12 +185,10 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               onChange={handleChange}
               className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
-              <option value="None">None (General)</option>
-              <option value="Schedule H">Schedule H</option>
-              <option value="Schedule H1">Schedule H1</option>
-              <option value="Schedule X">Schedule X</option>
-              <option value="Schedule G">Schedule G</option>
-              <option value="Narcotic">Narcotic</option>
+              <option value="OTC">OTC</option>
+              <option value="SCHEDULE_H">SCHEDULE_H</option>
+              <option value="SCHEDULE_G">SCHEDULE_G</option>
+              <option value="SCHEDULE_X">SCHEDULE_X</option>
             </select>
           </div>
 

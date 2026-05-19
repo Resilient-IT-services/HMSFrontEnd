@@ -276,7 +276,7 @@ export const MedicineInventory = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/5 p-3 rounded-xl border border-white/10">
                       <p className="text-[9px] font-black uppercase text-white/40 mb-1">Schedule Drug</p>
-                      <p className="text-xs font-bold text-orange-400">{selectedMedicine.scheduleType || 'None'}</p>
+                          <p className="text-xs font-bold text-orange-400">{selectedMedicine.scheduleType || 'OTC'}</p>
                     </div>
                     <div className="bg-white/5 p-3 rounded-xl border border-white/10">
                       <p className="text-[9px] font-black uppercase text-white/40 mb-1">Strength</p>

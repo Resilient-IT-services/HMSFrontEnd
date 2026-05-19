@@ -59,7 +59,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T11:00:00',
-        status: 'WALK_IN',
+        status: 'SCHEDULED',
       }
     ];
 
@@ -86,7 +86,7 @@ describe('PatientQueuePage', () => {
     });
 
     // Check stats
-    const elements = screen.getAllByText('01');
+    const elements = screen.getAllByText('02');
     expect(elements.length).toBeGreaterThan(0);
   });
 

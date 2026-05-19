@@ -16,7 +16,7 @@ describe('cloneHospitalMembership', () => {
         schedules: [
           {
             id: 'schedule-1',
-            dayOfWeek: 1,
+            dayOfWeek: 'MONDAY',
             startTime: '09:00',
             endTime: '12:00',
             slotDurationMinutes: 15,

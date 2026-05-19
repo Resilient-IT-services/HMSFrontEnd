@@ -7,7 +7,8 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const getStatusStyles = (status: string) => {
     switch (status.toUpperCase()) {
-      case 'PENDING': {
+      case 'PENDING':
+      case 'ACTIVE': {
         return 'bg-blue-100 text-blue-700';
       }
       case 'DISPENSED':

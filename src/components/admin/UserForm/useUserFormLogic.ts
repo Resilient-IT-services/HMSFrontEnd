@@ -305,7 +305,16 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   };
 
   const checkScheduleOverlaps = (memberships: HospitalMembershipDTO[]) => {
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
+    const dayOrder: Record<string, number> = {
+      MONDAY: 1,
+      TUESDAY: 2,
+      WEDNESDAY: 3,
+      THURSDAY: 4,
+      FRIDAY: 5,
+      SATURDAY: 6,
+      SUNDAY: 7
+    };
     const allSchedules: Array<ScheduleDTO & { hospitalName: string; roleCode: string }> = [];
     
     for (const m of memberships) {
@@ -319,7 +328,9 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     }
 
     allSchedules.sort((a, b) => {
-      if (a.dayOfWeek !== b.dayOfWeek) return a.dayOfWeek - b.dayOfWeek;
+      const aDay = dayOrder[a.dayOfWeek] || 99;
+      const bDay = dayOrder[b.dayOfWeek] || 99;
+      if (aDay !== bDay) return aDay - bDay;
       return a.startTime.localeCompare(b.startTime);
     });
 
@@ -333,7 +344,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       const next = allSchedules[i + 1];
 
       if (current.dayOfWeek === next.dayOfWeek && timeToMinutes(current.endTime) > timeToMinutes(next.startTime)) {
-        const dayName = dayNames[current.dayOfWeek - 1] || `Day ${current.dayOfWeek}`;
+        const dayName = current.dayOfWeek || dayNames[0];
         triggerGlobalToast(
           `Overlapping schedules on ${dayName}: ${current.startTime}-${current.endTime} (${current.hospitalName}) and ${next.startTime}-${next.endTime} (${next.hospitalName})`,
           'error'

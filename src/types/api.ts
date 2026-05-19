@@ -23,6 +23,41 @@ export interface PageResponse<T> {
 }
 
 export type LocalTime = string;
+export type DayOfWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY';
+export type BloodGroup =
+  | 'A_POSITIVE'
+  | 'A_NEGATIVE'
+  | 'B_POSITIVE'
+  | 'B_NEGATIVE'
+  | 'AB_POSITIVE'
+  | 'AB_NEGATIVE'
+  | 'O_POSITIVE'
+  | 'O_NEGATIVE';
+export type DoctorAvailabilityExceptionType = 'FULL_DAY_OFF' | 'MODIFIED' | 'ADDED';
+export type MedicineForm = 'TABLET' | 'SYRUP' | 'INJECTION' | 'CAPSULE' | 'OINTMENT' | 'CREAM' | 'DROPS' | 'INHALER';
+export type MedicineScheduleType = 'SCHEDULE_H' | 'SCHEDULE_G' | 'SCHEDULE_X' | 'OTC';
+export type PharmacySaleType = 'VISIT' | 'WALKIN';
+export type PharmacySaleStatus = 'DRAFT' | 'COMPLETED' | 'CANCELLED';
+export type InventoryUnit = 'PIECE' | 'BOX' | 'STRIP' | 'BOTTLE' | 'PACK' | 'VIAL' | 'AMPULE';
+export type SourceType = 'APPOINTMENT' | 'PHARMACY_SALE_ITEM' | 'LAB_ORDER';
+export type AuditEntityName =
+  | 'PATIENT'
+  | 'APPOINTMENT'
+  | 'INVOICE'
+  | 'PAYMENT'
+  | 'PRESCRIPTION'
+  | 'MEDICINE'
+  | 'HOSPITAL'
+  | 'USER_ACCOUNT'
+  | 'USER_CONTRACT';
+export type PrescriptionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
 
 // Global User Info Types
 export interface Qualification {
@@ -85,7 +120,7 @@ export interface ReceptionistInfo {
 // Role Specific Details for Memberships
 export interface ScheduleDTO {
   id?: string;
-  dayOfWeek: number; // 1-7 (Mon-Sun)
+  dayOfWeek: DayOfWeek;
   startTime: string; // HH:mm
   endTime: string; // HH:mm
   slotDurationMinutes: number;
@@ -95,7 +130,7 @@ export interface ScheduleDTO {
 export interface AvailabilityExceptionDTO {
   id?: string;
   date: string; // YYYY-MM-DD
-  type: string; // "VACATION", "SICK_LEAVE", "EXTRA_HOURS", "BREAK"
+  type: DoctorAvailabilityExceptionType;
   startTime?: string; // HH:mm
   endTime?: string; // HH:mm
   mode: string; // "AVAILABLE", "UNAVAILABLE"
@@ -227,7 +262,7 @@ export interface PatientResponse {
   gender: Gender;
   dob: string;
   phone: string;
-  bloodGroup?: string;
+  bloodGroup?: BloodGroup;
   address: string;
   createdAt: string;
 }
@@ -249,7 +284,7 @@ export interface CreatePatientRequest {
   dob: string;
   phone: string;
   address: string;
-  bloodGroup?: string;
+  bloodGroup?: BloodGroup;
   medicalHistory?: string;
 }
 
@@ -343,6 +378,7 @@ export interface VitalsDTO {
   temperature: number;
   weight: number;
   oxygenLevel?: number;
+  respiratoryRate?: number;
 }
 
 export interface AppointmentResponse {
@@ -463,7 +499,7 @@ export interface MedicineResponse {
   genericName?: string;
   composition?: string;
   strength?: string;
-  form?: string; // mapping from category
+  form?: MedicineForm;
   category?: string;
   manufacturer?: string;
   batchNumber?: string;
@@ -476,7 +512,7 @@ export interface MedicineResponse {
   temperature?: string;
   humidity?: string;
   specialNotes?: string;
-  scheduleType?: string; // Correct field from API
+  scheduleType?: MedicineScheduleType;
   /** @deprecated use scheduleType */
   scheduleDrug?: string;
   /** @deprecated use scheduleType */
@@ -491,7 +527,7 @@ export interface MedicineSummaryDTO {
   genericName?: string;
   composition?: string;
   strength?: string;
-  form?: string;
+  form?: MedicineForm;
   category?: string;
   manufacturer?: string;
   currentStock?: number;
@@ -538,7 +574,7 @@ export interface PharmacySaleRequest {
 }
 
 export interface QuickPharmacySaleRequest {
-  saleType: string;
+  saleType: PharmacySaleType;
   patientId?: string;
   visitId?: string;
   prescriptionId?: string;
@@ -556,8 +592,14 @@ export interface QuickPharmacySaleRequest {
 }
 
 export interface QuickPharmacySaleItem {
+  id?: string;
   medicineId: string;
+  medicineName?: string;
+  batchNumber?: string;
   quantity: number;
+  unitPrice?: number;
+  discountAmount?: number;
+  netAmount?: number;
 }
 
 export interface QuickPharmacySaleResponse {
@@ -566,7 +608,7 @@ export interface QuickPharmacySaleResponse {
   invoiceId: string;
   invoiceNumber: string;
   totalAmount: number;
-  status: string;
+  status: PharmacySaleStatus;
   paymentId?: string;
   receiptNumber?: string;
   customerName?: string;
@@ -610,7 +652,7 @@ export interface InventoryItemResponse {
   id: string;
   name: string;
   category: string;
-  unit: string;
+  unit: InventoryUnit;
   currentStock: number;
   createdAt: string;
 }
@@ -618,7 +660,7 @@ export interface InventoryItemResponse {
 export interface InventoryItemRequestDTO {
   name: string;
   category: string;
-  unit: string;
+  unit: InventoryUnit;
 }
 
 export type StockTransactionType = 'STOCK_IN' | 'STOCK_OUT' | 'RETURN' | 'ADJUSTMENT';
@@ -648,7 +690,7 @@ export interface PrescriptionDTO {
   appointmentId?: string;
   visitId?: string;
   items: PrescriptionItemDTO[];
-  status?: string;
+  status?: PrescriptionStatus;
   createdAt?: string;
 }
 
@@ -661,7 +703,7 @@ export interface PrescriptionSummaryDTO {
   doctorName: string;
   appointmentId: string;
   visitId?: string;
-  status: string;
+  status: PrescriptionStatus;
   createdAt: string;
   itemCount: number;
 }
@@ -684,7 +726,7 @@ export interface InvoiceItemDTO {
   taxAmount: number;
   discountAmount: number;
   netTotal: number;
-  sourceType: string;
+  sourceType: SourceType;
   sourceId: string;
   doctorId?: string;
   doctorName?: string;
@@ -744,7 +786,7 @@ export interface AuditDetail {
 
 export interface AuditLogResponse {
   id: string;
-  entityName: string;
+  entityName: AuditEntityName;
   entityId: string;
   action: 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | 'LOGOUT' | 'UPDATE_STATUS';
   performedBy: string;

@@ -18,10 +18,10 @@ interface ContractEditorProps {
 export const ContractEditor: React.FC<ContractEditorProps> = ({
   newContract, setNewContract, hospitals, departments, editingContractIndex, validationErrors, onCancel, onConfirm
 }) => {
-  const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-  const [activeDay, setActiveDay] = useState(1); // 1-7 (Mon-Sun)
+  const dayNames = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'] as const;
+  const [activeDay, setActiveDay] = useState<typeof dayNames[number]>('MONDAY');
   const [showCopyUI, setShowCopyUI] = useState<number | null>(null); // raIdx
-  const [copyTargets, setCopyTargets] = useState<number[]>([]);
+  const [copyTargets, setCopyTargets] = useState<Array<typeof dayNames[number]>>([]);
 
   const selectedHospital = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
   const availableDepartments = React.useMemo(() => {
@@ -201,11 +201,10 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
               {(ra.roleCode === 'DOCTOR' || ra.roleCode === 'NURSE') && (
                 <div className="space-y-4">
                   <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200 overflow-x-auto scrollbar-hide">
-                    {dayNames.map((day, idx) => {
-                      const dayNum = idx + 1;
-                      const count = ra.schedules?.filter(s => s.dayOfWeek === dayNum).length || 0;
+                    {dayNames.map((day) => {
+                      const count = ra.schedules?.filter(s => s.dayOfWeek === day).length || 0;
                       return (
-                        <button key={day} type="button" onClick={() => setActiveDay(dayNum)} className={`flex-1 min-w-[50px] py-2 rounded-lg text-[8px] md:text-[9px] font-black uppercase transition-all whitespace-nowrap ${activeDay === dayNum ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
+                        <button key={day} type="button" onClick={() => setActiveDay(day)} className={`flex-1 min-w-[50px] py-2 rounded-lg text-[8px] md:text-[9px] font-black uppercase transition-all whitespace-nowrap ${activeDay === day ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>
                           {day.slice(0, 3)} {count > 0 && `(${count})`}
                         </button>
                       );
@@ -214,7 +213,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                   
                   <div className="space-y-3 p-3 md:p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] font-black text-slate-400 uppercase">Daily Slots ({dayNames[activeDay-1]})</span>
+                      <span className="text-[10px] font-black text-slate-400 uppercase">Daily Slots ({activeDay})</span>
                       <div className="flex gap-3 md:gap-4">
                         <button type="button" onClick={() => setShowCopyUI(showCopyUI === raIdx ? null : raIdx)} className="text-slate-400 text-[8px] md:text-[9px] font-black uppercase flex items-center gap-1 hover:text-primary">
                           <span className="material-symbols-outlined text-xs">content_copy</span> <span className="hidden md:inline">Copy to...</span>
@@ -227,16 +226,15 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 
                     {showCopyUI === raIdx && (
                       <div className="p-3 md:p-4 bg-white rounded-xl border-2 border-primary/20 mb-4 animate-in zoom-in-95">
-                        <p className="text-[10px] font-black text-primary uppercase mb-3 tracking-widest">Select target days to copy {dayNames[activeDay-1]} slots:</p>
+                        <p className="text-[10px] font-black text-primary uppercase mb-3 tracking-widest">Select target days to copy {activeDay} slots:</p>
                         <div className="flex flex-wrap gap-2 mb-4">
-                          {dayNames.map((day, idx) => {
-                            const dayNum = idx + 1;
-                            if (dayNum === activeDay) return null;
-                            const isSelected = copyTargets.includes(dayNum);
+                          {dayNames.map((day) => {
+                            if (day === activeDay) return null;
+                            const isSelected = copyTargets.includes(day);
                             return (
                               <button
                                 key={day} type="button"
-                                onClick={() => setCopyTargets(prev => isSelected ? prev.filter(d => d !== dayNum) : [...prev, dayNum])}
+                                onClick={() => setCopyTargets(prev => isSelected ? prev.filter(d => d !== day) : [...prev, day])}
                                 className={`px-2 md:px-3 py-1.5 rounded-lg border-2 text-[8px] md:text-[9px] font-black uppercase transition-all ${isSelected ? 'bg-primary border-primary text-white shadow-md' : 'bg-slate-50 border-slate-100 text-slate-400'}`}
                               >
                                 {day.slice(0, 3)}

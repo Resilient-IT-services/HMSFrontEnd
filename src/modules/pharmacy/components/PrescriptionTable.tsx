@@ -69,7 +69,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                  </span>
               </td>
               <td className="px-6 py-4 text-center">
-                <StatusBadge status={prescription.status || 'PENDING'} />
+                <StatusBadge status={prescription.status || 'ACTIVE'} />
               </td>
               <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                 <Link 
@@ -78,7 +78,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 >
                   View details
                 </Link>
-                {prescription.status === 'DISPENSED' ? (
+                {prescription.status === 'COMPLETED' ? (
                   <Link 
                     href={`/pharmacy/sales/prescription/${prescription.id}`}
                     className="px-4 py-2 bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-800/20 hover:bg-black transition-all active:scale-95 flex items-center gap-2"

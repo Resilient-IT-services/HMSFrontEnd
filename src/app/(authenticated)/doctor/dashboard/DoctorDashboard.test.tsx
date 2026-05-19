@@ -47,7 +47,7 @@ describe('DoctorDashboard', () => {
             doctorId: 'doctor-2',
             doctorName: 'Other Doctor',
             appointmentTime: `${new Date().toISOString().split('T')[0]}T11:00:00`,
-            status: 'WALK_IN',
+            status: 'SCHEDULED',
             notes: '',
             createdAt: '2026-04-26T00:00:00',
           },

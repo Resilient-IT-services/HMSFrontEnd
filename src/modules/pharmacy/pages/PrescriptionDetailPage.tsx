@@ -189,7 +189,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
         sessionStorage.removeItem(`rx_draft_${id}`);
         // Refresh prescription data
         const rxRes = await pharmacyApi.getPrescriptionById(id);
-        if (rxRes.success) setPrescription(rxRes.data);
+        if (rxRes.success && rxRes.data) setPrescription(rxRes.data);
       } else {
         triggerGlobalToast(res.message || 'Dispensing failed', 'error');
       }
@@ -234,7 +234,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               </div>
             </div>
             <div className="ml-auto">
-              <StatusBadge status={prescription.status || 'PENDING'} />
+              <StatusBadge status={prescription.status || 'ACTIVE'} />
             </div>
           </section>
 
@@ -335,7 +335,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               </div>
             </div>
 
-            {prescription.status !== 'DISPENSED' && (
+            {prescription.status !== 'COMPLETED' && (
               <div className="mb-6">
                 <p className="text-[10px] font-black uppercase text-slate-400 mb-3">Payment Method</p>
                 <div className="grid grid-cols-3 gap-2">
@@ -356,7 +356,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               </div>
             )}
             
-            {prescription.status === 'DISPENSED' ? (
+            {prescription.status === 'COMPLETED' ? (
               <button 
                 onClick={handlePrintInvoice}
                 className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"

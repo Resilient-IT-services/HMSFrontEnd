@@ -22,9 +22,9 @@ export const usePharmacyInventory = () => {
       } else {
         // Mock data for demo
         setItems([
-          { id: 'item-1', name: 'Disposable Syringe 5ml', category: 'Consumables', unit: 'pcs', currentStock: 1200, createdAt: new Date().toISOString() },
-          { id: 'item-2', name: 'Surgical Gloves (Size 7)', category: 'Surgical', unit: 'pair', currentStock: 450, createdAt: new Date().toISOString() },
-          { id: 'item-3', name: 'Absorbent Cotton 500g', category: 'Consumables', unit: 'roll', currentStock: 85, createdAt: new Date().toISOString() },
+          { id: 'item-1', name: 'Disposable Syringe 5ml', category: 'Consumables', unit: 'PIECE', currentStock: 1200, createdAt: new Date().toISOString() },
+          { id: 'item-2', name: 'Surgical Gloves (Size 7)', category: 'Surgical', unit: 'PACK', currentStock: 450, createdAt: new Date().toISOString() },
+          { id: 'item-3', name: 'Absorbent Cotton 500g', category: 'Consumables', unit: 'PACK', currentStock: 85, createdAt: new Date().toISOString() },
         ]);
       }
     } catch (error) {

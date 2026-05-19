@@ -13,8 +13,8 @@ interface PharmacySaleDetailPageProps {
   prescriptionId?: string;
 }
 
-const formatCurrency = (amount: number) => {
-  return `₹${(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatCurrency = (amount?: number) => {
+  return `Rs ${(amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, prescriptionId }) => {
@@ -242,3 +242,4 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
 };
 
 export default PharmacySaleDetailPage;
+
