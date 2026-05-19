@@ -5,6 +5,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { catalogService } from '@/services/catalogService';
 import { Department, Specialization } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { Modal } from '@/components/ui/Modal';
 
 type CatalogType = 'DEPARTMENT' | 'SPECIALIZATION';
 
@@ -245,70 +246,65 @@ export function CatalogManagement() {
       </div>
 
       {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50/50">
-              <h3 className="font-headline-sm text-slate-900">
-                {editingItem ? 'Edit' : 'Add New'} {activeTab === 'DEPARTMENT' ? 'Department' : 'Specialization'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-slate-600">
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div>
-                <label className="font-label-md text-slate-700 mb-2 block uppercase tracking-widest text-[10px] font-black">Name *</label>
-                <input 
-                  type="text" 
-                  className="form-input" 
-                  required
-                  placeholder={`e.g. ${activeTab === 'DEPARTMENT' ? 'Cardiology' : 'General Surgery'}`}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="font-label-md text-slate-700 mb-2 block uppercase tracking-widest text-[10px] font-black">Description</label>
-                <textarea 
-                  className="form-input min-h-[100px]" 
-                  placeholder="Optional details..."
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
-                <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-700">Active Status</p>
-                  <p className="text-[10px] text-slate-400">Enable or disable this item in dropdowns.</p>
-                </div>
-                <input 
-                  type="checkbox" 
-                  className="w-5 h-5 accent-primary"
-                  checked={formData.active}
-                  onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                />
-              </div>
-              <div className="pt-4 flex gap-3">
-                <button 
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="flex-1 py-3 border border-gray-200 rounded-xl font-black uppercase tracking-widest text-[10px] text-slate-500 hover:bg-slate-50 transition-all"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1 py-3 bg-primary text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20"
-                >
-                  {submitting ? 'Saving...' : 'Save Catalog Item'}
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title={`${editingItem ? 'Edit' : 'Add New'} ${activeTab === 'DEPARTMENT' ? 'Department' : 'Specialization'}`}
+      >
+        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          <div>
+            <label className="font-label-md text-slate-700 mb-2 block uppercase tracking-widest text-[10px] font-black">Name *</label>
+            <input 
+              type="text" 
+              className="form-input font-bold" 
+              required
+              placeholder={`e.g. ${activeTab === 'DEPARTMENT' ? 'Cardiology' : 'General Surgery'}`}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
           </div>
-        </div>
-      )}
+          <div>
+            <label className="font-label-md text-slate-700 mb-2 block uppercase tracking-widest text-[10px] font-black">Description</label>
+            <textarea 
+              className="form-input min-h-[100px] font-medium" 
+              placeholder="Optional details..."
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+          <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-700">Active Status</p>
+              <p className="text-[10px] text-slate-400">Enable or disable this item in dropdowns.</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer" 
+                checked={formData.active}
+                onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
+              />
+              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+          <div className="pt-4 flex gap-3">
+            <button 
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="flex-1 py-3 border border-gray-200 rounded-xl font-black uppercase tracking-widest text-[10px] text-slate-500 hover:bg-slate-50 transition-all"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              disabled={submitting}
+              className="flex-1 py-3 bg-primary text-white rounded-xl font-black uppercase tracking-widest text-[10px] hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+            >
+              {submitting ? 'Saving...' : 'Save Catalog Item'}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </MainLayout>
   );
 }

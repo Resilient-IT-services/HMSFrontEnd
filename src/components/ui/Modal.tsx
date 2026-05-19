@@ -52,7 +52,7 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10 overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 animate-in fade-in" 
@@ -61,24 +61,24 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Container */}
       <div 
-        className={`relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-full ${sizeClasses[size]}`}
+        className={`relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[90vw] md:w-[40vw] h-[70vh]`}
         style={width ? { width, maxWidth: '100%' } : {}}
       >
         {!hideHeader && (
-          <div className="px-8 py-6 border-b border-slate-50 flex justify-between items-center bg-white">
+          <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-white shrink-0">
             <div className="space-y-0.5">
-              <h3 className="text-xl font-black text-slate-900 tracking-tight">{title}</h3>
+              <h3 className="text-lg font-black text-slate-900 tracking-tight">{title}</h3>
             </div>
             <button 
               onClick={onClose}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all group active:scale-90"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all group active:scale-90"
             >
-              <span className="material-symbols-outlined text-xl group-hover:rotate-90 transition-transform duration-300">close</span>
+              <span className="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-300">close</span>
             </button>
           </div>
         )}
         
-        <div className="max-h-[85vh] overflow-y-auto custom-scrollbar">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
           {children}
         </div>
       </div>
