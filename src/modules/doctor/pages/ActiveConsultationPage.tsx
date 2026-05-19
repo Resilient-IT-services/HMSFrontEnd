@@ -74,7 +74,7 @@ const MedicineSearchInput = ({
       <input
         type="text"
         className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none transition-all ${
-          !inStock ? 'border-red-200 text-red-900 pr-16' : 'border-slate-200 text-slate-900'
+          inStock ? 'border-slate-200 text-slate-900' : 'border-red-200 text-red-900 pr-16'
         }`}
         placeholder="Search medicine..."
         value={searchTerm}
@@ -485,7 +485,7 @@ export const ActiveConsultationPage = () => {
                     <div className="space-y-2">
                       {prescriptions.map((p) => (
                         <div key={p.id} className={`grid grid-cols-12 gap-2 p-2 sm:px-4 sm:py-2 border rounded-xl group relative items-center transition-all ${
-                          !p.inStock ? 'bg-red-50/50 border-red-100 shadow-sm shadow-red-500/5' : 'bg-slate-50 border-slate-100'
+                          p.inStock ? 'bg-slate-50 border-slate-100' : 'bg-red-50/50 border-red-100 shadow-sm shadow-red-500/5'
                         }`}>
                           <div className="col-span-12 sm:col-span-5">
                             <label className="sm:hidden block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Medicine Name</label>

@@ -45,7 +45,7 @@ export const PatientQueuePage = () => {
     {
       header: 'TOKEN',
       render: (appointment) => (
-        <span className={`font-bold ${appointment.status === 'WALK_IN' ? 'text-primary' : 'text-gray-900'}`}>
+        <span className={`font-bold ${appointment.status === 'CONSULTATION_STARTED' ? 'text-primary' : 'text-gray-900'}`}>
           #{formatToken(appointment)}
         </span>
       )
@@ -86,10 +86,12 @@ export const PatientQueuePage = () => {
       header: 'STATUS',
       render: (appointment) => {
         const variants: Record<string, 'orange' | 'emerald' | 'blue' | 'red' | 'slate'> = {
-          WALK_IN: 'orange',
+          CONSULTATION_STARTED: 'orange',
           COMPLETED: 'emerald',
           SCHEDULED: 'blue',
-          CANCELLED: 'red'
+          CANCELLED: 'red',
+          VITALS_RECORDED: 'orange',
+          PAID: 'emerald'
         };
         return <Badge variant={variants[appointment.status] || 'slate'}>{appointment.status.replace('_', ' ')}</Badge>;
       }
@@ -100,7 +102,7 @@ export const PatientQueuePage = () => {
       className: 'text-right',
       render: (appointment) => (
         <div className="flex justify-end gap-2">
-          {appointment.status === 'WALK_IN' ? (
+          {appointment.status === 'CONSULTATION_STARTED' ? (
             <Button size="sm" onClick={() => router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`)}>Resume</Button>
           ) : appointment.status === 'COMPLETED' ? (
             <Badge variant="slate">Consulted</Badge>
@@ -122,7 +124,7 @@ export const PatientQueuePage = () => {
   const metricItems = [
     { label: 'Total Patients', value: stats.total, icon: 'group', variant: 'orange' as const },
     { label: 'Waiting', value: stats.waiting, icon: 'hourglass_empty', variant: 'blue' as const },
-    { label: 'Walk-in', value: stats.inProgress, icon: 'clinical_notes', variant: 'orange' as const },
+    { label: 'In Progress', value: stats.inProgress, icon: 'clinical_notes', variant: 'orange' as const },
     { label: 'Completed', value: stats.completed, icon: 'check_circle', variant: 'emerald' as const }
   ];
 
@@ -192,7 +194,7 @@ export const PatientQueuePage = () => {
             data={appointments}
             isLoading={loading}
             onRowDoubleClick={(appointment) => {
-              if (appointment.status === 'WALK_IN') {
+              if (appointment.status === 'CONSULTATION_STARTED') {
                 router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`);
               } else if (appointment.status !== 'COMPLETED') {
                 handleStartConsultation(appointment.id);

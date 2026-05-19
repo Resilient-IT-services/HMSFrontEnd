@@ -45,7 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = globalThis.window === undefined ? null : localStorage.getItem('token');
 
     if (isAuthenticated) {
       if (isLoading) dispatch(setLoading(false));

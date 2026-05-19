@@ -27,7 +27,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
   const availableDepartments = React.useMemo(() => {
     const hospDepts = selectedHospital?.departments || [];
     // Merge with global departments, unique
-    return Array.from(new Set([...departments, ...hospDepts]));
+    return [...new Set([...departments, ...hospDepts])];
   }, [departments, selectedHospital]);
 
   const handleUpdateSchedule = (raIdx: number, newSchedules: ScheduleDTO[]) => {

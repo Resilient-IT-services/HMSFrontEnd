@@ -78,21 +78,21 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 >
                   View details
                 </Link>
-                {prescription.status !== 'DISPENSED' ? (
-                  <Link 
-                    href={`/pharmacy/sales?prescriptionId=${prescription.id}`}
-                    className="px-4 py-2 bg-orange-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">payments</span>
-                    Dispense
-                  </Link>
-                ) : (
+                {prescription.status === 'DISPENSED' ? (
                   <Link 
                     href={`/pharmacy/sales/prescription/${prescription.id}`}
                     className="px-4 py-2 bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-800/20 hover:bg-black transition-all active:scale-95 flex items-center gap-2"
                   >
                     <span className="material-symbols-outlined text-sm">print</span>
                     Print Invoice
+                  </Link>
+                ) : (
+                  <Link 
+                    href={`/pharmacy/sales?prescriptionId=${prescription.id}`}
+                    className="px-4 py-2 bg-orange-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-sm">payments</span>
+                    Dispense
                   </Link>
                 )}
               </td>

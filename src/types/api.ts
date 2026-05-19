@@ -55,7 +55,7 @@ export interface DoctorInfo {
   registrationNumber?: string;
   experienceYears?: number;
   awards?: string[];
-  languages?: LanguageEntry[];
+  languages?: string[];
   signature?: string;
   consultationFee?: number;
   metadata?: Record<string, unknown>;
@@ -257,7 +257,7 @@ export type ReportType = 'DOCTOR_REVENUE' | 'PHARMACY_REVENUE' | 'PAYMENT_SUMMAR
 
 export interface OPDPaymentInfo {
   amount: number;
-  mode: 'CASH' | 'UPI' | 'CARD';
+  mode: 'CASH' | 'CARD' | 'UPI' | 'NEFT' | 'INSURANCE';
   referenceNumber?: string;
 }
 
@@ -272,7 +272,7 @@ export interface OPDEncounterRequest {
 // ... other types ...
 
 export interface UpdateBillingStatusRequest {
-  status: 'PENDING' | 'PAID' | 'CANCELLED' | 'PARTIALLY_PAID';
+  status: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCELLED';
   paymentMethod?: string;
   discount?: number;
 }
@@ -333,22 +333,16 @@ export type AppointmentStatus =
   | 'CONSULTATION_STARTED'
   | 'PRESCRIPTION_FINALIZED'
   | 'COMPLETED'
-  | 'CANCELLED'
-  | 'WAITING_FOR_VITALS'
-  | 'WALK_IN'
-  | 'ADD_VITALS'
-  | 'CHECKED_IN';
+  | 'CANCELLED';
 
 export interface VitalsDTO {
   bloodPressure: string; // Combined for legacy or display
   systolic?: number;
   diastolic?: number;
   heartRate: number;
-  pulseRate?: number;
   temperature: number;
   weight: number;
   oxygenLevel?: number;
-  respiratoryRate?: number;
 }
 
 export interface AppointmentResponse {
@@ -691,7 +685,7 @@ export type PrescriptionResponse = PrescriptionDTO;
 
 // Finance types
 export type InvoiceStatus = 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCELLED';
-export type InvoiceItemCategory = 'CONSULTATION' | 'PHARMACY' | 'LAB' | 'PROCEDURE' | 'OTHERS';
+export type InvoiceItemCategory = 'CONSULTATION' | 'PHARMACY' | 'LAB' | 'PROCEDURE';
 
 export interface InvoiceItemDTO {
   id: string;
@@ -733,7 +727,7 @@ export interface PaymentDTO {
   patientId: string;
   visitId?: string;
   amount: number;
-  paymentMode: 'CASH' | 'UPI' | 'CARD';
+  paymentMode: 'CASH' | 'CARD' | 'UPI' | 'NEFT' | 'INSURANCE';
   referenceNumber?: string;
   status: 'SUCCESS' | 'FAILED' | 'REFUNDED';
   paymentDate: string;
@@ -745,7 +739,7 @@ export interface RecordPaymentRequest {
   patientId: string;
   visitId?: string;
   amount: number;
-  paymentMode: 'CASH' | 'UPI' | 'CARD';
+  paymentMode: 'CASH' | 'CARD' | 'UPI' | 'NEFT' | 'INSURANCE';
   referenceNumber?: string;
   invoiceId?: string;
 }

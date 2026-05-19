@@ -74,8 +74,12 @@ export const DoctorDashboard = () => {
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
-    const waiting = appointments.filter((appointment) => appointment.status === 'SCHEDULED' || appointment.status === 'CHECKED_IN' || appointment.status === 'ADD_VITALS').length;
-    const active = appointments.filter((appointment) => appointment.status === 'WALK_IN').length;
+    const waiting = appointments.filter((appointment) => 
+      appointment.status === 'SCHEDULED' || 
+      appointment.status === 'PAID' || 
+      appointment.status === 'VITALS_RECORDED'
+    ).length;
+    const active = appointments.filter((appointment) => appointment.status === 'CONSULTATION_STARTED').length;
     const completed = appointments.filter((appointment) => appointment.status === 'COMPLETED').length;
     const earnedCount = appointments.filter((appointment) => appointment.status !== 'CANCELLED' && appointment.status !== 'PAYMENT_PENDING').length;
 
@@ -92,9 +96,7 @@ export const DoctorDashboard = () => {
     const base = appointments.filter(
       (appointment) => 
         appointment.status !== 'COMPLETED' && 
-        appointment.status !== 'CANCELLED' &&
-        appointment.status !== 'WAITING_FOR_VITALS' &&
-        appointment.status !== 'ADD_VITALS'
+        appointment.status !== 'CANCELLED'
     );
     return sortByToken(base);
   }, [appointments]);
@@ -129,7 +131,7 @@ export const DoctorDashboard = () => {
       render: (appointment) => (
         <div className={cn(
           "h-12 w-20 shrink-0 rounded-lg bg-slate-100 text-center text-lg font-bold leading-[3rem] text-slate-400",
-          appointment.status === 'WALK_IN' && "bg-orange-100 text-orange-700"
+          appointment.status === 'CONSULTATION_STARTED' && "bg-orange-100 text-orange-700"
         )}>
           {formatToken(appointment)}
         </div>
@@ -157,7 +159,7 @@ export const DoctorDashboard = () => {
           <StatusIndicator 
             status={metadata.label}
             variant={metadata.variant}
-            pulse={appointment.status === 'WALK_IN'}
+            pulse={appointment.status === 'CONSULTATION_STARTED'}
           />
         );
       }

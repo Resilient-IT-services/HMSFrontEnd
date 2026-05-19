@@ -31,14 +31,14 @@ export const useReceptionVitals = () => {
 
   // UI state for local conversion with persistence
   const [displayTempUnit, setDisplayTempUnitState] = useState<'C' | 'F'>(() => {
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       return (localStorage.getItem('hms_vitals_temp_unit') as 'C' | 'F') || 'C';
     }
     return 'C';
   });
 
   const [displayWeightUnit, setDisplayWeightUnitState] = useState<'KG' | 'LB'>(() => {
-    if (typeof window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       return (localStorage.getItem('hms_vitals_weight_unit') as 'KG' | 'LB') || 'KG';
     }
     return 'KG';
@@ -68,10 +68,10 @@ export const useReceptionVitals = () => {
       const val = Number.parseFloat(weight);
       if (unit === 'LB') {
         // Converting KG -> LB
-        setWeight((val * 2.20462).toFixed(1));
+        setWeight((val * 2.204_62).toFixed(1));
       } else {
         // Converting LB -> KG
-        setWeight((val / 2.20462).toFixed(1));
+        setWeight((val / 2.204_62).toFixed(1));
       }
     }
   };
@@ -98,15 +98,18 @@ export const useReceptionVitals = () => {
       unitLabel = displayWeightUnit.toLowerCase();
       // Backend is KG
       if (displayWeightUnit === 'LB') {
-        min = min * 2.20462;
-        max = max * 2.20462;
+        min = min * 2.204_62;
+        max = max * 2.204_62;
       }
     } else {
       switch (type) {
         case 'SYSTOLIC_BP':
-        case 'DIASTOLIC_BP': unitLabel = 'mmHg'; break;
-        case 'HEART_RATE': unitLabel = 'bpm'; break;
-        case 'OXYGEN_LEVEL': unitLabel = '%'; break;
+        case 'DIASTOLIC_BP': { unitLabel = 'mmHg'; break;
+        }
+        case 'HEART_RATE': { unitLabel = 'bpm'; break;
+        }
+        case 'OXYGEN_LEVEL': { unitLabel = '%'; break;
+        }
       }
     }
 
@@ -160,7 +163,7 @@ export const useReceptionVitals = () => {
       let w = Number(vitals.weight);
       if (displayWeightUnit === 'LB') {
         // KG -> LB
-        w = w * 2.20462;
+        w = w * 2.204_62;
       }
       setWeight(w.toFixed(1));
     } else {
@@ -230,7 +233,7 @@ export const useReceptionVitals = () => {
           valueToValidate = (num * 9 / 5 + 32);
         } else if (field === 'weight' && displayWeightUnit === 'LB') {
           // Convert LB to KG to validate against backend range
-          valueToValidate = num / 2.20462;
+          valueToValidate = num / 2.204_62;
         }
       }
     }
@@ -277,7 +280,7 @@ export const useReceptionVitals = () => {
       let finalWeight = Number.parseFloat(weight) || 0;
       if (displayWeightUnit === 'LB') {
         // Convert LB to KG for backend
-        finalWeight = finalWeight / 2.20462;
+        finalWeight = finalWeight / 2.204_62;
       }
 
       const vitals: VitalsDTO = {

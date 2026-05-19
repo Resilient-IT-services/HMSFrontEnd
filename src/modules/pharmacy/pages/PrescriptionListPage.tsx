@@ -27,7 +27,7 @@ const PrescriptionListPage: React.FC = () => {
       } else {
         setError(response.message || 'Failed to fetch prescriptions');
       }
-    } catch (error_) {
+    } catch {
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);

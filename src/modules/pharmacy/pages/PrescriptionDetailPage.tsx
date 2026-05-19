@@ -56,8 +56,8 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
           }
         }
       }
-    } catch (err) {
-      console.error('Price resolution failed', err);
+    } catch (error) {
+      console.error('Price resolution failed', error);
     }
     return price;
   };
@@ -94,8 +94,8 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
             setBillItems(items);
           }
         }
-      } catch (err) {
-        console.error(err);
+      } catch (error) {
+        console.error(error);
         triggerGlobalToast('Failed to load prescription', 'error');
       } finally {
         setLoading(false);
@@ -145,7 +145,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
   };
 
   const handleQuantityChange = (key: string, value: string) => {
-    const qty = Math.max(0, parseInt(value) || 0);
+    const qty = Math.max(0, Number.parseInt(value) || 0);
     setBillItems(prev => prev.map(item => 
       item.key === key ? { ...item, quantity: qty } : item
     ));
@@ -155,9 +155,50 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
   const tax = subtotal * 0.12;
   const grandTotal = subtotal + tax;
 
+  const [paymentMode, setPaymentMode] = useState<'CASH' | 'CARD' | 'UPI'>('CASH');
+
   const handleDispense = async () => {
-    if (!id) return;
-    router.push(`/pharmacy/sales?prescriptionId=${id}`);
+    if (!id || !prescription) return;
+
+    // Filter valid items
+    const validItems = billItems.filter(item => item.id && item.id.trim() !== '');
+    
+    if (validItems.length === 0) {
+      triggerGlobalToast('No valid medicines selected from catalog. Please add medicines from the search box.', 'error');
+      return;
+    }
+    
+    try {
+      setDispensing(true);
+      const payload = {
+        patientId: prescription.patientId,
+        prescriptionId: prescription.id,
+        items: validItems.map(item => ({
+          medicineId: item.id,
+          quantity: item.quantity
+        })),
+        payment: {
+          mode: paymentMode,
+          referenceNumber: `AUTO-${Date.now()}`
+        }
+      };
+
+      const res = await pharmacyApi.dispensePrescription(id, payload);
+      if (res.success) {
+        triggerGlobalToast('Prescription dispensed successfully, bill generated and paid.', 'success');
+        sessionStorage.removeItem(`rx_draft_${id}`);
+        // Refresh prescription data
+        const rxRes = await pharmacyApi.getPrescriptionById(id);
+        if (rxRes.success) setPrescription(rxRes.data);
+      } else {
+        triggerGlobalToast(res.message || 'Dispensing failed', 'error');
+      }
+    } catch (error: any) {
+      console.error(error);
+      triggerGlobalToast(error.response?.data?.message || 'Dispensing failed', 'error');
+    } finally {
+      setDispensing(false);
+    }
   };
 
   const handlePrintInvoice = () => {
@@ -293,8 +334,37 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                 <span className="text-3xl font-black text-orange-700">₹{grandTotal.toFixed(2)}</span>
               </div>
             </div>
+
+            {prescription.status !== 'DISPENSED' && (
+              <div className="mb-6">
+                <p className="text-[10px] font-black uppercase text-slate-400 mb-3">Payment Method</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['CASH', 'CARD', 'UPI'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => setPaymentMode(mode)}
+                      className={`py-2 rounded-lg text-[10px] font-black uppercase transition-all border ${
+                        paymentMode === mode 
+                          ? 'bg-orange-50 border-orange-200 text-orange-700' 
+                          : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'
+                      }`}
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             
-            {prescription.status !== 'DISPENSED' ? (
+            {prescription.status === 'DISPENSED' ? (
+              <button 
+                onClick={handlePrintInvoice}
+                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span className="material-symbols-outlined">print</span>
+                Print Invoice
+              </button>
+            ) : (
               <button 
                 onClick={handleDispense}
                 disabled={dispensing || billItems.length === 0}
@@ -302,14 +372,6 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
               >
                 <span className="material-symbols-outlined">payments</span>
                 {dispensing ? 'Finalizing...' : 'Complete Dispensing'}
-              </button>
-            ) : (
-              <button 
-                onClick={handlePrintInvoice}
-                className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
-              >
-                <span className="material-symbols-outlined">print</span>
-                Print Invoice
               </button>
             )}
             

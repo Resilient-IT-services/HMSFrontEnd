@@ -89,11 +89,12 @@ export const AppointmentsPage = () => {
       mobilePosition: 'meta',
       render: (app) => {
         const variants: Record<string, any> = {
-          WALK_IN: 'emerald',
           SCHEDULED: 'blue',
           PAYMENT_PENDING: 'orange',
-          ADD_VITALS: 'purple',
-          WAITING_FOR_VITALS: 'purple',
+          PAID: 'emerald',
+          VITALS_RECORDED: 'purple',
+          CONSULTATION_STARTED: 'blue',
+          PRESCRIPTION_FINALIZED: 'blue',
           COMPLETED: 'emerald',
           CANCELLED: 'red'
         };
@@ -107,7 +108,7 @@ export const AppointmentsPage = () => {
       mobilePosition: 'action',
       render: (app) => (
         <div className="flex items-center justify-center gap-2">
-          {!['SCHEDULED', 'WALK_IN', 'CHECKED_IN', 'COMPLETED', 'CANCELLED'].includes(app.status) && (
+          {['PAID', 'VITALS_RECORDED'].includes(app.status) && (
             <Button 
               size="sm" 
               icon="vital_signs"
@@ -132,9 +133,9 @@ export const AppointmentsPage = () => {
 
   const statConfig = [
     { label: 'Total Today', value: stats.total, variant: 'slate', filter: 'ALL' },
-    { label: 'Walk-In', value: stats.walkIn, variant: 'emerald', filter: 'WALK_IN' },
+    { label: 'In Progress', value: stats.walkIn, variant: 'emerald', filter: 'CONSULTATION_STARTED' },
     { label: 'Pay Pending', value: stats.paymentPending, variant: 'orange', filter: 'PAYMENT_PENDING' },
-    { label: 'Waiting Vitals', value: stats.waitingForVitals, variant: 'purple', filter: 'WAITING_FOR_VITALS' },
+    { label: 'Waiting Vitals', value: stats.waitingForVitals, variant: 'purple', filter: 'PAID' },
     { label: 'Completed', value: stats.completed, variant: 'emerald', filter: 'COMPLETED' },
   ];
 
@@ -269,7 +270,7 @@ export const AppointmentsPage = () => {
           <div className="space-y-1">
             <label className="text-[10px] font-black uppercase text-slate-400">Appointment Status</label>
             <div className="flex flex-wrap gap-2">
-              {['SCHEDULED', 'WALK_IN', 'PAYMENT_PENDING', 'ADD_VITALS', 'WAITING_FOR_VITALS', 'COMPLETED', 'CANCELLED'].map(s => (
+              {['SCHEDULED', 'PAYMENT_PENDING', 'PAID', 'VITALS_RECORDED', 'CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED', 'CANCELLED'].map(s => (
                 <label key={s} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
                   advancedFilters.statuses.includes(s) 
                     ? 'bg-orange-700 text-white border-orange-700' 

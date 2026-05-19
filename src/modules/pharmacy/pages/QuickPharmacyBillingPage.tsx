@@ -143,8 +143,8 @@ export default function QuickPharmacyBillingPage() {
             const pRes = await pharmacyApi.getPatientById(pid);
             if (pRes.success && pRes.data) setSelectedPatient(pRes.data);
           }
-        } catch (err) {
-          console.error('Failed to load pre-filled data', err);
+        } catch (error) {
+          console.error('Failed to load pre-filled data', error);
           triggerGlobalToast('Failed to load details', 'error');
         }
       };
@@ -156,7 +156,10 @@ export default function QuickPharmacyBillingPage() {
     // Check if this EXACT batch is already in cart
     const existingIndex = cart.findIndex(item => item.id === stock.id);
     
-    if (existingIndex > -1) {
+    if (existingIndex === -1) {
+      // Add as a new row (supports multi-batch for same medicine)
+      setCart([...cart, { ...stock, selectedQuantity: 1, discount: 0 }]);
+    } else {
       const newCart = [...cart];
       if (newCart[existingIndex].selectedQuantity < stock.quantity) {
         newCart[existingIndex].selectedQuantity += 1;
@@ -164,9 +167,6 @@ export default function QuickPharmacyBillingPage() {
       } else {
         triggerGlobalToast('Insufficient stock in this batch', 'error');
       }
-    } else {
-      // Add as a new row (supports multi-batch for same medicine)
-      setCart([...cart, { ...stock, selectedQuantity: 1, discount: 0 }]);
     }
   };
 
@@ -383,7 +383,7 @@ export default function QuickPharmacyBillingPage() {
                             <input 
                               type="number" 
                               value={item.selectedQuantity}
-                              onChange={(e) => updateQuantity(index, parseInt(e.target.value) || 0)}
+                              onChange={(e) => updateQuantity(index, Number.parseInt(e.target.value) || 0)}
                               className="w-10 text-center font-black text-sm outline-none bg-transparent"
                             />
                             <button 
@@ -401,7 +401,7 @@ export default function QuickPharmacyBillingPage() {
                             <input 
                               type="number" 
                               value={item.discount}
-                              onChange={(e) => updateDiscount(index, parseFloat(e.target.value) || 0)}
+                              onChange={(e) => updateDiscount(index, Number.parseFloat(e.target.value) || 0)}
                               className="w-16 text-right font-black text-sm outline-none bg-transparent"
                               placeholder="0"
                             />
@@ -483,7 +483,7 @@ export default function QuickPharmacyBillingPage() {
                    <input 
                     type="number" 
                     value={amountPaid}
-                    onChange={(e) => setAmountPaid(parseFloat(e.target.value) || 0)}
+                    onChange={(e) => setAmountPaid(Number.parseFloat(e.target.value) || 0)}
                     className="w-full pl-10 pr-4 py-4 bg-primary/5 border-2 border-primary/10 rounded-[24px] text-2xl font-black text-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
                   />
                 </div>

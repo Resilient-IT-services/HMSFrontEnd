@@ -97,7 +97,7 @@ export const useDoctorQueue = () => {
     const todayApps = appointments.filter(a => a.appointmentTime.startsWith(today));
 
     const waiting = todayApps.filter((a) => a.status === 'SCHEDULED').length;
-    const inProgress = todayApps.filter((a) => a.status === 'WALK_IN').length;
+    const inProgress = todayApps.filter((a) => a.status === 'CONSULTATION_STARTED').length;
     const completed = todayApps.filter((a) => a.status === 'COMPLETED').length;
 
     return {
@@ -110,7 +110,7 @@ export const useDoctorQueue = () => {
 
   const handleStartConsultation = async (id: string) => {
     try {
-      const res = await appointmentService.updateStatus(id, { status: 'WALK_IN' });
+      const res = await appointmentService.updateStatus(id, { status: 'CONSULTATION_STARTED' });
       if (res.success) {
         router.push(`/doctor/active-consultation?appointmentId=${id}`);
       } else {
@@ -128,7 +128,7 @@ export const useDoctorQueue = () => {
     let base = appointments;
     base = activeTab === 'TODAY' ? appointments.filter(a => 
         a.appointmentTime.startsWith(today) && 
-        (a.status === 'SCHEDULED' || a.status === 'WALK_IN')
+        (a.status === 'SCHEDULED' || a.status === 'CONSULTATION_STARTED')
       ) : appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
     
     const sorted = activeTab === 'TODAY' ? sortByToken(base) : [...base].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));

@@ -39,17 +39,28 @@ export const usePharmacyStock = () => {
         const thirtyDaysFromNow = new Date();
         thirtyDaysFromNow.setDate(today.getDate() + 30);
 
-        if (statusFilter === 'EXPIRED') {
+        switch (statusFilter) {
+        case 'EXPIRED': {
           content = content.filter(m => m.expiryDate && new Date(m.expiryDate) < today);
-        } else if (statusFilter === 'EXPIRING_SOON') {
+        
+        break;
+        }
+        case 'EXPIRING_SOON': {
           content = content.filter(m => {
             if (!m.expiryDate) return false;
             const expDate = new Date(m.expiryDate);
             return expDate >= today && expDate < thirtyDaysFromNow;
           });
-        } else if (statusFilter === 'LOW_STOCK') {
+        
+        break;
+        }
+        case 'LOW_STOCK': {
           // Backend might already handle this, but ensuring consistency
           content = content.filter(m => (m.quantity || 0) < 50);
+        
+        break;
+        }
+        // No default
         }
 
         // Client-side search fallback

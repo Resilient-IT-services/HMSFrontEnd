@@ -71,10 +71,10 @@ export const useReceptionAppointments = () => {
         const statusStats = statsRes.data.byStatus;
         setStats({
           total: statsRes.data.total,
-          walkIn: statusStats['WALK_IN'] || 0,
+          walkIn: statusStats['CONSULTATION_STARTED'] || 0,
           upcoming: statsRes.data.upcoming || 0,
           paymentPending: statusStats['PAYMENT_PENDING'] || 0,
-          waitingForVitals: statusStats['WAITING_FOR_VITALS'] || 0,
+          waitingForVitals: statusStats['PAID'] || 0,
           completed: statusStats['COMPLETED'] || 0,
           cancelled: statusStats['CANCELLED'] || 0,
         });

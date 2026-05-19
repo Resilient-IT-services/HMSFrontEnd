@@ -182,11 +182,9 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
     // Doctor Specific Validation
     if (assignedRoles.includes('DOCTOR') && formData.doctorInfo) {
-      if (!formData.doctorInfo.specializations || formData.doctorInfo.specializations.length === 0) {
-          if (!formData.doctorInfo.specialization?.trim()) {
+      if ((!formData.doctorInfo.specializations || formData.doctorInfo.specializations.length === 0) && !formData.doctorInfo.specialization?.trim()) {
             errors.specialization = 'Specialization is required';
           }
-      }
       if (!formData.doctorInfo.licenseNumber?.trim()) {
         errors.licenseNumber = 'License number is required';
       }

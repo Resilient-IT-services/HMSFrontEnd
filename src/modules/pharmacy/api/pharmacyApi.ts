@@ -36,6 +36,11 @@ export const pharmacyApi = {
     return response.data;
   },
 
+  dispensePrescription: async (id: string, request: any) => {
+    const response = await apiClient.post<ApiResponse<any>>(`/pharmacy/prescriptions/${id}/dispense`, request);
+    return response.data;
+  },
+
   getPrescriptionsSummary: async (params?: { search?: string; page?: number; size?: number }) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;

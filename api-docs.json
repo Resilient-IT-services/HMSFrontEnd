@@ -81,6 +81,76 @@
         }
       }
     },
+    "/api/v1/specializations/{id}": {
+      "put": {
+        "tags": [
+          "specialization-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Specialization"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSpecialization"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "specialization-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/pharmacy/medicines/{id}": {
       "get": {
         "tags": [
@@ -115,7 +185,7 @@
         "tags": [
           "Pharmacy"
         ],
-        "operationId": "update_1",
+        "operationId": "update_2",
         "parameters": [
           {
             "name": "id",
@@ -154,7 +224,7 @@
         "tags": [
           "Pharmacy"
         ],
-        "operationId": "delete_1",
+        "operationId": "delete_2",
         "parameters": [
           {
             "name": "id",
@@ -214,7 +284,7 @@
         "tags": [
           "Patients"
         ],
-        "operationId": "update_2",
+        "operationId": "update_3",
         "parameters": [
           {
             "name": "patientId",
@@ -284,7 +354,7 @@
         "tags": [
           "Hospitals"
         ],
-        "operationId": "update_3",
+        "operationId": "update_4",
         "parameters": [
           {
             "name": "hospitalId",
@@ -313,6 +383,76 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseHospitalDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/departments/{id}": {
+      "put": {
+        "tags": [
+          "department-controller"
+        ],
+        "operationId": "update_5",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Department"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDepartment"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "department-controller"
+        ],
+        "operationId": "delete_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
                 }
               }
             }
@@ -354,7 +494,7 @@
         "tags": [
           "Appointments"
         ],
-        "operationId": "update_4",
+        "operationId": "update_6",
         "parameters": [
           {
             "name": "appointmentId",
@@ -395,7 +535,7 @@
         "tags": [
           "Vital Range Config"
         ],
-        "operationId": "update_5",
+        "operationId": "update_7",
         "parameters": [
           {
             "name": "vitalType",
@@ -575,6 +715,54 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/specializations": {
+      "get": {
+        "tags": [
+          "specialization-controller"
+        ],
+        "operationId": "listAll",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListString"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "specialization-controller"
+        ],
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Specialization"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSpecialization"
                 }
               }
             }
@@ -850,7 +1038,7 @@
         "tags": [
           "Prescriptions"
         ],
-        "operationId": "create_1",
+        "operationId": "create_2",
         "requestBody": {
           "content": {
             "application/json": {
@@ -928,7 +1116,7 @@
         "tags": [
           "Pharmacy"
         ],
-        "operationId": "create_2",
+        "operationId": "create_3",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1044,7 +1232,7 @@
         "tags": [
           "Patients"
         ],
-        "operationId": "create_3",
+        "operationId": "create_4",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1238,7 +1426,7 @@
         "tags": [
           "Hospitals"
         ],
-        "operationId": "create_4",
+        "operationId": "create_5",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1286,6 +1474,54 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponsePaymentDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/departments": {
+      "get": {
+        "tags": [
+          "department-controller"
+        ],
+        "operationId": "listAll_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListString"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "department-controller"
+        ],
+        "operationId": "create_6",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Department"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDepartment"
                 }
               }
             }
@@ -1436,7 +1672,7 @@
         "tags": [
           "Appointments"
         ],
-        "operationId": "create_5",
+        "operationId": "create_7",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1878,19 +2114,19 @@
         }
       }
     },
-    "/api/v1/specializations": {
+    "/api/v1/specializations/all": {
       "get": {
         "tags": [
           "specialization-controller"
         ],
-        "operationId": "listAll",
+        "operationId": "listManagement",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseListString"
+                  "$ref": "#/components/schemas/ApiResponseListSpecialization"
                 }
               }
             }
@@ -2840,19 +3076,19 @@
         }
       }
     },
-    "/api/v1/departments": {
+    "/api/v1/departments/all": {
       "get": {
         "tags": [
           "department-controller"
         ],
-        "operationId": "listAll_1",
+        "operationId": "listManagement_1",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseListString"
+                  "$ref": "#/components/schemas/ApiResponseListDepartment"
                 }
               }
             }
@@ -3522,6 +3758,46 @@
           }
         }
       },
+      "Specialization": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseSpecialization": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Specialization"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
       "MedicineDTO": {
         "required": [
           "name"
@@ -3752,6 +4028,46 @@
           },
           "data": {
             "$ref": "#/components/schemas/HospitalDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "Department": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseDepartment": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/Department"
           },
           "error": {
             "$ref": "#/components/schemas/ApiError"
@@ -5069,6 +5385,23 @@
           }
         }
       },
+      "ApiResponseListSpecialization": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Specialization"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
       "ApiResponsePageResponseSearchResultDTO": {
         "type": "object",
         "properties": {
@@ -6052,6 +6385,23 @@
             "pattern": "HH:mm",
             "type": "string",
             "example": "09:00"
+          }
+        }
+      },
+      "ApiResponseListDepartment": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Department"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
           }
         }
       },

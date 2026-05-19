@@ -49,11 +49,7 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setIsCompressed(prev => {
       const newValue = !prev;
       localStorage.setItem('ui_compressed', String(newValue));
-      if (newValue) {
-        document.documentElement.classList.add('ui-compressed');
-      } else {
-        document.documentElement.classList.remove('ui-compressed');
-      }
+      document.documentElement.classList.toggle('ui-compressed', newValue);
       return newValue;
     });
   }, []);

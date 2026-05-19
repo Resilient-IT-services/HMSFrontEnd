@@ -125,7 +125,7 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
       } else {
         // DIAGNOSTIC: Force a unique patient code to see if backend accepts it
         // and if it bypasses the auto-generator collision.
-        payload.patientCode = `DEBUG-${Math.floor(Math.random() * 10000)}`;
+        payload.patientCode = `DEBUG-${Math.floor(Math.random() * 10_000)}`;
       }
 
       const res = isEditMode

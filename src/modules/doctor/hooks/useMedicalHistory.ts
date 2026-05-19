@@ -125,11 +125,7 @@ export const useMedicalHistory = () => {
 
   useEffect(() => {
     const trigger = async () => {
-      if (activeView === 'APPOINTMENTS') {
-        await fetchHistoryList(debouncedSearchTerm, appointmentsPage);
-      } else {
-        await fetchPatientsList(debouncedSearchTerm, patientsPage);
-      }
+      await (activeView === 'APPOINTMENTS' ? fetchHistoryList(debouncedSearchTerm, appointmentsPage) : fetchPatientsList(debouncedSearchTerm, patientsPage));
     };
     void trigger();
   }, [activeView, appointmentsPage, patientsPage, debouncedSearchTerm, fetchHistoryList, fetchPatientsList]);

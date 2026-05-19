@@ -48,7 +48,7 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
   }, [id, prescriptionId]);
 
   const handlePrint = () => {
-    window.print();
+    globalThis.print();
   };
 
   if (loading) return <MainLayout title="Sale Details"><LoadingSkeleton /></MainLayout>;

@@ -68,8 +68,8 @@ export const PharmacySalesPage = () => {
           if (matchedStock) price = matchedStock.sellingPrice || matchedStock.price || matchedStock.purchasePrice || 0;
         }
       }
-    } catch (err) {
-      console.error('Price resolution failed', err);
+    } catch (error) {
+      console.error('Price resolution failed', error);
     }
     return price;
   };
@@ -79,10 +79,10 @@ export const PharmacySalesPage = () => {
     
     // Robust stock field resolution
     const stockAvailable = 
-      medicine.currentStock !== undefined ? medicine.currentStock :
-      medicine.quantity !== undefined ? medicine.quantity :
-      medicine.totalQuantity !== undefined ? medicine.totalQuantity :
-      medicine.stock !== undefined ? medicine.stock : 0;
+      medicine.currentStock === undefined ? medicine.quantity === undefined ? medicine.totalQuantity === undefined ? medicine.stock === undefined ? 0 : medicine.stock :
+      medicine.totalQuantity :
+      medicine.quantity :
+      medicine.currentStock;
     
     const existingInCart = cart.find(i => i.id === medicine.id);
     const currentQtyInCart = existingInCart ? existingInCart.quantity : 0;

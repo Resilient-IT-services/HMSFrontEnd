@@ -150,7 +150,7 @@ export const BillingPage = () => {
                   <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">OP Token No.</p>
                   <div className="p-3 sm:p-4 bg-slate-50 rounded-xl border border-slate-100 flex flex-col justify-center h-[72px] sm:h-auto">
                     <p className="font-black text-slate-900 text-base sm:text-xl leading-none">
-                      {formatToken(appointment) !== '---' ? formatToken(appointment) : (predictedToken || 'PENDING')}
+                      {formatToken(appointment) === '---' ? (predictedToken || 'PENDING') : formatToken(appointment)}
                     </p>
                     {!isPaid && !appointment.tokenDisplay && (
                       <span className="text-[8px] sm:text-[9px] font-bold text-orange-600 uppercase mt-1">Expected Token</span>
@@ -175,9 +175,7 @@ export const BillingPage = () => {
                 </div>
                 <div className="flex justify-between items-center py-1 sm:py-2">
                   <span className="text-xs sm:text-sm font-bold text-slate-600">Discount</span>
-                  {appointment.status !== 'PAYMENT_PENDING' ? (
-                    <span className="font-black text-emerald-600">- ₹{(invoice?.discountAmount ?? discount).toFixed(2)}</span>
-                  ) : (
+                  {appointment.status === 'PAYMENT_PENDING' ? (
                     <div className="relative">
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px]">₹</span>
                       <input 
@@ -187,6 +185,8 @@ export const BillingPage = () => {
                         onChange={(e) => setDiscount(Number(e.target.value))}
                       />
                     </div>
+                  ) : (
+                    <span className="font-black text-emerald-600">- ₹{(invoice?.discountAmount ?? discount).toFixed(2)}</span>
                   )}
                 </div>
                 {isPaid && (
@@ -250,7 +250,18 @@ export const BillingPage = () => {
           </div>
           
           <div className="flex flex-col xs:flex-row gap-3 w-full sm:w-auto">
-            {appointment.status !== 'PAYMENT_PENDING' ? (
+            {appointment.status === 'PAYMENT_PENDING' ? (
+              <Button 
+                size="xl" 
+                icon="check_circle" 
+                fullWidth 
+                className="px-6 sm:px-12 text-sm uppercase font-black"
+                isLoading={submittingPayment}
+                onClick={handleMarkAsPaid}
+              >
+                {submittingPayment ? 'Processing...' : 'Confirm Payment'}
+              </Button>
+            ) : (
               <>
                 <Button 
                   variant="secondary" 
@@ -270,17 +281,6 @@ export const BillingPage = () => {
                   Proceed to Vitals
                 </Button>
               </>
-            ) : (
-              <Button 
-                size="xl" 
-                icon="check_circle" 
-                fullWidth 
-                className="px-6 sm:px-12 text-sm uppercase font-black"
-                isLoading={submittingPayment}
-                onClick={handleMarkAsPaid}
-              >
-                {submittingPayment ? 'Processing...' : 'Confirm Payment'}
-              </Button>
             )}
           </div>
         </div>

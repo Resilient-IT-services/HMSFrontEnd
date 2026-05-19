@@ -17,7 +17,7 @@ export default function AuthenticatedLayout({
   const hideTimer = useRef<NodeJS.Timeout | null>(null);
 
   const startHideTimer = useCallback(() => {
-    if (typeof window === 'undefined' || window.innerWidth >= MOBILE_BREAKPOINT) {
+    if (globalThis.window === undefined || window.innerWidth >= MOBILE_BREAKPOINT) {
       setIsTopbarVisible(true);
       return;
     }
@@ -64,17 +64,17 @@ export default function AuthenticatedLayout({
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('mousemove', handleInteraction);
-    window.addEventListener('touchstart', handleTouchStart, { passive: true });
-    window.addEventListener('click', handleInteraction);
+    globalThis.addEventListener('mousemove', handleInteraction);
+    globalThis.addEventListener('touchstart', handleTouchStart, { passive: true });
+    globalThis.addEventListener('click', handleInteraction);
 
     startHideTimer();
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('mousemove', handleInteraction);
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('click', handleInteraction);
+      globalThis.removeEventListener('mousemove', handleInteraction);
+      globalThis.removeEventListener('touchstart', handleTouchStart);
+      globalThis.removeEventListener('click', handleInteraction);
       if (hideTimer.current) clearTimeout(hideTimer.current);
     };
   }, [startHideTimer]);

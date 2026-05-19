@@ -44,13 +44,20 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'DOCTOR': return 'stethoscope';
-      case 'ADMIN': return 'admin_panel_settings';
-      case 'RECEPTIONIST': return 'desk';
-      case 'PHARMACIST': return 'prescriptions';
-      case 'NURSE': return 'vital_signs';
-      case 'SUPER_ADMIN': return 'shield_person';
-      default: return 'person';
+      case 'DOCTOR': { return 'stethoscope';
+      }
+      case 'ADMIN': { return 'admin_panel_settings';
+      }
+      case 'RECEPTIONIST': { return 'desk';
+      }
+      case 'PHARMACIST': { return 'prescriptions';
+      }
+      case 'NURSE': { return 'vital_signs';
+      }
+      case 'SUPER_ADMIN': { return 'shield_person';
+      }
+      default: { return 'person';
+      }
     }
   };
 
