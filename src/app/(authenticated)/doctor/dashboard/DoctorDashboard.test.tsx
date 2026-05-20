@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import DoctorDashboard from './page';
 import { appointmentService } from '@/services/appointmentService';
+import { doctorService } from '@/services/doctorService';
 import { DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 const mockPush = vi.fn();
@@ -16,6 +17,12 @@ vi.mock('@/services/appointmentService', () => ({
   appointmentService: {
     list: vi.fn(),
     updateStatus: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/doctorService', () => ({
+  doctorService: {
+    getRevenueSummary: vi.fn(),
   },
 }));
 
@@ -78,6 +85,11 @@ describe('DoctorDashboard', () => {
       ]
     };
 
+    vi.mocked(doctorService.getRevenueSummary).mockResolvedValue({
+      success: true,
+      data: { totalAppointments: 2, totalRevenue: 1000, averageFee: 500 }
+    });
+
     render(
       <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser, hospitalTimezone: 'UTC' }) => state } })}>
         <DoctorDashboard />
@@ -89,7 +101,7 @@ describe('DoctorDashboard', () => {
     await waitFor(() => {
       expect(appointmentService.list).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, undefined, expect.anything(), expect.anything(), 'doctor-1');
       expect(screen.getAllByText('Jane Roe')[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/500/)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/1000/)[0]).toBeInTheDocument();
     });
   });
 
@@ -137,6 +149,11 @@ describe('DoctorDashboard', () => {
         }
       ]
     };
+
+    vi.mocked(doctorService.getRevenueSummary).mockResolvedValue({
+      success: true,
+      data: { totalAppointments: 2, totalRevenue: 1000, averageFee: 500 }
+    });
 
     render(
       <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser, hospitalTimezone: 'UTC' }) => state } })}>

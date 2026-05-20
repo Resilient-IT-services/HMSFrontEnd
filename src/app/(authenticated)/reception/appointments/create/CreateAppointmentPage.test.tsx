@@ -18,6 +18,7 @@ vi.mock('@/services/doctorService', () => ({
     get: vi.fn(),
     list: vi.fn(),
     getAvailability: vi.fn(),
+    getDoctorsSelection: vi.fn(),
   },
 }));
 
@@ -104,6 +105,11 @@ describe('CreateAppointmentPage', () => {
     (doctorService.list as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
       data: { content: mockDoctors },
+    });
+
+    (doctorService.getDoctorsSelection as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
+      success: true,
+      data: mockDoctors.map(d => ({ id: d.doctorId, fullName: d.fullName, specialization: d.departments[0] })),
     });
 
     (doctorService.get as unknown as ReturnType<typeof vi.fn>).mockResolvedValue({
