@@ -9,22 +9,17 @@ import { PatientHistoryDetailView } from '../components/MedicalHistory/PatientHi
 export const MedicalHistoryPage = () => {
   const {
     patientId,
-    patients,
     historyAppointments,
+    patientDetails,
     selectedPatient,
     patientVisits,
     selectedVisit,
     loading,
     searchTerm,
     setSearchTerm,
-    activeView,
-    setActiveView,
     appointmentsPage,
     setAppointmentsPage,
     appointmentsTotalElements,
-    patientsPage,
-    setPatientsPage,
-    patientsTotalElements,
     pageSize,
     setPageSize,
     handleSearch,
@@ -37,21 +32,16 @@ export const MedicalHistoryPage = () => {
     return (
       <MainLayout title="Medical History" hideTitle>
         <HistoryDirectoryView 
-          activeView={activeView}
-          setActiveView={setActiveView}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           handleSearch={handleSearch}
           loading={loading}
           historyAppointments={historyAppointments}
-          patients={patients}
+          patientDetails={patientDetails}
           selectPatient={selectPatient}
           appointmentsPage={appointmentsPage}
-          patientsPage={patientsPage}
           appointmentsTotalElements={appointmentsTotalElements}
-          patientsTotalElements={patientsTotalElements}
           setAppointmentsPage={setAppointmentsPage}
-          setPatientsPage={setPatientsPage}
           pageSize={pageSize}
           setPageSize={setPageSize}
         />

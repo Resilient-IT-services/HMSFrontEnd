@@ -51,10 +51,7 @@ export const PatientHistoryDetailView: React.FC<PatientHistoryDetailViewProps> =
             </div>
           </div>
         </div>
-        <div className="flex gap-2 sm:gap-3">
-          <Button variant="secondary" icon="print" size="sm" className="flex-1 sm:flex-none text-[10px] sm:text-xs">Print EMR</Button>
-          <Button icon="clinical_notes" href="/doctor/active-consultation" size="sm" className="flex-1 sm:flex-none text-[10px] sm:text-xs">Consultation</Button>
-        </div>
+
       </div>
 
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden lg:overflow-visible">

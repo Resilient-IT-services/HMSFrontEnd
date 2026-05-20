@@ -216,7 +216,13 @@ export function AppointmentScheduling() {
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
       
       // Quick check for existing appointment to prevent duplicates and enable resume
-      const res = await appointmentService.list(0, 50, undefined, from, to, selectedDoctor.id);
+      const res = await appointmentService.list({ 
+        page: 0, 
+        size: 50, 
+        from, 
+        to, 
+        doctorId: selectedDoctor.id 
+      });
       if (res.success && res.data) {
         const existing = res.data.content.find(a => 
           a.patientId === selectedPatient.id && 

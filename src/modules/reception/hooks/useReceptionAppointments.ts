@@ -62,15 +62,15 @@ export const useReceptionAppointments = () => {
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
 
       const [appRes, statsRes] = await Promise.all([
-        appointmentService.listSummary(
-          0, 100, 
-          debouncedSearchTerm, 
-          fromParam,
-          toParam,
-          undefined,
-          statusesToUse,
-          filters.paymentStatuses?.join(',')
-        ),
+        appointmentService.listSummary({
+          page: 0,
+          size: 100,
+          search: debouncedSearchTerm,
+          from: fromParam,
+          to: toParam,
+          status: statusesToUse,
+          paymentStatus: filters.paymentStatuses?.join(',')
+        }),
         appointmentService.getStats(from, to)
       ]);
 
