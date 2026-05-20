@@ -23,7 +23,7 @@ const MedicineViewModal: React.FC<MedicineViewModalProps> = ({
         setLoading(true);
         const [medResponse, stockResponse] = await Promise.all([
           pharmacyApi.getMedicineById(medicineId),
-          pharmacyApi.getMedicineStock({ size: 1000 }) // Fetch all batches to filter locally
+          pharmacyApi.getMedicineStock({ size: 100, medicineId }) // Optimized server-side filtering
         ]);
 
         if (medResponse.success && medResponse.data) {
@@ -31,10 +31,7 @@ const MedicineViewModal: React.FC<MedicineViewModalProps> = ({
         }
 
         if (stockResponse.success && stockResponse.data) {
-          const medicineBatches = stockResponse.data.content.filter(
-            (b) => b.medicineId === medicineId
-          );
-          setBatches(medicineBatches);
+          setBatches(stockResponse.data.content || []);
         }
       } catch (error) {
         console.error('Fetch Details Error:', error);

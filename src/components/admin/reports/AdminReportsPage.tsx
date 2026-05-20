@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { reportService, ReportRow, ReportType } from '@/services/reportService';
-import { DoctorStaffResponse, HospitalResponse } from '@/types/api';
+import { DoctorStaffResponse, HospitalResponse, HospitalSelectionDTO } from '@/types/api';
 import dayjs from '@/lib/dayjs';
 
 const reportTypeOptions: Array<{ label: string; value: ReportType }> = [
@@ -61,7 +61,7 @@ export default function AdminReportsPage() {
   const [endDate, setEndDate] = useState(getToday);
   const [hospitalId, setHospitalId] = useState('');
   const [doctorId, setDoctorId] = useState('');
-  const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
+  const [hospitals, setHospitals] = useState<HospitalSelectionDTO[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [rows, setRows] = useState<ReportRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -88,11 +88,26 @@ export default function AdminReportsPage() {
     [doctorId, doctorOptions]
   );
 
-  const getRangeForHospital = useCallback((hospital: HospitalResponse) => {
-    const tz = hospital.timezone || 'UTC';
+  const getRangeForHospital = useCallback(async (hId: string) => {
+    // We need the timezone of the hospital. If it's a selection DTO, we might not have it.
+    // Optimization: Fetch full hospital details only if needed, or backend handles it.
+    // Based on release notes, report preview takes UTC from/to.
+    // If hospitalId is provided, we fetch full hospital once to get timezone.
+    try {
+      const res = await hospitalService.getById(hId);
+      if (res.success && res.data) {
+        const tz = res.data.timezone || 'UTC';
+        return {
+          from: dayjs(startDate).tz(tz).startOf('day').toISOString(),
+          to: dayjs(endDate).tz(tz).endOf('day').toISOString()
+        };
+      }
+    } catch (err) {
+      console.error('Error fetching hospital for timezone:', err);
+    }
     return {
-      from: dayjs(startDate).tz(tz).startOf('day').toISOString(),
-      to: dayjs(endDate).tz(tz).endOf('day').toISOString()
+      from: dayjs(startDate).startOf('day').toISOString(),
+      to: dayjs(endDate).endOf('day').toISOString()
     };
   }, [startDate, endDate]);
 
@@ -121,8 +136,8 @@ export default function AdminReportsPage() {
       setLoading(true);
       setError('');
 
-      if (hospitalId && selectedHospital) {
-        const { from, to } = getRangeForHospital(selectedHospital);
+      if (hospitalId) {
+        const { from, to } = await getRangeForHospital(hospitalId);
         const response = await reportService.preview({
           type: reportType,
           from,
@@ -135,44 +150,22 @@ export default function AdminReportsPage() {
           setError(response.error?.message || response.message || 'Unable to load report data.');
         }
       } else {
-        if (hospitals.length === 0) {
-          setRows([]);
-          return;
-        }
+        // Optimized: Single call for all hospitals if backend supports it
+        const fromUTC = dayjs(startDate).startOf('day').toISOString();
+        const toUTC = dayjs(endDate).endOf('day').toISOString();
+        
+        const response = await reportService.preview({
+          type: reportType,
+          from: fromUTC,
+          to: toUTC,
+          allHospitals: true,
+          ...(doctorId ? { doctorId } : {})
+        });
 
-        const responses = await Promise.all(
-          hospitals.map(async (hospital) => {
-            try {
-              const { from, to } = getRangeForHospital(hospital);
-              const response = await reportService.preview({
-                type: reportType,
-                from,
-                to,
-                hospitalId: hospital.id,
-                ...(doctorId ? { doctorId } : {})
-              });
-              return {
-                hospital,
-                response
-              };
-            } catch {
-              return { hospital, response: { success: false, message: 'Failed' } };
-            }
-          })
-        );
-        const mergedRows = responses.flatMap(({ hospital, response }) =>
-          response && response.success
-            ? (response.data ?? []).map((row) => ({
-                hospitalName: row.hospitalName ?? hospital.name,
-                hospitalCode: row.hospitalCode ?? hospital.code,
-                ...row
-              }))
-            : []
-        );
-        setRows(mergedRows);
-
-        if (mergedRows.length === 0 && responses.some(({ response }) => !response || !response.success)) {
-          setError('Unable to load report data for one or more hospitals.');
+        if (response.success) {
+          setRows(response.data ?? []);
+        } else {
+          setError(response.error?.message || response.message || 'Unable to load combined report data.');
         }
       }
     } catch (fetchError) {
@@ -182,7 +175,7 @@ export default function AdminReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [hospitalId, selectedHospital, hospitals, reportType, doctorId, getRangeForHospital]);
+  }, [hospitalId, reportType, doctorId, getRangeForHospital, startDate, endDate]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -195,8 +188,8 @@ export default function AdminReportsPage() {
     const fetchHospitals = async () => {
       try {
         setLoadingHospitals(true);
-        const response = await hospitalService.list(0, 500);
-        setHospitals(response.success ? response.data?.content ?? [] : []);
+        const response = await hospitalService.getHospitalsSelection();
+        setHospitals(response.success ? response.data ?? [] : []);
       } catch (hospitalError) {
         console.error(hospitalError);
         setHospitals([]);
@@ -294,7 +287,7 @@ export default function AdminReportsPage() {
         return;
       }
 
-      const { from, to } = getRangeForHospital(selectedHospital!);
+      const { from, to } = await getRangeForHospital(hospitalId);
       const filtersWithUTC = { type: reportType, from, to, hospitalId, ...(doctorId ? { doctorId } : {}) };
 
       const blob = format === 'pdf' ? await reportService.exportPdf(filtersWithUTC) : await reportService.exportExcel(filtersWithUTC);
@@ -390,7 +383,7 @@ export default function AdminReportsPage() {
                   <option value="">All Hospitals</option>
                   {hospitals.map((hospital) => (
                     <option key={hospital.id} value={hospital.id}>
-                      {hospital.name} {hospital.code ? `(${hospital.code})` : ''}
+                      {hospital.name}
                     </option>
                   ))}
                 </select>

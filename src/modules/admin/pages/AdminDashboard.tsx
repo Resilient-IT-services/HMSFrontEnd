@@ -10,9 +10,9 @@ import { MetricCard } from '@/components/ui/MetricCard';
 import { Avatar } from '@/components/ui/Avatar';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { Table, Column } from '@/components/ui/Table';
-import { userService } from '@/services/userService';
+import { adminService } from '@/services/adminService';
 import { hospitalService } from '@/services/hospitalService';
-import { UserSummaryDTO, HospitalResponse } from '@/types/api';
+import { HospitalResponse } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import dayjs from '@/lib/dayjs';
 
@@ -32,24 +32,24 @@ export const AdminDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // We fetch counts using size=1 trick to get totalElements metadata efficiently
-        const [hospRes, usersRes, activeRes, doctorsRes] = await Promise.all([
-          hospitalService.list(0, 5), // Fetch 5 for the table
-          userService.listUsers(0, 1), // Total users count
-          userService.listUsers(0, 1, undefined, undefined, true), // Active users count
-          userService.listUsers(0, 1, undefined, 'DOCTOR') // Doctors count
+        // Use optimized unified stats endpoint and selection list for the table
+        const [hospRes, statsRes] = await Promise.all([
+          hospitalService.list(0, 5), // Fetch top 5 for the activity table
+          adminService.getAdminStats() // Unified metrics
         ]);
 
         if (hospRes.success && hospRes.data) {
           setHospitals(hospRes.data.content || []);
         }
 
-        setStats({
-          totalHospitals: hospRes.data?.totalElements || 0,
-          platformUsers: usersRes.data?.totalElements || 0,
-          activeNow: activeRes.data?.totalElements || 0,
-          certifiedDoctors: doctorsRes.data?.totalElements || 0
-        });
+        if (statsRes.success && statsRes.data) {
+          setStats({
+            totalHospitals: statsRes.data.totalHospitals,
+            platformUsers: statsRes.data.totalUsers,
+            activeNow: statsRes.data.activeUsers,
+            certifiedDoctors: statsRes.data.totalDoctors
+          });
+        }
       } catch (error) {
         console.error('Admin Dashboard Fetch Error:', error);
       } finally {
@@ -125,7 +125,7 @@ export const AdminDashboard = () => {
           />
           <MetricCard 
             label="Staff Online" 
-            value={users.filter(u => u.active).length} 
+            value={stats.activeNow} 
             icon="badge" 
             variant="emerald" 
             layout="pill" 

@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, HospitalResponse, CreateHospitalRequest } from '@/types/api';
+import { ApiResponse, PageResponse, HospitalResponse, CreateHospitalRequest, HospitalSelectionDTO } from '@/types/api';
 
 export const hospitalService = {
   async list(page = 0, size = 20, name?: string, status?: string): Promise<ApiResponse<PageResponse<HospitalResponse>>> {
@@ -9,13 +9,18 @@ export const hospitalService = {
     return response.data;
   },
 
-  async create(request: CreateHospitalRequest): Promise<ApiResponse<HospitalResponse>> {
-    const response = await apiClient.post<ApiResponse<HospitalResponse>>('/hospitals', request);
+  async getHospitalsSelection(): Promise<ApiResponse<HospitalSelectionDTO[]>> {
+    const response = await apiClient.get<ApiResponse<HospitalSelectionDTO[]>>('/hospitals/selection');
     return response.data;
   },
 
-  async update(hospitalId: string, request: Partial<CreateHospitalRequest> & { status?: string }): Promise<ApiResponse<HospitalResponse>> {
-    const response = await apiClient.put<ApiResponse<HospitalResponse>>(`/hospitals/${hospitalId}`, request);
+  async create(data: CreateHospitalRequest): Promise<ApiResponse<HospitalResponse>> {
+    const response = await apiClient.post<ApiResponse<HospitalResponse>>('/hospitals', data);
+    return response.data;
+  },
+
+  async update(hospitalId: string, data: CreateHospitalRequest): Promise<ApiResponse<HospitalResponse>> {
+    const response = await apiClient.put<ApiResponse<HospitalResponse>>(`/hospitals/${hospitalId}`, data);
     return response.data;
   },
 

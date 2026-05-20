@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
+import { doctorService } from '@/services/doctorService';
 import { RootState } from '@/state/store';
-import { AppointmentResponse } from '@/types/api';
+import { AppointmentResponse, DoctorRevenueSummaryDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
@@ -31,6 +32,7 @@ export const DoctorDashboard = () => {
   const router = useRouter();
   const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [revenueSummary, setRevenueSummary] = useState<DoctorRevenueSummaryDTO | null>(null);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const consultationFee = useConsultationFee();
@@ -44,26 +46,30 @@ export const DoctorDashboard = () => {
     try {
       if (!isBackground) setLoading(true);
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
-      const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, from, to, user.id);
+      
+      const [appRes, revRes] = await Promise.all([
+        appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, from, to, user.id),
+        doctorService.getRevenueSummary(user.id, from, to)
+      ]);
 
-      if (!response.success || !response.data) {
-        setAppointments([]);
-        setTotalElements(0);
-        return;
+      if (appRes.success && appRes.data) {
+        // Safety filter for doctor's own data
+        const filtered = appRes.data.content.filter(app => 
+          app.doctorId === user.id || 
+          app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
+        );
+
+        const normalized = normalizeAppointmentData(filtered);
+        setAppointments(normalized);
+        setTotalElements(appRes.data.totalElements);
+        syncExpiredAppointments(filtered);
       }
 
-      // Safety filter for doctor's own data
-      const filtered = response.data.content.filter(app => 
-        app.doctorId === user.id || 
-        app.doctorName.toLowerCase().includes(user.fullName.toLowerCase())
-      );
-
-      const normalized = normalizeAppointmentData(filtered);
-      setAppointments(normalized);
-      setTotalElements(response.data.totalElements);
-      syncExpiredAppointments(filtered);
+      if (revRes.success && revRes.data) {
+        setRevenueSummary(revRes.data);
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Doctor Dashboard Fetch Error:', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
@@ -86,16 +92,15 @@ export const DoctorDashboard = () => {
     ).length;
     const active = appointments.filter((appointment) => appointment.status === 'CONSULTATION_STARTED').length;
     const completed = appointments.filter((appointment) => appointment.status === 'COMPLETED').length;
-    const earnedCount = appointments.filter((appointment) => appointment.status !== 'CANCELLED' && appointment.status !== 'PAYMENT_PENDING').length;
 
     return {
-      total: totalElements,
+      total: revenueSummary?.totalAppointments ?? totalElements,
       waiting,
       active,
       completed,
-      earnings: typeof consultationFee === 'number' ? earnedCount * consultationFee : 0,
+      earnings: revenueSummary?.totalRevenue ?? 0,
     };
-  }, [appointments, consultationFee, totalElements]);
+  }, [appointments, revenueSummary, totalElements]);
 
   const queue = useMemo(() => {
     if (!hospitalTimezone) return [];

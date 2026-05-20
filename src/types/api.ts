@@ -871,6 +871,54 @@ export interface Specialization {
 }
 
 // User Summary
+export interface DoctorSelectionDTO {
+  id: string;
+  fullName: string;
+  specialization: string;
+}
+
+export interface ApiResponseListDoctorSelectionDTO {
+  success: boolean;
+  data?: DoctorSelectionDTO[];
+  error?: ApiError;
+}
+
+export interface HospitalSelectionDTO {
+  id: string;
+  name: string;
+}
+
+export interface ApiResponseListHospitalSelectionDTO {
+  success: boolean;
+  data?: HospitalSelectionDTO[];
+  error?: ApiError;
+}
+
+export interface AdminStatsDTO {
+  totalUsers: number;
+  activeUsers: number;
+  totalHospitals: number;
+  totalDoctors: number;
+}
+
+export interface ApiResponseAdminStatsDTO {
+  success: boolean;
+  data?: AdminStatsDTO;
+  error?: ApiError;
+}
+
+export interface DoctorRevenueSummaryDTO {
+  totalAppointments: number;
+  totalRevenue: number;
+  averageFee: number;
+}
+
+export interface ApiResponseDoctorRevenueSummaryDTO {
+  success: boolean;
+  data?: DoctorRevenueSummaryDTO;
+  error?: ApiError;
+}
+
 export interface UserSummaryDTO {
   id: string;
   username: string;

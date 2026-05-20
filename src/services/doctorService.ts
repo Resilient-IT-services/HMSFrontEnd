@@ -1,5 +1,5 @@
 import apiClient from './apiClient';
-import { ApiResponse, PageResponse, DoctorStaffResponse, DoctorAvailabilityResponse, UserSummaryDTO, DoctorSlotDTO } from '@/types/api';
+import { ApiResponse, PageResponse, DoctorStaffResponse, DoctorAvailabilityResponse, UserSummaryDTO, DoctorSlotDTO, DoctorSelectionDTO, DoctorRevenueSummaryDTO } from '@/types/api';
 
 export const doctorService = {
   async list(
@@ -26,6 +26,18 @@ export const doctorService = {
 
   async get(doctorId: string): Promise<ApiResponse<DoctorStaffResponse>> {
     const response = await apiClient.get<ApiResponse<DoctorStaffResponse>>(`/staff/doctors/${doctorId}`);
+    return response.data;
+  },
+
+  async getDoctorsSelection(): Promise<ApiResponse<DoctorSelectionDTO[]>> {
+    const response = await apiClient.get<ApiResponse<DoctorSelectionDTO[]>>('/staff/doctors/selection');
+    return response.data;
+  },
+
+  async getRevenueSummary(doctorId: string, from?: string, to?: string): Promise<ApiResponse<DoctorRevenueSummaryDTO>> {
+    const response = await apiClient.get<ApiResponse<DoctorRevenueSummaryDTO>>(`/doctors/${doctorId}/revenue-summary`, {
+      params: { from, to }
+    });
     return response.data;
   },
 

@@ -6,8 +6,10 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { patientService } from '@/services/patientService';
-import { DoctorStaffResponse, PatientResponse, SessionInfo } from '@/types/api';
+import { DoctorStaffResponse, PatientResponse, SessionInfo, DoctorSelectionDTO } from '@/types/api';
+import { PageHeading } from '@/components/ui/PageHeading';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+
 import { useDebounce } from '@/hooks/useDebounce';
 import { SessionGrid } from '@/components/reception/appointments/SessionGrid';
 import { ConfirmationPanel } from '@/components/reception/appointments/ConfirmationPanel';
@@ -53,8 +55,8 @@ export function AppointmentScheduling() {
   const preselectedPatientId = searchParams.get('patientId');
   const preselectedDoctorId = searchParams.get('doctorId');
 
-  const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
-  const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
+  const [doctors, setDoctors] = useState<DoctorSelectionDTO[]>([]);
+  const [selectedDoctor, setSelectedDoctor] = useState<DoctorSelectionDTO | null>(null);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   
   const [patientSearch, setPatientSearch] = useState('');
@@ -72,17 +74,17 @@ export function AppointmentScheduling() {
 
   const debouncedSearch = useDebounce(patientSearch, 300);
 
-  // Fetch Doctors
+  // Fetch Doctors Selection
   useEffect(() => {
     const trigger = async () => {
-      const res = await doctorService.list(0, 100);
+      const res = await doctorService.getDoctorsSelection();
       if (res.success && res.data) {
-        setDoctors(res.data.content);
+        setDoctors(res.data);
         if (preselectedDoctorId) {
-          const doc = res.data.content.find(d => d.doctorId === preselectedDoctorId || d.userId === preselectedDoctorId);
+          const doc = res.data.find(d => d.id === preselectedDoctorId);
           if (doc) setSelectedDoctor(doc);
-        } else if (res.data.content.length > 0 && !selectedDoctor) {
-          setSelectedDoctor(res.data.content[0]);
+        } else if (res.data.length > 0 && !selectedDoctor) {
+          setSelectedDoctor(res.data[0]);
         }
       }
       setLoadingDoctors(false);
@@ -108,7 +110,7 @@ export function AppointmentScheduling() {
       setFetchingAvailability(true);
       setSelectedSession(null);
       const { from } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
-      const res = await doctorService.getAvailability(selectedDoctor.doctorId, from);
+      const res = await doctorService.getAvailability(selectedDoctor.id, from);
       if (res.success && res.data) {
         let sessions = res.data.sessions;
         
@@ -184,7 +186,7 @@ export function AppointmentScheduling() {
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
       
       // Quick check for existing appointment to prevent duplicates and enable resume
-      const res = await appointmentService.list(0, 50, undefined, from, to, selectedDoctor.doctorId);
+      const res = await appointmentService.list(0, 50, undefined, from, to, selectedDoctor.id);
       if (res.success && res.data) {
         const existing = res.data.content.find(a => 
           a.patientId === selectedPatient.id && 
@@ -200,7 +202,7 @@ export function AppointmentScheduling() {
 
       const params = new URLSearchParams({
         patientId: selectedPatient.id,
-        doctorId: selectedDoctor.doctorId,
+        doctorId: selectedDoctor.id,
         appointmentTime: appointmentTime,
         sessionPeriod: getSessionPeriod(editableTime),
         notes
@@ -309,16 +311,16 @@ export function AppointmentScheduling() {
                     <select 
                       id="doctor-select"
                       className="w-full pl-3 pr-10 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none text-sm text-slate-900 font-medium"
-                      value={selectedDoctor?.doctorId || ''}
+                      value={selectedDoctor?.id || ''}
                       onChange={(e) => {
-                        const doc = doctors.find(d => d.doctorId === e.target.value);
+                        const doc = doctors.find(d => d.id === e.target.value);
                         if (doc) setSelectedDoctor(doc);
                       }}
                     >
                       <option value="" disabled>Choose doctor...</option>
                       {doctors.map(doc => (
-                        <option key={doc.doctorId} value={doc.doctorId}>
-                          {doc.fullName} ({getPrimarySpecialization(doc)})
+                        <option key={doc.id} value={doc.id}>
+                          {doc.fullName} ({doc.specialization})
                         </option>
                       ))}
                     </select>
@@ -332,7 +334,7 @@ export function AppointmentScheduling() {
               {/* Availability Slots */}
               <SessionGrid 
                 fetchingAvailability={fetchingAvailability}
-                selectedDoctor={selectedDoctor}
+                selectedDoctor={selectedDoctor as any}
                 availability={availability}
                 selectedSession={selectedSession}
                 setSelectedSession={setSelectedSession}
@@ -352,7 +354,7 @@ export function AppointmentScheduling() {
           <div className="lg:col-span-4 lg:sticky lg:top-20">
             <ConfirmationPanel 
               selectedPatient={selectedPatient}
-              selectedDoctor={selectedDoctor}
+              selectedDoctor={selectedDoctor as any}
               selectedSession={selectedSession}
               editableTime={editableTime}
               handleConfirm={handleConfirm}

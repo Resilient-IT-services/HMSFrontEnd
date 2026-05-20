@@ -31,7 +31,7 @@ export function PatientProfile({ id }: { id: string }) {
       setLoading(true);
       const [patientRes, appointmentsRes] = await Promise.all([
         patientService.get(id),
-        appointmentService.list(0, 100) // Fetch all to filter for this patient
+        appointmentService.list(0, 100, undefined, undefined, undefined, undefined, id) // Server-side filtering by patientId
       ]);
 
       if (patientRes.success && patientRes.data) {
@@ -39,7 +39,7 @@ export function PatientProfile({ id }: { id: string }) {
       }
 
       if (appointmentsRes.success && appointmentsRes.data) {
-        setAppointments(appointmentsRes.data.content.filter(a => a.patientId === id));
+        setAppointments(appointmentsRes.data.content);
       }
     } catch (error) {
       console.error('Failed to fetch patient data', error);

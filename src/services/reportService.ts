@@ -10,13 +10,15 @@ export interface ReportFilters {
   to: string;
   hospitalId?: string;
   doctorId?: string;
+  allHospitals?: boolean;
 }
 
-const buildParams = ({ type, from, to, doctorId }: ReportFilters) => ({
+const buildParams = ({ type, from, to, doctorId, allHospitals }: ReportFilters) => ({
   type,
   from,
   to,
-  ...(doctorId ? { doctorId } : {})
+  ...(doctorId ? { doctorId } : {}),
+  ...(allHospitals ? { allHospitals } : {})
 });
 
 const buildConfig = (filters: ReportFilters) => ({
