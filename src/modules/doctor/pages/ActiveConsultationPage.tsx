@@ -113,14 +113,8 @@ const MedicineSearchInput = ({
               </div>
               <div className="flex flex-col items-end shrink-0 ml-3">
                 <div className="flex items-center gap-1">
-                  <span className={`text-xs font-black ${
-                    (med.currentStock || 0) > 0 
-                      ? 'text-emerald-600' 
-                      : 'text-red-600'
-                  }`}>
-                    {med.currentStock || 0}
-                  </span>
-                  <span className="text-[8px] font-black text-slate-300 uppercase tracking-tighter">STK</span>
+
+
                 </div>
                 {med.form && <span className="text-[8px] text-slate-400 font-bold mt-0.5 uppercase">{med.form}</span>}
               </div>
@@ -321,7 +315,23 @@ export const ActiveConsultationPage = () => {
   if (!appointment) return <MainLayout title="Active Consultation">Appointment not found</MainLayout>;
 
   const isReadOnly = appointment.status === 'COMPLETED';
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
 
+    let age = today.getFullYear() - birthDate.getFullYear();
+
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+        monthDiff < 0 ||
+        (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age;
+  };
   return (
     <MainLayout title={`Consultation: ${appointment.patientName}`}>
       <div className="flex flex-col h-full">
@@ -337,7 +347,12 @@ export const ActiveConsultationPage = () => {
             <div className="flex items-center gap-3 text-slate-500 text-sm mt-2 font-medium">
               <span>{patient?.gender}</span>
               <span>•</span>
-              <span>{appointment.patientAge || '--'} Yrs</span>
+              <span>
+  {patient?.dob
+      ? calculateAge(patient.dob)
+      : '--'}{' '}
+                Yrs
+</span>
               <span>•</span>
               <span className="flex items-center gap-1 text-slate-400">
                 <span className="material-symbols-outlined text-sm">event</span>
@@ -391,12 +406,30 @@ export const ActiveConsultationPage = () => {
                       <span className="font-bold text-lg leading-none">{appointment.vitals?.heartRate || '--'} <span className="text-[10px] text-slate-400">BPM</span></span>
                     </div>
                   </div>
+
                   <div className="w-px h-8 bg-slate-100 hidden sm:block"></div>
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">Temperature</span>
                     <div className="flex items-center gap-1.5 text-blue-600">
                       <span className="material-symbols-outlined text-sm">device_thermostat</span>
                       <span className="font-bold text-lg leading-none">{appointment.vitals?.temperature || '--'} <span className="text-[10px] text-slate-400">°F</span></span>
+                    </div>
+
+                  </div>
+                  <div className="w-px h-8 bg-slate-100 hidden sm:block"></div>
+
+                  <div className="flex flex-col">
+    <span className="text-[10px] uppercase font-black text-slate-400 tracking-widest mb-1">
+    Weight
+  </span>
+
+                    <div className="flex items-center gap-1.5 text-blue-600">
+                      <span className="material-symbols-outlined text-sm">monitor_weight</span>
+
+                      <span className="font-bold text-lg leading-none">
+      {appointment.vitals?.weight || '--'}{' '}
+                        <span className="text-[10px] text-slate-400">kg</span>
+    </span>
                     </div>
                   </div>
                   <div className="w-px h-8 bg-slate-100 hidden sm:block"></div>
@@ -426,9 +459,9 @@ export const ActiveConsultationPage = () => {
                     </h3>
                   </div>
                   <textarea
-                    className="w-full min-h-[180px] p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium text-slate-700 resize-none outline-none"
+                    className="w-full min-h-[180px] p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium text-slate-700 resize-none outline-none  "
                     placeholder="Describe patient symptoms and chief complaints..."
-                    value={complaints}
+                    value={complaints || appointment.notes || '--'}
                     onChange={(e) => setComplaints(e.target.value)}
                   />
                 </div>
@@ -490,8 +523,7 @@ export const ActiveConsultationPage = () => {
                           <div className="col-span-12 sm:col-span-5">
                             <label className="sm:hidden block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Medicine Name</label>
                             <MedicineSearchInput 
-                              value={p.medicine} 
-                              inStock={p.inStock}
+                              value={p.medicine}
                               onChange={(val) => updatePrescriptionRow(p.id, 'medicine', val)}
                               onSelect={(med) => selectMedicine(p.id, med)}
                             />

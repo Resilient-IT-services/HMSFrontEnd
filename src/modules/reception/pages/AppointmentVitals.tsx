@@ -296,7 +296,7 @@ export const AppointmentVitals = () => {
 
                 {/* Chief Complaints */}
                 <div className="pt-4 border-t border-slate-50">
-                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">Patient Symptoms & Complaints</label>
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-4">Cheif Complaints</label>
                    <textarea 
                     className={`w-full p-4 sm:p-6 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-slate-900 focus:ring-4 focus:ring-orange-600/10 transition-all outline-none resize-none text-sm sm:text-base ${isReadOnly ? 'opacity-60 cursor-not-allowed' : ''}`}
                     placeholder="Document current symptoms, duration, and patient's primary concern..."
