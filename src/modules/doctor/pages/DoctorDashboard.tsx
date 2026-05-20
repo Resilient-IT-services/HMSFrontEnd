@@ -31,6 +31,7 @@ export const DoctorDashboard = () => {
   const router = useRouter();
   const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
+  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const consultationFee = useConsultationFee();
 
@@ -47,6 +48,7 @@ export const DoctorDashboard = () => {
 
       if (!response.success || !response.data) {
         setAppointments([]);
+        setTotalElements(0);
         return;
       }
 
@@ -58,6 +60,7 @@ export const DoctorDashboard = () => {
 
       const normalized = normalizeAppointmentData(filtered);
       setAppointments(normalized);
+      setTotalElements(response.data.totalElements);
       syncExpiredAppointments(filtered);
     } catch (error) {
       console.error(error);
@@ -86,13 +89,13 @@ export const DoctorDashboard = () => {
     const earnedCount = appointments.filter((appointment) => appointment.status !== 'CANCELLED' && appointment.status !== 'PAYMENT_PENDING').length;
 
     return {
-      total: appointments.length,
+      total: totalElements,
       waiting,
       active,
       completed,
       earnings: typeof consultationFee === 'number' ? earnedCount * consultationFee : 0,
     };
-  }, [appointments, consultationFee]);
+  }, [appointments, consultationFee, totalElements]);
 
   const queue = useMemo(() => {
     if (!hospitalTimezone) return [];

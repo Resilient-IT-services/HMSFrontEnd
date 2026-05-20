@@ -15,22 +15,24 @@ import dayjs from '@/lib/dayjs';
 export function TokenQueue() {
   const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
+  const [totalInQueue, setTotalInQueue] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchQueue = useCallback(async () => {
     try {
       if (!hospitalTimezone) return;
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
-      const res = await appointmentService.listSummary(0, 100, undefined, from, to);
+      const res = await appointmentService.listSummary(0, 10, undefined, from, to);
       if (res.success && res.data) {
         setAppointments(res.data.content);
+        setTotalInQueue(res.data.totalElements);
       }
     } catch (error) {
       console.error('Failed to fetch queue', error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [hospitalTimezone]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -86,7 +88,7 @@ export function TokenQueue() {
             <div className="p-4 sm:p-6 bg-white">
               <div className="flex justify-between items-center mb-4">
                 <span className="text-slate-400 font-black uppercase text-[10px]">Waiting List</span>
-                <span className="text-orange-600 font-black text-[10px] uppercase">{opdQueue.length} in queue</span>
+                <span className="text-orange-600 font-black text-[10px] uppercase">{totalInQueue} in queue</span>
               </div>
               <div className="flex gap-3 sm:gap-4 justify-between">
                 <div className="flex flex-col flex-1 items-center bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-100">

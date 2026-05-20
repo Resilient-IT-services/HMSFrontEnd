@@ -18,45 +18,46 @@ import dayjs from '@/lib/dayjs';
 
 export const AdminDashboard = () => {
   const router = useRouter();
-  const [users, setUsers] = useState<UserSummaryDTO[]>([]);
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [stats, setStats] = useState({
+    totalHospitals: 0,
+    platformUsers: 0,
+    activeNow: 0,
+    certifiedDoctors: 0
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [userRes, hospRes] = await Promise.all([
-          userService.listUsers(0, 100),
-          hospitalService.list(0, 100)
+        // We fetch counts using size=1 trick to get totalElements metadata efficiently
+        const [hospRes, usersRes, activeRes, doctorsRes] = await Promise.all([
+          hospitalService.list(0, 5), // Fetch 5 for the table
+          userService.listUsers(0, 1), // Total users count
+          userService.listUsers(0, 1, undefined, undefined, true), // Active users count
+          userService.listUsers(0, 1, undefined, 'DOCTOR') // Doctors count
         ]);
 
-        if (userRes.success) setUsers(userRes.data?.content || []);
-        if (hospRes.success) setHospitals(hospRes.data?.content || []);
+        if (hospRes.success && hospRes.data) {
+          setHospitals(hospRes.data.content || []);
+        }
+
+        setStats({
+          totalHospitals: hospRes.data?.totalElements || 0,
+          platformUsers: usersRes.data?.totalElements || 0,
+          activeNow: activeRes.data?.totalElements || 0,
+          certifiedDoctors: doctorsRes.data?.totalElements || 0
+        });
       } catch (error) {
-        console.error(error);
+        console.error('Admin Dashboard Fetch Error:', error);
       } finally {
         setLoading(false);
       }
     };
     fetchData();
   }, []);
-
-  const stats = useMemo(() => {
-    const activeNow = users.filter(u => u.active).length;
-    const doctors = users.filter(u => {
-        const roles = new Set<string>();
-        if (u.memberships) for (const m of u.memberships) m.roleAssignments?.forEach((ra: any) => roles.add(ra.roleCode));
-        return roles.has('DOCTOR');
-    }).length;
-
-    return {
-      totalHospitals: hospitals.length,
-      platformUsers: users.length,
-      activeNow,
-      certifiedDoctors: doctors
-    };
-  }, [users, hospitals]);
 
   const columns: Column<HospitalResponse>[] = [
     {

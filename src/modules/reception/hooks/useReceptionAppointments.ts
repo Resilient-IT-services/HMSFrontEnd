@@ -17,7 +17,6 @@ import dayjs from '@/lib/dayjs';
 export const useReceptionAppointments = () => {
   const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
-  const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
@@ -55,7 +54,7 @@ export const useReceptionAppointments = () => {
         ? filters.statuses.join(',') 
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
 
-      const [appRes, docRes, statsRes] = await Promise.all([
+      const [appRes, statsRes] = await Promise.all([
         appointmentService.listSummary(
           0, 100, 
           debouncedSearchTerm, 
@@ -65,15 +64,11 @@ export const useReceptionAppointments = () => {
           statusesToUse,
           filters.paymentStatuses?.join(',')
         ),
-        doctorService.list(0, 100),
         appointmentService.getStats(from, to)
       ]);
 
       if (appRes.success && appRes.data) {
         setAppointments(appRes.data.content);
-      }
-      if (docRes.success && docRes.data) {
-        setDoctors(docRes.data.content);
       }
 
       if (statsRes.success && statsRes.data) {
@@ -93,7 +88,7 @@ export const useReceptionAppointments = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [statusFilter, debouncedSearchTerm, activeFilters]);
+  }, [statusFilter, debouncedSearchTerm, activeFilters, hospitalTimezone]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -158,7 +153,6 @@ export const useReceptionAppointments = () => {
 
   return {
     appointments: filteredAppointments,
-    doctors,
     loading,
     statusFilter,
     setStatusFilter,

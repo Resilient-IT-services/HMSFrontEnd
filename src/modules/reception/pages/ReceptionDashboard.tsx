@@ -47,11 +47,11 @@ export const ReceptionDashboard = () => {
     try {
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
       const [appRes, docRes, patRes, statsRes, nurseRes] = await Promise.all([
-        appointmentService.list(0, 500, undefined, from, to),
-        doctorService.list(0, 50),
+        appointmentService.list(0, 5, undefined, from, to),
+        doctorService.list(0, 4),
         patientService.listSummary(0, 5),
         appointmentService.getStats(from, to),
-        nurseService.list(0, 100)
+        nurseService.list(0, 1)
       ]);
 
       if (appRes.success && appRes.data) {
