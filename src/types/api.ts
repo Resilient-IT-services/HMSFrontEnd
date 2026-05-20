@@ -412,6 +412,7 @@ export interface AppointmentSummaryDTO {
   patientId: string;
   patientName: string;
   patientCode: string;
+  patientGender?: Gender;
   doctorId: string;
   doctorName: string;
   doctorSpecialization: string;

@@ -86,7 +86,13 @@ export const EarningsPage = () => {
       const fromUTC = dayjs(startDate).tz(hospitalTimezone).startOf('day').toISOString();
       const toUTC = dayjs(endDate).tz(hospitalTimezone).endOf('day').toISOString();
 
-      const response = await appointmentService.list(0, 1000, undefined, fromUTC, toUTC, user.id);
+      const response = await appointmentService.list({ 
+        page: 0, 
+        size: 1000, 
+        from: fromUTC, 
+        to: toUTC, 
+        doctorId: user.id 
+      });
 
       if (!response.success || !response.data) {
         setAppointments([]);

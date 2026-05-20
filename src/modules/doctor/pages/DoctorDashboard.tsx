@@ -48,7 +48,13 @@ export const DoctorDashboard = () => {
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
       
       const [appRes, revRes] = await Promise.all([
-        appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, from, to, user.id),
+        appointmentService.list({ 
+          page: 0, 
+          size: DEFAULT_PAGE_SIZE, 
+          from, 
+          to, 
+          doctorId: user.id 
+        }),
         doctorService.getRevenueSummary(user.id, from, to)
       ]);
 

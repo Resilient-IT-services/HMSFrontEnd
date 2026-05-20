@@ -16,6 +16,8 @@ import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { Button } from '@/components/ui/Button';
 import { useDebounce } from '@/hooks/useDebounce';
 
+import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
+
 const MedicineSearchInput = ({ 
   value, 
   onChange, 
@@ -24,34 +26,46 @@ const MedicineSearchInput = ({
 }: { 
   value: string; 
   onChange: (val: string) => void;
-  onSelect: (med: MedicineResponse) => void;
+  onSelect: (med: any) => void;
   inStock?: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState(value);
-  const [results, setResults] = useState<MedicineResponse[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
   const debouncedSearch = useDebounce(searchTerm, 300);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastFetchedSearch = useRef('');
 
   useEffect(() => {
-    setSearchTerm(value);
+    if (value !== searchTerm) {
+      setSearchTerm(value);
+    }
   }, [value]);
 
   useEffect(() => {
     const fetchMedicines = async () => {
-      if (debouncedSearch.length < 2) {
+      const trimmedSearch = debouncedSearch?.trim() || '';
+      if (trimmedSearch.length < 2) {
         setResults([]);
         return;
       }
+
+      // Prevent redundant fetches if search hasn't changed
+      if (trimmedSearch === lastFetchedSearch.current) return;
+
       setLoading(true);
       try {
-        const res = await pharmacyService.listMedicines({ search: debouncedSearch, size: 5 });
+        const res = await pharmacyApi.getMedicineStock({ search: trimmedSearch, size: 5 });
         if (res.success && res.data) {
-          setResults(res.data.content);
+          lastFetchedSearch.current = trimmedSearch;
+          setResults(res.data.content || []);
+        } else {
+          setResults([]);
         }
       } catch (error) {
         console.error('Failed to fetch medicines:', error);
+        setResults([]);
       } finally {
         setLoading(false);
       }
@@ -108,13 +122,14 @@ const MedicineSearchInput = ({
               }}
             >
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{med.name}</span>
+                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{med.medicineName || med.name}</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{med.genericName || med.category}</span>
               </div>
               <div className="flex flex-col items-end shrink-0 ml-3">
                 <div className="flex items-center gap-1">
-
-
+                  <span className={`text-[10px] font-black ${(med.totalQuantity || med.quantity) > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                    Stock: {med.totalQuantity || med.quantity || 0}
+                  </span>
                 </div>
                 {med.form && <span className="text-[8px] text-slate-400 font-bold mt-0.5 uppercase">{med.form}</span>}
               </div>
@@ -222,12 +237,16 @@ export const ActiveConsultationPage = () => {
     }
   };
 
-  const selectMedicine = (id: string, med: MedicineResponse) => {
+  const selectMedicine = (id: string, med: any) => {
+    // Map either from MedicineResponse or PharmacyStockDTO
+    const medicineName = med.medicineName || med.name;
+    const currentStock = med.totalQuantity !== undefined ? med.totalQuantity : (med.currentStock || 0);
+    
     setPrescriptions(prescriptions.map(p => p.id === id ? { 
       ...p, 
-      medicine: med.name,
-      medicineId: med.id,
-      inStock: (med.currentStock || 0) > 0,
+      medicine: medicineName,
+      medicineId: med.medicineId || med.id,
+      inStock: currentStock > 0,
       composition: med.composition,
       frequency: p.frequency || '',
       instructions: p.instructions || ''
