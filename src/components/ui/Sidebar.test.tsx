@@ -89,4 +89,51 @@ describe('Sidebar', () => {
     fireEvent.click(screen.getAllByText('Logout')[0]);
     expect(authService.logout).toHaveBeenCalled();
   });
+
+  it('toggles sidebar expansion when menu button is clicked', () => {
+    const store = createMockStore({ activeRole: 'DOCTOR' });
+    render(
+      <Provider store={store}>
+        <LayoutProvider>
+          <Sidebar />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    // Initial state: collapsed (w-20)
+    const aside = screen.getByRole('complementary', { hidden: true });
+    expect(aside.className).toContain('w-20');
+
+    // Click to expand
+    const expandButton = screen.getByTitle('Expand Menu');
+    fireEvent.click(expandButton);
+    expect(aside.className).toContain('w-64');
+
+    // Click to collapse
+    const collapseButton = screen.getByTitle('Collapse Menu');
+    fireEvent.click(collapseButton);
+    expect(aside.className).toContain('w-20');
+  });
+
+  it('expands on hover and collapses on mouse leave', () => {
+    const store = createMockStore({ activeRole: 'DOCTOR' });
+    render(
+      <Provider store={store}>
+        <LayoutProvider>
+          <Sidebar />
+        </LayoutProvider>
+      </Provider>
+    );
+
+    const aside = screen.getByRole('complementary', { hidden: true });
+    expect(aside.className).toContain('w-20');
+
+    // Hover
+    fireEvent.mouseEnter(aside);
+    expect(aside.className).toContain('w-64');
+
+    // Mouse leave
+    fireEvent.mouseLeave(aside);
+    expect(aside.className).toContain('w-20');
+  });
 });
