@@ -82,8 +82,8 @@ export function AppointmentScheduling() {
   }, [hospitalTimezone]);
 
   const fetchingDoctors = useRef(false);
-  useRef<string | null | undefined>(undefined);
-// Fetch Doctors Selection
+
+  // Fetch Doctors Selection
   useEffect(() => {
     if (fetchingDoctors.current) return;
     
@@ -109,6 +109,17 @@ export function AppointmentScheduling() {
     };
     void trigger();
   }, [preselectedDoctorId, selectedDoctor]); // Added selectedDoctor check to prevent clearing manually set doctor
+
+  // Fetch Preselected Patient
+  useEffect(() => {
+    const trigger = async () => {
+      if (preselectedPatientId) {
+        const res = await patientService.get(preselectedPatientId);
+        if (res.success && res.data) setSelectedPatient(res.data);
+      }
+    };
+    void trigger();
+  }, [preselectedPatientId]);
 
   const availabilityCallRef = useRef<string>('');
 
