@@ -98,7 +98,6 @@ const UserForm: React.FC<UserFormProps> = ({ initialData, isEdit }) => {
             {logic.activeTab === 'contracts' && (
               <UserFormContractsTab 
                 formData={logic.formData} setFormData={logic.setFormData} hospitals={logic.hospitals} 
-                departments={logic.departments}
                 validationErrors={logic.validationErrors} isAddingContract={logic.isAddingContract} 
                 openAddContract={logic.openAddContract} openEditContract={logic.openEditContract}
                 setIsAddingContract={logic.setIsAddingContract}

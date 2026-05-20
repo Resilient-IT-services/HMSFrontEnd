@@ -8,7 +8,6 @@ interface UserFormContractsTabProps {
   formData: UserRequestDTO;
   setFormData: (data: UserRequestDTO) => void;
   hospitals: HospitalResponse[];
-  departments: string[];
   validationErrors: Record<string, string>;
   isAddingContract: boolean;
   openAddContract: () => void;
@@ -25,7 +24,6 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
   formData,
   setFormData,
   hospitals,
-  departments,
   validationErrors,
   isAddingContract,
   openAddContract,
@@ -44,7 +42,6 @@ export const UserFormContractsTab: React.FC<UserFormContractsTabProps> = ({
           newContract={newContract}
           setNewContract={setNewContract}
           hospitals={hospitals}
-          departments={departments}
           editingContractIndex={editingContractIndex}
           validationErrors={validationErrors}
           onCancel={() => setIsAddingContract(false)}
