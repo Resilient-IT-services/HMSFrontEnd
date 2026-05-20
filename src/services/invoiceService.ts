@@ -15,5 +15,12 @@ export const invoiceService = {
   async recordPayment(request: RecordPaymentRequest): Promise<ApiResponse<PaymentDTO>> {
     const response = await apiClient.post<ApiResponse<PaymentDTO>>('/finance/payments', request);
     return response.data;
+  },
+
+  async exportPdf(invoiceId: string): Promise<Blob> {
+    const response = await apiClient.get(`/finance/invoices/${invoiceId}/export`, {
+      responseType: 'blob'
+    });
+    return response.data;
   }
 };

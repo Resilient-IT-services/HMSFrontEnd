@@ -3,10 +3,12 @@
 import React, { useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
-import { hydrateAuth, setUser, setLoading, setActiveRole, setSuperMode, setCurrentHospitalId } from '@/state/authSlice';
+import { hydrateAuth, setUser, setLoading, setActiveRole, setSuperMode, setCurrentHospitalId, setHospitalTimezone } from '@/state/authSlice';
 import { authService } from '@/services/authService';
+import { hospitalService } from '@/services/hospitalService';
 import { usePathname, useRouter } from 'next/navigation';
 import { Role } from '@/types/api';
+import { setDefaultTimezone } from '@/lib/dayjs';
 
 const PUBLIC_ROUTES = new Set(['/login', '/privacy', '/terms', '/forgot-password']);
 
@@ -14,8 +16,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, isAuthenticated, isLoading, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
+  const { user, isAuthenticated, isLoading, isSuperMode, activeRole, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const checkInProgress = useRef(false);
+
+  // Apply global timezone if hospital is selected
+  useEffect(() => {
+    if (hospitalTimezone) {
+      setDefaultTimezone(hospitalTimezone);
+    }
+  }, [hospitalTimezone]);
 
   // 1. Initial hydration on mount
   useEffect(() => {
@@ -64,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // On private routes, always attempt to check auth
     checkAuth();
-  }, [dispatch, isAuthenticated, pathname]);
+  }, [dispatch, isAuthenticated, pathname, isLoading]);
 
   const handleUnauthenticated = useCallback(() => {
     if (!PUBLIC_ROUTES.has(pathname)) {
@@ -88,7 +97,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   }, [dispatch, isSuperMode, pathname, router]);
 
-  const handleHospitalSelection = useCallback((roles: string[]) => {
+  const fetchAndSetHospitalTimezone = useCallback(async (hospitalId: string) => {
+    try {
+      const res = await hospitalService.getById(hospitalId);
+      if (res.success && res.data) {
+        dispatch(setHospitalTimezone(res.data.timezone));
+      }
+    } catch (err) {
+      console.error('Failed to fetch hospital timezone:', err);
+    }
+  }, [dispatch]);
+
+  const handleHospitalSelection = useCallback(async (roles: string[]) => {
     if (user?.memberships && user.memberships.length > 1) {
       if (pathname !== '/select-hospital') {
         router.push('/select-hospital');
@@ -97,9 +117,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const targetHospitalId = user.memberships[0].hospitalId;
 
       if (user.currentHospitalId === targetHospitalId) {
+        if (!hospitalTimezone) {
+          await fetchAndSetHospitalTimezone(targetHospitalId);
+        }
         return;
       }
 
+      await fetchAndSetHospitalTimezone(targetHospitalId);
       dispatch(setCurrentHospitalId(targetHospitalId));
 
     } else if (roles.includes('SUPER_ADMIN')) {
@@ -108,7 +132,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } else if (pathname !== '/unauthorized') {
       router.push('/unauthorized');
     }
-  }, [dispatch, pathname, router, user]);
+  }, [dispatch, pathname, router, user, hospitalTimezone, fetchAndSetHospitalTimezone]);
+
+  // Ensure timezone is fetched if currentHospitalId exists but hospitalTimezone is missing (e.g. after refresh)
+  useEffect(() => {
+    if (isAuthenticated && user?.currentHospitalId && !hospitalTimezone && !isSuperMode) {
+      void fetchAndSetHospitalTimezone(user.currentHospitalId);
+    }
+  }, [isAuthenticated, user?.currentHospitalId, hospitalTimezone, isSuperMode, fetchAndSetHospitalTimezone]);
 
   const handleRoleSelection = useCallback((roles: string[]) => {
     if (roles.length > 1) {

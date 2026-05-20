@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
@@ -12,18 +12,18 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { SessionGrid } from '@/components/reception/appointments/SessionGrid';
 import { ConfirmationPanel } from '@/components/reception/appointments/ConfirmationPanel';
 import { getPrimarySpecialization } from '@/utils/staffDisplay';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 
-const getLocalDateString = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
+const getLocalDateString = (date: Date | dayjs.Dayjs, tz?: string | null) => {
+  return dayjs(date).tz(tz || undefined).format('YYYY-MM-DD');
 };
 
-const calculateSuggestedTime = (session: SessionInfo, date: string) => {
-  const now = new Date();
-  const todayStr = getLocalDateString(now);
+const calculateSuggestedTime = (session: SessionInfo, date: string, tz?: string | null) => {
+  const now = dayjs().tz(tz || undefined);
+  const todayStr = getLocalDateString(now, tz);
   
   const baseTime = session.nextSuggestedTime || session.startTime;
   
@@ -32,7 +32,7 @@ const calculateSuggestedTime = (session: SessionInfo, date: string) => {
   const [hours, minutes] = baseTime.split(':').map(Number);
   const baseTotalMinutes = hours * 60 + minutes;
   
-  const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+  const currentTotalMinutes = now.hour() * 60 + now.minute();
   
   // Use a 10-minute buffer to ensure the time is in the future even with minor delays
   if (currentTotalMinutes + 10 > baseTotalMinutes) {
@@ -48,6 +48,8 @@ const calculateSuggestedTime = (session: SessionInfo, date: string) => {
 export function AppointmentScheduling() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
+  
   const preselectedPatientId = searchParams.get('patientId');
   const preselectedDoctorId = searchParams.get('doctorId');
 
@@ -60,7 +62,7 @@ export function AppointmentScheduling() {
   const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
   
   const [notes, setNotes] = useState('');
-  const [selectedDate, setSelectedDate] = useState(getLocalDateString(new Date()));
+  const [selectedDate, setSelectedDate] = useState(getLocalDateString(new Date(), hospitalTimezone));
   const [availability, setAvailability] = useState<SessionInfo[]>([]);
   const [selectedSession, setSelectedSession] = useState<SessionInfo | null>(null);
   const [editableTime, setEditableTime] = useState<string>('');
@@ -79,7 +81,7 @@ export function AppointmentScheduling() {
         if (preselectedDoctorId) {
           const doc = res.data.content.find(d => d.doctorId === preselectedDoctorId || d.userId === preselectedDoctorId);
           if (doc) setSelectedDoctor(doc);
-        } else if (res.data.content.length > 0) {
+        } else if (res.data.content.length > 0 && !selectedDoctor) {
           setSelectedDoctor(res.data.content[0]);
         }
       }
@@ -102,20 +104,20 @@ export function AppointmentScheduling() {
   // Fetch Availability
   useEffect(() => {
     const trigger = async () => {
-      if (!selectedDoctor) return;
+      if (!selectedDoctor || !hospitalTimezone) return;
       setFetchingAvailability(true);
       setSelectedSession(null);
-      const searchDate = getLocalStartOfDayISO(selectedDate);
-      const res = await doctorService.getAvailability(selectedDoctor.doctorId, searchDate);
+      const { from } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
+      const res = await doctorService.getAvailability(selectedDoctor.doctorId, from);
       if (res.success && res.data) {
         let sessions = res.data.sessions;
         
         // Filter out past sessions
-        const now = new Date();
-        const todayStr = getLocalDateString(now);
+        const now = dayjs().tz(hospitalTimezone);
+        const todayStr = getLocalDateString(now, hospitalTimezone);
         
         if (selectedDate === todayStr) {
-          const currentHHmm = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+          const currentHHmm = now.format('HH:mm');
           sessions = sessions.filter(s => s.endTime > currentHHmm);
         } else if (selectedDate < todayStr) {
           sessions = [];
@@ -126,19 +128,19 @@ export function AppointmentScheduling() {
       setFetchingAvailability(false);
     };
     void trigger();
-  }, [selectedDoctor, selectedDate]);
+  }, [selectedDoctor, selectedDate, hospitalTimezone]);
 
   // Handle Suggested Time
   useEffect(() => {
     const trigger = async () => {
       if (selectedSession) {
-        setEditableTime(calculateSuggestedTime(selectedSession, selectedDate));
+        setEditableTime(calculateSuggestedTime(selectedSession, selectedDate, hospitalTimezone));
       } else {
         setEditableTime('');
       }
     };
     void trigger();
-  }, [selectedSession, selectedDate]);
+  }, [selectedSession, selectedDate, hospitalTimezone]);
 
   // Patient Search
   useEffect(() => {
@@ -152,20 +154,19 @@ export function AppointmentScheduling() {
   }, [debouncedSearch]);
 
   const handleConfirm = async () => {
-    if (!selectedPatient || !selectedDoctor || !selectedSession || !editableTime) {
+    if (!selectedPatient || !selectedDoctor || !selectedSession || !editableTime || !hospitalTimezone) {
       triggerGlobalToast('Please complete all selections', 'error');
       return;
     }
 
     // Double check time is in the future if it's today
-    const now = new Date();
-    const todayStr = getLocalDateString(now);
+    const now = dayjs().tz(hospitalTimezone);
+    const todayStr = getLocalDateString(now, hospitalTimezone);
     if (selectedDate === todayStr) {
       const [h, m] = editableTime.split(':').map(Number);
-      const chosenTotalMinutes = h * 60 + m;
-      const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+      const chosen = now.hour(h).minute(m).second(0).millisecond(0);
       
-      if (chosenTotalMinutes <= currentTotalMinutes) {
+      if (!chosen.isAfter(now)) {
         triggerGlobalToast('Please select a time in the future', 'error');
         return;
       }
@@ -179,15 +180,15 @@ export function AppointmentScheduling() {
 
     setSubmitting(true);
     try {
-      const appointmentTime = `${selectedDate}T${editableTime}:00`;
-      const searchDate = getLocalStartOfDayISO(selectedDate);
+      const appointmentTime = dayjs(`${selectedDate}T${editableTime}`).tz(hospitalTimezone, true).toISOString();
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
       
       // Quick check for existing appointment to prevent duplicates and enable resume
-      const res = await appointmentService.list(0, 50, undefined, searchDate, selectedDoctor.doctorId);
+      const res = await appointmentService.list(0, 50, undefined, from, to, selectedDoctor.doctorId);
       if (res.success && res.data) {
         const existing = res.data.content.find(a => 
           a.patientId === selectedPatient.id && 
-          a.appointmentTime.startsWith(appointmentTime) &&
+          a.appointmentTime === appointmentTime &&
           a.status !== 'CANCELLED'
         );
         if (existing) {
@@ -214,18 +215,17 @@ export function AppointmentScheduling() {
 
   const dateOptions = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const iso = getLocalDateString(d);
+      const d = dayjs().tz(hospitalTimezone || undefined).add(i, 'day');
+      const iso = getLocalDateString(d, hospitalTimezone);
       let label;
 
       if (i === 0) label = 'Today';
       else if (i === 1) label = 'Tomorrow';
-      else label = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+      else label = d.format('ddd, MMM D');
 
       return { iso, label, active: iso === selectedDate };
     });
-  }, [selectedDate]);
+  }, [selectedDate, hospitalTimezone]);
 
   return (
     <MainLayout title="Fast-Track Appointment" hideTitle>
@@ -243,7 +243,7 @@ export function AppointmentScheduling() {
           </div>
           <div className="flex items-center gap-2 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-sm self-start sm:self-auto">
             <span className="material-symbols-outlined text-slate-400 text-sm">event</span>
-            <span className="font-bold text-slate-700 text-[10px] sm:text-xs">Today, {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            <span className="font-bold text-slate-700 text-[10px] sm:text-xs">Today, {dayjs().tz(hospitalTimezone || undefined).format('MMM D')}</span>
           </div>
         </div>
 

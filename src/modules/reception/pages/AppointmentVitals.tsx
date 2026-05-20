@@ -313,7 +313,7 @@ export const AppointmentVitals = () => {
             <div className="flex justify-center sm:justify-end pb-8">
               {isReadOnly ? (
                 <Button
-                  variant="slate"
+                  variant="secondary"
                   icon="close"
                   size="xl"
                   onClick={() => router.push('/reception/appointments')}

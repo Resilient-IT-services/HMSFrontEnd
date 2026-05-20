@@ -7,11 +7,15 @@ import { AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@
 import { sortByToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
 
 export const useReceptionAppointments = () => {
+  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,9 +44,12 @@ export const useReceptionAppointments = () => {
   const fetchData = useCallback(async (isBackground = false, filters = activeFilters) => {
     if (!isBackground) setLoading(true);
     try {
-      const today = getLocalStartOfDayISO();
+      if (!hospitalTimezone) return;
+
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
       
-      const dateToUse = (statusFilter === 'UPCOMING' ? undefined : today);
+      const fromParam = (statusFilter === 'UPCOMING' ? undefined : from);
+      const toParam = (statusFilter === 'UPCOMING' ? undefined : to);
       
       const statusesToUse = filters.statuses && filters.statuses.length > 0 
         ? filters.statuses.join(',') 
@@ -52,13 +59,14 @@ export const useReceptionAppointments = () => {
         appointmentService.listSummary(
           0, 100, 
           debouncedSearchTerm, 
-          dateToUse,
+          fromParam,
+          toParam,
           undefined,
           statusesToUse,
           filters.paymentStatuses?.join(',')
         ),
         doctorService.list(0, 100),
-        appointmentService.getStats(today)
+        appointmentService.getStats(from, to)
       ]);
 
       if (appRes.success && appRes.data) {
@@ -125,12 +133,14 @@ export const useReceptionAppointments = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    const today = getLocalStartOfDayISO().split('T')[0];
+    if (!hospitalTimezone) return [];
+    
+    const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
     
     const base = appointments.filter(app => {
-      const appDate = app.appointmentTime.split('T')[0];
-      const isToday = appDate === today;
-      const isUpcoming = appDate > today;
+      const appHospitalDate = dayjs(app.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
+      const isToday = appHospitalDate === hospitalToday;
+      const isUpcoming = appHospitalDate > hospitalToday;
 
       if (statusFilter === 'UPCOMING') {
         if (!isUpcoming) return false;
@@ -144,7 +154,7 @@ export const useReceptionAppointments = () => {
     });
 
     return sortByToken(base);
-  }, [appointments, statusFilter, activeFilters]);
+  }, [appointments, statusFilter, activeFilters, hospitalTimezone]);
 
   return {
     appointments: filteredAppointments,

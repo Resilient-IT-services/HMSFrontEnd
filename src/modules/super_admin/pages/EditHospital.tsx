@@ -25,8 +25,19 @@ export function EditHospital({ id }: { id: string }) {
     state: '',
     pincode: '',
     status: 'ACTIVE',
-    departments: []
+    departments: [],
+    timezone: 'Asia/Kolkata'
   });
+
+  const commonTimezones = [
+    'Asia/Kolkata',
+    'UTC',
+    'America/New_York',
+    'Europe/London',
+    'Asia/Dubai',
+    'Africa/Nairobi',
+    'Australia/Sydney'
+  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -194,15 +205,18 @@ export function EditHospital({ id }: { id: string }) {
                       {errors.registrationNo && <p className="text-red-500 text-xs mt-1">{errors.registrationNo}</p>}
                     </div>
                     <div className="col-span-2">
-                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">GSTIN</label>
-                      <input 
-                        className={`form-input font-body-md ${errors.gstin ? 'border-red-500' : ''}`}
-                        type="text" 
-                        placeholder="22AAAAA0000A1Z5"
-                        value={formData.gstin}
-                        onChange={(e) => setFormData({ ...formData, gstin: e.target.value.toUpperCase() })}
-                      />
-                      {errors.gstin && <p className="text-red-500 text-xs mt-1">{errors.gstin}</p>}
+                      <label className="font-label-md text-[var(--on-surface-variant)] mb-2 block">Facility Timezone *</label>
+                      <select 
+                        className="form-input font-body-md"
+                        value={formData.timezone}
+                        onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                        required
+                      >
+                        {commonTimezones.map(tz => (
+                          <option key={tz} value={tz}>{tz}</option>
+                        ))}
+                      </select>
+                      <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-bold italic">Critical for accurate scheduling and reporting boundaries.</p>
                     </div>
                   </div>
                 </div>

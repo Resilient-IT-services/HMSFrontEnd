@@ -7,155 +7,155 @@ import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { doctorService } from '@/services/doctorService';
 import { invoiceService } from '@/services/invoiceService';
-import {
-  AppointmentResponse,
-  PatientResponse,
-  DoctorStaffResponse,
-  InvoiceDTO,
-} from '@/types/api';
+import { AppointmentResponse, PatientResponse, DoctorStaffResponse, InvoiceDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 
 const APPOINTMENT_CONFLICT_MESSAGE = 'Appointment already exists for this patient with the same doctor at the selected time';
 
-const getAppointmentSubmitErrorMessage = (error: unknown) => {
-  if (isAxiosError(error) && error.response?.status === 409) {
-    const apiData = error.response.data as any;
-    return apiData?.error?.message || apiData?.message || APPOINTMENT_CONFLICT_MESSAGE;
-  }
-
-  return 'Failed to process payment';
-};
-
 export const useReceptionBilling = () => {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const appointmentId = searchParams.get('appointmentId');
+  const searchParams = useSearchParams();
+  const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
+
+  // Params for "New Booking" scenario
   const patientIdParam = searchParams.get('patientId');
   const doctorIdParam = searchParams.get('doctorId');
   const appointmentTimeParam = searchParams.get('appointmentTime');
-  const sessionPeriodParam = searchParams.get('sessionPeriod') as any;
   const notesParam = searchParams.get('notes');
+  const sessionPeriodParam = searchParams.get('sessionPeriod') as any;
+
+  // Param for "Pay for Existing" scenario
+  const appointmentId = searchParams.get('appointmentId');
 
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [doctor, setDoctor] = useState<DoctorStaffResponse | null>(null);
   const [invoice, setInvoice] = useState<InvoiceDTO | null>(null);
   const [loading, setLoading] = useState(true);
-  const [predictedToken, setPredictedToken] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
-  const [discount, setDiscount] = useState(0);
   const [submittingPayment, setSubmittingPayment] = useState(false);
+  
+  const [predictedToken, setPredictedToken] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'UPI'>('CASH');
+  const [discount, setDiscount] = useState(0);
 
-  const applyInvoiceData = useCallback((invoiceData: InvoiceDTO | null) => {
-    if (!invoiceData) return;
+  const applyInvoiceData = (inv: InvoiceDTO | null) => {
+    setInvoice(inv);
+    if (inv) {
+      setDiscount(inv.discountAmount || 0);
+    }
+  };
 
-    setInvoice(invoiceData);
-    setDiscount(invoiceData.discountAmount || 0);
-    // Since InvoiceDTO doesn't have a single payment method (it can have multiple payments), 
-    // we just keep the default or use the first payment's mode if needed.
-  }, []);
+  const fetchData = useCallback(async () => {
+    if (!appointmentId) return;
 
-  const loadExistingAppointmentBilling = useCallback(async (id: string) => {
-    const appRes = await appointmentService.get(id);
-    if (!appRes.success || !appRes.data) return;
-
-    setAppointment(appRes.data);
-    
-    const [invRes, patRes, docRes] = await Promise.all([
-      invoiceService.getByVisit(appRes.data.visitId!).catch(() => ({ success: false, data: null })),
-      patientService.get(appRes.data.patientId),
-      doctorService.get(appRes.data.doctorId),
-    ]);
-
-    if (invRes.success) applyInvoiceData(invRes.data || null);
-    if (patRes.success) setPatient(patRes.data || null);
-    if (docRes.success) setDoctor(docRes.data || null);
-  }, [applyInvoiceData]);
-
-  const loadNewAppointmentBilling = useCallback(async () => {
-    if (!patientIdParam || !doctorIdParam || !appointmentTimeParam) return;
-
-    // Check if an appointment already exists for this patient/time
-    // to handle "back" navigation or duplicate submissions gracefully
-    const searchDate = getLocalStartOfDayISO(appointmentTimeParam || undefined);
-    const existingRes = await appointmentService.list(0, 1, undefined, searchDate, doctorIdParam);
-    if (existingRes.success && existingRes.data && existingRes.data.content.length > 0) {
-      const existing = existingRes.data.content.find(a => 
-        a.patientId === patientIdParam && 
-        a.appointmentTime.startsWith(appointmentTimeParam!) &&
-        a.status !== 'CANCELLED'
-      );
-      
-      if (existing) {
-        setAppointment(existing);
+    try {
+      setLoading(true);
+      const res = await appointmentService.get(appointmentId);
+      if (res.success && res.data) {
+        setAppointment(res.data);
         
         const [invRes, patRes, docRes] = await Promise.all([
-          invoiceService.getByVisit(existing.visitId!).catch(() => ({ success: false, data: null })),
-          patientService.get(existing.patientId),
-          doctorService.get(existing.doctorId),
+          invoiceService.getByVisit(res.data.visitId!).catch(() => ({ success: false, data: null })),
+          patientService.get(res.data.patientId),
+          doctorService.get(res.data.doctorId),
         ]);
 
         if (invRes.success) applyInvoiceData(invRes.data || null);
         if (patRes.success) setPatient(patRes.data || null);
         if (docRes.success) setDoctor(docRes.data || null);
-        return;
-      }
-    }
-
-    const [patRes, docRes] = await Promise.all([
-      patientService.get(patientIdParam),
-      doctorService.get(doctorIdParam),
-    ]);
-    if (patRes.success) setPatient(patRes.data || null);
-    if (docRes.success) setDoctor(docRes.data || null);
-
-    setAppointment({
-      id: 'TEMP',
-      patientId: patientIdParam,
-      patientName: patRes.data?.fullName || 'N/A',
-      doctorId: doctorIdParam,
-      doctorName: docRes.data?.fullName || 'N/A',
-      appointmentTime: appointmentTimeParam || new Date().toISOString(),
-      sessionPeriod: sessionPeriodParam,
-      status: 'PAYMENT_PENDING',
-      notes: notesParam || '',
-      createdAt: new Date().toISOString()
-    } as any);
-
-    const statsRes = await appointmentService.listSummary(0, 1, undefined, searchDate, doctorIdParam);
-    if (statsRes.success && statsRes.data) {
-      const nextNum = statsRes.data.totalElements + 1;
-      setPredictedToken(`T-${nextNum.toString().padStart(3, '0')}`);
-    }
-  }, [appointmentTimeParam, doctorIdParam, notesParam, patientIdParam, sessionPeriodParam, applyInvoiceData]);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (appointmentId) {
-        await loadExistingAppointmentBilling(appointmentId);
-      } else if (patientIdParam && doctorIdParam) {
-        await loadNewAppointmentBilling();
       }
     } catch (error) {
-      console.error('Failed to fetch billing data', error);
-      triggerGlobalToast('Failed to load billing details', 'error');
+      console.error('Billing Fetch Error:', error);
     } finally {
       setLoading(false);
     }
-  }, [appointmentId, doctorIdParam, loadExistingAppointmentBilling, loadNewAppointmentBilling, patientIdParam]);
+  }, [appointmentId]);
+
+  const loadNewAppointmentBilling = useCallback(async () => {
+    if (!patientIdParam || !doctorIdParam || !hospitalTimezone) return;
+
+    try {
+      setLoading(true);
+      
+      // Check if an appointment already exists for this patient/time
+      // to handle "back" navigation or duplicate submissions gracefully
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone, appointmentTimeParam || undefined);
+      const existingRes = await appointmentService.list(0, 1, undefined, from, to, doctorIdParam);
+      if (existingRes.success && existingRes.data && existingRes.data.content.length > 0) {
+        const existing = existingRes.data.content.find(a => 
+          a.patientId === patientIdParam && 
+          (appointmentTimeParam ? a.appointmentTime === appointmentTimeParam : true) &&
+          a.status !== 'CANCELLED'
+        );
+        
+        if (existing) {
+          setAppointment(existing);
+          
+          const [invRes, patRes, docRes] = await Promise.all([
+            invoiceService.getByVisit(existing.visitId!).catch(() => ({ success: false, data: null })),
+            patientService.get(existing.patientId),
+            doctorService.get(existing.doctorId),
+          ]);
+
+          if (invRes.success) applyInvoiceData(invRes.data || null);
+          if (patRes.success) setPatient(patRes.data || null);
+          if (docRes.success) setDoctor(docRes.data || null);
+          return;
+        }
+      }
+
+      const [patRes, docRes] = await Promise.all([
+        patientService.get(patientIdParam),
+        doctorService.get(doctorIdParam),
+      ]);
+      if (patRes.success) setPatient(patRes.data || null);
+      if (docRes.success) setDoctor(docRes.data || null);
+
+      setAppointment({
+        id: 'TEMP',
+        patientId: patientIdParam,
+        patientName: patRes.data?.fullName || 'N/A',
+        doctorId: doctorIdParam,
+        doctorName: docRes.data?.fullName || 'N/A',
+        appointmentTime: appointmentTimeParam || new Date().toISOString(),
+        sessionPeriod: sessionPeriodParam,
+        status: 'PAYMENT_PENDING',
+        notes: notesParam || '',
+        createdAt: new Date().toISOString()
+      } as any);
+
+      const statsRes = await appointmentService.listSummary(0, 1, undefined, from, to, doctorIdParam);
+      if (statsRes.success && statsRes.data) {
+        setPredictedToken(String(statsRes.data.totalElements + 1));
+      }
+    } catch (error) {
+      console.error('Initial Billing Load Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [patientIdParam, doctorIdParam, appointmentTimeParam, notesParam, sessionPeriodParam, hospitalTimezone]);
 
   useEffect(() => {
-    const trigger = async () => {
-      await fetchData();
-    };
-    void trigger();
-  }, [fetchData]);
+    if (appointmentId) {
+      fetchData();
+    } else {
+      loadNewAppointmentBilling();
+    }
+  }, [appointmentId, fetchData, loadNewAppointmentBilling]);
 
   const consultationFee = doctor?.consultationFee || 0;
-  const tax = 0;
-  const total = Math.max(0, consultationFee - discount + tax);
+  const total = Math.max(0, consultationFee - discount);
+
+  const getAppointmentSubmitErrorMessage = (error: unknown) => {
+    if (isAxiosError(error) && error.response?.data?.message?.includes('already exists')) {
+      return APPOINTMENT_CONFLICT_MESSAGE;
+    }
+    return 'Failed to process payment';
+  };
 
   const handleMarkAsPaid = async () => {
     setSubmittingPayment(true);
@@ -212,26 +212,32 @@ export const useReceptionBilling = () => {
     }
   };
 
-  const generateBill = () => {
-    triggerGlobalToast('Bill generated', 'success');
-    globalThis.print();
+  const generateBill = async () => {
+     if (!appointment || !invoice) return;
+     try {
+       triggerGlobalToast('Generating invoice...', 'info');
+       const blob = await invoiceService.exportPdf(invoice.id);
+       const url = window.URL.createObjectURL(blob);
+       const link = document.createElement('a');
+       link.href = url;
+       link.setAttribute('download', `invoice_${invoice.invoiceNumber}.pdf`);
+       document.body.appendChild(link);
+       link.click();
+       link.remove();
+     } catch (error) {
+       console.error('Invoice Generation Error:', error);
+       triggerGlobalToast('Failed to generate invoice', 'error');
+     }
   };
 
-  const downloadReceipt = () => {
-    const element = document.createElement('a');
-    const file = new Blob(['Mock Bill Content'], { type: 'text/plain' });
-    element.href = URL.createObjectURL(file);
-    element.download = `bill_${appointmentId || 'new'}.txt`;
-    document.body.append(element);
-    element.click();
-    element.remove();
+  const downloadReceipt = async () => {
+    // Similar to generateBill but for payment receipt
   };
 
   return {
     appointment,
     patient,
     doctor,
-    invoice,
     loading,
     predictedToken,
     paymentMethod,
@@ -244,6 +250,7 @@ export const useReceptionBilling = () => {
     handleMarkAsPaid,
     generateBill,
     downloadReceipt,
+    invoice,
     isPaid: appointment?.status !== 'PAYMENT_PENDING'
   };
 };

@@ -22,27 +22,28 @@ import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { cn } from '@/lib/cn';
 import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 import { useConsultationFee } from '@/hooks/useConsultationFee';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import { getLocalStartOfDayISO, getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 export const DoctorDashboard = () => {
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const consultationFee = useConsultationFee();
 
   const fetchData = useCallback(async (isBackground = false) => {
-    if (!user) {
+    if (!user || !hospitalTimezone) {
       setLoading(false);
       return;
     }
 
     try {
       if (!isBackground) setLoading(true);
-      const today = getLocalStartOfDayISO();
-      const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, today, user.id);
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
+      const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, from, to, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -63,7 +64,7 @@ export const DoctorDashboard = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id, user?.fullName]);
+  }, [user?.id, user?.fullName, hospitalTimezone]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -94,15 +95,16 @@ export const DoctorDashboard = () => {
   }, [appointments, consultationFee]);
 
   const queue = useMemo(() => {
-    const today = getLocalStartOfDayISO().split('T')[0];
+    if (!hospitalTimezone) return [];
+    const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
     const base = appointments.filter(
       (appointment) => 
-        appointment.appointmentTime.startsWith(today) &&
+        dayjs(appointment.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD') === hospitalToday &&
         appointment.status !== 'COMPLETED' && 
         appointment.status !== 'CANCELLED'
     );
     return sortByToken(base);
-  }, [appointments]);
+  }, [appointments, hospitalTimezone]);
 
   const handleStartConsultation = async (appointmentId: string) => {
     try {

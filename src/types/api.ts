@@ -321,7 +321,6 @@ export interface PatientDashboardStatsDTO {
 // Hospital types
 export interface HospitalSettings {
   configurations?: Record<string, unknown>;
-  timezone?: string;
   currency?: string;
   opdEnabled?: boolean;
   pharmacyEnabled?: boolean;
@@ -341,6 +340,7 @@ export interface HospitalResponse {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'ONBOARDING';
   settings?: HospitalSettings;
   departments?: string[];
+  timezone: string;
   createdAt: string;
 }
 
@@ -357,6 +357,7 @@ export interface CreateHospitalRequest {
   status?: string;
   settings?: HospitalSettings;
   departments?: string[];
+  timezone: string;
 }
 
 // Appointment types

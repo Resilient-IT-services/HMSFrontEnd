@@ -301,7 +301,7 @@ export const BillingPage = () => {
                 )}
                 {isReadOnly && (
                    <Button 
-                    variant="slate"
+                    variant="secondary"
                     size="lg" 
                     icon="close" 
                     onClick={() => router.push('/reception/appointments')}
@@ -321,7 +321,6 @@ export const BillingPage = () => {
         isOpen={showSuccessModal} 
         onClose={() => setShowSuccessModal(false)}
         title="Payment Confirmed"
-        className="max-w-md"
       >
         <div className="p-8 text-center">
           <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">

@@ -9,6 +9,7 @@ import { RootState } from '@/state/store';
 import { useDebounce } from '@/hooks/useDebounce';
 import { PatientResponse, AppointmentResponse, PrescriptionResponse, AppointmentSummaryDTO, PatientSummaryDTO } from '@/types/api';
 import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
+import dayjs from '@/lib/dayjs';
 
 export const useMedicalHistory = () => {
   const searchParams = useSearchParams();
@@ -88,7 +89,7 @@ export const useMedicalHistory = () => {
         );
 
         const sortedVisits = myVisits.toSorted(
-          (a, b) => new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime()
+          (a, b) => dayjs(b.appointmentTime).valueOf() - dayjs(a.appointmentTime).valueOf()
         );
         setPatientVisits(sortedVisits as any);
         

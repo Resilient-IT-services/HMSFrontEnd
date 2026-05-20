@@ -6,16 +6,16 @@ export type ReportRow = Record<string, unknown>;
 
 export interface ReportFilters {
   type: ReportType;
-  startDate: string;
-  endDate: string;
+  from: string;
+  to: string;
   hospitalId?: string;
   doctorId?: string;
 }
 
-const buildParams = ({ type, startDate, endDate, doctorId }: ReportFilters) => ({
+const buildParams = ({ type, from, to, doctorId }: ReportFilters) => ({
   type,
-  startDate,
-  endDate,
+  from,
+  to,
   ...(doctorId ? { doctorId } : {})
 });
 

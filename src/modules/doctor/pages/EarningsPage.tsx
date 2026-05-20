@@ -17,9 +17,10 @@ import { Pagination } from '@/components/ui/Pagination';
 import { EarningsVisitHistory } from '../components/Earnings/EarningsVisitHistory';
 import { useConsultationFee } from '@/hooks/useConsultationFee';
 import { APPOINTMENT_STATUS_METADATA, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import dayjs from '@/lib/dayjs';
 
 export const EarningsPage = () => {
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const consultationFee = useConsultationFee();
@@ -28,27 +29,26 @@ export const EarningsPage = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  const today = useMemo(() => {
-    const now = new Date();
-    const offset = now.getTimezoneOffset();
-    const localDate = new Date(now.getTime() - (offset * 60 * 1000));
-    return localDate.toISOString().split('T')[0];
-  }, []);
+  const hospitalToday = useMemo(() => {
+    if (!hospitalTimezone) return new Date().toISOString().split('T')[0];
+    return dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
+  }, [hospitalTimezone]);
 
   const lastMonthStr = useMemo(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() - 1);
-    const offset = d.getTimezoneOffset();
-    const localDate = new Date(d.getTime() - (offset * 60 * 1000));
-    return localDate.toISOString().split('T')[0];
-  }, []);
+    if (!hospitalTimezone) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - 1);
+      return d.toISOString().split('T')[0];
+    }
+    return dayjs().tz(hospitalTimezone).subtract(1, 'month').format('YYYY-MM-DD');
+  }, [hospitalTimezone]);
 
   const [startDate, setStartDate] = useState(lastMonthStr);
-  const [endDate, setEndDate] = useState(today);
+  const [endDate, setEndDate] = useState(hospitalToday);
 
   const handleStartDateChange = (val: string) => {
     if (!val) return;
-    if (val > today) {
+    if (val > hospitalToday) {
       triggerGlobalToast('Start date cannot be in the future', 'warning');
       return;
     }
@@ -62,7 +62,7 @@ export const EarningsPage = () => {
 
   const handleEndDateChange = (val: string) => {
     if (!val) return;
-    if (val > today) {
+    if (val > hospitalToday) {
       triggerGlobalToast('End date cannot be in the future', 'warning');
       return;
     }
@@ -75,11 +75,18 @@ export const EarningsPage = () => {
   };
 
   const fetchData = useCallback(async () => {
-    if (!user) return;
+    if (!user || !hospitalTimezone) return;
 
     try {
       setLoading(true);
-      const response = await appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, undefined, user.id);
+      // We want to fetch a broad range or just enough for the current filters
+      // For earnings, we might want to fetch everything and then filter client-side, 
+      // or pass the from/to to the backend if the API supports it.
+      // The current backend API list supports from/to.
+      const fromUTC = dayjs(startDate).tz(hospitalTimezone).startOf('day').toISOString();
+      const toUTC = dayjs(endDate).tz(hospitalTimezone).endOf('day').toISOString();
+
+      const response = await appointmentService.list(0, 1000, undefined, fromUTC, toUTC, user.id);
 
       if (!response.success || !response.data) {
         setAppointments([]);
@@ -97,7 +104,7 @@ export const EarningsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, hospitalTimezone, startDate, endDate]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -165,7 +172,7 @@ export const EarningsPage = () => {
                 <input 
                   type="date" 
                   value={startDate} 
-                  max={today}
+                  max={hospitalToday}
                   onChange={(e) => handleStartDateChange(e.target.value)}
                   className="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer"
                 />
@@ -176,7 +183,7 @@ export const EarningsPage = () => {
                 <input 
                   type="date" 
                   value={endDate} 
-                  max={today}
+                  max={hospitalToday}
                   onChange={(e) => handleEndDateChange(e.target.value)}
                   className="text-sm font-bold text-slate-700 outline-none bg-transparent cursor-pointer"
                 />

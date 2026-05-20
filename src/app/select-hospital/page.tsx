@@ -3,16 +3,33 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setCurrentHospitalId } from '@/state/authSlice';
+import { setCurrentHospitalId, setHospitalTimezone } from '@/state/authSlice';
+import { hospitalService } from '@/services/hospitalService';
+import { triggerGlobalToast } from '@/components/ui/Toast';
 import Link from 'next/link';
 
 const SelectHospitalPage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSelecting, setIsSelecting] = useState(false);
 
-  const handleSelect = (hospitalId: string) => {
-    dispatch(setCurrentHospitalId(hospitalId));
+  const handleSelect = async (hospitalId: string) => {
+    try {
+      setIsSelecting(true);
+      const res = await hospitalService.getById(hospitalId);
+      if (res.success && res.data) {
+        dispatch(setHospitalTimezone(res.data.timezone));
+        dispatch(setCurrentHospitalId(hospitalId));
+      } else {
+        triggerGlobalToast('Failed to retrieve hospital settings', 'error');
+      }
+    } catch (error) {
+      console.error('Hospital selection error:', error);
+      triggerGlobalToast('An error occurred during hospital selection', 'error');
+    } finally {
+      setIsSelecting(false);
+    }
   };
 
   const filteredHospitals = user?.memberships.filter(h => 

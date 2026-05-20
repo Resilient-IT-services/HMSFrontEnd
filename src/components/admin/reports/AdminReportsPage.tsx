@@ -5,6 +5,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { reportService, ReportRow, ReportType } from '@/services/reportService';
 import { DoctorStaffResponse, HospitalResponse } from '@/types/api';
+import dayjs from '@/lib/dayjs';
 
 const reportTypeOptions: Array<{ label: string; value: ReportType }> = [
   { label: 'Doctor-wise Revenue', value: 'DOCTOR_REVENUE' },
@@ -21,13 +22,9 @@ const titleCase = (value: string) =>
     .replaceAll(/([a-z])([A-Z])/g, '$1 $2')
     .replaceAll(/\b\w/g, (char) => char.toUpperCase());
 
-const today = () => new Date().toISOString().slice(0, 10);
+const getToday = () => dayjs().format('YYYY-MM-DD');
 
-const monthStart = () => {
-  const date = new Date();
-  date.setDate(1);
-  return date.toISOString().slice(0, 10);
-};
+const getMonthStart = () => dayjs().startOf('month').format('YYYY-MM-DD');
 
 const toNumber = (value: unknown) => {
   if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
@@ -60,8 +57,8 @@ const downloadBlob = (blob: Blob, filename: string) => {
 
 export default function AdminReportsPage() {
   const [reportType, setReportType] = useState<ReportType>('DOCTOR_REVENUE');
-  const [startDate, setStartDate] = useState(monthStart);
-  const [endDate, setEndDate] = useState(today);
+  const [startDate, setStartDate] = useState(getMonthStart);
+  const [endDate, setEndDate] = useState(getToday);
   const [hospitalId, setHospitalId] = useState('');
   const [doctorId, setDoctorId] = useState('');
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
@@ -91,10 +88,13 @@ export default function AdminReportsPage() {
     [doctorId, doctorOptions]
   );
 
-  const filters = useMemo(
-    () => ({ type: reportType, startDate, endDate, ...(hospitalId ? { hospitalId } : {}), ...(doctorId ? { doctorId } : {}) }),
-    [reportType, startDate, endDate, hospitalId, doctorId]
-  );
+  const getRangeForHospital = useCallback((hospital: HospitalResponse) => {
+    const tz = hospital.timezone || 'UTC';
+    return {
+      from: dayjs(startDate).tz(tz).startOf('day').toISOString(),
+      to: dayjs(endDate).tz(tz).endOf('day').toISOString()
+    };
+  }, [startDate, endDate]);
 
   const columns = useMemo(() => {
     const keys = new Set<string>();
@@ -121,8 +121,15 @@ export default function AdminReportsPage() {
       setLoading(true);
       setError('');
 
-      if (hospitalId) {
-        const response = await reportService.preview(filters);
+      if (hospitalId && selectedHospital) {
+        const { from, to } = getRangeForHospital(selectedHospital);
+        const response = await reportService.preview({
+          type: reportType,
+          from,
+          to,
+          hospitalId,
+          ...(doctorId ? { doctorId } : {})
+        });
         setRows(response.success ? response.data ?? [] : []);
         if (!response.success) {
           setError(response.error?.message || response.message || 'Unable to load report data.');
@@ -136,7 +143,14 @@ export default function AdminReportsPage() {
         const responses = await Promise.all(
           hospitals.map(async (hospital) => {
             try {
-              const response = await reportService.preview({ ...filters, hospitalId: hospital.id });
+              const { from, to } = getRangeForHospital(hospital);
+              const response = await reportService.preview({
+                type: reportType,
+                from,
+                to,
+                hospitalId: hospital.id,
+                ...(doctorId ? { doctorId } : {})
+              });
               return {
                 hospital,
                 response
@@ -168,7 +182,7 @@ export default function AdminReportsPage() {
     } finally {
       setLoading(false);
     }
-  }, [filters, hospitalId, hospitals]);
+  }, [hospitalId, selectedHospital, hospitals, reportType, doctorId, getRangeForHospital]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -280,7 +294,10 @@ export default function AdminReportsPage() {
         return;
       }
 
-      const blob = format === 'pdf' ? await reportService.exportPdf(filters) : await reportService.exportExcel(filters);
+      const { from, to } = getRangeForHospital(selectedHospital!);
+      const filtersWithUTC = { type: reportType, from, to, hospitalId, ...(doctorId ? { doctorId } : {}) };
+
+      const blob = format === 'pdf' ? await reportService.exportPdf(filtersWithUTC) : await reportService.exportExcel(filtersWithUTC);
       const filename = `report-${reportType.toLowerCase()}-${startDate}-to-${endDate}.${format === 'pdf' ? 'pdf' : 'xlsx'}`;
       downloadBlob(blob, filename);
     } catch (exportError) {

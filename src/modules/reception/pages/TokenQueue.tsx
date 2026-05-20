@@ -5,18 +5,23 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { AppointmentSummaryDTO } from '@/types/api';
 import { Stethoscope, Pill, Microscope, Info, Droplets } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import { formatToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
 
 export function TokenQueue() {
+  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchQueue = useCallback(async () => {
     try {
-      const today = getLocalStartOfDayISO();
-      const res = await appointmentService.listSummary(0, 100, undefined, today);
+      if (!hospitalTimezone) return;
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
+      const res = await appointmentService.listSummary(0, 100, undefined, from, to);
       if (res.success && res.data) {
         setAppointments(res.data.content);
       }

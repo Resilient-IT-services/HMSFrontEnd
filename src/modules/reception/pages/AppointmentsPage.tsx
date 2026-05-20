@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
 import { cn } from '@/lib/cn';
 import { APPOINTMENT_STATUS_OPTIONS } from '@/utils/enumOptions';
+import { formatDateTime } from '@/utils/formatters';
+import dayjs from '@/lib/dayjs';
 
 export const AppointmentsPage = () => {
   const router = useRouter();
@@ -49,18 +51,7 @@ export const AppointmentsPage = () => {
       render: (app) => (
         <div className="flex flex-col">
           <span className="font-medium text-slate-900">
-            {new Date(app.appointmentTime).toLocaleDateString("en-GB", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          </span>
-          <span className="text-xs text-slate-500">
-            {new Date(app.appointmentTime).toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: true,
-            })}
+            {formatDateTime(app.appointmentTime)}
           </span>
         </div>
       )

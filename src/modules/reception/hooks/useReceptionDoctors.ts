@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import { doctorService } from '@/services/doctorService';
 import { catalogService } from '@/services/catalogService';
 import { DoctorStaffResponse, SessionInfo } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
 import { hasDepartment } from '@/utils/staffDisplay';
 import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
 
 export const useReceptionDoctors = () => {
+  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +21,7 @@ export const useReceptionDoctors = () => {
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
   
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
-  const [selectedDate, setSelectedDate] = useState(getLocalStartOfDayISO());
+  const [selectedDate, setSelectedDate] = useState(getLocalStartOfDayISO(undefined, hospitalTimezone));
   const [availability, setAvailability] = useState<SessionInfo[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
 
@@ -69,7 +73,7 @@ export const useReceptionDoctors = () => {
   const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
     try {
       setLoadingSchedule(true);
-      const searchDate = getLocalStartOfDayISO(date);
+      const searchDate = getLocalStartOfDayISO(date, hospitalTimezone);
       const res = await doctorService.getAvailability(doctorId, searchDate);
       if (res.success && res.data) {
         setAvailability(res.data.sessions);
@@ -79,7 +83,7 @@ export const useReceptionDoctors = () => {
     } finally {
       setLoadingSchedule(false);
     }
-  }, []);
+  }, [hospitalTimezone]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -92,19 +96,18 @@ export const useReceptionDoctors = () => {
 
   const viewSchedule = (doctor: DoctorStaffResponse) => {
     setSelectedDoctor(doctor);
-    setSelectedDate(getLocalStartOfDayISO());
+    setSelectedDate(getLocalStartOfDayISO(undefined, hospitalTimezone));
   };
 
   const dateOptions = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      const iso = getLocalStartOfDayISO(d);
-      const label = i === 0 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' });
-      const day = d.getDate();
+      const d = dayjs().tz(hospitalTimezone || undefined).add(i, 'day');
+      const iso = getLocalStartOfDayISO(d.toDate(), hospitalTimezone);
+      const label = i === 0 ? 'Today' : d.format('ddd');
+      const day = d.date();
       return { iso, label, day };
     });
-  }, []);
+  }, [hospitalTimezone]);
 
   return {
     doctors,

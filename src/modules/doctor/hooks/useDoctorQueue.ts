@@ -10,13 +10,14 @@ import { AppointmentResponse, PatientResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { sortByToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 export const useDoctorQueue = () => {
   const router = useRouter();
-  const { user } = useSelector((state: RootState) => state.auth);
+  const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,15 +25,19 @@ export const useDoctorQueue = () => {
   const [activeTab, setActiveTab] = useState<'TODAY' | 'UPCOMING'>('TODAY');
 
   const fetchData = useCallback(async (isBackground = false) => {
-    if (!user) {
+    if (!user || !hospitalTimezone) {
       setLoading(false);
       return;
     }
 
     try {
       if (!isBackground) setLoading(true);
-      const today = getLocalStartOfDayISO();
-      const response = await appointmentService.list(0, 100, undefined, today, user.id);
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
+      
+      const fromParam = activeTab === 'TODAY' ? from : undefined;
+      const toParam = activeTab === 'TODAY' ? to : undefined;
+
+      const response = await appointmentService.list(0, 100, undefined, fromParam, toParam, user.id);
 
       if (response.success && response.data) {
         // Filter by current doctor as a safety measure
@@ -48,7 +53,7 @@ export const useDoctorQueue = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user]);
+  }, [user, hospitalTimezone, activeTab]);
 
   // Fetch missing patient details
   useEffect(() => {
@@ -94,10 +99,12 @@ export const useDoctorQueue = () => {
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
   const stats = useMemo(() => {
-    const today = getLocalStartOfDayISO().split('T')[0];
-    const todayApps = appointments.filter(a => a.appointmentTime.startsWith(today));
+    if (!hospitalTimezone) return { total: 0, waiting: 0, inProgress: 0, completed: 0 };
 
-    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED').length;
+    const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
+    const todayApps = appointments.filter(a => dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD') === hospitalToday);
+
+    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED' || a.status === 'PAID' || a.status === 'VITALS_RECORDED').length;
     const inProgress = todayApps.filter((a) => a.status === 'CONSULTATION_STARTED').length;
     const completed = todayApps.filter((a) => a.status === 'COMPLETED').length;
 
@@ -107,7 +114,7 @@ export const useDoctorQueue = () => {
       inProgress,
       completed,
     };
-  }, [appointments]);
+  }, [appointments, hospitalTimezone]);
 
   const handleStartConsultation = async (id: string) => {
     try {
@@ -124,13 +131,18 @@ export const useDoctorQueue = () => {
   };
 
   const filteredAppointments = useMemo(() => {
-    const today = getLocalStartOfDayISO().split('T')[0];
+    if (!hospitalTimezone) return [];
+
+    const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
     
     let base = appointments;
-    base = activeTab === 'TODAY' ? appointments.filter(a => 
-        a.appointmentTime.startsWith(today) && 
-        (a.status === 'SCHEDULED' || a.status === 'CONSULTATION_STARTED')
-      ) : appointments.filter(a => a.appointmentTime > today && a.status !== 'CANCELLED');
+    base = activeTab === 'TODAY' ? appointments.filter(a => {
+        const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
+        return appHospitalDate === hospitalToday && (a.status !== 'COMPLETED' && a.status !== 'CANCELLED');
+      }) : appointments.filter(a => {
+        const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
+        return appHospitalDate > hospitalToday && a.status !== 'CANCELLED';
+      });
     
     const sorted = activeTab === 'TODAY' ? sortByToken(base) : [...base].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
     
@@ -141,7 +153,7 @@ export const useDoctorQueue = () => {
         a.patientName.toLowerCase().includes(term) ||
         a.patientId.toLowerCase().includes(term)
     );
-  }, [appointments, searchTerm, activeTab]);
+  }, [appointments, searchTerm, activeTab, hospitalTimezone]);
 
   return {
     appointments: filteredAppointments,

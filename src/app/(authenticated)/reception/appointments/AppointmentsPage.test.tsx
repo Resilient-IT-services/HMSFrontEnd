@@ -82,7 +82,7 @@ const mockDoctors = [
 ];
 
 describe('TodayAppointmentsPage', () => {
-  const store = configureStore({ reducer: { auth: (state = { user: { role: 'RECEPTIONIST' } }) => state } });
+  const store = configureStore({ reducer: { auth: (state = { user: { role: 'RECEPTIONIST' }, hospitalTimezone: 'UTC' }) => state } });
 
   beforeEach(() => {
     vi.clearAllMocks();

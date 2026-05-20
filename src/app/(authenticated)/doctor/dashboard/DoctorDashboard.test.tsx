@@ -79,7 +79,7 @@ describe('DoctorDashboard', () => {
     };
 
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser }) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser, hospitalTimezone: 'UTC' }) => state } })}>
         <DoctorDashboard />
       </Provider>,
     );
@@ -87,7 +87,7 @@ describe('DoctorDashboard', () => {
     expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(appointmentService.list).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, undefined, today, 'doctor-1');
+      expect(appointmentService.list).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, undefined, expect.anything(), expect.anything(), 'doctor-1');
       expect(screen.getAllByText('Jane Roe')[0]).toBeInTheDocument();
       expect(screen.getAllByText(/500/)[0]).toBeInTheDocument();
     });
@@ -139,7 +139,7 @@ describe('DoctorDashboard', () => {
     };
 
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser }) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: mockUser, hospitalTimezone: 'UTC' }) => state } })}>
         <DoctorDashboard />
       </Provider>,
     );

@@ -4,88 +4,76 @@ import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { patientService } from '@/services/patientService';
-import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { nurseService } from '@/services/nurseService';
-import { PatientResponse, AppointmentResponse, DoctorStaffResponse, NurseStaffResponse } from '@/types/api';
-import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
-import { Table, Column } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
-import { SearchInput } from '@/components/ui/SearchInput';
-import { MetricsGrid } from '@/components/ui/MetricsGrid';
-import { MetricCard } from '@/components/ui/MetricCard';
-import { PageSurface } from '@/components/ui/PageSurface';
+import { appointmentService } from '@/services/appointmentService';
+import { AppointmentResponse, PatientSummaryDTO, DoctorStaffResponse } from '@/types/api';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { MetricCard } from '@/components/ui/MetricCard';
+import { MetricsGrid } from '@/components/ui/MetricsGrid';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { Card } from '@/components/ui/Card';
+import { Table, Column } from '@/components/ui/Table';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 import { cn } from '@/lib/cn';
 import { getPrimaryDepartment } from '@/utils/staffDisplay';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
-
-const getLocalDateKey = (date: Date) => {
-  return getLocalStartOfDayISO(date);
-};
-
-const getPatientCreatedDateKey = (createdAt?: string) => {
-  if (!createdAt) return '';
-
-  const parsedDate = new Date(createdAt);
-  if (Number.isNaN(parsedDate.getTime())) {
-    return createdAt.slice(0, 10);
-  }
-
-  return getLocalDateKey(parsedDate);
-};
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import dayjs from '@/lib/dayjs';
 
 export const ReceptionDashboard = () => {
   const router = useRouter();
-  const [recentPatients, setRecentPatients] = useState<PatientResponse[]>([]);
-  const [totalPatients, setTotalPatients] = useState(0);
+  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
-  const [totalAppointmentsToday, setTotalAppointmentsToday] = useState(0);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
-  const [nurses, setNurses] = useState<NurseStaffResponse[]>([]);
-  const [totalNurses, setTotalNurses] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [showFabMenu, setShowFabMenu] = useState(false);
+  const [recentPatients, setRecentPatients] = useState<PatientSummaryDTO[]>([]);
+  const [totalNurses, setTotalNurses] = useState(0);
+
+  const [stats, setStats] = useState({
+    appointmentsToday: 0,
+    activeQueue: 0,
+    totalPatients: 0
+  });
 
   const fetchData = useCallback(async (isBackground = false) => {
+    if (!hospitalTimezone) return;
+    
+    if (!isBackground) setLoading(true);
     try {
-      if (!isBackground) setLoading(true);
-      const today = getLocalDateKey(new Date());
-      
-      const [patRes, appRes, docRes, nurRes] = await Promise.all([
-        patientService.list(0, 500),
-        appointmentService.list(0, 500, undefined, today),
-        doctorService.list(0, 10),
-        nurseService.list(0, 10)
+      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
+      const [appRes, docRes, patRes, statsRes, nurseRes] = await Promise.all([
+        appointmentService.list(0, 500, undefined, from, to),
+        doctorService.list(0, 50),
+        patientService.listSummary(0, 5),
+        appointmentService.getStats(from, to),
+        nurseService.list(0, 100)
       ]);
 
-      if (patRes.success && patRes.data) {
-        const patients = patRes.data.content || [];
-        setRecentPatients(patients.slice(0, 5));
-        setTotalPatients(patRes.data.totalElements);
-      }
       if (appRes.success && appRes.data) {
-        const normalized = normalizeAppointmentData(appRes.data.content || []);
-        setAppointments(normalized);
-        setTotalAppointmentsToday(appRes.data.totalElements);
-        syncExpiredAppointments(appRes.data.content || []);
+        setAppointments(appRes.data.content);
       }
-      if (docRes.success && docRes.data) setDoctors(docRes.data.content || []);
-      if (nurRes.success && nurRes.data) {
-        setNurses(nurRes.data.content || []);
-        setTotalNurses(nurRes.data.totalElements);
+      if (docRes.success && docRes.data) setDoctors(docRes.data.content);
+      if (patRes.success && patRes.data) setRecentPatients(patRes.data.content);
+      if (nurseRes.success && nurseRes.data) setTotalNurses(nurseRes.data.totalElements);
+      
+      if (statsRes.success && statsRes.data) {
+        setStats({
+          appointmentsToday: statsRes.data.total,
+          activeQueue: statsRes.data.upcoming + (statsRes.data.byStatus['SCHEDULED'] || 0) + (statsRes.data.byStatus['VITALS_RECORDED'] || 0),
+          totalPatients: patRes.data?.totalElements || 0
+        });
       }
-
     } catch (error) {
-      console.error('Operation fetchData in ReceptionDashboard failed:', error);
+      console.error('Dashboard data fetch error:', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, []);
+  }, [hospitalTimezone]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -96,54 +84,32 @@ export const ReceptionDashboard = () => {
 
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL);
 
-  const stats = useMemo(() => {
-    const activeQueue = appointments.filter(a => a.status !== 'COMPLETED' && a.status !== 'CANCELLED').length;
-    const doctorQueueByName = new Map<string, number>();
+  const getLocalDateKey = useCallback((date: Date) => {
+    if (!hospitalTimezone) return date.toISOString().split('T')[0];
+    return dayjs(date).tz(hospitalTimezone).format('YYYY-MM-DD');
+  }, [hospitalTimezone]);
 
-    for (const appointment of appointments) {
-      if (appointment.status === 'COMPLETED' || appointment.status === 'CANCELLED') {
-        continue;
-      }
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
-      const currentCount = doctorQueueByName.get(appointment.doctorName) || 0;
-      doctorQueueByName.set(appointment.doctorName, currentCount + 1);
-    }
-
-    return {
-      totalPatients,
-      activeQueue,
-      appointmentsToday: totalAppointmentsToday,
-      doctorQueueByName
-    };
-  }, [totalPatients, appointments, totalAppointmentsToday]);
-
-  const patientColumns: Column<PatientResponse>[] = [
+  const patientColumns: Column<PatientSummaryDTO>[] = [
     {
-      header: 'Patient Name',
+      header: 'Full Name',
       mobilePosition: 'title',
       render: (p) => <span className="font-bold text-slate-900">{p.fullName}</span>
     },
     {
-      header: 'Phone',
+      header: 'Code',
       mobilePosition: 'subtitle',
-      key: 'phone'
+      render: (p) => <span className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">{p.patientCode}</span>
     },
     {
-      header: 'Status',
-      mobilePosition: 'meta',
-      render: () => <Badge variant="orange">Registered</Badge>
+      header: 'Contact',
+      key: 'phone',
+      mobilePosition: 'body'
     }
   ];
 
   const metricItems = [
-    {
-      label: 'Total Patients',
-      value: stats.totalPatients,
-      variant: 'orange' as const,
-      icon: 'group',
-      layout: 'horizontal' as const,
-      tag: 'All Time'
-    },
     {
       label: 'Active Queue',
       value: stats.activeQueue,
@@ -256,7 +222,7 @@ export const ReceptionDashboard = () => {
         <div className="flex items-center gap-2 mb-2 opacity-40 group/date cursor-default hidden md:flex">
           <span className="material-symbols-outlined text-xs group-hover/date:text-orange-600 transition-colors">calendar_today</span>
           <span className="text-[9px] font-black uppercase tracking-[0.2em]">
-            {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            {hospitalTimezone ? dayjs().tz(hospitalTimezone).format('MMM DD, YYYY') : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           </span>
         </div>
         <PageHeading
@@ -337,121 +303,91 @@ export const ReceptionDashboard = () => {
                 onRowDoubleClick={(p) => router.push(`/reception/patients/${p.id}`)}
               />
             </Card>
-
-            {/* Doctor Availability Grid */}
-            <section className="space-y-4">
-              <h4 className="font-bold text-slate-900 px-1 uppercase text-[10px] tracking-widest text-slate-400">Doctor Availability Snapshot</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {doctors.map((doc) => (
-                  <Card key={doc.assignmentId} className="p-5 flex items-center gap-4 border-l-4 border-l-emerald-500 hover:shadow-md transition-all">
-                    <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 font-bold text-xl shrink-0">
-                      {doc.fullName[0]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm text-slate-900 truncate">{doc.fullName}</p>
-                      <p className="text-[10px] text-emerald-600 font-black uppercase tracking-tighter">{stats.doctorQueueByName.get(doc.fullName) || 0} queued today</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xl font-black text-slate-900 leading-none">{stats.doctorQueueByName.get(doc.fullName) || 0}</p>
-                      <p className="text-[10px] uppercase text-slate-400 font-black mt-1">Queue</p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </section>
           </div>
 
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-8">
             {/* Quick Actions */}
-            <Card className="bg-slate-900 text-white shadow-xl border-none hidden lg:block">
-              <h4 className="font-bold mb-6 uppercase text-[10px] tracking-widest opacity-50">Quick Actions</h4>
-              <div className="space-y-4">
-                <Button                  fullWidth
-                  onClick={() => router.push('/reception/patients/create')}
-                  icon="person_add"
-                  className="justify-between"
-                >
-                  Register Patient
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </Button>
-                <Button 
-                  fullWidth
-                  variant="secondary"
-                  onClick={() => router.push('/reception/appointments/create')}
-                  icon="medical_services"
-                  className="bg-slate-800 border-slate-700  justify-between"
-                >
-                  Create Visit
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </Button>
-              </div>
+            <Card title="Clinical Resources" className="p-4 bg-slate-900 text-white border-none shadow-xl">
+               <div className="space-y-3">
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group">
+                     <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-lg bg-orange-600 flex items-center justify-center text-white">
+                           <span className="material-symbols-outlined">person_add</span>
+                        </div>
+                        <div onClick={() => router.push('/reception/patients/register')}>
+                           <h4 className="text-sm font-bold">Register Patient</h4>
+                           <p className="text-[10px] text-white/50 font-medium">New EHR Initialization</p>
+                        </div>
+                     </div>
+                  </div>
+                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group" onClick={() => router.push('/reception/appointments/create')}>
+                     <div className="flex items-center gap-3">
+                        <div className="size-10 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                           <span className="material-symbols-outlined">calendar_add_on</span>
+                        </div>
+                        <div>
+                           <h4 className="text-sm font-bold">Create OP Visit</h4>
+                           <p className="text-[10px] text-white/50 font-medium">Consultation Booking</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
             </Card>
 
-            {/* Staff on Duty */}
-            <Card title="Nursing Staff on Duty" subtitle="CURRENT SHIFT">
-              <div className="space-y-4">
-                {loading && <p className="text-[10px] text-slate-400 italic">Loading staff list...</p>}
-                {nurses.map((n) => (
-                  <div key={n.assignmentId} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
-                      <span className="material-symbols-outlined text-sm">person</span>
+            <Card title="Available Doctors" className="p-0 overflow-hidden">
+               <div className="divide-y divide-slate-50">
+                  {doctors.slice(0, 4).map((doc, idx) => (
+                    <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-all">
+                       <div className="flex items-center gap-3">
+                          <div className="size-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-xs">
+                             {doc.fullName.charAt(0)}
+                          </div>
+                          <div>
+                             <h5 className="text-xs font-bold text-slate-900">{doc.fullName}</h5>
+                             <p className="text-[9px] font-black uppercase text-slate-400">{getPrimaryDepartment(doc)}</p>
+                          </div>
+                       </div>
+                       <Badge variant="emerald" className="text-[8px] px-1.5 py-0.5">ON DUTY</Badge>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-slate-900">{n.fullName}</p>
-                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{getPrimaryDepartment(n)}</p>
-                    </div>
-                    <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  </div>
-                ))}
-                {nurses.length === 0 && <p className="text-[10px] text-slate-400 italic">No nurses listed.</p>}
-              </div>
+                  ))}
+               </div>
+               <div className="p-4 bg-slate-50 border-t border-slate-100">
+                  <Button variant="ghost" fullWidth size="sm" onClick={() => router.push('/reception/doctors')} className="text-[10px] font-black uppercase">View Roster</Button>
+               </div>
             </Card>
           </div>
         </div>
       </PageSurface>
 
-      {/* Mobile Floating Action Button */}
-      {showFabMenu && (
-        <div 
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 lg:hidden"
-          onClick={() => setShowFabMenu(false)}
-        />
-      )}
-      
-      <div className="lg:hidden fixed bottom-8 right-6 z-50 flex flex-col items-end gap-3">
+      {/* Floating Action Button for Mobile */}
+      <div className="md:hidden fixed bottom-24 right-6 z-50">
         {showFabMenu && (
-          <div className="flex flex-col items-end gap-3 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-200">
-            <button
-              onClick={() => {
-                setShowFabMenu(false);
-                router.push('/reception/appointments/create');
-              }}
-              className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-xl border border-slate-100 active:scale-95 transition-all"
+          <div className="absolute bottom-16 right-0 space-y-3 mb-2 animate-in slide-in-from-bottom-4 fade-in duration-300">
+            <button 
+              onClick={() => router.push('/reception/appointments/create')}
+              className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap"
             >
-              <span className="text-sm font-bold text-slate-900">Create Visit</span>
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner">
-                <span className="material-symbols-outlined text-xl">medical_services</span>
+              <span className="text-xs font-black text-slate-900 uppercase">Book Visit</span>
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white">
+                <span className="material-symbols-outlined text-sm">calendar_add_on</span>
               </div>
             </button>
-            <button
-              onClick={() => {
-                setShowFabMenu(false);
-                router.push('/reception/patients/create');
-              }}
-              className="flex items-center gap-3 bg-white px-4 py-3 rounded-2xl shadow-xl border border-slate-100 active:scale-95 transition-all"
+            <button 
+              onClick={() => router.push('/reception/patients/register')}
+              className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap"
             >
-              <span className="text-sm font-bold text-slate-900">Register Patient</span>
-              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 shadow-inner">
-                <span className="material-symbols-outlined text-xl">person_add</span>
+              <span className="text-xs font-black text-slate-900 uppercase">Register</span>
+              <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white">
+                <span className="material-symbols-outlined text-sm">person_add</span>
               </div>
             </button>
           </div>
         )}
-        <button
+        <button 
           onClick={() => setShowFabMenu(!showFabMenu)}
           className={cn(
-            "w-14 h-14 rounded-full bg-slate-900 text-white shadow-2xl flex items-center justify-center transition-all active:scale-90 duration-300",
+            "w-14 h-14 bg-slate-900 rounded-full shadow-2xl flex items-center justify-center text-white transition-all duration-300",
             showFabMenu ? "rotate-45 bg-red-600" : ""
           )}
         >

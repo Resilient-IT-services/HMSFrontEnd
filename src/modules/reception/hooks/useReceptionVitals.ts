@@ -8,6 +8,7 @@ import { adminService } from '@/services/adminService';
 import { AppointmentResponse, PatientResponse, VitalsDTO, VitalRangesResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateVital } from '@/utils/vitalsValidator';
+import dayjs from '@/lib/dayjs';
 
 export const useReceptionVitals = () => {
   const searchParams = useSearchParams();
@@ -201,12 +202,7 @@ export const useReceptionVitals = () => {
 
   const patientAge = useMemo(() => {
     if (!patient?.dob) return '--';
-    const birthDate = new Date(patient.dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-    return age;
+    return dayjs().diff(dayjs(patient.dob), 'year');
   }, [patient]);
 
   const getFieldError = (field: string, value: any) => {

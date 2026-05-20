@@ -6,6 +6,7 @@ import { PharmacyStockDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
+import dayjs from '@/lib/dayjs';
 
 export const usePharmacyStock = () => {
   const [medicines, setMedicines] = useState<PharmacyStockDTO[]>([]);
@@ -35,21 +36,20 @@ export const usePharmacyStock = () => {
         let content = response.data.content || [];
 
         // Client-side filtering fallback for filters not supported by backend
-        const today = new Date();
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(today.getDate() + 30);
+        const today = dayjs().startOf('day');
+        const thirtyDaysFromNow = dayjs().add(30, 'day').endOf('day');
 
         switch (statusFilter) {
         case 'EXPIRED': {
-          content = content.filter(m => m.expiryDate && new Date(m.expiryDate) < today);
+          content = content.filter(m => m.expiryDate && dayjs(m.expiryDate).isBefore(today));
         
         break;
         }
         case 'EXPIRING_SOON': {
           content = content.filter(m => {
             if (!m.expiryDate) return false;
-            const expDate = new Date(m.expiryDate);
-            return expDate >= today && expDate < thirtyDaysFromNow;
+            const expDate = dayjs(m.expiryDate);
+            return expDate.isAfter(today.subtract(1, 'day')) && expDate.isBefore(thirtyDaysFromNow);
           });
         
         break;
@@ -166,10 +166,9 @@ export const usePharmacyStock = () => {
   const lowStockCount = medicines.filter(m => (m.quantity || 0) > 0 && (m.quantity || 0) < 50).length;
   const expiringSoonCount = medicines.filter(m => {
     if (!m.expiryDate) return false;
-    const expDate = new Date(m.expiryDate);
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-    return expDate < thirtyDaysFromNow;
+    const expDate = dayjs(m.expiryDate);
+    const thirtyDaysFromNow = dayjs().add(30, 'day');
+    return expDate.isBefore(thirtyDaysFromNow);
   }).length;
 
   return {

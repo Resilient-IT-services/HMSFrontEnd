@@ -7,7 +7,8 @@ export const appointmentService = {
     page = 0, 
     size = 20, 
     search?: string, 
-    date?: string,
+    from?: string,
+    to?: string,
     doctorId?: string,
     status?: string,
     paymentStatus?: string,
@@ -20,7 +21,8 @@ export const appointmentService = {
         page, 
         size, 
         search, 
-        date,
+        from,
+        to,
         doctorId,
         status,
         paymentStatus,
@@ -36,7 +38,8 @@ export const appointmentService = {
     page = 0, 
     size = 20, 
     search?: string, 
-    date?: string,
+    from?: string,
+    to?: string,
     doctorId?: string,
     status?: string,
     paymentStatus?: string,
@@ -49,7 +52,8 @@ export const appointmentService = {
         page, 
         size, 
         search, 
-        date,
+        from,
+        to,
         doctorId,
         status,
         paymentStatus,
@@ -110,9 +114,9 @@ export const appointmentService = {
     return response.data;
   },
 
-  async getStats(date: string): Promise<ApiResponse<AppointmentStatsDTO>> {
+  async getStats(from?: string, to?: string): Promise<ApiResponse<AppointmentStatsDTO>> {
     const response = await apiClient.get<ApiResponse<AppointmentStatsDTO>>('/appointments/stats', {
-      params: { date }
+      params: { from, to }
     });
     return response.data;
   }

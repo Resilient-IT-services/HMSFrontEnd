@@ -29,6 +29,7 @@ const createMockStore = (initialState?: any) => {
         isLoading: false,
         activeRole: 'DOCTOR',
         isSuperMode: false,
+        hospitalTimezone: 'UTC',
         error: null,
         ...initialState
       },

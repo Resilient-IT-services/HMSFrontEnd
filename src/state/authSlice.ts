@@ -8,6 +8,7 @@ export interface AuthState {
   error: string | null;
   isSuperMode: boolean;
   activeRole: Role | null;
+  hospitalTimezone: string | null;
 }
 
 export type AuthAction = PayloadAction<UserProfileResponse | null> 
@@ -24,6 +25,7 @@ const initialState: AuthState = {
   error: null,
   isSuperMode: false,
   activeRole: null,
+  hospitalTimezone: null,
 };
 
 const computeRoles = (user: UserProfileResponse, hospitalId: string | null): Role[] => {
@@ -54,6 +56,7 @@ const authSlice = createSlice({
       if (globalThis.window !== undefined) {
         state.isSuperMode = localStorage.getItem('isSuperMode') === 'true';
         state.activeRole = (localStorage.getItem('activeRole') as Role) || null;
+        state.hospitalTimezone = localStorage.getItem('hospitalTimezone');
       }
     },
     setUser: (state, action: PayloadAction<UserProfileResponse | null>) => {
@@ -64,6 +67,7 @@ const authSlice = createSlice({
         state.error = null;
         state.isSuperMode = false;
         state.activeRole = null;
+        state.hospitalTimezone = null;
         return;
       }
 
@@ -104,6 +108,10 @@ const authSlice = createSlice({
         state.activeRole = rolesArray[0];
         if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
       }
+
+      if (globalThis.window !== undefined) {
+        state.hospitalTimezone = localStorage.getItem('hospitalTimezone');
+      }
     },
     setCurrentHospitalId: (state, action: PayloadAction<string | null>) => {
       if (state.user) {
@@ -124,6 +132,13 @@ const authSlice = createSlice({
           state.activeRole = rolesArray[0];
           if (globalThis.window !== undefined) localStorage.setItem('activeRole', state.activeRole);
         }
+      }
+    },
+    setHospitalTimezone: (state, action: PayloadAction<string | null>) => {
+      state.hospitalTimezone = action.payload;
+      if (globalThis.window !== undefined) {
+        if (action.payload) localStorage.setItem('hospitalTimezone', action.payload);
+        else localStorage.removeItem('hospitalTimezone');
       }
     },
     setSuperMode: (state, action: PayloadAction<boolean>) => {
@@ -153,24 +168,28 @@ const authSlice = createSlice({
       state.error = null;
       state.activeRole = null;
       state.isSuperMode = false;
+      state.hospitalTimezone = null;
       if (globalThis.window !== undefined) {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('isSuperMode');
         localStorage.removeItem('currentHospitalId');
+        localStorage.removeItem('hospitalTimezone');
         localStorage.removeItem('token');
       }
     },
     clearAuthSession: (state) => {
       state.activeRole = null;
+      state.hospitalTimezone = null;
       if (globalThis.window !== undefined) {
         localStorage.removeItem('activeRole');
         localStorage.removeItem('currentHospitalId');
+        localStorage.removeItem('hospitalTimezone');
       }
     },
   },
 });
 
-export const { hydrateAuth, setUser, setLoading, setError, logout, setSuperMode, setActiveRole, setCurrentHospitalId, clearAuthSession } = authSlice.actions;
+export const { hydrateAuth, setUser, setLoading, setError, logout, setSuperMode, setActiveRole, setCurrentHospitalId, setHospitalTimezone, clearAuthSession } = authSlice.actions;
 
 export const authReducer: Reducer<AuthState, AuthAction> = authSlice.reducer as Reducer<AuthState, AuthAction>;
 export default authReducer;

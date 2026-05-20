@@ -14,6 +14,7 @@ import { userService } from '@/services/userService';
 import { hospitalService } from '@/services/hospitalService';
 import { UserSummaryDTO, HospitalResponse } from '@/types/api';
 import { useRouter } from 'next/navigation';
+import dayjs from '@/lib/dayjs';
 
 export const AdminDashboard = () => {
   const router = useRouter();
@@ -96,7 +97,7 @@ export const AdminDashboard = () => {
       headerClassName: 'text-right',
       render: (h) => (
         <p className="font-bold text-slate-500 text-xs">
-          {new Date(h.createdAt).toLocaleDateString()}
+          {dayjs(h.createdAt).format('DD MMM YYYY')}
         </p>
       )
     }
@@ -269,7 +270,7 @@ export const AdminDashboard = () => {
                       <div className="text-right">
                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Last Sync</p>
                         <p className="font-bold text-slate-500 text-xs">
-                          {new Date(h.createdAt).toLocaleDateString()}
+                          {dayjs(h.createdAt).format('DD MMM YYYY')}
                         </p>
                       </div>
                     </div>
