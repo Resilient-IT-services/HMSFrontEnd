@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, {useEffect, useState, useMemo, useCallback, useRef} from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
@@ -50,7 +50,7 @@ const calculateSuggestedTime = (session: SessionInfo, date: string, tz?: string 
 export function AppointmentScheduling() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
+  const hospitalTimezone = useSelector((state: RootState) => state.auth.hospitalTimezone);
   
   const preselectedPatientId = searchParams.get('patientId');
   const preselectedDoctorId = searchParams.get('doctorId');
@@ -74,63 +74,83 @@ export function AppointmentScheduling() {
 
   const debouncedSearch = useDebounce(patientSearch, 300);
 
-  // Fetch Doctors Selection
+  // Keep selectedDate in sync with timezone if it changes on mount
   useEffect(() => {
-    const trigger = async () => {
-      const res = await doctorService.getDoctorsSelection();
-      if (res.success && res.data) {
-        setDoctors(res.data);
-        if (preselectedDoctorId) {
-          const doc = res.data.find(d => d.id === preselectedDoctorId);
-          if (doc) setSelectedDoctor(doc);
-        } else if (res.data.length > 0 && !selectedDoctor) {
-          setSelectedDoctor(res.data[0]);
-        }
-      }
-      setLoadingDoctors(false);
-    };
-    void trigger();
-  }, [preselectedDoctorId]);
+    if (hospitalTimezone) {
+      setSelectedDate(getLocalDateString(new Date(), hospitalTimezone));
+    }
+  }, [hospitalTimezone]);
 
-  // Fetch Preselected Patient
+  const fetchingDoctors = useRef(false);
+  useRef<string | null | undefined>(undefined);
+// Fetch Doctors Selection
   useEffect(() => {
+    if (fetchingDoctors.current) return;
+    
     const trigger = async () => {
-      if (preselectedPatientId) {
-        const res = await patientService.get(preselectedPatientId);
-        if (res.success && res.data) setSelectedPatient(res.data);
+      fetchingDoctors.current = true;
+      try {
+        const res = await doctorService.getDoctorsSelection();
+        if (res.success && res.data) {
+          setDoctors(res.data);
+          
+          // Auto-select doctor logic
+          if (preselectedDoctorId) {
+            const doc = res.data.find(d => d.id === preselectedDoctorId);
+            if (doc) setSelectedDoctor(doc);
+          } else if (res.data.length > 0 && !selectedDoctor) {
+            setSelectedDoctor(res.data[0]);
+          }
+        }
+      } finally {
+        setLoadingDoctors(false);
+        fetchingDoctors.current = false;
       }
     };
     void trigger();
-  }, [preselectedPatientId]);
+  }, [preselectedDoctorId, selectedDoctor]); // Added selectedDoctor check to prevent clearing manually set doctor
+
+  const availabilityCallRef = useRef<string>('');
 
   // Fetch Availability
   useEffect(() => {
     const trigger = async () => {
       if (!selectedDoctor || !hospitalTimezone) return;
+      
+      const { from } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
+      const callKey = `${selectedDoctor.id}-${from}`;
+      
+      // Prevent duplicate calls for the same parameters
+      if (availabilityCallRef.current === callKey) return;
+      
+      availabilityCallRef.current = callKey;
       setFetchingAvailability(true);
       setSelectedSession(null);
-      const { from } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
-      const res = await doctorService.getAvailability(selectedDoctor.id, from);
-      if (res.success && res.data) {
-        let sessions = res.data.sessions;
-        
-        // Filter out past sessions
-        const now = dayjs().tz(hospitalTimezone);
-        const todayStr = getLocalDateString(now, hospitalTimezone);
-        
-        if (selectedDate === todayStr) {
-          const currentHHmm = now.format('HH:mm');
-          sessions = sessions.filter(s => s.endTime > currentHHmm);
-        } else if (selectedDate < todayStr) {
-          sessions = [];
-        }
+      
+      try {
+        const res = await doctorService.getAvailability(selectedDoctor.id, from);
+        if (res.success && res.data) {
+          let sessions = res.data.sessions;
+          
+          // Filter out past sessions
+          const now = dayjs().tz(hospitalTimezone);
+          const todayStr = getLocalDateString(now, hospitalTimezone);
+          
+          if (selectedDate === todayStr) {
+            const currentHHmm = now.format('HH:mm');
+            sessions = sessions.filter(s => s.endTime > currentHHmm);
+          } else if (selectedDate < todayStr) {
+            sessions = [];
+          }
 
-        setAvailability(sessions);
+          setAvailability(sessions);
+        }
+      } finally {
+        setFetchingAvailability(false);
       }
-      setFetchingAvailability(false);
     };
     void trigger();
-  }, [selectedDoctor, selectedDate, hospitalTimezone]);
+  }, [selectedDoctor?.id, selectedDate, hospitalTimezone]);
 
   // Handle Suggested Time
   useEffect(() => {

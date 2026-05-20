@@ -875,6 +875,7 @@ export interface DoctorSelectionDTO {
   id: string;
   fullName: string;
   specialization: string;
+  consultationFee:number;
 }
 
 export interface ApiResponseListDoctorSelectionDTO {
