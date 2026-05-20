@@ -128,8 +128,7 @@ export function AppointmentScheduling() {
     const trigger = async () => {
       if (!selectedDoctor || !hospitalTimezone) return;
       
-      const { from } = getHospitalDayRangeUTC(hospitalTimezone, selectedDate);
-      const callKey = `${selectedDoctor.id}-${from}`;
+      const callKey = `${selectedDoctor.id}-${selectedDate}`;
       
       // Prevent duplicate calls for the same parameters
       if (availabilityCallRef.current === callKey) return;
@@ -139,7 +138,7 @@ export function AppointmentScheduling() {
       setSelectedSession(null);
       
       try {
-        const res = await doctorService.getAvailability(selectedDoctor.id, from);
+        const res = await doctorService.getAvailability(selectedDoctor.id, selectedDate);
         if (res.success && res.data) {
           let sessions = res.data.sessions;
           
