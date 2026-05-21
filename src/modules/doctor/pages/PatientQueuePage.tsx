@@ -142,7 +142,7 @@ export const PatientQueuePage = () => {
 
   return (
     <MainLayout title="Patient Queue" hideTitle>
-      <PageSurface contentClassName="space-y-8" fontClassName="font-inter" fullBleed={false}>
+      <PageSurface contentClassName="space-y-8" fontClassName="font-inter">
         <PageHeading
           title="Patient Queue"
           description={`Manage ${activeTab === 'TODAY' ? "today's" : 'upcoming'} appointments and surgical consultations.`}
