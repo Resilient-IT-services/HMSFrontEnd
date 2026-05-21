@@ -8,6 +8,7 @@ import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 import { useMedicines } from '@/modules/super_admin/hooks/useMedicines';
 import { Modal } from '@/components/ui/Modal';
+import { Pagination } from '@/components/ui/Pagination';
 
 export function MedicineList() {
   const {
@@ -16,6 +17,10 @@ export function MedicineList() {
     loading,
     searchTerm,
     setSearchTerm,
+    page,
+    setPage,
+    pageSize,
+    setPageSize,
     showImportModal,
     setShowImportModal,
     showAddModal,
@@ -145,6 +150,14 @@ export function MedicineList() {
                 rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
               />
             )}
+            <Pagination
+              page={page}
+              totalElements={totalMedicines}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              label="medicines"
+            />
           </div>
         </div>
 

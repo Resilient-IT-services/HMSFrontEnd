@@ -63,7 +63,7 @@ describe('SuperAdminDashboard', () => {
     await waitFor(() => {
       // Metric values are displayed in multiple places (desktop and mobile grids)
       // We check for presence of at least one instance of each key stat
-      expect(screen.getAllByText('5').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('05').length).toBeGreaterThan(0);
       expect(screen.getAllByText('10').length).toBeGreaterThan(0);
       
       // Check for Admin Overview in the MainLayout mock
