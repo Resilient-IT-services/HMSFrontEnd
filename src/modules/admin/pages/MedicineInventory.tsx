@@ -126,8 +126,36 @@ export const MedicineInventory = () => {
     setLoading(true);
     try {
       const response = await pharmacyApi.importMedicines(importFile);
-      if (response.success) {
-        triggerGlobalToast(`Import completed. The system is designed to skip medicines that already exist by Name and Composition.`, 'success');
+      if (response.success && response.data) {
+        const { importedRows, skippedRows, failedRows, errorFileBase64 } = response.data;
+        
+        if (failedRows === 0 && importedRows === 0 && skippedRows > 0) {
+          triggerGlobalToast('All medicines in the file already exist in the database.', 'info');
+        } else {
+          triggerGlobalToast(
+            `Import Results - Success: ${importedRows}, Skipped: ${skippedRows}, Failed: ${failedRows}`, 
+            failedRows > 0 ? 'warning' : 'success'
+          );
+        }
+
+        if (errorFileBase64) {
+          // Trigger automatic download of feedback file
+          const byteCharacters = atob(errorFileBase64);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = 'Medicine_Import_Feedback.xlsx';
+          link.click();
+          
+          alert('Import completed with some issues. Please check the downloaded "Medicine_Import_Feedback.xlsx" file for details, fix the errors, and re-upload.');
+        }
+
         setShowImportModal(false);
         setImportFile(null);
         fetchMedicines();

@@ -8,6 +8,7 @@ import {
   MedicineResponse, 
   MedicineSummaryDTO,
   MedicineRequestDTO,
+  MedicineImportResponse,
   PharmacyStockDTO,
   InventoryItemResponse,
   InventoryItemRequestDTO,
@@ -66,7 +67,7 @@ export const pharmacyApi = {
   importMedicines: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/medicines/import', formData, {
+    const response = await apiClient.post<ApiResponse<MedicineImportResponse>>('/pharmacy/medicines/import', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
