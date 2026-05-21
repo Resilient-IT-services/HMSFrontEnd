@@ -313,31 +313,42 @@ export const ReceptionDashboard = () => {
           {/* Right Column */}
           <div className="lg:col-span-4 space-y-8">
             {/* Quick Actions */}
-            <Card title="Clinical Resources" className="p-4 bg-slate-900 text-white border-none shadow-xl">
-               <div className="space-y-3">
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group">
-                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-lg bg-orange-600 flex items-center justify-center text-white">
-                           <span className="material-symbols-outlined">person_add</span>
-                        </div>
-                        <div onClick={() => router.push('/reception/patients/register')}>
-                           <h4 className="text-sm font-bold">Register Patient</h4>
-                           <p className="text-[10px] text-white/50 font-medium">New EHR Initialization</p>
-                        </div>
-                     </div>
+            <Card title="Clinical Resources" className="p-4 bg-white text-black border border-gray-200 shadow-md">
+              <div className="space-y-3">
+
+                {/* Register Patient */}
+                <div
+                    className="p-4 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 transition-all cursor-pointer group"
+                    onClick={() => router.push('/reception/patients/register')}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-lg bg-orange-600 flex items-center justify-center text-white">
+                      <span className="material-symbols-outlined">person_add</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-black">Register Patient</h4>
+                      <p className="text-[10px] text-gray-500 font-medium">New EHR Initialization</p>
+                    </div>
                   </div>
-                  <div className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-pointer group" onClick={() => router.push('/reception/appointments/create')}>
-                     <div className="flex items-center gap-3">
-                        <div className="size-10 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-                           <span className="material-symbols-outlined">calendar_add_on</span>
-                        </div>
-                        <div>
-                           <h4 className="text-sm font-bold">Create OP Visit</h4>
-                           <p className="text-[10px] text-white/50 font-medium">Consultation Booking</p>
-                        </div>
-                     </div>
+                </div>
+
+                {/* Create OP Visit */}
+                <div
+                    className="p-4 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 transition-all cursor-pointer group"
+                    onClick={() => router.push('/reception/appointments/create')}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                      <span className="material-symbols-outlined">calendar_add_on</span>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-black">Create OP Visit</h4>
+                      <p className="text-[10px] text-gray-500 font-medium">Consultation Booking</p>
+                    </div>
                   </div>
-               </div>
+                </div>
+
+              </div>
             </Card>
 
             <Card title="Available Doctors" className="p-0 overflow-hidden">

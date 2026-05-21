@@ -104,10 +104,14 @@ export const PatientQueuePage = () => {
         <div className="flex justify-end gap-2">
           {appointment.status === 'CONSULTATION_STARTED' ? (
             <Button size="sm" onClick={() => router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`)}>Resume</Button>
-          ) : appointment.status === 'COMPLETED' ? (
-            <Badge variant="slate">Consulted</Badge>
           ) : (
-            <Button variant="secondary" size="sm" onClick={() => handleStartConsultation(appointment.id)}>Start Consultation</Button>
+            <Button 
+              variant={appointment.status === 'COMPLETED' ? "ghost" : "secondary"} 
+              size="sm" 
+              onClick={() => handleStartConsultation(appointment.id)}
+            >
+              {appointment.status === 'COMPLETED' ? "Reopen" : "Start Consultation"}
+            </Button>
           )}
           <Button 
             variant="ghost" 
@@ -193,41 +197,13 @@ export const PatientQueuePage = () => {
             columns={columns}
             data={appointments}
             isLoading={loading}
-            onRowDoubleClick={(appointment) => {
-              if (appointment.status === 'CONSULTATION_STARTED') {
-                router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`);
-              } else if (appointment.status !== 'COMPLETED') {
-                handleStartConsultation(appointment.id);
-              }
-            }}
+            onRowDoubleClick={(appointment) => handleStartConsultation(appointment.id)}
             loadingMessage="Loading queue..."
             emptyMessage="No patients in the queue for today."
           />
         </ContentPanel>
 
-        <section className="grid grid-cols-1 gap-6 pb-8 md:grid-cols-3">
-          <div className="flex items-center justify-between rounded-2xl border border-orange-100 bg-orange-50/50 p-8 md:col-span-2">
-            <div>
-              <h4 className="text-sm font-bold uppercase tracking-tight text-orange-900">Next Surgery Scheduled</h4>
-              <p className="mt-1 text-sm font-medium text-orange-700">Laparoscopic Cholecystectomy - 12:30 PM with Team Alpha</p>
-            </div>
-            <Button size="lg">View Details</Button>
-          </div>
-          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
-            <p className="mb-4 text-[10px] font-black uppercase tracking-widest text-slate-400">Average Wait Time</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">18</span>
-              <span className="text-sm font-bold uppercase text-slate-500">mins</span>
-            </div>
-            <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-slate-100">
-              <div className="h-full w-[65%] rounded-full bg-orange-500" />
-            </div>
-            <p className="mt-2 flex items-center gap-1 text-[10px] font-bold text-emerald-600">
-              <span className="material-symbols-outlined text-xs">trending_down</span>
-              5% LOWER THAN YESTERDAY
-            </p>
-          </div>
-        </section>
+
       </PageSurface>
     </MainLayout>
   );

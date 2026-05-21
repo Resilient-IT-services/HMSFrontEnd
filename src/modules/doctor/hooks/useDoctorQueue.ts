@@ -124,6 +124,32 @@ export const useDoctorQueue = () => {
 
   const handleStartConsultation = async (id: string) => {
     try {
+      const appointment = appointments.find(a => a.id === id);
+      
+      if (!appointment) {
+        triggerGlobalToast('Appointment not found', 'error');
+        return;
+      }
+
+      if (appointment.status === 'CONSULTATION_STARTED') {
+        router.push(`/doctor/active-consultation?appointmentId=${id}`);
+        return;
+      }
+
+      const allowedStatuses = ['VITALS_RECORDED', 'COMPLETED'];
+      if (!allowedStatuses.includes(appointment.status)) {
+        const messages: Record<string, string> = {
+          'SCHEDULED': 'Consultation cannot be started as payment is pending/vitals not recorded',
+          'PAYMENT_PENDING': 'Consultation cannot be started as payment is pending',
+          'PAID': 'Consultation cannot be started as vitals are not recorded',
+          'CANCELLED': 'This appointment has been cancelled',
+          'PRESCRIPTION_FINALIZED': 'Prescription has already been finalized for this appointment'
+        };
+        
+        triggerGlobalToast(messages[appointment.status] || 'Consultation cannot be started at this time', 'warning');
+        return;
+      }
+
       const res = await appointmentService.updateStatus(id, { status: 'CONSULTATION_STARTED' });
       if (res.success) {
         router.push(`/doctor/active-consultation?appointmentId=${id}`);
@@ -144,7 +170,7 @@ export const useDoctorQueue = () => {
     let base = appointments;
     base = activeTab === 'TODAY' ? appointments.filter(a => {
         const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
-        return appHospitalDate === hospitalToday && (a.status !== 'COMPLETED' && a.status !== 'CANCELLED');
+        return appHospitalDate === hospitalToday && a.status !== 'CANCELLED';
       }) : appointments.filter(a => {
         const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
         return appHospitalDate > hospitalToday && a.status !== 'CANCELLED';
