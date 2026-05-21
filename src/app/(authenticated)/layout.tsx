@@ -109,8 +109,8 @@ export default function AuthenticatedLayout({
           <main 
             ref={scrollContainerRef}
             className={cn(
-              "flex-1 p-3 lg:p-gutter w-full pb-20 lg:pb-gutter transition-all duration-500 overflow-y-auto",
-              isTopbarVisible ? "pt-20 lg:pt-gutter" : "pt-4 lg:pt-gutter"
+              "flex-1 p-3 lg:p-5 w-full pb-20 lg:pb-5 transition-all duration-500 overflow-y-auto",
+              isTopbarVisible ? "pt-20 lg:pt-5" : "pt-4 lg:pt-5"
             )}
           >
             {children}

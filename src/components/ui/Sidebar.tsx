@@ -10,6 +10,7 @@ import { authService } from '@/services/authService';
 import { getFilteredMenuItems } from '@/lib/navigation';
 import { useLayout } from '@/context/LayoutContext';
 import { cn } from '@/lib/cn';
+import HelpDeskModal from '@/components/HelpDeskModal';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -18,6 +19,7 @@ const Sidebar = () => {
   const { isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const { isSidebarOpen, toggleSidebar } = useLayout();
   const [isHovered, setIsHovered] = React.useState(false);
+  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
 
   const handleLogout = async () => {
     try {
@@ -115,9 +117,11 @@ const Sidebar = () => {
       </nav>
 
       <div className="mt-auto flex flex-col gap-1.5 pt-4 border-t border-gray-100 px-1">
-        <a className={cn(
-          "flex items-center gap-4 px-3 py-3 text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all font-manrope text-sm font-bold rounded-xl cursor-pointer overflow-hidden group/item relative"
-        )}>
+        <button
+            onClick={() => setIsHelpOpen(true)}
+            className={cn(
+                "flex items-center gap-4 px-3 py-3 text-slate-500 hover:bg-slate-50 hover:text-orange-600 transition-all font-manrope text-sm font-bold rounded-xl cursor-pointer overflow-hidden group/item relative w-full"
+            )}>
           <span className="material-symbols-outlined text-2xl shrink-0">help</span>
           <span className={cn(
             "transition-all duration-500 whitespace-nowrap",
@@ -130,7 +134,7 @@ const Sidebar = () => {
               Support
             </div>
           )}
-        </a>
+        </button>
         <button
           onClick={handleLogout}
           className={cn(
@@ -151,6 +155,12 @@ const Sidebar = () => {
           )}
         </button>
       </div>
+
+      <HelpDeskModal
+          isOpen={isHelpOpen}
+          onClose={() => setIsHelpOpen(false)}
+      />
+
     </aside>
   );
 };

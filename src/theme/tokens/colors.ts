@@ -3,8 +3,8 @@ export const colorTokens = {
   primaryHover: '#E55A20',
   primaryLight: '#FFF0EA',
 
-  background: '#f8f6f6',
-  surface: '#FFFFFF',
+  background: '#f4f4f9',
+  surface: '#f9f9ff',
 
   textPrimary: '#0f172a',
   textSecondary: '#64748b',
