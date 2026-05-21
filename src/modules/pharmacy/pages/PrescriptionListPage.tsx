@@ -56,10 +56,7 @@ const PrescriptionListPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="flex items-center px-6 py-3.5 bg-white border border-[var(--border)] text-[var(--text-primary)] font-semibold rounded-xl hover:bg-[var(--background)] transition-colors">
-              <span className="material-symbols-outlined mr-2">filter_list</span>
-              Filters
-            </button>
+
             <Link 
               href="/pharmacy/sales"
               className="flex items-center px-6 py-3.5 bg-orange-700 text-white font-bold rounded-xl hover:bg-orange-800 transition-all shadow-lg shadow-orange-700/20 active:scale-95"
