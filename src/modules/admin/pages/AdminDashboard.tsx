@@ -228,15 +228,6 @@ export const AdminDashboard = () => {
             />
           </ContentPanel>
 
-          {/* Footer */}
-          <footer className="pt-8 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-            <p>© 2026 CareFlow <span className="text-[10px] opacity-70 italic ml-1">by Resilient</span>. All records encrypted via AES-256-GCM.</p>
-            <div className="flex gap-6">
-              <a className="hover:text-orange-700 transition-colors" href="#">Compliance</a>
-              <a className="hover:text-orange-700 transition-colors" href="#">Privacy</a>
-              <a className="hover:text-orange-700 transition-colors" href="#">Security</a>
-            </div>
-          </footer>
         </div>
       </PageSurface>
 
