@@ -222,7 +222,7 @@ export default function QuickPharmacyBillingPage() {
         customerName: saleType === 'WALKIN' ? customerName : selectedPatient?.fullName,
         customerPhone: saleType === 'WALKIN' ? customerPhone : selectedPatient?.phone,
         items: cart.map(item => ({
-          medicineId: item.medicineId,
+          medicineBatchId: item.id,
           quantity: item.selectedQuantity,
         })),
         payment: {

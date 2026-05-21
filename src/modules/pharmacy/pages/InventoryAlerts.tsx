@@ -3,12 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
-import { MedicineResponse } from '@/types/api';
+import { PharmacyStockDTO } from '@/types/api';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 
 export const InventoryAlerts = () => {
-  const [lowStock, setLowStock] = useState<MedicineResponse[]>([]);
-  const [expiring, setExpiring] = useState<MedicineResponse[]>([]);
+  const [lowStock, setLowStock] = useState<PharmacyStockDTO[]>([]);
+  const [expiring, setExpiring] = useState<PharmacyStockDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,12 +16,12 @@ export const InventoryAlerts = () => {
       try {
         setLoading(true);
         const [lowRes, expRes] = await Promise.all([
-          pharmacyApi.getLowStockAlerts(20),
+          pharmacyApi.getLowStockAlerts({ threshold: 20 }),
           pharmacyApi.getExpiryAlerts(30)
         ]);
 
         if (lowRes.success && lowRes.data) {
-          setLowStock(lowRes.data);
+          setLowStock(lowRes.data.content || []);
         }
         
         if (expRes.success && expRes.data) {
@@ -67,11 +67,11 @@ export const InventoryAlerts = () => {
                     {lowStock.map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50/50">
                         <td className="px-6 py-4">
-                          <p className="font-bold text-slate-800 text-sm">{item.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">{item.category}</p>
+                          <p className="font-bold text-slate-800 text-sm">{item.medicineName}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase">Batch: {item.batchNumber}</p>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className={`text-sm font-black ${item.currentStock === 0 ? 'text-red-600' : 'text-orange-600'}`}>{item.currentStock} Units</span>
+                          <span className={`text-sm font-black ${item.quantity === 0 ? 'text-red-600' : 'text-orange-600'}`}>{item.quantity} Units</span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button className="text-[10px] font-black text-orange-700 uppercase tracking-widest hover:underline">Restock</button>
@@ -110,11 +110,11 @@ export const InventoryAlerts = () => {
                     {expiring.map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50/50">
                         <td className="px-6 py-4">
-                          <p className="font-bold text-slate-800 text-sm">{item.name}</p>
+                          <p className="font-bold text-slate-800 text-sm">{item.medicineName}</p>
                           <p className="text-[10px] text-slate-400 font-bold uppercase">Batch: {item.batchNumber}</p>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="text-sm font-black text-red-600">{item.expiryDate}</span>
+                          <span className="text-sm font-black text-red-600">{new Date(item.expiryDate).toLocaleDateString()}</span>
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button className="text-[10px] font-black text-red-700 uppercase tracking-widest hover:underline">Remove</button>
