@@ -12,12 +12,14 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 
+import { ContentPanel } from '@/components/ui/ContentPanel';
+import { SearchInput } from '@/components/ui/SearchInput';
+
 import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 
 import { Table, Column } from '@/components/ui/Table';
 import { Avatar } from '@/components/ui/Avatar';
-import { InfoRow } from '@/components/ui/InfoRow';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
@@ -51,7 +53,9 @@ export const MedicineInventory = () => {
       if (response.success && response.data) {
         setMedicines(response.data.content);
         setTotalMedicines(response.data.totalElements);
-        if (response.data.content.length > 0 && !selectedMedicine) {
+        
+        // Auto-select first medicine if none selected and it's the first page
+        if (response.data.content.length > 0 && !selectedMedicine && page === 0) {
           const firstId = response.data.content[0].id;
           const detailRes = await pharmacyApi.getMedicineById(firstId);
           if (detailRes.success && detailRes.data) {
@@ -69,7 +73,7 @@ export const MedicineInventory = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, pageSize, selectedMedicine]); // Added selectedMedicine to dependencies
+  }, [debouncedSearch, page, pageSize]); // Removed selectedMedicine from dependencies
 
   useEffect(() => {
     const trigger = async () => {
@@ -88,7 +92,25 @@ export const MedicineInventory = () => {
     setPage(0);
   };
 
+  const handleRowClick = async (m: MedicineSummaryDTO) => {
+    try {
+      const detailRes = await pharmacyApi.getMedicineById(m.id);
+      if (detailRes.success && detailRes.data) {
+        setSelectedMedicine(detailRes.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch medicine details:', error);
+    }
+  };
+
   const openEditModal = async (id: string) => {
+    // If clicking edit, we should ensure the selectedMedicine is updated first if it's not the same
+    if (selectedMedicine?.id !== id) {
+      const detailRes = await pharmacyApi.getMedicineById(id);
+      if (detailRes.success && detailRes.data) {
+        setSelectedMedicine(detailRes.data);
+      }
+    }
     setShowEditModal(true);
   };
 
@@ -199,51 +221,49 @@ export const MedicineInventory = () => {
         <PageHeading
           title="Medicine Master Catalog"
           description="Manage and monitor the central medicine inventory and pharmaceutical master data."
-        />
+        >
+          <div className="flex gap-2">
+            <Button variant="secondary" icon="file_upload" onClick={() => setShowImportModal(true)}>
+              Import
+            </Button>
+            <Button icon="add" onClick={() => setShowAddModal(true)}>
+              Add Medicine
+            </Button>
+          </div>
+        </PageHeading>
 
-        <div className="grid grid-cols-1 xl:grid-cols-1 gap-8">
-          <div className="xl:col-span-2 space-y-6">
-            {/* Stats & Actions */}
-            <Card className="p-4">
-              <div className="flex flex-col md:flex-row gap-4 items-center">
-                <div className="flex-1 relative w-full">
-                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                  <input
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-orange-500/10 transition-all font-inter"
-                    placeholder="Search catalog..."
-                    type="text"
+        <ContentPanel
+          toolbar={(
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-1 items-center gap-4">
+                <div className="w-full max-w-xl">
+                  <SearchInput
+                    placeholder="Search catalog by medicine name, generic name..."
                     value={searchTerm}
                     onChange={(e) => handleSearchChange(e.target.value)}
                   />
                 </div>
-                <div className="flex gap-2">
-                  <Button variant="secondary" icon="file_upload" onClick={() => setShowImportModal(true)} />
-                  <Button icon="add" onClick={() => setShowAddModal(true)}>
-                    Add Medicine
-                  </Button>
-                </div>
               </div>
-            </Card>
-
-            <Card className="p-0 overflow-hidden">
-              <Table
-                columns={columns}
-                data={medicines}
-                isLoading={loading}
-                rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : ''}
-              />
-              <Pagination
-                page={page}
-                totalElements={totalMedicines}
-                pageSize={pageSize}
-                onPageChange={setPage}
-                onPageSizeChange={handlePageSizeChange}
-                label="medicines"
-              />
-            </Card>
-          </div>
-
-        </div>
+              <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => fetchMedicines()} />
+            </div>
+          )}
+        >
+          <Table
+            columns={columns}
+            data={medicines}
+            isLoading={loading}
+            onRowClick={handleRowClick}
+            rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : ''}
+          />
+          <Pagination
+            page={page}
+            totalElements={totalMedicines}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={handlePageSizeChange}
+            label="medicines"
+          />
+        </ContentPanel>
 
         {/* Excel Import Modal */}
         {showImportModal && (
