@@ -180,37 +180,7 @@ export function HospitalList() {
           />
         </ContentPanel>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card 
-            title="Regional Coverage" 
-            className="lg:col-span-2" 
-            headerActions={<Badge variant="orange">Live Map View</Badge>}
-          >
-            <div className="relative h-64 w-full overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#ad2c00 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <p className="text-xs font-bold uppercase tracking-widest italic text-slate-400 opacity-50">Interactive Network Map Engine</p>
-              </div>
-              <div className="absolute left-1/3 top-1/4 h-3 w-3 animate-pulse rounded-full bg-orange-700 ring-4 ring-orange-700/20" />
-              <div className="absolute right-1/4 top-2/3 h-3 w-3 animate-pulse rounded-full bg-orange-700 ring-4 ring-orange-700/20" />
-              <div className="absolute bottom-1/4 left-1/2 h-3 w-3 animate-pulse rounded-full bg-orange-700 ring-4 ring-orange-700/20" />
-            </div>
-          </Card>
 
-          <Card className="relative overflow-hidden bg-orange-700 border-none text-white p-8 flex flex-col justify-end shadow-lg shadow-orange-700/20 min-h-[250px] group">
-            <div className="relative z-10 h-full flex flex-col justify-between">
-              <div>
-                <span className="material-symbols-outlined mb-4 text-4xl">verified_user</span>
-                <h4 className="mb-2 font-manrope text-xl font-bold uppercase">Compliance Alert</h4>
-                <p className="text-sm font-medium leading-relaxed text-white/80">3 facilities in the South Basin region require mandatory safety audit renewals by the end of this quarter.</p>
-              </div>
-              <Button variant="secondary" fullWidth className="mt-8">
-                View Audit Schedule
-              </Button>
-            </div>
-            <div className="absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-white/10 blur-3xl" />
-          </Card>
-        </div>
       </PageSurface>
 
       {isModalOpen && selectedHospital && (
