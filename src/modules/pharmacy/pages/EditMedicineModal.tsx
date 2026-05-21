@@ -62,13 +62,13 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
       size="2xl"
     >
       <form onSubmit={handleSubmit} className="p-8 space-y-8">
-        <div className="bg-blue-50 p-6 rounded-[1.5rem] border border-blue-100 flex items-center gap-4">
-          <div className="w-12 h-12 bg-blue-700 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-700/20 shrink-0">
+        <div className="bg-orange-50 p-6 rounded-[1.5rem] border border-orange-100 flex items-center gap-4">
+          <div className="w-12 h-12 bg-orange-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-700/20 shrink-0">
             <span className="material-symbols-outlined">edit</span>
           </div>
           <div>
-            <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight leading-none mb-1">Update Master Catalog</h4>
-            <p className="text-xs text-blue-800 font-medium">Modify existing pharmaceutical product details in the system.</p>
+            <h4 className="text-sm font-black text-slate-700 uppercase tracking-tight leading-none mb-1">Update Master Catalog</h4>
+            <p className="text-xs text-slate-500 font-medium">Modify existing pharmaceutical product details in the system.</p>
           </div>
         </div>
 
@@ -80,7 +80,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-300 outline-none transition-all font-bold"
               placeholder="e.g. Paracetamol 500mg" 
               type="text"
             />
@@ -92,7 +92,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="genericName"
               value={formData.genericName}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold"
               placeholder="e.g. Acetaminophen" 
               type="text"
             />
@@ -104,7 +104,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="strength"
               value={formData.strength}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold"
               placeholder="e.g. 500mg, 5ml" 
               type="text"
             />
@@ -117,7 +117,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               value={formData.composition}
               onChange={handleChange}
               rows={2}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold resize-none" 
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none"
               placeholder="List chemical composition..." 
             />
           </div>
@@ -128,7 +128,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="form"
               value={formData.form}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
               {MEDICINE_FORM_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -142,7 +142,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="scheduleType"
               value={formData.scheduleType}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
             >
               {MEDICINE_SCHEDULE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
@@ -156,7 +156,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="manufacturer"
               value={formData.manufacturer}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-bold" 
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold"
               placeholder="e.g. PharmaCorp India" 
               type="text"
             />
@@ -174,7 +174,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
           <button 
             type="submit"
             disabled={loading}
-            className="px-10 py-3.5 rounded-2xl bg-blue-700 font-black text-xs uppercase tracking-widest text-white hover:bg-blue-800 transition-all shadow-xl shadow-blue-700/20 active:scale-95 flex items-center gap-2 disabled:opacity-50"
+            className="px-10 py-3.5 rounded-2xl bg-orange-600 font-black text-xs uppercase tracking-widest text-white hover:bg-orange-600 transition-all shadow-xl shadow-blue-700/20 active:scale-95 flex items-center gap-2 disabled:opacity-50"
           >
             {loading ? (
               <span className="material-symbols-outlined animate-spin text-[20px]">sync</span>
