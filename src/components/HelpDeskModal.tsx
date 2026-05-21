@@ -16,7 +16,7 @@ const HelpDeskModal: React.FC<Props> = ({ isOpen, onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md transition-all">
 
             {/* Modal Card */}
-            <div className="relative w-full max-w-lg bg-[var(--surface)] rounded-2xl shadow-2xl border border-[var(--primary)]/10 overflow-hidden animate-[fadeIn_0.3s_ease]">
+            <div className="relative w-[90%] md:w-[550px] max-h-[85vh] overflow-y-auto bg-[var(--surface)] rounded-2xl shadow-2xl border border-[var(--primary)]/10 overflow-hidden animate-[fadeIn_0.3s_ease]">
 
                 {/* Top Gradient Header */}
                 <div className="bg-gradient-to-r from-[var(--primary)] to-orange-200 p-6 text-white">
