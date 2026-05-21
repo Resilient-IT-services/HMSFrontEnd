@@ -29,6 +29,8 @@ export const UserManagementPage = () => {
     setSearchTerm,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements,
     roleFilter,
     setRoleFilter,
@@ -219,8 +221,9 @@ export const UserManagementPage = () => {
           <Pagination
             page={page}
             totalElements={totalElements}
-            pageSize={10}
+            pageSize={pageSize}
             onPageChange={setPage}
+            onPageSizeChange={setPageSize}
             label="staff members"
           />
         </ContentPanel>

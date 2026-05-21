@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { pharmacyService } from '@/services/pharmacyService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { MedicineResponse } from '@/types/api';
@@ -12,7 +12,10 @@ export const useMedicines = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
-  
+
+  const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+
   const [showImportModal, setShowImportModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -22,11 +25,15 @@ export const useMedicines = () => {
   const fetchMedicines = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await pharmacyService.listMedicines({ search: debouncedSearch, size: 2000 });
+      const response = await pharmacyService.listMedicines({ 
+        search: debouncedSearch, 
+        page: page,
+        size: pageSize 
+      });
       if (response.success && response.data) {
         setMedicines(response.data.content);
         setTotalMedicines(response.data.totalElements);
-        if (response.data.content.length > 0 && !selectedMedicine) {
+        if (response.data.content.length > 0 && !selectedMedicine && page === 0) {
           setSelectedMedicine(response.data.content[0]);
         }
       }
@@ -36,7 +43,7 @@ export const useMedicines = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, selectedMedicine]);
+  }, [debouncedSearch, page, pageSize, selectedMedicine]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -44,6 +51,16 @@ export const useMedicines = () => {
     };
     void trigger();
   }, [fetchMedicines]);
+
+  const handleSearchTermChange = (term: string) => {
+    setSearchTerm(term);
+    setPage(0);
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -98,7 +115,11 @@ export const useMedicines = () => {
     totalMedicines,
     loading,
     searchTerm,
-    setSearchTerm,
+    setSearchTerm: handleSearchTermChange,
+    page,
+    setPage,
+    pageSize,
+    setPageSize: handlePageSizeChange,
     showImportModal,
     setShowImportModal,
     showAddModal,

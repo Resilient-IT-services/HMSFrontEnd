@@ -91,7 +91,7 @@ describe('PatientQueuePage', () => {
     expect(elements.length).toBeGreaterThan(0);
   });
 
-  it('filters out completed appointments from the list', async () => {
+  it('shows completed appointments in the list', async () => {
     const mockAppointments = [
       {
         id: '1',
@@ -130,8 +130,11 @@ describe('PatientQueuePage', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText('Alice Smith')[0]).toBeInTheDocument();
-      expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
+      expect(screen.getAllByText('Bob Jones')[0]).toBeInTheDocument();
     });
+
+    // Check for Reopen button for completed appointment
+    expect(screen.getAllByText('Reopen')[0]).toBeInTheDocument();
 
     // Stats should still show completed count
     expect(screen.getAllByText('Completed')[0]).toBeInTheDocument();
