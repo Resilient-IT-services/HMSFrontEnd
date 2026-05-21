@@ -185,45 +185,87 @@ export const BillingPage = () => {
             </Card>
 
             {/* Cost Breakdown */}
-            <Card title="Financial Breakdown" icon="payments" className="op-bill-card w-full border-slate-100 shadow-sm">
-              <div className="w-full space-y-4">
-                <div className="flex items-center justify-between gap-4">
+            <Card title="Financial Breakdown" icon="payments" className="op-bill-card">
+              <div className="space-y-4">
+
+                {/* Base Fee */}
+                <div className="flex justify-between items-center">
                   <span className="text-xs sm:text-sm font-bold text-slate-600">Base Fee</span>
-                  <span className="font-black text-slate-900">₹{(invoice?.subtotalAmount ?? consultationFee).toFixed(2)}</span>
+                  <span className="font-black text-slate-900">
+        ₹{(invoice?.subtotalAmount ?? consultationFee).toFixed(2)}
+      </span>
                 </div>
-                <div className="flex items-center justify-between gap-4 py-1 sm:py-2">
+
+                {/* Discount */}
+                <div className="flex justify-between items-center py-1 sm:py-2">
                   <span className="text-xs sm:text-sm font-bold text-slate-600">Discount</span>
+
                   {appointment.status === 'PAYMENT_PENDING' ? (
-                    <div className="relative">
-                      <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px]">₹</span>
-                      <input 
-                        type="number"
-                        className="w-24 sm:w-32 pl-6 sm:pl-7 pr-2 sm:pr-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all text-sm"
-                        value={discount}
-                        onChange={(e) => setDiscount(Number(e.target.value))}
-                      />
-                    </div>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-black text-[10px]">₹</span>
+
+                        <input
+                            type="number"
+                            min="0"
+                            max={invoice?.subtotalAmount ?? consultationFee}
+                            className="w-24 sm:w-32 pl-6 sm:pl-7 pr-2 sm:pr-3 py-1.5 sm:py-2 bg-slate-50 border border-slate-200 rounded-lg text-right font-black text-slate-900 focus:ring-2 focus:ring-orange-200 outline-none transition-all text-sm"
+
+                            value={discount}
+
+                            onChange={(e) => {
+                              let value = Number(e.target.value);
+
+                              // handle NaN / empty
+                              if (isNaN(value)) value = 0;
+
+                              // block negative
+                              if (value < 0) value = 0;
+
+                              // block over-discount
+                              const base = invoice?.subtotalAmount ?? consultationFee;
+                              if (value > base) value = base;
+
+                              setDiscount(value);
+                            }}
+                        />
+                      </div>
                   ) : (
-                    <span className="font-black text-emerald-600">- ₹{(invoice?.discountAmount ?? discount).toFixed(2)}</span>
+                      <span className="font-black text-emerald-600">
+          - ₹{Math.max(0, (invoice?.discountAmount ?? discount)).toFixed(2)}
+        </span>
                   )}
                 </div>
+
+                {/* Amount Paid */}
                 {isPaid && (
-                   <div className="flex items-center justify-between gap-4 border-t border-slate-100 py-1 pt-3">
-                     <span className="text-xs sm:text-sm font-bold text-slate-500">Amount Paid</span>
-                     <span className="font-black text-emerald-700">₹{(invoice?.amountPaid ?? total).toFixed(2)}</span>
-                   </div>
+                    <div className="flex justify-between items-center py-1 border-t border-slate-50 pt-3">
+                      <span className="text-xs sm:text-sm font-bold text-slate-500">Amount Paid</span>
+                      <span className="font-black text-emerald-700">
+          ₹{(invoice?.amountPaid ?? total).toFixed(2)}
+        </span>
+                    </div>
                 )}
-                <div className="mt-4 flex flex-col items-start justify-between gap-3 border-t border-slate-100 pt-4 sm:mt-6 sm:flex-row sm:items-end sm:pt-6">
+
+                {/* Total */}
+                <div className="pt-4 sm:pt-6 border-t border-slate-100 mt-4 sm:mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-2">
                   <div>
                     <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                       {isPaid ? 'Balance Due' : 'Total Net Payable'}
                     </p>
-                    <p className="text-[10px] sm:text-sm font-bold text-slate-500 italic">Inclusive of all medical charges</p>
+                    <p className="text-[10px] sm:text-sm font-bold text-slate-500 italic">
+                      Inclusive of all medical charges
+                    </p>
                   </div>
-                  <span className={`text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl ${isPaid && (invoice?.amountDue ?? 0) <= 0 ? 'text-emerald-600' : 'text-orange-600'}`}>
-                    ₹{(isPaid ? (invoice?.amountDue ?? 0) : total).toFixed(2)}
-                  </span>
+
+                  <span className={`text-3xl sm:text-4xl font-black tracking-tighter ${
+                      isPaid && (invoice?.amountDue ?? 0) <= 0
+                          ? 'text-emerald-600'
+                          : 'text-orange-600'
+                  }`}>
+        ₹{(isPaid ? (invoice?.amountDue ?? 0) : total).toFixed(2)}
+      </span>
                 </div>
+
               </div>
             </Card>
 
@@ -284,7 +326,7 @@ export const BillingPage = () => {
                 <Button 
                   variant="secondary" 
                   size="lg" 
-                  icon="receipt_long" 
+                  icon="receipt_long" FF
                   onClick={generateBill}
                   className="w-full text-[10px] font-black uppercase sm:w-auto sm:flex-none"
                 >
