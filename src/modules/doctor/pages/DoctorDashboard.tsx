@@ -183,13 +183,8 @@ export const DoctorDashboard = () => {
         );
       }
     },
-    {
-      header: '',
-      render: () => (
-        <Button variant="ghost" size="sm" icon="more_vert" className="text-slate-300 hover:text-orange-600" />
-      ),
-      className: 'text-right'
-    }
+
+
   ];
 
   const metricItems = [
@@ -229,15 +224,16 @@ export const DoctorDashboard = () => {
     {
       label: "Today's Earnings",
       value: (
-        <>
-          <span>{`₹${stats.earnings}`}</span>
-          <span className="sr-only">{`₹${stats.earnings}`}</span>
-        </>
+          <>
+            <span>{`₹${stats.earnings}`}</span>
+            <span className="sr-only">{`₹${stats.earnings}`}</span>
+          </>
       ),
       variant: 'indigo' as const,
       icon: 'payments',
       layout: 'compact' as const,
-      progressBar: 100
+      progressBar: 100,
+      onClick: () => router.push('/doctor/earnings')
     }
   ];
 
