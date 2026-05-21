@@ -88,7 +88,7 @@ export function DoctorList() {
   return (
     <MainLayout title="Medical Staff">
       <div className="space-y-6 overflow-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
            <Card className="lg:col-span-3">
               <div className="flex flex-col lg:flex-row gap-4 mb-6">
                 <div className="flex-1 relative">
@@ -132,36 +132,29 @@ export function DoctorList() {
               />
            </Card>
 
-           <div className="space-y-6">
-              <Card className="p-4">
-                 <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-4 opacity-50 text-center">Duty Overview</h3>
-                 <div className="space-y-3">
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--success-light)]/30 border border-[var(--success)]/10">
-                       <span className="text-[10px] font-bold text-[var(--success)] uppercase">On Duty</span>
-                       <span className="text-lg font-black text-[var(--text-primary)]">{doctors.length}</span>
-                    </div>
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--warning-light)]/30 border border-[var(--warning)]/10">
-                       <span className="text-[10px] font-bold text-[var(--warning)] uppercase">In Surgery</span>
-                       <span className="text-lg font-black text-[var(--text-primary)]">0</span>
-                    </div>
-                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--error-light)]/30 border border-[var(--error)]/10">
-                       <span className="text-[10px] font-bold text-[var(--error)] uppercase">Off Duty</span>
-                       <span className="text-lg font-black text-[var(--text-primary)]">0</span>
-                    </div>
-                 </div>
-              </Card>
 
-              <Card className="bg-[var(--primary)] text-white overflow-hidden relative group p-5">
-                 <div className="relative z-10">
-                    <h4 className="text-base font-black uppercase italic leading-tight mb-2">Staff Roster</h4>
-                    <p className="text-white/70 text-[10px] font-medium mb-4">Daily staff schedules are synced from HRMS.</p>
-                    <button className="w-full py-2 bg-white/20 rounded-lg text-[10px] font-black uppercase hover:bg-white/30 transition-all">View Full</button>
-                 </div>
-                 <Stethoscope className="absolute -right-4 -bottom-4 size-24 text-white/10 group-hover:scale-110 transition-transform duration-500" />
-              </Card>
+              {/*<Card className="p-4">*/}
+              {/*   <h3 className="text-[10px] font-black uppercase tracking-widest text-[var(--text-secondary)] mb-4 opacity-50 text-center">Duty Overview</h3>*/}
+              {/*   <div className="space-y-3">*/}
+              {/*      <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--success-light)]/30 border border-[var(--success)]/10">*/}
+              {/*         <span className="text-[10px] font-bold text-[var(--success)] uppercase">On Duty</span>*/}
+              {/*         <span className="text-lg font-black text-[var(--text-primary)]">{doctors.length}</span>*/}
+              {/*      </div>*/}
+              {/*      <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--warning-light)]/30 border border-[var(--warning)]/10">*/}
+              {/*         <span className="text-[10px] font-bold text-[var(--warning)] uppercase">In Surgery</span>*/}
+              {/*         <span className="text-lg font-black text-[var(--text-primary)]">0</span>*/}
+              {/*      </div>*/}
+              {/*      <div className="flex items-center justify-between p-2.5 rounded-xl bg-[var(--error-light)]/30 border border-[var(--error)]/10">*/}
+              {/*         <span className="text-[10px] font-bold text-[var(--error)] uppercase">Off Duty</span>*/}
+              {/*         <span className="text-lg font-black text-[var(--text-primary)]">0</span>*/}
+              {/*      </div>*/}
+              {/*   </div>*/}
+              {/*</Card>*/}
+
+
            </div>
         </div>
-      </div>
+
 
       {/* Doctor Schedule Modal */}
       <Modal 
