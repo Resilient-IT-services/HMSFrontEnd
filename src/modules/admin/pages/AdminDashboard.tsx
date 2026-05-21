@@ -159,8 +159,8 @@ export const AdminDashboard = () => {
           description="Real-time health indicators and administrative network status."
           className="hidden md:flex"
         >
-          <Button variant="secondary" icon="calendar_today">
-            Last 30 Days
+          <Button variant="secondary" icon="person_add"  onClick={() => router.push('/admin/users/create')}>Hire User
+
           </Button>
           <Button 
             onClick={() => router.push('/super_admin/hospitals')}
@@ -227,7 +227,7 @@ export const AdminDashboard = () => {
             {/* Main Table Area */}
             <Card 
               title="Network Activity" 
-              className="lg:col-span-8 p-0 overflow-hidden"
+              className="lg:col-span-15 p-0 overflow-hidden"
               headerActions={
                 <Button variant="ghost" size="sm" onClick={() => router.push('/super_admin/hospitals')}>
                   View All Records
@@ -280,54 +280,7 @@ export const AdminDashboard = () => {
               />
             </Card>
 
-            {/* Sidebar Info */}
-            <div className="lg:col-span-4 space-y-6">
-              <Card title="Quick Actions">
-                <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
-                  {[
-                    { label: 'New Branch', icon: 'add_business', href: '/super_admin/hospitals' },
-                    { label: 'Hire Admin', icon: 'person_add', href: '/admin/users/create' },
-                    { label: 'Audit Logs', icon: 'analytics', href: '#' },
-                    { label: 'Backups', icon: 'cloud_download', href: '#' }
-                  ].map((act, i) => (
-                    <Button 
-                      key={i} 
-                      variant="secondary"
-                      onClick={() => act.href !== '#' && router.push(act.href)}
-                      className="flex-col h-auto py-4 px-2 active:bg-orange-50 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-slate-400 group-hover:text-orange-700 mb-2">{act.icon}</span>
-                      <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">{act.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              </Card>
 
-              <Card className="bg-orange-700 border-none shadow-lg relative overflow-hidden group min-h-[160px] flex flex-col justify-center">
-                <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent pointer-events-none"></div>
-                <div className="relative z-10 text-white p-2">
-                  <div className="flex items-center justify-between mb-4 md:mb-6">
-                    <h3 className="text-lg md:text-xl font-bold font-manrope leading-none">System Integrity</h3>
-                    <span className="material-symbols-outlined text-white/50">verified_user</span>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-[10px] font-black mb-1.5 opacity-80 uppercase tracking-[0.15em]">Server Load</div>
-                      <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full w-[42%] shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
-                      </div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-[10px] font-black mb-1.5 opacity-80 uppercase tracking-[0.15em]">DB Latency</div>
-                      <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                        <div className="h-full bg-white rounded-full w-[12%] shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-6 text-[10px] md:text-[11px] leading-relaxed opacity-70 font-medium">All clusters are performing within optimal parameters. No outages reported in the last 72 hours.</p>
-                </div>
-              </Card>
-            </div>
           </div>
 
           {/* Footer */}
