@@ -56,7 +56,7 @@ const MedicineSearchInput = ({
 
       setLoading(true);
       try {
-        const res = await pharmacyApi.getMedicineStock({ search: trimmedSearch, size: 5 });
+        const res = await pharmacyApi.getMedicinesSummary({ search: trimmedSearch, size: 10 });
         if (res.success && res.data) {
           lastFetchedSearch.current = trimmedSearch;
           setResults(res.data.content || []);
@@ -87,10 +87,8 @@ const MedicineSearchInput = ({
     <div className="relative w-full" ref={wrapperRef}>
       <input
         type="text"
-        className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none transition-all ${
-          inStock ? 'border-slate-200 text-slate-900' : 'border-red-200 text-red-900 pr-16'
-        }`}
-        placeholder="Search medicine..."
+        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none transition-all text-slate-900"
+        placeholder="Search global medicine master..."
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -100,17 +98,11 @@ const MedicineSearchInput = ({
         onFocus={() => setShowResults(true)}
       />
       
-      {!inStock && !showResults && searchTerm && (
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-black text-red-600 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded border border-red-100 pointer-events-none">
-          No Stock
-        </span>
-      )}
-
       {showResults && (searchTerm.length >= 2 || results.length > 0) && (
         <div className="absolute z-[100] w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
-          {loading && <div className="p-3 text-xs text-slate-400 font-bold italic">Searching...</div>}
+          {loading && <div className="p-3 text-xs text-slate-400 font-bold italic">Searching Master...</div>}
           {!loading && results.length === 0 && searchTerm.length >= 2 && (
-            <div className="p-3 text-xs text-slate-400 font-bold">No matches found. Using manual entry.</div>
+            <div className="p-3 text-xs text-slate-400 font-bold">No matches found in master. Using manual entry.</div>
           )}
           {results.map((med) => (
             <button
@@ -122,16 +114,16 @@ const MedicineSearchInput = ({
               }}
             >
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{med.medicineName || med.name}</span>
+                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{med.name}</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{med.genericName || med.category}</span>
               </div>
               <div className="flex flex-col items-end shrink-0 ml-3">
                 <div className="flex items-center gap-1">
-                  <span className={`text-[10px] font-black ${(med.totalQuantity || med.quantity) > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                    Stock: {med.totalQuantity || med.quantity || 0}
+                  <span className="text-[10px] font-black text-slate-500 uppercase">
+                    {med.form}
                   </span>
                 </div>
-                {med.form && <span className="text-[8px] text-slate-400 font-bold mt-0.5 uppercase">{med.form}</span>}
+                {med.manufacturer && <span className="text-[8px] text-slate-400 font-bold mt-0.5 uppercase truncate max-w-[100px]">{med.manufacturer}</span>}
               </div>
             </button>
           ))}

@@ -20,6 +20,8 @@ interface BillItem {
   quantity: number;
   price: number;
   isManual: boolean;
+  outOfStock: boolean;
+  totalAvailable: number;
 }
 
 interface PrescriptionDetailPageProps {
@@ -34,32 +36,44 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
   const [dispensing, setDispensing] = useState(false);
   const [billItems, setBillItems] = useState<BillItem[]>([]);
 
-  // Robust price resolver
-  const resolvePrice = async (medicineId: string, medicineName: string) => {
+  // Robust price & stock resolver
+  const resolveStockAndPrice = async (medicineId: string, medicineName: string) => {
     let price = 0;
+    let totalAvailable = 0;
+    
     try {
-      // 1. Try Medicine Master
-      const medRes = await pharmacyApi.getMedicineById(medicineId);
-      if (medRes.success && medRes.data) {
-        // MedicineResponse uses sellingPrice/purchasePrice, not price
-        price = medRes.data.sellingPrice || medRes.data.purchasePrice || 0;
+      // 1. Check Stock first
+      const stockRes = await pharmacyApi.getMedicineStock({ 
+        medicineId: medicineId || undefined,
+        search: medicineId ? undefined : medicineName 
+      });
+
+      if (stockRes.success && stockRes.data?.content) {
+        // If searched by name, filter carefully
+        const matches = medicineId 
+          ? stockRes.data.content 
+          : stockRes.data.content.filter(s => s.medicineName.toLowerCase() === medicineName.toLowerCase());
+        
+        totalAvailable = matches.reduce((acc, s) => acc + (s.quantity || 0), 0);
+        
+        if (totalAvailable > 0) {
+          const firstAvailable = matches.find(s => (s.quantity || 0) > 0);
+          price = firstAvailable?.sellingPrice || firstAvailable?.price || 0;
+        }
       }
       
-      // 2. Fallback to Stock if still 0
-      if (price === 0) {
-        const stockRes = await pharmacyApi.getMedicineStock({ search: medicineName });
-        if (stockRes.success && stockRes.data?.content) {
-          const matchedStock = stockRes.data.content.find(s => s.medicineId === medicineId);
-          if (matchedStock) {
-            // PharmacyStockDTO does have price
-            price = matchedStock.sellingPrice || matchedStock.price || matchedStock.purchasePrice || 0;
-          }
+      // 2. Fallback to Medicine Master for price if stock is 0 or price not in stock record
+      if (price === 0 && medicineId) {
+        const medRes = await pharmacyApi.getMedicineById(medicineId);
+        if (medRes.success && medRes.data) {
+          price = medRes.data.sellingPrice || medRes.data.purchasePrice || 0;
         }
       }
     } catch (error) {
-      console.error('Price resolution failed', error);
+      console.error('Stock/Price resolution failed', error);
     }
-    return price;
+    
+    return { price, totalAvailable, outOfStock: totalAvailable === 0 };
   };
 
   // Initial Load & Persistence
@@ -79,16 +93,18 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
           } else {
             // Initialize from prescription
             const items = await Promise.all(rxRes.data.items.map(async (item, idx) => {
-              const price = await resolvePrice(item.medicineId || '', item.medicineName);
+              const { price, totalAvailable, outOfStock } = await resolveStockAndPrice(item.medicineId || '', item.medicineName);
               return {
                 key: `api-${item.medicineId || idx}-${Date.now()}`,
                 id: item.medicineId || '',
                 name: item.medicineName,
                 dosage: item.dosage,
                 duration: item.duration,
-                quantity: 1,
+                quantity: outOfStock ? 0 : 1,
                 price: price,
-                isManual: false
+                isManual: false,
+                outOfStock,
+                totalAvailable
               };
             }));
             setBillItems(items);
@@ -112,14 +128,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
   }, [billItems, id]);
 
   const handleAddMedicine = async (medicine: MedicineResponse) => {
-    console.log('Adding medicine:', medicine);
-    // Use sellingPrice from MedicineResponse
-    let price = medicine.sellingPrice || medicine.purchasePrice || 0;
-    
-    // Double check if price is 0
-    if (price === 0 && medicine.id) {
-      price = await resolvePrice(medicine.id, medicine.name);
-    }
+    const { price, totalAvailable, outOfStock } = await resolveStockAndPrice(medicine.id, medicine.name);
 
     const newItem: BillItem = {
       key: `manual-${medicine.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -127,13 +136,19 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
       name: medicine.name,
       dosage: '-',
       duration: '-',
-      quantity: 1,
+      quantity: outOfStock ? 0 : 1,
       price: price,
-      isManual: true
+      isManual: true,
+      outOfStock,
+      totalAvailable
     };
 
     setBillItems(prev => [...prev, newItem]);
-    triggerGlobalToast(`${medicine.name} added to bill`, 'success');
+    if (outOfStock) {
+      triggerGlobalToast(`${medicine.name} is currently out of stock`, 'warning');
+    } else {
+      triggerGlobalToast(`${medicine.name} added to bill`, 'success');
+    }
   };
 
   const handleRemoveItem = (key: string) => {
@@ -145,7 +160,17 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
   };
 
   const handleQuantityChange = (key: string, value: string) => {
+    const item = billItems.find(i => i.key === key);
+    if (item?.outOfStock) return; // Prevent modification if out of stock
+
     const qty = Math.max(0, Number.parseInt(value) || 0);
+    
+    // Optional: cap at totalAvailable
+    if (item && qty > item.totalAvailable) {
+      triggerGlobalToast(`Only ${item.totalAvailable} units available in stock`, 'warning');
+      return;
+    }
+
     setBillItems(prev => prev.map(item => 
       item.key === key ? { ...item, quantity: qty } : item
     ));
@@ -160,11 +185,16 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
   const handleDispense = async () => {
     if (!id || !prescription) return;
 
-    // Filter valid items
-    const validItems = billItems.filter(item => item.id && item.id.trim() !== '');
+    // Filter valid items: must have ID, not be out of stock, and have quantity > 0
+    const validItems = billItems.filter(item => 
+      item.id && 
+      item.id.trim() !== '' && 
+      !item.outOfStock && 
+      item.quantity > 0
+    );
     
     if (validItems.length === 0) {
-      triggerGlobalToast('No valid medicines selected from catalog. Please add medicines from the search box.', 'error');
+      triggerGlobalToast('No valid in-stock medicines selected. Out-of-stock items cannot be dispensed.', 'error');
       return;
     }
     
@@ -189,7 +219,11 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
         sessionStorage.removeItem(`rx_draft_${id}`);
         // Refresh prescription data
         const rxRes = await pharmacyApi.getPrescriptionById(id);
-        if (rxRes.success && rxRes.data) setPrescription(rxRes.data);
+        if (rxRes.success && rxRes.data) {
+          setPrescription(rxRes.data);
+          // Re-initialize bill items to reflect new stock levels or completion
+          router.refresh();
+        }
       } else {
         triggerGlobalToast(res.message || 'Dispensing failed', 'error');
       }
@@ -272,11 +306,14 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
             <div className="p-6">
               <div className="space-y-3">
                 {billItems.map((item) => (
-                  <div key={item.key} className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:border-orange-200 transition-colors group">
+                  <div key={item.key} className={`flex items-center gap-4 p-4 border rounded-xl transition-colors group ${
+                    item.outOfStock ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200 hover:border-orange-200'
+                  }`}>
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-bold text-slate-900">{item.name}</p>
+                        <p className={`text-sm font-bold ${item.outOfStock ? 'text-slate-500' : 'text-slate-900'}`}>{item.name}</p>
                         {item.isManual && <Badge variant="blue" className="text-[8px]">Manual</Badge>}
+                        {item.outOfStock && <Badge variant="red" className="text-[8px] uppercase">Out of Stock</Badge>}
                       </div>
                       <p className="text-[10px] text-slate-400 font-bold uppercase">{item.dosage} • {item.duration}</p>
                     </div>
@@ -286,15 +323,18 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                         type="number" 
                         value={item.quantity} 
                         onChange={(e) => handleQuantityChange(item.key, e.target.value)}
-                        className="w-14 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-sm text-center font-bold outline-none focus:border-orange-500"
+                        className={`w-14 px-2 py-1 border rounded text-sm text-center font-bold outline-none focus:border-orange-500 ${
+                          item.outOfStock ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-50 border-slate-200 text-slate-700'
+                        }`}
                         min="0"
+                        disabled={item.outOfStock}
                       />
                       <span className="text-[10px] text-slate-400 uppercase font-black tracking-tighter">Units</span>
                     </div>
 
                     <div className="text-right min-w-[120px]">
                       <p className="text-[10px] text-slate-400 font-bold uppercase">Rate: ₹{(Number(item.price) || 0).toFixed(2)}</p>
-                      <p className="text-sm font-black text-slate-900">₹{(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}</p>
+                      <p className={`text-sm font-black ${item.outOfStock ? 'text-slate-400' : 'text-slate-900'}`}>₹{(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}</p>
                     </div>
 
                     <button 
