@@ -43,10 +43,10 @@ export const MedicineInventory = () => {
   const fetchMedicines = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getMedicinesSummary({ 
-        search: debouncedSearch, 
-        page: page, 
-        size: pageSize 
+      const response = await pharmacyApi.getMedicinesSummary({
+        search: debouncedSearch,
+        page: page,
+        size: pageSize
       });
       if (response.success && response.data) {
         setMedicines(response.data.content);
@@ -88,22 +88,7 @@ export const MedicineInventory = () => {
     setPage(0);
   };
 
-  const handleSelectMedicine = async (id: string) => {
-    try {
-      setLoading(true);
-      const res = await pharmacyApi.getMedicineById(id);
-      if (res.success && res.data) {
-        setSelectedMedicine(res.data);
-      }
-    } catch (error) {
-      console.error('Failed to select medicine:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const openEditModal = async (id: string) => {
-    await handleSelectMedicine(id);
     setShowEditModal(true);
   };
 
@@ -135,7 +120,7 @@ export const MedicineInventory = () => {
 
   const handleDeleteMedicine = async () => {
     if (!medicineToDelete) return;
-    
+
     try {
       setLoading(true);
       const response = await pharmacyApi.deleteMedicine(medicineToDelete.id);
@@ -182,7 +167,7 @@ export const MedicineInventory = () => {
       headerClassName: 'text-right',
       render: (m) => (
         <div className="flex justify-end items-center gap-2">
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             icon="edit"
@@ -191,7 +176,7 @@ export const MedicineInventory = () => {
               void openEditModal(m.id);
             }}
           />
-          <Button 
+          <Button
             variant="ghost"
             size="sm"
             icon="delete"
@@ -211,8 +196,8 @@ export const MedicineInventory = () => {
   return (
     <MainLayout title="Medicine Master Catalog">
       <PageSurface>
-        <PageHeading 
-          title="Medicine Master Catalog" 
+        <PageHeading
+          title="Medicine Master Catalog"
           description="Manage and monitor the central medicine inventory and pharmaceutical master data."
         />
 
@@ -223,9 +208,9 @@ export const MedicineInventory = () => {
               <div className="flex flex-col md:flex-row gap-4 items-center">
                 <div className="flex-1 relative w-full">
                   <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                  <input 
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-orange-500/10 transition-all font-inter" 
-                    placeholder="Search catalog..." 
+                  <input
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-4 focus:ring-orange-500/10 transition-all font-inter"
+                    placeholder="Search catalog..."
                     type="text"
                     value={searchTerm}
                     onChange={(e) => handleSearchChange(e.target.value)}
@@ -241,11 +226,10 @@ export const MedicineInventory = () => {
             </Card>
 
             <Card className="p-0 overflow-hidden">
-              <Table 
+              <Table
                 columns={columns}
                 data={medicines}
                 isLoading={loading}
-                onRowClick={(m) => void handleSelectMedicine(m.id)}
                 rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : ''}
               />
               <Pagination
@@ -263,8 +247,8 @@ export const MedicineInventory = () => {
 
         {/* Excel Import Modal */}
         {showImportModal && (
-          <Modal 
-            isOpen={showImportModal} 
+          <Modal
+            isOpen={showImportModal}
             onClose={() => setShowImportModal(false)}
             title="Import Medicines"
           >
@@ -273,8 +257,8 @@ export const MedicineInventory = () => {
                 <span className="material-symbols-outlined text-4xl">file_upload</span>
               </div>
               <p className="text-slate-500 mt-2 font-medium">Duplicate medicines will be automatically identified and skipped.</p>
-              
-              <div 
+
+              <div
                 onClick={() => fileInputRef.current?.click()}
                 className="mt-8 border-4 border-dashed border-slate-100 rounded-[2rem] p-12 hover:border-orange-500/20 hover:bg-orange-50/30 transition-all cursor-pointer group"
               >
@@ -293,7 +277,7 @@ export const MedicineInventory = () => {
                 <Button variant="secondary" fullWidth onClick={() => setShowImportModal(false)}>
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   fullWidth
                   onClick={confirmImport}
                   disabled={!importFile || loading}
@@ -308,7 +292,7 @@ export const MedicineInventory = () => {
 
         {/* Add Medicine Modal */}
         {showAddModal && (
-          <AddMedicineModal 
+          <AddMedicineModal
             onClose={() => setShowAddModal(false)}
             onSuccess={fetchMedicines}
           />
@@ -316,7 +300,7 @@ export const MedicineInventory = () => {
 
         {/* Edit Medicine Modal */}
         {showEditModal && selectedMedicine && (
-          <EditMedicineModal 
+          <EditMedicineModal
             medicine={selectedMedicine}
             onClose={() => setShowEditModal(false)}
             onSuccess={fetchMedicines}
@@ -342,11 +326,11 @@ export const MedicineInventory = () => {
               <p className="text-slate-500 text-sm">
                 Are you sure you want to remove <span className="font-bold text-slate-800">"{medicineToDelete.name}"</span> from the master catalog? This action cannot be undone.
               </p>
-              
+
               <div className="mt-10 flex gap-4">
-                <Button 
-                  variant="secondary" 
-                  fullWidth 
+                <Button
+                  variant="secondary"
+                  fullWidth
                   onClick={() => {
                     setShowDeleteModal(false);
                     setMedicineToDelete(null);
@@ -354,8 +338,8 @@ export const MedicineInventory = () => {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  fullWidth 
+                <Button
+                  fullWidth
                   className="bg-red-600 hover:bg-red-700 shadow-red-200 text-white"
                   onClick={handleDeleteMedicine}
                   isLoading={loading}

@@ -39,6 +39,15 @@ const calculateSuggestedTime = (session: SessionInfo, date: string, tz?: string 
   // Use a 10-minute buffer to ensure the time is in the future even with minor delays
   if (currentTotalMinutes + 10 > baseTotalMinutes) {
     const suggestedTotalMinutes = currentTotalMinutes + 10;
+    
+    // Ensure suggested time does not exceed session end time
+    const [endH, endM] = session.endTime.split(':').map(Number);
+    const endTotalMinutes = endH * 60 + endM;
+    
+    if (suggestedTotalMinutes >= endTotalMinutes) {
+      return session.endTime;
+    }
+
     const h = Math.floor(suggestedTotalMinutes / 60);
     const m = suggestedTotalMinutes % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
@@ -162,17 +171,11 @@ export function AppointmentScheduling() {
     void trigger();
   }, [selectedDoctor?.id, selectedDate, hospitalTimezone]);
 
-  // Handle Suggested Time
-  useEffect(() => {
-    const trigger = async () => {
-      if (selectedSession) {
-        setEditableTime(calculateSuggestedTime(selectedSession, selectedDate, hospitalTimezone));
-      } else {
-        setEditableTime('');
-      }
-    };
-    void trigger();
-  }, [selectedSession, selectedDate, hospitalTimezone]);
+  // Handle Manual Session Selection from UI
+  const handleSessionSelect = useCallback((session: SessionInfo) => {
+    setSelectedSession(session);
+    setEditableTime(calculateSuggestedTime(session, selectedDate, hospitalTimezone));
+  }, [selectedDate, hospitalTimezone]);
 
   // Patient Search
   useEffect(() => {
@@ -188,6 +191,12 @@ export function AppointmentScheduling() {
   const handleConfirm = async () => {
     if (!selectedPatient || !selectedDoctor || !selectedSession || !editableTime || !hospitalTimezone) {
       triggerGlobalToast('Please complete all selections', 'error');
+      return;
+    }
+
+    // Strict validation: Appointment time must be within session bounds
+    if (editableTime < selectedSession.startTime || editableTime >= selectedSession.endTime) {
+      triggerGlobalToast(`Time must be between ${selectedSession.startTime} and ${selectedSession.endTime}`, 'error');
       return;
     }
 
@@ -374,6 +383,7 @@ export function AppointmentScheduling() {
                 availability={availability}
                 selectedSession={selectedSession}
                 setSelectedSession={setSelectedSession}
+                onSessionSelect={handleSessionSelect}
                 selectedDate={selectedDate}
                 setSelectedDate={setSelectedDate}
                 dateOptions={dateOptions}
