@@ -48,7 +48,13 @@ export const DoctorDashboard = () => {
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
       
       const [appRes, revRes] = await Promise.all([
-        appointmentService.list(0, DEFAULT_PAGE_SIZE, undefined, from, to, user.id),
+        appointmentService.list({ 
+          page: 0, 
+          size: DEFAULT_PAGE_SIZE, 
+          from, 
+          to, 
+          doctorId: user.id 
+        }),
         doctorService.getRevenueSummary(user.id, from, to)
       ]);
 
@@ -243,7 +249,7 @@ export const DoctorDashboard = () => {
 
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
-      <PageSurface paddingClassName="p-4 lg:p-8">
+      <PageSurface>
         {/* Info Pills Row - Visible only on mobile */}
         <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 

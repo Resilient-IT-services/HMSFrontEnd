@@ -57,7 +57,7 @@ export type AuditEntityName =
   | 'HOSPITAL'
   | 'USER_ACCOUNT'
   | 'USER_CONTRACT';
-export type PrescriptionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'DISPENSED';
+export type PrescriptionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'DISPENSED' | 'PENDING';
 
 // Global User Info Types
 export interface Qualification {
@@ -412,6 +412,7 @@ export interface AppointmentSummaryDTO {
   patientId: string;
   patientName: string;
   patientCode: string;
+  patientGender?: Gender;
   doctorId: string;
   doctorName: string;
   doctorSpecialization: string;
@@ -875,6 +876,7 @@ export interface DoctorSelectionDTO {
   id: string;
   fullName: string;
   specialization: string;
+  consultationFee:number;
 }
 
 export interface ApiResponseListDoctorSelectionDTO {

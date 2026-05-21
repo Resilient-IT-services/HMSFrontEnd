@@ -10,7 +10,7 @@ import { cn } from '@/lib/cn';
 import { useLayout } from '@/context/LayoutContext';
 
 const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
-  const { headerActions, isSidebarOpen, isCompressed, toggleCompressed } = useLayout();
+  const { headerActions, isCompressed, toggleCompressed } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -68,16 +68,14 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
     )}>
       <div className="flex items-center h-full">
         <div className={cn(
-          "px-4 lg:px-6 flex items-center gap-3 transition-all duration-500 ease-in-out border-r border-transparent lg:border-gray-100 h-full",
-          isSidebarOpen ? "lg:w-64" : "lg:w-20"
+          "px-4 lg:px-6 flex items-center gap-3 transition-all duration-500 ease-in-out border-r border-transparent lg:border-gray-100 h-full lg:w-64"
         )}>
           <div className="flex items-center gap-3 overflow-hidden">
             <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center text-white shadow-sm shadow-primary/20 shrink-0">
               <span className="material-symbols-outlined text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>medical_services</span>
             </div>
             <div className={cn(
-              "flex flex-col leading-none transition-all duration-500 whitespace-nowrap",
-              isSidebarOpen ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none w-0"
+              "flex flex-col leading-none transition-all duration-500 whitespace-nowrap opacity-100 translate-x-0"
             )}>
               <h1 className="text-xl font-black tracking-tight text-primary font-manrope">CareFlow</h1>
               <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">System Intelligence</span>

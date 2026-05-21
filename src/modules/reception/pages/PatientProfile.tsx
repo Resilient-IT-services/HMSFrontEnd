@@ -31,7 +31,11 @@ export function PatientProfile({ id }: { id: string }) {
       setLoading(true);
       const [patientRes, appointmentsRes] = await Promise.all([
         patientService.get(id),
-        appointmentService.list(0, 100, undefined, undefined, undefined, undefined, id) // Server-side filtering by patientId
+        appointmentService.list({ 
+          page: 0, 
+          size: 100, 
+          patientId: id 
+        }) // Server-side filtering by patientId
       ]);
 
       if (patientRes.success && patientRes.data) {
@@ -61,7 +65,7 @@ export function PatientProfile({ id }: { id: string }) {
   const tabs = [
     { id: 'Overview', label: 'Overview' },
     { id: 'Visit History', label: 'Visit History' },
-    { id: 'Prescriptions', label: 'Prescriptions' }
+
   ];
 
   return (

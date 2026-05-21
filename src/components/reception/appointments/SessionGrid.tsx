@@ -9,6 +9,7 @@ interface SessionGridProps {
   availability: SessionInfo[];
   selectedSession: SessionInfo | null;
   setSelectedSession: (session: SessionInfo) => void;
+  onSessionSelect: (session: SessionInfo) => void;
   selectedDate: string;
   setSelectedDate: (date: string) => void;
   dateOptions: { iso: string, label: string, active: boolean }[];
@@ -23,6 +24,7 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
   availability,
   selectedSession,
   setSelectedSession,
+  onSessionSelect,
   selectedDate,
   setSelectedDate,
   dateOptions,
@@ -54,8 +56,13 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
 
   // Sync selected session when editableTime changes
   React.useEffect(() => {
-    if (matchingSession && matchingSession !== selectedSession) {
-      setSelectedSession(matchingSession);
+    if (matchingSession) {
+      if (matchingSession !== selectedSession) {
+        setSelectedSession(matchingSession);
+      }
+    } else if (selectedSession && editableTime) {
+      // Clear selection if manually entered time is out of any session range
+      setSelectedSession(null as any);
     }
   }, [editableTime, matchingSession, selectedSession, setSelectedSession]);
 
@@ -119,7 +126,7 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
                 <button
                   key={idx}
                   disabled={isDisabled}
-                  onClick={() => setSelectedSession(session)}
+                  onClick={() => onSessionSelect(session)}
                   className={`flex flex-col items-center justify-center p-3 border rounded-xl transition-all group ${
                     isSelected
                       ? 'border-primary bg-orange-50 ring-1 ring-primary/20'
@@ -128,8 +135,8 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
                       : 'border-slate-200 bg-white hover:border-primary/50 hover:bg-slate-50')
                   }`}
                 >
-                  <span className={`text-sm font-black ${isSelected ? 'text-primary' : 'text-slate-900 group-hover:text-primary transition-colors'}`}>
-                    {formatLocalTime(session.startTime)}
+                  <span className={`text-xs font-black ${isSelected ? 'text-primary' : 'text-slate-900 group-hover:text-primary transition-colors'}`}>
+                    {formatLocalTime(session.startTime)} - {formatLocalTime(session.endTime)}
                   </span>
                   <span className={`text-[9px] font-bold uppercase tracking-tighter ${isSelected ? 'text-primary/70' : 'text-slate-400'}`}>
                     {isSelected ? 'Selected' : (isDisabled ? 'Full' : 'Available')}

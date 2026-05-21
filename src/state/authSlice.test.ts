@@ -75,7 +75,8 @@ describe('authSlice', () => {
       isLoading: false,
       error: null,
       isSuperMode: true,
-      activeRole: 'DOCTOR'
+      activeRole: 'DOCTOR',
+      hospitalTimezone: null
     }, logout());
 
     expect(state.user).toBe(null);
@@ -108,7 +109,8 @@ describe('authSlice', () => {
         isLoading: true,
         error: null,
         isSuperMode: true,
-        activeRole: null 
+        activeRole: null,
+        hospitalTimezone: null 
       }, 
       setUser(mockUser) 
     );

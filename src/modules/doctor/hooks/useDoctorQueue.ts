@@ -37,7 +37,13 @@ export const useDoctorQueue = () => {
       const fromParam = activeTab === 'TODAY' ? from : undefined;
       const toParam = activeTab === 'TODAY' ? to : undefined;
 
-      const response = await appointmentService.list(0, 100, undefined, fromParam, toParam, user.id);
+      const response = await appointmentService.list({ 
+        page: 0, 
+        size: 100, 
+        from: fromParam, 
+        to: toParam, 
+        doctorId: user.id 
+      });
 
       if (response.success && response.data) {
         // Filter by current doctor as a safety measure

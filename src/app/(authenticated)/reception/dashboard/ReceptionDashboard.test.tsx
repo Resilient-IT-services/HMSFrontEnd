@@ -62,6 +62,7 @@ describe('ReceptionDashboard', () => {
             id: 'patient-1',
             fullName: 'Asha',
             patientCode: 'P-1',
+            gender: 'FEMALE',
             phone: '9999999999',
           },
         ],

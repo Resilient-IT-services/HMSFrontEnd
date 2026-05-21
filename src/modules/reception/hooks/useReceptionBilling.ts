@@ -10,7 +10,6 @@ import { invoiceService } from '@/services/invoiceService';
 import { AppointmentResponse, PatientResponse, DoctorStaffResponse, InvoiceDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
-import dayjs from '@/lib/dayjs';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 
@@ -84,7 +83,13 @@ export const useReceptionBilling = () => {
       // Check if an appointment already exists for this patient/time
       // to handle "back" navigation or duplicate submissions gracefully
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone, appointmentTimeParam || undefined);
-      const existingRes = await appointmentService.list(0, 1, undefined, from, to, doctorIdParam);
+      const existingRes = await appointmentService.list({
+        page: 0, 
+        size: 1, 
+        from, 
+        to, 
+        doctorId: doctorIdParam
+      });
       if (existingRes.success && existingRes.data && existingRes.data.content.length > 0) {
         const existing = existingRes.data.content.find(a => 
           a.patientId === patientIdParam && 
@@ -128,7 +133,13 @@ export const useReceptionBilling = () => {
         createdAt: new Date().toISOString()
       } as any);
 
-      const statsRes = await appointmentService.listSummary(0, 1, undefined, from, to, doctorIdParam);
+      const statsRes = await appointmentService.listSummary({
+        page: 0, 
+        size: 1, 
+        from, 
+        to, 
+        doctorId: doctorIdParam
+      });
       if (statsRes.success && statsRes.data) {
         setPredictedToken(String(statsRes.data.totalElements + 1));
       }

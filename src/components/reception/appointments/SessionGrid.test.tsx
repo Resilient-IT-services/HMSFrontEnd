@@ -40,6 +40,7 @@ describe('SessionGrid', () => {
     availability: mockAvailability,
     selectedSession: null,
     setSelectedSession: vi.fn(),
+    onSessionSelect: vi.fn(),
     selectedDate: '2026-05-10',
     setSelectedDate: vi.fn(),
     dateOptions: dateOptions,
@@ -55,17 +56,17 @@ describe('SessionGrid', () => {
 
   it('renders available and full sessions', () => {
     render(<SessionGrid {...defaultProps} />);
-    expect(screen.getByText('09:00')).toBeInTheDocument();
-    expect(screen.getByText('14:00')).toBeInTheDocument();
+    expect(screen.getByText('09:00 - 12:00')).toBeInTheDocument();
+    expect(screen.getByText('14:00 - 17:00')).toBeInTheDocument();
     expect(screen.getByText('Available')).toBeInTheDocument();
     expect(screen.getByText('Full')).toBeInTheDocument();
   });
 
   it('handles session selection', () => {
-    const setSelectedSession = vi.fn();
-    render(<SessionGrid {...defaultProps} setSelectedSession={setSelectedSession} />);
-    fireEvent.click(screen.getByText('09:00'));
-    expect(setSelectedSession).toHaveBeenCalledWith(mockAvailability[0]);
+    const onSessionSelect = vi.fn();
+    render(<SessionGrid {...defaultProps} onSessionSelect={onSessionSelect} />);
+    fireEvent.click(screen.getByText('09:00 - 12:00'));
+    expect(onSessionSelect).toHaveBeenCalledWith(mockAvailability[0]);
   });
 
   it('renders loading state', () => {

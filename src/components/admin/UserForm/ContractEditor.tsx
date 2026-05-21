@@ -9,7 +9,6 @@ interface ContractEditorProps {
   newContract: HospitalMembershipDTO;
   setNewContract: (data: HospitalMembershipDTO) => void;
   hospitals: HospitalResponse[];
-  departments: string[];
   editingContractIndex: number | null;
   validationErrors: Record<string, string>;
   onCancel: () => void;
@@ -17,7 +16,7 @@ interface ContractEditorProps {
 }
 
 export const ContractEditor: React.FC<ContractEditorProps> = ({
-  newContract, setNewContract, hospitals, departments, editingContractIndex, validationErrors, onCancel, onConfirm
+  newContract, setNewContract, hospitals, editingContractIndex, validationErrors, onCancel, onConfirm
 }) => {
   const dayValues = DAY_OF_WEEK_OPTIONS.map((option) => option.value);
   const [activeDay, setActiveDay] = useState<typeof dayValues[number]>('MONDAY');
@@ -26,10 +25,9 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
 
   const selectedHospital = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
   const availableDepartments = React.useMemo(() => {
-    const hospDepts = selectedHospital?.departments || [];
-    // Merge with global departments, unique
-    return [...new Set([...departments, ...hospDepts])];
-  }, [departments, selectedHospital]);
+    // Strictly use departments configured for the selected hospital
+    return selectedHospital?.departments || [];
+  }, [selectedHospital]);
 
   const handleUpdateSchedule = (raIdx: number, newSchedules: ScheduleDTO[]) => {
     const updatedAssignments = [...(newContract.roleAssignments || [])];
@@ -155,7 +153,12 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
                         </button>
                       );
                     })}
-                    {availableDepartments.length === 0 && <p className="text-[10px] text-slate-400 italic font-medium">No departments available in catalog.</p>}
+                    {availableDepartments.length === 0 && (
+                      <div className="flex items-center gap-2 py-2">
+                        <span className="material-symbols-outlined text-slate-400 text-sm">info</span>
+                        <p className="text-[10px] text-slate-400 italic font-medium">No departments configured for this facility.</p>
+                      </div>
+                    )}
                   </div>
                   {renderFieldError(departmentsErrorKey)}
                 </div>

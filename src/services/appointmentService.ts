@@ -2,68 +2,41 @@ import { AxiosRequestConfig } from 'axios';
 import apiClient from './apiClient';
 import { ApiResponse, PageResponse, AppointmentResponse, AppointmentSummaryDTO, CreateAppointmentRequest, UpdateAppointmentStatusRequest, AppointmentStatus, VitalsDTO, AppointmentStatsDTO, OPDEncounterRequest } from '@/types/api';
 
+export interface AppointmentListParams {
+  page?: number;
+  size?: number;
+  search?: string;
+  from?: string;
+  to?: string;
+  doctorId?: string;
+  doctorName?: string;
+  patientId?: string;
+  patientCode?: string;
+  status?: string;
+  paymentStatus?: string;
+  vitalsStatus?: string;
+  tokenNumber?: string;
+  timeSlot?: string;
+}
+
 export const appointmentService = {
-  async list(
-    page = 0, 
-    size = 20, 
-    search?: string, 
-    from?: string,
-    to?: string,
-    doctorId?: string,
-    patientId?: string,
-    status?: string,
-    paymentStatus?: string,
-    vitalsStatus?: string,
-    tokenNumber?: string,
-    timeSlot?: string
-  ): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
+  async list(params: AppointmentListParams = {}): Promise<ApiResponse<PageResponse<AppointmentResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<AppointmentResponse>>>('/appointments', {
       params: { 
-        page, 
-        size, 
-        search, 
-        from,
-        to,
-        doctorId,
-        patientId,
-        status,
-        paymentStatus,
-        vitalsStatus,
-        tokenNumber,
-        timeSlot
+        page: 0, 
+        size: 20, 
+        ...params 
       }
     });
     return response.data;
   },
 
-  async listSummary(
-    page = 0, 
-    size = 20, 
-    search?: string, 
-    from?: string,
-    to?: string,
-    doctorId?: string,
-    patientId?: string,
-    status?: string,
-    paymentStatus?: string,
-    vitalsStatus?: string,
-    tokenNumber?: string,
-    timeSlot?: string
-  ): Promise<ApiResponse<PageResponse<AppointmentSummaryDTO>>> {
+  async listSummary(params: AppointmentListParams = {}): Promise<ApiResponse<PageResponse<AppointmentSummaryDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<AppointmentSummaryDTO>>>('/appointments/summary', {
       params: { 
-        page, 
-        size, 
-        search, 
-        from,
-        to,
-        doctorId,
-        patientId,
-        status,
-        paymentStatus,
-        vitalsStatus,
-        tokenNumber,
-        timeSlot
+        page: 0, 
+        size: 20, 
+        ...params 
       }
     });
     return response.data;

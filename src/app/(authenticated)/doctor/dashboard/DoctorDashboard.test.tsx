@@ -99,7 +99,13 @@ describe('DoctorDashboard', () => {
     expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(appointmentService.list).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, undefined, expect.anything(), expect.anything(), 'doctor-1');
+      expect(appointmentService.list).toHaveBeenCalledWith({
+        page: 0,
+        size: DEFAULT_PAGE_SIZE,
+        from: expect.anything(),
+        to: expect.anything(),
+        doctorId: 'doctor-1'
+      });
       expect(screen.getAllByText('Jane Roe')[0]).toBeInTheDocument();
       expect(screen.getAllByText(/1000/)[0]).toBeInTheDocument();
     });

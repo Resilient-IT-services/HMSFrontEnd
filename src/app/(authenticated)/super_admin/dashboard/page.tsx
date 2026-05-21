@@ -1,7 +1,7 @@
 'use client';
 
-import { SuperAdminDashboard } from '@/modules/super_admin/pages/SuperAdminDashboard';
+import { AdminDashboard } from '@/modules/admin/pages/AdminDashboard';
 
-export default function Page() {
-  return <SuperAdminDashboard />;
+export default function SuperAdminDashboardPage() {
+  return <AdminDashboard />;
 }

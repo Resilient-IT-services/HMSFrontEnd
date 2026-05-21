@@ -22,7 +22,12 @@ export function TokenQueue() {
     try {
       if (!hospitalTimezone) return;
       const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
-      const res = await appointmentService.listSummary(0, 10, undefined, from, to);
+      const res = await appointmentService.listSummary({ 
+        page: 0, 
+        size: 10, 
+        from, 
+        to 
+      });
       if (res.success && res.data) {
         setAppointments(res.data.content);
         setTotalInQueue(res.data.totalElements);

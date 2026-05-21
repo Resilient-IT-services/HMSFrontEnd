@@ -20,7 +20,6 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'personal' | 'contracts' | 'profile'>('personal');
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
-  const [departments, setDepartments] = useState<string[]>([]);
   const [specializations, setSpecializations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -121,9 +120,6 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   useEffect(() => {
     hospitalService.list().then(res => {
       if (res.success && res.data) setHospitals(res.data.content || []);
-    });
-    catalogService.getDepartments().then(res => {
-      if (res.success && res.data) setDepartments(res.data);
     });
     catalogService.getSpecializations().then(res => {
       if (res.success && res.data) setSpecializations(res.data);
@@ -435,7 +431,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
 
   return {
     formData, setFormData, activeTab, setActiveTab, loading, validationErrors,
-    hospitals, departments, specializations, isAddingContract, openAddContract, openEditContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
+    hospitals, specializations, isAddingContract, openAddContract, openEditContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
     newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract, duplicateContract, router
   };
 };

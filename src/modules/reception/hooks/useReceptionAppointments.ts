@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { appointmentService } from '@/services/appointmentService';
 import { doctorService } from '@/services/doctorService';
 import { AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
@@ -15,7 +15,7 @@ import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
 import dayjs from '@/lib/dayjs';
 
 export const useReceptionAppointments = () => {
-  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
+  const hospitalTimezone = useSelector((state: RootState) => state.auth.hospitalTimezone);
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'ALL' | 'UPCOMING'>('ALL');
@@ -40,13 +40,20 @@ export const useReceptionAppointments = () => {
     cancelled: 0,
   });
 
+  const lastFetchKey = useRef<string>('');
+
   const fetchData = useCallback(async (isBackground = false, filters = activeFilters) => {
+    if (!hospitalTimezone) return;
+
+    const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
+    const fetchKey = `${hospitalTimezone}-${statusFilter}-${debouncedSearchTerm}-${JSON.stringify(filters)}`;
+    
+    // Prevent duplicate calls if params haven't changed (unless it's a background refresh)
+    if (!isBackground && lastFetchKey.current === fetchKey) return;
+    lastFetchKey.current = fetchKey;
+
     if (!isBackground) setLoading(true);
     try {
-      if (!hospitalTimezone) return;
-
-      const { from, to } = getHospitalDayRangeUTC(hospitalTimezone);
-      
       const fromParam = (statusFilter === 'UPCOMING' ? undefined : from);
       const toParam = (statusFilter === 'UPCOMING' ? undefined : to);
       
@@ -55,15 +62,15 @@ export const useReceptionAppointments = () => {
         : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
 
       const [appRes, statsRes] = await Promise.all([
-        appointmentService.listSummary(
-          0, 100, 
-          debouncedSearchTerm, 
-          fromParam,
-          toParam,
-          undefined,
-          statusesToUse,
-          filters.paymentStatuses?.join(',')
-        ),
+        appointmentService.listSummary({
+          page: 0,
+          size: 100,
+          search: debouncedSearchTerm,
+          from: fromParam,
+          to: toParam,
+          status: statusesToUse,
+          paymentStatus: filters.paymentStatuses?.join(',')
+        }),
         appointmentService.getStats(from, to)
       ]);
 
