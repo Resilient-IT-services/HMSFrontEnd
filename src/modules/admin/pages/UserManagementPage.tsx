@@ -226,26 +226,6 @@ export const UserManagementPage = () => {
         </ContentPanel>
 
         <div className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
-          <Card className="relative flex flex-col justify-between overflow-hidden bg-slate-900 border-none text-white shadow-xl shadow-slate-900/10 h-full">
-            <div className="relative z-10">
-              <h4 className="mb-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">Total Provisioned</h4>
-              <p className="text-4xl font-black">{totalElements}</p>
-            </div>
-            <div className="relative z-10 mt-8">
-              <p className="flex items-center gap-2 text-xs font-bold text-emerald-400">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-                System Fully Operational
-              </p>
-            </div>
-            <span className="material-symbols-outlined absolute -bottom-4 -right-4 rotate-12 text-9xl text-white/5">shield_person</span>
-          </Card>
-
-          <Card className="md:col-span-2" headerActions={<Button variant="secondary" icon="history">Security Log</Button>}>
-            <h4 className="mb-2 font-manrope text-xl font-black tracking-tight text-slate-900 uppercase">Access Control Audit</h4>
-            <p className="max-w-md text-sm font-medium leading-relaxed text-slate-500">
-              All user modifications are logged for compliance. Periodic review of privileged accounts (Admin/Super Admin) is recommended every 90 days.
-            </p>
-          </Card>
         </div>
       </PageSurface>
     </MainLayout>
