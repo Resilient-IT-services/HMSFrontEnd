@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
@@ -17,6 +16,19 @@ export const SuperAdminDashboard = () => {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [users, setUsers] = useState<UserSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const quickActions = [
+    { label: 'Manage Hospitals', href: '/super_admin/hospitals', icon: 'apartment', variant: 'primary' as const },
+    { label: 'Medicine Master', href: '/admin/medicines', icon: 'medication', variant: 'secondary' as const },
+    { label: 'Manage Users', href: '/admin/users', icon: 'group', variant: 'secondary' as const },
+    { label: 'System Settings', href: '/settings', icon: 'admin_panel_settings', variant: 'secondary' as const },
+  ];
+
+  const quickStats = [
+    { label: 'Active Hospitals', value: loading ? '...' : hospitals.length, icon: 'local_hospital' },
+    { label: 'Total Users', value: loading ? '...' : users.length, icon: 'groups' },
+    { label: 'System Status', value: 'Healthy', icon: 'verified' },
+  ];
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -175,29 +187,69 @@ export const SuperAdminDashboard = () => {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-          <Card className="flex flex-col md:justify-center md:items-center md:text-center py-6 md:py-12">
-            <div className="md:max-w-md md:mx-auto">
-              <div className="flex items-center gap-4 mb-4 md:flex-col md:text-center">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 md:w-16 md:h-16 md:bg-transparent md:opacity-20 md:mb-4">
-                  <span className="material-symbols-outlined text-2xl text-orange-600 md:text-6xl">shield_person</span>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 items-stretch">
+          <Card className="relative overflow-hidden min-h-[420px] h-full rounded-3xl border-orange-100/80 bg-gradient-to-br from-white via-orange-50/55 to-slate-50 shadow-xl shadow-slate-200/70">
+            <div className="absolute right-0 top-0 h-40 w-40 rounded-bl-full bg-orange-100/60 blur-2xl"></div>
+            <div className="absolute bottom-0 left-8 h-32 w-32 rounded-full bg-emerald-100/50 blur-3xl"></div>
+
+            <div className="relative z-10 flex h-full flex-col justify-between gap-7">
+              <div className="space-y-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-white/80 bg-white/85 text-orange-600 shadow-lg shadow-orange-200/40 backdrop-blur">
+                    <span className="material-symbols-outlined text-4xl">health_and_safety</span>
+                  </div>
+                  <div className="hidden rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-emerald-700 sm:flex">
+                    Operational
+                  </div>
                 </div>
+
                 <div>
-                  <h2 className="text-lg md:text-2xl font-black text-slate-900 mb-1 leading-tight">Welcome, Super Admin</h2>
-                  <p className="text-xs md:text-slate-500 font-medium md:mb-6">
-                    Manage nodes, global users, and core system parameters.
+                  <p className="mb-2 text-[10px] font-black uppercase tracking-[0.24em] text-orange-600">Super Admin Workspace</p>
+                  <h2 className="text-2xl font-black leading-tight text-slate-950 md:text-4xl">Welcome back, Super Admin</h2>
+                  <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-600 md:text-base">
+                    Manage hospitals, users, medicines, and global settings from one clean command center.
                   </p>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 md:gap-3 md:justify-center mt-4">
-                <Button href="/super_admin/hospitals" className="h-10 text-xs md:text-sm md:h-auto">Manage Hospitals</Button>
-                <Button variant="secondary" href="/admin/medicines" className="h-10 text-xs md:text-sm md:h-auto">Medicine Master</Button>
-                <Button variant="secondary" href="/admin/users" className="h-10 text-xs md:text-sm md:h-auto">Manage Users</Button>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {quickActions.map((action) => (
+                  <Button
+                    key={action.label}
+                    href={action.href}
+                    icon={action.icon}
+                    variant={action.variant}
+                    className="h-12 justify-start rounded-2xl px-4 text-xs normal-case tracking-normal hover:-translate-y-0.5 hover:shadow-lg md:text-sm"
+                    fullWidth
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+
+              <div className="rounded-2xl border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Quick Stats</h3>
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.14)]"></span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {quickStats.map((stat) => (
+                    <div key={stat.label} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white/80 p-3">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                        <span className="material-symbols-outlined text-xl">{stat.icon}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-[10px] font-bold uppercase tracking-wide text-slate-400">{stat.label}</p>
+                        <p className="text-sm font-black text-slate-900">{stat.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </Card>
 
-          <Card className="relative overflow-hidden rounded-3xl border-none min-h-[420px] shadow-xl">
+          <Card className="relative overflow-hidden rounded-3xl border-none min-h-[360px] md:min-h-[420px] h-full shadow-xl">
 
             {/* Background Image */}
             <img
@@ -210,9 +262,9 @@ export const SuperAdminDashboard = () => {
             <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent"></div>
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col justify-center h-full p-10 max-w-[55%]">
+            <div className="relative z-10 flex flex-col justify-center h-full p-6 md:p-10 max-w-full sm:max-w-[60%]">
 
-              <h2 className="text-5xl font-black text-slate-900 leading-tight mb-6">
+              <h2 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight mb-6">
                 Better Care.
                 <br />
                 Smarter Systems.
@@ -220,16 +272,16 @@ export const SuperAdminDashboard = () => {
                 Stronger Tomorrow.
               </h2>
 
-              <p className="text-lg text-slate-700 leading-relaxed mb-8">
+              <p className="text-sm md:text-lg text-slate-700 leading-relaxed mb-8">
                 Empowering healthcare with technology that connects,
                 simplifies, and saves lives.
               </p>
 
-              <div className="flex flex-wrap gap-6 text-sm font-semibold text-slate-700">
-                <span>✔ Secure</span>
-                <span>✔ Connected</span>
-                <span>✔ Reliable</span>
-                <span>✔ Scalable</span>
+              <div className="flex flex-wrap gap-3 md:gap-6 text-xs md:text-sm font-semibold text-slate-700">
+                <span>Secure</span>
+                <span>Connected</span>
+                <span>Reliable</span>
+                <span>Scalable</span>
               </div>
 
             </div>
