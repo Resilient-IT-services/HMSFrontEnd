@@ -249,7 +249,7 @@ export const DoctorDashboard = () => {
 
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
-      <PageSurface paddingClassName="p-4 lg:p-8">
+      <PageSurface>
         {/* Info Pills Row - Visible only on mobile */}
         <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 

@@ -9,26 +9,23 @@ interface PageSurfaceProps {
   maxWidthClassName?: string;
   paddingClassName?: string;
   fontClassName?: string;
-  fullBleed?: boolean;
 }
 
 export const PageSurface: React.FC<PageSurfaceProps> = ({
   children,
   className,
   contentClassName,
-  backgroundClassName = 'bg-[#f9f9ff]',
+  backgroundClassName = 'bg-surface',
   maxWidthClassName = 'max-w-7xl',
-  paddingClassName = 'p-8',
+  paddingClassName = 'p-0',
   fontClassName,
-  fullBleed = true,
 }) => {
   return (
     <div
       className={cn(
         paddingClassName,
         maxWidthClassName,
-        'mx-auto w-full min-h-screen',
-        fullBleed && '-m-8',
+        'mx-auto w-full',
         backgroundClassName,
         fontClassName,
         className,
