@@ -164,12 +164,9 @@ export const MedicineInventory = () => {
     {
       header: 'Medicine Details',
       render: (m) => (
-        <div className="flex items-center gap-3">
-          <Avatar name={m.name} variant="slate" className="rounded-lg" />
-          <div>
-            <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
-            <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
-          </div>
+        <div>
+          <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
         </div>
       )
     },
@@ -190,7 +187,7 @@ export const MedicineInventory = () => {
       render: (m) => (
         <div className="flex justify-end items-center gap-2">
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             icon="edit"
             onClick={(e) => {
@@ -199,7 +196,7 @@ export const MedicineInventory = () => {
             }}
           />
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             icon="delete"
             className="text-red-600 hover:text-red-700 hover:bg-red-50"
@@ -253,7 +250,8 @@ export const MedicineInventory = () => {
             data={medicines}
             isLoading={loading}
             onRowClick={handleRowClick}
-            rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-orange-50/50 border-l-4 border-orange-700' : ''}
+            onRowDoubleClick={(m) => openEditModal(m.id)}
+            rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
           />
           <Pagination
             page={page}
