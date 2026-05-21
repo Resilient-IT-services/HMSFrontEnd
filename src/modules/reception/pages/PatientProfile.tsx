@@ -65,7 +65,7 @@ export function PatientProfile({ id }: { id: string }) {
   const tabs = [
     { id: 'Overview', label: 'Overview' },
     { id: 'Visit History', label: 'Visit History' },
-    { id: 'Prescriptions', label: 'Prescriptions' }
+
   ];
 
   return (
