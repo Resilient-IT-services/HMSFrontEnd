@@ -15,6 +15,7 @@ export default function AuthenticatedLayout({
   const [isTopbarVisible, setIsTopbarVisible] = useState(true);
   const lastScrollY = useRef(0);
   const hideTimer = useRef<NodeJS.Timeout | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const startHideTimer = useCallback(() => {
     if (globalThis.window === undefined || window.innerWidth >= MOBILE_BREAKPOINT) {
@@ -29,13 +30,15 @@ export default function AuthenticatedLayout({
   }, []);
 
   useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+
     const handleScroll = () => {
       if (window.innerWidth >= MOBILE_BREAKPOINT) {
         setIsTopbarVisible(true);
         return;
       }
 
-      const currentScrollY = window.scrollY;
+      const currentScrollY = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
       
       // Reappear on scroll up
       if (currentScrollY < lastScrollY.current) {
@@ -63,7 +66,12 @@ export default function AuthenticatedLayout({
       startHideTimer();
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+    } else {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+    
     globalThis.addEventListener('mousemove', handleInteraction);
     globalThis.addEventListener('touchstart', handleTouchStart, { passive: true });
     globalThis.addEventListener('click', handleInteraction);
@@ -71,7 +79,11 @@ export default function AuthenticatedLayout({
     startHideTimer();
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      } else {
+        window.removeEventListener('scroll', handleScroll);
+      }
       globalThis.removeEventListener('mousemove', handleInteraction);
       globalThis.removeEventListener('touchstart', handleTouchStart);
       globalThis.removeEventListener('click', handleInteraction);
@@ -80,30 +92,31 @@ export default function AuthenticatedLayout({
   }, [startHideTimer]);
 
   return (
-    <div className="min-h-screen bg-surface flex flex-col relative overflow-x-hidden">
+    <div className="h-screen bg-surface flex flex-col relative overflow-hidden">
       <div 
         className={cn(
-          "fixed top-0 left-0 right-0 z-[60] transition-transform duration-500 lg:sticky lg:translate-y-0",
+          "fixed top-0 left-0 right-0 z-[60] transition-transform duration-500 lg:relative lg:translate-y-0 lg:z-[60] shrink-0",
           !isTopbarVisible && "-translate-y-full"
         )}
       >
         <Topbar isVisible={true} />
       </div>
       
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1 relative overflow-hidden">
         <Sidebar />
         
-        <div className="flex-1 flex flex-col min-w-0">
+        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <main 
+            ref={scrollContainerRef}
             className={cn(
-              "flex-1 p-3 lg:p-gutter w-full pb-20 lg:pb-gutter transition-all duration-500",
+              "flex-1 p-3 lg:p-gutter w-full pb-20 lg:pb-gutter transition-all duration-500 overflow-y-auto",
               isTopbarVisible ? "pt-20 lg:pt-gutter" : "pt-4 lg:pt-gutter"
             )}
           >
             {children}
           </main>
           
-          <footer className="hidden lg:block px-8 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] border-t border-slate-100 bg-white/50">
+          <footer className="hidden lg:block px-8 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] border-t border-slate-100 bg-white/50 shrink-0">
             CareFlow <span className="opacity-50">by Resilient</span> © 2026
           </footer>
         </div>

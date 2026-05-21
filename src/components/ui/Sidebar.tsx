@@ -38,7 +38,7 @@ const Sidebar = () => {
   return (
     <aside 
       className={cn(
-        "bg-white h-[calc(100vh-64px)] border-r border-gray-200 flex flex-col p-3 transition-all duration-500 ease-in-out sticky top-16 z-[50] hidden lg:flex group overflow-hidden",
+        "bg-white h-full border-r border-gray-200 flex flex-col p-3 transition-all duration-500 ease-in-out z-[50] hidden lg:flex group overflow-hidden shrink-0",
         isExpanded ? "w-64" : "w-20"
       )}
       onMouseEnter={() => setIsHovered(true)}
