@@ -216,7 +216,7 @@ export const MedicineInventory = () => {
           description="Manage and monitor the central medicine inventory and pharmaceutical master data."
         />
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 xl:grid-cols-1 gap-8">
           <div className="xl:col-span-2 space-y-6">
             {/* Stats & Actions */}
             <Card className="p-4">
@@ -259,59 +259,6 @@ export const MedicineInventory = () => {
             </Card>
           </div>
 
-          {/* Info Panel / Details */}
-          <div className="space-y-6">
-            {selectedMedicine ? (
-              <Card className="p-0 overflow-hidden sticky top-24 border-none shadow-xl">
-                <div className="p-8 bg-slate-900 text-white">
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md">
-                      <span className="material-symbols-outlined text-3xl">medication</span>
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-black">{selectedMedicine.name}</h3>
-                      <p className="text-[10px] font-black uppercase text-white/50 tracking-widest">{selectedMedicine.manufacturer}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                      <p className="text-[9px] font-black uppercase text-white/40 mb-1">Schedule Drug</p>
-                          <p className="text-xs font-bold text-orange-400">{selectedMedicine.scheduleType || 'OTC'}</p>
-                    </div>
-                    <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                      <p className="text-[9px] font-black uppercase text-white/40 mb-1">Strength</p>
-                      <p className="text-xs font-bold">{selectedMedicine.strength || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="p-8 space-y-6">
-                  <div>
-                    <p className="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Composition / Salt</p>
-                    <p className="text-sm font-bold text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100 italic">
-                      {selectedMedicine.composition || 'No composition data recorded.'}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-1 gap-6">
-                    <InfoRow label="Generic Name" value={selectedMedicine.genericName} className="py-3 border-b border-slate-50 flex-row justify-between items-center" />
-                    <InfoRow label="Form Factor" value={selectedMedicine.form || selectedMedicine.category} className="py-3 border-b border-slate-50 flex-row justify-between items-center" />
-
-                  </div>
-                  <Button 
-                    variant="secondary"
-                    fullWidth
-                    onClick={() => setShowEditModal(true)}
-                  >
-                    Edit Medicine Master
-                  </Button>
-                </div>
-              </Card>
-            ) : (
-              <div className="bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 p-20 text-center flex flex-col items-center justify-center h-full">
-                <span className="material-symbols-outlined text-6xl text-slate-200 mb-4">info</span>
-                <p className="text-slate-400 font-bold">Select a medicine to view detailed information.</p>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Excel Import Modal */}
