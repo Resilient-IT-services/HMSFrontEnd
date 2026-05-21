@@ -104,10 +104,14 @@ export const PatientQueuePage = () => {
         <div className="flex justify-end gap-2">
           {appointment.status === 'CONSULTATION_STARTED' ? (
             <Button size="sm" onClick={() => router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`)}>Resume</Button>
-          ) : appointment.status === 'COMPLETED' ? (
-            <Badge variant="slate">Consulted</Badge>
           ) : (
-            <Button variant="secondary" size="sm" onClick={() => handleStartConsultation(appointment.id)}>Start Consultation</Button>
+            <Button 
+              variant={appointment.status === 'COMPLETED' ? "ghost" : "secondary"} 
+              size="sm" 
+              onClick={() => handleStartConsultation(appointment.id)}
+            >
+              {appointment.status === 'COMPLETED' ? "Reopen" : "Start Consultation"}
+            </Button>
           )}
           <Button 
             variant="ghost" 
@@ -193,13 +197,7 @@ export const PatientQueuePage = () => {
             columns={columns}
             data={appointments}
             isLoading={loading}
-            onRowDoubleClick={(appointment) => {
-              if (appointment.status === 'CONSULTATION_STARTED') {
-                router.push(`/doctor/active-consultation?appointmentId=${appointment.id}`);
-              } else if (appointment.status !== 'COMPLETED') {
-                handleStartConsultation(appointment.id);
-              }
-            }}
+            onRowDoubleClick={(appointment) => handleStartConsultation(appointment.id)}
             loadingMessage="Loading queue..."
             emptyMessage="No patients in the queue for today."
           />

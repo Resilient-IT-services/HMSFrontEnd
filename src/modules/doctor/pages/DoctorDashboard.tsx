@@ -114,7 +114,6 @@ export const DoctorDashboard = () => {
     const base = appointments.filter(
       (appointment) => 
         dayjs(appointment.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD') === hospitalToday &&
-        appointment.status !== 'COMPLETED' && 
         appointment.status !== 'CANCELLED'
     );
     return sortByToken(base);
@@ -122,6 +121,32 @@ export const DoctorDashboard = () => {
 
   const handleStartConsultation = async (appointmentId: string) => {
     try {
+      const appointment = appointments.find(a => a.id === appointmentId);
+      
+      if (!appointment) {
+        triggerGlobalToast('Appointment not found', 'error');
+        return;
+      }
+
+      if (appointment.status === 'CONSULTATION_STARTED') {
+        router.push(`/doctor/active-consultation?appointmentId=${appointmentId}`);
+        return;
+      }
+
+      const allowedStatuses = ['VITALS_RECORDED', 'COMPLETED'];
+      if (!allowedStatuses.includes(appointment.status)) {
+        const messages: Record<string, string> = {
+          'SCHEDULED': 'Consultation cannot be started as payment is pending/vitals not recorded',
+          'PAYMENT_PENDING': 'Consultation cannot be started as payment is pending',
+          'PAID': 'Consultation cannot be started as vitals are not recorded',
+          'CANCELLED': 'This appointment has been cancelled',
+          'PRESCRIPTION_FINALIZED': 'Prescription has already been finalized for this appointment'
+        };
+        
+        triggerGlobalToast(messages[appointment.status] || 'Consultation cannot be started at this time', 'warning');
+        return;
+      }
+
       const res = await appointmentService.updateStatus(appointmentId, { status: 'CONSULTATION_STARTED' });
       if (res.success) {
         router.push(`/doctor/active-consultation?appointmentId=${appointmentId}`);
