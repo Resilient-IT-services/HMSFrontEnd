@@ -33,12 +33,12 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = 'Medicine name is required';
-    if (!formData.genericName.trim()) newErrors.genericName = 'Generic name is required';
-    if (!formData.composition.trim()) newErrors.composition = 'Salt/Composition is required';
-    if (!formData.strength.trim()) newErrors.strength = 'Strength is required';
+    if (!formData.name?.trim()) newErrors.name = 'Medicine name is required';
+    if (!formData.genericName?.trim()) newErrors.genericName = 'Generic name is required';
+    if (!formData.composition?.trim()) newErrors.composition = 'Salt/Composition is required';
+    if (!formData.strength?.trim()) newErrors.strength = 'Strength is required';
     if (!formData.form) newErrors.form = 'Form is required';
-    if (!formData.manufacturer.trim()) newErrors.manufacturer = 'Manufacturer is required';
+    if (!formData.manufacturer?.trim()) newErrors.manufacturer = 'Manufacturer is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

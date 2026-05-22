@@ -32,12 +32,12 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = 'Medicine name is required';
-    if (!formData.genericName.trim()) newErrors.genericName = 'Generic name is required';
-    if (!formData.composition.trim()) newErrors.composition = 'Salt/Composition is required';
-    if (!formData.strength.trim()) newErrors.strength = 'Strength is required';
+    if (!formData.name?.trim()) newErrors.name = 'Medicine name is required';
+    if (!formData.genericName?.trim()) newErrors.genericName = 'Generic name is required';
+    if (!formData.composition?.trim()) newErrors.composition = 'Salt/Composition is required';
+    if (!formData.strength?.trim()) newErrors.strength = 'Strength is required';
     if (!formData.form) newErrors.form = 'Form is required';
-    if (!formData.manufacturer.trim()) newErrors.manufacturer = 'Manufacturer is required';
+    if (!formData.manufacturer?.trim()) newErrors.manufacturer = 'Manufacturer is required';
     
     if (formData.currentStock !== undefined && formData.currentStock < 0) newErrors.currentStock = 'Initial stock cannot be negative';
     if (formData.reorderLevel !== undefined && formData.reorderLevel < 0) newErrors.reorderLevel = 'Reorder level cannot be negative';
