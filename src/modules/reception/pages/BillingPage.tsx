@@ -208,7 +208,7 @@ export const BillingPage = () => {
                               value={discount}
                               onChange={(e) => {
                                 let value = Number(e.target.value);
-                                if (isNaN(value) || value < 0) value = 0;
+                                if (Number.isNaN(value) || value < 0) value = 0;
                                 const base = invoice?.subtotalAmount ?? consultationFee;
                                 if (value > base) value = base;
                                 setDiscount(value);
