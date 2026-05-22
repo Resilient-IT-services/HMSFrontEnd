@@ -35,9 +35,9 @@ vi.mock('next/navigation', () => ({
 
 // Mock MainLayout
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children, title }: any) => (
+  default: ({ children, title, hideTitle }: any) => (
     <div data-testid="main-layout">
-      <h1>{title}</h1>
+      {!hideTitle && <h1>{title}</h1>}
       {children}
     </div>
   )
