@@ -134,8 +134,12 @@ export const AppointmentsPage = () => {
 
   return (
     <MainLayout title="Appointments Dashboard" hideTitle>
-      <PageSurface maxWidthClassName="max-w-[1600px]">
-        <div className="space-y-6 lg:space-y-8">
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
           <PageHeading 
             level={1}
             title="Today's Appointments" 

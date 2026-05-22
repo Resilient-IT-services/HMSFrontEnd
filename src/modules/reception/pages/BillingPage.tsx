@@ -5,9 +5,10 @@ import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { useReceptionBilling } from '@/modules/reception/hooks/useReceptionBilling';
 import { PageHeading } from '@/components/ui/PageHeading';
-import { Button } from '@/components/ui/Button';
+import { PageSurface } from '@/components/ui/PageSurface';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { formatToken } from '@/utils/tokenHelper';
 import { getPrimarySpecialization } from '@/utils/staffDisplay';
@@ -71,9 +72,13 @@ export const BillingPage = () => {
   const isReadOnly = ['CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED'].includes(appointment.status);
 
   return (
-      <MainLayout title="Consultation Billing" hideTitle>
-        <div className="mx-auto w-full max-w-[1600px] bg-[#f8fafc] px-4 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6 font-inter pb-32">
-
+    <MainLayout title="Consultation Billing" hideTitle>
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
           {/* Top Header */}
           <div className="no-print mb-4">
             <PageHeading
@@ -290,6 +295,7 @@ export const BillingPage = () => {
             </div>
           </div>
         </div>
+      </PageSurface>
 
         {/* Sticky Bottom Action Bar */}
         <div className="no-print fixed bottom-0 left-0 right-0 z-50 flex justify-center border-t border-slate-200 bg-white/95 p-3.5 shadow-[0_-10px_25px_rgba(15,23,42,0.05)] backdrop-blur-md sm:px-6">

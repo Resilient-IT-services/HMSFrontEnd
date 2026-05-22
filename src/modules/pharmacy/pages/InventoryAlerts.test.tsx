@@ -11,7 +11,12 @@ vi.mock('@/modules/pharmacy/api/pharmacyApi', () => ({
 }));
 
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children, title }: any) => <div><h1>{title}</h1>{children}</div>,
+  default: ({ children, title, hideTitle }: any) => (
+    <div>
+      {!hideTitle && <h1>{title}</h1>}
+      {children}
+    </div>
+  ),
 }));
 
 describe('InventoryAlerts', () => {
