@@ -104,83 +104,82 @@ export function HospitalList() {
   return (
     <MainLayout title="Hospital Network">
       <PageSurface
-        className="space-y-8"
         maxWidthClassName="max-w-[1600px]"
-        backgroundClassName="bg-[#f7f9fb]"
+        backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <PageHeading
-          title="Hospital Network"
-          description="Manage and monitor interconnected healthcare facilities across the region."
-        >
-          <Button icon="add" size="lg" href="/super_admin/hospitals/create">
-            Register New Hospital
-          </Button>
-        </PageHeading>
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Hospital Network"
+            description="Manage and monitor interconnected healthcare facilities across the region."
+          >
+            <Button icon="add" size="lg" href="/super_admin/hospitals/create">
+              Register New Hospital
+            </Button>
+          </PageHeading>
 
-        <ContentPanel
-          className="rounded-xl"
-          toolbar={(
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="min-w-[300px] flex-1">
-                <SearchInput
-                  placeholder="Search hospitals by name or code..."
-                  value={searchTerm}
-                  onChange={(event) => setSearchTerm(event.target.value)}
-                />
-              </div>
-              <div className="relative flex gap-3">
-                <Button variant="secondary" icon="filter_list" onClick={() => setShowFilter(!showFilter)}>
-                  Filter
-                </Button>
-                {showFilter && (
-                  <div className="absolute right-0 top-12 z-50 w-44 rounded-xl border border-slate-200 bg-white shadow-lg">
-                    <div className="border-b px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                      Filter by Status
+          <ContentPanel
+            className="rounded-xl"
+            toolbar={(
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="min-w-[300px] flex-1">
+                  <SearchInput
+                    placeholder="Search hospitals by name or code..."
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                  />
+                </div>
+                <div className="relative flex gap-3">
+                  <Button variant="secondary" icon="filter_list" onClick={() => setShowFilter(!showFilter)}>
+                    Filter
+                  </Button>
+                  {showFilter && (
+                    <div className="absolute right-0 top-12 z-50 w-44 rounded-xl border border-slate-200 bg-white shadow-lg">
+                      <div className="border-b px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Filter by Status
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {statusOptions.map((status) => (
+                          <div
+                            key={status}
+                            onClick={() => {
+                              setStatusFilter(status);
+                              setShowFilter(false);
+                            }}
+                            className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm ${statusFilter === status ? 'bg-orange-50 font-semibold text-orange-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                          >
+                            {status}
+                            {statusFilter === status && (
+                              <span className="material-symbols-outlined text-sm">check</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="max-h-48 overflow-y-auto">
-                      {statusOptions.map((status) => (
-                        <div
-                          key={status}
-                          onClick={() => {
-                            setStatusFilter(status);
-                            setShowFilter(false);
-                          }}
-                          className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm ${statusFilter === status ? 'bg-orange-50 font-semibold text-orange-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                        >
-                          {status}
-                          {statusFilter === status && (
-                            <span className="material-symbols-outlined text-sm">check</span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {showExportButton && <Button variant="secondary" icon="download">Export</Button>}
+                  )}
+                  {showExportButton && <Button variant="secondary" icon="download">Export</Button>}
+                </div>
               </div>
-            </div>
-          )}
-        >
-          <Table
-            columns={columns}
-            data={hospitals}
-            isLoading={loading}
-            onRowDoubleClick={(hospital) => router.push(`/super_admin/hospitals/${hospital.id}`)}
-            emptyMessage="No hospitals found matching your criteria."
-          />
+            )}
+          >
+            <Table
+              columns={columns}
+              data={hospitals}
+              isLoading={loading}
+              onRowDoubleClick={(hospital) => router.push(`/super_admin/hospitals/${hospital.id}`)}
+              emptyMessage="No hospitals found matching your criteria."
+            />
 
-          <Pagination
-            page={page}
-            totalElements={totalElements}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-            label="facilities"
-          />
-        </ContentPanel>
-
-
+            <Pagination
+              page={page}
+              totalElements={totalElements}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              label="facilities"
+            />
+          </ContentPanel>
+        </div>
       </PageSurface>
 
       {isModalOpen && selectedHospital && (

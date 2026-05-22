@@ -40,9 +40,30 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       
       setLoading(true);
       try {
-        const response = await pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 });
+        let response;
+        if (stockOnly) {
+          response = await pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 10 });
+        } else {
+          response = await pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 });
+        }
+
         if (response.success && response.data) {
-          setResults(response.data.content || []);
+          // Normalize results: convert PharmacyStockDTO to a format similar to MedicineResponse for the dropdown
+          const normalized = (response.data.content || []).map((item: any) => ({
+            id: item.id,
+            medicineId: item.medicineId || item.id,
+            name: item.medicineName || item.name,
+            genericName: item.genericName,
+            composition: item.composition,
+            form: item.form,
+            category: item.category,
+            manufacturer: item.manufacturer,
+            currentStock: item.quantity !== undefined ? item.quantity : item.currentStock,
+            batchNumber: item.batchNumber,
+            expiryDate: item.expiryDate,
+            sellingPrice: item.sellingPrice || item.price
+          }));
+          setResults(normalized as any);
         }
       } catch (error) {
         console.error(error);
@@ -87,8 +108,8 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       </div>
 
       {showDropdown && results.length > 0 && (
-        <div className="absolute z-[100] w-full mt-1 bg-white border border-outline-variant rounded-xl shadow-xl max-h-60 overflow-y-auto">
-          {results.map((medicine) => (
+        <div className="absolute z-[100] w-full mt-1 bg-white border border-outline-variant rounded-xl shadow-xl max-h-60 overflow-y-auto p-1">
+          {results.map((medicine: any) => (
             <button
               key={medicine.id}
               type="button"
@@ -97,37 +118,42 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
                 setSearchTerm(medicine.name);
                 setShowDropdown(false);
               }}
-              className="w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-none group"
+              className="w-full text-left px-4 py-3 hover:bg-primary/5 transition-colors border-b border-gray-50 last:border-none group rounded-lg"
             >
               <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-bold text-on-surface group-hover:text-primary">{medicine.name}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-on-surface group-hover:text-primary transition-colors truncate">{medicine.name}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="px-1.5 py-0.5 bg-gray-100 text-[9px] font-black uppercase rounded text-gray-600 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                       {medicine.form || medicine.category || 'General'}
                     </span>
-                    {medicine.composition && (
-                      <p className="text-[10px] text-gray-500 line-clamp-1 italic">{medicine.composition}</p>
+                    {medicine.manufacturer && (
+                      <p className="text-[9px] text-slate-400 font-bold uppercase truncate max-w-[120px]">
+                        {medicine.manufacturer}
+                      </p>
+                    )}
+                  </div>
+                  {medicine.composition && (
+                    <p className="text-[10px] text-gray-500 line-clamp-1 italic mt-1 font-medium">{medicine.composition}</p>
+                  )}
+                </div>
+                <div className="text-right shrink-0 ml-3">
+                  <p className={`text-xs font-black ${ (medicine.currentStock || 0) <= 0 ? 'text-red-500' : (medicine.currentStock || 0) < 10 ? 'text-orange-500' : 'text-green-600'}`}>
+                    {(medicine.currentStock || 0) > 0 ? `${medicine.currentStock} Units` : 'Out of Stock'}
+                  </p>
+                  <div className="flex flex-col items-end gap-0.5 mt-0.5">
+                    {medicine.batchNumber && (
+                      <p className="text-[9px] font-mono font-black bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">
+                        #{medicine.batchNumber}
+                      </p>
+                    )}
+                    {medicine.expiryDate && (
+                      <p className={`text-[9px] font-black uppercase ${new Date(medicine.expiryDate) < new Date() ? 'text-red-500' : 'text-slate-400'}`}>
+                        EXP: {new Date(medicine.expiryDate).toLocaleDateString()}
+                      </p>
                     )}
                   </div>
                 </div>
-                {stockOnly && (
-                  <div className="text-right">
-                    <p className={`text-xs font-black ${ (medicine.currentStock || 0) < 10 ? 'text-red-500' : 'text-green-600'}`}>
-                      {medicine.currentStock || 0} In Stock
-                    </p>
-                    <div className="flex flex-col items-end gap-0.5 mt-0.5">
-                      {medicine.batchNumber && (
-                        <p className="text-[9px] font-mono font-bold bg-slate-100 px-1 rounded text-slate-600">
-                          #{medicine.batchNumber}
-                        </p>
-                      )}
-                      {medicine.expiryDate && (
-                        <p className="text-[10px] text-gray-400 font-bold uppercase">Exp: {new Date(medicine.expiryDate).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>
             </button>
           ))}

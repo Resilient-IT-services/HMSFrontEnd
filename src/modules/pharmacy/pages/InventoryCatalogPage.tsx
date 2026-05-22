@@ -12,6 +12,7 @@ import AddInventoryItemModal from '../components/AddInventoryItemModal';
 import StockUpdateModal from '../components/StockUpdateModal';
 
 import MainLayout from '@/components/ui/MainLayout';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 const InventoryCatalogPage = () => {
   const {
@@ -80,44 +81,56 @@ const InventoryCatalogPage = () => {
           Define New Item
         </Button>
       }
+      hideTitle
     >
-      <div className="space-y-6">
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-slate-50 bg-slate-50/30">
-            <div className="max-w-md">
-              <SearchInput 
-                placeholder="Search items by name or category..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Inventory Item Catalog"
+            description="Manage the master list of all pharmaceutical and clinical items."
+          />
+
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-100 bg-slate-50/30">
+              <div className="max-w-md">
+                <SearchInput 
+                  placeholder="Search items by name or category..." 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
             </div>
+            
+            <Table 
+              columns={columns} 
+              data={items} 
+              isLoading={loading}
+              loadingMessage="Loading inventory catalog..."
+              emptyMessage="No inventory items found"
+            />
           </div>
-          
-          <Table 
-            columns={columns} 
-            data={items} 
-            isLoading={loading}
-            loadingMessage="Loading inventory catalog..."
-            emptyMessage="No inventory items found"
-          />
+
+          {showAddModal && (
+            <AddInventoryItemModal 
+              onClose={() => setShowAddModal(false)}
+              onSuccess={refresh}
+            />
+          )}
+
+          {selectedItem && (
+            <StockUpdateModal 
+              itemId={selectedItem.id}
+              itemName={selectedItem.name}
+              onClose={() => setSelectedItem(null)}
+              onSuccess={refresh}
+            />
+          )}
         </div>
-
-        {showAddModal && (
-          <AddInventoryItemModal 
-            onClose={() => setShowAddModal(false)}
-            onSuccess={refresh}
-          />
-        )}
-
-        {selectedItem && (
-          <StockUpdateModal 
-            itemId={selectedItem.id}
-            itemName={selectedItem.name}
-            onClose={() => setSelectedItem(null)}
-            onSuccess={refresh}
-          />
-        )}
-      </div>
+      </PageSurface>
     </MainLayout>
   );
 };

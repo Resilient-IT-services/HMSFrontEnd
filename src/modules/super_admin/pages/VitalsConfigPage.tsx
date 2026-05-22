@@ -6,6 +6,9 @@ import { Card } from '@/components/ui/Card';
 import { adminService } from '@/services/adminService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { ContentPanel } from '@/components/ui/ContentPanel';
 
 export function VitalsConfigPage() {
   const [settings, setSettings] = useState<Record<string, {minValue: number, maxValue: number}>>({});
@@ -96,73 +99,81 @@ export function VitalsConfigPage() {
 
   return (
     <MainLayout title="Global Vitals Configuration">
-      <div className="space-y-6 max-w-5xl mx-auto">
-        <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600">
-              <span className="material-symbols-outlined text-3xl">health_metrics</span>
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-800 uppercase tracking-tight">Global Clinical Standard</h2>
-              <p className="text-sm text-slate-500 italic">Configure standard medical vital thresholds applied across all hospitals in the system.</p>
-            </div>
-          </div>
-          <span className="text-[10px] bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-green-100">Active Enforcement</span>
-        </div>
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Global Vitals Configuration"
+            description="Configure standard medical vital thresholds applied across all hospitals in the system."
+          />
 
-        <Card>
-          <div className="p-4 border-b border-gray-50">
-            <h3 className="font-bold text-slate-700 flex items-center gap-2 uppercase text-xs tracking-tighter">
-              Standard Safety Ranges
-            </h3>
+          <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600">
+                <span className="material-symbols-outlined text-3xl">health_metrics</span>
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-800 uppercase tracking-tight">Global Clinical Standard</h2>
+                <p className="text-sm text-slate-500 italic">Centralized safety enforcement protocols.</p>
+              </div>
+            </div>
+            <span className="text-[10px] bg-green-50 text-green-700 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-green-100">Active Enforcement</span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-slate-50">
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vital Metric</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Safety Range (Min - Max)</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {loading ? (
-                  <tr><td colSpan={3} className="px-6 py-10 text-center text-slate-400 italic">Loading global medical policies...</td></tr>
-                ) : VITAL_TYPES.map((type) => {
-                  const range = settings[type.value];
-                  return (
-                    <tr 
-                      key={type.value} 
-                      className="hover:bg-slate-50 transition-colors group cursor-pointer"
-                      onDoubleClick={() => handleOpenModal(type.value, range)}
-                    >
-                      <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
-                      <td className="px-6 py-4 text-center">
-                        {range ? (
-                          <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                            {range.minValue} — {range.maxValue}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300 italic text-xs">Awaiting Initialization...</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button 
-                          onClick={() => handleOpenModal(type.value, range)} 
-                          className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
-                        >
-                          <span className="material-symbols-outlined text-sm">settings</span>
-                          Configure
-                        </button>
-                      </td>
+
+          <ContentPanel>
+            {loading ? (
+              <div className="p-12 text-center text-slate-500 font-medium">Loading global medical policies...</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-50">
+                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vital Metric</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Safety Range (Min - Max)</th>
+                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </Card>
-      </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {VITAL_TYPES.map((type) => {
+                      const range = settings[type.value];
+                      return (
+                        <tr 
+                          key={type.value} 
+                          className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                          onDoubleClick={() => handleOpenModal(type.value, range)}
+                        >
+                          <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
+                          <td className="px-6 py-4 text-center">
+                            {range ? (
+                              <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
+                                {range.minValue} — {range.maxValue}
+                              </span>
+                            ) : (
+                              <span className="text-gray-300 italic text-xs">Awaiting Initialization...</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <button 
+                              onClick={() => handleOpenModal(type.value, range)} 
+                              className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
+                            >
+                              <span className="material-symbols-outlined text-sm">settings</span>
+                              Configure
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </ContentPanel>
+        </div>
+      </PageSurface>
 
       <Modal 
         isOpen={isModalOpen} 

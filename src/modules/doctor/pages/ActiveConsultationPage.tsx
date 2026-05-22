@@ -15,6 +15,7 @@ import { formatToken } from '@/utils/tokenHelper';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { Button } from '@/components/ui/Button';
 import { useDebounce } from '@/hooks/useDebounce';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 
@@ -22,12 +23,14 @@ const MedicineSearchInput = ({
   value, 
   onChange, 
   onSelect,
-  inStock = true
+  inStock = true,
+  error
 }: { 
   value: string; 
   onChange: (val: string) => void;
   onSelect: (med: any) => void;
   inStock?: boolean;
+  error?: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState(value);
   const [results, setResults] = useState<any[]>([]);
@@ -56,7 +59,7 @@ const MedicineSearchInput = ({
 
       setLoading(true);
       try {
-        const res = await pharmacyApi.getMedicineStock({ search: trimmedSearch, size: 5 });
+        const res = await pharmacyApi.getMedicinesSummary({ search: trimmedSearch, size: 10 });
         if (res.success && res.data) {
           lastFetchedSearch.current = trimmedSearch;
           setResults(res.data.content || []);
@@ -87,10 +90,10 @@ const MedicineSearchInput = ({
     <div className="relative w-full" ref={wrapperRef}>
       <input
         type="text"
-        className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none transition-all ${
-          inStock ? 'border-slate-200 text-slate-900' : 'border-red-200 text-red-900 pr-16'
+        className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold focus:ring-2 focus:ring-orange-500 outline-none transition-all text-slate-900 ${
+          error ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
         }`}
-        placeholder="Search medicine..."
+        placeholder="Search global medicine master..."
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -100,17 +103,11 @@ const MedicineSearchInput = ({
         onFocus={() => setShowResults(true)}
       />
       
-      {!inStock && !showResults && searchTerm && (
-        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[8px] font-black text-red-600 uppercase tracking-tighter bg-red-50 px-1.5 py-0.5 rounded border border-red-100 pointer-events-none">
-          No Stock
-        </span>
-      )}
-
       {showResults && (searchTerm.length >= 2 || results.length > 0) && (
         <div className="absolute z-[100] w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
-          {loading && <div className="p-3 text-xs text-slate-400 font-bold italic">Searching...</div>}
+          {loading && <div className="p-3 text-xs text-slate-400 font-bold italic">Searching Master...</div>}
           {!loading && results.length === 0 && searchTerm.length >= 2 && (
-            <div className="p-3 text-xs text-slate-400 font-bold">No matches found. Using manual entry.</div>
+            <div className="p-3 text-xs text-slate-400 font-bold">No matches found in master. Using manual entry.</div>
           )}
           {results.map((med) => (
             <button
@@ -122,16 +119,16 @@ const MedicineSearchInput = ({
               }}
             >
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{med.medicineName || med.name}</span>
+                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{med.name}</span>
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{med.genericName || med.category}</span>
               </div>
               <div className="flex flex-col items-end shrink-0 ml-3">
                 <div className="flex items-center gap-1">
-                  <span className={`text-[10px] font-black ${(med.totalQuantity || med.quantity) > 0 ? 'text-emerald-600' : 'text-red-600'}`}>
-                    Stock: {med.totalQuantity || med.quantity || 0}
+                  <span className="text-[10px] font-black text-slate-500 uppercase">
+                    {med.form}
                   </span>
                 </div>
-                {med.form && <span className="text-[8px] text-slate-400 font-bold mt-0.5 uppercase">{med.form}</span>}
+                {med.manufacturer && <span className="text-[8px] text-slate-400 font-bold mt-0.5 uppercase truncate max-w-[100px]">{med.manufacturer}</span>}
               </div>
             </button>
           ))}
@@ -158,6 +155,40 @@ export const ActiveConsultationPage = () => {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
+
+  // Duplicate medicine validation
+  useEffect(() => {
+    setValidationErrors(prev => {
+      const newErrors = { ...prev };
+      const activePrescriptions = prescriptions.filter(p => p.medicine);
+      const medicineNames = activePrescriptions.map(p => p.medicine.toLowerCase().trim());
+      const medicineIds = activePrescriptions.filter(p => p.medicineId).map(p => p.medicineId);
+
+      let hasChanged = false;
+      prescriptions.forEach(p => {
+        if (!p.medicine) {
+          if (newErrors[`${p.id}-medicine`]) {
+            newErrors[`${p.id}-medicine`] = false;
+            hasChanged = true;
+          }
+          return;
+        }
+
+        const name = p.medicine.toLowerCase().trim();
+        const id = p.medicineId;
+        const isDuplicateByName = medicineNames.filter(n => n === name).length > 1;
+        const isDuplicateById = id && medicineIds.filter(i => i === id).length > 1;
+        const isDuplicate = isDuplicateByName || isDuplicateById;
+
+        if (newErrors[`${p.id}-medicine`] !== isDuplicate) {
+          newErrors[`${p.id}-medicine`] = !!isDuplicate;
+          hasChanged = true;
+        }
+      });
+
+      return hasChanged ? newErrors : prev;
+    });
+  }, [prescriptions]);
 
   const fetchAppointment = useCallback(async () => {
     if (!appointmentId) return;
@@ -260,6 +291,10 @@ export const ActiveConsultationPage = () => {
     const errors: Record<string, boolean> = {};
     let hasError = false;
 
+    const activePrescriptions = prescriptions.filter(p => p.medicine);
+    const medicineNames = activePrescriptions.map(p => p.medicine.toLowerCase().trim());
+    const medicineIds = activePrescriptions.filter(p => p.medicineId).map(p => p.medicineId);
+
     prescriptions.forEach(p => {
       if (p.medicine) {
         if (!p.frequency) {
@@ -270,12 +305,27 @@ export const ActiveConsultationPage = () => {
           errors[`${p.id}-instructions`] = true;
           hasError = true;
         }
+
+        const name = p.medicine.toLowerCase().trim();
+        const id = p.medicineId;
+        const isDuplicateByName = medicineNames.filter(n => n === name).length > 1;
+        const isDuplicateById = id && medicineIds.filter(i => i === id).length > 1;
+        
+        if (isDuplicateByName || isDuplicateById) {
+          errors[`${p.id}-medicine`] = true;
+          hasError = true;
+        }
       }
     });
 
     if (hasError) {
-      setValidationErrors(errors);
-      triggerGlobalToast('Please fill frequency and duration for all prescribed medicines', 'error');
+      setValidationErrors(prev => ({ ...prev, ...errors }));
+      const hasDuplicateError = Object.keys(errors).some(k => k.endsWith('-medicine'));
+      if (hasDuplicateError) {
+        triggerGlobalToast('Duplicate medicines found. Each medicine can only be prescribed once.', 'error');
+      } else {
+        triggerGlobalToast('Please fill frequency and duration for all prescribed medicines', 'error');
+      }
       return false;
     }
 
@@ -298,7 +348,7 @@ export const ActiveConsultationPage = () => {
           }))
         }
       };
-      
+
       const res = await appointmentService.updateConsultation(appointmentId, updateData as any);
       if (res.success && !silent) {
         triggerGlobalToast('Progress saved successfully', 'success');
@@ -353,8 +403,14 @@ export const ActiveConsultationPage = () => {
   };
   return (
     <MainLayout title={`Consultation: ${appointment.patientName}`}>
-      <div className="flex flex-col h-full">
-        {/* Header - Patient Info & Actions */}
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <div className="flex flex-col h-full">
+            {/* Header - Patient Info & Actions */}
         <div className="p-4 sm:p-6 border-b border-slate-200 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-10">
           <div className="flex flex-col">
             <div className="flex items-center gap-3">
@@ -379,9 +435,9 @@ export const ActiveConsultationPage = () => {
               </span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3 w-full sm:w-auto">
-            <Button 
+            <Button
               variant="secondary"
               onClick={() => saveConsultation()}
               icon="save"
@@ -389,7 +445,7 @@ export const ActiveConsultationPage = () => {
             >
               Save Progress
             </Button>
-            <Button 
+            <Button
               variant="secondary"
               onClick={() => setShowPreview(true)}
               icon="visibility"
@@ -397,7 +453,7 @@ export const ActiveConsultationPage = () => {
             >
               Preview Prescription
             </Button>
-            <Button 
+            <Button
               onClick={handleComplete}
               icon="task_alt"
               className="flex-1 sm:flex-none shadow-lg shadow-orange-600/20"
@@ -412,10 +468,10 @@ export const ActiveConsultationPage = () => {
         <div className="flex-1 bg-slate-50 overflow-y-auto p-4 sm:p-6">
           <div className="max-w-[1440px] mx-auto">
             <div className="grid grid-cols-12 gap-6">
-              
+
               {/* Left Column: Complaints & Diagnosis */}
               <div className="col-span-12 lg:col-span-6 space-y-6">
-                
+
                 {/* Vitals Summary Card */}
                 <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-wrap gap-6 items-center">
                   <div className="flex flex-col">
@@ -510,7 +566,7 @@ export const ActiveConsultationPage = () => {
                       <span className="material-symbols-outlined text-orange-600">description</span>
                       Medication Plan
                     </h3>
-                    <button 
+                    <button
                       onClick={addPrescriptionRow}
                       className="text-xs font-black text-orange-600 uppercase tracking-widest flex items-center gap-1.5 hover:text-orange-700 transition-colors bg-orange-600/5 px-3 py-2 rounded-lg border border-orange-600/10"
                     >
@@ -541,10 +597,11 @@ export const ActiveConsultationPage = () => {
                         }`}>
                           <div className="col-span-12 sm:col-span-5">
                             <label className="sm:hidden block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Medicine Name</label>
-                            <MedicineSearchInput 
+                            <MedicineSearchInput
                               value={p.medicine}
                               onChange={(val) => updatePrescriptionRow(p.id, 'medicine', val)}
                               onSelect={(med) => selectMedicine(p.id, med)}
+                              error={validationErrors[`${p.id}-medicine`]}
                             />
                           </div>
                           <div className="col-span-6 sm:col-span-3">
@@ -609,7 +666,9 @@ export const ActiveConsultationPage = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+        </div>
+      </PageSurface>
 
       {/* Prescription Preview Modal */}
       {showPreview && (
@@ -636,4 +695,3 @@ export const ActiveConsultationPage = () => {
     </MainLayout>
   );
 };
-

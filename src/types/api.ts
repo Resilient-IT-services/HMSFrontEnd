@@ -572,7 +572,8 @@ export interface StockRequest {
 }
 
 export interface PharmacySaleItem {
-  medicineId: string;
+  medicineId?: string;
+  medicineBatchId?: string;
   quantity: number;
 }
 

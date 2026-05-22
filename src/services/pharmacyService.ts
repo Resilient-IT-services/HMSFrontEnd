@@ -6,6 +6,7 @@ import {
   PrescriptionDTO,
   MedicineResponse,
   MedicineRequestDTO,
+  MedicineSummaryDTO,
   PharmacyStockDTO,
   InventoryItemResponse,
   InventoryItemRequestDTO,
@@ -13,6 +14,8 @@ import {
   StockRequest,
   PharmacySaleRequest,
   PharmacySaleResponse,
+  QuickPharmacySaleRequest,
+  QuickPharmacySaleResponse,
   PharmacyReturnRequest,
   PharmacyReturnResponse,
   InventoryStockDTO
@@ -42,7 +45,12 @@ export const pharmacyService = {
     return response.data;
   },
 
-  async listStock(params?: { lowStock?: boolean; page?: number; size?: number }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
+  async listMedicinesSummary(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<MedicineSummaryDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<MedicineSummaryDTO>>>('/pharmacy/medicines/summary', { params });
+    return response.data;
+  },
+
+  async listStock(params?: { lowStock?: boolean; page?: number; size?: number; search?: string; medicineId?: string }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params });
     return response.data;
   },
@@ -91,8 +99,28 @@ export const pharmacyService = {
   },
 
   // Sale & Returns
-  async processSale(request: PharmacySaleRequest): Promise<ApiResponse<PharmacySaleResponse>> {
-    const response = await apiClient.post<ApiResponse<PharmacySaleResponse>>('/pharmacy/sales', request);
+  async processSale(request: QuickPharmacySaleRequest): Promise<ApiResponse<QuickPharmacySaleResponse>> {
+    const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>('/pharmacy/sales', request);
+    return response.data;
+  },
+
+  async dispensePrescription(id: string, request: QuickPharmacySaleRequest): Promise<ApiResponse<QuickPharmacySaleResponse>> {
+    const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/prescriptions/${id}/dispense`, request);
+    return response.data;
+  },
+
+  async getSale(id: string): Promise<ApiResponse<QuickPharmacySaleResponse>> {
+    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/sales/${id}`);
+    return response.data;
+  },
+
+  async getSaleByPrescription(prescriptionId: string): Promise<ApiResponse<QuickPharmacySaleResponse>> {
+    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/sales/prescription/${prescriptionId}`);
+    return response.data;
+  },
+
+  async searchRecentCustomers(search: string): Promise<ApiResponse<any[]>> {
+    const response = await apiClient.get<ApiResponse<any[]>>('/pharmacy/recent-customers', { params: { search } });
     return response.data;
   },
 
@@ -101,7 +129,18 @@ export const pharmacyService = {
     return response.data;
   },
 
-  // Inventory Management
+  // Alerts
+  async getExpiryAlerts(days: number = 30): Promise<ApiResponse<PharmacyStockDTO[]>> {
+    const response = await apiClient.get<ApiResponse<PharmacyStockDTO[]>>('/pharmacy/alerts/expiry', { params: { days } });
+    return response.data;
+  },
+
+  async getLowStockAlerts(params?: { page?: number; size?: number; threshold?: number }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/alerts/low-stock', { params });
+    return response.data;
+  },
+
+  // Inventory Management (Shared/General)
   async listInventoryItems(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<InventoryItemResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<InventoryItemResponse>>>('/inventory/items', { params });
     return response.data;

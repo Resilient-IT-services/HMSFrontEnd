@@ -87,43 +87,49 @@ export function PatientList() {
 
   return (
     <MainLayout title="Patient Directory" hideTitle>
-      <PageSurface maxWidthClassName="max-w-[1600px]" fontClassName="font-inter">
-        <PageHeading
-          title="Patient Directory"
-          description="Access and manage comprehensive electronic health records."
-        >
-          <Button icon="person_add" size="xl" href="/reception/patients/create">
-            Register New Patient
-          </Button>
-        </PageHeading>
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Patient Directory"
+            description="Access and manage comprehensive electronic health records."
+          >
+            <Button icon="person_add" size="xl" href="/reception/patients/create">
+              Register New Patient
+            </Button>
+          </PageHeading>
 
-        <div className="mb-8">
-          <div className="flex w-full items-center rounded-2xl border border-slate-100 bg-white p-2 shadow-sm max-w-md">
-            <SearchInput
-              placeholder="Search by name, ID, or phone..."
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
+          <div className="mb-8">
+            <div className="flex w-full items-center rounded-2xl border border-slate-100 bg-white p-2 shadow-sm max-w-md">
+              <SearchInput
+                placeholder="Search by name, ID, or phone..."
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+              />
+            </div>
           </div>
-        </div>
 
-        <ContentPanel className="mb-12 border-slate-100">
-          <Table
-            columns={columns}
-            data={patients}
-            isLoading={loading}
-            onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
-            emptyMessage="No patient records found."
-          />
-          <Pagination
-            page={page}
-            totalElements={totalElements}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-            label="patients"
-          />
-        </ContentPanel>
+          <ContentPanel className="mb-12 border-slate-100">
+            <Table
+              columns={columns}
+              data={patients}
+              isLoading={loading}
+              onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
+              emptyMessage="No patient records found."
+            />
+            <Pagination
+              page={page}
+              totalElements={totalElements}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              label="patients"
+            />
+          </ContentPanel>
+        </div>
       </PageSurface>
     </MainLayout>
   );

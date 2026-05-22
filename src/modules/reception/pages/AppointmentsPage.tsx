@@ -127,15 +127,19 @@ export const AppointmentsPage = () => {
   const statConfig = [
     { label: 'Total Today', value: stats.total, variant: 'slate', filter: 'ALL' },
     { label: 'In Progress', value: stats.inProgress, variant: 'emerald', filter: 'CONSULTATION_STARTED' },
-    { label: 'Pay Pending', value: stats.paymentPending, variant: 'orange', filter: 'PAYMENT_PENDING' },
     { label: 'Waiting Vitals', value: stats.waitingForVitals, variant: 'purple', filter: 'PAID' },
     { label: 'Completed', value: stats.completed, variant: 'emerald', filter: 'COMPLETED' },
+    { label: 'Upcoming', value: stats.upcoming, variant: 'blue', filter: 'UPCOMING' },
   ];
 
   return (
     <MainLayout title="Appointments Dashboard" hideTitle>
-      <PageSurface maxWidthClassName="max-w-[1600px]">
-        <div className="space-y-6 lg:space-y-8">
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
           <PageHeading 
             level={1}
             title="Today's Appointments" 
@@ -149,7 +153,7 @@ export const AppointmentsPage = () => {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
             {statConfig.map((stat, i) => (
-              <div 
+              <div
                 key={i} 
                 className={cn(
                   "transition-all h-full",

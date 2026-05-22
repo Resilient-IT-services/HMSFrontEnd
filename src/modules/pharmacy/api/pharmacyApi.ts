@@ -140,15 +140,15 @@ export const pharmacyApi = {
   },
 
   // Alerts
-  getLowStockAlerts: async (threshold: number = LOW_STOCK_THRESHOLD) => {
-    const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/alerts/low-stock', {
-      params: { threshold }
+  getLowStockAlerts: async (params?: { page?: number; size?: number; threshold?: number }) => {
+    const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/alerts/low-stock', {
+      params: { threshold: LOW_STOCK_THRESHOLD, ...params }
     });
     return response.data;
   },
 
   getExpiryAlerts: async (days: number = EXPIRY_ALERT_DAYS) => {
-    const response = await apiClient.get<ApiResponse<MedicineResponse[]>>('/pharmacy/alerts/expiry', {
+    const response = await apiClient.get<ApiResponse<PharmacyStockDTO[]>>('/pharmacy/alerts/expiry', {
       params: { days }
     });
     return response.data;
@@ -179,22 +179,22 @@ export const pharmacyApi = {
   },
 
   createQuickSale: async (data: QuickPharmacySaleRequest) => {
-    const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>('/pharmacy/quick-sale', data);
+    const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>('/pharmacy/sales', data);
     return response.data;
   },
 
   getSale: async (id: string) => {
-    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/quick-sale/${id}`);
+    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/sales/${id}`);
     return response.data;
   },
 
   getSaleByPrescription: async (prescriptionId: string) => {
-    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/quick-sale/prescription/${prescriptionId}`);
+    const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/sales/prescription/${prescriptionId}`);
     return response.data;
   },
 
   searchRecentCustomers: async (search: string) => {
-    const response = await apiClient.get<ApiResponse<any[]>>(`/pharmacy/quick-sale/recent-customers`, {
+    const response = await apiClient.get<ApiResponse<any[]>>('/pharmacy/recent-customers', {
       params: { search }
     });
     return response.data;
