@@ -189,7 +189,7 @@ export const DoctorDashboard = () => {
           <div>
             <h4 className="text-sm font-bold text-slate-900">{appointment.patientName}</h4>
             <p className="text-[10px] font-black uppercase text-slate-500">
-              Scheduled: {new Date(appointment.appointmentTime).toLocaleDateString()} {appointment.appointmentTime.split('T')[1].slice(0, 5)} | {appointment.notes || 'Routine Checkup'}
+              Scheduled: {hospitalTimezone ? dayjs(appointment.appointmentTime).tz(hospitalTimezone).format('MMM DD, YYYY HH:mm') : new Date(appointment.appointmentTime).toLocaleDateString()} | {appointment.notes || 'Routine Checkup'}
             </p>
           </div>
         </div>
@@ -270,8 +270,13 @@ export const DoctorDashboard = () => {
 
   return (
     <MainLayout title="Doctor Dashboard" hideTitle>
-      <PageSurface>
-        {/* Info Pills Row - Visible only on mobile */}
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          {/* Info Pills Row - Visible only on mobile */}
         <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 
             label="Daily Load" 
@@ -415,6 +420,7 @@ export const DoctorDashboard = () => {
           </section>
 
 
+        </div>
         </div>
       </PageSurface>
     </MainLayout>

@@ -128,106 +128,112 @@ export const AdminDashboard = () => {
 
   return (
     <MainLayout title="Admin Overview">
-      <PageSurface>
-        {/* Mobile Header */}
-        <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-700">
-                <span className="material-symbols-outlined">shield_person</span>
-              </div>
-              <div>
-                <h1 className="font-headline-md text-slate-900 leading-tight">Admin Overview</h1>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Command Center</p>
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          {/* Mobile Header */}
+          <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-700">
+                  <span className="material-symbols-outlined">shield_person</span>
+                </div>
+                <div>
+                  <h1 className="font-headline-md text-slate-900 leading-tight">Admin Overview</h1>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Command Center</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <PageHeading 
-          title="Admin Overview" 
-          description="Real-time health indicators and administrative network status."
-          className="hidden md:flex"
-        >
-          <Button variant="secondary" icon="person_add"  onClick={() => router.push('/admin/users/create')}>Hire User</Button>
-          <Button 
-            onClick={() => router.push('/super_admin/hospitals/create')}
-            icon="add"
+          <PageHeading 
+            title="Admin Overview" 
+            description="Real-time health indicators and administrative network status."
+            className="hidden md:flex"
           >
-            Onboard Hospital
-          </Button>
-        </PageHeading>
+            <Button variant="secondary" icon="person_add"  onClick={() => router.push('/admin/users/create')}>Hire User</Button>
+            <Button 
+              onClick={() => router.push('/super_admin/hospitals/create')}
+              icon="add"
+            >
+              Onboard Hospital
+            </Button>
+          </PageHeading>
 
-        <div className="space-y-8">
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <MetricCard label="Total Hospitals" value={adminStats.totalHospitals} icon="apartment" variant="orange" trend="+12%" layout="horizontal" />
-            <MetricCard label="Platform Users" value={adminStats.platformUsers} icon="group" variant="blue" trend="+5.4%" layout="horizontal" />
-            <MetricCard label="Active Now" value={adminStats.activeNow} icon="bolt" variant="emerald" pulse layout="horizontal" />
-            <MetricCard label="Certified Doctors" value={adminStats.certifiedDoctors} icon="medical_services" variant="purple" trend="Stable" layout="horizontal" />
+          <div className="space-y-8">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <MetricCard label="Total Hospitals" value={adminStats.totalHospitals} icon="apartment" variant="orange" trend="+12%" layout="horizontal" />
+              <MetricCard label="Platform Users" value={adminStats.platformUsers} icon="group" variant="blue" trend="+5.4%" layout="horizontal" />
+              <MetricCard label="Active Now" value={adminStats.activeNow} icon="bolt" variant="emerald" pulse layout="horizontal" />
+              <MetricCard label="Certified Doctors" value={adminStats.certifiedDoctors} icon="medical_services" variant="purple" trend="Stable" layout="horizontal" />
+            </div>
+
+            <ContentPanel
+              className="rounded-xl"
+              toolbar={(
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="min-w-[300px] flex-1">
+                    <SearchInput
+                      placeholder="Search hospitals by name or code..."
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                    />
+                  </div>
+                  <div className="relative flex gap-3">
+                    <Button variant="secondary" icon="filter_list" onClick={() => setShowFilter(!showFilter)}>
+                      Filter
+                    </Button>
+                    {showFilter && (
+                      <div className="absolute right-0 top-12 z-50 w-44 rounded-xl border border-slate-200 bg-white shadow-lg">
+                        <div className="border-b px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                          Filter by Status
+                        </div>
+                        <div className="max-h-48 overflow-y-auto">
+                          {statusOptions.map((status) => (
+                            <div
+                              key={status}
+                              onClick={() => {
+                                setStatusFilter(status);
+                                setShowFilter(false);
+                              }}
+                              className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm ${statusFilter === status ? 'bg-orange-50 font-semibold text-orange-700' : 'text-slate-700 hover:bg-slate-50'}`}
+                            >
+                              {status}
+                              {statusFilter === status && (
+                                <span className="material-symbols-outlined text-sm">check</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            >
+              <Table
+                columns={columns}
+                data={hospitals}
+                isLoading={loading}
+                onRowDoubleClick={(hospital) => router.push(`/super_admin/hospitals/${hospital.id}`)}
+                emptyMessage="No hospitals found matching your criteria."
+              />
+
+              <Pagination
+                page={page}
+                totalElements={totalElements}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+                label="facilities"
+              />
+            </ContentPanel>
+
           </div>
-
-          <ContentPanel
-            className="rounded-xl"
-            toolbar={(
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="min-w-[300px] flex-1">
-                  <SearchInput
-                    placeholder="Search hospitals by name or code..."
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                  />
-                </div>
-                <div className="relative flex gap-3">
-                  <Button variant="secondary" icon="filter_list" onClick={() => setShowFilter(!showFilter)}>
-                    Filter
-                  </Button>
-                  {showFilter && (
-                    <div className="absolute right-0 top-12 z-50 w-44 rounded-xl border border-slate-200 bg-white shadow-lg">
-                      <div className="border-b px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                        Filter by Status
-                      </div>
-                      <div className="max-h-48 overflow-y-auto">
-                        {statusOptions.map((status) => (
-                          <div
-                            key={status}
-                            onClick={() => {
-                              setStatusFilter(status);
-                              setShowFilter(false);
-                            }}
-                            className={`flex cursor-pointer items-center justify-between px-4 py-2.5 text-sm ${statusFilter === status ? 'bg-orange-50 font-semibold text-orange-700' : 'text-slate-700 hover:bg-slate-50'}`}
-                          >
-                            {status}
-                            {statusFilter === status && (
-                              <span className="material-symbols-outlined text-sm">check</span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          >
-            <Table
-              columns={columns}
-              data={hospitals}
-              isLoading={loading}
-              onRowDoubleClick={(hospital) => router.push(`/super_admin/hospitals/${hospital.id}`)}
-              emptyMessage="No hospitals found matching your criteria."
-            />
-
-            <Pagination
-              page={page}
-              totalElements={totalElements}
-              pageSize={pageSize}
-              onPageChange={setPage}
-              onPageSizeChange={setPageSize}
-              label="facilities"
-            />
-          </ContentPanel>
-
         </div>
       </PageSurface>
 

@@ -6,6 +6,7 @@ import { hospitalService } from '@/services/hospitalService';
 import { reportService, ReportRow, ReportType } from '@/services/reportService';
 import { DoctorStaffResponse, HospitalResponse, HospitalSelectionDTO } from '@/types/api';
 import dayjs from '@/lib/dayjs';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 const reportTypeOptions: Array<{ label: string; value: ReportType }> = [
   { label: 'Doctor-wise Revenue', value: 'DOCTOR_REVENUE' },
@@ -89,10 +90,6 @@ export default function AdminReportsPage() {
   );
 
   const getRangeForHospital = useCallback(async (hId: string) => {
-    // We need the timezone of the hospital. If it's a selection DTO, we might not have it.
-    // Optimization: Fetch full hospital details only if needed, or backend handles it.
-    // Based on release notes, report preview takes UTC from/to.
-    // If hospitalId is provided, we fetch full hospital once to get timezone.
     try {
       const res = await hospitalService.getById(hId);
       if (res.success && res.data) {
@@ -150,7 +147,6 @@ export default function AdminReportsPage() {
           setError(response.error?.message || response.message || 'Unable to load report data.');
         }
       } else {
-        // Optimized: Single call for all hospitals if backend supports it
         const fromUTC = dayjs(startDate).startOf('day').toISOString();
         const toUTC = dayjs(endDate).endOf('day').toISOString();
         
@@ -256,7 +252,6 @@ export default function AdminReportsPage() {
       setExporting(format);
       setError('');
 
-      // If 'All Hospitals' is selected, handle export differently since backend requires hospital context
       if (!hospitalId) {
         if (rows.length === 0) {
           setError('Please generate the report first to export "All Hospitals" data.');
@@ -265,7 +260,6 @@ export default function AdminReportsPage() {
         }
 
         if (format === 'excel') {
-          // Generate CSV from currently loaded merged rows
           const header = columns.map(titleCase).join(',');
           const csvRows = rows.map((row) =>
             columns
@@ -280,7 +274,6 @@ export default function AdminReportsPage() {
           const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
           downloadBlob(blob, `all-hospitals-${reportType.toLowerCase()}-${startDate}-to-${endDate}.csv`);
         } else {
-          // Trigger print for PDF export of "All Hospitals"
           globalThis.print();
         }
         setExporting(null);
@@ -303,247 +296,253 @@ export default function AdminReportsPage() {
 
   return (
     <MainLayout title="Reports" hideTitle>
-      <div className="min-h-screen bg-[#f7f9fb] p-4 sm:p-6 lg:p-8 print:bg-white print:p-0">
-        {/* Professional Print Header & Summary */}
-        <div className="hidden print:block mb-6 w-full">
-          <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">System Revenue Report</h1>
-              <p className="text-sm text-slate-500 mt-1">Generated on {new Date().toLocaleDateString('en-IN')} at {new Date().toLocaleTimeString('en-IN')}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-bold text-orange-700 uppercase tracking-widest">VitalSync HMS Enterprise</p>
-              <p className="text-sm font-semibold text-slate-900">All Hospitals Combined Data</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-4 mb-8">
-            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Report Type</p>
-              <p className="text-sm font-bold text-slate-900">{reportTypeOptions.find(o => o.value === reportType)?.label}</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Period</p>
-              <p className="text-sm font-bold text-slate-900">{startDate} to {endDate}</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Total Revenue</p>
-              <p className="text-sm font-bold text-slate-900">{stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
-            </div>
-            <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
-              <p className="text-[10px] font-bold text-slate-500 uppercase">Total Records</p>
-              <p className="text-sm font-bold text-slate-900">{stats.recordCount}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 print:m-0 print:max-w-none">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between no-print">
-            <div>
-              <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                <span>Super Admin</span>
-                <span className="material-symbols-outlined text-sm">chevron_right</span>
-                <span className="text-orange-700">Reports</span>
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="py-4 md:py-8 space-y-6 print:bg-white print:p-0">
+          {/* Professional Print Header & Summary */}
+          <div className="hidden print:block mb-6 w-full">
+            <div className="flex justify-between items-start border-b-2 border-slate-900 pb-4 mb-6">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900 uppercase tracking-tight">System Revenue Report</h1>
+                <p className="text-sm text-slate-500 mt-1">Generated on {new Date().toLocaleDateString('en-IN')} at {new Date().toLocaleTimeString('en-IN')}</p>
               </div>
-              <h1 className="font-manrope text-3xl font-bold text-slate-900">System Reports</h1>
-              <p className="mt-1 text-sm text-slate-500">Analyze all hospitals or one hospital using live revenue data.</p>
+              <div className="text-right">
+                <p className="text-xs font-bold text-orange-700 uppercase tracking-widest">VitalSync HMS Enterprise</p>
+                <p className="text-sm font-semibold text-slate-900">All Hospitals Combined Data</p>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => handleExport('excel')}
-                disabled={exporting !== null}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <span className="material-symbols-outlined text-lg">cloud_download</span>
-                {exporting === 'excel' ? 'Exporting...' : 'Export Excel'}
-              </button>
-              <button
-                type="button"
-                onClick={() => handleExport('pdf')}
-                disabled={exporting !== null}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
-                {exporting === 'pdf' ? 'Exporting...' : 'Export PDF'}
-              </button>
+
+            <div className="grid grid-cols-4 gap-4 mb-8">
+              <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <p className="text-[10px] font-bold text-slate-500 uppercase">Report Type</p>
+                <p className="text-sm font-bold text-slate-900">{reportTypeOptions.find(o => o.value === reportType)?.label}</p>
+              </div>
+              <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <p className="text-[10px] font-bold text-slate-500 uppercase">Period</p>
+                <p className="text-sm font-bold text-slate-900">{startDate} to {endDate}</p>
+              </div>
+              <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <p className="text-[10px] font-bold text-slate-500 uppercase">Total Revenue</p>
+                <p className="text-sm font-bold text-slate-900">{stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR' })}</p>
+              </div>
+              <div className="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                <p className="text-[10px] font-bold text-slate-500 uppercase">Total Records</p>
+                <p className="text-sm font-bold text-slate-900">{stats.recordCount}</p>
+              </div>
             </div>
           </div>
 
-          <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm no-print">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
-              <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                Hospital
-                <select
-                  value={hospitalId}
-                  onChange={(event) => setHospitalId(event.target.value)}
-                  disabled={loadingHospitals}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">All Hospitals</option>
-                  {hospitals.map((hospital) => (
-                    <option key={hospital.id} value={hospital.id}>
-                      {hospital.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                Doctor
-                <select
-                  value={doctorId}
-                  onChange={(event) => setDoctorId(event.target.value)}
-                  disabled={loadingDoctors}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  <option value="">All Doctors</option>
-                  {doctorOptions.map((doctor) => {
-                    const value = doctor.doctorId || doctor.userId;
-                    const departmentLabel = doctor.departments?.filter(Boolean).join(', ');
-                    return (
-                      <option key={value} value={value}>
-                        {doctor.fullName} {departmentLabel ? `(${departmentLabel})` : ''}
-                      </option>
-                    );
-                  })}
-                </select>
-              </label>
-              <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                Report Type
-                <select
-                  value={reportType}
-                  onChange={(event) => setReportType(event.target.value as ReportType)}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
-                >
-                  {reportTypeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                Start Date
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(event) => {
-                    const val = event.target.value;
-                    if (endDate && val > endDate) {
-                      setError('Start date cannot be greater than end date');
-                      return;
-                    }
-                    setError('');
-                    setStartDate(val);
-                  }}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
-                />
-              </label>
-              <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-                End Date
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(event) => {
-                    const val = event.target.value;
-                    if (startDate && val < startDate) {
-                      setError('End date cannot be less than start date');
-                      return;
-                    }
-                    setError('');
-                    setEndDate(val);
-                  }}
-                  className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
-                />
-              </label>
-              <div className="flex items-end">
+          <div className="flex flex-col gap-6 print:m-0 print:max-w-none">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between no-print">
+              <div>
+                <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  <span>Super Admin</span>
+                  <span className="material-symbols-outlined text-sm">chevron_right</span>
+                  <span className="text-orange-700">Reports</span>
+                </div>
+                <h1 className="font-manrope text-3xl font-bold text-slate-900">System Reports</h1>
+                <p className="mt-1 text-sm text-slate-500">Analyze all hospitals or one hospital using live revenue data.</p>
+              </div>
+              <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
-                  onClick={fetchPreview}
-                  disabled={loading}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  onClick={() => handleExport('excel')}
+                  disabled={exporting !== null}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <span className="material-symbols-outlined text-lg">query_stats</span>
-                  {loading ? 'Loading...' : 'Generate Report'}
+                  <span className="material-symbols-outlined text-lg">cloud_download</span>
+                  {exporting === 'excel' ? 'Exporting...' : 'Export Excel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExport('pdf')}
+                  disabled={exporting !== null}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <span className="material-symbols-outlined text-lg">picture_as_pdf</span>
+                  {exporting === 'pdf' ? 'Exporting...' : 'Export PDF'}
                 </button>
               </div>
             </div>
-          </section>
 
-          {error && (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 no-print">
-              {error}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 no-print">
-            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Total Revenue</p>
-              <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
-                {stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">Calculated from API response fields.</p>
-            </section>
-            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Report Records</p>
-              <h2 className="mt-2 text-3xl font-extrabold text-slate-900">{stats.recordCount.toLocaleString('en-IN')}</h2>
-              <p className="mt-1 text-xs text-slate-500">
-                {selectedHospital ? selectedHospital.name : 'All Hospitals'} / {selectedDoctor ? selectedDoctor.fullName : 'All Doctors'}
-              </p>
-            </section>
-            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Average Revenue</p>
-              <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
-                {stats.averageRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
-              </h2>
-              <p className="mt-1 text-xs text-slate-500">Based on current filters.</p>
-            </section>
-          </div>
-
-          <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm print:border-slate-800 print:rounded-none">
-            <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between no-print">
-              <div>
-                <h2 className="font-manrope text-xl font-bold text-slate-900">Report Preview</h2>
-                <p className="text-sm text-slate-500">
-                  {selectedHospital ? selectedHospital.name : 'All Hospitals'} / {selectedDoctor ? selectedDoctor.fullName : 'All Doctors'} - {startDate} to {endDate}
-                </p>
-              </div>
-              {loading && <span className="text-sm font-semibold text-orange-700">Fetching latest data...</span>}
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[760px] text-left border-collapse print:min-w-0">
-                <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500 print:bg-slate-100 print:text-slate-900 print:border-b-2 print:border-slate-800">
-                  <tr>
-                    {(columns.length > 0 ? columns : ['report']).map((column) => (
-                      <th key={column} className="px-5 py-3 border-b border-slate-100 print:border-slate-300">
-                        {titleCase(column)}
-                      </th>
+            <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm no-print">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
+                <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Hospital
+                  <select
+                    value={hospitalId}
+                    onChange={(event) => setHospitalId(event.target.value)}
+                    disabled={loadingHospitals}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="">All Hospitals</option>
+                    {hospitals.map((hospital) => (
+                      <option key={hospital.id} value={hospital.id}>
+                        {hospital.name}
+                      </option>
                     ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-sm text-slate-700 print:divide-slate-300">
-                  {rows.map((row, index) => (
-                    <tr key={`${reportType}-${index}`} className="hover:bg-slate-50 print:hover:bg-transparent">
-                      {columns.map((column) => (
-                        <td key={column} className="px-5 py-4 font-medium print:py-2 print:px-3 print:border-b print:border-slate-200">
-                          {getDisplayValue(row[column])}
-                        </td>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Doctor
+                  <select
+                    value={doctorId}
+                    onChange={(event) => setDoctorId(event.target.value)}
+                    disabled={loadingDoctors}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <option value="">All Doctors</option>
+                    {doctorOptions.map((doctor) => {
+                      const value = doctor.doctorId || doctor.userId;
+                      const departmentLabel = doctor.departments?.filter(Boolean).join(', ');
+                      return (
+                        <option key={value} value={value}>
+                          {doctor.fullName} {departmentLabel ? `(${departmentLabel})` : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Report Type
+                  <select
+                    value={reportType}
+                    onChange={(event) => setReportType(event.target.value as ReportType)}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
+                  >
+                    {reportTypeOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Start Date
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(event) => {
+                      const val = event.target.value;
+                      if (endDate && val > endDate) {
+                        setError('Start date cannot be greater than end date');
+                        return;
+                      }
+                      setError('');
+                      setStartDate(val);
+                    }}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
+                  />
+                </label>
+                <label className="flex flex-col gap-2 text-xs font-bold uppercase tracking-wide text-slate-500">
+                  End Date
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(event) => {
+                      const val = event.target.value;
+                      if (startDate && val < startDate) {
+                        setError('End date cannot be less than start date');
+                        return;
+                      }
+                      setError('');
+                      setEndDate(val);
+                    }}
+                    className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium normal-case tracking-normal text-slate-800 outline-none transition focus:border-orange-600 focus:ring-2 focus:ring-orange-100"
+                  />
+                </label>
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={fetchPreview}
+                    disabled={loading}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-orange-700 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    <span className="material-symbols-outlined text-lg">query_stats</span>
+                    {loading ? 'Loading...' : 'Generate Report'}
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            {error && (
+              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 no-print">
+                {error}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 no-print">
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Total Revenue</p>
+                <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+                  {stats.totalRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">Calculated from API response fields.</p>
+              </section>
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Report Records</p>
+                <h2 className="mt-2 text-3xl font-extrabold text-slate-900">{stats.recordCount.toLocaleString('en-IN')}</h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  {selectedHospital ? selectedHospital.name : 'All Hospitals'} / {selectedDoctor ? selectedDoctor.fullName : 'All Doctors'}
+                </p>
+              </section>
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Average Revenue</p>
+                <h2 className="mt-2 text-3xl font-extrabold text-slate-900">
+                  {stats.averageRevenue.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
+                </h2>
+                <p className="mt-1 text-xs text-slate-500">Based on current filters.</p>
+              </section>
+            </div>
+
+            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm print:border-slate-800 print:rounded-none">
+              <div className="flex flex-col gap-2 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between no-print">
+                <div>
+                  <h2 className="font-manrope text-xl font-bold text-slate-900">Report Preview</h2>
+                  <p className="text-sm text-slate-500">
+                    {selectedHospital ? selectedHospital.name : 'All Hospitals'} / {selectedDoctor ? selectedDoctor.fullName : 'All Doctors'} - {startDate} to {endDate}
+                  </p>
+                </div>
+                {loading && <span className="text-sm font-semibold text-orange-700">Fetching latest data...</span>}
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left border-collapse print:min-w-0">
+                  <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500 print:bg-slate-100 print:text-slate-900 print:border-b-2 print:border-slate-800">
+                    <tr>
+                      {(columns.length > 0 ? columns : ['report']).map((column) => (
+                        <th key={column} className="px-5 py-3 border-b border-slate-100 print:border-slate-300">
+                          {titleCase(column)}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                  {!loading && rows.length === 0 && (
-                    <tr>
-                      <td className="px-5 py-12 text-center text-slate-400" colSpan={Math.max(columns.length, 1)}>
-                        No report data found for the selected filters.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm text-slate-700 print:divide-slate-300">
+                    {rows.map((row, index) => (
+                      <tr key={`${reportType}-${index}`} className="hover:bg-slate-50 print:hover:bg-transparent">
+                        {columns.map((column) => (
+                          <td key={column} className="px-5 py-4 font-medium print:py-2 print:px-3 print:border-b print:border-slate-200">
+                            {getDisplayValue(row[column])}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                    {!loading && rows.length === 0 && (
+                      <tr>
+                        <td className="px-5 py-12 text-center text-slate-400" colSpan={Math.max(columns.length, 1)}>
+                          No report data found for the selected filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
+      </PageSurface>
     </MainLayout>
   );
 }

@@ -6,6 +6,10 @@ import { catalogService } from '@/services/catalogService';
 import { Department, Specialization } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
+import { PageSurface } from '@/components/ui/PageSurface';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { Button } from '@/components/ui/Button';
+import { ContentPanel } from '@/components/ui/ContentPanel';
 
 type CatalogType = 'DEPARTMENT' | 'SPECIALIZATION';
 
@@ -42,7 +46,6 @@ export function CatalogManagement() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 
@@ -134,116 +137,120 @@ export function CatalogManagement() {
 
   return (
     <MainLayout title="Catalog Management" hideGlobalSearch={true}>
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h2 className="font-headline-xl text-[var(--on-surface)]">Master Catalog Management</h2>
-            <p className="font-body-md text-[var(--on-surface-variant)] mt-1">Manage hospital departments and medical specializations used across the system.</p>
-          </div>
-          <button 
-            onClick={() => handleOpenModal()}
-            className="btn-primary flex items-center gap-2"
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Master Catalog Management"
+            description="Manage hospital departments and medical specializations used across the system."
           >
-            <span className="material-symbols-outlined">add</span>
-            Add {activeTab === 'DEPARTMENT' ? 'Department' : 'Specialization'}
-          </button>
-        </div>
+            <Button 
+              onClick={() => handleOpenModal()}
+              icon="add"
+            >
+              Add {activeTab === 'DEPARTMENT' ? 'Department' : 'Specialization'}
+            </Button>
+          </PageHeading>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 mb-6">
-          <button
-            onClick={() => setActiveTab('DEPARTMENT')}
-            className={`px-8 py-4 font-black uppercase tracking-widest text-[10px] transition-all border-b-2 ${
-              activeTab === 'DEPARTMENT' 
-                ? 'border-primary text-primary' 
-                : 'border-transparent text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Departments
-          </button>
-          <button
-            onClick={() => setActiveTab('SPECIALIZATION')}
-            className={`px-8 py-4 font-black uppercase tracking-widest text-[10px] transition-all border-b-2 ${
-              activeTab === 'SPECIALIZATION' 
-                ? 'border-primary text-primary' 
-                : 'border-transparent text-slate-400 hover:text-slate-600'
-            }`}
-          >
-            Specializations
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="py-20 text-center text-slate-400 font-bold uppercase tracking-widest animate-pulse">
-            Loading catalog data...
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab('DEPARTMENT')}
+              className={`px-8 py-4 font-black uppercase tracking-widest text-[10px] transition-all border-b-2 ${
+                activeTab === 'DEPARTMENT' 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Departments
+            </button>
+            <button
+              onClick={() => setActiveTab('SPECIALIZATION')}
+              className={`px-8 py-4 font-black uppercase tracking-widest text-[10px] transition-all border-b-2 ${
+                activeTab === 'SPECIALIZATION' 
+                  ? 'border-primary text-primary' 
+                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              Specializations
+            </button>
           </div>
-        ) : (
-          <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50 border-b border-gray-100">
-                  <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Name</th>
-                  <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Description</th>
-                  <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Status</th>
-                  <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {currentList.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
-                      No items found in this category.
-                    </td>
+
+          <ContentPanel>
+            {loading ? (
+              <div className="p-12 text-center text-slate-500 font-medium">Loading catalog data...</div>
+            ) : (
+              <div className="overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-gray-100">
+                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Name</th>
+                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Description</th>
+                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Status</th>
+                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500 text-right">Actions</th>
                   </tr>
-                ) : (
-                  currentList.map((item) => (
-                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4 font-bold text-slate-900">{item.name}</td>
-                      <td className="px-6 py-4 text-sm text-slate-500 max-w-md truncate">{item.description || '—'}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
-                          item.active 
-                            ? 'bg-emerald-100 text-emerald-700' 
-                            : 'bg-slate-100 text-slate-500'
-                        }`}>
-                          {item.active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={() => handleToggleStatus(item)}
-                            title={item.active ? 'Deactivate' : 'Activate'}
-                            className={`p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition-all ${
-                              item.active ? 'text-amber-600' : 'text-emerald-600'
-                            }`}
-                          >
-                            <span className="material-symbols-outlined text-lg">
-                              {item.active ? 'block' : 'check_circle'}
-                            </span>
-                          </button>
-                          <button 
-                            onClick={() => handleOpenModal(item)}
-                            className="p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 text-primary transition-all"
-                          >
-                            <span className="material-symbols-outlined text-lg">edit</span>
-                          </button>
-                          <button 
-                            onClick={() => handleDelete(item.id)}
-                            className="p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 text-red-500 transition-all"
-                          >
-                            <span className="material-symbols-outlined text-lg">delete</span>
-                          </button>
-                        </div>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {currentList.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
+                        No items found in this category.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+                  ) : (
+                    currentList.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <td className="px-6 py-4 font-bold text-slate-900">{item.name}</td>
+                        <td className="px-6 py-4 text-sm text-slate-500 max-w-md truncate">{item.description || '—'}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
+                            item.active 
+                              ? 'bg-emerald-100 text-emerald-700' 
+                              : 'bg-slate-100 text-slate-500'
+                          }`}>
+                            {item.active ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button 
+                              onClick={() => handleToggleStatus(item)}
+                              title={item.active ? 'Deactivate' : 'Activate'}
+                              className={`p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 transition-all ${
+                                item.active ? 'text-amber-600' : 'text-emerald-600'
+                              }`}
+                            >
+                              <span className="material-symbols-outlined text-lg">
+                                {item.active ? 'block' : 'check_circle'}
+                              </span>
+                            </button>
+                            <button 
+                              onClick={() => handleOpenModal(item)}
+                              className="p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 text-primary transition-all"
+                            >
+                              <span className="material-symbols-outlined text-lg">edit</span>
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(item.id)}
+                              className="p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-200 text-red-500 transition-all"
+                            >
+                              <span className="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            )}
+          </ContentPanel>
+        </div>
+      </PageSurface>
 
       {/* Modal */}
       <Modal

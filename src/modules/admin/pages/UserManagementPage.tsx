@@ -29,6 +29,8 @@ export const UserManagementPage = () => {
     setSearchTerm,
     page,
     setPage,
+    pageSize,
+    setPageSize,
     totalElements,
     roleFilter,
     setRoleFilter,
@@ -158,74 +160,77 @@ export const UserManagementPage = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <PageHeading
-          title="Identity & Access"
-          description="Manage hospital staff credentials, institutional memberships, and role-based access controls."
-        >
-          <Button icon="person_add" size="lg" href="/admin/users/create">
-            Create User
-          </Button>
-        </PageHeading>
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Identity & Access"
+            description="Manage hospital staff credentials, institutional memberships, and role-based access controls."
+          >
+            <Button icon="person_add" size="lg" href="/admin/users/create">
+              Create User
+            </Button>
+          </PageHeading>
 
-        <ContentPanel
-          className="mb-12"
-          toolbar={(
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-1 items-center gap-4">
-                <div className="w-full max-w-xl">
-                  <SearchInput
-                    placeholder="Search by name, email..."
-                    value={searchTerm}
-                    onChange={(event) => setSearchTerm(event.target.value)}
-                  />
+          <ContentPanel
+            className="mb-12"
+            toolbar={(
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-1 items-center gap-4">
+                  <div className="w-full max-w-xl">
+                    <SearchInput
+                      placeholder="Search by name, email..."
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                    />
+                  </div>
+                  <select
+                    value={roleFilter || ''}
+                    onChange={(event) => setRoleFilter(event.target.value || undefined)}
+                    className="min-w-[180px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
+                  >
+                    <option value="">All Functional Roles</option>
+                    <option value="ADMIN">Administrator</option>
+                    <option value="DOCTOR">Medical Doctor</option>
+                    <option value="NURSE">Nursing Staff</option>
+                    <option value="RECEPTIONIST">Receptionist</option>
+                    <option value="PHARMACIST">Pharmacist</option>
+                  </select>
+                  <select
+                    value={activeFilter === undefined ? '' : String(activeFilter)}
+                    onChange={(event) => {
+                      const value = event.target.value;
+                      setActiveFilter(value === '' ? undefined : value === 'true');
+                    }}
+                    className="min-w-[150px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
                 </div>
-                <select
-                  value={roleFilter || ''}
-                  onChange={(event) => setRoleFilter(event.target.value || undefined)}
-                  className="min-w-[180px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
-                >
-                  <option value="">All Functional Roles</option>
-                  <option value="ADMIN">Administrator</option>
-                  <option value="DOCTOR">Medical Doctor</option>
-                  <option value="NURSE">Nursing Staff</option>
-                  <option value="RECEPTIONIST">Receptionist</option>
-                  <option value="PHARMACIST">Pharmacist</option>
-                </select>
-                <select
-                  value={activeFilter === undefined ? '' : String(activeFilter)}
-                  onChange={(event) => {
-                    const value = event.target.value;
-                    setActiveFilter(value === '' ? undefined : value === 'true');
-                  }}
-                  className="min-w-[150px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
-                >
-                  <option value="">All Statuses</option>
-                  <option value="true">Active</option>
-                  <option value="false">Inactive</option>
-                </select>
+                <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => refresh()} />
               </div>
-              <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => refresh()} />
-            </div>
-          )}
-        >
-          <Table
-            columns={columns}
-            data={users}
-            isLoading={loading}
-            onRowDoubleClick={(user) => router.push(`/admin/users/${user.id}`)}
-            emptyMessage="No staff members found matching your security criteria."
-          />
+            )}
+          >
+            <Table
+              columns={columns}
+              data={users}
+              isLoading={loading}
+              onRowDoubleClick={(user) => router.push(`/admin/users/${user.id}`)}
+              emptyMessage="No staff members found matching your security criteria."
+            />
 
-          <Pagination
-            page={page}
-            totalElements={totalElements}
-            pageSize={10}
-            onPageChange={setPage}
-            label="staff members"
-          />
-        </ContentPanel>
+            <Pagination
+              page={page}
+              totalElements={totalElements}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              label="staff members"
+            />
+          </ContentPanel>
 
-        <div className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+          </div>
         </div>
       </PageSurface>
     </MainLayout>

@@ -8,7 +8,6 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { MedicineResponse, MedicineSummaryDTO } from '@/types/api';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
-import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 
@@ -20,6 +19,7 @@ import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 
 import { Table, Column } from '@/components/ui/Table';
 import { Avatar } from '@/components/ui/Avatar';
+import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
@@ -126,8 +126,35 @@ export const MedicineInventory = () => {
     setLoading(true);
     try {
       const response = await pharmacyApi.importMedicines(importFile);
-      if (response.success) {
-        triggerGlobalToast(`Import completed. The system is designed to skip medicines that already exist by Name and Composition.`, 'success');
+      if (response.success && response.data) {
+        const { importedRows, skippedRows, failedRows, errorFileBase64 } = response.data;
+        
+        if (failedRows === 0 && importedRows === 0 && skippedRows > 0) {
+          triggerGlobalToast('All medicines in the file already exist in the database.', 'info');
+        } else {
+          triggerGlobalToast(
+            `Import Results - Success: ${importedRows}, Skipped: ${skippedRows}, Failed: ${failedRows}`, 
+            failedRows > 0 ? 'warning' : 'success'
+          );
+        }
+
+        if (errorFileBase64) {
+          // Trigger automatic download of feedback file
+          const byteCharacters = atob(errorFileBase64);
+          const byteArray = new Uint8Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteArray[i] = byteCharacters.charCodeAt(i);
+          }
+          const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+          
+          const link = document.createElement('a');
+          link.href = globalThis.URL.createObjectURL(blob);
+          link.download = 'Medicine_Import_Feedback.xlsx';
+          link.click();
+          
+          alert('Import completed with some issues. Please check the downloaded "Medicine_Import_Feedback.xlsx" file for details, fix the errors, and re-upload.');
+        }
+
         setShowImportModal(false);
         setImportFile(null);
         fetchMedicines();
@@ -164,10 +191,27 @@ export const MedicineInventory = () => {
     {
       header: 'Medicine Details',
       render: (m) => (
-        <div>
-          <p className="font-black text-slate-900 text-sm leading-tight">{m.name}</p>
-          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{m.genericName} • {m.strength}</p>
+        <div className="flex items-center gap-3">
+          <Avatar name={m.name} variant="orange" />
+          <div>
+            <p className="text-sm font-bold leading-tight text-slate-900">{m.name}</p>
+            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{m.manufacturer || 'Unknown Manufacturer'} • {m.strength}</p>
+          </div>
         </div>
+      )
+    },
+    {
+      header: 'Generic Name',
+      render: (m) => (
+        <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
+      )
+    },
+    {
+      header: 'Composition',
+      render: (m) => (
+        <span className="text-[10px] text-slate-500 font-medium line-clamp-2 max-w-[200px]" title={m.composition}>
+          {m.composition || '-'}
+        </span>
       )
     },
     {
@@ -175,9 +219,7 @@ export const MedicineInventory = () => {
       className: 'text-center',
       headerClassName: 'text-center',
       render: (m) => (
-        <span className="px-3 py-1 bg-white border border-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase">
-          {m.form || m.category}
-        </span>
+        <Badge variant="slate" size="sm">{m.form || m.category}</Badge>
       )
     },
     {
@@ -206,7 +248,6 @@ export const MedicineInventory = () => {
               setShowDeleteModal(true);
             }}
           />
-          <span className="material-symbols-outlined text-slate-300">chevron_right</span>
         </div>
       )
     }
@@ -214,54 +255,60 @@ export const MedicineInventory = () => {
 
   return (
     <MainLayout title="Medicine Master Catalog">
-      <PageSurface>
-        <PageHeading
-          title="Medicine Master Catalog"
-          description="Manage and monitor the central medicine inventory and pharmaceutical master data."
-        >
-          <div className="flex gap-2">
-            <Button variant="secondary" icon="file_upload" onClick={() => setShowImportModal(true)}>
-              Import
-            </Button>
-            <Button icon="add" onClick={() => setShowAddModal(true)}>
-              Add Medicine
-            </Button>
-          </div>
-        </PageHeading>
-
-        <ContentPanel
-          toolbar={(
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex flex-1 items-center gap-4">
-                <div className="w-full max-w-xl">
-                  <SearchInput
-                    placeholder="Search catalog by medicine name, generic name..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearchChange(e.target.value)}
-                  />
-                </div>
-              </div>
-              <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => fetchMedicines()} />
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Medicine Master Catalog"
+            description="Manage and monitor the central medicine inventory and pharmaceutical master data."
+          >
+            <div className="flex gap-2">
+              <Button variant="secondary" icon="file_upload" onClick={() => setShowImportModal(true)}>
+                Import
+              </Button>
+              <Button icon="add" onClick={() => setShowAddModal(true)}>
+                Add Medicine
+              </Button>
             </div>
-          )}
-        >
-          <Table
-            columns={columns}
-            data={medicines}
-            isLoading={loading}
-            onRowClick={handleRowClick}
-            onRowDoubleClick={(m) => openEditModal(m.id)}
-            rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
-          />
-          <Pagination
-            page={page}
-            totalElements={totalMedicines}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={handlePageSizeChange}
-            label="medicines"
-          />
-        </ContentPanel>
+          </PageHeading>
+
+          <ContentPanel
+            toolbar={(
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-1 items-center gap-4">
+                  <div className="w-full max-w-xl">
+                    <SearchInput
+                      placeholder="Search catalog by medicine name, generic name..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => fetchMedicines()} />
+              </div>
+            )}
+          >
+            <Table
+              columns={columns}
+              data={medicines}
+              isLoading={loading}
+              onRowClick={handleRowClick}
+              onRowDoubleClick={(m) => openEditModal(m.id)}
+              rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
+            />
+            <Pagination
+              page={page}
+              totalElements={totalMedicines}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={handlePageSizeChange}
+              label="medicines"
+            />
+          </ContentPanel>
+        </div>
 
         {/* Excel Import Modal */}
         {showImportModal && (

@@ -535,6 +535,14 @@ export interface MedicineSummaryDTO {
   currentStock?: number;
 }
 
+export interface MedicineImportResponse {
+  totalRows: number;
+  importedRows: number;
+  skippedRows: number;
+  failedRows: number;
+  errorFileBase64?: string;
+}
+
 export interface PharmacyStockDTO {
   id: string;
   medicineId: string;
@@ -564,7 +572,8 @@ export interface StockRequest {
 }
 
 export interface PharmacySaleItem {
-  medicineId: string;
+  medicineId?: string;
+  medicineBatchId?: string;
   quantity: number;
 }
 
