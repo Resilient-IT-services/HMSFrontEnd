@@ -33,6 +33,12 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name.trim()) newErrors.name = 'Medicine name is required';
+    if (!formData.genericName.trim()) newErrors.genericName = 'Generic name is required';
+    if (!formData.composition.trim()) newErrors.composition = 'Salt/Composition is required';
+    if (!formData.strength.trim()) newErrors.strength = 'Strength is required';
+    if (!formData.form) newErrors.form = 'Form is required';
+    if (!formData.manufacturer.trim()) newErrors.manufacturer = 'Manufacturer is required';
+    
     if (formData.currentStock !== undefined && formData.currentStock < 0) newErrors.currentStock = 'Initial stock cannot be negative';
     if (formData.reorderLevel !== undefined && formData.reorderLevel < 0) newErrors.reorderLevel = 'Reorder level cannot be negative';
     
@@ -129,10 +135,11 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               name="genericName"
               value={formData.genericName}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.genericName ? 'border-red-500' : 'border-slate-200'}`} 
               placeholder="e.g. Acetaminophen" 
               type="text"
             />
+            {errors.genericName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.genericName}</p>}
           </div>
 
           <div>
@@ -141,10 +148,11 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               name="strength"
               value={formData.strength}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.strength ? 'border-red-500' : 'border-slate-200'}`} 
               placeholder="e.g. 500mg, 5ml" 
               type="text"
             />
+            {errors.strength && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.strength}</p>}
           </div>
 
           <div className="md:col-span-2">
@@ -154,9 +162,10 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               value={formData.composition}
               onChange={handleChange}
               rows={2}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none" 
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none ${errors.composition ? 'border-red-500' : 'border-slate-200'}`} 
               placeholder="List chemical composition..." 
             />
+            {errors.composition && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.composition}</p>}
           </div>
 
           <div>
@@ -165,12 +174,13 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               name="form"
               value={formData.form}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer ${errors.form ? 'border-red-500' : 'border-slate-200'}`}
             >
               {MEDICINE_FORM_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
+            {errors.form && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.form}</p>}
           </div>
 
           <div>
@@ -193,10 +203,11 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               name="manufacturer"
               value={formData.manufacturer}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.manufacturer ? 'border-red-500' : 'border-slate-200'}`} 
               placeholder="e.g. PharmaCorp India" 
               type="text"
             />
+            {errors.manufacturer && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.manufacturer}</p>}
           </div>
         </div>
 

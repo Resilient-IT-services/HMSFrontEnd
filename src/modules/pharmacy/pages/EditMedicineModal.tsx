@@ -29,16 +29,37 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
     currentStock: medicine.currentStock || 0,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!formData.name.trim()) newErrors.name = 'Medicine name is required';
+    if (!formData.genericName.trim()) newErrors.genericName = 'Generic name is required';
+    if (!formData.composition.trim()) newErrors.composition = 'Salt/Composition is required';
+    if (!formData.strength.trim()) newErrors.strength = 'Strength is required';
+    if (!formData.form) newErrors.form = 'Form is required';
+    if (!formData.manufacturer.trim()) newErrors.manufacturer = 'Manufacturer is required';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'number' ? Number.parseFloat(value) || 0 : value
     }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) {
+      triggerGlobalToast('Please correct form errors', 'error');
+      return;
+    }
+    
     try {
       setLoading(true);
       const response = await pharmacyApi.updateMedicine(medicine.id, formData);
@@ -76,14 +97,14 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
           <div className="md:col-span-2">
             <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Medicine Name</label>
             <input 
-              required
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-300 outline-none transition-all font-bold"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.name ? 'border-red-500' : 'border-slate-200'}`}
               placeholder="e.g. Paracetamol 500mg" 
               type="text"
             />
+            {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.name}</p>}
           </div>
 
           <div>
@@ -92,10 +113,11 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="genericName"
               value={formData.genericName}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.genericName ? 'border-red-500' : 'border-slate-200'}`}
               placeholder="e.g. Acetaminophen" 
               type="text"
             />
+            {errors.genericName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.genericName}</p>}
           </div>
 
           <div>
@@ -104,10 +126,11 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="strength"
               value={formData.strength}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.strength ? 'border-red-500' : 'border-slate-200'}`}
               placeholder="e.g. 500mg, 5ml" 
               type="text"
             />
+            {errors.strength && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.strength}</p>}
           </div>
 
           <div className="md:col-span-2">
@@ -117,9 +140,10 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               value={formData.composition}
               onChange={handleChange}
               rows={2}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none ${errors.composition ? 'border-red-500' : 'border-slate-200'}`}
               placeholder="List chemical composition..." 
             />
+            {errors.composition && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.composition}</p>}
           </div>
 
           <div>
@@ -128,12 +152,13 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="form"
               value={formData.form}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer ${errors.form ? 'border-red-500' : 'border-slate-200'}`}
             >
               {MEDICINE_FORM_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>{option.label}</option>
               ))}
             </select>
+            {errors.form && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.form}</p>}
           </div>
 
           <div>
@@ -156,10 +181,11 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
               name="manufacturer"
               value={formData.manufacturer}
               onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold"
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.manufacturer ? 'border-red-500' : 'border-slate-200'}`}
               placeholder="e.g. PharmaCorp India" 
               type="text"
             />
+            {errors.manufacturer && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.manufacturer}</p>}
           </div>
         </div>
 
