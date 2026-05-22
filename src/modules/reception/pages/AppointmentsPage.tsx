@@ -129,7 +129,7 @@ export const AppointmentsPage = () => {
     { label: 'In Progress', value: stats.inProgress, variant: 'emerald', filter: 'CONSULTATION_STARTED' },
     { label: 'Waiting Vitals', value: stats.waitingForVitals, variant: 'purple', filter: 'PAID' },
     { label: 'Completed', value: stats.completed, variant: 'emerald', filter: 'COMPLETED' },
-    { label: 'Upcoming', value: stats.upcoming, variant: 'blue', filter: 'BOOKED' },
+    { label: 'Upcoming', value: stats.upcoming, variant: 'blue', filter: 'UPCOMING' },
   ];
 
   return (
