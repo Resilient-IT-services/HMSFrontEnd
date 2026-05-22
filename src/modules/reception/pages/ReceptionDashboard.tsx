@@ -173,205 +173,211 @@ export const ReceptionDashboard = () => {
 
   return (
     <MainLayout title="Reception Dashboard" hideTitle>
-      <PageSurface fontClassName="font-manrope">
-        {/* Info Pills Row - Visible only on mobile */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
-          <MetricCard 
-            label="Queue Load" 
-            value={stats.activeQueue} 
-            icon="timer" 
-            variant="orange" 
-            layout="pill" 
-            onClick={() => router.push('/reception/appointments')}
-          />
-          <MetricCard 
-            label="Check-ins" 
-            value={stats.appointmentsToday} 
-            icon="login" 
-            variant="blue" 
-            layout="pill" 
-            onClick={() => router.push('/reception/appointments')}
-          />
-          <MetricCard 
-            label="Doctors" 
-            value={doctors.length} 
-            icon="stethoscope" 
-            variant="emerald" 
-            layout="pill" 
-            onClick={() => router.push('/reception/doctors')}
-          />
-          <MetricCard 
-            label="Support" 
-            value="Online" 
-            icon="support_agent" 
-            variant="purple" 
-            layout="pill" 
-          />
-        </div>
-
-        {/* Mobile Header - Visible only on small screens */}
-        <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-700 shrink-0">
-                <span className="material-symbols-outlined">desk</span>
-              </div>
-              <div>
-                <h1 className="text-lg font-black text-slate-900 leading-tight">Reception</h1>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Arrivals & Queue</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 mb-2 opacity-40 group/date cursor-default hidden md:flex">
-          <span className="material-symbols-outlined text-xs group-hover/date:text-orange-600 transition-colors">calendar_today</span>
-          <span className="text-[9px] font-black uppercase tracking-[0.2em]">
-            {hospitalTimezone ? dayjs().tz(hospitalTimezone).format('MMM DD, YYYY') : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-          </span>
-        </div>
-        <PageHeading
-          title="Reception Dashboard"
-          description="Manage arrivals, patient queues, and daily operations."
-          className="hidden md:flex"
-        />
-
-        {/* Mobile Stats Cards */}
-        <div className="md:hidden space-y-4 mb-8">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Arrivals</h3>
-            <div className="flex items-center gap-1.5">
-              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
-              <span className="text-[10px] font-bold text-emerald-600 uppercase">Live</span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div 
-              className="bg-slate-900 p-4 rounded-2xl text-white shadow-lg flex flex-col justify-between h-32 cursor-pointer active:scale-95 transition-all"
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          {/* Info Pills Row - Visible only on mobile */}
+          <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
+            <MetricCard 
+              label="Queue Load" 
+              value={stats.activeQueue} 
+              icon="timer" 
+              variant="orange" 
+              layout="pill" 
               onClick={() => router.push('/reception/appointments')}
-            >
-              <span className="material-symbols-outlined text-white/50 text-xl">hourglass_empty</span>
-              <div>
-                <p className="text-[32px] font-extrabold leading-none mb-1">{stats.activeQueue}</p>
-                <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Active Queue</p>
-              </div>
-            </div>
-            <div 
-              className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 cursor-pointer active:scale-95 transition-all"
-              onClick={() => router.push('/reception/patients')}
-            >
-              <span className="material-symbols-outlined text-orange-500 text-xl">group</span>
-              <div>
-                <p className="text-[32px] font-extrabold text-slate-900 leading-none mb-1">{stats.totalPatients}</p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Patients</p>
+            />
+            <MetricCard 
+              label="Check-ins" 
+              value={stats.appointmentsToday} 
+              icon="login" 
+              variant="blue" 
+              layout="pill" 
+              onClick={() => router.push('/reception/appointments')}
+            />
+            <MetricCard 
+              label="Doctors" 
+              value={doctors.length} 
+              icon="stethoscope" 
+              variant="emerald" 
+              layout="pill" 
+              onClick={() => router.push('/reception/doctors')}
+            />
+            <MetricCard 
+              label="Support" 
+              value="Online" 
+              icon="support_agent" 
+              variant="purple" 
+              layout="pill" 
+            />
+          </div>
+
+          {/* Mobile Header - Visible only on small screens */}
+          <div className="md:hidden mb-6 animate-in fade-in slide-in-from-top-4 duration-700">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center text-orange-700 shrink-0">
+                  <span className="material-symbols-outlined">desk</span>
+                </div>
+                <div>
+                  <h1 className="text-lg font-black text-slate-900 leading-tight">Reception</h1>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Arrivals & Queue</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Metrics Grid - Hidden on Mobile */}
-        <MetricsGrid items={metricItems} className="mb-8 hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6" />
+          <div className="flex items-center gap-2 mb-2 opacity-40 group/date cursor-default hidden md:flex">
+            <span className="material-symbols-outlined text-xs group-hover/date:text-orange-600 transition-colors">calendar_today</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.2em]">
+              {hospitalTimezone ? dayjs().tz(hospitalTimezone).format('MMM DD, YYYY') : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+          </div>
+          <PageHeading
+            title="Reception Dashboard"
+            description="Manage arrivals, patient queues, and daily operations."
+            className="hidden md:flex"
+          />
 
-        {/* Main Section Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column */}
-          <div className="lg:col-span-8 space-y-8">
-            {/* Recent Appointments Table */}
-            <Card 
-              title="Recent Appointments" 
-              className="p-0 overflow-hidden"
-              headerActions={
-                <Button variant="ghost" size="sm" onClick={() => router.push('/reception/appointments')} className="text-orange-600 font-bold">View All</Button>
-              }
-            >
-              <Table 
-                columns={appointmentColumns} 
-                data={appointments.slice(0, 5)} 
-                isLoading={loading}
-                onRowDoubleClick={(a) => router.push(`/reception/billing?appointmentId=${a.id}`)}
-              />
-            </Card>
-
-            {/* Recent Patients Table */}
-            <Card 
-              title="Recent Patient Arrivals" 
-              className="p-0 overflow-hidden"
-              headerActions={
-                <Button variant="ghost" size="sm" onClick={() => router.push('/reception/patients')} className="text-orange-600 font-bold">View All</Button>
-              }
-            >
-              <Table 
-                columns={patientColumns} 
-                data={recentPatients} 
-                isLoading={loading}
-                onRowDoubleClick={(p) => router.push(`/reception/patients/${p.id}`)}
-              />
-            </Card>
+          {/* Mobile Stats Cards */}
+          <div className="md:hidden space-y-4 mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Arrivals</h3>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-[10px] font-bold text-emerald-600 uppercase">Live</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div 
+                className="bg-slate-900 p-4 rounded-2xl text-white shadow-lg flex flex-col justify-between h-32 cursor-pointer active:scale-95 transition-all"
+                onClick={() => router.push('/reception/appointments')}
+              >
+                <span className="material-symbols-outlined text-white/50 text-xl">hourglass_empty</span>
+                <div>
+                  <p className="text-[32px] font-extrabold leading-none mb-1">{stats.activeQueue}</p>
+                  <p className="text-[10px] font-bold opacity-70 uppercase tracking-wider">Active Queue</p>
+                </div>
+              </div>
+              <div 
+                className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between h-32 cursor-pointer active:scale-95 transition-all"
+                onClick={() => router.push('/reception/patients')}
+              >
+                <span className="material-symbols-outlined text-orange-500 text-xl">group</span>
+                <div>
+                  <p className="text-[32px] font-extrabold text-slate-900 leading-none mb-1">{stats.totalPatients}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Patients</p>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Right Column */}
-          <div className="lg:col-span-4 space-y-8">
-            {/* Quick Actions */}
-            <Card title="Clinical Resources" className="p-4 bg-white text-black border border-gray-200 shadow-md">
-              <div className="space-y-3">
+          {/* Metrics Grid - Hidden on Mobile */}
+          <MetricsGrid items={metricItems} className="mb-8 hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6" />
 
-                {/* Register Patient */}
-                <div
-                    className="p-4 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 transition-all cursor-pointer group"
-                    onClick={() => router.push('/reception/patients/register')}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-lg bg-orange-600 flex items-center justify-center text-white">
-                      <span className="material-symbols-outlined">person_add</span>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-black">Register Patient</h4>
-                      <p className="text-[10px] text-gray-500 font-medium">New EHR Initialization</p>
+          {/* Main Section Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {/* Left Column */}
+            <div className="lg:col-span-8 space-y-8">
+              {/* Recent Appointments Table */}
+              <Card 
+                title="Recent Appointments" 
+                className="p-0 overflow-hidden"
+                headerActions={
+                  <Button variant="ghost" size="sm" onClick={() => router.push('/reception/appointments')} className="text-orange-600 font-bold">View All</Button>
+                }
+              >
+                <Table 
+                  columns={appointmentColumns} 
+                  data={appointments.slice(0, 5)} 
+                  isLoading={loading}
+                  onRowDoubleClick={(a) => router.push(`/reception/billing?appointmentId=${a.id}`)}
+                />
+              </Card>
+
+              {/* Recent Patients Table */}
+              <Card 
+                title="Recent Patient Arrivals" 
+                className="p-0 overflow-hidden"
+                headerActions={
+                  <Button variant="ghost" size="sm" onClick={() => router.push('/reception/patients')} className="text-orange-600 font-bold">View All</Button>
+                }
+              >
+                <Table 
+                  columns={patientColumns} 
+                  data={recentPatients} 
+                  isLoading={loading}
+                  onRowDoubleClick={(p) => router.push(`/reception/patients/${p.id}`)}
+                />
+              </Card>
+            </div>
+
+            {/* Right Column */}
+            <div className="lg:col-span-4 space-y-8">
+              {/* Quick Actions */}
+              <Card title="Clinical Resources" className="p-4 bg-white text-black border border-gray-200 shadow-md">
+                <div className="space-y-3">
+
+                  {/* Register Patient */}
+                  <div
+                      className="p-4 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 transition-all cursor-pointer group"
+                      onClick={() => router.push('/reception/patients/register')}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-orange-600 flex items-center justify-center text-white">
+                        <span className="material-symbols-outlined">person_add</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-black">Register Patient</h4>
+                        <p className="text-[10px] text-gray-500 font-medium">New EHR Initialization</p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Create OP Visit */}
-                <div
-                    className="p-4 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 transition-all cursor-pointer group"
-                    onClick={() => router.push('/reception/appointments/create')}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-lg bg-blue-600 flex items-center justify-center text-white">
-                      <span className="material-symbols-outlined">calendar_add_on</span>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-black">Create OP Visit</h4>
-                      <p className="text-[10px] text-gray-500 font-medium">Consultation Booking</p>
+                  {/* Create OP Visit */}
+                  <div
+                      className="p-4 rounded-xl bg-white border border-gray-200 hover:bg-gray-100 transition-all cursor-pointer group"
+                      onClick={() => router.push('/reception/appointments/create')}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                        <span className="material-symbols-outlined">calendar_add_on</span>
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-bold text-black">Create OP Visit</h4>
+                        <p className="text-[10px] text-gray-500 font-medium">Consultation Booking</p>
+                      </div>
                     </div>
                   </div>
+
                 </div>
+              </Card>
 
-              </div>
-            </Card>
-
-            <Card title="Available Doctors" className="p-0 overflow-hidden">
-               <div className="divide-y divide-slate-50">
-                  {doctors.slice(0, 4).map((doc, idx) => (
-                    <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-all">
-                       <div className="flex items-center gap-3">
-                          <div className="size-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-xs">
-                             {doc.fullName.charAt(0)}
-                          </div>
-                          <div>
-                             <h5 className="text-xs font-bold text-slate-900">{doc.fullName}</h5>
-                             <p className="text-[9px] font-black uppercase text-slate-400">{getPrimaryDepartment(doc)}</p>
-                          </div>
-                       </div>
-                       <Badge variant="emerald" className="text-[8px] px-1.5 py-0.5">ON DUTY</Badge>
-                    </div>
-                  ))}
-               </div>
-               <div className="p-4 bg-slate-50 border-t border-slate-100">
-                  <Button variant="ghost" fullWidth size="sm" onClick={() => router.push('/reception/doctors')} className="text-[10px] font-black uppercase">View Roster</Button>
-               </div>
-            </Card>
+              <Card title="Available Doctors" className="p-0 overflow-hidden">
+                 <div className="divide-y divide-slate-50">
+                    {doctors.slice(0, 4).map((doc, idx) => (
+                      <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-all">
+                         <div className="flex items-center gap-3">
+                            <div className="size-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 font-bold text-xs">
+                               {doc.fullName.charAt(0)}
+                            </div>
+                            <div>
+                               <h5 className="text-xs font-bold text-slate-900">{doc.fullName}</h5>
+                               <p className="text-[9px] font-black uppercase text-slate-400">{getPrimaryDepartment(doc)}</p>
+                            </div>
+                         </div>
+                         <Badge variant="emerald" className="text-[8px] px-1.5 py-0.5">ON DUTY</Badge>
+                      </div>
+                    ))}
+                 </div>
+                 <div className="p-4 bg-slate-50 border-t border-slate-100">
+                    <Button variant="ghost" fullWidth size="sm" onClick={() => router.push('/reception/doctors')} className="text-[10px] font-black uppercase">View Roster</Button>
+                 </div>
+              </Card>
+            </div>
           </div>
         </div>
       </PageSurface>
