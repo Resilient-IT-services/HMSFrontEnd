@@ -146,7 +146,12 @@ export const PatientQueuePage = () => {
 
   return (
     <MainLayout title="Patient Queue" hideTitle>
-      <PageSurface contentClassName="space-y-8" fontClassName="font-inter">
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
         <PageHeading
           title="Patient Queue"
           description={`Manage ${activeTab === 'TODAY' ? "today's" : 'upcoming'} appointments and surgical consultations.`}
@@ -203,7 +208,7 @@ export const PatientQueuePage = () => {
           />
         </ContentPanel>
 
-
+        </div>
       </PageSurface>
     </MainLayout>
   );

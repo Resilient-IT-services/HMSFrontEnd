@@ -15,6 +15,7 @@ import { formatToken } from '@/utils/tokenHelper';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { Button } from '@/components/ui/Button';
 import { useDebounce } from '@/hooks/useDebounce';
+import { PageSurface } from '@/components/ui/PageSurface';
 
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 
@@ -402,8 +403,14 @@ export const ActiveConsultationPage = () => {
   };
   return (
     <MainLayout title={`Consultation: ${appointment.patientName}`}>
-      <div className="flex flex-col h-full">
-        {/* Header - Patient Info & Actions */}
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <div className="flex flex-col h-full">
+            {/* Header - Patient Info & Actions */}
         <div className="p-4 sm:p-6 border-b border-slate-200 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-10">
           <div className="flex flex-col">
             <div className="flex items-center gap-3">
@@ -659,7 +666,9 @@ export const ActiveConsultationPage = () => {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+        </div>
+      </PageSurface>
 
       {/* Prescription Preview Modal */}
       {showPreview && (
