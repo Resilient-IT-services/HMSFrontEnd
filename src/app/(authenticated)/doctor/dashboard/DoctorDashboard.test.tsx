@@ -27,7 +27,12 @@ vi.mock('@/services/doctorService', () => ({
 }));
 
 vi.mock('@/components/ui/MainLayout', () => ({
-  default: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  default: ({ children, title, hideTitle }: any) => (
+    <div data-testid="main-layout">
+      {!hideTitle && <h1>{title}</h1>}
+      {children}
+    </div>
+  )
 }));
 
 describe('DoctorDashboard', () => {
