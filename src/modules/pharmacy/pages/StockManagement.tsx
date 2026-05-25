@@ -300,11 +300,6 @@ export const StockManagement = () => {
         </div>
       </PageSurface>
 
-      <Button 
-        icon="qr_code_scanner" 
-        className="fixed bottom-10 right-10 z-50 h-16 w-16 !rounded-3xl bg-slate-900 !p-0 shadow-2xl hover:-rotate-6 hover:scale-110 active:scale-95"
-      />
-
       {selectedMedicineForStock && (
         <QuickStockAddModal
           medicineId={selectedMedicineForStock.id}
