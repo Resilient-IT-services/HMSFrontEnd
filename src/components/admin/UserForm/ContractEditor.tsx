@@ -80,7 +80,14 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
             label="Facility"
             options={hospitals.map(h => ({ id: h.id, name: h.name, icon: 'location_city' }))}
             value={newContract.hospitalId || ''}
-            onChange={(val) => setNewContract({ ...newContract, hospitalId: val })}
+            onChange={(val) => {
+              // Reset departments when switching hospitals to prevent stale linkage errors
+              const resetAssignments = (newContract.roleAssignments || []).map(ra => ({
+                ...ra,
+                departments: []
+              }));
+              setNewContract({ ...newContract, hospitalId: val, roleAssignments: resetAssignments });
+            }}
             placeholder="Select Facility..."
             disabled={editingContractIndex !== null}
             error={validationErrors.contractHospital}
