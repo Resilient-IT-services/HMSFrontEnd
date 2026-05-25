@@ -255,6 +255,70 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
           </div>
         )}
 
+        {assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo && (
+          <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
+              <span className="material-symbols-outlined text-emerald-600 text-xl">pill</span>
+              <h4 className="text-[10px] font-black text-on-surface uppercase tracking-widest">Pharmacist Credentials</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">PCI Registration No. <span className="text-primary">*</span></label>
+                    <input 
+                      className={`form-input ${validationErrors.pciRegNo ? 'border-error' : ''}`} 
+                      type="text" 
+                      placeholder="e.g. PCI-123456" 
+                      value={formData.pharmacistInfo.pciRegNo} 
+                      onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, pciRegNo: e.target.value } })} 
+                    />
+                    {renderFieldError('pciRegNo')}
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Highest Qualification</label>
+                    <input 
+                      className="form-input" 
+                      type="text" 
+                      placeholder="e.g. B.Pharm, M.Pharm" 
+                      value={formData.pharmacistInfo.qualification} 
+                      onChange={(e) => setFormData({ ...formData, pharmacistInfo: { ...formData.pharmacistInfo!, qualification: e.target.value } })} 
+                    />
+                </div>
+            </div>
+          </div>
+        )}
+
+        {assignedRoles.includes('LAB_TECHNICIAN') && formData.labTechInfo && (
+          <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4 shadow-sm">
+            <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
+              <span className="material-symbols-outlined text-purple-600 text-xl">biotech</span>
+              <h4 className="text-[10px] font-black text-on-surface uppercase tracking-widest">Laboratory Credentials</h4>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Specialty / Domain</label>
+                    <input 
+                      className="form-input" 
+                      type="text" 
+                      placeholder="e.g. Pathology, Radiology" 
+                      value={formData.labTechInfo.specialty} 
+                      onChange={(e) => setFormData({ ...formData, labTechInfo: { ...formData.labTechInfo!, specialty: e.target.value } })} 
+                    />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-gray-700 uppercase">Technical License No. <span className="text-primary">*</span></label>
+                    <input 
+                      className={`form-input ${validationErrors.licenseNo ? 'border-error' : ''}`} 
+                      type="text" 
+                      placeholder="e.g. LAB-7654321" 
+                      value={formData.labTechInfo.licenseNo} 
+                      onChange={(e) => setFormData({ ...formData, labTechInfo: { ...formData.labTechInfo!, licenseNo: e.target.value } })} 
+                    />
+                    {renderFieldError('licenseNo')}
+                </div>
+            </div>
+          </div>
+        )}
+
         {assignedRoles.includes('RECEPTIONIST') && formData.receptionistInfo && (
           <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
