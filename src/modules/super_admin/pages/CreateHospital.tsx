@@ -48,7 +48,7 @@ export function CreateHospital() {
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    
+
     // GSTIN Validation (India)
     const gstinRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
     if (formData.gstin && !gstinRegex.test(formData.gstin)) {
@@ -66,7 +66,7 @@ export function CreateHospital() {
     if (!formData.name) newErrors.name = 'Hospital name is required';
     if (!formData.code) newErrors.code = 'Hospital code is required';
     if (!formData.city) newErrors.city = 'City is required';
-    
+
     // Pincode Validation
     if (!formData.pincode) {
       newErrors.pincode = 'Pincode is required';
@@ -109,7 +109,7 @@ export function CreateHospital() {
             <form onSubmit={handleSubmit}>
               <div className="flex justify-between items-end mb-8">
                 <div>
-                  <div 
+                  <div
                     onClick={() => router.back()}
                     className="flex items-center gap-2 text-slate-500 mb-2 cursor-pointer hover:text-[var(--primary)] transition-colors"
                   >
@@ -120,14 +120,14 @@ export function CreateHospital() {
                   <p className="font-body-md text-slate-500 mt-1">Manage registration details and operational settings for the new facility.</p>
                 </div>
                 <div className="flex gap-3">
-                  <button 
+                  <button
                     type="button"
                     onClick={() => router.back()}
                     className="px-6 py-2.5 border border-gray-300 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm"
                   >
                     Discard Changes
                   </button>
-                  <Button 
+                  <Button
                     type="submit"
                     isLoading={loading}
                   >
@@ -150,9 +150,9 @@ export function CreateHospital() {
                       <div className="grid grid-cols-2 gap-6">
                         <div className="col-span-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Hospital Name *</label>
-                          <input 
+                          <input
                             className={`form-input font-bold ${errors.name ? 'border-red-500' : ''}`}
-                            type="text" 
+                            type="text"
                             placeholder="e.g. St. Mary's General Hospital"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -162,9 +162,9 @@ export function CreateHospital() {
                         </div>
                         <div>
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Hospital Code *</label>
-                          <input 
+                          <input
                             className={`form-input font-bold ${errors.code ? 'border-red-500' : ''}`}
-                            type="text" 
+                            type="text"
                             placeholder="e.g. HSP-001"
                             value={formData.code}
                             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
@@ -174,9 +174,9 @@ export function CreateHospital() {
                         </div>
                         <div>
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Registration Number *</label>
-                          <input 
+                          <input
                             className={`form-input font-bold ${errors.registrationNo ? 'border-red-500' : ''}`}
-                            type="text" 
+                            type="text"
                             placeholder="REG-2024-XXXX"
                             value={formData.registrationNo}
                             onChange={(e) => setFormData({ ...formData, registrationNo: e.target.value })}
@@ -184,9 +184,33 @@ export function CreateHospital() {
                           />
                           {errors.registrationNo && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.registrationNo}</p>}
                         </div>
+                        <div>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">
+                            GSTIN Number *
+                          </label>
+
+                          <input
+                              className={`form-input font-bold ${errors.gstin ? 'border-red-500' : ''}`}
+                              type="text"
+                              placeholder="22AAAAA0000A1Z5"
+                              value={formData.gstin}
+                              onChange={(e) =>
+                                  setFormData({
+                                    ...formData,
+                                    gstin: e.target.value.toUpperCase(),
+                                  })
+                              }
+                          />
+
+                          {errors.gstin && (
+                              <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">
+                                {errors.gstin}
+                              </p>
+                          )}
+                        </div>
                         <div className="col-span-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Facility Timezone *</label>
-                          <select 
+                          <select
                             className="form-input font-bold"
                             value={formData.timezone}
                             onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
@@ -214,7 +238,7 @@ export function CreateHospital() {
                       <div className="grid grid-cols-2 gap-6">
                         <div className="col-span-2">
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Full Address</label>
-                          <textarea 
+                          <textarea
                             className="form-input min-h-[100px] py-3 font-medium"
                             placeholder="Street address, building, landmark..."
                             value={formData.address}
@@ -223,9 +247,9 @@ export function CreateHospital() {
                         </div>
                         <div>
                           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">City *</label>
-                          <input 
+                          <input
                             className={`form-input font-bold ${errors.city ? 'border-red-500' : ''}`}
-                            type="text" 
+                            type="text"
                             value={formData.city}
                             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                             required
@@ -235,18 +259,18 @@ export function CreateHospital() {
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">State</label>
-                            <input 
-                              className="form-input font-bold" 
-                              type="text" 
+                            <input
+                              className="form-input font-bold"
+                              type="text"
                               value={formData.state}
                               onChange={(e) => setFormData({ ...formData, state: e.target.value })}
                             />
                           </div>
                           <div>
                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Pincode *</label>
-                            <input 
+                            <input
                               className={`form-input font-bold ${errors.pincode ? 'border-red-500' : ''}`}
-                              type="text" 
+                              type="text"
                               value={formData.pincode}
                               maxLength={6}
                               onChange={(e) => {
@@ -283,11 +307,11 @@ export function CreateHospital() {
                               type="button"
                               onClick={() => {
                                 const current = formData.departments;
-                                setFormData({ 
-                                  ...formData, 
-                                  departments: isSelected 
-                                    ? current.filter(d => d !== dept) 
-                                    : [...current, dept] 
+                                setFormData({
+                                  ...formData,
+                                  departments: isSelected
+                                    ? current.filter(d => d !== dept)
+                                    : [...current, dept]
                                 });
                               }}
                               className={`px-4 py-2 rounded-xl border-2 font-bold text-xs uppercase tracking-tight transition-all ${
@@ -321,9 +345,9 @@ export function CreateHospital() {
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Visible to patients and staff</p>
                           </div>
                           <label className="relative inline-flex items-center cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              className="sr-only peer" 
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
                               checked={formData.status === 'ACTIVE'}
                               onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 'ACTIVE' : 'INACTIVE' })}
                             />
@@ -332,7 +356,7 @@ export function CreateHospital() {
                         </div>
                         <div className="pt-6 border-t border-slate-100">
                           <p className="font-bold text-slate-900 text-sm mb-3">Onboarding Status</p>
-                          <select 
+                          <select
                             className="form-input font-bold"
                             value={formData.status}
                             onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
