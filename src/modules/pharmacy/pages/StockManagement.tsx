@@ -102,7 +102,7 @@ export const StockManagement = () => {
               className={`h-full rounded-full transition-all duration-700 ${
                 (medicine.quantity || 0) === 0
                   ? 'w-0'
-                  : (medicine.quantity || 0) < 50
+                  : (medicine.quantity || 0) < (medicine.reorderLevel ?? 50)
                     ? 'w-1/3 bg-orange-500'
                     : 'w-[85%] bg-emerald-500'
               }`}
@@ -127,9 +127,10 @@ export const StockManagement = () => {
       className: 'text-center',
       headerClassName: 'text-center',
       render: (medicine) => {
-        const qty = medicine.quantity || 0;
+        const qty = Number(medicine.quantity || 0);
+        const reorderLevel = Number(medicine.reorderLevel || 50); // Fallback to 50 if 0, undefined, or null
         const isOutOfStock = qty === 0;
-        const isLowStock = qty < 50 && qty > 0;
+        const isLowStock = qty < reorderLevel && qty > 0;
         
         const expiryDate = medicine.expiryDate ? new Date(medicine.expiryDate) : null;
         const today = new Date();
@@ -211,7 +212,7 @@ export const StockManagement = () => {
               disabled={importing}
               isLoading={importing}
             >
-              Import CSV
+              Import Excel
             </Button>
             <Button icon="inventory" href="/pharmacy/batch-entry">
               Add Batch Stock
@@ -243,7 +244,7 @@ export const StockManagement = () => {
                     <option value="EXPIRING_SOON">Expiring Soon</option>
                   </select>
                 </div>
-                <Button variant="secondary" icon="download" onClick={handleExport}>Export CSV</Button>
+                <Button variant="secondary" icon="download" onClick={handleExport}>Export Excel</Button>
               </div>
             )}
           >

@@ -56,7 +56,11 @@ export const usePharmacyStock = () => {
         }
         case 'LOW_STOCK': {
           // Backend might already handle this, but ensuring consistency
-          content = content.filter(m => (m.quantity || 0) < 50);
+          content = content.filter(m => {
+            const qty = Number(m.quantity || 0);
+            const threshold = Number(m.reorderLevel || 50); // Fallback to 50 if 0, null, or undefined
+            return qty < threshold && qty > 0;
+          });
         
         break;
         }
@@ -100,40 +104,59 @@ export const usePharmacyStock = () => {
     void trigger();
   }, [debouncedSearch, statusFilter, pageSize]);
 
-  const handleExport = () => {
-    if (medicines.length === 0) {
-        triggerGlobalToast('No data available to export', 'error');
-        return;
+  const handleExport = async () => {
+    try {
+      setLoading(true);
+      const response = await pharmacyApi.exportStockExcel();
+      const url = window.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `pharmacy_stock_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.append(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Export failed', error);
+      triggerGlobalToast('Failed to export stock', 'error');
+    } finally {
+      setLoading(false);
     }
-    
-    const headers = ['Medicine Name', 'Batch', 'Expiry Date', 'Quantity', 'Price (₹)'];
-    const csvContent = [
-      headers.join(','),
-      ...medicines.map(m => [
-        `"${m.medicineName}"`,
-        `"${m.batchNumber}"`,
-        `"${m.expiryDate}"`,
-        m.quantity,
-        m.price
-      ].join(','))
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.setAttribute('download', `inventory_report_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.append(link);
-    link.click();
-    link.remove();
   };
 
   const handleImport = async (file: File) => {
     try {
       setImporting(true);
       const response = await pharmacyApi.importStock(file);
-      if (response.success) {
-        triggerGlobalToast('Stock imported successfully', 'success');
+      if (response.success && response.data) {
+        const { importedRows, medicineNotFoundRows, skippedRows, errorFileBase64 } = response.data;
+        
+        if (medicineNotFoundRows > 0 || skippedRows > 0) {
+          triggerGlobalToast(
+            `Import partial: ${importedRows} success, ${medicineNotFoundRows} medicine not found, ${skippedRows} failed. Downloading feedback file...`, 
+            'warning'
+          );
+          
+          if (errorFileBase64) {
+            const byteCharacters = atob(errorFileBase64);
+            const byteNumbers = new Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+              byteNumbers[i] = byteCharacters.charCodeAt(i);
+            }
+            const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', `stock_import_feedback_${new Date().getTime()}.xlsx`);
+            document.body.append(link);
+            link.click();
+            link.remove();
+          }
+        } else {
+          triggerGlobalToast(`Successfully imported ${importedRows} records`, 'success');
+        }
         fetchInventory();
+      } else {
+        triggerGlobalToast(response.message || 'Import failed', 'error');
       }
     } catch (error) {
       console.error('Import failed', error);
@@ -163,7 +186,11 @@ export const usePharmacyStock = () => {
   // KPI Calculations
   const uniqueMedicinesCount = new Set(medicines.map(m => m.medicineId)).size;
   const totalStockUnits = medicines.reduce((acc, m) => acc + (m.quantity || 0), 0);
-  const lowStockCount = medicines.filter(m => (m.quantity || 0) > 0 && (m.quantity || 0) < 50).length;
+  const lowStockCount = medicines.filter(m => {
+    const qty = Number(m.quantity || 0);
+    const threshold = Number(m.reorderLevel || 50);
+    return qty > 0 && qty < threshold;
+  }).length;
   const expiringSoonCount = medicines.filter(m => {
     if (!m.expiryDate) return false;
     const expDate = dayjs(m.expiryDate);

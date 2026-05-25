@@ -209,6 +209,19 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
             />
             {errors.manufacturer && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.manufacturer}</p>}
           </div>
+
+          <div>
+            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Label (Units)</label>
+            <input 
+              name="reorderLevel"
+              value={formData.reorderLevel}
+              onChange={handleChange}
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.reorderLevel ? 'border-red-500' : 'border-slate-200'}`} 
+              placeholder="e.g. 50" 
+              type="number"
+            />
+            {errors.reorderLevel && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.reorderLevel}</p>}
+          </div>
         </div>
 
         <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">

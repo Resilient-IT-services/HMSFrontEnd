@@ -543,6 +543,15 @@ export interface MedicineImportResponse {
   errorFileBase64?: string;
 }
 
+export interface StockImportResponse {
+  totalRows: number;
+  importedRows: number;
+  skippedRows: number;
+  medicineNotFoundRows: number;
+  lastError?: string;
+  errorFileBase64?: string;
+}
+
 export interface PharmacyStockDTO {
   id: string;
   medicineId: string;
@@ -553,6 +562,7 @@ export interface PharmacyStockDTO {
   expiryDate: string;
   quantity: number;
   totalQuantity?: number;
+  reorderLevel?: number;
   price: number;
   purchasePrice?: number;
   sellingPrice?: number;
@@ -566,6 +576,7 @@ export interface StockRequest {
   quantity: number;
   purchasePrice: number;
   sellingPrice: number;
+  reorderLevel?: number;
   supplier?: string;
   gst?: number;
   rackLocation?: string;
