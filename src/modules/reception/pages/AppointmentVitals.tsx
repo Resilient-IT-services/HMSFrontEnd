@@ -72,10 +72,9 @@ export const AppointmentVitals = () => {
             />
           </div>
 
-          {/* Changed grid layout to take full advantage of wide screens */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start w-full">
 
-            {/* Patient Profile & Complaints Sidebar (Takes 1 Col) */}
+            {/* Patient Profile & Complaints Sidebar */}
             <div className="lg:col-span-1 space-y-3 w-full">
               {/* Profile Card */}
               <Card className="overflow-hidden p-3 w-full">
@@ -131,7 +130,7 @@ export const AppointmentVitals = () => {
               </div>
             </div>
 
-            {/* Vitals Entry Form - Stretches dynamically over 3 fractions to kill white gaps */}
+            {/* Vitals Entry Form */}
             <div className="lg:col-span-3 space-y-3 w-full">
               <Card title="Clinical Measurements" icon="monitoring" className="p-4 w-full">
                 <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
@@ -176,11 +175,8 @@ export const AppointmentVitals = () => {
                       </div>
                     </div>
                     <div className="mt-1 space-y-0.5">
-                      {(fieldErrors.systolic || fieldErrors.diastolic) && (
-                          <p className="text-[9px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[10px]">error</span> Fix required ranges
-                          </p>
-                      )}
+                      {fieldErrors.systolic && <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> Systolic: {fieldErrors.systolic}</p>}
+                      {fieldErrors.diastolic && <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> Diastolic: {fieldErrors.diastolic}</p>}
                       <p className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
                         <span className="material-symbols-outlined text-[10px]">info</span>
                         Normal: {formatRangeInSelectedUnit('SYSTOLIC_BP')} / {formatRangeInSelectedUnit('DIASTOLIC_BP')}
@@ -204,9 +200,12 @@ export const AppointmentVitals = () => {
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-orange-600 text-base">favorite</span>
                       </div>
-                      <p className="text-[8px] text-slate-400 font-bold mt-0.5 flex items-center gap-1">
-                        Range: {formatRangeInSelectedUnit('HEART_RATE')}
-                      </p>
+                      <div className="mt-1 space-y-0.5">
+                        {fieldErrors.heartRate && <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> {fieldErrors.heartRate}</p>}
+                        <p className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
+                          Range: {formatRangeInSelectedUnit('HEART_RATE')}
+                        </p>
+                      </div>
                     </FormField>
 
                     {/* Oxygen Level */}
@@ -223,9 +222,12 @@ export const AppointmentVitals = () => {
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-blue-600 text-base">pulse_alert</span>
                       </div>
-                      <p className="text-[8px] text-slate-400 font-bold mt-0.5 flex items-center gap-1">
-                        Range: {formatRangeInSelectedUnit('OXYGEN_LEVEL')}
-                      </p>
+                      <div className="mt-1 space-y-0.5">
+                        {fieldErrors.oxygenLevel && <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1"><span className="material-symbols-outlined text-xs">error</span> {fieldErrors.oxygenLevel}</p>}
+                        <p className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
+                          Range: {formatRangeInSelectedUnit('OXYGEN_LEVEL')}
+                        </p>
+                      </div>
                     </FormField>
 
                     {/* Body Temperature */}
@@ -237,7 +239,7 @@ export const AppointmentVitals = () => {
                               className="text-[8px] font-black bg-slate-100 border-none rounded px-1 py-0.5 uppercase outline-none"
                               value={displayTempUnit}
                               disabled={isReadOnly}
-                              onChange={(e) => setDisplayTempUnit(e.target.value as any)}
+                              onChange={(e) => { setDisplayTempUnit(e.target.value as any); validateField('temperature', temperature); }}
                           >
                             <option value="C">°C</option>
                             <option value="F">°F</option>
@@ -256,9 +258,17 @@ export const AppointmentVitals = () => {
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">{displayTempUnit === 'C' ? '°C' : '°F'}</span>
                         </div>
                       </div>
-                      <p className="text-[8px] text-slate-400 font-bold mt-0.5 flex items-center gap-1">
-                        Range: {formatRangeInSelectedUnit('BODY_TEMPERATURE')}
-                      </p>
+                      <div className="mt-1 space-y-0.5">
+                        {fieldErrors.temperature && (
+                            <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">error</span>
+                              {displayTempUnit === 'C' ? 'Temperature must be between 35.0 and 42.2 °C' : 'Temperature must be between 95.0 and 108.0 °F'}
+                            </p>
+                        )}
+                        <p className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
+                          Range: {formatRangeInSelectedUnit('BODY_TEMPERATURE')}
+                        </p>
+                      </div>
                     </FormField>
 
                     {/* Weight */}
@@ -270,7 +280,7 @@ export const AppointmentVitals = () => {
                               className="text-[8px] font-black bg-slate-100 border-none rounded px-1 py-0.5 uppercase outline-none"
                               value={displayWeightUnit}
                               disabled={isReadOnly}
-                              onChange={(e) => setDisplayWeightUnit(e.target.value as any)}
+                              onChange={(e) => { setDisplayWeightUnit(e.target.value as any); validateField('weight', weight); }}
                           >
                             <option value="KG">KG</option>
                             <option value="LB">LB</option>
@@ -289,9 +299,17 @@ export const AppointmentVitals = () => {
                           <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 font-bold lowercase text-xs">{displayWeightUnit}</span>
                         </div>
                       </div>
-                      <p className="text-[8px] text-slate-400 font-bold mt-0.5 flex items-center gap-1">
-                        Range: {formatRangeInSelectedUnit('WEIGHT')}
-                      </p>
+                      <div className="mt-1 space-y-0.5">
+                        {fieldErrors.weight && (
+                            <p className="text-[10px] text-red-600 font-bold uppercase tracking-tight flex items-center gap-1">
+                              <span className="material-symbols-outlined text-xs">error</span>
+                              {displayWeightUnit === 'KG' ? 'Weight must be between 40.0 and 120.0 kg' : 'Weight must be between 88.1 and 264.5 lb'}
+                            </p>
+                        )}
+                        <p className="text-[8px] text-slate-400 font-bold flex items-center gap-1">
+                          Range: {formatRangeInSelectedUnit('WEIGHT')}
+                        </p>
+                      </div>
                     </FormField>
 
                   </div>
