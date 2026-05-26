@@ -255,6 +255,8 @@ export default function QuickPharmacyBillingPage() {
         items: cart.map(item => ({
           medicineBatchId: item.id,
           quantity: item.selectedQuantity,
+          discountAmount: item.discount,
+          taxAmount: 0
         })),
         payment: {
           mode: paymentMode as any,
