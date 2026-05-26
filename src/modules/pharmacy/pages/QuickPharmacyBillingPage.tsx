@@ -215,8 +215,22 @@ export default function QuickPharmacyBillingPage() {
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting) return; // Prevention of double-submit
-    
+    if (isSubmitting) return;
+
+    const invalidItem = cart.find(
+        item =>
+            item.selectedQuantity <= 0 ||
+            item.quantity <= 0
+    );
+
+    if (invalidItem) {
+      triggerGlobalToast(
+          'Items with 0 quantity or 0 stock cannot be billed',
+          'error'
+      );
+      return;
+    }
+
     if (cart.length === 0) {
       triggerGlobalToast('Cart is empty', 'error');
       return;
@@ -519,9 +533,9 @@ export default function QuickPharmacyBillingPage() {
                 <div className="p-8 pt-0">
                   <button
                     onClick={handleSubmit}
-                    disabled={isSubmitting || cart.length === 0}
-                    className={`w-full py-5 rounded-[24px] text-white font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 shadow-2xl ${isSubmitting || cart.length === 0 ? 'bg-slate-200 cursor-not-allowed' : 'bg-primary hover:bg-primary-hover hover:scale-[1.02] shadow-primary/20 active:scale-95'}`}
-                  >
+                    disabled={isSubmitting || cart.length === 0 || cart.some(item => item.selectedQuantity <= 0 || item.quantity <= 0)
+                    }
+                    className={`w-full py-5 rounded-[24px] text-white font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 shadow-2xl ${isSubmitting || cart.length === 0 ? 'bg-slate-200 cursor-not-allowed' : 'bg-primary hover:bg-primary-hover hover:scale-[1.02] shadow-primary/20 active:scale-95'}`}>
                     {isSubmitting ? (
                       <div className="flex items-center justify-center gap-3">
                         <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></div>
