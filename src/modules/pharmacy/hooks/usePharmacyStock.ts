@@ -171,13 +171,38 @@ export const usePharmacyStock = () => {
 
     try {
       setLoading(true);
-      const response = await pharmacyApi.deleteMedicine(id); 
+      const response = await pharmacyApi.deleteStock(id); 
       if (response.success) {
         setMedicines(prev => prev.filter(m => m.id !== id));
-        triggerGlobalToast('Record deleted', 'success');
+        triggerGlobalToast('Stock record deleted', 'success');
+      }
+    } catch (error: any) {
+      console.error('Delete failed', error);
+      
+      if (error.response?.status === 409) {
+        if (globalThis.confirm('This batch has sales history and cannot be deleted for audit reasons. Would you like to set its quantity to 0 instead?')) {
+          await handleAdjust(id, 0);
+        }
+      } else {
+        const message = error.response?.data?.error?.message || 'Failed to delete stock record';
+        triggerGlobalToast(message, 'error');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAdjust = async (id: string, quantity: number) => {
+    try {
+      setLoading(true);
+      const response = await pharmacyApi.adjustStock(id, quantity);
+      if (response.success) {
+        setMedicines(prev => prev.map(m => m.id === id ? { ...m, quantity } : m));
+        triggerGlobalToast(`Stock quantity updated to ${quantity}`, 'success');
       }
     } catch (error) {
-      console.error('Delete failed', error);
+      console.error('Adjustment failed', error);
+      triggerGlobalToast('Failed to adjust stock quantity', 'error');
     } finally {
       setLoading(false);
     }
@@ -218,6 +243,7 @@ export const usePharmacyStock = () => {
     handleExport,
     handleImport,
     handleDelete,
+    handleAdjust,
     refresh: fetchInventory,
     stats: {
       totalElements,

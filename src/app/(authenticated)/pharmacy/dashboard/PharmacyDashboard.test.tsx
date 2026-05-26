@@ -34,6 +34,7 @@ describe('PharmacyDashboard', () => {
               { id: 'item-2', medicineId: 'med-2', medicineName: 'Cetirizine', dosage: '1 tab', duration: '3 days' },
             ],
             status: 'PENDING',
+            phone: '9876543210',
             createdAt: '2026-04-26T00:00:00',
           },
           {
@@ -46,6 +47,7 @@ describe('PharmacyDashboard', () => {
               { id: 'item-3', medicineId: 'med-3', medicineName: 'Azithromycin', dosage: '1 tab', duration: '3 days' },
             ],
             status: 'COMPLETED',
+            phone: '9876543211',
             createdAt: '2026-04-26T00:00:00',
           },
         ],

@@ -110,6 +110,18 @@ export const pharmacyApi = {
   },
 
   // Stock Management
+  deleteStock: async (id: string) => {
+    const response = await apiClient.delete<ApiResponse<void>>(`/pharmacy/stock/${id}`);
+    return response.data;
+  },
+
+  adjustStock: async (id: string, quantity: number) => {
+    const response = await apiClient.put<ApiResponse<PharmacyStockDTO>>(`/pharmacy/stock/${id}/adjust`, null, {
+      params: { quantity }
+    });
+    return response.data;
+  },
+
   addStock: async (data: StockRequest) => {
     const response = await apiClient.post<ApiResponse<PharmacyStockDTO>>('/pharmacy/stock', data);
     return response.data;

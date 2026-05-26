@@ -19,6 +19,8 @@ export const PharmacyDashboard = () => {
   const [lowStockCount, setLowStockCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const [searchTerm, setSearchTerm] = useState('');
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -65,26 +67,46 @@ export const PharmacyDashboard = () => {
   }, []);
 
   const stats = useMemo(() => {
-    // Ensure prescriptions is an array before processing
     const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
     
-    const pendingPrescriptions = safePrescriptions.filter((prescription) => 
-      prescription && prescription.status !== 'PENDING'
-    ).length;
+    // Correct Pending logic: Not Dispensed, Not Completed, Not Cancelled
+    const pendingPrescriptions = safePrescriptions.filter((p) => {
+      const s = (p.status || '').toUpperCase();
+      return !['DISPENSED', 'COMPLETED', 'CANCELLED'].includes(s);
+    }).length;
     
-    const dispensedToday = safePrescriptions.filter((prescription) => 
-      prescription && prescription.status === 'DISPENSED'
-    ).length;
-    
-
+    // Correct Completed logic: Either Dispensed or Completed (Case-insensitive)
+    const dispensedToday = safePrescriptions.filter((p) => {
+      const s = (p.status || '').toUpperCase();
+      return s === 'DISPENSED' || s === 'COMPLETED';
+    }).length;
 
     return {
       pendingPrescriptions,
       dispensedToday,
-
       lowStockCount: typeof lowStockCount === 'number' ? lowStockCount : 0,
     };
   }, [lowStockCount, prescriptions]);
+
+  const filteredPrescriptions = useMemo(() => {
+    const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
+    const term = searchTerm.toLowerCase().trim();
+
+    return safePrescriptions.filter((p) => {
+      // 1. Hide finalized prescriptions from the dashboard queue
+      const s = (p.status || '').toUpperCase();
+      if (['DISPENSED', 'COMPLETED', 'CANCELLED'].includes(s)) return false;
+
+      // 2. Multi-field search
+      if (!term) return true;
+      return (
+        p.patientName?.toLowerCase().includes(term) ||
+        p.id?.toString().toLowerCase().includes(term) ||
+        p.patientId?.toString().toLowerCase().includes(term) ||
+        p.patientCode?.toLowerCase().includes(term)
+      );
+    });
+  }, [prescriptions, searchTerm]);
 
   const prescriptionColumns: Column<PrescriptionResponse>[] = [
     {
@@ -92,8 +114,18 @@ export const PharmacyDashboard = () => {
       render: (p) => (
         <div>
           <p className="font-bold text-slate-900">{p.patientName}</p>
-          <p className="text-xs text-slate-500">ID: #RX-{p.id}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+            ID: {p.patientCode || p.patientId || 'N/A'}
+          </p>
         </div>
+      )
+    },
+    {
+      header: 'Rx Ref',
+      render: (p) => (
+        <span className="font-mono text-[11px] font-black bg-slate-100 px-2 py-1 rounded text-slate-600">
+          #{p.id?.toString().slice(-6).toUpperCase() || 'N/A'}
+        </span>
       )
     },
     {
@@ -183,40 +215,46 @@ export const PharmacyDashboard = () => {
                 }
               >
                 <div className="p-6 pb-0">
-                  <SearchInput placeholder="Search by patient name or Rx ID..." />
+                  <SearchInput 
+                    placeholder="Search by Patient Name, ID, or Rx ID..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                 </div>
                 <Table 
                   columns={prescriptionColumns} 
-                  data={prescriptions} 
+                  data={filteredPrescriptions} 
                   isLoading={loading}
                   emptyMessage="No prescriptions found."
                 />
-              </Card>
-
-              <Card title="Operational Summary" subtitle="DAILY MONITORING">
-                <div className="space-y-6">
-                  {operationalSummary.map((item) => (
-                    <div key={item.title} className={`flex items-center gap-4 border-l-2 pl-4 ${item.accentClassName}`}>
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                        <p className="text-xs text-slate-500">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </Card>
             </div>
 
             <div className="space-y-8">
               <Card title="Queue Snapshot" subtitle="VOLUME TREND">
-                <div className="h-48 w-full flex items-end gap-2 px-2">
-                  {[stats.pendingPrescriptions, stats.dispensedToday, stats.lowStockCount].map((value, index) => (
-                    <div
-                      key={`${value}-${index}`}
-                      className="flex-1 rounded-t-lg bg-orange-600/20 hover:bg-orange-600 transition-all"
-                      style={{ height: `${Math.max(20, Math.min(100, value * 10 || 20))}%` }}
-                    />
-                  ))}
+                <div className="h-48 w-full flex items-end gap-3 px-2">
+                  {[
+                    { label: 'Pending', value: stats.pendingPrescriptions, color: 'bg-blue-600' },
+                    { label: 'Done', value: stats.dispensedToday, color: 'bg-emerald-600' },
+                    { label: 'Alerts', value: stats.lowStockCount, color: 'bg-orange-600' }
+                  ].map((item, index) => {
+                    const total = Math.max(stats.pendingPrescriptions + stats.dispensedToday + stats.lowStockCount, 1);
+                    const height = (item.value / total) * 100;
+                    return (
+                      <div key={index} className="flex-1 flex flex-col items-center gap-2 h-full">
+                        <div className="flex-1 w-full flex flex-col justify-end">
+                          <div
+                            className={`w-full rounded-t-lg transition-all ${item.color} opacity-80 hover:opacity-100 shadow-lg`}
+                            style={{ height: `${Math.max(8, height)}%` }}
+                          />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-tighter leading-none">{item.label}</p>
+                          <p className="text-sm font-black text-slate-800 leading-tight">{item.value}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </Card>
 
