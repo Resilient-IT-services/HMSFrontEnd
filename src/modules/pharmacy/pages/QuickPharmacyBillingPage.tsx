@@ -195,7 +195,22 @@ export default function QuickPharmacyBillingPage() {
 
   const updateDiscount = (index: number, discount: number) => {
     const newCart = [...cart];
-    newCart[index].discount = Math.max(0, discount);
+
+    const item = newCart[index];
+    const itemTotal = item.sellingPrice! * item.selectedQuantity;
+
+    const safeDiscount = Math.max(0, discount);
+
+    if (safeDiscount > itemTotal) {
+      triggerGlobalToast(
+          `Discount cannot exceed total amount (${formatCurrency(itemTotal)})`,
+          'error'
+      );
+
+      return;
+    }
+
+    newCart[index].discount = safeDiscount;
     setCart(newCart);
   };
 
