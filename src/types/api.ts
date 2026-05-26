@@ -646,6 +646,7 @@ export interface PharmacySaleResponse {
   prescriptionId?: string;
   visitId?: string;
   totalAmount: number;
+  status?: PharmacySaleStatus;
   items: PharmacySaleItem[];
 }
 
@@ -714,7 +715,7 @@ export interface PrescriptionDTO {
   items: PrescriptionItemDTO[];
   createdAt?: string;
   phone: string;
-
+  status?: string;
 }
 
 export interface PrescriptionSummaryDTO {
@@ -728,6 +729,7 @@ export interface PrescriptionSummaryDTO {
   visitId?: string;
   createdAt: string;
   itemCount: number;
+  status?: string;
 }
 // Legacy aliases
 export type PrescriptionItemResponse = PrescriptionItemDTO;

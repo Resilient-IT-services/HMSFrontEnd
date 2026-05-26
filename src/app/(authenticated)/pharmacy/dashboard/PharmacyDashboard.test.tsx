@@ -89,8 +89,8 @@ describe('PharmacyDashboard', () => {
       success: true,
       data: {
         content: [
-          { id: 'rx-1', patientName: 'Amit Sharma', items: [], status: 'PENDING' },
-          { id: 'rx-2', patientName: 'Meera Singh', items: [], status: 'ACTIVE' },
+          { id: 'rx-1', patientName: 'Amit Sharma', items: [], status: 'PENDING', phone: '1234567890' },
+          { id: 'rx-2', patientName: 'Meera Singh', items: [], status: 'ACTIVE', phone: '0987654321' },
         ],
         totalElements: 2,
         totalPages: 1,
@@ -125,8 +125,8 @@ describe('PharmacyDashboard', () => {
       success: true,
       data: {
         content: [
-          { id: 'rx-123456', patientName: 'Amit Sharma', items: [], status: 'PENDING' },
-          { id: 'rx-789012', patientName: 'Meera Singh', items: [], status: 'ACTIVE' },
+          { id: 'rx-123456', patientName: 'Amit Sharma', items: [], status: 'PENDING', phone: '1234567890' },
+          { id: 'rx-789012', patientName: 'Meera Singh', items: [], status: 'ACTIVE', phone: '0987654321' },
         ],
         totalElements: 2,
         totalPages: 1,
