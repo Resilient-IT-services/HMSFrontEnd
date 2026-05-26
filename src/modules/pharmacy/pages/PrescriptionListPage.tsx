@@ -26,7 +26,11 @@ const PrescriptionListPage: React.FC = () => {
       setLoading(true);
       const response = await pharmacyApi.getPrescriptionsSummary({ search: debouncedSearch });
       if (response.success && response.data) {
-        setPrescriptions(response.data.content);
+        // Filter out prescriptions that are already completed or dispensed
+        const activePrescriptions = response.data.content.filter(
+          rx => rx.status !== 'COMPLETED' && rx.status !== 'DISPENSED'
+        );
+        setPrescriptions(activePrescriptions);
       } else {
         setError(response.message || 'Failed to fetch prescriptions');
       }

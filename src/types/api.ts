@@ -714,6 +714,8 @@ export interface PrescriptionDTO {
   items: PrescriptionItemDTO[];
   status?: PrescriptionStatus;
   createdAt?: string;
+  phone: string;
+
 }
 
 export interface PrescriptionSummaryDTO {
