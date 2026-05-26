@@ -240,6 +240,21 @@ export default function QuickPharmacyBillingPage() {
       triggerGlobalToast('Customer name is required for walk-in', 'error');
       return;
     }
+    if (saleType === 'VISIT' && !selectedPatient) {
+      triggerGlobalToast(
+          'Patient selection is required for patient visit billing',
+          'error'
+      );
+      return;
+    }
+    if (
+        saleType === 'VISIT' && !selectedDoctor) {
+      triggerGlobalToast(
+          'Doctor selection is required for patient visit billing',
+          'error'
+      );
+      return;
+    }
 
     setIsSubmitting(true);
     try {
