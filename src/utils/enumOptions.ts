@@ -13,7 +13,6 @@ import type {
   HospitalResponse,
   PharmacySaleStatus,
   PharmacySaleType,
-  PrescriptionStatus,
   Role,
   SourceType,
   StockTransactionType,
@@ -87,13 +86,6 @@ export const APPOINTMENT_STATUS_OPTIONS: Option<AppointmentStatus>[] = [
   { value: 'PRESCRIPTION_FINALIZED', label: 'Prescription Finalized' },
   { value: 'COMPLETED', label: 'Completed' },
   { value: 'CANCELLED', label: 'Cancelled' }
-];
-
-export const PRESCRIPTION_STATUS_OPTIONS: Option<PrescriptionStatus>[] = [
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'COMPLETED', label: 'Completed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-  { value: 'DISPENSED', label: 'Dispensed' }
 ];
 
 export const MEDICINE_FORM_OPTIONS: Option<MedicineForm>[] = [

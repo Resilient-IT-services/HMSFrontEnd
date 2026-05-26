@@ -1,6 +1,5 @@
 import React from 'react';
 import { PrescriptionSummaryDTO } from '@/types/api';
-import StatusBadge from './StatusBadge';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -33,7 +32,6 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold">Patient Name</th>
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold">Doctor Name</th>
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold text-center">Items</th>
-            <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold text-center">Status</th>
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold text-right">Action</th>
           </tr>
         </thead>
@@ -68,9 +66,6 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                    {prescription.itemCount} Meds
                  </span>
               </td>
-              <td className="px-6 py-4 text-center">
-                <StatusBadge status={prescription.status || 'ACTIVE'} />
-              </td>
               <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                 <Link 
                   href={`/pharmacy/prescriptions/${prescription.id}`}
@@ -78,15 +73,6 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 >
                   View details
                 </Link>
-                {prescription.status === 'COMPLETED' || prescription.status === 'DISPENSED' ? (
-                  <Link 
-                    href={`/pharmacy/sales/prescription/${prescription.id}`}
-                    className="px-4 py-2 bg-slate-800 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-800/20 hover:bg-black transition-all active:scale-95 flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">print</span>
-                    Print Invoice
-                  </Link>
-                ) : (
                   <Link 
                     href={`/pharmacy/sales?prescriptionId=${prescription.id}`}
                     className="px-4 py-2 bg-orange-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 flex items-center gap-2"
@@ -94,7 +80,6 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                     <span className="material-symbols-outlined text-sm">payments</span>
                     Dispense
                   </Link>
-                )}
               </td>
             </tr>
           ))}

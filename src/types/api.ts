@@ -57,7 +57,6 @@ export type AuditEntityName =
   | 'HOSPITAL'
   | 'USER_ACCOUNT'
   | 'USER_CONTRACT';
-export type PrescriptionStatus = 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'DISPENSED' | 'PENDING';
 
 // Global User Info Types
 export interface Qualification {
@@ -547,6 +546,7 @@ export interface StockImportResponse {
   totalRows: number;
   importedRows: number;
   skippedRows: number;
+  failedRows?: number;
   medicineNotFoundRows: number;
   lastError?: string;
   errorFileBase64?: string;
@@ -712,7 +712,6 @@ export interface PrescriptionDTO {
   appointmentId?: string;
   visitId?: string;
   items: PrescriptionItemDTO[];
-  status?: PrescriptionStatus;
   createdAt?: string;
   phone: string;
 
@@ -727,7 +726,6 @@ export interface PrescriptionSummaryDTO {
   doctorName: string;
   appointmentId: string;
   visitId?: string;
-  status: PrescriptionStatus;
   createdAt: string;
   itemCount: number;
 }

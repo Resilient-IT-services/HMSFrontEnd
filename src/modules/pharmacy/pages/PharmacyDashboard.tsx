@@ -67,23 +67,8 @@ export const PharmacyDashboard = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
-    
-    // Correct Pending logic: Not Dispensed, Not Completed, Not Cancelled
-    const pendingPrescriptions = safePrescriptions.filter((p) => {
-      const s = (p.status || '').toUpperCase();
-      return !['DISPENSED', 'COMPLETED', 'CANCELLED'].includes(s);
-    }).length;
-    
-    // Correct Completed logic: Either Dispensed or Completed (Case-insensitive)
-    const dispensedToday = safePrescriptions.filter((p) => {
-      const s = (p.status || '').toUpperCase();
-      return s === 'DISPENSED' || s === 'COMPLETED';
-    }).length;
-
     return {
-      pendingPrescriptions,
-      dispensedToday,
+      totalPrescriptions: (prescriptions || []).length,
       lowStockCount: typeof lowStockCount === 'number' ? lowStockCount : 0,
     };
   }, [lowStockCount, prescriptions]);
@@ -92,13 +77,9 @@ export const PharmacyDashboard = () => {
     const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
     const term = searchTerm.toLowerCase().trim();
 
-    return safePrescriptions.filter((p) => {
-      // 1. Hide finalized prescriptions from the dashboard queue
-      const s = (p.status || '').toUpperCase();
-      if (['DISPENSED', 'COMPLETED', 'CANCELLED'].includes(s)) return false;
+    if (!term) return safePrescriptions;
 
-      // 2. Multi-field search
-      if (!term) return true;
+    return safePrescriptions.filter((p) => {
       return (
         p.patientName?.toLowerCase().includes(term) ||
         p.id?.toString().toLowerCase().includes(term) ||
@@ -151,18 +132,10 @@ export const PharmacyDashboard = () => {
 
   const metricItems = [
     {
-      label: 'Pending Prescriptions',
-      value: stats.pendingPrescriptions,
+      label: 'Total Prescriptions',
+      value: stats.totalPrescriptions,
       variant: 'blue' as const,
       icon: 'pending_actions',
-      layout: 'horizontal' as const,
-      tag: 'Live'
-    },
-    {
-      label: 'Completed Prescriptions',
-      value: stats.dispensedToday,
-      variant: 'emerald' as const,
-      icon: 'task_alt',
       layout: 'horizontal' as const,
       tag: 'Live'
     },
@@ -179,14 +152,9 @@ export const PharmacyDashboard = () => {
 
   const operationalSummary = [
     {
-      title: 'Pending prescriptions',
-      description: `${stats.pendingPrescriptions} records are waiting to be dispensed.`,
+      title: 'Active prescriptions',
+      description: `${stats.totalPrescriptions} records are in the system.`,
       accentClassName: 'border-orange-600'
-    },
-    {
-      title: 'Completed prescriptions',
-      description: `${stats.dispensedToday} records are already marked as completed.`,
-      accentClassName: 'border-slate-200'
     }
   ];
 
@@ -234,11 +202,10 @@ export const PharmacyDashboard = () => {
               <Card title="Queue Snapshot" subtitle="VOLUME TREND">
                 <div className="h-48 w-full flex items-end gap-3 px-2">
                   {[
-                    { label: 'Pending', value: stats.pendingPrescriptions, color: 'bg-blue-600' },
-                    { label: 'Done', value: stats.dispensedToday, color: 'bg-emerald-600' },
+                    { label: 'Prescriptions', value: stats.totalPrescriptions, color: 'bg-blue-600' },
                     { label: 'Alerts', value: stats.lowStockCount, color: 'bg-orange-600' }
                   ].map((item, index) => {
-                    const total = Math.max(stats.pendingPrescriptions + stats.dispensedToday + stats.lowStockCount, 1);
+                    const total = Math.max(stats.totalPrescriptions + stats.lowStockCount, 1);
                     const height = (item.value / total) * 100;
                     return (
                       <div key={index} className="flex-1 flex flex-col items-center gap-2 h-full">

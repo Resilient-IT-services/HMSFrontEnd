@@ -8,7 +8,6 @@ import { patientService } from '@/services/patientService';
 import { PrescriptionDTO, MedicineResponse } from '@/types/api';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import StatusBadge from '@/modules/pharmacy/components/StatusBadge';
 import MedicineAutocomplete from '@/modules/pharmacy/components/MedicineAutocomplete';
 import { Badge } from '@/components/ui/Badge';
 import { PageSurface } from '@/components/ui/PageSurface';
@@ -268,7 +267,6 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
 
   if (loading) return <MainLayout title="Loading..." hideTitle><PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter"><LoadingSkeleton /></PageSurface></MainLayout>;
   if (!prescription) return <MainLayout title="Not Found" hideTitle><PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter"><div>Prescription not found</div></PageSurface></MainLayout>;
-  const isFinalized = prescription.status === 'COMPLETED' || prescription.status === 'DISPENSED';
 
   return (
     <MainLayout title={`Dispense Order: #RX-${id}`} hideTitle>
@@ -303,9 +301,6 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                     <p className="text-[10px] font-black uppercase text-slate-400">Doctor</p>
                     <p className="text-lg font-bold text-slate-900">{prescription.doctorName}</p>
                   </div>
-                </div>
-                <div className="ml-auto">
-                  <StatusBadge status={prescription.status || 'ACTIVE'} />
                 </div>
               </section>
 
@@ -412,7 +407,6 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                   </div>
                 </div>
 
-                {!isFinalized && (
                   <div className="mb-6">
                     <p className="text-[10px] font-black uppercase text-slate-400 mb-3">Payment Method</p>
                     <div className="grid grid-cols-3 gap-2">
@@ -431,17 +425,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                       ))}
                     </div>
                   </div>
-                )}
                 
-                {isFinalized ? (
-                  <button 
-                    onClick={handlePrintInvoice}
-                    className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2"
-                  >
-                    <span className="material-symbols-outlined">print</span>
-                    Print Invoice
-                  </button>
-                ) : (
                   <button 
                     onClick={handleDispense}
                     disabled={dispensing || billItems.length === 0}
@@ -450,7 +434,6 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                     <span className="material-symbols-outlined">payments</span>
                     {dispensing ? 'Finalizing...' : 'Complete Dispensing'}
                   </button>
-                )}
                 
                 <button 
                   onClick={() => globalThis.print()}

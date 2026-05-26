@@ -128,11 +128,12 @@ export const usePharmacyStock = () => {
       setImporting(true);
       const response = await pharmacyApi.importStock(file);
       if (response.success && response.data) {
-        const { importedRows, medicineNotFoundRows, skippedRows, errorFileBase64 } = response.data;
+        const { importedRows, medicineNotFoundRows, skippedRows, failedRows, errorFileBase64 } = response.data;
         
-        if (medicineNotFoundRows > 0 || skippedRows > 0) {
+        if (medicineNotFoundRows > 0 || skippedRows > 0 || (failedRows || 0) > 0) {
+          const totalIssues = (medicineNotFoundRows || 0) + (skippedRows || 0) + (failedRows || 0);
           triggerGlobalToast(
-            `Import partial: ${importedRows} success, ${medicineNotFoundRows} medicine not found, ${skippedRows} failed. Downloading feedback file...`, 
+            `Import partial: ${importedRows} success, ${totalIssues} issues found. Downloading feedback file...`, 
             'warning'
           );
           
