@@ -9,6 +9,7 @@ import {
   MedicineSummaryDTO,
   MedicineRequestDTO,
   MedicineImportResponse,
+  StockImportResponse,
   PharmacyStockDTO,
   InventoryItemResponse,
   InventoryItemRequestDTO,
@@ -122,8 +123,15 @@ export const pharmacyApi = {
   importStock: async (file: File) => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await apiClient.post<ApiResponse<void>>('/pharmacy/stock/import', formData, {
+    const response = await apiClient.post<ApiResponse<StockImportResponse>>('/pharmacy/stock/import', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  exportStockExcel: async () => {
+    const response = await apiClient.get('/pharmacy/stock/export', {
+      responseType: 'blob'
     });
     return response.data;
   },

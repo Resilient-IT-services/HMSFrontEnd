@@ -47,6 +47,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     } : undefined,
     nurseInfo: initialData?.nurseInfo,
     pharmacistInfo: initialData?.pharmacistInfo,
+    labTechInfo: initialData?.labTechInfo,
     receptionistInfo: initialData?.receptionistInfo ? {
       ...initialData.receptionistInfo,
       languagesSpoken: {
@@ -82,6 +83,9 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     }
     if (roles.includes('PHARMACIST') && !currentFormData.pharmacistInfo) {
       updates.pharmacistInfo = { pciRegNo: '', qualification: '' };
+    }
+    if (roles.includes('LAB_TECHNICIAN') && !currentFormData.labTechInfo) {
+      updates.labTechInfo = { specialty: '', licenseNo: '' };
     }
     if (roles.includes('RECEPTIONIST') && !currentFormData.receptionistInfo) {
       updates.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
@@ -203,6 +207,11 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
       }
     }
 
+    // Lab Tech Specific Validation
+    if (assignedRoles.includes('LAB_TECHNICIAN') && formData.labTechInfo && !formData.labTechInfo.licenseNo?.trim()) {
+      errors.licenseNo = 'License number is required';
+    }
+
     setValidationErrors(errors);
     if (Object.keys(errors).length > 0) {
       triggerGlobalToast('Please fill all required professional details', 'error');
@@ -253,6 +262,12 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
         pciRegNo: formData.pharmacistInfo.pciRegNo?.trim()
       } : undefined;
 
+      const cleanedLabTechInfo = formData.labTechInfo ? {
+        ...formData.labTechInfo,
+        licenseNo: formData.labTechInfo.licenseNo?.trim(),
+        specialty: formData.labTechInfo.specialty?.trim()
+      } : undefined;
+
       const cleanedReceptionistInfo = formData.receptionistInfo ? {
         ...formData.receptionistInfo,
         languagesSpoken: {
@@ -274,6 +289,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
         doctorInfo: cleanedDoctorInfo,
         nurseInfo: cleanedNurseInfo,
         pharmacistInfo: cleanedPharmacistInfo,
+        labTechInfo: cleanedLabTechInfo,
         receptionistInfo: cleanedReceptionistInfo,
         status: formData.active ? 'ACTIVE' : 'INACTIVE'
       };

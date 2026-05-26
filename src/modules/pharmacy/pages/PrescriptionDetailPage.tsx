@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { useRouter } from 'next/navigation';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
+import { patientService } from '@/services/patientService';
 import { PrescriptionDTO, MedicineResponse } from '@/types/api';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
 import { triggerGlobalToast } from '@/components/ui/Toast';
@@ -32,7 +33,7 @@ interface PrescriptionDetailPageProps {
 
 const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) => {
   const router = useRouter();
-  
+
   const [prescription, setPrescription] = useState<PrescriptionDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [dispensing, setDispensing] = useState(false);
@@ -88,7 +89,21 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
         const rxRes = await pharmacyApi.getPrescriptionById(id);
         
         if (rxRes.success && rxRes.data) {
-          setPrescription(rxRes.data);
+          let rxData = rxRes.data;
+          
+          // Robustly fetch patient phone if missing from prescription record
+          if (!rxData.phone && rxData.patientId) {
+            try {
+              const patientRes = await patientService.get(rxData.patientId);
+              if (patientRes.success && patientRes.data?.phone) {
+                rxData = { ...rxData, phone: patientRes.data.phone };
+              }
+            } catch (err) {
+              console.warn('Failed to fetch patient phone as fallback', err);
+            }
+          }
+          
+          setPrescription(rxData);
           
           if (saved) {
             setBillItems(JSON.parse(saved));
@@ -129,12 +144,14 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
     }
   }, [billItems, id]);
 
-  const handleAddMedicine = async (medicine: MedicineResponse) => {
-    const { price, totalAvailable, outOfStock } = await resolveStockAndPrice(medicine.id, medicine.name);
+  const handleAddMedicine = async (medicine: any) => {
+    // Autocomplete might return medicineId for stock records, fallback to id
+    const mid = medicine.medicineId || medicine.id;
+    const { price, totalAvailable, outOfStock } = await resolveStockAndPrice(mid, medicine.name);
 
     const newItem: BillItem = {
-      key: `manual-${medicine.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      id: medicine.id,
+      key: `manual-${mid}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: mid,
       name: medicine.name,
       dosage: '-',
       duration: '-',
@@ -203,13 +220,24 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
     try {
       setDispensing(true);
       const payload = {
+        saleType: 'VISIT',
         patientId: prescription.patientId,
         prescriptionId: prescription.id,
+        visitId: prescription.visitId,
+
+        doctorId: prescription.doctorId || null,
+
+        customerName: prescription.patientName || '',
+        customerPhone: prescription.phone || '',
+
+
         items: validItems.map(item => ({
           medicineId: item.id,
           quantity: item.quantity
         })),
+
         payment: {
+          amount: grandTotal,
           mode: paymentMode,
           referenceNumber: `AUTO-${Date.now()}`
         }
@@ -219,13 +247,9 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
       if (res.success) {
         triggerGlobalToast('Prescription dispensed successfully, bill generated and paid.', 'success');
         sessionStorage.removeItem(`rx_draft_${id}`);
-        // Refresh prescription data
-        const rxRes = await pharmacyApi.getPrescriptionById(id);
-        if (rxRes.success && rxRes.data) {
-          setPrescription(rxRes.data);
-          // Re-initialize bill items to reflect new stock levels or completion
-          router.refresh();
-        }
+        
+        // Redirect back to the prescription list queue
+        router.push('/pharmacy/prescriptions');
       } else {
         triggerGlobalToast(res.message || 'Dispensing failed', 'error');
       }
@@ -319,11 +343,11 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                   <div className="space-y-3">
                     {billItems.map((item) => (
                       <div key={item.key} className={`flex items-center gap-4 p-4 border rounded-xl transition-colors group ${
-                        item.outOfStock ? 'bg-slate-50 border-slate-100 opacity-60' : 'bg-white border-slate-200 hover:border-orange-200'
+                        item.outOfStock ? 'bg-red-50/40 border-red-100 shadow-sm' : 'bg-white border-slate-200 hover:border-orange-200'
                       }`}>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <p className={`text-sm font-bold ${item.outOfStock ? 'text-slate-500' : 'text-slate-900'}`}>{item.name}</p>
+                            <p className={`text-sm font-bold ${item.outOfStock ? 'text-red-900' : 'text-slate-900'}`}>{item.name}</p>
                             {item.isManual && <Badge variant="blue" className="text-[8px]">Manual</Badge>}
                             {item.outOfStock && <Badge variant="red" className="text-[8px] uppercase">Out of Stock</Badge>}
                           </div>
@@ -336,7 +360,7 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                             value={item.quantity} 
                             onChange={(e) => handleQuantityChange(item.key, e.target.value)}
                             className={`w-14 px-2 py-1 border rounded text-sm text-center font-bold outline-none focus:border-orange-500 ${
-                              item.outOfStock ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' : 'bg-slate-50 border-slate-200 text-slate-700'
+                              item.outOfStock ? 'bg-white border-red-200 text-red-500 cursor-not-allowed shadow-inner' : 'bg-slate-50 border-slate-200 text-slate-700'
                             }`}
                             min="0"
                             disabled={item.outOfStock}
@@ -345,13 +369,13 @@ const PrescriptionDetailPage: React.FC<PrescriptionDetailPageProps> = ({ id }) =
                         </div>
 
                         <div className="text-right min-w-[120px]">
-                          <p className="text-[10px] text-slate-400 font-bold uppercase">Rate: ₹{(Number(item.price) || 0).toFixed(2)}</p>
-                          <p className={`text-sm font-black ${item.outOfStock ? 'text-slate-400' : 'text-slate-900'}`}>₹{(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}</p>
+                          <p className={`text-[10px] font-bold uppercase ${item.outOfStock ? 'text-red-400' : 'text-slate-400'}`}>Rate: ₹{(Number(item.price) || 0).toFixed(2)}</p>
+                          <p className={`text-sm font-black ${item.outOfStock ? 'text-red-600' : 'text-slate-900'}`}>₹{(Number(item.price || 0) * Number(item.quantity || 0)).toFixed(2)}</p>
                         </div>
 
                         <button 
                           onClick={() => handleRemoveItem(item.key)}
-                          className="p-2 text-slate-200 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          className={`p-2 rounded-lg transition-all ${item.outOfStock ? 'text-red-300 hover:text-red-600 hover:bg-red-100' : 'text-slate-200 hover:text-red-500 hover:bg-red-50'}`}
                           title="Remove Item"
                         >
                           <span className="material-symbols-outlined text-lg">delete</span>

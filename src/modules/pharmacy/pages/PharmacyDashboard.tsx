@@ -69,23 +69,19 @@ export const PharmacyDashboard = () => {
     const safePrescriptions = Array.isArray(prescriptions) ? prescriptions : [];
     
     const pendingPrescriptions = safePrescriptions.filter((prescription) => 
-      prescription && prescription.status !== 'COMPLETED'
+      prescription && prescription.status !== 'PENDING'
     ).length;
     
     const dispensedToday = safePrescriptions.filter((prescription) => 
-      prescription && prescription.status === 'COMPLETED'
+      prescription && prescription.status === 'DISPENSED'
     ).length;
     
-    let queuedItems = 0;
-    for (const prescription of safePrescriptions) {
-      const itemsCount = Array.isArray(prescription?.items) ? prescription.items.length : 0;
-      queuedItems += itemsCount;
-    }
+
 
     return {
       pendingPrescriptions,
       dispensedToday,
-      queuedItems,
+
       lowStockCount: typeof lowStockCount === 'number' ? lowStockCount : 0,
     };
   }, [lowStockCount, prescriptions]);
@@ -131,7 +127,7 @@ export const PharmacyDashboard = () => {
       tag: 'Live'
     },
     {
-      label: 'Filled Today',
+      label: 'Completed Prescriptions',
       value: stats.dispensedToday,
       variant: 'emerald' as const,
       icon: 'task_alt',
@@ -146,14 +142,7 @@ export const PharmacyDashboard = () => {
       layout: 'horizontal' as const,
       tag: 'Live'
     },
-    {
-      label: 'Items in Queue',
-      value: stats.queuedItems,
-      variant: 'indigo' as const,
-      icon: 'inventory_2',
-      layout: 'horizontal' as const,
-      tag: 'Live'
-    }
+
   ];
 
   const operationalSummary = [
@@ -221,7 +210,7 @@ export const PharmacyDashboard = () => {
             <div className="space-y-8">
               <Card title="Queue Snapshot" subtitle="VOLUME TREND">
                 <div className="h-48 w-full flex items-end gap-2 px-2">
-                  {[stats.pendingPrescriptions, stats.dispensedToday, stats.lowStockCount, stats.queuedItems].map((value, index) => (
+                  {[stats.pendingPrescriptions, stats.dispensedToday, stats.lowStockCount].map((value, index) => (
                     <div
                       key={`${value}-${index}`}
                       className="flex-1 rounded-t-lg bg-orange-600/20 hover:bg-orange-600 transition-all"

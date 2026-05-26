@@ -84,7 +84,7 @@ describe('PatientsPage', () => {
       </Provider>
     );
 
-    expect(screen.getByRole('heading', { name: 'Patient Directory', level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Patient Directory', level: 2 })).toBeInTheDocument();
     
     await waitFor(() => {
       expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();

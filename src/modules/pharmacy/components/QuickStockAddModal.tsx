@@ -31,6 +31,7 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
     quantity: '',
     purchasePrice: '',
     sellingPrice: '',
+    reorderLevel: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,6 +54,7 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
         quantity: Number(formData.quantity),
         purchasePrice: Number(formData.purchasePrice),
         sellingPrice: Number(formData.sellingPrice),
+        reorderLevel: formData.reorderLevel ? Number(formData.reorderLevel) : undefined,
       });
 
       if (response.success) {
@@ -158,7 +160,7 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
             </div>
 
             {/* Selling Price */}
-            <div className="md:col-span-2">
+            <div>
               <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Retail Price (₹)</label>
               <input
                 required
@@ -168,7 +170,20 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
                 value={formData.sellingPrice}
                 onChange={handleChange}
                 placeholder="0.00"
-                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-lg font-black text-slate-900 focus:ring-4 focus:ring-green-500/10 focus:border-green-500 outline-none transition-all"
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-green-500/10 focus:border-green-500 outline-none transition-all"
+              />
+            </div>
+
+            {/* Reorder Level */}
+            <div>
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Label (Units)</label>
+              <input
+                type="number"
+                name="reorderLevel"
+                value={formData.reorderLevel}
+                onChange={handleChange}
+                placeholder="e.g. 50"
+                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all"
               />
             </div>
           </div>
