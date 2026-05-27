@@ -15,7 +15,7 @@ export const validateDOB = (dob: string, maxAge: number = 110): { isValid: boole
   const today = new Date();
   
   // Basic date validity check
-  if (isNaN(dobDate.getTime())) {
+  if (Number.isNaN(dobDate.getTime())) {
     return { isValid: false, message: 'You entered a wrong date of birth' };
   }
 

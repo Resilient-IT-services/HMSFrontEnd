@@ -9,4 +9,6 @@ export const setDefaultTimezone = (tz: string) => {
   dayjs.tz.setDefault(tz);
 };
 
-export default dayjs;
+
+
+export {default} from 'dayjs';

@@ -108,7 +108,7 @@ export const usePharmacyStock = () => {
     try {
       setLoading(true);
       const response = await pharmacyApi.exportStockExcel();
-      const url = window.URL.createObjectURL(new Blob([response]));
+      const url = globalThis.URL.createObjectURL(new Blob([response]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `pharmacy_stock_export_${new Date().toISOString().split('T')[0]}.xlsx`);
@@ -139,15 +139,14 @@ export const usePharmacyStock = () => {
           
           if (errorFileBase64) {
             const byteCharacters = atob(errorFileBase64);
-            const byteNumbers = new Array(byteCharacters.length);
+            const byteNumbers = new Uint8Array(byteCharacters.length);
             for (let i = 0; i < byteCharacters.length; i++) {
               byteNumbers[i] = byteCharacters.charCodeAt(i);
             }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            const blob = new Blob([byteNumbers], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `stock_import_feedback_${new Date().getTime()}.xlsx`);
+            link.setAttribute('download', `stock_import_feedback_${Date.now()}.xlsx`);
             document.body.append(link);
             link.click();
             link.remove();

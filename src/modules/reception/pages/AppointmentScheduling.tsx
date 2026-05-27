@@ -138,8 +138,8 @@ export default function AppointmentScheduling() {
       // Construct the exact ISO string based on selected date and editable time
       const [hours, minutes] = editableTime.split(':');
       const appointmentTime = dayjs(selectedDate)
-        .hour(parseInt(hours))
-        .minute(parseInt(minutes))
+        .hour(Number.parseInt(hours))
+        .minute(Number.parseInt(minutes))
         .second(0)
         .millisecond(0)
         .toISOString();

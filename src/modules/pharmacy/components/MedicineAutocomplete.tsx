@@ -41,11 +41,7 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       setLoading(true);
       try {
         let response;
-        if (stockOnly) {
-          response = await pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 10 });
-        } else {
-          response = await pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 });
-        }
+        response = await (stockOnly ? pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 10 }) : pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 }));
 
         if (response.success && response.data) {
           // Normalize results: convert PharmacyStockDTO to a format similar to MedicineResponse for the dropdown
@@ -58,7 +54,7 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
             form: item.form,
             category: item.category,
             manufacturer: item.manufacturer,
-            currentStock: item.quantity !== undefined ? item.quantity : item.currentStock,
+            currentStock: item.quantity === undefined ? item.currentStock : item.quantity,
             batchNumber: item.batchNumber,
             expiryDate: item.expiryDate,
             sellingPrice: item.sellingPrice || item.price
