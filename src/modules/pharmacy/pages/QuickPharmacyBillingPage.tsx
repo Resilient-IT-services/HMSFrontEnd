@@ -60,8 +60,10 @@ export default function QuickPharmacyBillingPage() {
   const totalAmount = subtotal - totalDiscount;
 
   useEffect(() => {
-    setAmountPaid(totalAmount);
-  }, [totalAmount]);
+    if (!isSubmitting && amountPaid !== totalAmount) {
+      setAmountPaid(totalAmount);
+    }
+  }, [totalAmount, isSubmitting]);
 
   // Handle URL Params for Pre-loading
   useEffect(() => {
@@ -72,6 +74,7 @@ export default function QuickPharmacyBillingPage() {
     
     if (rxId || pid) {
       initialized.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSaleType('VISIT');
       
       const loadData = async () => {
@@ -237,7 +240,21 @@ export default function QuickPharmacyBillingPage() {
     }
 
     if (saleType === 'WALKIN' && !customerName) {
-      triggerGlobalToast('Customer name is required for walk-in', 'error');
+      triggerGlobalToast(
+          'Customer name is required for walk-in',
+          'error'
+      );
+      return;
+    }
+
+    if (
+        saleType === 'WALKIN' &&
+        (!customerPhone || !/^[6-9]\d{9}$/.test(customerPhone))
+    ) {
+      triggerGlobalToast(
+          'Please enter a valid 10-digit mobile number',
+          'error'
+      );
       return;
     }
     if (saleType === 'VISIT' && !selectedPatient) {
@@ -251,6 +268,13 @@ export default function QuickPharmacyBillingPage() {
         saleType === 'VISIT' && !selectedDoctor) {
       triggerGlobalToast(
           'Doctor selection is required for patient visit billing',
+          'error'
+      );
+      return;
+    }
+    if (amountPaid < totalAmount) {
+      triggerGlobalToast(
+          'Paid amount cannot be less than total amount',
           'error'
       );
       return;
@@ -272,7 +296,7 @@ export default function QuickPharmacyBillingPage() {
           quantity: item.selectedQuantity,
           discountAmount: item.discount,
           taxAmount: 0
-        })),
+          })),
         payment: {
           mode: paymentMode as any,
           amount: amountPaid,
@@ -289,7 +313,7 @@ export default function QuickPharmacyBillingPage() {
         router.push(`/pharmacy/sales/${response.data.saleId}`);
       } else {
         triggerGlobalToast(response.message || 'Failed to create sale', 'error');
-        setIsSubmitting(false); // Re-enable only on actual failure
+        setIsSubmitting(false);
       }
     } catch (error: any) {
       console.error('Sale error:', error);
@@ -354,12 +378,15 @@ export default function QuickPharmacyBillingPage() {
                         </div>
                         <div>
                           <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Phone Number</label>
-                          <input 
-                            type="text" 
-                            value={customerPhone}
-                            onChange={(e) => setCustomerPhone(e.target.value)}
-                            placeholder="Enter phone number"
-                            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-primary/10 outline-none transition-all"
+                          <input
+                              type="tel"
+                              maxLength={10}
+                              value={customerPhone}
+                              onChange={(e) =>
+                                  setCustomerPhone(e.target.value.replaceAll(/\D/g, ''))
+                              }
+                              placeholder="Enter 10-digit mobile number"
+                              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-primary/10 outline-none transition-all"
                           />
                         </div>
                       </>
@@ -431,7 +458,7 @@ export default function QuickPharmacyBillingPage() {
                                   className="w-8 h-8 rounded-xl border border-slate-200 flex items-center justify-center hover:bg-white hover:shadow-lg active:scale-90 transition-all text-slate-400 hover:text-primary"
                                 ><span className="material-symbols-outlined text-sm font-black">remove</span></button>
                                 <input 
-                                  type="number" 
+                                  type="number" min={1}
                                   value={item.selectedQuantity}
                                   onChange={(e) => updateQuantity(index, Number.parseInt(e.target.value) || 0)}
                                   className="w-10 text-center font-black text-sm outline-none bg-transparent"
@@ -449,7 +476,7 @@ export default function QuickPharmacyBillingPage() {
                               <div className="flex items-center justify-end bg-white border border-slate-100 rounded-xl px-3 py-1.5 shadow-sm">
                                 <span className="text-[10px] font-black text-slate-300 mr-1.5">₹</span>
                                 <input 
-                                  type="number" 
+                                  type="number" min={0}
                                   value={item.discount}
                                   onChange={(e) => updateDiscount(index, Number.parseFloat(e.target.value) || 0)}
                                   className="w-16 text-right font-black text-sm outline-none bg-transparent"
@@ -533,7 +560,8 @@ export default function QuickPharmacyBillingPage() {
                       <input 
                         type="number" 
                         value={amountPaid}
-                        onChange={(e) => setAmountPaid(Number.parseFloat(e.target.value) || 0)}
+                        onChange={(e) =>
+                            setAmountPaid(Math.max(0, Number.parseFloat(e.target.value) || 0))}
                         className="w-full pl-10 pr-4 py-4 bg-primary/5 border-2 border-primary/10 rounded-[24px] text-2xl font-black text-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
                       />
                     </div>
@@ -550,8 +578,7 @@ export default function QuickPharmacyBillingPage() {
                 <div className="p-8 pt-0">
                   <button
                     onClick={handleSubmit}
-                    disabled={isSubmitting || cart.length === 0 || cart.some(item => item.selectedQuantity <= 0 || item.quantity <= 0)
-                    }
+                    disabled={isSubmitting || cart.length === 0 || amountPaid < totalAmount || cart.some(item => item.selectedQuantity <= 0 || item.quantity <= 0)}
                     className={`w-full py-5 rounded-[24px] text-white font-black text-sm uppercase tracking-[0.2em] transition-all duration-500 shadow-2xl ${isSubmitting || cart.length === 0 ? 'bg-slate-200 cursor-not-allowed' : 'bg-primary hover:bg-primary-hover hover:scale-[1.02] shadow-primary/20 active:scale-95'}`}>
                     {isSubmitting ? (
                       <div className="flex items-center justify-center gap-3">
