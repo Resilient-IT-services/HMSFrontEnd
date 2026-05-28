@@ -15,6 +15,8 @@ import dayjs from '@/lib/dayjs';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
+const DOCTOR_QUEUE_STATUSES = new Set(['PAID', 'VITALS_RECORDED', 'CONSULTATION_STARTED']);
+
 export const useDoctorQueue = () => {
   const router = useRouter();
   const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
@@ -110,7 +112,7 @@ export const useDoctorQueue = () => {
     const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
     const todayApps = appointments.filter(a => dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD') === hospitalToday);
 
-    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED' || a.status === 'PAID' || a.status === 'VITALS_RECORDED').length;
+    const waiting = todayApps.filter((a) => a.status === 'PAID' || a.status === 'VITALS_RECORDED').length;
     const inProgress = todayApps.filter((a) => a.status === 'CONSULTATION_STARTED').length;
     const completed = todayApps.filter((a) => a.status === 'COMPLETED').length;
 
@@ -136,23 +138,28 @@ export const useDoctorQueue = () => {
         return;
       }
 
-      const allowedStatuses = ['VITALS_RECORDED', 'COMPLETED'];
+      const allowedStatuses = ['PAID', 'VITALS_RECORDED'];
       if (!allowedStatuses.includes(appointment.status)) {
         const messages: Record<string, string> = {
           'SCHEDULED': 'Consultation cannot be started as payment is pending/vitals not recorded',
           'PAYMENT_PENDING': 'Consultation cannot be started as payment is pending',
-          'PAID': 'Consultation cannot be started as vitals are not recorded',
           'CANCELLED': 'This appointment has been cancelled',
-          'PRESCRIPTION_FINALIZED': 'Prescription has already been finalized for this appointment'
+          'PRESCRIPTION_FINALIZED': 'Prescription has already been finalized for this appointment',
+          'COMPLETED': 'Consultation has already been completed for this appointment'
         };
         
         triggerGlobalToast(messages[appointment.status] || 'Consultation cannot be started at this time', 'warning');
         return;
       }
 
-      const res = await appointmentService.updateStatus(id, { status: 'CONSULTATION_STARTED' });
-      if (res.success) {
-        router.push(`/doctor/active-consultation?appointmentId=${id}`);
+      if (!user?.id) {
+        triggerGlobalToast('Doctor profile is unavailable', 'error');
+        return;
+      }
+
+      const res = await appointmentService.startNextConsultation(user.id);
+      if (res.success && res.data?.id) {
+        router.push(`/doctor/active-consultation?appointmentId=${res.data.id}`);
       } else {
         triggerGlobalToast('Failed to start consultation', 'error');
       }
@@ -170,10 +177,10 @@ export const useDoctorQueue = () => {
     let base = appointments;
     base = activeTab === 'TODAY' ? appointments.filter(a => {
         const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
-        return appHospitalDate === hospitalToday && a.status !== 'CANCELLED';
+        return appHospitalDate === hospitalToday && DOCTOR_QUEUE_STATUSES.has(a.status);
       }) : appointments.filter(a => {
         const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
-        return appHospitalDate > hospitalToday && a.status !== 'CANCELLED';
+        return appHospitalDate > hospitalToday && DOCTOR_QUEUE_STATUSES.has(a.status);
       });
     
     const sorted = activeTab === 'TODAY' ? sortByToken(base) : [...base].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
