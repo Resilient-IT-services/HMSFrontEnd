@@ -26,7 +26,7 @@ import { LOW_STOCK_THRESHOLD, EXPIRY_ALERT_DAYS } from '@/utils/constants';
 
 export const pharmacyApi = {
   // Prescription Management
-  getPrescriptions: async (params?: { search?: string; page?: number; size?: number }) => {
+  getPrescriptions: async (params?: { search?: string; page?: number; size?: number; status?: string }) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionDTO>>>('/pharmacy/prescriptions', { params: queryParams });
@@ -43,7 +43,7 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  getPrescriptionsSummary: async (params?: { search?: string; page?: number; size?: number }) => {
+  getPrescriptionsSummary: async (params?: { search?: string; page?: number; size?: number; status?: string }) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionSummaryDTO>>>('/pharmacy/prescriptions/summary', { params: queryParams });

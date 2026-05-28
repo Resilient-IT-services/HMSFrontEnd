@@ -68,6 +68,19 @@ const findBatchesToFulfill = async (medicineName: string, prescribedQty: number)
   }
 };
 
+interface PrescriptionResponse {
+  id: string;
+  patientId: string;
+  doctorId?: string;
+  doctorName?: string;
+  visitId?: string;
+  status?: string;
+  items: Array<{
+    medicineId?: string;
+    medicineName: string;
+  }>;
+}
+
 export default function QuickPharmacyBillingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -85,6 +98,7 @@ export default function QuickPharmacyBillingPage() {
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [prescriptionId, setPrescriptionId] = useState<string | null>(null);
+  const [prescriptionStatus, setPrescriptionStatus] = useState<string | null>(null);
   const [prescribedDoctorId, setPrescribedDoctorId] = useState<string | null>(null);
   const [visitId, setVisitId] = useState<string | null>(null);
 
@@ -109,6 +123,7 @@ export default function QuickPharmacyBillingPage() {
     const res = await pharmacyApi.getPrescriptionById(rxId);
     if (res.success && res.data) {
       const rx = res.data;
+      setPrescriptionStatus(rx.status || 'PENDING');
       
       // Handle Doctor
       if (rx.doctorId) {
@@ -301,9 +316,18 @@ export default function QuickPharmacyBillingPage() {
       <div className="min-w-0">
         <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight truncate">Quick Pharmacy Counter</h1>
         {prescriptionId && (
-            <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200 mt-0.5">
-          Prescription: #RX-{prescriptionId}
-        </span>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
+              Prescription: #RX-{prescriptionId.substring(0, 8).toUpperCase()}
+            </span>
+            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
+              prescriptionStatus === 'PENDING' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+              prescriptionStatus === 'DISPENSED' ? 'bg-green-100 text-green-700 border-green-200' :
+              'bg-slate-100 text-slate-700 border-slate-200'
+            }`}>
+              {prescriptionStatus || 'PENDING'}
+            </span>
+          </div>
         )}
       </div>
 

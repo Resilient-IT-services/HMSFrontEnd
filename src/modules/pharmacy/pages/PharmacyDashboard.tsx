@@ -27,7 +27,7 @@ export const PharmacyDashboard = () => {
         setLoading(true);
 
         const [prescriptionResponse, lowStockResponse] = await Promise.allSettled([
-          pharmacyService.listPrescriptions(),
+          pharmacyService.listPrescriptions({ status: 'PENDING' }),
           pharmacyService.getLowStockCount(),
         ]);
 
@@ -120,6 +120,15 @@ export const PharmacyDashboard = () => {
       className: 'text-center'
     },
     {
+      header: 'Status',
+      render: (p) => (
+        <Badge variant={p.status === 'PENDING' ? 'orange' : p.status === 'DISPENSED' ? 'emerald' : 'slate'}>
+          {p.status || 'PENDING'}
+        </Badge>
+      ),
+      className: 'text-center'
+    },
+    {
       header: 'Action',
       render: (p) => (
         <Link href={`/pharmacy/sales?prescriptionId=${p.id}`} className="text-orange-600 hover:underline text-sm font-bold">
@@ -198,46 +207,7 @@ export const PharmacyDashboard = () => {
               </Card>
             </div>
 
-            <div className="space-y-8">
-              <Card title="Queue Snapshot" subtitle="VOLUME TREND">
-                <div className="h-48 w-full flex items-end gap-3 px-2">
-                  {[
-                    { label: 'Prescriptions', value: stats.totalPrescriptions, color: 'bg-blue-600' },
-                    { label: 'Alerts', value: stats.lowStockCount, color: 'bg-orange-600' }
-                  ].map((item, index) => {
-                    const total = Math.max(stats.totalPrescriptions + stats.lowStockCount, 1);
-                    const height = (item.value / total) * 100;
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center gap-2 h-full">
-                        <div className="flex-1 w-full flex flex-col justify-end">
-                          <div
-                            className={`w-full rounded-t-lg transition-all ${item.color} opacity-80 hover:opacity-100 shadow-lg`}
-                            style={{ height: `${Math.max(8, height)}%` }}
-                          />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-tighter leading-none">{item.label}</p>
-                          <p className="text-sm font-black text-slate-800 leading-tight">{item.value}</p>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </Card>
 
-              <Card title="Inventory Status" subtitle="STOCK ALERTS">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">Low stock medicines</p>
-                      <p className="text-xs text-slate-500 font-medium">{stats.lowStockCount} inventory records currently need attention.</p>
-                    </div>
-                    <span className="text-xs font-bold text-slate-900">{stats.lowStockCount}</span>
-                  </div>
-                  <Button variant="secondary" fullWidth href="/pharmacy/stock">Review Stock Queue</Button>
-                </div>
-              </Card>
-            </div>
           </div>
         </div>
       </PageSurface>

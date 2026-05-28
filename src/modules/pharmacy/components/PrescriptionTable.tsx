@@ -32,6 +32,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold">Patient Name</th>
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold">Doctor Name</th>
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold text-center">Items</th>
+            <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold text-center">Status</th>
             <th className="px-6 py-4 text-label-sm text-secondary uppercase font-semibold text-right">Action</th>
           </tr>
         </thead>
@@ -64,6 +65,15 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                  <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-black uppercase">
                    {prescription.itemCount} Meds
                  </span>
+              </td>
+              <td className="px-6 py-4 text-center">
+                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase ${
+                  prescription.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                  prescription.status === 'DISPENSED' ? 'bg-green-100 text-green-700' :
+                  'bg-slate-100 text-slate-700'
+                }`}>
+                  {prescription.status || 'PENDING'}
+                </span>
               </td>
               <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
                   <Link 

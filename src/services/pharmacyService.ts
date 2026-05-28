@@ -24,8 +24,8 @@ import { AxiosError } from 'axios';
 
 export const pharmacyService = {
   // Prescription Management
-  async listPrescriptions(): Promise<ApiResponse<PageResponse<PrescriptionResponse>>> {
-    const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionResponse>>>('/pharmacy/prescriptions');
+  async listPrescriptions(params?: { search?: string; page?: number; size?: number; status?: string }): Promise<ApiResponse<PageResponse<PrescriptionResponse>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionResponse>>>('/pharmacy/prescriptions', { params });
     return response.data;
   },
 
