@@ -122,7 +122,7 @@ export const PharmacyDashboard = () => {
     {
       header: 'Action',
       render: (p) => (
-        <Link href={`/pharmacy/prescriptions/${p.id}`} className="text-orange-600 hover:underline text-sm font-bold">
+        <Link href={`/pharmacy/sales?prescriptionId=${p.id}`} className="text-orange-600 hover:underline text-sm font-bold">
           Process Bill
         </Link>
       ),

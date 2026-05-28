@@ -9,11 +9,13 @@ import { formatCurrency } from '@/utils/formatters';
 interface MedicineStockSearchProps {
   onSelect: (stock: PharmacyStockDTO) => void;
   placeholder?: string;
+  stockOnly?: boolean;
 }
 
 const MedicineStockSearch: React.FC<MedicineStockSearchProps> = ({ 
   onSelect, 
-  placeholder = "Search medicine name or batch number..." 
+  placeholder = "Search medicine name or batch number...",
+  stockOnly = true
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [results, setResults] = useState<PharmacyStockDTO[]>([]);
@@ -31,9 +33,18 @@ const MedicineStockSearch: React.FC<MedicineStockSearchProps> = ({
       
       setLoading(true);
       try {
-        const response = await pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 10 });
+        const response = await pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 20 });
         if (response.success && response.data) {
-          setResults(response.data.content || []);
+          let filteredResults = response.data.content || [];
+          
+          if (stockOnly) {
+            const now = new Date();
+            filteredResults = filteredResults.filter(stock => 
+              stock.quantity > 0 && (!stock.expiryDate || new Date(stock.expiryDate) > now)
+            );
+          }
+          
+          setResults(filteredResults);
         }
       } catch (error) {
         console.error(error);
@@ -43,7 +54,7 @@ const MedicineStockSearch: React.FC<MedicineStockSearchProps> = ({
     };
 
     fetchResults();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, stockOnly]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

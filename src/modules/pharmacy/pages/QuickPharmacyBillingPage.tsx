@@ -20,27 +20,52 @@ import MainLayout from '@/components/ui/MainLayout';
 import { PHARMACY_SALE_TYPE_OPTIONS } from '@/utils/enumOptions';
 import { PageSurface } from '@/components/ui/PageSurface';
 
-interface CartItem extends PharmacyStockDTO {
-  selectedQuantity: number;
+import { doctorService } from '@/services/doctorService';
+
+interface CartItem {
+  id?: string;
+  medicineId?: string;
+  medicineName: string;
+  batchNumber?: string;
+  sellingPrice?: number;
+  quantity: number; // available quantity in stock
+  selectedQuantity: number; // quantity to be sold
   discount: number;
+  isOutOfStock?: boolean;
+  isExpired?: boolean;
 }
 
-const findBatchesToFulfill = async (medicineName: string, prescribedQty: number) => {
-  const stockRes = await pharmacyApi.getMedicineStock({ search: medicineName, size: 5 });
-  const batches: CartItem[] = [];
-  let remaining = prescribedQty;
+const findBatchesToFulfill = async (medicineName: string, prescribedQty: number): Promise<{ batches: CartItem[], remaining: number }> => {
+  try {
+    const stockRes = await pharmacyApi.getMedicineStock({ search: medicineName, size: 5 });
+    const batches: CartItem[] = [];
+    let remaining = prescribedQty;
 
-  if (stockRes.success && stockRes.data?.content?.length) {
-    for (const batch of stockRes.data.content) {
-      if (remaining <= 0) break;
-      const take = Math.min(remaining, batch.quantity);
-      if (take > 0) {
-        batches.push({ ...batch, selectedQuantity: take, discount: 0 });
-        remaining -= take;
+    if (stockRes.success && stockRes.data?.content?.length) {
+      const now = new Date();
+      // Filter out expired stock first
+      const validStock = stockRes.data.content.filter(s => !s.expiryDate || new Date(s.expiryDate) > now);
+
+      for (const batch of validStock) {
+        if (remaining <= 0) break;
+        const take = Math.min(remaining, batch.quantity);
+        if (take > 0) {
+          batches.push({ 
+            ...batch, 
+            selectedQuantity: take, 
+            discount: 0,
+            isOutOfStock: false,
+            isExpired: false
+          });
+          remaining -= take;
+        }
       }
     }
+    return { batches, remaining };
+  } catch (error) {
+    console.error('Error finding batches:', error);
+    return { batches: [], remaining: prescribedQty };
   }
-  return { batches, remaining };
 };
 
 export default function QuickPharmacyBillingPage() {
@@ -69,7 +94,7 @@ export default function QuickPharmacyBillingPage() {
   const [referenceNumber, setReferenceNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const subtotal = useMemo(() => cart.reduce((acc, item) => acc + (item.sellingPrice! * item.selectedQuantity), 0), [cart]);
+  const subtotal = useMemo(() => cart.reduce((acc, item) => acc + ((item.sellingPrice || 0) * item.selectedQuantity), 0), [cart]);
   const totalDiscount = useMemo(() => cart.reduce((acc, item) => acc + item.discount, 0), [cart]);
   const totalAmount = useMemo(() => subtotal - totalDiscount, [subtotal, totalDiscount]);
 
@@ -84,8 +109,24 @@ export default function QuickPharmacyBillingPage() {
     const res = await pharmacyApi.getPrescriptionById(rxId);
     if (res.success && res.data) {
       const rx = res.data;
-      setExternalDoctorName(rx.doctorName || '');
-      if (rx.doctorId) setPrescribedDoctorId(rx.doctorId);
+      
+      // Handle Doctor
+      if (rx.doctorId) {
+        setPrescribedDoctorId(rx.doctorId);
+        try {
+          const docRes = await doctorService.get(rx.doctorId);
+          if (docRes.success && docRes.data) {
+            setSelectedDoctor(docRes.data);
+          } else {
+            setExternalDoctorName(rx.doctorName || '');
+          }
+        } catch {
+          setExternalDoctorName(rx.doctorName || '');
+        }
+      } else {
+        setExternalDoctorName(rx.doctorName || '');
+      }
+
       setVisitId(rx.visitId || null);
 
       if (rx.patientId) {
@@ -96,8 +137,25 @@ export default function QuickPharmacyBillingPage() {
       const newItems: CartItem[] = [];
       for (const rxItem of rx.items) {
         const { batches, remaining } = await findBatchesToFulfill(rxItem.medicineName, 1);
-        newItems.push(...batches);
-        if (remaining > 0) triggerGlobalToast(`Insufficient stock for ${rxItem.medicineName}.`, 'warning');
+        if (batches.length > 0) {
+          newItems.push(...batches);
+        }
+        
+        if (remaining > 0) {
+          // Add as out-of-stock item
+          newItems.push({
+            medicineName: rxItem.medicineName,
+            medicineId: rxItem.medicineId,
+            quantity: 0,
+            selectedQuantity: remaining,
+            discount: 0,
+            isOutOfStock: true,
+            isExpired: false,
+            batchNumber: 'N/A',
+            sellingPrice: 0
+          });
+          triggerGlobalToast(`Insufficient stock for ${rxItem.medicineName}.`, 'warning');
+        }
       }
       setCart(prev => [...prev, ...newItems]);
     }
@@ -129,7 +187,16 @@ export default function QuickPharmacyBillingPage() {
   const addToCart = (stock: PharmacyStockDTO) => {
     const existingIndex = cart.findIndex(item => item.id === stock.id);
     if (existingIndex === -1) {
-      setCart([...cart, { ...stock, selectedQuantity: 1, discount: 0 }]);
+      const now = new Date();
+      const isExpired = stock.expiryDate ? new Date(stock.expiryDate) < now : false;
+      
+      setCart([...cart, { 
+        ...stock, 
+        selectedQuantity: 1, 
+        discount: 0, 
+        isOutOfStock: stock.quantity <= 0,
+        isExpired
+      }]);
     } else {
       const newCart = [...cart];
       if (newCart[existingIndex].selectedQuantity < stock.quantity) {
@@ -142,6 +209,9 @@ export default function QuickPharmacyBillingPage() {
   };
 
   const updateQuantity = (index: number, qty: number) => {
+    const item = cart[index];
+    if (item.isOutOfStock || item.isExpired) return;
+
     const newCart = [...cart];
     const stockQty = newCart[index].quantity;
     const safeQty = Math.max(1, Math.min(qty, stockQty));
@@ -151,9 +221,11 @@ export default function QuickPharmacyBillingPage() {
   };
 
   const updateDiscount = (index: number, discount: number) => {
+    const item = cart[index];
+    if (item.isOutOfStock || item.isExpired) return;
+
     const newCart = [...cart];
-    const item = newCart[index];
-    const itemTotal = item.sellingPrice! * item.selectedQuantity;
+    const itemTotal = (item.sellingPrice || 0) * item.selectedQuantity;
     const safeDiscount = Math.max(0, Math.min(discount, itemTotal));
     if (discount > itemTotal) triggerGlobalToast(`Discount cannot exceed total amount`, 'error');
     newCart[index].discount = safeDiscount;
@@ -162,6 +234,15 @@ export default function QuickPharmacyBillingPage() {
 
   const handleSubmit = async () => {
     if (isSubmitting || cart.length === 0) return;
+    
+    // Filter out invalid items for the final payload
+    const validItems = cart.filter(item => !item.isOutOfStock && !item.isExpired && item.id);
+    
+    if (validItems.length === 0) {
+      triggerGlobalToast('No valid items in cart to sell', 'error');
+      return;
+    }
+
     if (saleType === 'WALKIN' && (!customerName || !/^[6-9]\d{9}$/.test(customerPhone))) {
       triggerGlobalToast('Valid name and phone required', 'error');
       return;
@@ -183,8 +264,8 @@ export default function QuickPharmacyBillingPage() {
         externalDoctorName,
         customerName: saleType === 'WALKIN' ? customerName : selectedPatient?.fullName,
         customerPhone: saleType === 'WALKIN' ? customerPhone : selectedPatient?.phone,
-        items: cart.map(item => ({
-          medicineBatchId: item.id,
+        items: validItems.map(item => ({
+          medicineBatchId: item.id!,
           quantity: item.selectedQuantity,
           discountAmount: item.discount,
           taxAmount: 0
@@ -283,7 +364,7 @@ export default function QuickPharmacyBillingPage() {
                 <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-nowrap sm:flex-row justify-between items-center gap-2 shrink-0">
                   <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider">Medication Table</h2>
                   <div className="w-full sm:w-64 shrink-0">
-                    <MedicineStockSearch onSelect={addToCart} />
+                    <MedicineStockSearch onSelect={addToCart} stockOnly={true} />
                   </div>
                 </div>
 
@@ -309,29 +390,62 @@ export default function QuickPharmacyBillingPage() {
                           </td>
                         </tr>
                     ) : cart.map((item, index) => (
-                        <tr key={`${item.id}-${index}`} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                        <tr key={`${item.id || item.medicineName}-${index}`} className={`border-b border-slate-50 transition-colors ${item.isOutOfStock || item.isExpired ? 'bg-red-50/30' : 'hover:bg-slate-50/50'}`}>
                           <td className="py-2.5 px-2">
-                            <p className="font-bold text-slate-800">{item.medicineName}</p>
-                            <p className="text-[9px] font-mono text-orange-600 font-bold uppercase">Batch: #{item.batchNumber}</p>
+                            <div className="flex items-center gap-2">
+                              <p className={`font-bold ${item.isOutOfStock || item.isExpired ? 'text-red-700' : 'text-slate-800'}`}>{item.medicineName}</p>
+                              {item.isOutOfStock && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Out of Stock</span>}
+                              {item.isExpired && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Expired</span>}
+                            </div>
+                            <p className="text-[9px] font-mono text-orange-600 font-bold uppercase">Batch: #{item.batchNumber || 'N/A'}</p>
                           </td>
                           <td className="py-2.5 px-2 text-center">
-                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">{item.quantity}</span>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${item.quantity <= 0 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+                              {item.quantity}
+                            </span>
                           </td>
                           <td className="py-2.5 px-2">
                             <div className="flex items-center justify-center gap-1.5">
-                              <button onClick={() => updateQuantity(index, item.selectedQuantity - 1)} className="w-6 h-6 rounded border border-slate-200 flex items-center justify-center hover:bg-white transition-all text-slate-400 hover:text-orange-700"><span className="material-symbols-outlined text-xs font-black">remove</span></button>
-                              <input type="number" min={1} value={item.selectedQuantity} onChange={(e) => updateQuantity(index, Number.parseInt(e.target.value) || 0)} className="w-8 text-center font-black text-xs outline-none bg-transparent" />
-                              <button onClick={() => updateQuantity(index, item.selectedQuantity + 1)} className="w-6 h-6 rounded border border-slate-200 flex items-center justify-center hover:bg-white transition-all text-slate-400 hover:text-orange-700"><span className="material-symbols-outlined text-xs font-black">add</span></button>
+                              <button 
+                                onClick={() => updateQuantity(index, item.selectedQuantity - 1)} 
+                                disabled={item.isOutOfStock || item.isExpired}
+                                className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${item.isOutOfStock || item.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
+                              >
+                                <span className="material-symbols-outlined text-xs font-black">remove</span>
+                              </button>
+                              <input 
+                                type="number" 
+                                min={1} 
+                                value={item.selectedQuantity} 
+                                onChange={(e) => updateQuantity(index, Number.parseInt(e.target.value) || 0)} 
+                                disabled={item.isOutOfStock || item.isExpired}
+                                className={`w-8 text-center font-black text-xs outline-none bg-transparent ${item.isOutOfStock || item.isExpired ? 'text-red-400 cursor-not-allowed' : ''}`} 
+                              />
+                              <button 
+                                onClick={() => updateQuantity(index, item.selectedQuantity + 1)} 
+                                disabled={item.isOutOfStock || item.isExpired}
+                                className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${item.isOutOfStock || item.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
+                              >
+                                <span className="material-symbols-outlined text-xs font-black">add</span>
+                              </button>
                             </div>
                           </td>
-                          <td className="py-2.5 px-2 text-right text-slate-500 font-medium">{formatCurrency(item.sellingPrice!)}</td>
+                          <td className="py-2.5 px-2 text-right text-slate-500 font-medium">{formatCurrency(item.sellingPrice || 0)}</td>
                           <td className="py-2.5 px-2">
-                            <div className="flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto">
+                            <div className={`flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${item.isOutOfStock || item.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
                               <span className="text-[10px] text-slate-400 mr-1">₹</span>
-                              <input type="number" min={0} value={item.discount === 0 ? '' : item.discount} onChange={(e) => updateDiscount(index, Number.parseFloat(e.target.value) || 0)} className="w-full text-right font-bold text-xs outline-none bg-transparent" placeholder="0" />
+                              <input 
+                                type="number" 
+                                min={0} 
+                                value={item.discount === 0 ? '' : item.discount} 
+                                onChange={(e) => updateDiscount(index, Number.parseFloat(e.target.value) || 0)} 
+                                disabled={item.isOutOfStock || item.isExpired}
+                                className="w-full text-right font-bold text-xs outline-none bg-transparent" 
+                                placeholder="0" 
+                              />
                             </div>
                           </td>
-                          <td className="py-2.5 px-2 text-right font-black text-slate-900">{formatCurrency((item.sellingPrice! * item.selectedQuantity) - item.discount)}</td>
+                          <td className="py-2.5 px-2 text-right font-black text-slate-900">{formatCurrency(((item.sellingPrice || 0) * item.selectedQuantity) - item.discount)}</td>
                           <td className="py-2.5 px-2 text-center">
                             <button onClick={() => { const newCart = [...cart]; newCart.splice(index, 1); setCart(newCart); }} className="p-1 text-slate-300 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-base">delete</span></button>
                           </td>

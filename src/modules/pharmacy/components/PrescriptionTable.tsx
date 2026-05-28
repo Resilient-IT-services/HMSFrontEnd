@@ -39,8 +39,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
           {prescriptions.map((prescription) => (
             <tr 
               key={prescription.id} 
-              className="hover:bg-[var(--background)] transition-colors cursor-pointer"
-              onDoubleClick={() => router.push(`/pharmacy/prescriptions/${prescription.id}`)}
+              className="hover:bg-[var(--background)] transition-colors"
             >
               <td className="px-6 py-4">
                 <span className="font-medium text-[var(--text-primary)] text-xs bg-slate-100 px-2 py-1 rounded">
@@ -67,12 +66,6 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                  </span>
               </td>
               <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
-                <Link 
-                  href={`/pharmacy/prescriptions/${prescription.id}`}
-                  className="text-slate-400 hover:text-slate-900 text-[10px] font-black uppercase tracking-widest transition-colors"
-                >
-                  View details
-                </Link>
                   <Link 
                     href={`/pharmacy/sales?prescriptionId=${prescription.id}`}
                     className="px-4 py-2 bg-orange-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 flex items-center gap-2"
