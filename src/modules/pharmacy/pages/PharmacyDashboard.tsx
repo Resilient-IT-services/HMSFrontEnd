@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/Button';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { pharmacyApi } from '../api/pharmacyApi';
 
 export const PharmacyDashboard = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
@@ -21,50 +22,69 @@ export const PharmacyDashboard = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
 
-        const [prescriptionResponse, lowStockResponse] = await Promise.allSettled([
-          pharmacyService.listPrescriptions({ status: 'PENDING' }),
-          pharmacyService.getLowStockCount(),
-        ]);
+      const [prescriptionResponse, lowStockResponse] = await Promise.allSettled([
+        pharmacyService.listPrescriptions({ status: 'PENDING' }),
+        pharmacyService.getLowStockCount(),
+      ]);
 
-        if (prescriptionResponse.status === 'fulfilled') {
-          const res = prescriptionResponse.value;
-          if (res.success && res.data && Array.isArray(res.data.content)) {
-            setPrescriptions(res.data.content);
-          } else {
-            console.error('Pharmacy Dashboard - Prescriptions API returned unsuccessful or invalid data:', res);
-            setPrescriptions([]);
-          }
+      if (prescriptionResponse.status === 'fulfilled') {
+        const res = prescriptionResponse.value;
+        if (res.success && res.data && Array.isArray(res.data.content)) {
+          setPrescriptions(res.data.content);
         } else {
-          console.error('Pharmacy Dashboard - Prescriptions API request failed:', prescriptionResponse.reason);
+          console.error('Pharmacy Dashboard - Prescriptions API returned unsuccessful or invalid data:', res);
           setPrescriptions([]);
         }
+      } else {
+        console.error('Pharmacy Dashboard - Prescriptions API request failed:', prescriptionResponse.reason);
+        setPrescriptions([]);
+      }
 
-        if (lowStockResponse.status === 'fulfilled') {
-          const res = lowStockResponse.value;
-          if (res.success && res.data && typeof res.data.totalElements === 'number') {
-            setLowStockCount(res.data.totalElements);
-          } else {
-            console.error('Pharmacy Dashboard - Low Stock API returned unsuccessful or invalid data:', res);
-            setLowStockCount(0);
-          }
+      if (lowStockResponse.status === 'fulfilled') {
+        const res = lowStockResponse.value;
+        if (res.success && res.data && typeof res.data.totalElements === 'number') {
+          setLowStockCount(res.data.totalElements);
         } else {
-          console.error('Pharmacy Dashboard - Low Stock API request failed:', lowStockResponse.reason);
+          console.error('Pharmacy Dashboard - Low Stock API returned unsuccessful or invalid data:', res);
           setLowStockCount(0);
         }
-      } catch (error) {
-        console.error('Pharmacy Dashboard - Unexpected Error:', error);
-      } finally {
-        setLoading(false);
+      } else {
+        console.error('Pharmacy Dashboard - Low Stock API request failed:', lowStockResponse.reason);
+        setLowStockCount(0);
       }
-    };
+    } catch (error) {
+      console.error('Pharmacy Dashboard - Unexpected Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await pharmacyApi.cancelPrescription(id);
+      if (response.success) {
+        fetchDashboardData();
+      } else {
+        alert(response.message || 'Failed to cancel prescription');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling prescription:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
+      alert(`Error: ${errorMessage}`);
+    }
+  };
 
   const stats = useMemo(() => {
     return {
@@ -131,9 +151,23 @@ export const PharmacyDashboard = () => {
     {
       header: 'Action',
       render: (p) => (
-        <Link href={`/pharmacy/sales?prescriptionId=${p.id}`} className="text-orange-600 hover:underline text-sm font-bold">
-          Process Bill
-        </Link>
+        <div className="flex items-center justify-end gap-3">
+          {p.status === 'PENDING' ? (
+            <>
+              <button 
+                onClick={() => handleCancel(p.id!)}
+                className="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-wider"
+              >
+                Cancel
+              </button>
+              <Link href={`/pharmacy/sales?prescriptionId=${p.id}`} className="text-orange-600 hover:underline text-sm font-bold">
+                Process Bill
+              </Link>
+            </>
+          ) : (
+            <span className="text-[10px] font-bold text-slate-400 uppercase italic">No Actions</span>
+          )}
+        </div>
       ),
       className: 'text-right'
     }

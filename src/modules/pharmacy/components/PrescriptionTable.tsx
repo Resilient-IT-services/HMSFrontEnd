@@ -2,14 +2,35 @@ import React from 'react';
 import { PrescriptionSummaryDTO } from '@/types/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { pharmacyApi } from '../api/pharmacyApi';
 
 interface PrescriptionTableProps {
   prescriptions: PrescriptionSummaryDTO[];
   loading?: boolean;
+  onRefresh?: () => void;
 }
 
-const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, loading }) => {
+const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, loading, onRefresh }) => {
   const router = useRouter();
+
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await pharmacyApi.cancelPrescription(id);
+      if (response.success) {
+        if (onRefresh) onRefresh();
+      } else {
+        alert(response.message || 'Failed to cancel prescription');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling prescription:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
+      alert(`Error: ${errorMessage}`);
+    }
+  };
 
   if (loading) {
     return (
@@ -76,13 +97,26 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 </span>
               </td>
               <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
-                  <Link 
-                    href={`/pharmacy/sales?prescriptionId=${prescription.id}`}
-                    className="px-4 py-2 bg-orange-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 flex items-center gap-2"
-                  >
-                    <span className="material-symbols-outlined text-sm">payments</span>
-                    Dispense
-                  </Link>
+                {prescription.status === 'PENDING' ? (
+                  <>
+                    <button 
+                      onClick={() => handleCancel(prescription.id)}
+                      className="px-4 py-2 border border-red-200 text-red-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-sm">cancel</span>
+                      Cancel
+                    </button>
+                    <Link 
+                      href={`/pharmacy/sales?prescriptionId=${prescription.id}`}
+                      className="px-4 py-2 bg-orange-700 text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-orange-700/20 hover:bg-orange-800 transition-all active:scale-95 flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-sm">payments</span>
+                      Dispense
+                    </Link>
+                  </>
+                ) : (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase italic">No Actions</span>
+                )}
               </td>
             </tr>
           ))}
