@@ -55,7 +55,7 @@ export const AppointmentVitals = () => {
             <h3 className="text-lg font-black text-slate-900">{patient?.fullName || appointment.patientName}</h3>
             <div className="flex items-center gap-2 mt-1">
               <Badge variant="blue">{patientAge} Years</Badge>
-              <Badge variant="outline">{patient?.gender || '--'}</Badge>
+              <Badge variant="slate">{patient?.gender || '--'}</Badge>
             </div>
           </div>
           
@@ -86,7 +86,7 @@ export const AppointmentVitals = () => {
       <Card title="Clinical Measurements" icon="monitoring" className="p-6">
         <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if(!isReadOnly) handleSave(); }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField label="Blood Pressure (mmHg)" icon="blood_pressure" error={fieldErrors.systolic || fieldErrors.diastolic}>
+            <FormField label="Blood Pressure (mmHg)" error={fieldErrors.systolic || fieldErrors.diastolic}>
               <div className="flex items-center gap-3">
                 <input
                   type="text" placeholder="Sys" disabled={isReadOnly}
@@ -102,7 +102,7 @@ export const AppointmentVitals = () => {
               </div>
             </FormField>
 
-            <FormField label="Heart Rate (BPM)" icon="favorite" error={fieldErrors.heartRate}>
+            <FormField label="Heart Rate (BPM)" error={fieldErrors.heartRate}>
               <input
                 type="text" placeholder="e.g. 72" disabled={isReadOnly}
                 className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50' : ''}`}
@@ -110,7 +110,7 @@ export const AppointmentVitals = () => {
               />
             </FormField>
 
-            <FormField label="Temperature (°F)" icon="device_thermostat" error={fieldErrors.temperature}>
+            <FormField label="Temperature (°F)" error={fieldErrors.temperature}>
               <input
                 type="text" placeholder="e.g. 98.6" disabled={isReadOnly}
                 className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none ${fieldErrors.temperature ? 'border-red-500 bg-red-50' : ''}`}
@@ -118,7 +118,7 @@ export const AppointmentVitals = () => {
               />
             </FormField>
 
-            <FormField label="Oxygen SpO2 (%)" icon="air" error={fieldErrors.oxygenLevel}>
+            <FormField label="Oxygen SpO2 (%)" error={fieldErrors.oxygenLevel}>
               <input
                 type="text" placeholder="e.g. 98" disabled={isReadOnly}
                 className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none ${fieldErrors.oxygenLevel ? 'border-red-500 bg-red-50' : ''}`}
@@ -126,7 +126,7 @@ export const AppointmentVitals = () => {
               />
             </FormField>
 
-            <FormField label="Body Weight (kg)" icon="monitor_weight">
+            <FormField label="Body Weight (kg)">
               <input
                 type="text" placeholder="e.g. 70" disabled={isReadOnly}
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none"
@@ -134,7 +134,7 @@ export const AppointmentVitals = () => {
               />
             </FormField>
 
-            <FormField label="Respiratory Rate" icon="airwave">
+            <FormField label="Respiratory Rate">
               <input
                 type="text" placeholder="e.g. 16" disabled={isReadOnly}
                 className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none"
@@ -143,7 +143,7 @@ export const AppointmentVitals = () => {
             </FormField>
           </div>
 
-          <FormField label="Chief Complaints" icon="description">
+          <FormField label="Chief Complaints">
             <textarea
               rows={3} disabled={isReadOnly}
               placeholder="Document patient's primary symptoms..."
@@ -173,7 +173,6 @@ export const AppointmentVitals = () => {
       <PageHeading 
         title={isReadOnly ? "View Recorded Vitals" : "Clinical Vitals Intake"} 
         description={isReadOnly ? "Viewing finalized physiological measurements for this visit." : "Capture primary physiological measurements to establish the patient's current health baseline."}
-        backHref="/reception/appointments"
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
