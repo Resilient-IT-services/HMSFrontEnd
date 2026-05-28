@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
@@ -150,52 +150,52 @@ export const ActiveConsultationPage = () => {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
-  const fetchAppointment = useCallback(async () => {
-    if (!appointmentId) return;
-    try {
-      const res = await appointmentService.get(appointmentId);
-      if (res.success && res.data) {
-        setAppointment(res.data);
-        setComplaints(res.data.chiefComplaints || '');
-        setDiagnosis(res.data.diagnosis || '');
-
-        if (res.data.prescription?.items) {
-          setPrescriptions(res.data.prescription.items.map((item, idx) => {
-            const dosageParts = (item.dosage || '0-0-0').split('-');
-            return {
-              id: item.id || `existing-${idx}`,
-              medicineId: item.medicineId,
-              medicine: item.medicineName,
-              freqM: dosageParts[0] === '0' ? '' : dosageParts[0],
-              freqA: dosageParts[1] === '0' ? '' : dosageParts[1],
-              freqN: dosageParts[2] === '0' ? '' : dosageParts[2],
-              duration: Number.parseInt(item.duration) || 0,
-              inStock: true
-            };
-          }));
-        } else {
-          setPrescriptions([{ id: '1', medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, inStock: true }]);
-        }
-
-        const pRes = await patientService.get(res.data.patientId);
-        if (pRes.success && pRes.data) setPatient(pRes.data);
-
-        if (user?.currentHospitalId) {
-          const hRes = await hospitalService.getById(user.currentHospitalId);
-          if (hRes.success && hRes.data) setHospital(hRes.data);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch:', error);
-      triggerGlobalToast('Failed to fetch details', 'error');
-    } finally {
-      setLoading(false);
-    }
-  }, [appointmentId, user]);
-
   useEffect(() => {
-    if (appointmentId) void fetchAppointment();
-  }, [appointmentId, fetchAppointment]);
+    const fetchAppointmentData = async () => {
+      if (!appointmentId) return;
+      try {
+        const res = await appointmentService.get(appointmentId);
+        if (res.success && res.data) {
+          setAppointment(res.data);
+          setComplaints(res.data.chiefComplaints || '');
+          setDiagnosis(res.data.diagnosis || '');
+
+          if (res.data.prescription?.items) {
+            setPrescriptions(res.data.prescription.items.map((item, idx) => {
+              const dosageParts = (item.dosage || '0-0-0').split('-');
+              return {
+                id: item.id || `existing-${idx}`,
+                medicineId: item.medicineId,
+                medicine: item.medicineName,
+                freqM: dosageParts[0] === '0' ? '' : dosageParts[0],
+                freqA: dosageParts[1] === '0' ? '' : dosageParts[1],
+                freqN: dosageParts[2] === '0' ? '' : dosageParts[2],
+                duration: Number.parseInt(item.duration) || 0,
+                inStock: true
+              };
+            }));
+          } else {
+            setPrescriptions([{ id: '1', medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, inStock: true }]);
+          }
+
+          const pRes = await patientService.get(res.data.patientId);
+          if (pRes.success && pRes.data) setPatient(pRes.data);
+
+          if (user?.currentHospitalId) {
+            const hRes = await hospitalService.getById(user.currentHospitalId);
+            if (hRes.success && hRes.data) setHospital(hRes.data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch:', error);
+        triggerGlobalToast('Failed to fetch details', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (appointmentId) void fetchAppointmentData();
+  }, [appointmentId, user?.currentHospitalId]);
 
   const addPrescriptionRow = () => {
     setPrescriptions([...prescriptions, { id: Date.now().toString(), medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, inStock: true }]);

@@ -8,8 +8,6 @@ import {
   PatientResponse,
   DoctorStaffResponse
 } from '@/types/api';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/state/store';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatCurrency } from '@/utils/formatters';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -27,6 +25,7 @@ interface CartItem {
   medicineId?: string;
   medicineName: string;
   batchNumber?: string;
+  expiryDate?: string;
   sellingPrice?: number;
   quantity: number; // available quantity in stock
   selectedQuantity: number; // quantity to be sold
@@ -68,23 +67,26 @@ const findBatchesToFulfill = async (medicineName: string, prescribedQty: number)
   }
 };
 
-interface PrescriptionResponse {
-  id: string;
-  patientId: string;
-  doctorId?: string;
-  doctorName?: string;
-  visitId?: string;
-  status?: string;
-  items: Array<{
-    medicineId?: string;
-    medicineName: string;
-  }>;
-}
+const calculatePrescribedQuantity = (dosage?: string, duration?: string): number => {
+  if (!dosage || !duration) return 1;
+
+  // Try to parse total from "X days (Total: Y units)"
+  const totalMatch = duration.match(/Total:\s*(\d+)/i);
+  if (totalMatch) return Number.parseInt(totalMatch[1]);
+
+  // Fallback to manual calculation: Dosage (1-0-1) * Days (5)
+  const dosageParts = dosage.split('-');
+  const dailyFreq = dosageParts.reduce((acc, val) => acc + (Number.parseFloat(val) || 0), 0);
+
+  const daysMatch = duration.match(/^(\d+)/);
+  const days = daysMatch ? Number.parseInt(daysMatch[1]) : 0;
+
+  return dailyFreq > 0 && days > 0 ? dailyFreq * days : (days || 1);
+};
 
 export default function QuickPharmacyBillingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user } = useSelector((state: RootState) => state.auth);
   const initialized = useRef(false);
 
   const [saleType, setSaleType] = useState<'WALKIN' | 'VISIT'>(() => {
@@ -104,19 +106,85 @@ export default function QuickPharmacyBillingPage() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMode, setPaymentMode] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
-  const [amountPaid, setAmountPaid] = useState<number>(0);
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Group cart items by medicine name for a cleaner UI
+  const groupedCart = useMemo(() => {
+    const groups: Record<string, {
+      medicineName: string;
+      medicineId?: string;
+      totalStock: number;
+      totalSelected: number;
+      totalDiscount: number;
+      totalPrice: number;
+      batches: CartItem[];
+      isOutOfStock: boolean;
+      isExpired: boolean;
+    }> = {};
+
+    cart.forEach(item => {
+      if (!groups[item.medicineName]) {
+        groups[item.medicineName] = {
+          medicineName: item.medicineName,
+          medicineId: item.medicineId,
+          totalStock: 0,
+          totalSelected: 0,
+          totalDiscount: 0,
+          totalPrice: 0,
+          batches: [],
+          isOutOfStock: true,
+          isExpired: false
+        };
+      }
+      const g = groups[item.medicineName];
+      g.totalStock += item.quantity;
+      g.totalSelected += item.selectedQuantity;
+      g.totalDiscount += item.discount;
+      g.totalPrice += ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount;
+      g.batches.push(item);
+      if (!item.isOutOfStock) g.isOutOfStock = false;
+      if (item.isExpired) g.isExpired = true;
+    });
+
+    return Object.values(groups);
+  }, [cart]);
 
   const subtotal = useMemo(() => cart.reduce((acc, item) => acc + ((item.sellingPrice || 0) * item.selectedQuantity), 0), [cart]);
   const totalDiscount = useMemo(() => cart.reduce((acc, item) => acc + item.discount, 0), [cart]);
   const totalAmount = useMemo(() => subtotal - totalDiscount, [subtotal, totalDiscount]);
 
-  const [prevTotalAmount, setPrevTotalAmount] = useState(totalAmount);
-  if (totalAmount !== prevTotalAmount) {
-    setAmountPaid(totalAmount);
-    setPrevTotalAmount(totalAmount);
-  }
+  const [amountPaid, setAmountPaid] = useState<number>(0);
+  const [isAutoPaid, setIsAutoPaid] = useState(true);
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync amountPaid with totalAmount when auto-paid is on
+  useEffect(() => {
+    if (isAutoPaid) {
+      setAmountPaid(totalAmount);
+    }
+  }, [totalAmount, isAutoPaid]);
+
+  const validateSale = () => {
+    if (cart.length === 0) return false;
+    
+    if (saleType === 'WALKIN' && (!customerName || !/^[6-9]\d{9}$/.test(customerPhone))) {
+      triggerGlobalToast('Valid name and phone required', 'error');
+      return false;
+    }
+    if (saleType === 'VISIT' && (!selectedPatient || !selectedDoctor)) {
+      triggerGlobalToast('Patient and Doctor required', 'error');
+      return false;
+    }
+
+    const finalTotal = Number(totalAmount.toFixed(2));
+    const finalPaid = Number(amountPaid.toFixed(2));
+
+    if (finalPaid < finalTotal) {
+      triggerGlobalToast('Paid amount cannot be less than total', 'error');
+      return false;
+    }
+    return true;
+  };
 
   const loadPrescriptionData = async (rxId: string) => {
     setPrescriptionId(rxId);
@@ -125,7 +193,6 @@ export default function QuickPharmacyBillingPage() {
       const rx = res.data;
       setPrescriptionStatus(rx.status || 'PENDING');
       
-      // Handle Doctor
       if (rx.doctorId) {
         setPrescribedDoctorId(rx.doctorId);
         try {
@@ -151,13 +218,13 @@ export default function QuickPharmacyBillingPage() {
 
       const newItems: CartItem[] = [];
       for (const rxItem of rx.items) {
-        const { batches, remaining } = await findBatchesToFulfill(rxItem.medicineName, 1);
+        const prescribedQty = calculatePrescribedQuantity(rxItem.dosage, rxItem.duration);
+        const { batches, remaining } = await findBatchesToFulfill(rxItem.medicineName, prescribedQty);
         if (batches.length > 0) {
           newItems.push(...batches);
         }
         
         if (remaining > 0) {
-          // Add as out-of-stock item
           newItems.push({
             medicineName: rxItem.medicineName,
             medicineId: rxItem.medicineId,
@@ -195,83 +262,115 @@ export default function QuickPharmacyBillingPage() {
           triggerGlobalToast('Failed to load details', 'error');
         }
       };
-      load();
+      void load();
     }
   }, [searchParams]);
 
-  const addToCart = (stock: PharmacyStockDTO) => {
-    const existingIndex = cart.findIndex(item => item.id === stock.id);
-    if (existingIndex === -1) {
-      const now = new Date();
-      const isExpired = stock.expiryDate ? new Date(stock.expiryDate) < now : false;
-      
-      setCart([...cart, { 
-        ...stock, 
-        selectedQuantity: 1, 
-        discount: 0, 
-        isOutOfStock: stock.quantity <= 0,
-        isExpired
-      }]);
-    } else {
-      const newCart = [...cart];
-      if (newCart[existingIndex].selectedQuantity < stock.quantity) {
-        newCart[existingIndex].selectedQuantity += 1;
-        setCart(newCart);
-      } else {
-        triggerGlobalToast('Insufficient stock in this batch', 'error');
+  const updateGroupedQuantity = (medicineName: string, totalQty: number) => {
+    const relatedItems = [...cart].filter(item => item.medicineName === medicineName);
+    
+    // Sort batches: Non-expired first, then by oldest expiry date first (FIFO)
+    relatedItems.sort((a, b) => {
+      if (a.isExpired && !b.isExpired) return 1;
+      if (!a.isExpired && b.isExpired) return -1;
+      if (a.expiryDate && b.expiryDate) {
+        return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
       }
+      return 0;
+    });
+
+    const totalAvailable = relatedItems.reduce((acc, item) => acc + (item.isOutOfStock || item.isExpired ? 0 : item.quantity), 0);
+    
+    // Hard cap: Cannot exceed total available stock (unless it's an OOS placeholder from prescription)
+    const hasRealBatches = relatedItems.some(item => item.id);
+    const maxQty = hasRealBatches ? totalAvailable : totalQty; 
+    
+    const safeTotalQty = Math.max(0, Math.min(totalQty, maxQty));
+
+    if (totalQty > totalAvailable && hasRealBatches && totalAvailable > 0) {
+      triggerGlobalToast(`Maximum available stock is ${totalAvailable}`, 'warning');
+    }
+
+    let remaining = safeTotalQty;
+    const itemQtys: Record<string, number> = {};
+
+    relatedItems.forEach(item => {
+      const key = item.id || `oos-${item.medicineName}`;
+      const stock = (item.isOutOfStock || item.isExpired) ? 0 : item.quantity;
+      const take = Math.min(remaining, stock);
+      itemQtys[key] = take;
+      remaining -= take;
+    });
+
+    if (remaining > 0 && !hasRealBatches) {
+       const oosItem = relatedItems.find(item => !item.id);
+       if (oosItem) itemQtys[`oos-${oosItem.medicineName}`] = remaining;
+    }
+
+    setCart(cart.map(item => {
+      if (item.medicineName !== medicineName) return item;
+      const key = item.id || `oos-${item.medicineName}`;
+      return { ...item, selectedQuantity: itemQtys[key] || 0 };
+    }));
+  };
+
+  const addToCart = async (stock: PharmacyStockDTO) => {
+    const existingGroup = groupedCart.find(g => g.medicineName === stock.medicineName);
+    
+    if (!existingGroup) {
+      // Fetch all batches to support automatic fulfillment
+      const res = await pharmacyApi.getMedicineStock({ search: stock.medicineName, size: 20 });
+      const now = new Date();
+      const allBatches = res.success && res.data?.content ? res.data.content : [stock];
+      
+      const newItems: CartItem[] = [];
+      allBatches.forEach(b => {
+        const isExpired = b.expiryDate ? new Date(b.expiryDate) < now : false;
+        newItems.push({
+          ...b,
+          selectedQuantity: b.id === stock.id ? 1 : 0,
+          discount: 0,
+          isOutOfStock: b.quantity <= 0,
+          isExpired
+        });
+      });
+      
+      setCart(prev => [...prev, ...newItems]);
+    } else {
+       // Just increment grouped quantity, it will auto-distribute
+       updateGroupedQuantity(stock.medicineName, existingGroup.totalSelected + 1);
     }
   };
 
-  const updateQuantity = (index: number, qty: number) => {
-    const item = cart[index];
-    if (item.isOutOfStock || item.isExpired) return;
+  const updateGroupedDiscount = (medicineName: string, discount: number) => {
+    const relatedItems = cart.filter(item => item.medicineName === medicineName);
+    const totalItemAmount = relatedItems.reduce((acc, item) => acc + ((item.sellingPrice || 0) * item.selectedQuantity), 0);
+    const safeDiscount = Math.max(0, Math.min(discount, totalItemAmount));
 
-    const newCart = [...cart];
-    const stockQty = newCart[index].quantity;
-    const safeQty = Math.max(1, Math.min(qty, stockQty));
-    if (qty > stockQty) triggerGlobalToast(`Only ${stockQty} units available`, 'warning');
-    newCart[index].selectedQuantity = safeQty;
-    setCart(newCart);
+    if (discount > totalItemAmount) triggerGlobalToast(`Discount cannot exceed total amount`, 'error');
+
+    let remainingDiscount = safeDiscount;
+    setCart(cart.map(item => {
+      if (item.medicineName !== medicineName) return item;
+      const batchAmount = (item.sellingPrice || 0) * item.selectedQuantity;
+      const take = Math.min(remainingDiscount, batchAmount);
+      remainingDiscount -= take;
+      return { ...item, discount: take };
+    }));
   };
 
-  const updateDiscount = (index: number, discount: number) => {
-    const item = cart[index];
-    if (item.isOutOfStock || item.isExpired) return;
-
-    const newCart = [...cart];
-    const itemTotal = (item.sellingPrice || 0) * item.selectedQuantity;
-    const safeDiscount = Math.max(0, Math.min(discount, itemTotal));
-    if (discount > itemTotal) triggerGlobalToast(`Discount cannot exceed total amount`, 'error');
-    newCart[index].discount = safeDiscount;
-    setCart(newCart);
+  const removeFromCart = (medicineName: string) => {
+    setCart(cart.filter(item => item.medicineName !== medicineName));
   };
 
   const handleSubmit = async () => {
-    if (isSubmitting || cart.length === 0) return;
+    if (isSubmitting || !validateSale()) return;
     
     // Filter out invalid items for the final payload
     const validItems = cart.filter(item => !item.isOutOfStock && !item.isExpired && item.id);
     
     if (validItems.length === 0) {
       triggerGlobalToast('No valid items in cart to sell', 'error');
-      return;
-    }
-
-    if (saleType === 'WALKIN' && (!customerName || !/^[6-9]\d{9}$/.test(customerPhone))) {
-      triggerGlobalToast('Valid name and phone required', 'error');
-      return;
-    }
-    if (saleType === 'VISIT' && (!selectedPatient || !selectedDoctor)) {
-      triggerGlobalToast('Patient and Doctor required', 'error');
-      return;
-    }
-
-    const finalTotal = Number(totalAmount.toFixed(2));
-    const finalPaid = Number(amountPaid.toFixed(2));
-
-    if (finalPaid < finalTotal) {
-      triggerGlobalToast('Paid amount cannot be less than total', 'error');
       return;
     }
 
@@ -292,7 +391,7 @@ export default function QuickPharmacyBillingPage() {
           discountAmount: Number(item.discount.toFixed(2)),
           taxAmount: 0
         })),
-        payment: { mode: paymentMode as any, amount: finalPaid, referenceNumber },
+        payment: { mode: paymentMode as any, amount: Number(amountPaid.toFixed(2)), referenceNumber },
         notes: ''
       };
 
@@ -390,7 +489,6 @@ export default function QuickPharmacyBillingPage() {
                   </div>
                 </div>
               </section>
-
               <section className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
                 <div className="px-4 py-2.5 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-nowrap sm:flex-row justify-between items-center gap-2 shrink-0">
                   <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider">Medication Table</h2>
@@ -413,74 +511,90 @@ export default function QuickPharmacyBillingPage() {
                     </tr>
                     </thead>
                     <tbody>
-                    {cart.length === 0 ? (
+                    {groupedCart.length === 0 ? (
                         <tr>
                           <td colSpan={7} className="py-16 text-center text-slate-300 font-medium">
                             <span className="material-symbols-outlined text-4xl block mb-1">shopping_cart</span>
                             Terminal cart empty. Search stock items above.
                           </td>
                         </tr>
-                    ) : cart.map((item, index) => (
-                        <tr key={`${item.id || item.medicineName}-${index}`} className={`border-b border-slate-50 transition-colors ${item.isOutOfStock || item.isExpired ? 'bg-red-50/30' : 'hover:bg-slate-50/50'}`}>
-                          <td className="py-2.5 px-2">
-                            <div className="flex items-center gap-2">
-                              <p className={`font-bold ${item.isOutOfStock || item.isExpired ? 'text-red-700' : 'text-slate-800'}`}>{item.medicineName}</p>
-                              {item.isOutOfStock && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Out of Stock</span>}
-                              {item.isExpired && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Expired</span>}
-                            </div>
-                            <p className="text-[9px] font-mono text-orange-600 font-bold uppercase">Batch: #{item.batchNumber || 'N/A'}</p>
-                          </td>
-                          <td className="py-2.5 px-2 text-center">
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${item.quantity <= 0 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
-                              {item.quantity}
-                            </span>
-                          </td>
-                          <td className="py-2.5 px-2">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <button 
-                                onClick={() => updateQuantity(index, item.selectedQuantity - 1)} 
-                                disabled={item.isOutOfStock || item.isExpired}
-                                className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${item.isOutOfStock || item.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
-                              >
-                                <span className="material-symbols-outlined text-xs font-black">remove</span>
-                              </button>
-                              <input 
-                                type="number" 
-                                min={1} 
-                                value={item.selectedQuantity} 
-                                onChange={(e) => updateQuantity(index, Number.parseInt(e.target.value) || 0)} 
-                                disabled={item.isOutOfStock || item.isExpired}
-                                className={`w-8 text-center font-black text-xs outline-none bg-transparent ${item.isOutOfStock || item.isExpired ? 'text-red-400 cursor-not-allowed' : ''}`} 
-                              />
-                              <button 
-                                onClick={() => updateQuantity(index, item.selectedQuantity + 1)} 
-                                disabled={item.isOutOfStock || item.isExpired}
-                                className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${item.isOutOfStock || item.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
-                              >
-                                <span className="material-symbols-outlined text-xs font-black">add</span>
-                              </button>
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-2 text-right text-slate-500 font-medium">{formatCurrency(item.sellingPrice || 0)}</td>
-                          <td className="py-2.5 px-2">
-                            <div className={`flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${item.isOutOfStock || item.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                              <span className="text-[10px] text-slate-400 mr-1">₹</span>
-                              <input 
-                                type="number" 
-                                min={0} 
-                                value={item.discount === 0 ? '' : item.discount} 
-                                onChange={(e) => updateDiscount(index, Number.parseFloat(e.target.value) || 0)} 
-                                disabled={item.isOutOfStock || item.isExpired}
-                                className="w-full text-right font-bold text-xs outline-none bg-transparent" 
-                                placeholder="0" 
-                              />
-                            </div>
-                          </td>
-                          <td className="py-2.5 px-2 text-right font-black text-slate-900">{formatCurrency(((item.sellingPrice || 0) * item.selectedQuantity) - item.discount)}</td>
-                          <td className="py-2.5 px-2 text-center">
-                            <button onClick={() => { const newCart = [...cart]; newCart.splice(index, 1); setCart(newCart); }} className="p-1 text-slate-300 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-base">delete</span></button>
-                          </td>
-                        </tr>
+                    ) : groupedCart.map((group, index) => (
+                        <React.Fragment key={`${group.medicineName}-${index}`}>
+                          <tr className={`border-b border-slate-50 transition-colors ${group.isOutOfStock || group.isExpired ? 'bg-red-50/30' : 'hover:bg-slate-50/50'}`}>
+                            <td className="py-2.5 px-2">
+                              <div className="flex flex-col">
+                                <div className="flex items-center gap-2">
+                                  <p className={`font-black text-sm ${group.isOutOfStock || group.isExpired ? 'text-red-700' : 'text-slate-800'}`}>{group.medicineName}</p>
+                                  {group.isOutOfStock && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Out of Stock</span>}
+                                  {group.isExpired && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Expired</span>}
+                                </div>
+                                <div className="flex flex-wrap gap-x-2 gap-y-1 mt-1">
+                                  {group.batches.map((b, bi) => (
+                                    <span key={bi} className="text-[8px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                      #{b.batchNumber || 'N/A'} ({b.selectedQuantity})
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-2 text-center">
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${group.totalStock <= 0 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
+                                {group.totalStock}
+                              </span>
+                            </td>
+                            <td className="py-2.5 px-2">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button 
+                                  onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected - 1)} 
+                                  disabled={group.isOutOfStock || group.isExpired}
+                                  className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
+                                >
+                                  <span className="material-symbols-outlined text-xs font-black">remove</span>
+                                </button>
+                                <input 
+                                  type="number" 
+                                  min={1} 
+                                  value={group.totalSelected} 
+                                  onChange={(e) => updateGroupedQuantity(group.medicineName, Number.parseInt(e.target.value) || 0)} 
+                                  disabled={group.isOutOfStock || group.isExpired}
+                                  className={`w-10 text-center font-black text-xs outline-none bg-transparent ${group.isOutOfStock || group.isExpired ? 'text-red-400 cursor-not-allowed' : ''}`} 
+                                />
+                                <button 
+                                  onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected + 1)} 
+                                  disabled={group.isOutOfStock || group.isExpired}
+                                  className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
+                                >
+                                  <span className="material-symbols-outlined text-xs font-black">add</span>
+                                </button>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-2 text-right text-slate-500 font-medium">
+                              {group.batches.length > 1 ? (
+                                <span className="text-[9px] italic text-slate-400">Mixed Pricing</span>
+                              ) : (
+                                formatCurrency(group.batches[0].sellingPrice || 0)
+                              )}
+                            </td>
+                            <td className="py-2.5 px-2">
+                              <div className={`flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <span className="text-[10px] text-slate-400 mr-1">₹</span>
+                                <input 
+                                  type="number" 
+                                  min={0} 
+                                  value={group.totalDiscount === 0 ? '' : group.totalDiscount} 
+                                  onChange={(e) => updateGroupedDiscount(group.medicineName, Number.parseFloat(e.target.value) || 0)} 
+                                  disabled={group.isOutOfStock || group.isExpired}
+                                  className="w-full text-right font-bold text-xs outline-none bg-transparent" 
+                                  placeholder="0" 
+                                />
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-2 text-right font-black text-slate-900">{formatCurrency(group.totalPrice)}</td>
+                            <td className="py-2.5 px-2 text-center">
+                              <button onClick={() => removeFromCart(group.medicineName)} className="p-1 text-slate-300 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-base">delete</span></button>
+                            </td>
+                          </tr>
+                        </React.Fragment>
                     ))}
                     </tbody>
                   </table>
@@ -519,7 +633,24 @@ export default function QuickPharmacyBillingPage() {
                   <label className="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-wider">Cash Received Amount</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">₹</span>
-                    <input type="number" value={amountPaid === 0 ? '' : amountPaid} onChange={(e) => setAmountPaid(Math.max(0, Number.parseFloat(e.target.value) || 0))} className="w-full pl-7 pr-3 py-2 bg-orange-50/50 border-2 border-orange-100 rounded-xl text-lg font-black text-orange-700 outline-none" />
+                    <input 
+                      type="number" 
+                      value={amountPaid === 0 ? '' : amountPaid} 
+                      onChange={(e) => {
+                        const val = Math.max(0, Number.parseFloat(e.target.value) || 0);
+                        setAmountPaid(val);
+                        setIsAutoPaid(false); // Stop auto-sync once user types
+                      }} 
+                      className="w-full pl-7 pr-3 py-2 bg-orange-50/50 border-2 border-orange-100 rounded-xl text-lg font-black text-orange-700 outline-none" 
+                    />
+                    {totalAmount !== amountPaid && (
+                      <button 
+                        onClick={() => setIsAutoPaid(true)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-orange-400 uppercase hover:text-orange-600 transition-colors"
+                      >
+                        Reset
+                      </button>
+                    )}
                   </div>
                 </div>
 
