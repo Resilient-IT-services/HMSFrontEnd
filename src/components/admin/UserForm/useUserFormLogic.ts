@@ -145,6 +145,37 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
     catalogService.getSpecializations().then(res => { if (res.success && res.data) setSpecializations(res.data); });
   }, []);
 
+  // Initialize professional info objects when roles are assigned
+  useEffect(() => {
+    setFormData(prev => {
+      let updated = false;
+      const next = { ...prev };
+
+      if (assignedRoles.includes('DOCTOR') && !next.doctorInfo) {
+        next.doctorInfo = { specializations: [], education: { qualifications: [] }, bio: '', licenseNumber: '' };
+        updated = true;
+      }
+      if (assignedRoles.includes('NURSE') && !next.nurseInfo) {
+        next.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
+        updated = true;
+      }
+      if (assignedRoles.includes('PHARMACIST') && !next.pharmacistInfo) {
+        next.pharmacistInfo = { pciRegNo: '', qualification: '' };
+        updated = true;
+      }
+      if (assignedRoles.includes('LAB_TECHNICIAN') && !next.labTechInfo) {
+        next.labTechInfo = { licenseNo: '', specialty: '' };
+        updated = true;
+      }
+      if (assignedRoles.includes('RECEPTIONIST') && !next.receptionistInfo) {
+        next.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
+        updated = true;
+      }
+
+      return updated ? next : prev;
+    });
+  }, [assignedRoles]);
+
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
     if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
