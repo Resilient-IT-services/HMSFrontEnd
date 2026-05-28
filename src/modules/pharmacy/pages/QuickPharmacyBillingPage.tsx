@@ -251,7 +251,14 @@ export default function QuickPharmacyBillingPage() {
       triggerGlobalToast('Patient and Doctor required', 'error');
       return;
     }
-    if (amountPaid < totalAmount) { triggerGlobalToast('Paid amount cannot be less than total', 'error'); return; }
+
+    const finalTotal = Number(totalAmount.toFixed(2));
+    const finalPaid = Number(amountPaid.toFixed(2));
+
+    if (finalPaid < finalTotal) {
+      triggerGlobalToast('Paid amount cannot be less than total', 'error');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -267,10 +274,10 @@ export default function QuickPharmacyBillingPage() {
         items: validItems.map(item => ({
           medicineBatchId: item.id!,
           quantity: item.selectedQuantity,
-          discountAmount: item.discount,
+          discountAmount: Number(item.discount.toFixed(2)),
           taxAmount: 0
         })),
-        payment: { mode: paymentMode as any, amount: amountPaid, referenceNumber },
+        payment: { mode: paymentMode as any, amount: finalPaid, referenceNumber },
         notes: ''
       };
 
