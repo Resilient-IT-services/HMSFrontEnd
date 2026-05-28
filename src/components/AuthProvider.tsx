@@ -103,8 +103,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (res.success && res.data) {
         dispatch(setHospitalTimezone(res.data.timezone));
       }
-    } catch (err) {
-      console.error('Failed to fetch hospital timezone:', err);
+    } catch (error) {
+      console.error('Failed to fetch hospital timezone:', error);
     }
   }, [dispatch]);
 

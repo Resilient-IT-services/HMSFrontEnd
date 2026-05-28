@@ -85,7 +85,9 @@ export const Table = <T,>({
    * Generates a default mobile card layout based on column configurations.
    */
   const DefaultMobileCard = ({ row }: { row: T }) => {
-    const groups = columns.reduce((acc, col, index) => {
+    const groups: Record<string, { col: Column<T>, index: number }[]> = {};
+
+    for (const [index, col] of columns.entries()) {
       let pos = col.mobilePosition;
       
       // Default heuristics if no position is specified
@@ -96,33 +98,36 @@ export const Table = <T,>({
         else pos = 'body';
       }
 
-      if (pos === 'hidden') return acc;
+      if (pos === 'hidden') continue;
       
-      if (!acc[pos]) acc[pos] = [];
-      acc[pos].push({ col, index });
-      return acc;
-    }, {} as Record<string, { col: Column<T>, index: number }[]>);
+      if (!groups[pos]) groups[pos] = [];
+      groups[pos].push({ col, index });
+    }
 
     // Sort columns within each group by mobileOrder or original index
     const sortFn = (a: { col: Column<T>, index: number }, b: { col: Column<T>, index: number }) => 
       (a.col.mobileOrder ?? a.index) - (b.col.mobileOrder ?? b.index);
 
-    Object.values(groups).forEach(group => group.sort(sortFn));
+    const titleGroup = (groups.title || []).toSorted(sortFn);
+    const subtitleGroup = (groups.subtitle || []).toSorted(sortFn);
+    const metaGroup = (groups.meta || []).toSorted(sortFn);
+    const bodyGroup = (groups.body || []).toSorted(sortFn);
+    const actionGroup = (groups.action || []).toSorted(sortFn);
 
-    const topActions = groups.action?.filter(({ col }) => col.mobileOrder !== undefined && col.mobileOrder < 0) || [];
-    const bottomActions = groups.action?.filter(({ col }) => col.mobileOrder === undefined || col.mobileOrder >= 0) || [];
+    const topActions = actionGroup.filter(({ col }) => col.mobileOrder !== undefined && col.mobileOrder < 0);
+    const bottomActions = actionGroup.filter(({ col }) => col.mobileOrder === undefined || col.mobileOrder >= 0);
 
     return (
       <div className="flex flex-col gap-4">
         {/* Top Section: Title, Subtitle, and Quick Actions */}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0 flex flex-col gap-1">
-            {groups.title?.map(({ col, index }) => (
+            {titleGroup.map(({ col, index }) => (
               <div key={index} className="text-base font-bold text-slate-900 truncate leading-snug">
                 {renderCellContent(row, col)}
               </div>
             ))}
-            {groups.subtitle?.map(({ col, index }) => (
+            {subtitleGroup.map(({ col, index }) => (
               <div key={index} className="text-sm font-semibold text-slate-500 truncate leading-snug">
                 {renderCellContent(row, col)}
               </div>
@@ -134,16 +139,16 @@ export const Table = <T,>({
             {topActions.map(({ col, index }) => (
               <div key={index}>{renderCellContent(row, col)}</div>
             ))}
-            {groups.meta?.map(({ col, index }) => (
+            {metaGroup.map(({ col, index }) => (
               <div key={index}>{renderCellContent(row, col)}</div>
             ))}
           </div>
         </div>
 
         {/* Body Section: General detail area */}
-        {groups.body && groups.body.length > 0 && (
+        {bodyGroup.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 pt-3 border-t border-slate-50">
-            {groups.body.map(({ col, index }) => (
+            {bodyGroup.map(({ col, index }) => (
               <div key={index} className="text-sm text-slate-600 font-medium break-words">
                 {renderCellContent(row, col)}
               </div>

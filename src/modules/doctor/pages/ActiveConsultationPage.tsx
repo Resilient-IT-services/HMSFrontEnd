@@ -271,7 +271,7 @@ export const ActiveConsultationPage = () => {
   const selectMedicine = (id: string, med: any) => {
     // Map either from MedicineResponse or PharmacyStockDTO
     const medicineName = med.medicineName || med.name;
-    const currentStock = med.totalQuantity !== undefined ? med.totalQuantity : (med.currentStock || 0);
+    const currentStock = med.totalQuantity === undefined ? (med.currentStock || 0) : med.totalQuantity;
     
     setPrescriptions(prescriptions.map(p => p.id === id ? { 
       ...p, 

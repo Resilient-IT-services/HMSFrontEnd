@@ -228,11 +228,11 @@ export const useReceptionBilling = () => {
      try {
        triggerGlobalToast('Generating invoice...', 'info');
        const blob = await invoiceService.exportPdf(invoice.id);
-       const url = window.URL.createObjectURL(blob);
+       const url = globalThis.URL.createObjectURL(blob);
        const link = document.createElement('a');
        link.href = url;
        link.setAttribute('download', `invoice_${invoice.invoiceNumber}.pdf`);
-       document.body.appendChild(link);
+       document.body.append(link);
        link.click();
        link.remove();
      } catch (error) {

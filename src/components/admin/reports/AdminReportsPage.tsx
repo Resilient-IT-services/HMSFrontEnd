@@ -99,8 +99,8 @@ export default function AdminReportsPage() {
           to: dayjs(endDate).tz(tz).endOf('day').toISOString()
         };
       }
-    } catch (err) {
-      console.error('Error fetching hospital for timezone:', err);
+    } catch (error_) {
+      console.error('Error fetching hospital for timezone:', error_);
     }
     return {
       from: dayjs(startDate).startOf('day').toISOString(),
