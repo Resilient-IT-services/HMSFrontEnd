@@ -88,14 +88,17 @@ export const useReceptionVitals = () => {
     let max = range.maxValue;
     let unitLabel = '';
 
-    if (type === 'BODY_TEMPERATURE') {
+    const isTemp = type === 'BODY_TEMPERATURE' || type === 'vitals_temperatureF';
+    const isWeight = type === 'WEIGHT' || type === 'vitals_weight';
+
+    if (isTemp) {
       unitLabel = `°${displayTempUnit}`;
       // Backend is F
       if (displayTempUnit === 'C') {
         min = ((min - 32) * 5 / 9);
         max = ((max - 32) * 5 / 9);
       }
-    } else if (type === 'WEIGHT') {
+    } else if (isWeight) {
       unitLabel = displayWeightUnit.toLowerCase();
       // Backend is KG
       if (displayWeightUnit === 'LB') {
@@ -105,16 +108,17 @@ export const useReceptionVitals = () => {
     } else {
       switch (type) {
         case 'SYSTOLIC_BP':
-        case 'DIASTOLIC_BP': { unitLabel = 'mmHg'; break;
-        }
-        case 'HEART_RATE': { unitLabel = 'bpm'; break;
-        }
-        case 'OXYGEN_LEVEL': { unitLabel = '%'; break;
-        }
+        case 'vitals_systolic':
+        case 'DIASTOLIC_BP':
+        case 'vitals_diastolic': { unitLabel = 'mmHg'; break; }
+        case 'HEART_RATE':
+        case 'vitals_heartRate': { unitLabel = 'bpm'; break; }
+        case 'OXYGEN_LEVEL':
+        case 'vitals_oxygenLevel': { unitLabel = '%'; break; }
       }
     }
 
-    return `${min.toFixed(type === 'BODY_TEMPERATURE' || type === 'WEIGHT' ? 1 : 0)} - ${max.toFixed(type === 'BODY_TEMPERATURE' || type === 'WEIGHT' ? 1 : 0)} ${unitLabel}`;
+    return `${min.toFixed(isTemp || isWeight ? 1 : 0)} - ${max.toFixed(isTemp || isWeight ? 1 : 0)} ${unitLabel}`;
   };
 
   const [vitalRanges, setVitalRanges] = useState<VitalRangesResponse>({});
@@ -129,7 +133,8 @@ export const useReceptionVitals = () => {
           rangeRes.data.forEach(item => {
             configMap[item.vitalType] = {
               minValue: item.minValue,
-              maxValue: item.maxValue
+              maxValue: item.maxValue,
+              errorMessage: item.errorMessage
             };
           });
           setVitalRanges(configMap);
@@ -210,12 +215,12 @@ export const useReceptionVitals = () => {
     let label;
     let required = true;
     switch (field) {
-      case 'temperature': { range = vitalRanges.BODY_TEMPERATURE; label = 'Temperature'; break; }
-      case 'weight': { range = vitalRanges.WEIGHT; label = 'Weight'; break; }
-      case 'oxygenLevel': { range = vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break; }
-      case 'systolic': { range = vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break; }
-      case 'diastolic': { range = vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break; }
-      case 'heartRate': { range = vitalRanges.HEART_RATE; label = 'Heart Rate'; break; }
+      case 'temperature': { range = vitalRanges.vitals_temperatureF || vitalRanges.BODY_TEMPERATURE; label = 'Temperature'; break; }
+      case 'weight': { range = vitalRanges.vitals_weight || vitalRanges.WEIGHT; label = 'Weight'; break; }
+      case 'oxygenLevel': { range = vitalRanges.vitals_oxygenLevel || vitalRanges.OXYGEN_LEVEL; label = 'Oxygen Level'; break; }
+      case 'systolic': { range = vitalRanges.vitals_systolic || vitalRanges.SYSTOLIC_BP; label = 'Systolic BP'; break; }
+      case 'diastolic': { range = vitalRanges.vitals_diastolic || vitalRanges.DIASTOLIC_BP; label = 'Diastolic BP'; break; }
+      case 'heartRate': { range = vitalRanges.vitals_heartRate || vitalRanges.HEART_RATE; label = 'Heart Rate'; break; }
       case 'respiratoryRate': { range = vitalRanges.RESPIRATORY_RATE; label = 'Respiratory Rate'; required = false; break; }
     }
     

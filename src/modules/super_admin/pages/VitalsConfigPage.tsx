@@ -11,31 +11,41 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 
 export function VitalsConfigPage() {
-  const [settings, setSettings] = useState<Record<string, {minValue: number, maxValue: number}>>({});
+  const [settings, setSettings] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingType, setEditingType] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     minValue: 0,
-    maxValue: 0
+    maxValue: 0,
+    errorMessage: ''
   });
 
   const VITAL_TYPES = [
-    { value: 'BODY_TEMPERATURE', label: 'Body Temperature (°F)' },
-    { value: 'SYSTOLIC_BP', label: 'Systolic BP (mmHg)' },
-    { value: 'DIASTOLIC_BP', label: 'Diastolic BP (mmHg)' },
-    { value: 'HEART_RATE', label: 'Heart Rate (bpm)' },
-    { value: 'OXYGEN_LEVEL', label: 'Oxygen Level (%)' },
-    { value: 'WEIGHT', label: 'Weight (kg)' },
+    { value: 'vitals_temperatureF', label: 'Body Temperature (°F)' },
+    { value: 'vitals_systolic', label: 'Systolic BP (mmHg)' },
+    { value: 'vitals_diastolic', label: 'Diastolic BP (mmHg)' },
+    { value: 'vitals_heartRate', label: 'Heart Rate (bpm)' },
+    { value: 'vitals_oxygenLevel', label: 'Oxygen Level (%)' },
+    { value: 'vitals_weight', label: 'Weight (kg)' },
   ];
+
+  const legacyKeys: Record<string, string> = {
+    'vitals_temperatureF': 'BODY_TEMPERATURE',
+    'vitals_systolic': 'SYSTOLIC_BP',
+    'vitals_diastolic': 'DIASTOLIC_BP',
+    'vitals_heartRate': 'HEART_RATE',
+    'vitals_oxygenLevel': 'OXYGEN_LEVEL',
+    'vitals_weight': 'WEIGHT'
+  };
 
   const fetchSettings = React.useCallback(async () => {
     setLoading(true);
     try {
       const res = await adminService.listVitalSettings();
       if (res.success && res.data) {
-        const configMap: any = {};
+        const configMap: Record<string, any> = {};
         res.data.forEach((item: any) => {
           configMap[item.vitalType] = item;
         });
@@ -59,7 +69,8 @@ export function VitalsConfigPage() {
     setEditingType(type);
     setFormData({
       minValue: currentRange?.minValue || 0,
-      maxValue: currentRange?.maxValue || 0
+      maxValue: currentRange?.maxValue || 0,
+      errorMessage: currentRange?.errorMessage || ''
     });
     setFieldErrors({});
     setIsModalOpen(true);
@@ -80,11 +91,18 @@ export function VitalsConfigPage() {
       return;
     }
     try {
+      // Find the actual record we are editing (it might be under a legacy key in settings)
+      const existingRecord = settings[editingType] || settings[legacyKeys[editingType]];
+      
+      // If we found a legacy record, we update ITS vitalType to migrate it, or use new key for new records
+      const targetVitalType = existingRecord ? existingRecord.vitalType : editingType;
+
       const res = await adminService.saveVitalSetting({
-        id: (settings[editingType] as any)?.id,
-        vitalType: editingType as any,
+        id: existingRecord?.id,
+        vitalType: targetVitalType,
         minValue: formData.minValue,
-        maxValue: formData.maxValue
+        maxValue: formData.maxValue,
+        errorMessage: formData.errorMessage
       });
       if (res.success) {
         triggerGlobalToast(`${getVitalLabel(editingType)} updated successfully`, 'success');
@@ -141,7 +159,17 @@ export function VitalsConfigPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {VITAL_TYPES.map((type) => {
-                      const range = settings[type.value];
+                      // Fallback mapping for legacy keys
+                      const legacyKeys: Record<string, string> = {
+                        'vitals_temperatureF': 'BODY_TEMPERATURE',
+                        'vitals_systolic': 'SYSTOLIC_BP',
+                        'vitals_diastolic': 'DIASTOLIC_BP',
+                        'vitals_heartRate': 'HEART_RATE',
+                        'vitals_oxygenLevel': 'OXYGEN_LEVEL',
+                        'vitals_weight': 'WEIGHT'
+                      };
+                      
+                      const range = settings[type.value] || settings[legacyKeys[type.value]];
                       return (
                         <tr 
                           key={type.value} 
@@ -212,6 +240,16 @@ export function VitalsConfigPage() {
                 onChange={(e) => setFormData({...formData, maxValue: Number(e.target.value)})}
               />
               {fieldErrors.maxValue && <p className="text-red-500 text-[9px] mt-1 font-bold uppercase tracking-tighter animate-bounce">{fieldErrors.maxValue}</p>}
+            </div>
+            <div className="w-full">
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2">Custom Violation Message</label>
+              <input 
+                type="text" 
+                placeholder="e.g. Systolic BP out of safe clinical range (50-250 mmHg)"
+                className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 font-bold focus:ring-2 focus:ring-orange-200 outline-none transition-all shadow-sm"
+                value={formData.errorMessage}
+                onChange={(e) => setFormData({...formData, errorMessage: e.target.value})}
+              />
             </div>
           </div>
 

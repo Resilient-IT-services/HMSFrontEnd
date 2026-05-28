@@ -113,8 +113,8 @@ export const AppointmentsPage = () => {
           'COMPLETED'
         ].includes(app.status);
 
-        // Vitals button will be active for any patient status unless explicitly CANCELLED
-        const shouldShowVitalsButton = app.status !== 'CANCELLED';
+        // ✅ HIDE VITALS BUTTON IF STATUS IS 'COMPLETED' OR 'CANCELLED'
+        const shouldShowVitalsButton = !['COMPLETED', 'CANCELLED'].includes(app.status);
 
         return (
             <div className="flex items-center justify-center gap-2">
@@ -266,7 +266,7 @@ export const AppointmentsPage = () => {
                   columns={columns}
                   data={appointments}
                   isLoading={loading}
-                  onRowDoubleClick={(app) => router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
+                  onRowDoubleClick={(app) => app.status !== 'COMPLETED' && router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
                   emptyMessage="No appointments found for selected filters."
               />
             </div>
@@ -313,7 +313,7 @@ export const AppointmentsPage = () => {
                     <label key={ps} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
                         advancedFilters.paymentStatuses.includes(ps)
                             ? 'bg-blue-700 text-white border-blue-700'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'
+                            : 'bg-white text-slate-600 border-slate-200 hover:blue-300'
                     }`}>
                       <input
                           type="checkbox"

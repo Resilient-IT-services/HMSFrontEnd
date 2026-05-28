@@ -21,13 +21,14 @@ export const AppointmentVitals = () => {
     diastolic, setDiastolic,
     heartRate, setHeartRate,
     temperature, setTemperature,
+    displayTempUnit, setDisplayTempUnit,
     weight, setWeight,
     oxygenLevel, setOxygenLevel,
-    respiratoryRate, setRespiratoryRate,
     complaints, setComplaints,
     fieldErrors,
     saving,
     handleSave,
+    validateField
   } = useReceptionVitals();
 
   if (!appointment) {
@@ -44,141 +45,256 @@ export const AppointmentVitals = () => {
 
   const isReadOnly = ['CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED', 'CANCELLED'].includes(appointment.status);
 
-  const renderPatientSummary = () => (
-    <div className="lg:col-span-1 space-y-4">
-      <Card title="Patient Profile" icon="person" className="p-4">
-        <div className="space-y-4">
-          <div className="flex flex-col items-center text-center pb-4 border-b border-slate-100">
-            <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-3">
-              <span className="material-symbols-outlined text-4xl text-slate-400">account_circle</span>
-            </div>
-            <h3 className="text-lg font-black text-slate-900">{patient?.fullName || appointment.patientName}</h3>
-            <div className="flex items-center gap-2 mt-1">
-              <Badge variant="blue">{patientAge} Years</Badge>
-              <Badge variant="slate">{patient?.gender || '--'}</Badge>
-            </div>
-          </div>
-          
-          <div className="space-y-3">
-            <InfoRow label="Patient ID" value={patient?.patientCode || '--'} icon="id_card" />
-            <InfoRow label="Visit Token" value={appointment.tokenNumber || '--'} icon="confirmation_number" />
-            <InfoRow label="Doctor" value={`Dr. ${appointment.doctorName}`} icon="medical_services" />
-          </div>
-        </div>
-      </Card>
+  // REAL-TIME INDIVIDUAL FIELD BOUNDARY CHECKER ON BLUR
+  const handleFieldBlur = (fieldKey: string, value: string) => {
+    validateField(fieldKey, value);
+  };
 
-      <div className="bg-slate-900 p-4 rounded-2xl text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] opacity-50 mb-2">Protocol Note</h4>
-          <p className="text-xs font-medium leading-relaxed italic">
-            "Ensure the patient has rested for 5 minutes before recording blood pressure for accurate systolic/diastolic readings."
-          </p>
-        </div>
-        <div className="absolute -right-4 -bottom-4 opacity-10">
-          <span className="material-symbols-outlined text-8xl">clinical_notes</span>
-        </div>
-      </div>
-    </div>
-  );
-
-  const renderVitalsForm = () => (
-    <div className="lg:col-span-3 space-y-4">
-      <Card title="Clinical Measurements" icon="monitoring" className="p-6">
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); if(!isReadOnly) handleSave(); }}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField label="Blood Pressure (mmHg)" error={fieldErrors.systolic || fieldErrors.diastolic}>
-              <div className="flex items-center gap-3">
-                <input
-                  type="text" placeholder="Sys" disabled={isReadOnly}
-                  className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none text-center ${fieldErrors.systolic ? 'border-red-500 bg-red-50' : ''}`}
-                  value={systolic} onChange={(e) => setSystolic(e.target.value.replaceAll(/\D/g, ''))}
-                />
-                <span className="text-slate-300 font-bold">/</span>
-                <input
-                  type="text" placeholder="Dia" disabled={isReadOnly}
-                  className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none text-center ${fieldErrors.diastolic ? 'border-red-500 bg-red-50' : ''}`}
-                  value={diastolic} onChange={(e) => setDiastolic(e.target.value.replaceAll(/\D/g, ''))}
-                />
-              </div>
-            </FormField>
-
-            <FormField label="Heart Rate (BPM)" error={fieldErrors.heartRate}>
-              <input
-                type="text" placeholder="e.g. 72" disabled={isReadOnly}
-                className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none ${fieldErrors.heartRate ? 'border-red-500 bg-red-50' : ''}`}
-                value={heartRate} onChange={(e) => setHeartRate(e.target.value.replaceAll(/\D/g, ''))}
-              />
-            </FormField>
-
-            <FormField label="Temperature (°F)" error={fieldErrors.temperature}>
-              <input
-                type="text" placeholder="e.g. 98.6" disabled={isReadOnly}
-                className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none ${fieldErrors.temperature ? 'border-red-500 bg-red-50' : ''}`}
-                value={temperature} onChange={(e) => setTemperature(e.target.value)}
-              />
-            </FormField>
-
-            <FormField label="Oxygen SpO2 (%)" error={fieldErrors.oxygenLevel}>
-              <input
-                type="text" placeholder="e.g. 98" disabled={isReadOnly}
-                className={`w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none ${fieldErrors.oxygenLevel ? 'border-red-500 bg-red-50' : ''}`}
-                value={oxygenLevel} onChange={(e) => setOxygenLevel(e.target.value.replaceAll(/\D/g, ''))}
-              />
-            </FormField>
-
-            <FormField label="Body Weight (kg)">
-              <input
-                type="text" placeholder="e.g. 70" disabled={isReadOnly}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none"
-                value={weight} onChange={(e) => setWeight(e.target.value)}
-              />
-            </FormField>
-
-            <FormField label="Respiratory Rate">
-              <input
-                type="text" placeholder="e.g. 16" disabled={isReadOnly}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-black focus:ring-2 focus:ring-orange-500 outline-none"
-                value={respiratoryRate} onChange={(e) => setRespiratoryRate(e.target.value.replaceAll(/\D/g, ''))}
-              />
-            </FormField>
-          </div>
-
-          <FormField label="Chief Complaints">
-            <textarea
-              rows={3} disabled={isReadOnly}
-              placeholder="Document patient's primary symptoms..."
-              className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none resize-none"
-              value={complaints} onChange={(e) => setComplaints(e.target.value)}
-            />
-          </FormField>
-
-          {!isReadOnly && (
-            <div className="pt-4">
-              <Button
-                type="submit" disabled={saving}
-                className="w-full sm:w-auto px-12 py-3 shadow-lg shadow-orange-600/20"
-                icon={saving ? 'sync' : 'check_circle'}
-              >
-                {saving ? 'Processing...' : 'Submit Clinical Vitals'}
-              </Button>
-            </div>
-          )}
-        </form>
-      </Card>
-    </div>
-  );
+  // ✅ FIXED: Explicitly typed FormElement context to resolve deprecation warnings
+  const handleInterceptedSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (isReadOnly) return;
+    // ✅ FIXED: Added void keyword to bypass unhandled promise tracking alert
+    void handleSave();
+  };
 
   return (
-    <MainLayout title="Capture Vitals" hideTitle>
-      <PageHeading 
-        title={isReadOnly ? "View Recorded Vitals" : "Clinical Vitals Intake"} 
-        description={isReadOnly ? "Viewing finalized physiological measurements for this visit." : "Capture primary physiological measurements to establish the patient's current health baseline."}
-      />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mt-6">
-        {renderPatientSummary()}
-        {renderVitalsForm()}
-      </div>
-    </MainLayout>
+      <MainLayout title="Capture Vitals" hideTitle>
+        <PageHeading
+            title={isReadOnly ? "View Recorded Vitals" : "Clinical Vitals Intake"}
+            description={isReadOnly ? "Viewing finalized physiological measurements for this visit." : "Capture primary physiological measurements to establish the patient's current health baseline."}
+            backHref="/reception/appointments"
+        />
+
+        {/* MASTER GRID WITH TIGHT SLATE LAYOUT */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4 items-start">
+
+          {/* --- LEFT PANEL: COMPACT PROFILE & COMPLAINTS --- */}
+          <div className="lg:col-span-1 flex flex-col gap-3">
+
+            {/* Patient Card Layer */}
+            <Card title="Patient Profile" className="p-3 shadow-sm border border-slate-200/60">
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                    <span className="material-symbols-outlined text-base font-bold">person</span>
+                  </div>
+                  <span className="font-bold text-slate-400 text-xs uppercase tracking-wider">Profile Verification</span>
+                </div>
+
+                <div className="border-b border-slate-100 pb-2">
+                  <h3 className="text-base font-black text-slate-900 leading-tight uppercase truncate">{patient?.fullName || appointment.patientName}</h3>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <Badge variant="blue" className="text-[10px] font-black px-2 py-0.5">{patientAge} Yrs</Badge>
+                    <Badge variant="slate" className="text-[10px] font-black px-2 py-0.5">{patient?.gender || 'N/A'}</Badge>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 text-xs font-bold text-slate-600">
+                  <InfoRow label="Patient ID" value={patient?.patientCode || '--'} icon="id_card" />
+                  <InfoRow label="Visit Token" value={appointment.tokenNumber || '--'} icon="confirmation_number" />
+                  <InfoRow label="Assigned Doctor" value={`Dr. ${appointment.doctorName}`} icon="medical_services" />
+                </div>
+              </div>
+            </Card>
+
+            {/* Complaints Card Layer */}
+            <Card title="Chief Complaints" className="p-3 shadow-sm border border-slate-200/60">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded-md bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                    <span className="material-symbols-outlined text-base font-bold">description</span>
+                  </div>
+                  <span className="font-bold text-slate-400 text-xs uppercase tracking-wider">Symptoms Log</span>
+                </div>
+
+                <textarea
+                    rows={3}
+                    disabled={isReadOnly}
+                    placeholder="Document patient's primary symptoms & complaints here..."
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-xs text-slate-700 focus:ring-2 focus:ring-orange-500 outline-none resize-none shadow-inner"
+                    value={complaints}
+                    onChange={(e) => setComplaints(e.target.value)}
+                />
+              </div>
+            </Card>
+          </div>
+
+          {/* --- RIGHT PANEL: CLINICAL MEASUREMENTS FORM --- */}
+          <div className="lg:col-span-2">
+            <Card title="Clinical Measurements Baseline" className="p-4 shadow-md border border-slate-200/80">
+              <div className="flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                <div className="w-6 h-6 rounded-md bg-orange-50 text-orange-700 flex items-center justify-center border border-orange-100">
+                  <span className="material-symbols-outlined text-base font-black">monitoring</span>
+                </div>
+                <span className="font-bold text-slate-700 text-sm">Physiological Metrics Intake</span>
+              </div>
+
+              <form className="space-y-4" onSubmit={handleInterceptedSubmit}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-3.5">
+
+                  {/* 1. Blood Pressure Input Block */}
+                  <FormField
+                      label={
+                        <div className="flex items-center gap-1.5 font-bold text-slate-700 text-xs">
+                          <div className="w-5 h-5 rounded-full bg-orange-50/70 border border-orange-100/50 flex items-center justify-center text-orange-700 shrink-0">
+                            <span className="material-symbols-outlined text-[13px] font-black">cardiology</span>
+                          </div>
+                          <span>Blood Pressure (mmHg)</span>
+                        </div>
+                      }
+                      error={fieldErrors.systolic || fieldErrors.diastolic}
+                  >
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="relative flex-1">
+                        <input
+                            type="text" placeholder="Sys" disabled={isReadOnly} maxLength={3}
+                            className={`w-full p-3 bg-slate-50 border rounded-xl font-black text-sm text-center focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-sm ${fieldErrors.systolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'}`}
+                            value={systolic}
+                            onChange={(e) => setSystolic(e.target.value.replaceAll(/\D/g, ''))}
+                            onBlur={(e) => handleFieldBlur('systolic', e.target.value)}
+                        />
+                      </div>
+                      <span className="text-slate-300 font-black text-base">/</span>
+                      <div className="relative flex-1">
+                        <input
+                            type="text" placeholder="Dia" disabled={isReadOnly} maxLength={3}
+                            className={`w-full p-3 bg-slate-50 border rounded-xl font-black text-sm text-center focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-sm ${fieldErrors.diastolic ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'}`}
+                            value={diastolic}
+                            onChange={(e) => setDiastolic(e.target.value.replaceAll(/\D/g, ''))}
+                            onBlur={(e) => handleFieldBlur('diastolic', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </FormField>
+
+                  {/* 2. Heart Rate Input Block */}
+                  <FormField
+                      label={
+                        <div className="flex items-center gap-1.5 font-bold text-slate-700 text-xs">
+                          <div className="w-5 h-5 rounded-full bg-orange-50/70 border border-orange-100/50 flex items-center justify-center text-orange-700 shrink-0">
+                            <span className="material-symbols-outlined text-[13px] font-black">favorite</span>
+                          </div>
+                          <span>Heart Rate / Pulse (BPM)</span>
+                        </div>
+                      }
+                      error={fieldErrors.heartRate}
+                  >
+                    <div className="relative mt-1">
+                      <input
+                          type="text" placeholder="e.g. 72" disabled={isReadOnly} maxLength={3}
+                          className={`w-full p-3 bg-slate-50 border rounded-xl font-black text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-sm ${fieldErrors.heartRate ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'}`}
+                          value={heartRate}
+                          onChange={(e) => setHeartRate(e.target.value.replaceAll(/\D/g, ''))}
+                          onBlur={(e) => handleFieldBlur('heartRate', e.target.value)}
+                      />
+                    </div>
+                  </FormField>
+
+                  {/* 3. Temperature Input Block with SWITCH TOGGLE CONTROLS */}
+                  <FormField
+                      label={
+                        <div className="flex justify-between items-center w-full font-bold text-slate-700 text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-5 h-5 rounded-full bg-orange-50/70 border border-orange-100/50 flex items-center justify-center text-orange-700 shrink-0">
+                              <span className="material-symbols-outlined text-[13px] font-black">device_thermostat</span>
+                            </div>
+                            <span>Body Temperature</span>
+                          </div>
+
+                          <div className="flex border border-slate-300/80 rounded-md overflow-hidden bg-slate-100 p-0.5 scale-110 origin-right shrink-0 shadow-sm">
+                            <button
+                                type="button" disabled={isReadOnly}
+                                onClick={() => setDisplayTempUnit('F')}
+                                className={`px-3 py-0.5 text-[11px] font-extrabold rounded transition-all uppercase tracking-wide ${displayTempUnit === 'F' ? 'bg-orange-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >°F</button>
+                            <button
+                                type="button" disabled={isReadOnly}
+                                onClick={() => setDisplayTempUnit('C')}
+                                className={`px-3 py-0.5 text-[11px] font-extrabold rounded transition-all uppercase tracking-wide ${displayTempUnit === 'C' ? 'bg-orange-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >°C</button>
+                          </div>
+                        </div>
+                      }
+                      error={fieldErrors.temperature}
+                  >
+                    <div className="relative mt-1">
+                      <input
+                          type="text" placeholder={displayTempUnit === 'F' ? 'e.g. 98.6' : 'e.g. 37.0'} disabled={isReadOnly}
+                          className={`w-full p-3 bg-slate-50 border rounded-xl font-black text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-sm ${fieldErrors.temperature ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'}`}
+                          value={temperature}
+                          onChange={(e) => setTemperature(e.target.value.replaceAll(/[^0-9.]/g, ''))}
+                          onBlur={(e) => handleFieldBlur('temperature', e.target.value)}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-slate-400 pointer-events-none">°{displayTempUnit}</span>
+                    </div>
+                  </FormField>
+
+                  {/* 4. Oxygen Level SpO2 Input Block */}
+                  <FormField
+                      label={
+                        <div className="flex items-center gap-1.5 font-bold text-slate-700 text-xs">
+                          <div className="w-5 h-5 rounded-full bg-orange-50/70 border border-orange-100/50 flex items-center justify-center text-orange-700 shrink-0">
+                            <span className="material-symbols-outlined text-[13px] font-black">airwave</span>
+                          </div>
+                          <span>Oxygen Level SpO2 (%)</span>
+                        </div>
+                      }
+                      error={fieldErrors.oxygenLevel}
+                  >
+                    <div className="relative mt-1">
+                      <input
+                          type="text" placeholder="e.g. 98" disabled={isReadOnly} maxLength={3}
+                          className={`w-full p-3 bg-slate-50 border rounded-xl font-black text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-sm ${fieldErrors.oxygenLevel ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'}`}
+                          value={oxygenLevel}
+                          onChange={(e) => setOxygenLevel(e.target.value.replaceAll(/\D/g, ''))}
+                          onBlur={(e) => handleFieldBlur('oxygenLevel', e.target.value)}
+                      />
+                    </div>
+                  </FormField>
+
+                  {/* 5. Weight Input Block */}
+                  <FormField
+                      label={
+                        <div className="flex items-center gap-1.5 font-bold text-slate-700 text-xs">
+                          <div className="w-5 h-5 rounded-full bg-orange-50/70 border border-orange-100/50 flex items-center justify-center text-orange-700 shrink-0">
+                            <span className="material-symbols-outlined text-[13px] font-black">weight</span>
+                          </div>
+                          <span>Body Weight (kg)</span>
+                        </div>
+                      }
+                      error={fieldErrors.weight}
+                  >
+                    <div className="relative mt-1">
+                      <input
+                          type="text" placeholder="e.g. 70" disabled={isReadOnly} maxLength={5}
+                          className={`w-full p-3 bg-slate-50 border rounded-xl font-black text-sm focus:ring-2 focus:ring-orange-500 outline-none transition-all shadow-sm ${fieldErrors.weight ? 'border-red-500 bg-red-50 text-red-900' : 'border-slate-200 text-slate-800'}`}
+                          value={weight}
+                          onChange={(e) => setWeight(e.target.value.replaceAll(/[^0-9.]/g, ''))}
+                          onBlur={(e) => handleFieldBlur('weight', e.target.value)}
+                      />
+                    </div>
+                  </FormField>
+
+                </div>
+
+                {/* ACTION BUTTON TRIGGER */}
+                {!isReadOnly && (
+                    <div className="pt-3.5 border-t border-slate-100 flex justify-end">
+                      <Button
+                          type="submit" disabled={saving}
+                          className="w-full sm:w-auto px-10 py-2.5 bg-orange-700 hover:bg-orange-800 shadow-md text-xs font-black uppercase tracking-wider transition-all duration-150"
+                          icon={saving ? 'sync' : 'check_circle'}
+                      >
+                        {saving ? 'Processing Log...' : 'Submit Clinical Vitals'}
+                      </Button>
+                    </div>
+                )}
+              </form>
+            </Card>
+          </div>
+
+        </div>
+      </MainLayout>
   );
 };

@@ -29,7 +29,7 @@ export const validateVital = (
 
   // Handle range validation if config exists
   if (range && (numValue < range.minValue || numValue > range.maxValue)) {
-    return `${label} must be between ${range.minValue} and ${range.maxValue}`;
+    return range.errorMessage || `${label} must be between ${range.minValue} and ${range.maxValue}`;
   }
 
   return null;

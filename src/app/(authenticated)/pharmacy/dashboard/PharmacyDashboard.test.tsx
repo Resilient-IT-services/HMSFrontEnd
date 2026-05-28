@@ -80,7 +80,8 @@ describe('PharmacyDashboard', () => {
       expect(pharmacyService.getLowStockCount).toHaveBeenCalled();
       expect(screen.getAllByText('Amit Sharma')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Meera Singh')[0]).toBeInTheDocument();
-      expect(screen.getByText('3 inventory records currently need attention.')).toBeInTheDocument();
+      expect(screen.getAllByText('Low Stock Alerts')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('03')[0]).toBeInTheDocument();
     });
   });
 
