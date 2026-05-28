@@ -151,8 +151,8 @@ export const MobileSelector: React.FC<MobileSelectorProps> = ({
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    return () => setMounted(false);
   }, []);
 
   const selectedOption = options.find(o => String(o.id) === String(value));

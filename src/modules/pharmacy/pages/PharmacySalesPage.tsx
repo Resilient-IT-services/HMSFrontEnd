@@ -31,7 +31,7 @@ export const PharmacySalesPage = () => {
 
   React.useEffect(() => {
     if (patientIdParam) {
-      void patientService.get(patientIdParam).then(res => {
+      patientService.get(patientIdParam).then(res => {
         if (res.success && res.data) setSelectedPatient(res.data);
       });
     }

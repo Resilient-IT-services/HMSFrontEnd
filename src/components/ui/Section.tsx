@@ -62,7 +62,7 @@ export const Section: React.FC<SectionProps> = ({
       </div>
       <div className={cn(
         grid ? "grid gap-x-6 md:gap-x-8 gap-y-4 md:gap-y-6" : "block",
-        // @ts-expect-error
+        // @ts-expect-error - index typing for dynamic column mapping
         grid && (gridCols[cols] || gridCols[2])
       )}>
         {children}

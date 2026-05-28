@@ -23,16 +23,17 @@ export const LayoutProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [headerActions, setHeaderActions] = useState<React.ReactNode | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [hideGlobalSearch, setHideGlobalSearch] = useState(false);
-  const [isCompressed, setIsCompressed] = useState(false);
-
-  // Initialize from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('ui_compressed');
-    if (saved === 'true') {
-      setIsCompressed(true);
-      document.documentElement.classList.add('ui-compressed');
+  const [isCompressed, setIsCompressed] = useState(() => {
+    if (globalThis.window !== undefined) {
+      return localStorage.getItem('ui_compressed') === 'true';
     }
-  }, []);
+    return false;
+  });
+
+  // Handle document class sync separately
+  useEffect(() => {
+    document.documentElement.classList.toggle('ui-compressed', isCompressed);
+  }, [isCompressed]);
 
   const setTitle = useCallback((newTitle: string) => {
     setTitleState(newTitle);

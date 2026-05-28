@@ -76,8 +76,6 @@ export default function AuthenticatedLayout({
     globalThis.addEventListener('touchstart', handleTouchStart, { passive: true });
     globalThis.addEventListener('click', handleInteraction);
 
-    startHideTimer();
-
     return () => {
       if (scrollContainer) {
         scrollContainer.removeEventListener('scroll', handleScroll);
@@ -89,6 +87,13 @@ export default function AuthenticatedLayout({
       globalThis.removeEventListener('click', handleInteraction);
       if (hideTimer.current) clearTimeout(hideTimer.current);
     };
+  }, [startHideTimer]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      startHideTimer();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [startHideTimer]);
 
   return (

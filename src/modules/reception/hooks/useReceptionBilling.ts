@@ -151,11 +151,14 @@ export const useReceptionBilling = () => {
   }, [patientIdParam, doctorIdParam, appointmentTimeParam, notesParam, sessionPeriodParam, hospitalTimezone]);
 
   useEffect(() => {
-    if (appointmentId) {
-      fetchData();
-    } else {
-      loadNewAppointmentBilling();
-    }
+    const timer = setTimeout(() => {
+      if (appointmentId) {
+        fetchData();
+      } else {
+        loadNewAppointmentBilling();
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [appointmentId, fetchData, loadNewAppointmentBilling]);
 
   const consultationFee = doctor?.consultationFee || 0;

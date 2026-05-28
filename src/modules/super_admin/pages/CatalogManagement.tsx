@@ -46,7 +46,10 @@ export function CatalogManagement() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchData]);
 
   const handleOpenModal = (item?: any) => {

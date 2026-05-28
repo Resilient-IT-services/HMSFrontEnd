@@ -38,7 +38,7 @@ export const useMedicalHistory = () => {
       
       // Determine if search term looks like a patient code (e.g. PAT-001, 26-005) or is numeric
       const trimmed = search.trim();
-      const looksLikeCode = /^[\w\d]+-[\w\d]+$/.test(trimmed) || /^\d+$/.test(trimmed);
+      const looksLikeCode = /^\w+-\w+$/.test(trimmed) || /^\d+$/.test(trimmed);
       
       // Remove doctorId filter to allow searching all doctors/patients as requested
       // We pass the term to both search and specific fields if the backend supports them

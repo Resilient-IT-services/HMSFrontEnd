@@ -49,7 +49,10 @@ export function VitalsConfigPage() {
   }, []);
 
   useEffect(() => {
-    void fetchSettings();
+    const timer = setTimeout(() => {
+      void fetchSettings();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchSettings]);
 
   const handleOpenModal = (type: string, currentRange?: any) => {

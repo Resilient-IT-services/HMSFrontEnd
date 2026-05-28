@@ -33,6 +33,7 @@ const MedicineSearchInput = ({
   error?: boolean;
 }) => {
   const [searchTerm, setSearchTerm] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
   const [results, setResults] = useState<any[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -40,11 +41,10 @@ const MedicineSearchInput = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const lastFetchedSearch = useRef('');
 
-  useEffect(() => {
-    if (value !== searchTerm) {
-      setSearchTerm(value);
-    }
-  }, [value]);
+  if (value !== prevValue) {
+    setSearchTerm(value);
+    setPrevValue(value);
+  }
 
   useEffect(() => {
     const fetchMedicines = async () => {
@@ -156,39 +156,33 @@ export const ActiveConsultationPage = () => {
   const [showPreview, setShowPreview] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, boolean>>({});
 
-  // Duplicate medicine validation
-  useEffect(() => {
-    setValidationErrors(prev => {
-      const newErrors = { ...prev };
-      const activePrescriptions = prescriptions.filter(p => p.medicine);
-      const medicineNames = activePrescriptions.map(p => p.medicine.toLowerCase().trim());
-      const medicineIds = activePrescriptions.filter(p => p.medicineId).map(p => p.medicineId);
+  // Duplicate medicine validation derived from state
+  const duplicateErrors = useMemo(() => {
+    const errors: Record<string, boolean> = {};
+    const activePrescriptions = prescriptions.filter(p => p.medicine);
+    const medicineNames = activePrescriptions.map(p => p.medicine.toLowerCase().trim());
+    const medicineIds = activePrescriptions.filter(p => p.medicineId).map(p => p.medicineId);
 
-      let hasChanged = false;
-      prescriptions.forEach(p => {
-        if (!p.medicine) {
-          if (newErrors[`${p.id}-medicine`]) {
-            newErrors[`${p.id}-medicine`] = false;
-            hasChanged = true;
-          }
-          return;
-        }
-
-        const name = p.medicine.toLowerCase().trim();
-        const id = p.medicineId;
-        const isDuplicateByName = medicineNames.filter(n => n === name).length > 1;
-        const isDuplicateById = id && medicineIds.filter(i => i === id).length > 1;
-        const isDuplicate = isDuplicateByName || isDuplicateById;
-
-        if (newErrors[`${p.id}-medicine`] !== isDuplicate) {
-          newErrors[`${p.id}-medicine`] = !!isDuplicate;
-          hasChanged = true;
-        }
-      });
-
-      return hasChanged ? newErrors : prev;
+    prescriptions.forEach(p => {
+      if (!p.medicine) return;
+      
+      const name = p.medicine.toLowerCase().trim();
+      const id = p.medicineId;
+      const isDuplicateByName = medicineNames.filter(n => n === name).length > 1;
+      const isDuplicateById = id && medicineIds.filter(i => i === id).length > 1;
+      
+      if (isDuplicateByName || isDuplicateById) {
+        errors[`${p.id}-medicine`] = true;
+      }
     });
+
+    return errors;
   }, [prescriptions]);
+
+  const allValidationErrors = useMemo(() => ({
+    ...validationErrors,
+    ...duplicateErrors
+  }), [validationErrors, duplicateErrors]);
 
   const fetchAppointment = useCallback(async () => {
     if (!appointmentId) return;
@@ -231,7 +225,7 @@ export const ActiveConsultationPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [appointmentId, user?.currentHospitalId]);
+  }, [appointmentId, user]);
 
   useEffect(() => {
     const trigger = async () => {

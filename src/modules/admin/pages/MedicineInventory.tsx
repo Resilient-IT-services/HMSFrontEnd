@@ -143,7 +143,7 @@ export const MedicineInventory = () => {
           const byteCharacters = atob(errorFileBase64);
           const byteArray = new Uint8Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
-            byteArray[i] = byteCharacters.charCodeAt(i);
+            byteArray[i] = byteCharacters.codePointAt(i)!;
           }
           const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
           

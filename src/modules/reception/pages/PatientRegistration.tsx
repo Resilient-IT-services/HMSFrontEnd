@@ -87,7 +87,7 @@ export function PatientRegistration({ patientId }: { patientId?: string } = {}) 
       newErrors.dob = dobValidation.message || 'Invalid date of birth';
     }
 
-    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (formData.email && !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 

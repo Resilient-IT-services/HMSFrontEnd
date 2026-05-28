@@ -49,7 +49,7 @@ export const useReceptionDoctors = () => {
     try {
       const res = await catalogService.getDepartments();
       if (res.success && res.data) {
-        setDepartmentOptions(res.data.sort((a, b) => a.localeCompare(b)));
+        setDepartmentOptions(res.data.toSorted((a, b) => a.localeCompare(b)));
       }
     } catch (error) {
       console.error('Failed to fetch doctor departments', error);

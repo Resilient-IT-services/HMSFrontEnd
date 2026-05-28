@@ -21,15 +21,17 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
   stockOnly = false
 }) => {
   const [searchTerm, setSearchTerm] = useState(defaultValue);
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
   const [results, setResults] = useState<MedicineResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const debouncedSearch = useDebounce(searchTerm, 300);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  if (defaultValue !== prevDefaultValue) {
     setSearchTerm(defaultValue);
-  }, [defaultValue]);
+    setPrevDefaultValue(defaultValue);
+  }
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -40,8 +42,7 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
       
       setLoading(true);
       try {
-        let response;
-        response = await (stockOnly ? pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 10 }) : pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 }));
+        const response = await (stockOnly ? pharmacyApi.getMedicineStock({ search: debouncedSearch, size: 10 }) : pharmacyApi.getMedicinesSummary({ search: debouncedSearch, size: 10 }));
 
         if (response.success && response.data) {
           // Normalize results: convert PharmacyStockDTO to a format similar to MedicineResponse for the dropdown

@@ -13,15 +13,17 @@ interface DoctorSearchProps {
 
 const DoctorSearch: React.FC<DoctorSearchProps> = ({ onSelect, defaultValue = '' }) => {
   const [searchTerm, setSearchTerm] = useState(defaultValue);
+  const [prevDefaultValue, setPrevDefaultValue] = useState(defaultValue);
   const [results, setResults] = useState<DoctorStaffResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const debouncedSearch = useDebounce(searchTerm, 300);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  if (defaultValue !== prevDefaultValue) {
     setSearchTerm(defaultValue);
-  }, [defaultValue]);
+    setPrevDefaultValue(defaultValue);
+  }
 
   useEffect(() => {
     const fetchResults = async () => {

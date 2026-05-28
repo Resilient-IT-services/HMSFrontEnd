@@ -260,7 +260,7 @@ export default function AdminReportsPage() {
         }
 
         if (format === 'excel') {
-          const header = columns.map(titleCase).join(',');
+          const header = columns.map(c => titleCase(c)).join(',');
           const csvRows = rows.map((row) =>
             columns
               .map((col) => {

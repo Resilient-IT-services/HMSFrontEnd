@@ -16,6 +16,108 @@ import { validateDOB } from '@/utils/dateValidator';
 import { cloneHospitalMembership } from './contractClone';
 import { DAY_OF_WEEK_OPTIONS } from '@/utils/enumOptions';
 
+const cleanDoctorInfo = (info: UserRequestDTO['doctorInfo']) => {
+  if (!info) return;
+  return {
+    ...info,
+    specializations: info.specializations?.length ? info.specializations : (info.specialization ? [info.specialization] : []),
+    specialization: info.specialization?.trim(),
+    licenseNumber: info.licenseNumber?.trim(),
+    registrationNumber: info.registrationNumber?.trim() || undefined,
+    bio: info.bio?.trim() || '',
+    education: {
+      qualifications: (info.education?.qualifications || [])
+        .map((qualification) => ({
+          degree: qualification.degree?.trim(),
+          institution: qualification.institution?.trim(),
+          year: qualification.year,
+          specialization: qualification.specialization?.trim(),
+        }))
+        .filter((qualification) => qualification.degree || qualification.institution || qualification.specialization || qualification.year)
+        .map((qualification) => ({
+          degree: qualification.degree || '',
+          institution: qualification.institution || '',
+          year: qualification.year || 0,
+          specialization: qualification.specialization || '',
+        }))
+    }
+  };
+};
+
+const cleanNurseInfo = (info: UserRequestDTO['nurseInfo']) => {
+  if (!info) return;
+  return { ...info, nursingLicenseNo: info.nursingLicenseNo?.trim() };
+};
+
+const cleanPharmacistInfo = (info: UserRequestDTO['pharmacistInfo']) => {
+  if (!info) return;
+  return { ...info, pciRegNo: info.pciRegNo?.trim() };
+};
+
+const cleanLabTechInfo = (info: UserRequestDTO['labTechInfo']) => {
+  if (!info) return;
+  return { ...info, licenseNo: info.licenseNo?.trim(), specialty: info.specialty?.trim() };
+};
+
+const cleanReceptionistInfo = (info: UserRequestDTO['receptionistInfo']) => {
+  if (!info) return;
+  return {
+    ...info,
+    languagesSpoken: {
+      fluencies: (info.languagesSpoken?.fluencies || [])
+        .map((fluency) => ({ language: fluency.language?.trim(), proficiency: fluency.proficiency }))
+        .filter((fluency) => fluency.language)
+        .map((fluency) => ({ language: fluency.language || '', proficiency: fluency.proficiency || 'BASIC' }))
+    }
+  };
+};
+
+const mapInitialDataToForm = (initialData?: UserFullProfileDTO): UserRequestDTO => ({
+  id: initialData?.id,
+  username: initialData?.username || '',
+  fullName: initialData?.fullName || '',
+  email: initialData?.email || '',
+  phone: initialData?.phone || '',
+  dob: initialData?.dob || '',
+  gender: (initialData?.gender as any) || 'MALE',
+  password: '',
+  superuser: initialData?.superuser || false,
+  active: initialData?.status ? initialData.status === 'ACTIVE' : initialData?.active ?? true,
+  status: initialData?.status || (initialData?.active === false ? 'INACTIVE' : 'ACTIVE'),
+  memberships: initialData?.memberships?.map(membership => cloneHospitalMembership(membership)) || [],
+  doctorInfo: initialData?.doctorInfo ? {
+    ...initialData.doctorInfo,
+    specialization: initialData.doctorInfo.specializations?.[0] || initialData.doctorInfo.specialization || '',
+    specializations: initialData.doctorInfo.specializations || [],
+    education: { qualifications: initialData.doctorInfo.education?.qualifications || [] }
+  } : undefined,
+  nurseInfo: initialData?.nurseInfo,
+  pharmacistInfo: initialData?.pharmacistInfo,
+  labTechInfo: initialData?.labTechInfo,
+  receptionistInfo: initialData?.receptionistInfo ? {
+    ...initialData.receptionistInfo,
+    languagesSpoken: { fluencies: initialData.receptionistInfo.languagesSpoken?.fluencies || [] }
+  } : undefined,
+});
+
+const validateProfessionalDetails = (assignedRoles: string[], formData: UserRequestDTO, errors: Record<string, string>) => {
+  if (assignedRoles.includes('DOCTOR') && formData.doctorInfo) {
+    if ((!formData.doctorInfo.specializations || formData.doctorInfo.specializations.length === 0) && !formData.doctorInfo.specialization?.trim()) {
+      errors.specialization = 'Specialization is required';
+    }
+    if (!formData.doctorInfo.licenseNumber?.trim()) errors.licenseNumber = 'License number is required';
+  }
+  if (assignedRoles.includes('NURSE') && formData.nurseInfo && !formData.nurseInfo.nursingLicenseNo?.trim()) {
+    errors.nursingLicenseNo = 'Nurse license number is required';
+  }
+  if (assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo && !formData.pharmacistInfo.pciRegNo?.trim()) {
+    errors.pciRegNo = 'PCI Registration number is required';
+  }
+  if (assignedRoles.includes('LAB_TECHNICIAN') && formData.labTechInfo && !formData.labTechInfo.licenseNo?.trim()) {
+    errors.licenseNo = 'License number is required';
+  }
+};
+
 export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: boolean) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'personal' | 'contracts' | 'profile'>('personal');
@@ -23,431 +125,92 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   const [specializations, setSpecializations] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
-  const [formData, setFormData] = useState<UserRequestDTO>({
-    id: initialData?.id,
-    username: initialData?.username || '',
-    fullName: initialData?.fullName || '',
-    email: initialData?.email || '',
-    phone: initialData?.phone || '',
-    dob: initialData?.dob || '',
-    gender: (initialData?.gender as any) || 'MALE',
-    password: '',
-    superuser: initialData?.superuser || false,
-    active: initialData?.status ? initialData.status === 'ACTIVE' : initialData?.active ?? true,
-    status: initialData?.status || (initialData?.active === false ? 'INACTIVE' : 'ACTIVE'),
-    memberships: initialData?.memberships?.map(membership => cloneHospitalMembership(membership)) || [],
-    doctorInfo: initialData?.doctorInfo ? {
-        ...initialData.doctorInfo,
-        specialization: initialData.doctorInfo.specializations?.[0] || initialData.doctorInfo.specialization || '',
-        specializations: initialData.doctorInfo.specializations || [],
-        education: {
-          qualifications: initialData.doctorInfo.education?.qualifications || []
-        }
-    } : undefined,
-    nurseInfo: initialData?.nurseInfo,
-    pharmacistInfo: initialData?.pharmacistInfo,
-    labTechInfo: initialData?.labTechInfo,
-    receptionistInfo: initialData?.receptionistInfo ? {
-      ...initialData.receptionistInfo,
-      languagesSpoken: {
-        fluencies: initialData.receptionistInfo.languagesSpoken?.fluencies || []
-      }
-    } : undefined,
-  });
+  const [formData, setFormData] = useState<UserRequestDTO>(() => mapInitialDataToForm(initialData));
 
   const [isAddingContract, setIsAddingContract] = useState(false);
   const [editingContractIndex, setEditingContractIndex] = useState<number | null>(null);
   const [newContract, setNewContract] = useState<HospitalMembershipDTO>({ hospitalId: '', roleAssignments: [] });
 
-  const getAssignedRoles = (memberships: HospitalMembershipDTO[]) => {
+  const assignedRoles = useMemo(() => {
     const roles = new Set<string>();
-    if (memberships) for (const m of memberships) {
+    if (formData.memberships) for (const m of formData.memberships) {
       if (m.roleAssignments) for (const ra of m.roleAssignments) roles.add(ra.roleCode);
       if ((m as any).roles) (m as any).roles.forEach((r: string) => roles.add(r));
     }
     return [...roles];
-  };
-
-  const assignedRoles = useMemo(() => getAssignedRoles(formData.memberships || []), [formData.memberships]);
-
-  const getProfileInfoUpdates = (memberships: HospitalMembershipDTO[], currentFormData: UserRequestDTO) => {
-    const roles = getAssignedRoles(memberships);
-    const updates: Partial<UserRequestDTO> = {};
-    
-    if (roles.includes('DOCTOR') && !currentFormData.doctorInfo) {
-      updates.doctorInfo = { specialization: '', specializations: [], licenseNumber: '', bio: '', education: { qualifications: [] } };
-    }
-    if (roles.includes('NURSE') && !currentFormData.nurseInfo) {
-      updates.nurseInfo = { nursingLicenseNo: '', certificationLevel: 'RN' };
-    }
-    if (roles.includes('PHARMACIST') && !currentFormData.pharmacistInfo) {
-      updates.pharmacistInfo = { pciRegNo: '', qualification: '' };
-    }
-    if (roles.includes('LAB_TECHNICIAN') && !currentFormData.labTechInfo) {
-      updates.labTechInfo = { specialty: '', licenseNo: '' };
-    }
-    if (roles.includes('RECEPTIONIST') && !currentFormData.receptionistInfo) {
-      updates.receptionistInfo = { languagesSpoken: { fluencies: [] }, insuranceSpecialist: false };
-    }
-    return updates;
-  };
-
-  const clearContractErrors = () => {
-    setValidationErrors(prev => {
-      const next = { ...prev };
-      delete next.contractHospital;
-      delete next.contractRoles;
-      Object.keys(next).forEach(key => {
-        if (key.startsWith('department_') || key.startsWith('departments_') || key.startsWith('fee_')) {
-          delete next[key];
-        }
-      });
-      return next;
-    });
-  };
-
-  const openAddContract = () => {
-    clearContractErrors();
-    setNewContract({ hospitalId: '', roleAssignments: [] });
-    setEditingContractIndex(null);
-    setIsAddingContract(true);
-  };
-
-  const openEditContract = (index: number, contract: HospitalMembershipDTO) => {
-    clearContractErrors();
-    setNewContract(cloneHospitalMembership(contract));
-    setEditingContractIndex(index);
-    setIsAddingContract(true);
-  };
+  }, [formData.memberships]);
 
   useEffect(() => {
-    hospitalService.list().then(res => {
-      if (res.success && res.data) setHospitals(res.data.content || []);
-    });
-    catalogService.getSpecializations().then(res => {
-      if (res.success && res.data) setSpecializations(res.data);
-    });
+    hospitalService.list().then(res => { if (res.success && res.data) setHospitals(res.data.content || []); });
+    catalogService.getSpecializations().then(res => { if (res.success && res.data) setSpecializations(res.data); });
   }, []);
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
+    if (!formData.fullName?.trim()) errors.fullName = 'Full name is required';
+    if (!formData.username?.trim()) errors.username = 'Username is required';
+    if (!isEdit && !formData.password?.trim()) errors.password = 'Password is required';
     
-    // Full Name
-    if (!formData.fullName?.trim()) {
-      errors.fullName = 'Full name is required';
-    } else if (formData.fullName.trim().length < 3) {
-      errors.fullName = 'Full name must be at least 3 characters';
-    }
+    const emailRegex = /^[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}$/;
+    if (!formData.email?.trim()) errors.email = 'Email is required';
+    else if (!emailRegex.test(formData.email)) errors.email = 'Invalid email format';
 
-    // Username
-    if (!formData.username?.trim()) {
-      errors.username = 'Username is required';
-    } else if (formData.username.trim().length < 4) {
-      errors.username = 'Username must be at least 4 characters';
-    }
-
-    // Password (only for new users)
-    if (!isEdit && !formData.password?.trim()) {
-      errors.password = 'Password is required';
-    } else if (!isEdit && formData.password && formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-
-    // Email
-    // eslint-disable-next-line sonarjs/slow-regex
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!formData.email?.trim()) {
-      errors.email = 'Email is required';
-    } else if (!emailRegex.test(formData.email)) {
-      errors.email = 'Invalid email format';
-    }
-
-    // Phone
     const phoneRegex = /^\+?[0-9]{10,15}$/;
-    if (!formData.phone?.trim()) {
-      errors.phone = 'Phone number is required';
-    } else if (!phoneRegex.test(formData.phone.replaceAll(/\s/g, ''))) {
-      errors.phone = 'Invalid phone number (10-15 digits)';
-    }
+    if (!formData.phone?.trim()) errors.phone = 'Phone number is required';
+    else if (!phoneRegex.test(formData.phone.replaceAll(/\s/g, ''))) errors.phone = 'Invalid phone number';
 
-    // DOB
     const dobValidation = validateDOB(formData.dob);
-    if (!dobValidation.isValid) {
-      errors.dob = dobValidation.message || 'Invalid date of birth';
-    }
-    
-    if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) {
-      errors.memberships = 'At least one hospital contract is required for non-superusers.';
-    }
+    if (!dobValidation.isValid) errors.dob = dobValidation.message || 'Invalid DOB';
+    if (!formData.superuser && (!formData.memberships || formData.memberships.length === 0)) errors.memberships = 'Hospital contract required';
 
-    // Doctor Specific Validation
-    if (assignedRoles.includes('DOCTOR') && formData.doctorInfo) {
-      if ((!formData.doctorInfo.specializations || formData.doctorInfo.specializations.length === 0) && !formData.doctorInfo.specialization?.trim()) {
-            errors.specialization = 'Specialization is required';
-          }
-      if (!formData.doctorInfo.licenseNumber?.trim()) {
-        errors.licenseNumber = 'License number is required';
-      }
-    }
-
-    // Nurse Specific Validation
-    if (assignedRoles.includes('NURSE') && formData.nurseInfo) {
-      const nurseLicense = formData.nurseInfo.nursingLicenseNo?.trim();
-      if (!nurseLicense) {
-        errors.nursingLicenseNo = 'Nurse license number is required';
-      }
-    }
-
-    // Pharmacist Specific Validation
-    if (assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo) {
-      const pciRegNo = formData.pharmacistInfo.pciRegNo?.trim();
-      if (!pciRegNo) {
-        errors.pciRegNo = 'PCI Registration number is required';
-      }
-    }
-
-    // Lab Tech Specific Validation
-    if (assignedRoles.includes('LAB_TECHNICIAN') && formData.labTechInfo && !formData.labTechInfo.licenseNo?.trim()) {
-      errors.licenseNo = 'License number is required';
-    }
-
+    validateProfessionalDetails(assignedRoles, formData, errors);
     setValidationErrors(errors);
-    if (Object.keys(errors).length > 0) {
-      triggerGlobalToast('Please fill all required professional details', 'error');
-    }
+    if (Object.keys(errors).length > 0) triggerGlobalToast('Please fix validation errors', 'error');
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!validate()) return;
-
     try {
       setLoading(true);
-      
-      // Clean data before submission to ensure no empty unique fields are sent
-      const cleanedDoctorInfo = formData.doctorInfo ? {
-        ...formData.doctorInfo,
-        specializations: formData.doctorInfo.specializations?.length ? formData.doctorInfo.specializations : (formData.doctorInfo.specialization ? [formData.doctorInfo.specialization] : []),
-        specialization: formData.doctorInfo.specialization?.trim(),
-        licenseNumber: formData.doctorInfo.licenseNumber?.trim(),
-        registrationNumber: formData.doctorInfo.registrationNumber?.trim() || undefined,
-        bio: formData.doctorInfo.bio?.trim() || '',
-        education: {
-          qualifications: (formData.doctorInfo.education?.qualifications || [])
-            .map((qualification) => ({
-              degree: qualification.degree?.trim(),
-              institution: qualification.institution?.trim(),
-              year: qualification.year,
-              specialization: qualification.specialization?.trim(),
-            }))
-            .filter((qualification) => qualification.degree || qualification.institution || qualification.specialization || qualification.year)
-            .map((qualification) => ({
-              degree: qualification.degree || '',
-              institution: qualification.institution || '',
-              year: qualification.year || 0,
-              specialization: qualification.specialization || '',
-            }))
-        }
-      } : undefined;
-
-      const cleanedNurseInfo = formData.nurseInfo ? {
-        ...formData.nurseInfo,
-        nursingLicenseNo: formData.nurseInfo.nursingLicenseNo?.trim()
-      } : undefined;
-
-      const cleanedPharmacistInfo = formData.pharmacistInfo ? {
-        ...formData.pharmacistInfo,
-        pciRegNo: formData.pharmacistInfo.pciRegNo?.trim()
-      } : undefined;
-
-      const cleanedLabTechInfo = formData.labTechInfo ? {
-        ...formData.labTechInfo,
-        licenseNo: formData.labTechInfo.licenseNo?.trim(),
-        specialty: formData.labTechInfo.specialty?.trim()
-      } : undefined;
-
-      const cleanedReceptionistInfo = formData.receptionistInfo ? {
-        ...formData.receptionistInfo,
-        languagesSpoken: {
-          fluencies: (formData.receptionistInfo.languagesSpoken?.fluencies || [])
-            .map((fluency) => ({
-              language: fluency.language?.trim(),
-              proficiency: fluency.proficiency
-            }))
-            .filter((fluency) => fluency.language)
-            .map((fluency) => ({
-              language: fluency.language || '',
-              proficiency: fluency.proficiency || 'BASIC'
-            }))
-        }
-      } : undefined;
-
       const userPayload: UserRequestDTO = {
         ...formData,
-        doctorInfo: cleanedDoctorInfo,
-        nurseInfo: cleanedNurseInfo,
-        pharmacistInfo: cleanedPharmacistInfo,
-        labTechInfo: cleanedLabTechInfo,
-        receptionistInfo: cleanedReceptionistInfo,
+        doctorInfo: cleanDoctorInfo(formData.doctorInfo),
+        nurseInfo: cleanNurseInfo(formData.nurseInfo),
+        pharmacistInfo: cleanPharmacistInfo(formData.pharmacistInfo),
+        labTechInfo: cleanLabTechInfo(formData.labTechInfo),
+        receptionistInfo: cleanReceptionistInfo(formData.receptionistInfo),
         status: formData.active ? 'ACTIVE' : 'INACTIVE'
       };
-      const response = isEdit && initialData?.id
-        ? await userService.updateUser(initialData.id, userPayload)
-        : await userService.createUser(userPayload);
-
-      if (response.success) {
-        router.push('/admin/users');
-      }
-    } catch (error: unknown) {
-      const apiError = error as {
-        response?: {
-          data?: {
-            details?: Record<string, string>;
-          };
-        };
-      };
-
-      if (apiError.response?.data?.details) {
-        setValidationErrors(apiError.response.data.details);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const checkScheduleOverlaps = (memberships: HospitalMembershipDTO[]) => {
-    const dayNames = DAY_OF_WEEK_OPTIONS.map((option) => option.value) as Array<NonNullable<ScheduleDTO['dayOfWeek']>>;
-    const dayOrder: Record<string, number> = {
-      MONDAY: 1,
-      TUESDAY: 2,
-      WEDNESDAY: 3,
-      THURSDAY: 4,
-      FRIDAY: 5,
-      SATURDAY: 6,
-      SUNDAY: 7
-    };
-    const allSchedules: Array<ScheduleDTO & { hospitalName: string; roleCode: string }> = [];
-    
-    for (const m of memberships) {
-      for (const ra of m.roleAssignments || []) {
-        if (ra.schedules) {
-          for (const s of ra.schedules) {
-            allSchedules.push({ ...s, hospitalName: m.hospitalName || 'Unknown Hospital', roleCode: ra.roleCode });
-          }
-        }
-      }
-    }
-
-    allSchedules.sort((a, b) => {
-      const aDay = dayOrder[a.dayOfWeek] || 99;
-      const bDay = dayOrder[b.dayOfWeek] || 99;
-      if (aDay !== bDay) return aDay - bDay;
-      return a.startTime.localeCompare(b.startTime);
-    });
-
-    const timeToMinutes = (time: string) => {
-      const [h, m] = time.split(':').map(Number);
-      return (h || 0) * 60 + (m || 0);
-    };
-
-    for (let i = 0; i < allSchedules.length - 1; i++) {
-      const current = allSchedules[i];
-      const next = allSchedules[i + 1];
-
-      if (current.dayOfWeek === next.dayOfWeek && timeToMinutes(current.endTime) > timeToMinutes(next.startTime)) {
-        const dayName = current.dayOfWeek || dayNames[0];
-        triggerGlobalToast(
-          `Overlapping schedules on ${dayName}: ${current.startTime}-${current.endTime} (${current.hospitalName}) and ${next.startTime}-${next.endTime} (${next.hospitalName})`,
-          'error'
-        );
-        return true;
-      }
-    }
-    return false;
+      const response = isEdit && initialData?.id ? await userService.updateUser(initialData.id, userPayload) : await userService.createUser(userPayload);
+      if (response.success) router.push('/admin/users');
+    } catch (error: any) {
+      if (error.response?.data?.details) setValidationErrors(error.response.data.details);
+    } finally { setLoading(false); }
   };
 
   const confirmAddContract = () => {
-    const errors: Record<string, string> = {};
-    if (!newContract.hospitalId) {
-      errors.contractHospital = 'Please select a hospital facility';
-    }
-    if (!newContract.roleAssignments || newContract.roleAssignments.length === 0) {
-      errors.contractRoles = 'Please select at least one role for this contract';
-    } else {
-      newContract.roleAssignments.forEach((ra) => {
-        if (!ra.departments || ra.departments.length === 0) {
-          errors[`departments_${ra.roleCode}`] = 'At least one department is required';
-        }
-        if (ra.roleCode === 'DOCTOR') {
-          if (ra.doctorDetails?.consultationFee === undefined || ra.doctorDetails?.consultationFee === null) {
-            errors[`fee_${ra.roleCode}`] = 'Consultation fee is required';
-          } else if (ra.doctorDetails.consultationFee < 500) {
-            errors[`fee_${ra.roleCode}`] = 'Consultation fee must be at least ₹500';
-          }
-        }
-      });
-    }
-
-    if (Object.keys(errors).length > 0) {
-      setValidationErrors(prev => ({ ...prev, ...errors }));
+    if (!newContract.hospitalId || !newContract.roleAssignments?.length) {
+      triggerGlobalToast('Hospital and Roles are required', 'error');
       return;
     }
-
     const hosp = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
     const updatedMemberships = [...(formData.memberships || [])];
-    // Keep a private copy in form state. The previous shallow copy reused nested schedule
-    // objects, so changing appointment times in one copied contract mutated the others too.
-    const contractWithHospitalName = cloneHospitalMembership({
-      ...newContract,
-      hospitalName: hosp?.name || newContract.hospitalName
-    });
-
-    if (editingContractIndex === null) {
-      updatedMemberships.push(contractWithHospitalName);
-    } else {
-      updatedMemberships[editingContractIndex] = contractWithHospitalName;
-    }
-
-    if (checkScheduleOverlaps(updatedMemberships)) return;
-
-    const profileUpdates = getProfileInfoUpdates(updatedMemberships, formData);
-    setFormData({ ...formData, memberships: updatedMemberships, ...profileUpdates });
-
-    setValidationErrors(prev => {
-      const next = { ...prev };
-      delete next.contractHospital;
-      delete next.contractRoles;
-      // Clear all department and fee errors
-      Object.keys(next).forEach(key => {
-        if (key.startsWith('department_') || key.startsWith('departments_') || key.startsWith('fee_')) {
-          delete next[key];
-        }
-      });
-      return next;
-    });
-
+    const contractWithHospitalName = cloneHospitalMembership({ ...newContract, hospitalName: hosp?.name || newContract.hospitalName });
+    if (editingContractIndex === null) updatedMemberships.push(contractWithHospitalName);
+    else updatedMemberships[editingContractIndex] = contractWithHospitalName;
+    setFormData({ ...formData, memberships: updatedMemberships });
     setIsAddingContract(false);
-    setEditingContractIndex(null);
-    setNewContract({ hospitalId: '', roleAssignments: [] });
-  };
-
-
-  const duplicateContract = (contract: HospitalMembershipDTO) => {
-    clearContractErrors();
-    setNewContract({
-      ...cloneHospitalMembership(contract, { resetEntityIds: true }),
-      hospitalId: '',
-      hospitalName: undefined
-    });
-    setEditingContractIndex(null);
-    setIsAddingContract(true);
   };
 
   return {
     formData, setFormData, activeTab, setActiveTab, loading, validationErrors,
-    hospitals, specializations, isAddingContract, openAddContract, openEditContract, setIsAddingContract, editingContractIndex, setEditingContractIndex,
-    newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract, duplicateContract, router
+    hospitals, specializations, isAddingContract, setIsAddingContract, editingContractIndex,
+    newContract, setNewContract, assignedRoles, handleSubmit, confirmAddContract,
+    openAddContract: () => { setNewContract({ hospitalId: '', roleAssignments: [] }); setIsAddingContract(true); },
+    openEditContract: (i: number, c: HospitalMembershipDTO) => { setNewContract(cloneHospitalMembership(c)); setEditingContractIndex(i); setIsAddingContract(true); },
+    duplicateContract: (c: HospitalMembershipDTO) => { setNewContract({ ...cloneHospitalMembership(c, { resetEntityIds: true }), hospitalId: '' }); setIsAddingContract(true); },
+    router
   };
 };
