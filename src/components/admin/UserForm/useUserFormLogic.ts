@@ -146,7 +146,9 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   }, []);
 
   // Initialize professional info objects when roles are assigned
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData(prev => {
       let updated = false;
       const next = { ...prev };

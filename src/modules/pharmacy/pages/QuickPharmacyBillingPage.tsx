@@ -186,6 +186,7 @@ export default function QuickPharmacyBillingPage() {
     return true;
   };
 
+  // eslint-disable-next-line sonarjs/cognitive-complexity
   const loadPrescriptionData = async (rxId: string) => {
     setPrescriptionId(rxId);
     const res = await pharmacyApi.getPrescriptionById(rxId);
@@ -413,7 +414,7 @@ export default function QuickPharmacyBillingPage() {
   const renderHeader = () => (
     <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 mb-4 shrink-0">
       <div className="min-w-0">
-        <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight truncate">Quick Pharmacy Counter</h1>
+        <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight truncate">Quick Patient Visit Pharmacy Billing</h1>
         {prescriptionId && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200">

@@ -870,13 +870,15 @@ export interface VitalSetting {
 export interface VitalRange {
   minValue: number;
   maxValue: number;
+  errorMessage?: string;
 }
 
 export interface VitalRangeConfigDTO {
   id: string;
-  vitalType: 'BODY_TEMPERATURE' | 'SYSTOLIC_BP' | 'DIASTOLIC_BP' | 'OXYGEN_LEVEL' | 'WEIGHT' | 'HEART_RATE';
+  vitalType: 'BODY_TEMPERATURE' | 'SYSTOLIC_BP' | 'DIASTOLIC_BP' | 'OXYGEN_LEVEL' | 'WEIGHT' | 'HEART_RATE' | string;
   minValue: number;
   maxValue: number;
+  errorMessage?: string;
 }
 
 export type VitalRangesResponse = Record<string, VitalRange>;
