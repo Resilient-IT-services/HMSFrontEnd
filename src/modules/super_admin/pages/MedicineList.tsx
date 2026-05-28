@@ -217,9 +217,13 @@ export function MedicineList() {
                         <span className="text-xs text-slate-400 font-bold uppercase">Form Factor</span>
                         <span className="text-sm font-black text-slate-800">{selectedMedicine.form || selectedMedicine.category}</span>
                       </div>
-                      <div className="flex justify-between items-center py-3">
+                      <div className="flex justify-between items-center py-3 border-b border-slate-50">
                         <span className="text-xs text-slate-400 font-bold uppercase">Current Stock</span>
                         <span className="text-sm font-black text-emerald-600">{selectedMedicine.currentStock} Units</span>
+                      </div>
+                      <div className="flex justify-between items-center py-3">
+                        <span className="text-xs text-slate-400 font-bold uppercase">Low Stock Threshold</span>
+                        <span className="text-sm font-black text-orange-600">{selectedMedicine.thresholdQuantity ?? selectedMedicine.reorderLevel ?? 10} Units</span>
                       </div>
                     </div>
                     <button 
@@ -263,7 +267,8 @@ export function MedicineList() {
               <h3 className="font-black text-xs uppercase tracking-widest text-primary leading-none mb-2">Requirement Protocol</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Your Excel sheet must contain the following columns in order:
-                <span className="block mt-2 font-bold text-white/80">Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category.</span>
+                <span className="block mt-2 font-bold text-white/80">Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category, Threshold Quantity (Min Stock).</span>
+                <span className="block mt-1 text-[10px] text-primary font-bold italic">Note: Threshold Quantity should be in Column H (Index 7).</span>
               </p>
             </div>
 

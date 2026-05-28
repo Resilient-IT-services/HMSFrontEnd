@@ -507,6 +507,7 @@ export interface MedicineResponse {
   expiryDate?: string;
   currentStock?: number;
   reorderLevel?: number;
+  thresholdQuantity?: number;
   purchasePrice?: number;
   sellingPrice?: number;
   taxPercentage?: number;
@@ -532,6 +533,7 @@ export interface MedicineSummaryDTO {
   category?: string;
   manufacturer?: string;
   currentStock?: number;
+  thresholdQuantity?: number;
 }
 
 export interface MedicineImportResponse {
