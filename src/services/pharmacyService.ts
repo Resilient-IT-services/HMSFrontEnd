@@ -39,6 +39,11 @@ export const pharmacyService = {
     return response.data;
   },
 
+  async cancelPrescription(id: string): Promise<ApiResponse<void>> {
+    const response = await apiClient.post<ApiResponse<void>>(`/pharmacy/prescriptions/${id}/cancel`);
+    return response.data;
+  },
+
   // Medicine Management
   async listMedicines(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<MedicineResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineResponse>>>('/pharmacy/medicines', { params });

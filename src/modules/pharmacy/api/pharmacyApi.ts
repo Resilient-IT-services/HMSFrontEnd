@@ -38,6 +38,11 @@ export const pharmacyApi = {
     return response.data;
   },
 
+  cancelPrescription: async (id: string) => {
+    const response = await apiClient.post<ApiResponse<void>>(`/pharmacy/prescriptions/${id}/cancel`);
+    return response.data;
+  },
+
   dispensePrescription: async (id: string, request: any) => {
     const response = await apiClient.post<ApiResponse<any>>(`/pharmacy/prescriptions/${id}/dispense`, request);
     return response.data;

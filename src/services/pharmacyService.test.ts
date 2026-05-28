@@ -16,7 +16,7 @@ describe('pharmacyService', () => {
     const mockRes = { data: { success: true, data: { content: [] } } };
     vi.mocked(apiClient.get).mockResolvedValue(mockRes);
     const result = await pharmacyService.listPrescriptions();
-    expect(apiClient.get).toHaveBeenCalledWith('/pharmacy/prescriptions');
+    expect(apiClient.get).toHaveBeenCalledWith('/pharmacy/prescriptions', { params: undefined });
     expect(result).toEqual(mockRes.data);
   });
 

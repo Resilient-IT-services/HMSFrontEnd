@@ -138,7 +138,7 @@ const PrescriptionListPage: React.FC = () => {
             ) : error ? (
               <EmptyState message={error} icon="error" />
             ) : (
-              <PrescriptionTable prescriptions={prescriptions} />
+              <PrescriptionTable prescriptions={prescriptions} onRefresh={fetchPrescriptions} />
             )}
           </section>
         </div>
