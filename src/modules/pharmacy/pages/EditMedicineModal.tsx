@@ -24,7 +24,7 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
     manufacturer: medicine.manufacturer || '',
     scheduleType: medicine.scheduleType || 'OTC',
     category: medicine.category || 'General',
-    reorderLevel: medicine.reorderLevel || 50,
+    thresholdQuantity: medicine.thresholdQuantity ?? medicine.reorderLevel ?? 10,
     taxPercentage: medicine.taxPercentage || 12,
     currentStock: medicine.currentStock || 0,
   });
@@ -40,6 +40,8 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
     if (!formData.form) newErrors.form = 'Form is required';
     if (!formData.manufacturer?.trim()) newErrors.manufacturer = 'Manufacturer is required';
     
+    if (formData.thresholdQuantity !== undefined && formData.thresholdQuantity < 0) newErrors.thresholdQuantity = 'Threshold quantity cannot be negative';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -189,16 +191,16 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
           </div>
 
           <div>
-            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Label (Units)</label>
+            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Threshold (Min Stock)</label>
             <input 
-              name="reorderLevel"
-              value={formData.reorderLevel}
+              name="thresholdQuantity"
+              value={formData.thresholdQuantity}
               onChange={handleChange}
-              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.reorderLevel ? 'border-red-500' : 'border-slate-200'}`} 
-              placeholder="e.g. 50" 
+              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.thresholdQuantity ? 'border-red-500' : 'border-slate-200'}`} 
+              placeholder="e.g. 10" 
               type="number"
             />
-            {errors.reorderLevel && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.reorderLevel}</p>}
+            {errors.thresholdQuantity && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.thresholdQuantity}</p>}
           </div>
         </div>
 

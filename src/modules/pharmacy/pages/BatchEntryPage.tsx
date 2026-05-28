@@ -177,17 +177,7 @@ export const BatchEntryPage = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-black uppercase text-slate-500 mb-2 ml-1">Low Stock Label (Units)</label>
-                    <input 
-                      type="number"
-                      name="reorderLevel"
-                      value={formData.reorderLevel}
-                      onChange={handleChange}
-                      placeholder="e.g. 50"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
-                    />
-                  </div>
+
                 </div>
 
                 <div className="pt-6 border-t border-slate-100 flex justify-end gap-4">

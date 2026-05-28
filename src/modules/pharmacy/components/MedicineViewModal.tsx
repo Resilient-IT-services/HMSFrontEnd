@@ -110,9 +110,9 @@ const MedicineViewModal: React.FC<MedicineViewModalProps> = ({
               </div>
 
               <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl">
-                <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Reorder Level</p>
+                <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2">Low Stock Threshold</p>
                 <div className="flex items-end gap-2">
-                  <h3 className="text-2xl font-black text-slate-900 leading-none">{medicine.reorderLevel || 50}</h3>
+                  <h3 className="text-2xl font-black text-slate-900 leading-none">{medicine.thresholdQuantity ?? medicine.reorderLevel ?? 10}</h3>
                   <p className="text-[10px] text-slate-500 font-bold mb-0.5 uppercase">Units</p>
                 </div>
               </div>

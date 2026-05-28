@@ -22,11 +22,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { cn } from '@/lib/cn';
 import { APPOINTMENT_STATUS_METADATA, DASHBOARD_REFRESH_INTERVAL, DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { useConsultationFee } from '@/hooks/useConsultationFee';
-import { getLocalStartOfDayISO, getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
 import dayjs from '@/lib/dayjs';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
+
+const DASHBOARD_QUEUE_STATUSES = new Set(['PAID', 'VITALS_RECORDED', 'CONSULTATION_STARTED']);
 
 export const DoctorDashboard = () => {
   const router = useRouter();
@@ -35,7 +36,6 @@ export const DoctorDashboard = () => {
   const [revenueSummary, setRevenueSummary] = useState<DoctorRevenueSummaryDTO | null>(null);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
-  const consultationFee = useConsultationFee();
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user || !hospitalTimezone) {
@@ -92,7 +92,6 @@ export const DoctorDashboard = () => {
 
   const stats = useMemo(() => {
     const waiting = appointments.filter((appointment) => 
-      appointment.status === 'SCHEDULED' || 
       appointment.status === 'PAID' || 
       appointment.status === 'VITALS_RECORDED'
     ).length;
@@ -114,7 +113,7 @@ export const DoctorDashboard = () => {
     const base = appointments.filter(
       (appointment) => 
         dayjs(appointment.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD') === hospitalToday &&
-        appointment.status !== 'CANCELLED'
+        DASHBOARD_QUEUE_STATUSES.has(appointment.status)
     );
     return sortByToken(base);
   }, [appointments, hospitalTimezone]);
@@ -133,23 +132,28 @@ export const DoctorDashboard = () => {
         return;
       }
 
-      const allowedStatuses = ['VITALS_RECORDED', 'COMPLETED'];
+      const allowedStatuses = ['PAID', 'VITALS_RECORDED'];
       if (!allowedStatuses.includes(appointment.status)) {
         const messages: Record<string, string> = {
           'SCHEDULED': 'Consultation cannot be started as payment is pending/vitals not recorded',
           'PAYMENT_PENDING': 'Consultation cannot be started as payment is pending',
-          'PAID': 'Consultation cannot be started as vitals are not recorded',
           'CANCELLED': 'This appointment has been cancelled',
-          'PRESCRIPTION_FINALIZED': 'Prescription has already been finalized for this appointment'
+          'PRESCRIPTION_FINALIZED': 'Prescription has already been finalized for this appointment',
+          'COMPLETED': 'Consultation has already been completed for this appointment'
         };
         
         triggerGlobalToast(messages[appointment.status] || 'Consultation cannot be started at this time', 'warning');
         return;
       }
 
-      const res = await appointmentService.updateStatus(appointmentId, { status: 'CONSULTATION_STARTED' });
-      if (res.success) {
-        router.push(`/doctor/active-consultation?appointmentId=${appointmentId}`);
+      if (!user?.id) {
+        triggerGlobalToast('Doctor profile is unavailable', 'error');
+        return;
+      }
+
+      const res = await appointmentService.startNextConsultation(user.id);
+      if (res.success && res.data?.id) {
+        router.push(`/doctor/active-consultation?appointmentId=${res.data.id}`);
       } else {
         triggerGlobalToast('Failed to start consultation', 'error');
       }
@@ -159,14 +163,23 @@ export const DoctorDashboard = () => {
     }
   };
 
-  const handleStartNextConsultation = () => {
-    const nextAppointment = queue[0];
-    if (!nextAppointment) {
-      triggerGlobalToast('No patients in the queue', 'info');
+  const handleStartNextConsultation = async () => {
+    if (!user?.id) {
+      triggerGlobalToast('Doctor profile is unavailable', 'error');
       return;
     }
 
-    void handleStartConsultation(nextAppointment.id);
+    try {
+      const res = await appointmentService.startNextConsultation(user.id);
+      if (res.success && res.data?.id) {
+        router.push(`/doctor/active-consultation?appointmentId=${res.data.id}`);
+      } else {
+        triggerGlobalToast('No patients in the queue', 'info');
+      }
+    } catch (error) {
+      console.error('Failed to start next consultation', error);
+      triggerGlobalToast('Failed to start next consultation', 'error');
+    }
   };
 
   const columns: Column<AppointmentResponse>[] = [
@@ -260,12 +273,6 @@ export const DoctorDashboard = () => {
       progressBar: 100,
       onClick: () => router.push('/doctor/earnings')
     }
-  ];
-
-  const breakdownItems = [
-    { title: 'Scheduled visits', sub: `${stats.waiting} appointments are queued.`, done: false },
-    { title: 'Active consultations', sub: `${stats.active} appointments are in progress.`, done: stats.active > 0 },
-    { title: 'Completed visits', sub: `${stats.completed} appointments are finished.`, done: stats.completed > 0 }
   ];
 
   return (

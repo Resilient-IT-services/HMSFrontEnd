@@ -51,7 +51,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T10:00:00',
-        status: 'SCHEDULED',
+        status: 'PAID',
       },
       {
         id: '2',
@@ -60,7 +60,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T11:00:00',
-        status: 'SCHEDULED',
+        status: 'VITALS_RECORDED',
       }
     ];
 
@@ -91,7 +91,7 @@ describe('PatientQueuePage', () => {
     expect(elements.length).toBeGreaterThan(0);
   });
 
-  it('shows completed appointments in the list', async () => {
+  it('hides completed appointments from the queue while keeping completed stats', async () => {
     const mockAppointments = [
       {
         id: '1',
@@ -100,7 +100,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T10:00:00',
-        status: 'SCHEDULED',
+        status: 'PAID',
       },
       {
         id: '2',
@@ -130,11 +130,10 @@ describe('PatientQueuePage', () => {
 
     await waitFor(() => {
       expect(screen.getAllByText('Alice Smith')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Bob Jones')[0]).toBeInTheDocument();
     });
 
-    // Check for Reopen button for completed appointment
-    expect(screen.getAllByText('Reopen')[0]).toBeInTheDocument();
+    expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
+    expect(screen.queryByText('Reopen')).not.toBeInTheDocument();
 
     // Stats should still show completed count
     expect(screen.getAllByText('Completed')[0]).toBeInTheDocument();

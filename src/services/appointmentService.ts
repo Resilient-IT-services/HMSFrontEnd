@@ -81,6 +81,16 @@ export const appointmentService = {
     return response.data;
   },
 
+  async completeConsultation(appointmentId: string, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.put<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/complete`, undefined, config);
+    return response.data;
+  },
+
+  async startNextConsultation(doctorId: string, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.post<ApiResponse<AppointmentResponse>>(`/appointments/start-next/${doctorId}`, undefined, config);
+    return response.data;
+  },
+
   async patchVitals(appointmentId: string, vitals: VitalsDTO, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
     const response = await apiClient.patch<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/vitals`, vitals, config);
     return response.data;

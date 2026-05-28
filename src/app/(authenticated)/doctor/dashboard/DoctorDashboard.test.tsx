@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { Provider } from 'react-redux';
@@ -17,6 +16,7 @@ vi.mock('@/services/appointmentService', () => ({
   appointmentService: {
     list: vi.fn(),
     updateStatus: vi.fn(),
+    startNextConsultation: vi.fn(),
   },
 }));
 
@@ -71,7 +71,6 @@ describe('DoctorDashboard', () => {
       },
     });
 
-    const today = new Date().toISOString().split('T')[0];
     const mockUser = { 
       id: 'doctor-1', 
       fullName: 'John Doe',
@@ -141,7 +140,10 @@ describe('DoctorDashboard', () => {
       },
     });
 
-    vi.mocked(appointmentService.updateStatus).mockResolvedValue({ success: true, data: {} as any });
+    vi.mocked(appointmentService.startNextConsultation).mockResolvedValue({
+      success: true,
+      data: { id: 'app-1' } as any
+    });
 
     const mockUser = { 
       id: 'doctor-1', 
@@ -178,7 +180,8 @@ describe('DoctorDashboard', () => {
     fireEvent.click(startBtn);
 
     await waitFor(() => {
-      expect(appointmentService.updateStatus).toHaveBeenCalledWith('app-1', { status: 'CONSULTATION_STARTED' });
+      expect(appointmentService.startNextConsultation).toHaveBeenCalledWith('doctor-1');
+      expect(appointmentService.updateStatus).not.toHaveBeenCalled();
       expect(mockPush).toHaveBeenCalledWith('/doctor/active-consultation?appointmentId=app-1');
     });
   });

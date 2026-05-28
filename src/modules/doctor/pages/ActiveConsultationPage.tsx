@@ -363,7 +363,7 @@ export const ActiveConsultationPage = () => {
     }
 
     try {
-      const statusRes = await appointmentService.updateStatus(appointmentId!, { status: 'COMPLETED' });
+      const statusRes = await appointmentService.completeConsultation(appointmentId!);
       if (statusRes.success) {
         triggerGlobalToast('Consultation completed successfully', 'success');
         router.push('/doctor/dashboard');

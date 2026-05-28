@@ -24,7 +24,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
 
 export const MedicineInventory = () => {
-  const [medicines, setMedicines] = useState<MedicineSummaryDTO[]>([]);
+  const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
   const [totalMedicines, setTotalMedicines] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,7 +45,7 @@ export const MedicineInventory = () => {
   const fetchMedicines = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getMedicinesSummary({
+      const response = await pharmacyApi.getMedicines({
         search: debouncedSearch,
         page: page,
         size: pageSize
@@ -92,7 +92,7 @@ export const MedicineInventory = () => {
     setPage(0);
   };
 
-  const handleRowClick = async (m: MedicineSummaryDTO) => {
+  const handleRowClick = async (m: MedicineResponse) => {
     try {
       const detailRes = await pharmacyApi.getMedicineById(m.id);
       if (detailRes.success && detailRes.data) {
@@ -187,7 +187,7 @@ export const MedicineInventory = () => {
     }
   };
 
-  const columns: Column<MedicineSummaryDTO>[] = [
+  const columns: Column<MedicineResponse>[] = [
     {
       header: 'Medicine Details',
       render: (m) => (
@@ -220,6 +220,14 @@ export const MedicineInventory = () => {
       headerClassName: 'text-center',
       render: (m) => (
         <Badge variant="slate" size="sm">{m.form || m.category}</Badge>
+      )
+    },
+    {
+      header: 'Threshold',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      render: (m) => (
+        <span className="text-xs font-bold text-orange-600">{m.thresholdQuantity ?? m.reorderLevel ?? 10}</span>
       )
     },
     {
