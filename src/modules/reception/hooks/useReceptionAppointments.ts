@@ -2,8 +2,7 @@
 
 import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { appointmentService } from '@/services/appointmentService';
-import { doctorService } from '@/services/doctorService';
-import { AppointmentSummaryDTO, DoctorStaffResponse, AppointmentStatus } from '@/types/api';
+import { AppointmentSummaryDTO, AppointmentStatus } from '@/types/api';
 import { sortByToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
@@ -39,15 +38,14 @@ export const useReceptionAppointments = () => {
   }));
 
   // Update column filters if initialRange changes (e.g. timezone loaded)
-  useEffect(() => {
-    if (initialRange.from && !columnFilters.from) {
-        setColumnFilters(prev => ({
-            ...prev,
-            from: initialRange.from,
-            to: initialRange.to
-        }));
-    }
-  }, [initialRange]);
+  // We do this during render to avoid cascading renders in React 19
+  if (initialRange.from && !columnFilters.from) {
+      setColumnFilters(prev => ({
+          ...prev,
+          from: initialRange.from,
+          to: initialRange.to
+      }));
+  }
 
   const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 
@@ -94,7 +92,7 @@ export const useReceptionAppointments = () => {
       const sortParam = sort ? `${sort.key},${sort.direction}` : undefined;
 
       // Prepare API column filters (exclude from/to handled separately)
-      const { from, to, ...apiColFilters } = colFilters;
+      const { from: _from, to: _to, ...apiColFilters } = colFilters;
 
       const [appRes, statsRes] = await Promise.all([
         appointmentService.listSummary({

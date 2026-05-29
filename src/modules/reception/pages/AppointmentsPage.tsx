@@ -125,9 +125,7 @@ export const AppointmentsPage = () => {
     activeFilters,
     stats,
     applyFilters,
-    resetFilters,
-    removeFilter,
-    refresh
+    resetFilters
   } = useReceptionAppointments();
 
   const columns: Column<AppointmentSummaryDTO>[] = [

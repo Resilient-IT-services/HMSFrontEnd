@@ -421,7 +421,7 @@ export default function QuickPharmacyBillingPage() {
         {prescriptionId && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
-              Prescription: #RX-{prescriptionId.substring(0, 8).toUpperCase()}
+              Prescription ID :-{prescriptionId.substring(0, 8).toUpperCase()}
             </span>
             <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
               prescriptionStatus === 'PENDING' ? 'bg-orange-100 text-orange-700 border-orange-200' :
