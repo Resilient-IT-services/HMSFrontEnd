@@ -34,16 +34,26 @@ interface CartItem {
   isExpired?: boolean;
 }
 
-const findBatchesToFulfill = async (medicineName: string, prescribedQty: number): Promise<{ batches: CartItem[], remaining: number }> => {
+const findBatchesToFulfill = async (medicineId: string | undefined, medicineName: string, prescribedQty: number): Promise<{ batches: CartItem[], remaining: number }> => {
   try {
-    const stockRes = await pharmacyApi.getMedicineStock({ search: medicineName, size: 5 });
+    // Priority: Use medicineId for 100% accuracy. Fallback to name search only if ID is missing.
+    const stockRes = await pharmacyApi.getMedicineStock({ 
+      medicineId,
+      search: medicineId ? undefined : medicineName, 
+      size: 50 
+    });
     const batches: CartItem[] = [];
     let remaining = prescribedQty;
 
     if (stockRes.success && stockRes.data?.content?.length) {
       const now = new Date();
-      // Filter out expired stock first
-      const validStock = stockRes.data.content.filter(s => !s.expiryDate || new Date(s.expiryDate) > now);
+      // Filter out expired stock and ensure EXACT match (id if available, otherwise name)
+      const validStock = stockRes.data.content.filter(s => {
+        const isNotExpired = !s.expiryDate || new Date(s.expiryDate) > now;
+        const nameMatches = s.medicineName.trim().toLowerCase() === medicineName.trim().toLowerCase();
+        const idMatches = medicineId ? s.medicineId === medicineId : true;
+        return isNotExpired && nameMatches && idMatches;
+      });
 
       for (const batch of validStock) {
         if (remaining <= 0) break;
@@ -221,24 +231,21 @@ export default function QuickPharmacyBillingPage() {
       const newItems: CartItem[] = [];
       for (const rxItem of rx.items) {
         const prescribedQty = calculatePrescribedQuantity(rxItem.dosage, rxItem.duration);
-        const { batches, remaining } = await findBatchesToFulfill(rxItem.medicineName, prescribedQty);
+        // Corrected: Passing medicineId as first parameter
+        const { batches, remaining } = await findBatchesToFulfill(rxItem.medicineId, rxItem.medicineName, prescribedQty);
+        
         if (batches.length > 0) {
           newItems.push(...batches);
         }
 
         if (remaining > 0) {
-          newItems.push({
-            medicineName: rxItem.medicineName,
-            medicineId: rxItem.medicineId,
-            quantity: 0,
-            selectedQuantity: remaining,
-            discount: 0,
-            isOutOfStock: true,
-            isExpired: false,
-            batchNumber: 'N/A',
-            sellingPrice: 0
-          });
-          triggerGlobalToast(`Insufficient stock for ${rxItem.medicineName}.`, 'warning');
+          const available = prescribedQty - remaining;
+          triggerGlobalToast(
+            available > 0 
+              ? `Only ${available} units of ${rxItem.medicineName} available (Prescription: ${prescribedQty}).` 
+              : `Insufficient stock for ${rxItem.medicineName}.`, 
+            'warning'
+          );
         }
       }
       setCart(prev => [...prev, ...newItems]);
@@ -323,10 +330,14 @@ export default function QuickPharmacyBillingPage() {
       // Just increment grouped quantity, it will auto-distribute
       updateGroupedQuantity(stock.medicineName, existingGroup.totalSelected + 1);
     } else {
-      // Fetch all batches to support automatic fulfillment
-      const res = await pharmacyApi.getMedicineStock({ search: stock.medicineName, size: 20 });
+      // Fetch all batches for this SPECIFIC medicine ID to prevent unrelated medicines (like Flexon Neo)
+      const res = await pharmacyApi.getMedicineStock({ medicineId: stock.medicineId, size: 50 });
       const now = new Date();
-      const allBatches = res.success && res.data?.content ? res.data.content : [stock];
+      
+      // Filter: Only include batches with the EXACT medicine name as a secondary safety
+      const allBatches = res.success && res.data?.content 
+        ? res.data.content.filter(b => b.medicineName.trim().toLowerCase() === stock.medicineName.trim().toLowerCase())
+        : [stock];
 
       const newItems: CartItem[] = [];
       allBatches.forEach(b => {
@@ -368,11 +379,11 @@ export default function QuickPharmacyBillingPage() {
   const handleSubmit = async () => {
     if (isSubmitting || !validateSale()) return;
 
-    // Filter out invalid items for the final payload
-    const validItems = cart.filter(item => !item.isOutOfStock && !item.isExpired && item.id);
+    // Filter out invalid items for the final payload - ONLY items with quantity > 0
+    const validItems = cart.filter(item => !item.isOutOfStock && !item.isExpired && item.id && item.selectedQuantity > 0);
 
     if (validItems.length === 0) {
-      triggerGlobalToast('No valid items in cart to sell', 'error');
+      triggerGlobalToast('No valid items selected in cart', 'error');
       return;
     }
 
@@ -573,11 +584,15 @@ export default function QuickPharmacyBillingPage() {
                               </div>
                             </td>
                             <td className="py-2.5 px-2 text-right text-slate-500 font-medium">
-                              {group.batches.length > 1 ? (
-                                  <span className="text-[9px] italic text-slate-400">Mixed Pricing</span>
-                              ) : (
-                                  formatCurrency(group.batches[0].sellingPrice || 0)
-                              )}
+                              {(() => {
+                                const activeBatches = group.batches.filter(b => b.selectedQuantity > 0);
+                                const uniquePrices = new Set(activeBatches.map(b => b.sellingPrice));
+                                if (uniquePrices.size > 1) {
+                                  return <span className="text-[9px] italic text-slate-400">Mixed Pricing</span>;
+                                }
+                                const displayPrice = activeBatches.length > 0 ? activeBatches[0].sellingPrice : (group.batches[0]?.sellingPrice || 0);
+                                return formatCurrency(displayPrice || 0);
+                              })()}
                             </td>
                             <td className="py-2.5 px-2">
                               <div className={`flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
@@ -672,7 +687,14 @@ export default function QuickPharmacyBillingPage() {
               <div className="p-4 border-t border-slate-100 shrink-0">
                 <button
                     onClick={handleSubmit}
-                    disabled={isSubmitting || cart.length === 0 || amountPaid < totalAmount || cart.some(item => item.selectedQuantity <= 0 || item.quantity <= 0)}
+                    disabled={
+                      isSubmitting || 
+                      cart.length === 0 || 
+                      amountPaid < totalAmount || 
+                      // Disable ONLY if no items are selected at all, OR if any SELECTED item is invalid
+                      !cart.some(item => item.selectedQuantity > 0) ||
+                      cart.some(item => item.selectedQuantity > 0 && (item.isOutOfStock || item.isExpired || !item.id))
+                    }
                     className={`w-full py-3 rounded-xl text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition-all ${isSubmitting || cart.length === 0 ? 'bg-slate-200 cursor-not-allowed' : 'bg-orange-700 hover:bg-orange-800 shadow'}`}
                 >
                   {isSubmitting ? (<><div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div><span>Processing...</span></>) : (<><span className="material-symbols-outlined text-sm font-black">receipt_long</span><span>Confirm & Print Bill</span></>)}
