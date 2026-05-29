@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { PharmacyStockDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
@@ -9,11 +10,19 @@ import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 import dayjs from '@/lib/dayjs';
 
 export const usePharmacyStock = () => {
+  const searchParams = useSearchParams();
   const [medicines, setMedicines] = useState<PharmacyStockDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'ALL');
+
+  useEffect(() => {
+    const status = searchParams.get('status');
+    if (status) {
+      setStatusFilter(status);
+    }
+  }, [searchParams]);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
