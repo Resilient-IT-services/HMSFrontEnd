@@ -301,7 +301,7 @@ export const useReceptionVitals = () => {
 
       if (res.success) {
         triggerGlobalToast('Vitals captured successfully', 'success');
-        router.push('/reception/appointments');
+        router.push('/reception/dashboard');
       }
     } catch (error: any) {
       console.error('Save Error:', error);
