@@ -161,10 +161,18 @@ export default function QuickPharmacyBillingPage() {
 
   const validateSale = () => {
     if (cart.length === 0) return false;
-    
-    if (saleType === 'WALKIN' && (!customerName || !/^[6-9]\d{9}$/.test(customerPhone))) {
-      triggerGlobalToast('Valid name and phone required', 'error');
-      return false;
+
+    if (saleType === 'WALKIN') {
+
+      if (!customerName.trim()) {
+        triggerGlobalToast('Customer name required', 'error');
+        return false;
+      }
+
+      if (!/^[0-9]{10}$/.test(customerPhone)) {
+        triggerGlobalToast('Mobile number must be exactly 10 digits', 'error');
+        return false;
+      }
     }
     if (saleType === 'VISIT' && (!selectedPatient || !selectedDoctor)) {
       triggerGlobalToast('Patient and Doctor required', 'error');
