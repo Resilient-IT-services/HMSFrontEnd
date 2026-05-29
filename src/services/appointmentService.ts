@@ -19,7 +19,7 @@ export interface AppointmentListParams {
   token?: string;
   tokenNumber?: string;
   timeSlot?: string;
-  doctorSpecialization?: string;
+  doctor?: string;
   sort?: string;
 }
 

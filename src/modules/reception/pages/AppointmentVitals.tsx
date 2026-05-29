@@ -50,11 +50,11 @@ export const AppointmentVitals = () => {
     validateField(fieldKey, value);
   };
 
-  // ✅ FIXED: Explicitly typed FormElement context to resolve deprecation warnings
+
   const handleInterceptedSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isReadOnly) return;
-    // ✅ FIXED: Added void keyword to bypass unhandled promise tracking alert
+
     void handleSave();
   };
 

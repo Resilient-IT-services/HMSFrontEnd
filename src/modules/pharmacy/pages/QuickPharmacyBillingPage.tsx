@@ -161,10 +161,18 @@ export default function QuickPharmacyBillingPage() {
 
   const validateSale = () => {
     if (cart.length === 0) return false;
-    
-    if (saleType === 'WALKIN' && (!customerName || !/^[6-9]\d{9}$/.test(customerPhone))) {
-      triggerGlobalToast('Valid name and phone required', 'error');
-      return false;
+
+    if (saleType === 'WALKIN') {
+
+      if (!customerName.trim()) {
+        triggerGlobalToast('Customer name required', 'error');
+        return false;
+      }
+
+      if (!/^[0-9]{10}$/.test(customerPhone)) {
+        triggerGlobalToast('Mobile number must be exactly 10 digits', 'error');
+        return false;
+      }
     }
     if (saleType === 'VISIT' && (!selectedPatient || !selectedDoctor)) {
       triggerGlobalToast('Patient and Doctor required', 'error');
@@ -413,7 +421,7 @@ export default function QuickPharmacyBillingPage() {
         {prescriptionId && (
           <div className="flex items-center gap-2 mt-0.5">
             <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
-              Prescription: #RX-{prescriptionId.substring(0, 8).toUpperCase()}
+              Prescription ID :-{prescriptionId.substring(0, 8).toUpperCase()}
             </span>
             <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
               prescriptionStatus === 'PENDING' ? 'bg-orange-100 text-orange-700 border-orange-200' :

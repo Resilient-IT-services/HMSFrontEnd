@@ -84,11 +84,10 @@ export const Table = <T,>({
     const key = column.sortKey || (column.key as string);
     if (!key) return;
 
-    let nextDirection: 'asc' | 'desc' | null = 'asc';
-    if (activeSort?.key === key) {
-      if (activeSort.direction === 'asc') nextDirection = 'desc';
-      else nextDirection = null;
-    }
+    const nextDirection: 'asc' | 'desc' | null = activeSort?.key === key 
+      ? (activeSort.direction === 'asc' ? 'desc' : null) 
+      : 'asc';
+      
     onSort(key, nextDirection);
   };
 

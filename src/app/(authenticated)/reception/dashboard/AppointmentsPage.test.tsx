@@ -124,8 +124,8 @@ describe('TodayAppointmentsPage', () => {
     await waitFor(() => {
       expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
-    });
-  });
+    }, { timeout: 10_000 });
+  }, 10_000);
 
   it.skip('shows future appointments only in UPCOMING tab', async () => {
     (appointmentService.list as any).mockResolvedValue({

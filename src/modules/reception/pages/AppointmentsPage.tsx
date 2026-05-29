@@ -17,6 +17,96 @@ import { formatDateTime } from '@/utils/formatters';
 import dayjs from '@/lib/dayjs';
 import { PageSurface } from '@/components/ui/PageSurface';
 
+/**
+ * Component for Date Range filtering in the table header
+ */
+const DateRangeFilter = ({ 
+  onFilter, 
+  activeFilters 
+}: { 
+  onFilter: (key: string, value: string) => void, 
+  activeFilters: Record<string, string> 
+}) => {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const fromDate = activeFilters.from ? dayjs(activeFilters.from) : null;
+  const toDate = activeFilters.to ? dayjs(activeFilters.to) : null;
+  const hasFilter = !!(activeFilters.from || activeFilters.to);
+
+  const label = fromDate && toDate 
+    ? `${fromDate.format('MMM D')} - ${toDate.format('MMM D')}`
+    : 'Filter Date...';
+
+  return (
+    <div className="relative w-full">
+      <button 
+        onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+        className={cn(
+          "w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded-lg transition-all text-[10px] font-bold border",
+          hasFilter 
+            ? "bg-slate-50 text-slate-900 border-slate-400 shadow-sm" 
+            : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+        )}
+      >
+        <span className="truncate">{label}</span>
+        <span className="material-symbols-outlined text-[14px] shrink-0">calendar_month</span>
+      </button>
+
+      {isOpen && (
+        <>
+          <div className="fixed inset-0 z-[110]" onClick={() => setIsOpen(false)} />
+          <div 
+            className="absolute top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[280px] flex flex-col gap-4 normal-case tracking-normal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-1">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-orange-600">calendar_month</span>
+                <span className="text-xs font-black text-slate-900 uppercase tracking-tight">Date Range</span>
+              </div>
+              {hasFilter && (
+                <button 
+                  onClick={() => { onFilter('from', ''); onFilter('to', ''); setIsOpen(false); }}
+                  className="text-[10px] font-bold text-orange-600 hover:underline"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Start Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={activeFilters.from ? dayjs(activeFilters.from).format('YYYY-MM-DDTHH:mm') : ''}
+                  onChange={(e) => onFilter('from', e.target.value ? dayjs(e.target.value).toISOString() : '')}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">End Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={activeFilters.to ? dayjs(activeFilters.to).format('YYYY-MM-DDTHH:mm') : ''}
+                  onChange={(e) => onFilter('to', e.target.value ? dayjs(e.target.value).toISOString() : '')}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                />
+              </div>
+            </div>
+
+            <Button 
+              className="w-full shadow-lg shadow-orange-600/20 mt-2" 
+              onClick={() => setIsOpen(false)}
+            >
+              Apply Range
+            </Button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
 export const AppointmentsPage = () => {
   const router = useRouter();
   const {
@@ -35,9 +125,7 @@ export const AppointmentsPage = () => {
     activeFilters,
     stats,
     applyFilters,
-    resetFilters,
-    removeFilter,
-    refresh
+    resetFilters
   } = useReceptionAppointments();
 
   const columns: Column<AppointmentSummaryDTO>[] = [
@@ -56,86 +144,9 @@ export const AppointmentsPage = () => {
       sortable: true,
       filterable: true,
       sortKey: 'appointmentTime',
-      renderFilter: (onFilter, activeFilters) => {
-        const [isOpen, setIsOpen] = React.useState(false);
-        const fromDate = activeFilters.from ? dayjs(activeFilters.from) : null;
-        const toDate = activeFilters.to ? dayjs(activeFilters.to) : null;
-        const hasFilter = !!(activeFilters.from || activeFilters.to);
-
-        const label = fromDate && toDate 
-          ? `${fromDate.format('MMM D')} - ${toDate.format('MMM D')}`
-          : 'Filter Date...';
-
-        return (
-          <div className="relative w-full">
-            <button 
-              onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-              className={cn(
-                "w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded-lg transition-all text-[10px] font-bold border",
-                hasFilter 
-                  ? "bg-slate-50 text-slate-900 border-slate-400 shadow-sm" 
-                  : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
-              )}
-            >
-              <span className="truncate">{label}</span>
-              <span className="material-symbols-outlined text-[14px] shrink-0">calendar_month</span>
-            </button>
-
-            {isOpen && (
-              <>
-                <div className="fixed inset-0 z-[110]" onClick={() => setIsOpen(false)} />
-                <div 
-                  className="absolute top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[280px] flex flex-col gap-4 normal-case tracking-normal"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="material-symbols-outlined text-orange-600">calendar_month</span>
-                      <span className="text-xs font-black text-slate-900 uppercase tracking-tight">Date Range</span>
-                    </div>
-                    {hasFilter && (
-                      <button 
-                        onClick={() => { onFilter('from', ''); onFilter('to', ''); setIsOpen(false); }}
-                        className="text-[10px] font-bold text-orange-600 hover:underline"
-                      >
-                        Reset
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Start Date & Time</label>
-                      <input
-                        type="datetime-local"
-                        value={activeFilters.from ? dayjs(activeFilters.from).format('YYYY-MM-DDTHH:mm') : ''}
-                        onChange={(e) => onFilter('from', e.target.value ? dayjs(e.target.value).toISOString() : '')}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">End Date & Time</label>
-                      <input
-                        type="datetime-local"
-                        value={activeFilters.to ? dayjs(activeFilters.to).format('YYYY-MM-DDTHH:mm') : ''}
-                        onChange={(e) => onFilter('to', e.target.value ? dayjs(e.target.value).toISOString() : '')}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
-                      />
-                    </div>
-                  </div>
-
-                  <Button 
-                    className="w-full shadow-lg shadow-orange-600/20 mt-2" 
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Apply Range
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        );
-      },
+      renderFilter: (onFilter, activeFilters) => (
+        <DateRangeFilter onFilter={onFilter} activeFilters={activeFilters} />
+      ),
       render: (app) => (
           <div className="flex flex-col">
           <span className="font-medium text-slate-900">
@@ -163,8 +174,8 @@ export const AppointmentsPage = () => {
       mobilePosition: 'body',
       sortable: true,
       filterable: true,
-      sortKey: 'doctorSpecialization',
-      filterPlaceholder: 'Specialization...',
+      sortKey: 'doctor',
+      filterPlaceholder: 'Filter doctor...',
       render: (app) => (
           <div>
             <p className="font-medium text-slate-700">{app.doctorName}</p>
