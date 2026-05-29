@@ -1,5 +1,5 @@
-import { ReceptionDashboard} from '@/modules/reception/pages/ReceptionDashboard';
+import { AppointmentsPage } from '@/modules/reception/pages/AppointmentsPage';
 
 export default function Page() {
-  return <ReceptionDashboard />;
+  return <AppointmentsPage />;
 }

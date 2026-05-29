@@ -5,6 +5,8 @@ export interface Column<T> {
   header: string;
   /** Simple key for text-based data */
   key?: keyof T;
+  /** Key to use for sorting/filtering via API */
+  sortKey?: string;
   /** Legacy accessor compatibility */
   accessor?: (row: T) => React.ReactNode;
   /** Custom render function for complex HTML/Components */
@@ -12,6 +14,15 @@ export interface Column<T> {
   /** Custom width or alignment */
   className?: string;
   headerClassName?: string;
+  /** Sorting capability */
+  sortable?: boolean;
+  /** Filtering capability */
+  filterable?: boolean;
+  filterPlaceholder?: string;
+  filterType?: 'text' | 'select';
+  filterOptions?: { label: string, value: string }[];
+  /** Custom filter rendering */
+  renderFilter?: (onFilter: (key: string, value: string) => void, activeFilters: Record<string, string>) => React.ReactNode;
   /** 
    * How to treat this column on mobile:
    * - 'title': Primary information, usually top-left.
@@ -39,6 +50,12 @@ interface TableProps<T> {
   renderMobileCard?: (row: T) => React.ReactNode;
   /** Whether to hide the table header on mobile */
   hideHeaderOnMobile?: boolean;
+  /** Sorting handlers */
+  onSort?: (sortKey: string, direction: 'asc' | 'desc' | null) => void;
+  activeSort?: { key: string; direction: 'asc' | 'desc' } | null;
+  /** Filtering handlers */
+  onFilter?: (key: string, value: string) => void;
+  activeFilters?: Record<string, string>;
 }
 
 /**
@@ -55,8 +72,25 @@ export const Table = <T,>({
   loadingMessage = "Retrieving records...",
   rowClassName = "",
   renderMobileCard,
-  hideHeaderOnMobile = true
+  hideHeaderOnMobile = true,
+  onSort,
+  activeSort,
+  onFilter,
+  activeFilters = {}
 }: TableProps<T>) => {
+
+  const handleSort = (column: Column<T>) => {
+    if (!column.sortable || !onSort) return;
+    const key = column.sortKey || (column.key as string);
+    if (!key) return;
+
+    let nextDirection: 'asc' | 'desc' | null = 'asc';
+    if (activeSort?.key === key) {
+      if (activeSort.direction === 'asc') nextDirection = 'desc';
+      else nextDirection = null;
+    }
+    onSort(key, nextDirection);
+  };
 
   const renderCellContent = (row: T, column: Column<T>) => {
     if (column.render) return column.render(row);
@@ -208,22 +242,85 @@ export const Table = <T,>({
       </div>
 
       {/* Desktop Table View (shown at lg breakpoint and above) */}
-      <div className="hidden lg:block overflow-x-auto w-full">
+      <div className="hidden lg:block w-full">
         <table className="w-full text-left border-collapse">
-          <thead>
+          <thead className="z-20">
+            {/* Primary Header Row (Titles & Sorting) */}
             <tr className={cn(
-              "bg-white text-slate-400 text-[10px] font-black uppercase tracking-widest border-b border-slate-100",
+              "bg-white border-b border-slate-100",
               hideHeaderOnMobile ? "hidden lg:table-row" : "table-row"
             )}>
-              {columns.map((column, index) => (
-                <th
-                  key={index}
-                  className={cn("px-6 py-4 font-black text-slate-400", column.headerClassName)}
-                >
-                  {column.header}
-                </th>
-              ))}
+              {columns.map((column, index) => {
+                const sortKey = column.sortKey || (column.key as string);
+                const isSorted = activeSort?.key === sortKey;
+
+                return (
+                  <th
+                    key={index}
+                    className={cn(
+                      "px-6 py-4 font-black text-slate-700 text-[10px] uppercase tracking-widest relative group/header min-w-[120px]",
+                      column.sortable && "cursor-pointer hover:bg-slate-50 transition-colors",
+                      column.headerClassName
+                    )}
+                    onClick={() => handleSort(column)}
+                  >
+                    <div className="flex items-center gap-2 pr-6">
+                      {column.header}
+                      {column.sortable && (
+                        <span className={cn(
+                          "material-symbols-outlined text-[16px] transition-all",
+                          isSorted ? "text-orange-600" : "text-slate-300 opacity-0 group-hover/header:opacity-100"
+                        )}>
+                          {isSorted 
+                            ? (activeSort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward') 
+                            : 'swap_vert'}
+                        </span>
+                      )}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
+
+            {/* Secondary Header Row (Inline Filters) */}
+            {columns.some(c => c.filterable) && (
+              <tr className="bg-slate-50/50 border-b border-slate-100">
+                {columns.map((column, index) => {
+                  const sortKey = column.sortKey || (column.key as string);
+                  
+                  return (
+                    <th key={index} className="px-6 py-2">
+                      {column.filterable && onFilter && (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          {column.renderFilter ? (
+                             column.renderFilter(onFilter, activeFilters)
+                          ) : column.filterType === 'select' ? (
+                            <select
+                              value={activeFilters[sortKey] || ''}
+                              onChange={(e) => onFilter(sortKey, e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none cursor-pointer transition-all"
+                            >
+                              <option value="">All {column.header}</option>
+                              {column.filterOptions?.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              placeholder={`Filter...`}
+                              value={activeFilters[sortKey] || ''}
+                              onChange={(e) => onFilter(sortKey, e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold placeholder:text-slate-300 text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
+              </tr>
+            )}
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
             {isLoading ? (
@@ -259,3 +356,4 @@ export const Table = <T,>({
     </div>
   );
 };
+

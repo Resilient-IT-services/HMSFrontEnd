@@ -4,13 +4,11 @@ import React from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { AppointmentSummaryDTO } from '@/types/api';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { formatToken } from '@/utils/tokenHelper';
 import { Modal } from '@/components/ui/Modal';
 import { useReceptionAppointments } from '@/modules/reception/hooks/useReceptionAppointments';
-import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
-import { MetricCard } from '@/components/ui/MetricCard';
-import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
 import { cn } from '@/lib/cn';
@@ -26,8 +24,10 @@ export const AppointmentsPage = () => {
     loading,
     statusFilter,
     setStatusFilter,
-    searchTerm,
-    setSearchTerm,
+    sortState,
+    setSortState,
+    columnFilters,
+    setColumnFilters,
     isFilterModalOpen,
     setIsFilterModalOpen,
     advancedFilters,
@@ -44,11 +44,98 @@ export const AppointmentsPage = () => {
     {
       header: 'Token',
       mobilePosition: 'meta',
+      sortable: true,
+      filterable: true,
+      sortKey: 'token',
+      filterPlaceholder: 'Token...',
       render: (app) => <span className="font-bold text-slate-900">{formatToken(app)}</span>
     },
     {
       header: 'VISIT DATE & TIME',
       mobilePosition: 'title',
+      sortable: true,
+      filterable: true,
+      sortKey: 'appointmentTime',
+      renderFilter: (onFilter, activeFilters) => {
+        const [isOpen, setIsOpen] = React.useState(false);
+        const fromDate = activeFilters.from ? dayjs(activeFilters.from) : null;
+        const toDate = activeFilters.to ? dayjs(activeFilters.to) : null;
+        const hasFilter = !!(activeFilters.from || activeFilters.to);
+
+        const label = fromDate && toDate 
+          ? `${fromDate.format('MMM D')} - ${toDate.format('MMM D')}`
+          : 'Filter Date...';
+
+        return (
+          <div className="relative w-full">
+            <button 
+              onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+              className={cn(
+                "w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded-lg transition-all text-[10px] font-bold border",
+                hasFilter 
+                  ? "bg-slate-50 text-slate-900 border-slate-400 shadow-sm" 
+                  : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+              )}
+            >
+              <span className="truncate">{label}</span>
+              <span className="material-symbols-outlined text-[14px] shrink-0">calendar_month</span>
+            </button>
+
+            {isOpen && (
+              <>
+                <div className="fixed inset-0 z-[110]" onClick={() => setIsOpen(false)} />
+                <div 
+                  className="absolute top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[280px] flex flex-col gap-4 normal-case tracking-normal"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-orange-600">calendar_month</span>
+                      <span className="text-xs font-black text-slate-900 uppercase tracking-tight">Date Range</span>
+                    </div>
+                    {hasFilter && (
+                      <button 
+                        onClick={() => { onFilter('from', ''); onFilter('to', ''); setIsOpen(false); }}
+                        className="text-[10px] font-bold text-orange-600 hover:underline"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Start Date & Time</label>
+                      <input
+                        type="datetime-local"
+                        value={activeFilters.from ? dayjs(activeFilters.from).format('YYYY-MM-DDTHH:mm') : ''}
+                        onChange={(e) => onFilter('from', e.target.value ? dayjs(e.target.value).toISOString() : '')}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">End Date & Time</label>
+                      <input
+                        type="datetime-local"
+                        value={activeFilters.to ? dayjs(activeFilters.to).format('YYYY-MM-DDTHH:mm') : ''}
+                        onChange={(e) => onFilter('to', e.target.value ? dayjs(e.target.value).toISOString() : '')}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <Button 
+                    className="w-full shadow-lg shadow-orange-600/20 mt-2" 
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Apply Range
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        );
+      },
       render: (app) => (
           <div className="flex flex-col">
           <span className="font-medium text-slate-900">
@@ -60,26 +147,39 @@ export const AppointmentsPage = () => {
     {
       header: 'Patient',
       mobilePosition: 'subtitle',
+      sortable: true,
+      filterable: true,
+      sortKey: 'patientName',
+      filterPlaceholder: 'Patient name...',
       render: (app) => (
           <div>
             <p className="font-bold text-slate-900">{app.patientName}</p>
-            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Code: {(app as any).patientCode || 'N/A'}</p>
+            <p className="text-xs text-slate-500 uppercase font-bold tracking-tighter">Code: {(app as any).patientCode || 'N/A'}</p>
           </div>
       )
     },
     {
       header: 'Doctor',
       mobilePosition: 'body',
+      sortable: true,
+      filterable: true,
+      sortKey: 'doctorSpecialization',
+      filterPlaceholder: 'Specialization...',
       render: (app) => (
           <div>
             <p className="font-medium text-slate-700">{app.doctorName}</p>
-            <p className="text-[10px] text-slate-400 uppercase font-bold">{app.doctorSpecialization}</p>
+            <p className="text-xs text-slate-500 uppercase font-bold">{app.doctorSpecialization}</p>
           </div>
       )
     },
     {
       header: 'Status',
       mobilePosition: 'meta',
+      sortable: true,
+      filterable: true,
+      sortKey: 'status',
+      filterType: 'select',
+      filterOptions: APPOINTMENT_STATUS_OPTIONS,
       render: (app) => {
         const variants: Record<string, any> = {
           SCHEDULED: 'orange',
@@ -156,122 +256,102 @@ export const AppointmentsPage = () => {
             backgroundClassName="bg-[#f8f9fb]"
             fontClassName="font-inter"
         >
-          <div className="space-y-8 py-4 md:py-8">
-            <PageHeading
-                level={1}
-                title="Today's Appointments"
-                description="Real-time status of all patient visits for today."
-            >
-              <Button icon="add_circle" href="/reception/appointments/create">
-                New Visit
-              </Button>
-            </PageHeading>
+          <div className="space-y-4 py-4 md:py-6 pb-24 flex flex-col min-h-[calc(100vh-120px)]">
+            {/* Header Row with Compact Cards */}
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="shrink-0">
+                <h1 className="font-manrope text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">
+                  Today's Appointments
+                </h1>
+                <p className="text-slate-500 font-bold mt-1 text-xs uppercase tracking-wider hidden md:block">
+                  Real-time patient visit status
+                </p>
+              </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 mb-6">
-              {statConfig.map((stat, i) => (
-                  <div
-                      key={i}
-                      className={cn(
-                          "transition-all h-full",
-                          statusFilter === stat.filter ? 'ring-2 ring-orange-500 ring-offset-2 rounded-2xl' : ''
-                      )}
+              {/* Compact Stats Grid */}
+              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
+                {statConfig.map((stat, i) => (
+                  <button
+                    key={i}
+                    onClick={() => {
+                      setStatusFilter(stat.filter as any);
+                      if (activeFilters.statuses?.length) {
+                        resetFilters();
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all shrink-0 active:scale-95",
+                      statusFilter === stat.filter 
+                        ? 'bg-orange-600 border-orange-600 text-white shadow-lg shadow-orange-600/20' 
+                        : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-sm'
+                    )}
                   >
-                    <div className="sm:hidden">
-                      <MetricCard
-                          label={stat.label}
-                          value={stat.value}
-                          icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'}
-                          variant={stat.variant as any}
-                          layout="pill"
-                          onClick={() => {
-                            setStatusFilter(stat.filter as any);
-                            if (activeFilters.statuses?.length) {
-                              resetFilters();
-                            }
-                          }}
-                      />
+                    <div className={cn(
+                      "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
+                      statusFilter === stat.filter ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-500'
+                    )}>
+                      <span className="material-symbols-outlined text-[18px]">
+                        {statusFilter === stat.filter ? 'check_circle' : 'analytics'}
+                      </span>
                     </div>
-                    <div className="hidden sm:block h-full">
-                      <MetricCard
-                          label={stat.label}
-                          value={stat.value}
-                          icon={statusFilter === stat.filter ? 'check_circle' : 'analytics'}
-                          variant={stat.variant as any}
-                          onClick={() => {
-                            setStatusFilter(stat.filter as any);
-                            if (activeFilters.statuses?.length) {
-                              resetFilters();
-                            }
-                          }}
-                      />
+                    <div className="flex flex-col items-start leading-tight">
+                      <span className={cn(
+                        "text-[10px] font-black uppercase tracking-tighter mb-0.5",
+                        statusFilter === stat.filter ? 'text-white/80' : 'text-slate-500'
+                      )}>{stat.label}</span>
+                      <span className={cn(
+                        "text-base font-bold",
+                        statusFilter === stat.filter ? 'text-white' : 'text-slate-900'
+                      )}>{stat.value || 0}</span>
                     </div>
-                  </div>
-              ))}
-            </div>
-
-            {/* Toolbar */}
-            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-              <div className="flex items-center gap-3 w-full md:max-w-md">
-                <div className="flex-1">
-                  <SearchInput
-                      placeholder="Search patient..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-
-                <Button
-                    variant="secondary"
-                    icon="refresh"
-                    isLoading={loading}
-                    onClick={() => refresh()}
-                    className="shrink-0"
-                />
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Active Filters Display */}
-            {Object.values(activeFilters).some(v => Array.isArray(v) ? v.length > 0 : !!v) && (
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Filters:</span>
-                  {activeFilters.statuses?.map((s: string) => (
-                      <Badge key={s} variant="purple" className="gap-1">
-                        Status: {s.replace('_', ' ')}
-                        <button onClick={() => removeFilter('statuses', s)} className="hover:text-purple-900">
-                          <span className="material-symbols-outlined text-[14px]">close</span>
-                        </button>
-                      </Badge>
-                  ))}
-                  {activeFilters.paymentStatuses?.map((ps: string) => (
-                      <Badge key={ps} variant="orange" className="gap-1">
-                        Payment: {ps}
-                        <button onClick={() => removeFilter('paymentStatuses', ps)} className="hover:text-amber-900">
-                          <span className="material-symbols-outlined text-[14px]">close</span>
-                        </button>
-                      </Badge>
-                  ))}
-                  <button
-                      onClick={resetFilters}
-                      className="text-[10px] font-bold text-slate-400 hover:text-red-500 underline transition-colors ml-2"
-                  >
-                    Clear All
-                  </button>
-                </div>
-            )}
-
-            {/* Table Container */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            {/* Table Container - Growing to occupy space */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-[500px]">
               <Table
                   columns={columns}
                   data={appointments}
                   isLoading={loading}
                   onRowDoubleClick={(app) => app.status !== 'COMPLETED' && router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
-                  emptyMessage="No appointments found for selected filters."
+                  emptyMessage="No appointments found for today."
+                  onSort={(key, dir) => setSortState(dir ? { key, direction: dir } : null)}
+                  activeSort={sortState}
+                  onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                  activeFilters={columnFilters}
               />
             </div>
           </div>
         </PageSurface>
+
+        {/* Floating Action Buttons */}
+        <div className="fixed top-32 right-6 lg:top-32 lg:right-10 flex flex-col items-end gap-3 z-[100]">
+          <Link
+            href="/reception/appointments/create"
+            className="group flex items-center h-14 w-14 hover:w-48 p-4 rounded-full bg-orange-600 text-white shadow-2xl transition-all duration-300 ease-in-out overflow-hidden active:scale-95 hover:scale-105"
+          >
+            <div className="flex items-center gap-3 min-w-max px-0.5">
+              <span className="material-symbols-outlined text-2xl shrink-0">add</span>
+              <span className="font-bold text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                New Visit
+              </span>
+            </div>
+          </Link>
+
+          <Link
+            href="/reception/patients/create"
+            className="group flex items-center h-14 w-14 hover:w-52 p-4 rounded-full bg-blue-600 text-white shadow-2xl transition-all duration-300 ease-in-out overflow-hidden active:scale-95 hover:scale-105"
+          >
+            <div className="flex items-center gap-3 min-w-max px-0.5">
+              <span className="material-symbols-outlined text-2xl shrink-0">person_add</span>
+              <span className="font-bold text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                New Patient
+              </span>
+            </div>
+          </Link>
+        </div>
 
         <Modal
             isOpen={isFilterModalOpen}
@@ -281,7 +361,7 @@ export const AppointmentsPage = () => {
         >
           <div className="p-6 space-y-4">
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400">Appointment Status</label>
+              <label className="text-xs font-black uppercase text-slate-500">Appointment Status</label>
               <div className="flex flex-wrap gap-2">
                 {APPOINTMENT_STATUS_OPTIONS.map((option) => (
                     <label key={option.value} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
@@ -300,14 +380,14 @@ export const AppointmentsPage = () => {
                             setAdvancedFilters({...advancedFilters, statuses: items});
                           }}
                       />
-                      <span className="text-[10px] font-bold">{option.label}</span>
+                      <span className="text-xs font-bold">{option.label}</span>
                     </label>
                 ))}
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400">Payment Status</label>
+              <label className="text-xs font-black uppercase text-slate-500">Payment Status</label>
               <div className="flex flex-wrap gap-2">
                 {['PENDING', 'PAID', 'PARTIALLY_PAID', 'CANCELLED'].map(ps => (
                     <label key={ps} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border cursor-pointer transition-all ${
@@ -326,7 +406,7 @@ export const AppointmentsPage = () => {
                             setAdvancedFilters({...advancedFilters, paymentStatuses: items});
                           }}
                       />
-                      <span className="text-[10px] font-bold">{ps.replace('_', ' ')}</span>
+                      <span className="text-xs font-bold">{ps.replace('_', ' ')}</span>
                     </label>
                 ))}
               </div>

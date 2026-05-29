@@ -12,11 +12,15 @@ export interface AppointmentListParams {
   doctorName?: string;
   patientId?: string;
   patientCode?: string;
+  patientName?: string;
   status?: string;
   paymentStatus?: string;
   vitalsStatus?: string;
+  token?: string;
   tokenNumber?: string;
   timeSlot?: string;
+  doctorSpecialization?: string;
+  sort?: string;
 }
 
 export const appointmentService = {

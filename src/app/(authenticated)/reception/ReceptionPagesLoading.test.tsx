@@ -6,7 +6,7 @@ import { configureStore } from '@reduxjs/toolkit';
 // Import pages
 import ReceptionDashboard from './dashboard/page';
 import PatientsPage from './patients/page';
-import TodayAppointmentsPage from './appointments/page';
+import TodayAppointmentsPage from './dashboard/page';
 import DoctorsPage from './doctors/page';
 import QueuePage from './queue/page';
 
