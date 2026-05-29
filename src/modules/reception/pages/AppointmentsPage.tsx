@@ -176,8 +176,8 @@ export const AppointmentsPage = () => {
       mobilePosition: 'body',
       sortable: true,
       filterable: true,
-      sortKey: 'doctorSpecialization',
-      filterPlaceholder: 'Specialization...',
+      sortKey: 'doctor',
+      filterPlaceholder: 'Filter doctor...',
       render: (app) => (
           <div>
             <p className="font-medium text-slate-700">{app.doctorName}</p>
