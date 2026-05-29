@@ -33,18 +33,21 @@ export const useReceptionAppointments = () => {
     };
   }, [hospitalTimezone]);
 
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>(() => ({
+    from: initialRange.from,
+    to: initialRange.to
+  }));
 
-  // Update column filters when initialRange becomes available
+  // Update column filters if initialRange changes (e.g. timezone loaded)
   useEffect(() => {
     if (initialRange.from && !columnFilters.from) {
-      setColumnFilters(prev => ({
-        ...prev,
-        from: initialRange.from,
-        to: initialRange.to
-      }));
+        setColumnFilters(prev => ({
+            ...prev,
+            from: initialRange.from,
+            to: initialRange.to
+        }));
     }
-  }, [initialRange, columnFilters.from]);
+  }, [initialRange]);
 
   const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 

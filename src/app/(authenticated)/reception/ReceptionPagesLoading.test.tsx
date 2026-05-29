@@ -50,7 +50,7 @@ describe('Reception Pages Loading', () => {
         <ReceptionDashboard />
       </Provider>
     );
-    expect(screen.getByText(/Recent Patient Arrivals/i)).toBeInTheDocument();
+    expect(screen.getByText(/Today's Appointments/i)).toBeInTheDocument();
   });
 
   it('Patient Directory loads', async () => {
