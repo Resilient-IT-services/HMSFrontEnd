@@ -49,9 +49,9 @@ const findBatchesToFulfill = async (medicineName: string, prescribedQty: number)
         if (remaining <= 0) break;
         const take = Math.min(remaining, batch.quantity);
         if (take > 0) {
-          batches.push({ 
-            ...batch, 
-            selectedQuantity: take, 
+          batches.push({
+            ...batch,
+            selectedQuantity: take,
             discount: 0,
             isOutOfStock: false,
             isExpired: false
@@ -155,7 +155,7 @@ export default function QuickPharmacyBillingPage() {
   const [manualAmountPaid, setManualAmountPaid] = useState<number | null>(null);
   const [isAutoPaid, setIsAutoPaid] = useState(true);
   const amountPaid = isAutoPaid ? totalAmount : (manualAmountPaid ?? totalAmount);
-  
+
   const [referenceNumber, setReferenceNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -163,12 +163,10 @@ export default function QuickPharmacyBillingPage() {
     if (cart.length === 0) return false;
 
     if (saleType === 'WALKIN') {
-
       if (!customerName.trim()) {
         triggerGlobalToast('Customer name required', 'error');
         return false;
       }
-
       if (!/^[0-9]{10}$/.test(customerPhone)) {
         triggerGlobalToast('Mobile number must be exactly 10 digits', 'error');
         return false;
@@ -196,7 +194,7 @@ export default function QuickPharmacyBillingPage() {
     if (res.success && res.data) {
       const rx = res.data;
       setPrescriptionStatus(rx.status || 'PENDING');
-      
+
       if (rx.doctorId) {
         setPrescribedDoctorId(rx.doctorId);
         try {
@@ -227,7 +225,7 @@ export default function QuickPharmacyBillingPage() {
         if (batches.length > 0) {
           newItems.push(...batches);
         }
-        
+
         if (remaining > 0) {
           newItems.push({
             medicineName: rxItem.medicineName,
@@ -272,7 +270,7 @@ export default function QuickPharmacyBillingPage() {
 
   const updateGroupedQuantity = (medicineName: string, totalQty: number) => {
     const relatedItems = [...cart].filter(item => item.medicineName === medicineName);
-    
+
     // Sort batches: Non-expired first, then by oldest expiry date first (FIFO)
     relatedItems.sort((a, b) => {
       if (a.isExpired && !b.isExpired) return 1;
@@ -284,11 +282,11 @@ export default function QuickPharmacyBillingPage() {
     });
 
     const totalAvailable = relatedItems.reduce((acc, item) => acc + (item.isOutOfStock || item.isExpired ? 0 : item.quantity), 0);
-    
+
     // Hard cap: Cannot exceed total available stock (unless it's an OOS placeholder from prescription)
     const hasRealBatches = relatedItems.some(item => item.id);
-    const maxQty = hasRealBatches ? totalAvailable : totalQty; 
-    
+    const maxQty = hasRealBatches ? totalAvailable : totalQty;
+
     const safeTotalQty = Math.max(0, Math.min(totalQty, maxQty));
 
     if (totalQty > totalAvailable && hasRealBatches && totalAvailable > 0) {
@@ -307,8 +305,8 @@ export default function QuickPharmacyBillingPage() {
     });
 
     if (remaining > 0 && !hasRealBatches) {
-       const oosItem = relatedItems.find(item => !item.id);
-       if (oosItem) itemQtys[`oos-${oosItem.medicineName}`] = remaining;
+      const oosItem = relatedItems.find(item => !item.id);
+      if (oosItem) itemQtys[`oos-${oosItem.medicineName}`] = remaining;
     }
 
     setCart(cart.map(item => {
@@ -320,16 +318,16 @@ export default function QuickPharmacyBillingPage() {
 
   const addToCart = async (stock: PharmacyStockDTO) => {
     const existingGroup = groupedCart.find(g => g.medicineName === stock.medicineName);
-    
+
     if (existingGroup) {
-       // Just increment grouped quantity, it will auto-distribute
-       updateGroupedQuantity(stock.medicineName, existingGroup.totalSelected + 1);
+      // Just increment grouped quantity, it will auto-distribute
+      updateGroupedQuantity(stock.medicineName, existingGroup.totalSelected + 1);
     } else {
       // Fetch all batches to support automatic fulfillment
       const res = await pharmacyApi.getMedicineStock({ search: stock.medicineName, size: 20 });
       const now = new Date();
       const allBatches = res.success && res.data?.content ? res.data.content : [stock];
-      
+
       const newItems: CartItem[] = [];
       allBatches.forEach(b => {
         const isExpired = b.expiryDate ? new Date(b.expiryDate) < now : false;
@@ -341,7 +339,7 @@ export default function QuickPharmacyBillingPage() {
           isExpired
         });
       });
-      
+
       setCart(prev => [...prev, ...newItems]);
     }
   };
@@ -369,10 +367,10 @@ export default function QuickPharmacyBillingPage() {
 
   const handleSubmit = async () => {
     if (isSubmitting || !validateSale()) return;
-    
+
     // Filter out invalid items for the final payload
     const validItems = cart.filter(item => !item.isOutOfStock && !item.isExpired && item.id);
-    
+
     if (validItems.length === 0) {
       triggerGlobalToast('No valid items in cart to sell', 'error');
       return;
@@ -415,37 +413,39 @@ export default function QuickPharmacyBillingPage() {
   };
 
   const renderHeader = () => (
-    <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 mb-4 shrink-0">
-      <div className="min-w-0">
-        <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight truncate">Quick Patient Visit Pharmacy Billing</h1>
-        {prescriptionId && (
-          <div className="flex items-center gap-2 mt-0.5">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 mb-4 shrink-0">
+        <div className="min-w-0">
+          <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight truncate">Quick Patient Visit Pharmacy Billing</h1>
+
+          {/* 🚀 Conditional handling to show Prescription ID only in VISIT mode */}
+          {saleType === 'VISIT' && prescriptionId && (
+              <div className="flex items-center gap-2 mt-0.5">
             <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
               Prescription ID :-{prescriptionId.substring(0, 8).toUpperCase()}
             </span>
-            <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
-              prescriptionStatus === 'PENDING' ? 'bg-orange-100 text-orange-700 border-orange-200' :
-              prescriptionStatus === 'DISPENSED' ? 'bg-green-100 text-green-700 border-green-200' :
-              'bg-slate-100 text-slate-700 border-slate-200'
-            }`}>
+                <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
+                    prescriptionStatus === 'PENDING' ? 'bg-orange-100 text-orange-700 border-orange-200' :
+                        prescriptionStatus === 'DISPENSED' ? 'bg-green-100 text-green-700 border-green-200' :
+                            'bg-slate-100 text-slate-700 border-slate-200'
+                }`}>
               {prescriptionStatus || 'PENDING'}
             </span>
-          </div>
-        )}
-      </div>
+              </div>
+          )}
+        </div>
 
-      <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner shrink-0 w-full xl:w-auto">
-        {PHARMACY_SALE_TYPE_OPTIONS.map((option) => (
-            <button
-                key={option.value}
-                onClick={() => setSaleType(option.value)}
-                className={`flex-1 xl:flex-none px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${saleType === option.value ? 'bg-white shadow-md text-orange-700' : 'text-slate-400 hover:text-slate-600'}`}
-            >
-              {option.label}
-            </button>
-        ))}
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 shadow-inner shrink-0 w-full xl:w-auto">
+          {PHARMACY_SALE_TYPE_OPTIONS.map((option) => (
+              <button
+                  key={option.value}
+                  onClick={() => setSaleType(option.value)}
+                  className={`flex-1 xl:flex-none px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${saleType === option.value ? 'bg-white shadow-md text-orange-700' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                {option.label}
+              </button>
+          ))}
+        </div>
       </div>
-    </div>
   );
 
   return (
@@ -534,7 +534,7 @@ export default function QuickPharmacyBillingPage() {
                                 </div>
                                 <div className="flex flex-wrap gap-x-2 gap-y-1 mt-1">
                                   {group.batches.map((b, bi) => (
-                                    <span key={bi} className="text-[8px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                      <span key={bi} className="text-[8px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                                       #{b.batchNumber || 'N/A'} ({b.selectedQuantity})
                                     </span>
                                   ))}
@@ -548,25 +548,25 @@ export default function QuickPharmacyBillingPage() {
                             </td>
                             <td className="py-2.5 px-2">
                               <div className="flex items-center justify-center gap-1.5">
-                                <button 
-                                  onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected - 1)} 
-                                  disabled={group.isOutOfStock || group.isExpired}
-                                  className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
+                                <button
+                                    onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected - 1)}
+                                    disabled={group.isOutOfStock || group.isExpired}
+                                    className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
                                 >
                                   <span className="material-symbols-outlined text-xs font-black">remove</span>
                                 </button>
-                                <input 
-                                  type="number" 
-                                  min={1} 
-                                  value={group.totalSelected} 
-                                  onChange={(e) => updateGroupedQuantity(group.medicineName, Number.parseInt(e.target.value) || 0)} 
-                                  disabled={group.isOutOfStock || group.isExpired}
-                                  className={`w-10 text-center font-black text-xs outline-none bg-transparent ${group.isOutOfStock || group.isExpired ? 'text-red-400 cursor-not-allowed' : ''}`} 
+                                <input
+                                    type="number"
+                                    min={1}
+                                    value={group.totalSelected}
+                                    onChange={(e) => updateGroupedQuantity(group.medicineName, Number.parseInt(e.target.value) || 0)}
+                                    disabled={group.isOutOfStock || group.isExpired}
+                                    className={`w-10 text-center font-black text-xs outline-none bg-transparent ${group.isOutOfStock || group.isExpired ? 'text-red-400 cursor-not-allowed' : ''}`}
                                 />
-                                <button 
-                                  onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected + 1)} 
-                                  disabled={group.isOutOfStock || group.isExpired}
-                                  className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
+                                <button
+                                    onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected + 1)}
+                                    disabled={group.isOutOfStock || group.isExpired}
+                                    className={`w-6 h-6 rounded border border-slate-200 flex items-center justify-center transition-all text-slate-400 ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white hover:text-orange-700'}`}
                                 >
                                   <span className="material-symbols-outlined text-xs font-black">add</span>
                                 </button>
@@ -574,22 +574,22 @@ export default function QuickPharmacyBillingPage() {
                             </td>
                             <td className="py-2.5 px-2 text-right text-slate-500 font-medium">
                               {group.batches.length > 1 ? (
-                                <span className="text-[9px] italic text-slate-400">Mixed Pricing</span>
+                                  <span className="text-[9px] italic text-slate-400">Mixed Pricing</span>
                               ) : (
-                                formatCurrency(group.batches[0].sellingPrice || 0)
+                                  formatCurrency(group.batches[0].sellingPrice || 0)
                               )}
                             </td>
                             <td className="py-2.5 px-2">
                               <div className={`flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                 <span className="text-[10px] text-slate-400 mr-1">₹</span>
-                                <input 
-                                  type="number" 
-                                  min={0} 
-                                  value={group.totalDiscount === 0 ? '' : group.totalDiscount} 
-                                  onChange={(e) => updateGroupedDiscount(group.medicineName, Number.parseFloat(e.target.value) || 0)} 
-                                  disabled={group.isOutOfStock || group.isExpired}
-                                  className="w-full text-right font-bold text-xs outline-none bg-transparent" 
-                                  placeholder="0" 
+                                <input
+                                    type="number"
+                                    min={0}
+                                    value={group.totalDiscount === 0 ? '' : group.totalDiscount}
+                                    onChange={(e) => updateGroupedDiscount(group.medicineName, Number.parseFloat(e.target.value) || 0)}
+                                    disabled={group.isOutOfStock || group.isExpired}
+                                    className="w-full text-right font-bold text-xs outline-none bg-transparent"
+                                    placeholder="0"
                                 />
                               </div>
                             </td>
@@ -637,26 +637,26 @@ export default function QuickPharmacyBillingPage() {
                   <label className="block text-[9px] font-black uppercase text-slate-400 mb-1 tracking-wider">Cash Received Amount</label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-xs">₹</span>
-                    <input 
-                      type="number" 
-                      value={amountPaid === 0 ? '' : amountPaid} 
-                      onChange={(e) => {
-                        const val = Math.max(0, Number.parseFloat(e.target.value) || 0);
-                        setManualAmountPaid(val);
-                        setIsAutoPaid(false); // Stop auto-sync once user types
-                      }} 
-                      className="w-full pl-7 pr-3 py-2 bg-orange-50/50 border-2 border-orange-100 rounded-xl text-lg font-black text-orange-700 outline-none" 
+                    <input
+                        type="number"
+                        value={amountPaid === 0 ? '' : amountPaid}
+                        onChange={(e) => {
+                          const val = Math.max(0, Number.parseFloat(e.target.value) || 0);
+                          setManualAmountPaid(val);
+                          setIsAutoPaid(false); // Stop auto-sync once user types
+                        }}
+                        className="w-full pl-7 pr-3 py-2 bg-orange-50/50 border-2 border-orange-100 rounded-xl text-lg font-black text-orange-700 outline-none"
                     />
                     {totalAmount !== amountPaid && (
-                      <button 
-                        onClick={() => {
-                          setIsAutoPaid(true);
-                          setManualAmountPaid(null);
-                        }}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-orange-400 uppercase hover:text-orange-600 transition-colors"
-                      >
-                        Reset
-                      </button>
+                        <button
+                            onClick={() => {
+                              setIsAutoPaid(true);
+                              setManualAmountPaid(null);
+                            }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-orange-400 uppercase hover:text-orange-600 transition-colors"
+                        >
+                          Reset
+                        </button>
                     )}
                   </div>
                 </div>
