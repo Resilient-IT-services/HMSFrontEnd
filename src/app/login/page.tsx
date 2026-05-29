@@ -37,7 +37,8 @@ const LoginPage = () => {
     setLocalError(null);
 
     try {
-      const loginResponse = await authService.login(username, password);
+      const normalizedUsername = username.trim().toLowerCase();
+      const loginResponse = await authService.login(normalizedUsername, password);
       if (loginResponse.success) {
         // Clear previous session selection (role/hospital)
         dispatch(clearAuthSession());

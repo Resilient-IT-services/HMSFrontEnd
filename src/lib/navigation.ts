@@ -11,7 +11,12 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
   const dashboardPath = effectiveRole ? (ROLE_PATH_MAP[effectiveRole] || effectiveRole.toLowerCase()) : 'unauthorized';
 
   return [
-    { name: 'Dashboard', icon: 'dashboard', href: `/${dashboardPath}/dashboard`, roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] },
+    { 
+      name: 'Dashboard', 
+      icon: effectiveRole === 'RECEPTIONIST' ? 'calendar_today' : 'dashboard', 
+      href: `/${dashboardPath}/dashboard`, 
+      roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] 
+    },
     { 
       name: effectiveRole === 'DOCTOR' ? 'Queue' : 'Patients', 
       icon: 'group', 
@@ -19,7 +24,7 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
     },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['RECEPTIONIST', 'ADMIN'] },
+    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['ADMIN'] },
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST', 'ADMIN'] },
     {
       name: 'History',
