@@ -4,12 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import PharmacyDashboard from './page';
-import { pharmacyService } from '@/services/pharmacyService';
+import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 
-vi.mock('@/services/pharmacyService', () => ({
-  pharmacyService: {
-    listPrescriptions: vi.fn(),
-    getLowStockCount: vi.fn(),
+vi.mock('@/modules/pharmacy/api/pharmacyApi', () => ({
+  pharmacyApi: {
+    getPrescriptions: vi.fn(),
+    getMedicineStock: vi.fn(),
+    getSaleByPrescription: vi.fn(),
   },
 }));
 
@@ -23,7 +24,7 @@ describe('PharmacyDashboard', () => {
   });
 
   it('renders pharmacy metrics from services', async () => {
-    vi.mocked(pharmacyService.listPrescriptions).mockResolvedValue({
+    vi.mocked(pharmacyApi.getPrescriptions).mockResolvedValue({
       success: true,
       data: {
         content: [
@@ -60,15 +61,25 @@ describe('PharmacyDashboard', () => {
       },
     });
 
-    vi.mocked(pharmacyService.getLowStockCount).mockResolvedValue({
+    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({
       success: true,
       data: {
+        content: [
+          { medicineName: 'Med 1', quantity: 10, reorderLevel: 50 },
+          { medicineName: 'Med 2', quantity: 5, reorderLevel: 20 },
+          { medicineName: 'Med 3', quantity: 2, reorderLevel: 10 },
+        ],
         totalElements: 3,
       },
     });
 
+    vi.mocked(pharmacyApi.getSaleByPrescription).mockResolvedValue({
+      success: true,
+      data: { totalAmount: 100 },
+    });
+
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = {}) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Pharmacist' } }) => state } })}>
         <PharmacyDashboard />
       </Provider>,
     );
@@ -76,17 +87,17 @@ describe('PharmacyDashboard', () => {
     expect(screen.getByText(/Prescription Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(pharmacyService.listPrescriptions).toHaveBeenCalled();
-      expect(pharmacyService.getLowStockCount).toHaveBeenCalled();
+      expect(pharmacyApi.getPrescriptions).toHaveBeenCalled();
+      expect(pharmacyApi.getMedicineStock).toHaveBeenCalled();
       expect(screen.getAllByText('Amit Sharma')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Meera Singh')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Low Stock Alerts')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('03')[0]).toBeInTheDocument();
+      expect(screen.getByText('03')).toBeInTheDocument();
     });
   });
 
   it('filters prescriptions when searching by patient name', async () => {
-    vi.mocked(pharmacyService.listPrescriptions).mockResolvedValue({
+    vi.mocked(pharmacyApi.getPrescriptions).mockResolvedValue({
       success: true,
       data: {
         content: [
@@ -99,10 +110,10 @@ describe('PharmacyDashboard', () => {
         page: 0
       }
     });
-    vi.mocked(pharmacyService.getLowStockCount).mockResolvedValue({ success: true, data: { totalElements: 0 } });
+    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0 } });
 
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = {}) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Pharmacist' } }) => state } })}>
         <PharmacyDashboard />
       </Provider>,
     );
@@ -112,7 +123,7 @@ describe('PharmacyDashboard', () => {
       expect(screen.getAllByText('Meera Singh').length).toBeGreaterThan(0);
     });
 
-    const searchInput = screen.getByPlaceholderText(/Search by Patient Name, ID, or Rx ID/i);
+    const searchInput = screen.getByPlaceholderText(/Search Patient, Rx.../i);
     fireEvent.change(searchInput, { target: { value: 'Amit' } });
 
     await waitFor(() => {
@@ -122,7 +133,7 @@ describe('PharmacyDashboard', () => {
   });
 
   it('filters prescriptions when searching by Rx ID', async () => {
-    vi.mocked(pharmacyService.listPrescriptions).mockResolvedValue({
+    vi.mocked(pharmacyApi.getPrescriptions).mockResolvedValue({
       success: true,
       data: {
         content: [
@@ -135,10 +146,10 @@ describe('PharmacyDashboard', () => {
         page: 0
       }
     });
-    vi.mocked(pharmacyService.getLowStockCount).mockResolvedValue({ success: true, data: { totalElements: 0 } });
+    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0 } });
 
     render(
-      <Provider store={configureStore({ reducer: { auth: (state = {}) => state } })}>
+      <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Pharmacist' } }) => state } })}>
         <PharmacyDashboard />
       </Provider>,
     );
@@ -147,7 +158,7 @@ describe('PharmacyDashboard', () => {
       expect(screen.getAllByText('Amit Sharma').length).toBeGreaterThan(0);
     });
 
-    const searchInput = screen.getByPlaceholderText(/Search by Patient Name, ID, or Rx ID/i);
+    const searchInput = screen.getByPlaceholderText(/Search Patient, Rx.../i);
     fireEvent.change(searchInput, { target: { value: '123456' } });
 
     await waitFor(() => {
