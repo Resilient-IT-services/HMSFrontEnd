@@ -7,12 +7,12 @@ interface SearchInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   fullWidth?: boolean;
 }
 
-export const SearchInput: React.FC<SearchInputProps> = ({ 
-  className = '', 
+export const SearchInput: React.FC<SearchInputProps> = ({
+  className = '',
   fullWidth = true,
-  onSearch,
-  ...props 
+  ...props
 }) => {
+
   return (
     <div className={`relative ${fullWidth ? 'w-full' : ''}`}>
       <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">

@@ -152,17 +152,12 @@ export default function QuickPharmacyBillingPage() {
   const totalDiscount = useMemo(() => cart.reduce((acc, item) => acc + item.discount, 0), [cart]);
   const totalAmount = useMemo(() => subtotal - totalDiscount, [subtotal, totalDiscount]);
 
-  const [amountPaid, setAmountPaid] = useState<number>(0);
+  const [manualAmountPaid, setManualAmountPaid] = useState<number | null>(null);
   const [isAutoPaid, setIsAutoPaid] = useState(true);
+  const amountPaid = isAutoPaid ? totalAmount : (manualAmountPaid ?? totalAmount);
+  
   const [referenceNumber, setReferenceNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Sync amountPaid with totalAmount when auto-paid is on
-  useEffect(() => {
-    if (isAutoPaid) {
-      setAmountPaid(totalAmount);
-    }
-  }, [totalAmount, isAutoPaid]);
 
   const validateSale = () => {
     if (cart.length === 0) return false;
@@ -318,7 +313,10 @@ export default function QuickPharmacyBillingPage() {
   const addToCart = async (stock: PharmacyStockDTO) => {
     const existingGroup = groupedCart.find(g => g.medicineName === stock.medicineName);
     
-    if (!existingGroup) {
+    if (existingGroup) {
+       // Just increment grouped quantity, it will auto-distribute
+       updateGroupedQuantity(stock.medicineName, existingGroup.totalSelected + 1);
+    } else {
       // Fetch all batches to support automatic fulfillment
       const res = await pharmacyApi.getMedicineStock({ search: stock.medicineName, size: 20 });
       const now = new Date();
@@ -337,9 +335,6 @@ export default function QuickPharmacyBillingPage() {
       });
       
       setCart(prev => [...prev, ...newItems]);
-    } else {
-       // Just increment grouped quantity, it will auto-distribute
-       updateGroupedQuantity(stock.medicineName, existingGroup.totalSelected + 1);
     }
   };
 
@@ -639,14 +634,17 @@ export default function QuickPharmacyBillingPage() {
                       value={amountPaid === 0 ? '' : amountPaid} 
                       onChange={(e) => {
                         const val = Math.max(0, Number.parseFloat(e.target.value) || 0);
-                        setAmountPaid(val);
+                        setManualAmountPaid(val);
                         setIsAutoPaid(false); // Stop auto-sync once user types
                       }} 
                       className="w-full pl-7 pr-3 py-2 bg-orange-50/50 border-2 border-orange-100 rounded-xl text-lg font-black text-orange-700 outline-none" 
                     />
                     {totalAmount !== amountPaid && (
                       <button 
-                        onClick={() => setIsAutoPaid(true)}
+                        onClick={() => {
+                          setIsAutoPaid(true);
+                          setManualAmountPaid(null);
+                        }}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[8px] font-black text-orange-400 uppercase hover:text-orange-600 transition-colors"
                       >
                         Reset

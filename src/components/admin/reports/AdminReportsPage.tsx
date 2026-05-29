@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { hospitalService } from '@/services/hospitalService';
 import { reportService, ReportRow, ReportType } from '@/services/reportService';
-import { DoctorStaffResponse, HospitalResponse, HospitalSelectionDTO } from '@/types/api';
+import { DoctorStaffResponse, HospitalSelectionDTO } from '@/types/api';
 import dayjs from '@/lib/dayjs';
 import { PageSurface } from '@/components/ui/PageSurface';
 

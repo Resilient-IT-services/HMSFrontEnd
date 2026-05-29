@@ -32,12 +32,6 @@ export const SessionGrid: React.FC<SessionGridProps> = ({
   editableTime,
   setEditableTime
 }) => {
-  const getSessionIcon = (startTime: string) => {
-    if (startTime < '12:00') return 'wb_twilight';
-    if (startTime < '17:00') return 'light_mode';
-    return 'dark_mode';
-  };
-
   const getSessionName = (time: string) => {
     if (!time) return '--';
     if (time < '12:00') return 'Morning';

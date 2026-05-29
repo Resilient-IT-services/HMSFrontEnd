@@ -12,11 +12,9 @@ const SelectHospitalPage = () => {
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.auth.user);
   const [searchTerm, setSearchTerm] = useState('');
-  const [isSelecting, setIsSelecting] = useState(false);
 
   const handleSelect = async (hospitalId: string) => {
     try {
-      setIsSelecting(true);
       const res = await hospitalService.getById(hospitalId);
       if (res.success && res.data) {
         dispatch(setHospitalTimezone(res.data.timezone));
@@ -27,8 +25,6 @@ const SelectHospitalPage = () => {
     } catch (error) {
       console.error('Hospital selection error:', error);
       triggerGlobalToast('An error occurred during hospital selection', 'error');
-    } finally {
-      setIsSelecting(false);
     }
   };
 

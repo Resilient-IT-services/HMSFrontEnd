@@ -6,7 +6,7 @@ import {
   UserRequestDTO,
   UserFullProfileDTO,
   HospitalResponse,
-  HospitalMembershipDTO, ScheduleDTO
+  HospitalMembershipDTO
 } from '@/types/api';
 import { hospitalService } from '@/services/hospitalService';
 import { userService } from '@/services/userService';
@@ -14,7 +14,6 @@ import { catalogService } from '@/services/catalogService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { validateDOB } from '@/utils/dateValidator';
 import { cloneHospitalMembership } from './contractClone';
-import { DAY_OF_WEEK_OPTIONS } from '@/utils/enumOptions';
 
 const cleanDoctorInfo = (info: UserRequestDTO['doctorInfo']) => {
   if (!info) return;
@@ -146,7 +145,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
   }, []);
 
   // Initialize professional info objects when roles are assigned
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData(prev => {

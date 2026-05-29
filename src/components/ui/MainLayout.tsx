@@ -11,7 +11,7 @@ interface MainLayoutProps {
   hideGlobalSearch?: boolean;
 }
 
-const MainLayout: React.FC<MainLayoutProps> = ({ children, title, headerActions, hideTitle, hideGlobalSearch }) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children, title, headerActions, hideGlobalSearch }) => {
   return (
     <>
       <PageHeader title={title} headerActions={headerActions} hideGlobalSearch={hideGlobalSearch} />

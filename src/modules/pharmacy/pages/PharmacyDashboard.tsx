@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyService } from '@/services/pharmacyService';
 import { PrescriptionResponse } from '@/types/api';
@@ -22,9 +22,9 @@ export const PharmacyDashboard = () => {
 
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
 
       const [prescriptionResponse, lowStockResponse] = await Promise.allSettled([
         pharmacyService.listPrescriptions({ status: 'PENDING' }),
@@ -61,14 +61,17 @@ export const PharmacyDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void fetchDashboardData(false);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchDashboardData]);
+
   const handleCancel = async (id: string) => {
-    if (!window.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
+    if (!globalThis.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
       return;
     }
 
@@ -191,14 +194,6 @@ export const PharmacyDashboard = () => {
       tag: 'Live'
     },
 
-  ];
-
-  const operationalSummary = [
-    {
-      title: 'Active prescriptions',
-      description: `${stats.totalPrescriptions} records are in the system.`,
-      accentClassName: 'border-orange-600'
-    }
   ];
 
   return (

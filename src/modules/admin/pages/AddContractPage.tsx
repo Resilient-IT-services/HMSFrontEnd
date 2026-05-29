@@ -55,12 +55,12 @@ export const AddContractPage = ({ id }: { id: string }) => {
     shiftType: 'DAY'
   });
   
-  const [adminDetails, setAdminDetails] = useState<Partial<AdminHospitalDetailsDTO>>({
+  const [adminDetails] = useState<Partial<AdminHospitalDetailsDTO>>({
     officeLocation: '',
     departmentHead: false
   });
   
-  const [pharmacistDetails, setPharmacistDetails] = useState<Partial<PharmacistHospitalDetailsDTO>>({
+  const [pharmacistDetails] = useState<Partial<PharmacistHospitalDetailsDTO>>({
     counterLocation: '',
     pharmacyWing: ''
   });
