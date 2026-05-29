@@ -100,7 +100,7 @@ export default function AuthenticatedLayout({
     <div className="h-screen bg-surface flex flex-col relative overflow-hidden">
       <div 
         className={cn(
-          "fixed top-0 left-0 right-0 z-[60] transition-transform duration-500 lg:relative lg:translate-y-0 lg:z-[60] shrink-0",
+          "fixed top-0 left-0 right-0 z-[60] transition-transform duration-500 lg:relative lg:translate-y-0 lg:z-[60] shrink-0 no-print",
           !isTopbarVisible && "-translate-y-full"
         )}
       >
@@ -108,26 +108,30 @@ export default function AuthenticatedLayout({
       </div>
       
       <div className="flex flex-1 relative overflow-hidden">
-        <Sidebar />
+        <div className="no-print flex shrink-0 h-full">
+          <Sidebar />
+        </div>
         
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <main 
             ref={scrollContainerRef}
             className={cn(
-              "flex-1 p-3 lg:p-5 w-full pb-20 lg:pb-5 transition-all duration-500 overflow-y-auto",
+              "flex-1 p-3 lg:p-5 w-full pb-20 lg:pb-5 transition-all duration-500 overflow-y-auto print:p-0 print:overflow-visible",
               isTopbarVisible ? "pt-20 lg:pt-5" : "pt-4 lg:pt-5"
             )}
           >
             {children}
           </main>
           
-          <footer className="hidden lg:block px-8 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] border-t border-slate-100 bg-white/50 shrink-0">
+          <footer className="hidden lg:block px-8 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] border-t border-slate-100 bg-white/50 shrink-0 no-print">
             CareFlow <span className="opacity-50">by Resilient</span> © 2026
           </footer>
         </div>
       </div>
 
-      <BottomNavigation />
+      <div className="no-print">
+        <BottomNavigation />
+      </div>
     </div>
   );
 }

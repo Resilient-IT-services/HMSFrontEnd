@@ -17,8 +17,9 @@ export const invoiceService = {
     return response.data;
   },
 
-  async exportPdf(invoiceId: string): Promise<Blob> {
+  async exportPdf(invoiceId: string, category?: string): Promise<Blob> {
     const response = await apiClient.get(`/finance/invoices/${invoiceId}/export`, {
+      params: { category },
       responseType: 'blob'
     });
     return response.data;

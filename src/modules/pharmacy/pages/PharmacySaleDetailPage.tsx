@@ -11,6 +11,7 @@ import { RootState } from '@/state/store';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { invoiceService } from '@/services/invoiceService';
 
 interface PharmacySaleDetailPageProps {
     id?: string;
@@ -56,13 +57,30 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
         globalThis.print();
     };
 
+    const handleDownloadInvoice = async () => {
+        if (!sale?.invoiceId) return;
+        try {
+            triggerGlobalToast('Generating secure invoice...', 'info');
+            const blob = await invoiceService.exportPdf(sale.invoiceId, 'PHARMACY');
+            const url = globalThis.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `pharmacy_invoice_${sale.invoiceNumber}.pdf`);
+            document.body.append(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Invoice Generation Error:', error);
+            triggerGlobalToast('Failed to generate secure invoice', 'error');
+        }
+    };
+
     if (loading) return <MainLayout title="Sale Details" hideTitle><PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter"><LoadingSkeleton /></PageSurface></MainLayout>;
     if (!sale) return <MainLayout title="Sale Details" hideTitle><PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter"><div className="p-8 text-center font-bold text-slate-400 uppercase tracking-widest">Sale not found</div></PageSurface></MainLayout>;
 
     const totalDiscount = sale.items.reduce((acc, item) => acc + (item.discountAmount || 0), 0);
     const subtotal = sale.totalAmount + totalDiscount;
 
-    // DYNAMIC LOOKUP: Pharmacist ke profile facility data se hospital name nikalne ke liye logic
     const loggedInHospitalName = user?.memberships.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
     const dynamicHospitalName = loggedInHospitalName || 'CAREFLOW HOSPITAL & MEDICAL RESEARCH';
 
@@ -73,162 +91,212 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
                 backgroundClassName="bg-[#f8f9fb]"
                 fontClassName="font-inter"
             >
-                <div className="space-y-8 py-4 md:py-8">
+                <div className="space-y-6 py-4 md:py-6">
                     <PageHeading
                         title="Dispensing Transaction"
                         description={`Viewing record for invoice ${sale.invoiceNumber}.`}
                         className="no-print"
                     />
-                    <div className="max-w-5xl mx-auto w-full space-y-6 pb-20">
 
-                        {/* Header Actions */}
-                        <div className="flex justify-between items-center no-print">
+                    <div className="max-w-4xl mx-auto w-full space-y-4 pb-20">
+
+                        {/* Top Action Bar */}
+                        <div className="flex justify-between items-center no-print px-2">
                             <button
                                 onClick={() => router.push('/pharmacy/sales')}
-                                className="flex items-center gap-2 text-slate-500 hover:text-primary transition-colors font-bold text-sm uppercase tracking-wider"
+                                className="flex items-center gap-2 text-slate-600 hover:text-primary transition-colors font-semibold text-xs uppercase tracking-wider"
                             >
-                                <span className="material-symbols-outlined text-lg">arrow_back</span>
+                                <span className="material-symbols-outlined text-base">arrow_back</span>
                                 Back to Billing
                             </button>
 
                             <div className="flex gap-3">
                                 <button
-                                    onClick={handlePrint}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+                                    onClick={handleDownloadInvoice}
+                                    className="flex items-center gap-2 px-5 py-2 bg-orange-700 text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:bg-orange-800 transition-all"
                                 >
-                                    <span className="material-symbols-outlined text-lg">print</span>
-                                    Print Bill
+                                    <span className="material-symbols-outlined text-base">verified_user</span>
+                                    Download Secure Bill
+                                </button>
+                                <button
+                                    onClick={handlePrint}
+                                    className="flex items-center gap-2 px-5 py-2 bg-slate-900 text-white rounded-lg font-bold text-xs uppercase tracking-wider shadow-md hover:bg-slate-800 transition-all"
+                                >
+                                    <span className="material-symbols-outlined text-base">print</span>
+                                    Print View
                                 </button>
                             </div>
                         </div>
 
-                        {/* ❌ PHYSICAL PICKING LIST CARD COMPLETELY REMOVED FROM HERE */}
+                        {/* REAL BILL LAYOUT (Perfect for UI & Print) */}
+                        <div id="printable-invoice" className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print:shadow-none print:border-none print:rounded-none p-6 md:p-8 print:p-0 print:min-h-[277mm] print:flex print:flex-col">
 
-                        {/* Invoice Layout (Printable) */}
-                        <div id="printable-invoice" className="bg-white rounded-[40px] border border-slate-200 shadow-xl overflow-hidden print:shadow-none print:border-none print:rounded-none">
-                            {/* Invoice Header */}
-                            <div className="p-10 bg-slate-50 border-b border-slate-100 flex justify-between items-start print:bg-transparent">
-                                <div>
-                                    <div className="flex items-center gap-3 mb-6">
-                                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white">
-                                            <span className="material-symbols-outlined font-black">health_metrics</span>
-                                        </div>
-                                        {/* ✅ HMS PHARMACY HATA KAR DYNAMIC HOSPITAL NAME SET KIYA */}
-                                        <span className="text-2xl font-black text-slate-900 uppercase tracking-tighter">{dynamicHospitalName}</span>
-                                    </div>
-                                    <h1 className="text-4xl font-black text-slate-900 uppercase tracking-tighter mb-1">INVOICE</h1>
-                                    <p className="text-sm font-black text-primary uppercase tracking-[0.2em]">{sale.invoiceNumber}</p>
-                                </div>
-                                <div className="text-right">
-                                    <div className="mb-4">
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Date & Time</p>
-                                        <p className="text-sm font-bold text-slate-800">{new Date(sale.createdAt).toLocaleString()}</p>
-                                    </div>
+                            {/* Top Content (Header + Meta) */}
+                            <div className="print:flex-none">
+                                {/* Bill Header */}
+                                <div className="flex justify-between items-start border-b border-slate-200 pb-5 print:pb-4">
                                     <div>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Status</p>
-                                        <span className="px-3 py-1 bg-emerald-100 text-emerald-700 text-[10px] font-black rounded-full uppercase tracking-widest">
-                          {sale.status}
-                        </span>
+                                        <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase print:text-lg">{dynamicHospitalName}</h2>
+                                        <p className="text-xs text-slate-500 font-medium mt-0.5">Retail Pharmacy Invoice</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <h1 className="text-xl font-black text-slate-400 tracking-widest uppercase print:text-lg">INVOICE</h1>
+                                        <p className="text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded mt-1 inline-block print:bg-transparent print:p-0">{sale.invoiceNumber}</p>
                                     </div>
                                 </div>
+
+                                {/* Meta Info Grid */}
+                                <div className="grid grid-cols-2 gap-4 py-4 border-b border-slate-200 text-xs print:py-3">
+                                    <div className="space-y-1">
+                                        <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Patient Details</p>
+                                        <p className="font-black text-slate-800 text-sm uppercase">{sale.customerName || 'Walk-in Customer'}</p>
+                                        <p className="text-slate-600 font-medium">Contact: {sale.customerPhone || 'N/A'}</p>
+                                    </div>
+                                    <div className="text-right space-y-1">
+                                        <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Meta Info</p>
+                                        <p className="text-slate-700 font-medium">Date: <span className="font-bold text-slate-900">{new Date(sale.createdAt).toLocaleString()}</span></p>
+                                        <p className="text-slate-700 font-medium">Doctor: <span className="font-bold text-slate-900 uppercase">{sale.doctorName || sale.externalDoctorName || 'Hospital Doctor'}</span></p>
+                                        <p className="text-slate-700 font-medium">Pharmacist: <span className="font-bold text-slate-900 uppercase">{user?.fullName || 'Duty Manager'}</span></p>
+                                    </div>
+                                </div>
+
+                                {/* Status Pill for UI */}
+                                <div className="pt-4 no-print">
+                                    <span className="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded border border-emerald-200 uppercase tracking-wider">
+                                        {sale.status}
+                                    </span>
+                                </div>
                             </div>
 
-                            {/* Customer & Doctor Details */}
-                            <div className="p-10 grid grid-cols-2 gap-10 border-b border-slate-50">
-                                <div>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Bill To (Customer)</p>
-                                    <h3 className="text-lg font-black text-slate-800 uppercase">{sale.customerName || 'Walk-in Customer'}</h3>
-                                    <p className="text-sm font-bold text-slate-500 mt-1">{sale.customerPhone || 'N/A'}</p>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Prescribed By</p>
-                                    <h3 className="text-lg font-black text-slate-800 uppercase">{sale.externalDoctorName || 'Hospital Doctor'}</h3>
-                                    {/* ✅ LOGGED-IN PHARMACIST NAME ENTRY ADDED */}
-                                    <p className="text-xs font-bold text-slate-400 mt-2">Pharmacist: <span className="text-slate-700 uppercase">{user?.fullName || 'Duty Manager'}</span></p>
-                                </div>
-                            </div>
-
-                            {/* Item Table */}
-                            <div className="p-10">
-                                <table className="w-full text-left border-separate border-spacing-y-2">
+                            {/* Items Table - This expands to fill space */}
+                            <div className="mt-5 print:mt-4 print:flex-grow">
+                                <table className="w-full text-left border-collapse">
                                     <thead>
-                                    <tr className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                                        <th className="pb-4 px-4">Item Description</th>
-                                        <th className="pb-4 px-4 text-center">Batch</th>
-                                        <th className="pb-4 px-4 text-center">Qty</th>
-                                        <th className="pb-4 px-4 text-right">Rate</th>
-                                        <th className="pb-4 px-4 text-right">Disc.</th>
-                                        <th className="pb-4 px-4 text-right">Amount</th>
+                                    <tr className="border-b-2 border-slate-300 text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 print:bg-transparent">
+                                        <th className="py-2 px-3 text-left w-[45%]">Item Name</th>
+                                        <th className="py-2 px-2 text-center">Batch</th>
+                                        <th className="py-2 px-2 text-center">Qty</th>
+                                        <th className="py-2 px-2 text-right">Price</th>
+                                        <th className="py-2 px-2 text-right">Disc</th>
+                                        <th className="py-2 px-3 text-right">Total</th>
                                     </tr>
                                     </thead>
-                                    <tbody>
-                                    {sale.items.map((item) => (
-                                        <tr key={item.id} className="bg-slate-50/50 print:bg-transparent">
-                                            <td className="py-4 px-4 rounded-l-2xl border-l border-t border-b border-slate-100 print:border-none">
-                                                <p className="font-black text-sm text-slate-800">{item.medicineName}</p>
+                                    <tbody className="divide-y divide-slate-200 text-xs">
+                                    {sale.items.map((item, index) => (
+                                        <tr key={item.id || index} className="hover:bg-slate-50/50 print:hover:bg-transparent">
+                                            <td className="py-2.5 px-3 font-bold text-slate-800 uppercase">{item.medicineName}</td>
+                                            <td className="py-2.5 px-2 text-center font-mono text-slate-600 font-semibold">{item.batchNumber || '-'}</td>
+                                            <td className="py-2.5 px-2 text-center font-bold text-slate-800">{item.quantity}</td>
+                                            <td className="py-2.5 px-2 text-right font-medium text-slate-600">{formatCurrency(item.unitPrice)}</td>
+                                            <td className="py-2.5 px-2 text-right font-medium text-emerald-600">
+                                                {item.discountAmount ? `-${formatCurrency(item.discountAmount)}` : '0.00'}
                                             </td>
-                                            <td className="py-4 px-4 text-center border-t border-b border-slate-100 font-mono text-[11px] font-bold text-slate-600 print:border-none">
-                                                #{item.batchNumber}
-                                            </td>
-                                            <td className="py-4 px-4 text-center border-t border-b border-slate-100 font-black text-sm text-slate-800 print:border-none">
-                                                {item.quantity}
-                                            </td>
-                                            <td className="py-4 px-4 text-right border-t border-b border-slate-100 font-bold text-sm text-slate-500 print:border-none">
-                                                {formatCurrency(item.unitPrice)}
-                                            </td>
-                                            <td className="py-4 px-4 text-right border-t border-b border-slate-100 font-bold text-sm text-emerald-600 print:border-none">
-                                                -{formatCurrency(item.discountAmount)}
-                                            </td>
-                                            <td className="py-4 px-4 text-right rounded-r-2xl border-r border-t border-b border-slate-100 font-black text-sm text-primary print:border-none">
-                                                {formatCurrency(item.netAmount)}
-                                            </td>
+                                            <td className="py-2.5 px-3 text-right font-bold text-slate-900">{formatCurrency(item.netAmount)}</td>
                                         </tr>
                                     ))}
                                     </tbody>
                                 </table>
                             </div>
 
-                            {/* Totals - ✅ GST TAX LINES MAINTAINED UNTOUCHED AS REQUESTED */}
-                            <div className="p-10 bg-slate-50 flex justify-end print:bg-transparent">
-                                <div className="w-80 space-y-4">
-                                    <div className="flex justify-between text-sm font-bold">
-                                        <span className="text-slate-400 uppercase tracking-widest text-[10px]">Subtotal</span>
-                                        <span className="text-slate-800">{formatCurrency(subtotal)}</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm font-bold">
-                                        <span className="text-slate-400 uppercase tracking-widest text-[10px]">Total Discount</span>
-                                        <span className="text-emerald-600">-{formatCurrency(totalDiscount)}</span>
-                                    </div>
-                                    <div className="pt-6 border-t-2 border-dashed border-slate-200 flex justify-between items-end">
-                                        <span className="text-xs font-black text-slate-900 uppercase tracking-widest mb-1">Grand Total</span>
-                                        <span className="text-4xl font-black text-primary tracking-tighter">{formatCurrency(sale.totalAmount)}</span>
+                            {/* Bottom Content (Summary + Footer) */}
+                            <div className="print:flex-none">
+                                {/* Calculation Summary */}
+                                <div className="mt-4 border-t border-slate-200 pt-4 flex justify-end">
+                                    <div className="w-64 space-y-2 text-xs">
+                                        <div className="flex justify-between text-slate-600 font-medium">
+                                            <span>Subtotal:</span>
+                                            <span>{formatCurrency(subtotal)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-emerald-600 font-medium">
+                                            <span>Total Discount:</span>
+                                            <span>-{formatCurrency(totalDiscount)}</span>
+                                        </div>
+                                        <div className="border-t-2 border-double border-slate-300 pt-2 flex justify-between items-center text-slate-900">
+                                            <span className="font-bold uppercase tracking-wider text-[10px]">Grand Total:</span>
+                                            <span className="text-xl font-black tracking-tight">{formatCurrency(sale.totalAmount)}</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Footer */}
-                            <div className="p-10 border-t border-slate-100 text-center">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Thank you for your visit</p>
-                                <p className="text-[9px] font-bold text-slate-300 mt-2">Computer generated invoice. No signature required.</p>
+                                {/* Terms & Footer */}
+                                <div className="mt-8 pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 space-y-1 font-medium print:mt-12">
+                                    <p className="uppercase tracking-widest font-bold text-slate-500">Thank you for your business!</p>
+                                    <p>Medicines once sold will not be taken back without a valid receipt.</p>
+                                    <p className="text-[9px] text-slate-300 italic">This is a computer-generated invoice and requires no physical signature.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </PageSurface>
 
+            {/* CSS to ensure Print Mode looks absolutely perfect */}
             <style jsx global>{`
                 @media print {
-                    .no-print {
+                    /* Hide all UI elements marked with no-print */
+                    .no-print, 
+                    nav, 
+                    aside, 
+                    header, 
+                    footer, 
+                    .sidebar, 
+                    .topbar {
                         display: none !important;
                     }
-                    body {
-                        background-color: white !important;
+
+                    /* Reset body and container for printing */
+                    body, html {
+                        background: #fff !important;
+                        color: #000 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        height: auto !important;
+                        overflow: visible !important;
                     }
+
+                    /* Ensure the main container doesn't have restrictive styles */
+                    main, .PageSurface, .MainLayout {
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        background: transparent !important;
+                        display: block !important;
+                        overflow: visible !important;
+                        width: 100% !important;
+                        max-width: none !important;
+                    }
+
                     #printable-invoice {
                         border: none !important;
                         box-shadow: none !important;
                         margin: 0 !important;
-                        padding: 0 !important;
+                        padding: 20mm !important; /* Standard print padding */
+                        width: 100% !important;
+                        display: block !important;
+                        background: white !important;
+                    }
+
+                    /* Page setup */
+                    @page {
+                        size: A4;
+                        margin: 0;
+                    }
+
+                    /* Typography adjustments for print */
+                    h1, h2, p, span, td, th {
+                        color: #000 !important;
+                    }
+
+                    /* Prevent table rows from breaking across pages */
+                    table {
+                        width: 100% !important;
+                        page-break-inside: auto;
+                    }
+                    tr {
+                        page-break-inside: avoid;
+                        page-break-after: auto;
+                    }
+                    thead {
+                        display: table-header-group;
                     }
                 }
             `}</style>

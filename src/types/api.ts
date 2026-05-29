@@ -637,6 +637,7 @@ export interface QuickPharmacySaleResponse {
   receiptNumber?: string;
   customerName?: string;
   customerPhone?: string;
+  doctorName?: string;
   externalDoctorName?: string;
   createdAt: string;
   items: QuickPharmacySaleItem[];

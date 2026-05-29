@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { pharmacyApi } from '../api/pharmacyApi';
 import {
   QuickPharmacySaleRequest,
+  QuickPharmacySaleResponse,
   PharmacyStockDTO,
   PatientResponse,
   DoctorStaffResponse
@@ -17,6 +18,9 @@ import DoctorSearch from '../components/DoctorSearch';
 import MainLayout from '@/components/ui/MainLayout';
 import { PHARMACY_SALE_TYPE_OPTIONS } from '@/utils/enumOptions';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
+import { invoiceService } from '@/services/invoiceService';
 
 import { doctorService } from '@/services/doctorService';
 
@@ -168,6 +172,10 @@ export default function QuickPharmacyBillingPage() {
 
   const [referenceNumber, setReferenceNumber] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Success Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [lastSale, setLastSale] = useState<QuickPharmacySaleResponse | null>(null);
 
   const validateSale = () => {
     if (cart.length === 0) return false;
@@ -410,8 +418,9 @@ export default function QuickPharmacyBillingPage() {
 
       const response = await pharmacyApi.createQuickSale(payload);
       if (response.success && response.data) {
+        setLastSale(response.data);
+        setShowSuccessModal(true);
         triggerGlobalToast('Sale completed successfully', 'success');
-        router.push(`/pharmacy/sales/${response.data.saleId}`);
       } else {
         triggerGlobalToast(response.message || 'Failed to create sale', 'error');
         setIsSubmitting(false);
@@ -420,6 +429,24 @@ export default function QuickPharmacyBillingPage() {
       console.error(error);
       triggerGlobalToast(error.response?.data?.message || 'An error occurred', 'error');
       setIsSubmitting(false);
+    }
+  };
+
+  const downloadInvoice = async () => {
+    if (!lastSale?.invoiceId) return;
+    try {
+      triggerGlobalToast('Generating secure invoice...', 'info');
+      const blob = await invoiceService.exportPdf(lastSale.invoiceId, 'PHARMACY');
+      const url = globalThis.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `pharmacy_invoice_${lastSale.invoiceNumber}.pdf`);
+      document.body.append(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Invoice Generation Error:', error);
+      triggerGlobalToast('Failed to generate secure invoice', 'error');
     }
   };
 
@@ -703,6 +730,59 @@ export default function QuickPharmacyBillingPage() {
             </div>
           </div>
         </PageSurface>
+
+        {/* Success Modal */}
+        <Modal
+            isOpen={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            title="Sale Completed Successfully"
+        >
+          <div className="p-8 text-center">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-5xl">check_circle</span>
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 mb-2">₹{lastSale?.totalAmount.toFixed(2)} Collected</h3>
+            <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">
+              Pharmacy bill <span className="text-slate-900 font-bold">#{lastSale?.invoiceNumber}</span> has been generated and stock levels updated.
+            </p>
+
+            <div className="flex flex-col gap-3 max-w-xs mx-auto">
+              <Button
+                  size="lg"
+                  fullWidth
+                  icon="receipt_long"
+                  onClick={downloadInvoice}
+                  className="bg-orange-700 hover:bg-orange-800 text-xs font-black uppercase tracking-wider"
+              >
+                Download Secure Invoice
+              </Button>
+              <Button
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  icon="visibility"
+                  onClick={() => router.push(`/pharmacy/sales/${lastSale?.saleId}`)}
+                  className="text-[10px] font-black uppercase tracking-wider"
+              >
+                View Transaction Details
+              </Button>
+              <Button
+                  variant="ghost"
+                  size="sm"
+                  fullWidth
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    setCart([]);
+                    setSelectedPatient(null);
+                    setPrescriptionId(null);
+                  }}
+                  className="text-[9px] font-black uppercase tracking-widest text-slate-400"
+              >
+                Start New Billing
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </MainLayout>
   );
 }

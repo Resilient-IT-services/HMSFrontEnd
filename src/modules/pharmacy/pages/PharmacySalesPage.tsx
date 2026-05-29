@@ -6,14 +6,17 @@ import MedicineAutocomplete from '@/modules/pharmacy/components/MedicineAutocomp
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { addToCart, removeFromCart, updateCartQuantity, clearCart } from '@/state/pharmacySlice';
-import { PatientResponse, MedicineResponse } from '@/types/api';
+import { PatientResponse, QuickPharmacySaleResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { patientService } from '@/services/patientService';
+import { invoiceService } from '@/services/invoiceService';
 import { useSearchParams } from 'next/navigation';
 
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { Modal } from '@/components/ui/Modal';
+import { Button } from '@/components/ui/Button';
 
 export const PharmacySalesPage = () => {
   const dispatch = useDispatch();
@@ -24,6 +27,10 @@ export const PharmacySalesPage = () => {
   const [patientSearch, setPatientSearch] = useState('');
   const [patientResults, setPatientSearchState] = useState<PatientResponse[]>([]);
   const [searchingPatient, setSearchingPatient] = useState(false);
+  
+  // Success Modal State
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [lastSale, setLastSale] = useState<QuickPharmacySaleResponse | null>(null);
 
   // Pre-load from URL if provided
   const patientIdParam = searchParams.get('patientId');
@@ -139,10 +146,16 @@ export const PharmacySalesPage = () => {
       const response = await pharmacyApi.createSale({ 
         patientId: selectedPatient.id,
         visitId: visitIdParam || undefined,
-        items: saleItems 
-      });
+        items: saleItems,
+        payment: {
+          mode: 'CASH',
+          amount: grandTotal
+        }
+      } as any);
       
-      if (response.success) {
+      if (response.success && response.data) {
+        setLastSale(response.data);
+        setShowSuccessModal(true);
         triggerGlobalToast('Sale completed and bill generated', 'success');
         dispatch(clearCart());
         setSelectedPatient(null);
@@ -153,6 +166,24 @@ export const PharmacySalesPage = () => {
       triggerGlobalToast('Failed to complete sale', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const downloadInvoice = async () => {
+    if (!lastSale?.invoiceId) return;
+    try {
+      triggerGlobalToast('Generating invoice...', 'info');
+      const blob = await invoiceService.exportPdf(lastSale.invoiceId, 'PHARMACY');
+      const url = globalThis.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `pharmacy_invoice_${lastSale.invoiceNumber}.pdf`);
+      document.body.append(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error('Invoice Generation Error:', error);
+      triggerGlobalToast('Failed to generate invoice', 'error');
     }
   };
 
@@ -376,19 +407,51 @@ export const PharmacySalesPage = () => {
                       )}
                       {loading ? 'Processing...' : 'Complete & Generate Bill'}
                     </button>
-                    
-                    <button 
-                      onClick={() => globalThis.print()}
-                      className="w-full py-3 bg-white border border-slate-200 text-slate-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-                    >
-                      <span className="material-symbols-outlined text-lg">print</span> Print Estimate
-                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Success Modal */}
+        <Modal
+            isOpen={showSuccessModal}
+            onClose={() => setShowSuccessModal(false)}
+            title="Sale Completed Successfully"
+        >
+          <div className="p-8 text-center">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-5xl">check_circle</span>
+            </div>
+            <h3 className="text-2xl font-black text-slate-900 mb-2">₹{lastSale?.totalAmount.toFixed(2)} Collected</h3>
+            <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">
+              Pharmacy bill <span className="text-slate-900 font-bold">#{lastSale?.invoiceNumber}</span> has been generated and stock levels updated.
+            </p>
+
+            <div className="flex flex-col gap-3 max-w-xs mx-auto">
+              <Button
+                  size="lg"
+                  fullWidth
+                  icon="receipt_long"
+                  onClick={downloadInvoice}
+                  className="bg-orange-700 hover:bg-orange-800 text-xs font-black uppercase tracking-wider"
+              >
+                Download Invoice
+              </Button>
+              <Button
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  icon="add_shopping_cart"
+                  onClick={() => setShowSuccessModal(false)}
+                  className="text-[10px] font-black uppercase tracking-wider"
+              >
+                New Billing
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </PageSurface>
     </MainLayout>
   );

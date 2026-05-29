@@ -155,7 +155,7 @@ export const pharmacyApi = {
 
   // Sale & Returns
   createSale: async (saleData: PharmacySaleRequest) => {
-    const response = await apiClient.post<ApiResponse<PharmacySaleResponse>>('/pharmacy/sales', saleData);
+    const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>('/pharmacy/sales', saleData);
     return response.data;
   },
 

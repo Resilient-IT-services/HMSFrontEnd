@@ -97,7 +97,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 </span>
               </td>
               <td className="px-6 py-4 text-right flex items-center justify-end gap-3">
-                {prescription.status === 'PENDING' ? (
+                {prescription.status === 'PENDING' && (
                   <>
                     <button 
                       onClick={() => handleCancel(prescription.id)}
@@ -114,7 +114,17 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                       Dispense
                     </Link>
                   </>
-                ) : (
+                )}
+                {prescription.status === 'DISPENSED' && (
+                  <Link 
+                    href={`/pharmacy/sales/prescription/${prescription.id}`}
+                    className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-sm">visibility</span>
+                    View Bill
+                  </Link>
+                )}
+                {prescription.status !== 'PENDING' && prescription.status !== 'DISPENSED' && (
                   <span className="text-[10px] font-bold text-slate-400 uppercase italic">No Actions</span>
                 )}
               </td>
