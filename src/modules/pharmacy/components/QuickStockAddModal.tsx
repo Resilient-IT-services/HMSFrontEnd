@@ -44,6 +44,22 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const purchasePrice = Number(formData.purchasePrice);
+    const sellingPrice = Number(formData.sellingPrice);
+
+    if (purchasePrice <= 0) {
+      triggerGlobalToast('Purchase price must be greater than zero', 'error');
+      return;
+    }
+    if (sellingPrice <= 0) {
+      triggerGlobalToast('Selling price must be greater than zero', 'error');
+      return;
+    }
+    if (sellingPrice < purchasePrice) {
+      triggerGlobalToast('Selling price cannot be less than purchase price', 'error');
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -52,8 +68,8 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
         batchNumber: formData.batchNumber,
         expiryDate: formData.expiryDate,
         quantity: Number(formData.quantity),
-        purchasePrice: Number(formData.purchasePrice),
-        sellingPrice: Number(formData.sellingPrice),
+        purchasePrice,
+        sellingPrice,
         reorderLevel: formData.reorderLevel ? Number(formData.reorderLevel) : undefined,
       });
 
