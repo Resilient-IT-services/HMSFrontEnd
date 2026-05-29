@@ -421,33 +421,33 @@ export const PharmacyDashboard = () => {
                 </Link>
               </div>
 
-              {/* EXPIRY ALERTS */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-bold text-slate-800">Expiry Alerts</h3>
-                </div>
-                <div className="space-y-2.5 flex-1 mt-1">
-                  {expiryAlerts.length > 0 ? expiryAlerts.map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-50">
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-3 bg-purple-500 rounded-sm"></span>
-                        <span className="font-medium text-slate-700">{item.medicineName}</span>
-                      </div>
-                      <span className="font-bold text-purple-600">{dayjs(item.expiryDate).format('DD MMM')}</span>
-                    </div>
-                  )) : (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2 py-4">
-                      <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-                      <p className="text-xs font-medium">No items expiring soon</p>
-                    </div>
-                  )}
-                </div>
-                <Link href="/pharmacy/stock?status=EXPIRING_SOON">
-                  <button className="w-full py-2 bg-purple-50 text-purple-600 text-xs font-bold rounded-xl mt-3 hover:bg-purple-100 transition-all flex items-center justify-center gap-1">
-                    Go to Stock Inventory <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </Link>
-              </div>
+              {/*/!* EXPIRY ALERTS *!/*/}
+              {/*<div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">*/}
+              {/*  <div className="flex items-center justify-between mb-3">*/}
+              {/*    <h3 className="text-sm font-bold text-slate-800">Expiry Alerts</h3>*/}
+              {/*  </div>*/}
+              {/*  <div className="space-y-2.5 flex-1 mt-1">*/}
+              {/*    {expiryAlerts.length > 0 ? expiryAlerts.map((item, idx) => (*/}
+              {/*      <div key={idx} className="flex items-center justify-between text-xs py-1.5 border-b border-slate-50">*/}
+              {/*        <div className="flex items-center gap-2">*/}
+              {/*          <span className="w-1.5 h-3 bg-purple-500 rounded-sm"></span>*/}
+              {/*          <span className="font-medium text-slate-700">{item.medicineName}</span>*/}
+              {/*        </div>*/}
+              {/*        <span className="font-bold text-purple-600">{dayjs(item.expiryDate).format('DD MMM')}</span>*/}
+              {/*      </div>*/}
+              {/*    )) : (*/}
+              {/*      <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2 py-4">*/}
+              {/*        <CheckCircle2 className="w-8 h-8 text-emerald-500" />*/}
+              {/*        <p className="text-xs font-medium">No items expiring soon</p>*/}
+              {/*      </div>*/}
+              {/*    )}*/}
+              {/*  </div>*/}
+              {/*  <Link href="/pharmacy/stock?status=EXPIRING_SOON">*/}
+              {/*    <button className="w-full py-2 bg-purple-50 text-purple-600 text-xs font-bold rounded-xl mt-3 hover:bg-purple-100 transition-all flex items-center justify-center gap-1">*/}
+              {/*      Go to Stock Inventory <ArrowRight className="w-3.5 h-3.5" />*/}
+              {/*    </button>*/}
+              {/*  </Link>*/}
+              {/*</div>*/}
 
               {/* TODAY'S PERFORMANCE */}
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
