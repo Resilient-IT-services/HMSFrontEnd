@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { HospitalMembershipDTO, HospitalResponse, ScheduleDTO } from '@/types/api';
+import { HospitalMembershipDTO, HospitalResponse, ScheduleDTO, DayOfWeek } from '@/types/api';
 import { MobileSelector } from '@/components/ui/MobileSelector';
 import { DAY_OF_WEEK_OPTIONS } from '@/utils/enumOptions';
 
@@ -18,10 +18,9 @@ interface ContractEditorProps {
 export const ContractEditor: React.FC<ContractEditorProps> = ({
   newContract, setNewContract, hospitals, editingContractIndex, validationErrors, onCancel, onConfirm
 }) => {
-  const dayValues = DAY_OF_WEEK_OPTIONS.map((option) => option.value);
-  const [activeDay, setActiveDay] = useState<typeof dayValues[number]>('MONDAY');
+  const [activeDay, setActiveDay] = useState<DayOfWeek>('MONDAY');
   const [showCopyUI, setShowCopyUI] = useState<number | null>(null); // raIdx
-  const [copyTargets, setCopyTargets] = useState<Array<typeof dayValues[number]>>([]);
+  const [copyTargets, setCopyTargets] = useState<DayOfWeek[]>([]);
 
   const selectedHospital = hospitals.find(h => String(h.id) === String(newContract.hospitalId));
   const availableDepartments = React.useMemo(() => {

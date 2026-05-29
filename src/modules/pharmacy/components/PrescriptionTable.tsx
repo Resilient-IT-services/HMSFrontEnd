@@ -14,7 +14,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
   const router = useRouter();
 
   const handleCancel = async (id: string) => {
-    if (!window.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
+    if (!globalThis.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
       return;
     }
 

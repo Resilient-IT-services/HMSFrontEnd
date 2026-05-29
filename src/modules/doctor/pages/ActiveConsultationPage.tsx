@@ -130,8 +130,23 @@ const MedicineSearchInput = ({
 };
 
 const parseFreq = (val: string): number => {
+  if (!val) return 0;
+  if (val.includes('/')) {
+    const parts = val.split('/');
+    if (parts.length === 2) {
+      const num = Number.parseFloat(parts[0]);
+      const den = Number.parseFloat(parts[1]);
+      return den === 0 ? 0 : num / den;
+    }
+  }
   const n = Number.parseFloat(val);
   return Number.isNaN(n) ? 0 : n;
+};
+
+const calculateTotal = (p: any) => {
+  const daily = parseFreq(p.freqM || '0') + parseFreq(p.freqA || '0') + parseFreq(p.freqN || '0');
+  const multiplier = p.durationUnit === 'weeks' ? 7 : (p.durationUnit === 'months' ? 30 : 1);
+  return Math.ceil(daily * (p.duration || 0) * multiplier);
 };
 
 export const ActiveConsultationPage = () => {
@@ -163,6 +178,7 @@ export const ActiveConsultationPage = () => {
           if (res.data.prescription?.items) {
             setPrescriptions(res.data.prescription.items.map((item, idx) => {
               const dosageParts = (item.dosage || '0-0-0').split('-');
+              const durationParts = (item.duration || '0 days').split(' ');
               return {
                 id: item.id || `existing-${idx}`,
                 medicineId: item.medicineId,
@@ -170,12 +186,13 @@ export const ActiveConsultationPage = () => {
                 freqM: dosageParts[0] === '0' ? '' : dosageParts[0],
                 freqA: dosageParts[1] === '0' ? '' : dosageParts[1],
                 freqN: dosageParts[2] === '0' ? '' : dosageParts[2],
-                duration: Number.parseInt(item.duration) || 0,
+                duration: Number.parseInt(durationParts[0]) || 0,
+                durationUnit: durationParts[1] || 'days',
                 inStock: true
               };
             }));
           } else {
-            setPrescriptions([{ id: '1', medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, inStock: true }]);
+            setPrescriptions([{ id: '1', medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, durationUnit: 'days', inStock: true }]);
           }
 
           const pRes = await patientService.get(res.data.patientId);
@@ -198,7 +215,7 @@ export const ActiveConsultationPage = () => {
   }, [appointmentId, user?.currentHospitalId]);
 
   const addPrescriptionRow = () => {
-    setPrescriptions([...prescriptions, { id: Date.now().toString(), medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, inStock: true }]);
+    setPrescriptions([...prescriptions, { id: Date.now().toString(), medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, durationUnit: 'days', inStock: true }]);
   };
 
   const removePrescriptionRow = (id: string) => {
@@ -242,12 +259,14 @@ export const ActiveConsultationPage = () => {
             const fM = p.freqM || '0';
             const fA = p.freqA || '0';
             const fN = p.freqN || '0';
-            const total = (parseFreq(fM) + parseFreq(fA) + parseFreq(fN)) * (p.duration || 0);
+            const daily = parseFreq(fM) + parseFreq(fA) + parseFreq(fN);
+            const multiplier = p.durationUnit === 'weeks' ? 7 : (p.durationUnit === 'months' ? 30 : 1);
+            const total = daily * (p.duration || 0) * multiplier;
             return {
               medicineId: p.medicineId,
               medicineName: p.medicine,
               dosage: `${fM}-${fA}-${fN}`,
-              duration: `${p.duration} days (Total: ${total} units)`
+              duration: `${p.duration} ${p.durationUnit} (Total: ${total} units)`
             };
           })
         }
@@ -409,17 +428,23 @@ export const ActiveConsultationPage = () => {
                             </div>
                           ))}
                         </div>
-                        <div className="col-span-3 md:col-span-2">
-                          <div className="relative group/dur">
-                            <input
-                              type="number"
-                              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-black text-slate-900 outline-none focus:border-slate-400 text-center shadow-sm"
-                              placeholder="0"
-                              value={p.duration || ''}
-                              onChange={(e) => updatePrescriptionRow(p.id, 'duration', Number.parseInt(e.target.value) || 0)}
-                            />
-                            <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[7px] px-1 rounded opacity-0 group-focus-within/dur:opacity-100 transition-opacity">DAYS</span>
-                          </div>
+                        <div className="col-span-3 md:col-span-2 flex items-center gap-1">
+                          <input
+                            type="number"
+                            className="w-12 sm:w-16 px-2 py-2 bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-900 outline-none focus:border-slate-400 text-center shadow-sm"
+                            placeholder="0"
+                            value={p.duration || ''}
+                            onChange={(e) => updatePrescriptionRow(p.id, 'duration', Number.parseInt(e.target.value) || 0)}
+                          />
+                          <select
+                            className="flex-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 h-8 outline-none px-1"
+                            value={p.durationUnit}
+                            onChange={(e) => updatePrescriptionRow(p.id, 'durationUnit', e.target.value)}
+                          >
+                            <option value="days">Days</option>
+                            <option value="weeks">Weeks</option>
+                            <option value="months">Months</option>
+                          </select>
                         </div>
                         <div className="col-span-1 flex justify-end">
                           <button onClick={() => removePrescriptionRow(p.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all md:opacity-0 group-hover:opacity-100">
@@ -455,17 +480,11 @@ export const ActiveConsultationPage = () => {
       {showPreview && (
         <DigitalPrescription
           isOpen={showPreview} onClose={() => setShowPreview(false)} patient={patient} doctor={user} hospital={hospital} complaints={complaints} diagnosis={diagnosis}
-          prescriptions={prescriptions.filter(p => p.medicine).map(p => {
-            const fM = p.freqM || '0';
-            const fA = p.freqA || '0';
-            const fN = p.freqN || '0';
-            const total = (parseFreq(fM) + parseFreq(fA) + parseFreq(fN)) * (p.duration || 0);
-            return {
-              ...p,
-              dosage: `${fM}-${fA}-${fN}`,
-              duration: `${p.duration} days (Total: ${total} units)`
-            };
-          })}
+          prescriptions={prescriptions.filter(p => p.medicine).map(p => ({
+            ...p,
+            dosage: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
+            duration: `${p.duration} ${p.durationUnit} (Total: ${calculateTotal(p)} units)`
+          }))}
           vitals={{
             heartRate: appointment?.vitals?.heartRate?.toString() || '--',
             temp: appointment?.vitals?.temperature?.toString() || '--',

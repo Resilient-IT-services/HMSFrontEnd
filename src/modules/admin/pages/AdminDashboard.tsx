@@ -11,7 +11,6 @@ import { adminService } from '@/services/adminService';
 import { HospitalResponse } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import { useHospitals } from '@/modules/super_admin/hooks/useHospitals';
-import { SearchInput } from '@/components/ui/SearchInput';
 import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { Modal } from '@/components/ui/Modal';
@@ -26,18 +25,11 @@ export const AdminDashboard = () => {
     setPage,
     pageSize,
     setPageSize,
-    searchTerm,
-    setSearchTerm,
-    statusFilter,
-    setStatusFilter,
     selectedHospital,
     isModalOpen,
     setIsModalOpen,
     handleViewDetails
   } = useHospitals();
-
-  const [showFilter, setShowFilter] = useState(false);
-  const statusOptions = ['ALL', 'ACTIVE', 'INACTIVE', 'SUSPENDED', 'ONBOARDING'];
 
   const [adminStats, setAdminStats] = useState({
     totalHospitals: 0,
