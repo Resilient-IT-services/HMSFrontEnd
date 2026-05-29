@@ -38,7 +38,6 @@ export const StockManagement = () => {
     handleExport,
     handleImport,
     handleDelete,
-    handleAdjust,
     refresh,
     stats
   } = usePharmacyStock();
@@ -174,19 +173,7 @@ export const StockManagement = () => {
             onClick={() => setSelectedMedicineForView({ id: medicine.medicineId, name: medicine.medicineName })}
             title="View Profile"
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="inventory_2"
-            className="h-8 w-8 p-0"
-            onClick={() => {
-              if (globalThis.confirm(`Are you sure you want to set the quantity of "${medicine.medicineName}" (Batch: ${medicine.batchNumber}) to zero?`)) {
-                handleAdjust(medicine.id, 0);
-              }
-            }}
-            title="Set to Zero"
-            disabled={medicine.quantity === 0}
-          />
+
 
         </div>
       )
