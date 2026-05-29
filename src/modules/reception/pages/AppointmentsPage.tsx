@@ -209,8 +209,8 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Actions',
-      headerClassName: 'text-right pr-6',
-      className: 'text-right pr-6',
+      headerClassName: 'text-right pr-4',
+      className: 'text-right pr-4',
       mobilePosition: 'action',
       render: (app) => {
         const isVitalsNotRecorded = ['SCHEDULED', 'PAYMENT_PENDING', 'PAID'].includes(app.status);
@@ -234,13 +234,14 @@ export const AppointmentsPage = () => {
         return (
             <div className="flex items-center justify-end gap-2 w-full">
               {shouldShowVitalsButton && (
-                  <Button
-                      size="sm"
-                      icon="vital_signs"
+                  /* 🚀 Restored to original static full-width pill button as requested */
+                  <button
                       onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
+                      className="flex items-center justify-center gap-2 px-4 py-2 h-9 rounded-full bg-orange-600 text-white shadow-md hover:bg-orange-700 transition-all active:scale-95 text-xs font-black uppercase tracking-wider select-none border-none outline-none"
                   >
-                    {vitalsButtonText}
-                  </Button>
+                    <span className="material-symbols-outlined text-sm font-bold leading-none">vital_signs</span>
+                    <span>{vitalsButtonText}</span>
+                  </button>
               )}
               <Button
                   variant="secondary"
@@ -263,6 +264,33 @@ export const AppointmentsPage = () => {
     { label: 'Completed', value: stats.completed, variant: 'emerald', filter: 'COMPLETED' },
     { label: 'Upcoming', value: stats.upcoming, variant: 'blue', filter: 'UPCOMING' },
   ];
+
+  /**
+   * 🚀 Smart click handler that updates top state values while syncing date ranges
+   */
+  const handleTabClick = (filterType: string) => {
+    setStatusFilter(filterType as any);
+
+    if (filterType === 'UPCOMING') {
+      // Auto-set the table column filter from tomorrow onwards up to the next 30 days
+      setColumnFilters((prev) => ({
+        ...prev,
+        from: dayjs().add(1, 'day').startOf('day').toISOString(),
+        to: dayjs().add(30, 'days').endOf('day').toISOString(),
+      }));
+    } else {
+      // Forcefully reset the calendar ranges back to single day limits for active stats lists
+      setColumnFilters((prev) => ({
+        ...prev,
+        from: dayjs().startOf('day').toISOString(),
+        to: dayjs().endOf('day').toISOString(),
+      }));
+    }
+
+    if (activeFilters.statuses?.length) {
+      resetFilters();
+    }
+  };
 
   return (
       <MainLayout title="Appointments Dashboard" hideTitle>
@@ -288,12 +316,7 @@ export const AppointmentsPage = () => {
                 {statConfig.map((stat, i) => (
                     <button
                         key={i}
-                        onClick={() => {
-                          setStatusFilter(stat.filter as any);
-                          if (activeFilters.statuses?.length) {
-                            resetFilters();
-                          }
-                        }}
+                        onClick={() => handleTabClick(stat.filter)}
                         className={cn(
                             "flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all shrink-0 active:scale-95",
                             statusFilter === stat.filter
@@ -341,15 +364,15 @@ export const AppointmentsPage = () => {
           </div>
         </PageSurface>
 
-        {/* 🚀 FIXED HORIZONTAL SLATE BLACK CAPSULE */}
+        {/* FIXED HORIZONTAL SLATE BLACK CAPSULE */}
         <div className="fixed bottom-6 right-6 flex flex-row items-center gap-3 z-[100] bg-slate-900 border border-slate-800 p-2.5 rounded-full shadow-2xl transition-all duration-300">
 
-          {/* New Patient Button (Blue) - By default OPEN, but collapses when isOrangeHovered is true */}
+          {/* New Patient Button (Blue) */}
           <Link
               href="/reception/patients/create"
               className={cn(
                   "flex items-center justify-center h-12 p-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg transition-all duration-300 ease-out overflow-hidden active:scale-95 no-underline decoration-transparent select-none",
-                  isOrangeHovered ? "w-12" : "w-44" // Dynamic width based on interaction
+                  isOrangeHovered ? "w-12" : "w-44"
               )}
           >
             <div className="flex items-center justify-center gap-2.5 min-w-max">
@@ -365,7 +388,7 @@ export const AppointmentsPage = () => {
             </div>
           </Link>
 
-          {/* New Visit Button (Orange) - Controls the Blue button hover status */}
+          {/* New Visit Button (Orange) */}
           <Link
               href="/reception/appointments/create"
               onMouseEnter={() => setIsOrangeHovered(true)}
