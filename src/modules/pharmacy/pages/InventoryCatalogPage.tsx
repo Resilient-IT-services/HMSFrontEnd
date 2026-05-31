@@ -20,6 +20,8 @@ const InventoryCatalogPage = () => {
     loading,
     searchTerm,
     setSearchTerm,
+    columnFilters,
+    setColumnFilters,
     showAddModal,
     setShowAddModal,
     selectedItem,
@@ -30,6 +32,8 @@ const InventoryCatalogPage = () => {
   const columns: Column<InventoryItemResponse>[] = [
     {
       header: 'Item Name',
+      filterable: true,
+      filterPlaceholder: 'Item name...',
       render: (item) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center">
@@ -41,6 +45,8 @@ const InventoryCatalogPage = () => {
     },
     {
       header: 'Category',
+      filterable: true,
+      filterPlaceholder: 'Category...',
       render: (item) => <Badge variant="slate">{item.category}</Badge>
     },
     {
@@ -111,6 +117,8 @@ const InventoryCatalogPage = () => {
               isLoading={loading}
               loadingMessage="Loading inventory catalog..."
               emptyMessage="No inventory items found"
+              onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+              activeFilters={columnFilters}
             />
           </div>
 

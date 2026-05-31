@@ -26,7 +26,10 @@ export const usePharmacyStock = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
   const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
+  const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
   const [selectedMedicineForStock, setSelectedMedicineForStock] = useState<{ id: string; name: string } | null>(null);
   const [selectedMedicineForView, setSelectedMedicineForView] = useState<{ id: string; name: string } | null>(null);
 
@@ -39,7 +42,9 @@ export const usePharmacyStock = () => {
         search: debouncedSearch,
         lowStock: statusFilter === 'LOW_STOCK',
         expired: statusFilter === 'EXPIRED',
-        expiringSoon: statusFilter === 'EXPIRING_SOON'
+        expiringSoon: statusFilter === 'EXPIRING_SOON',
+        sort,
+        ...debouncedColumnFilters
       });
       if (response.success && response.data) {
         let content = response.data.content || [];
@@ -245,6 +250,10 @@ export const usePharmacyStock = () => {
     pageSize,
     setPageSize,
     totalElements,
+    columnFilters,
+    setColumnFilters,
+    sort,
+    setSort,
     selectedMedicineForStock,
     setSelectedMedicineForStock,
     selectedMedicineForView,

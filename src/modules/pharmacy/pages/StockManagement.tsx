@@ -31,6 +31,8 @@ export const StockManagement = () => {
     pageSize,
     setPageSize,
     totalElements,
+    columnFilters,
+    setColumnFilters,
     selectedMedicineForStock,
     setSelectedMedicineForStock,
     selectedMedicineForView,
@@ -59,6 +61,8 @@ export const StockManagement = () => {
   const columns: Column<PharmacyStockDTO>[] = [
     {
       header: 'Product Information',
+      filterable: true,
+      filterPlaceholder: 'Search name...',
       render: (medicine) => (
         <div className="flex items-center gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400 transition-colors group-hover:text-orange-600">
@@ -75,6 +79,8 @@ export const StockManagement = () => {
     },
     {
       header: 'Batch & Expiry',
+      filterable: true,
+      filterPlaceholder: 'Batch...',
       render: (medicine) => (
         <div className="space-y-1">
           <p className="inline-block rounded bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-black tracking-tighter text-slate-700">
@@ -124,6 +130,15 @@ export const StockManagement = () => {
     },
     {
       header: 'Status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'In Stock', value: 'IN_STOCK' },
+        { label: 'Low Stock', value: 'LOW_STOCK' },
+        { label: 'Out of Stock', value: 'OUT_OF_STOCK' },
+        { label: 'Expired', value: 'EXPIRED' },
+        { label: 'Expiring Soon', value: 'EXPIRING_SOON' }
+      ],
       className: 'text-center',
       headerClassName: 'text-center',
       render: (medicine) => {
@@ -247,6 +262,8 @@ export const StockManagement = () => {
               data={medicines}
               isLoading={loading}
               emptyMessage="No inventory found matching your criteria."
+              onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+              activeFilters={columnFilters}
             />
 
             <Pagination

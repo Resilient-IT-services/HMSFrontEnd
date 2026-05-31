@@ -26,7 +26,7 @@ import { LOW_STOCK_THRESHOLD, EXPIRY_ALERT_DAYS } from '@/utils/constants';
 
 export const pharmacyApi = {
   // Prescription Management
-  getPrescriptions: async (params?: { search?: string; page?: number; size?: number; status?: string }) => {
+  getPrescriptions: async (params?: { search?: string; page?: number; size?: number; status?: string; sort?: string } & Record<string, any>) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionDTO>>>('/pharmacy/prescriptions', { params: queryParams });
@@ -48,7 +48,7 @@ export const pharmacyApi = {
     return response.data;
   },
 
-  getPrescriptionsSummary: async (params?: { search?: string; page?: number; size?: number; status?: string }) => {
+  getPrescriptionsSummary: async (params?: { search?: string; page?: number; size?: number; status?: string; sort?: string } & Record<string, any>) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionSummaryDTO>>>('/pharmacy/prescriptions/summary', { params: queryParams });
@@ -56,14 +56,14 @@ export const pharmacyApi = {
   },
 
   // Medicine Management (Pharmacy Catalog)
-  getMedicines: async (params?: { search?: string; page?: number; size?: number }) => {
+  getMedicines: async (params?: { search?: string; page?: number; size?: number; sort?: string } & Record<string, any>) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineResponse>>>('/pharmacy/medicines', { params: queryParams });
     return response.data;
   },
 
-  getMedicinesSummary: async (params?: { search?: string; page?: number; size?: number }) => {
+  getMedicinesSummary: async (params?: { search?: string; page?: number; size?: number; sort?: string } & Record<string, any>) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineSummaryDTO>>>('/pharmacy/medicines/summary', { params: queryParams });
@@ -87,7 +87,8 @@ export const pharmacyApi = {
     expired?: boolean; 
     expiringSoon?: boolean;
     medicineId?: string;
-  }) => {
+    sort?: string;
+  } & Record<string, any>) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params: queryParams });
@@ -165,7 +166,7 @@ export const pharmacyApi = {
   },
 
   // Alerts
-  getLowStockAlerts: async (params?: { page?: number; size?: number; threshold?: number }) => {
+  getLowStockAlerts: async (params?: { page?: number; size?: number; threshold?: number; sort?: string } & Record<string, any>) => {
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/alerts/low-stock', {
       params: { threshold: LOW_STOCK_THRESHOLD, ...params }
     });
@@ -191,7 +192,7 @@ export const pharmacyApi = {
   },
 
   // Inventory Management
-  getInventoryItems: async (params?: { search?: string; page?: number; size?: number }) => {
+  getInventoryItems: async (params?: { search?: string; page?: number; size?: number; sort?: string } & Record<string, any>) => {
     const queryParams: any = { ...params };
     if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
     const response = await apiClient.get<ApiResponse<PageResponse<InventoryItemResponse>>>('/inventory/items', { params: queryParams });

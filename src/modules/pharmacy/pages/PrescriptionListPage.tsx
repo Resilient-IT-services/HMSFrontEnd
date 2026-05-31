@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { pharmacyApi } from '../api/pharmacyApi';
 import { PrescriptionSummaryDTO } from '@/types/api';
-import PrescriptionTable from '../components/PrescriptionTable';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import EmptyState from '../components/EmptyState';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -13,6 +12,11 @@ import Link from 'next/link';
 
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
+import { Table, Column } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { ContentPanel } from '@/components/ui/ContentPanel';
+import { SearchInput } from '@/components/ui/SearchInput';
 
 const PrescriptionListPage: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionSummaryDTO[]>([]);
@@ -20,15 +24,20 @@ const PrescriptionListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string | undefined>('PENDING');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
   const fetchPrescriptions = React.useCallback(async () => {
     try {
       setLoading(true);
       const response = await pharmacyApi.getPrescriptionsSummary({
         search: debouncedSearch,
-        status: showHistory ? (statusFilter === 'ALL' ? undefined : statusFilter) : 'PENDING'
+        status: showHistory ? (statusFilter === 'ALL' ? undefined : statusFilter) : 'PENDING',
+        sort,
+        ...debouncedColumnFilters
       });
       if (response.success && response.data) {
         setPrescriptions(response.data.content);
@@ -40,110 +49,197 @@ const PrescriptionListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, showHistory, statusFilter]);
+  }, [debouncedSearch, showHistory, statusFilter, debouncedColumnFilters, sort]);
 
   useEffect(() => {
-    const trigger = async () => {
-      await fetchPrescriptions();
-    };
-    void trigger();
+    void fetchPrescriptions();
   }, [fetchPrescriptions]);
 
-  const handleHistoryToggle = (checked: boolean) => {
-    setShowHistory(checked);
-    if (checked) {
-      setStatusFilter('ALL');
-    } else {
-      setStatusFilter('PENDING');
+  const handleCancel = async (id: string) => {
+    if (!globalThis.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await pharmacyApi.cancelPrescription(id);
+      if (response.success) {
+        void fetchPrescriptions();
+      } else {
+        alert(response.message || 'Failed to cancel prescription');
+      }
+    } catch (error: any) {
+      console.error('Error cancelling prescription:', error);
+      const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
-  return (
-      <MainLayout title="Prescription Queue" hideTitle>
-        <PageSurface
-            maxWidthClassName="max-w-[1600px]"
-            backgroundClassName="bg-[#f8f9fb]"
-            fontClassName="font-inter"
-        >
-          <div className="space-y-8 py-4 md:py-8">
-            <PageHeading
-                title="Prescription Queue"
-                description="Access and process incoming digital prescriptions from doctors."
-            >
-              <Link
-                  href="/pharmacy/billing"
-                  className="flex items-center px-6 py-3.5 bg-orange-700 text-white font-bold rounded-xl hover:bg-orange-800 transition-all shadow-lg shadow-orange-700/20 active:scale-95"
+  const columns: Column<PrescriptionSummaryDTO>[] = useMemo(() => [
+    {
+      header: 'Prescription ID',
+      filterable: true,
+      filterPlaceholder: 'Rx ID...',
+      render: (p) => (
+        <span className="font-medium text-[var(--text-primary)] text-xs bg-slate-100 px-2 py-1 rounded">
+          #{p.id.substring(0, 8).toUpperCase()}
+        </span>
+      )
+    },
+    {
+      header: 'Patient Name',
+      filterable: true,
+      filterPlaceholder: 'Patient...',
+      render: (p) => (
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 text-xs font-bold uppercase">
+            {p.patientName?.charAt(0) || 'P'}
+          </div>
+          <div>
+            <p className="font-bold text-slate-900 leading-tight">{p.patientName}</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase">{p.patientCode || 'N/A'}</p>
+          </div>
+        </div>
+      )
+    },
+    {
+      header: 'Doctor',
+      filterable: true,
+      filterPlaceholder: 'Doctor...',
+      render: (p) => <span className="text-sm font-medium text-slate-700">{p.doctorName}</span>
+    },
+    {
+      header: 'Items',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      render: (p) => (
+        <span className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-[10px] font-black uppercase">
+          {p.itemCount} Meds
+        </span>
+      )
+    },
+    {
+      header: 'Status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Dispensed', value: 'DISPENSED' },
+        { label: 'Cancelled', value: 'CANCELLED' }
+      ],
+      className: 'text-center',
+      headerClassName: 'text-center',
+      render: (p) => {
+        const variants: Record<string, any> = {
+          PENDING: 'orange',
+          DISPENSED: 'emerald',
+          CANCELLED: 'red'
+        };
+        return <Badge variant={variants[p.status || 'PENDING'] || 'slate'}>{p.status || 'PENDING'}</Badge>;
+      }
+    },
+    {
+      header: 'Actions',
+      className: 'text-right',
+      headerClassName: 'text-right',
+      render: (p) => (
+        <div className="flex items-center justify-end gap-2">
+          {p.status === 'PENDING' && (
+            <>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon="cancel"
+                className="text-red-600 border-red-100 hover:bg-red-50"
+                onClick={() => handleCancel(p.id)}
               >
-                <span className="material-symbols-outlined mr-2 text-xl">point_of_sale</span>
-                Walk-in Billing
-              </Link>
-            </PageHeading>
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                icon="payments"
+                href={`/pharmacy/sales?prescriptionId=${p.id}`}
+                className="bg-orange-700 hover:bg-orange-800"
+              >
+                Dispense
+              </Button>
+            </>
+          )}
+          {p.status === 'DISPENSED' && (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="visibility"
+              href={`/pharmacy/sales/prescription/${p.id}`}
+            >
+              View Bill
+            </Button>
+          )}
+        </div>
+      )
+    }
+  ], []);
 
-            <section className="rounded-2xl bg-[var(--surface)] p-6 border border-[var(--border)] shadow-sm">
-              <div className="mb-6 space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="relative flex-1 w-full">
-                    <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">search</span>
-                    <input
-                        className="w-full rounded-xl border-[var(--border)] bg-[var(--background)] py-3.5 pl-12 pr-4 focus:ring-[var(--primary)] text-[var(--text-primary)] outline-none"
-                        placeholder="Search by patient name, Rx ID, or doctor..."
-                        type="text"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
+  return (
+    <MainLayout title="Prescription Queue" hideTitle>
+      <PageSurface
+        maxWidthClassName="max-w-[1600px]"
+        backgroundClassName="bg-[#f8f9fb]"
+        fontClassName="font-inter"
+      >
+        <div className="space-y-8 py-4 md:py-8">
+          <PageHeading
+            title="Prescription Queue"
+            description="Access and process incoming digital prescriptions from doctors."
+          >
+            <Button icon="point_of_sale" className="bg-orange-700" href="/pharmacy/billing">
+              Walk-in Billing
+            </Button>
+          </PageHeading>
 
-                  <div className="flex items-center gap-2 px-2 py-2 bg-slate-50 rounded-xl border border-slate-200">
+          <ContentPanel
+            toolbar={(
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
+                <div className="relative flex-1 w-full max-w-xl">
+                  <SearchInput
+                    placeholder="Search by patient name, Rx ID, or doctor..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-xl border border-slate-200 shadow-sm">
                     <input
-                        type="checkbox"
-                        id="showHistory"
-                        checked={showHistory}
-                        onChange={(e) => handleHistoryToggle(e.target.checked)}
-                        className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
+                      type="checkbox"
+                      id="showHistory"
+                      checked={showHistory}
+                      onChange={(e) => setShowHistory(e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
                     />
                     <label htmlFor="showHistory" className="text-xs font-black uppercase text-slate-600 cursor-pointer select-none">Show History</label>
                   </div>
+                  <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => fetchPrescriptions()} />
                 </div>
-
-                {showHistory && (
-                    <div className="flex flex-wrap items-center gap-2 p-1 bg-slate-100 rounded-xl border border-slate-200 w-fit animate-in fade-in slide-in-from-top-2 duration-200">
-                      {[
-                        { label: 'All', value: 'ALL' },
-                        { label: 'Pending', value: 'PENDING' },
-                        { label: 'Completed', value: 'DISPENSED' },
-                        { label: 'Cancelled', value: 'CANCELLED' }
-                      ].map((filter) => (
-                          <button
-                              key={filter.value}
-                              onClick={() => setStatusFilter(filter.value)}
-                              className={`px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-                                  statusFilter === filter.value
-                                      ? 'bg-white shadow-sm text-orange-700'
-                                      : 'text-slate-400 hover:text-slate-600'
-                              }`}
-                          >
-                            {filter.label}
-                          </button>
-                      ))}
-                    </div>
-                )}
               </div>
-
-              {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                        <div key={i} className="h-16 bg-gray-100 animate-pulse rounded-xl"></div>
-                    ))}
-                  </div>
-              ) : error ? (
-                  <EmptyState message={error} icon="error" />
-              ) : (
-                  <PrescriptionTable prescriptions={prescriptions} onRefresh={fetchPrescriptions} />
-              )}
-            </section>
-          </div>
-        </PageSurface>
-      </MainLayout>
+            )}
+          >
+            {error ? (
+              <EmptyState message={error} icon="error" />
+            ) : (
+              <Table
+                columns={columns}
+                data={prescriptions}
+                isLoading={loading}
+                emptyMessage="No prescriptions found in the queue."
+                onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                activeFilters={columnFilters}
+                onSort={(key, dir) => setSort(dir ? `${key},${dir}` : undefined)}
+              />
+            )}
+          </ContentPanel>
+        </div>
+      </PageSurface>
+    </MainLayout>
   );
 };
 

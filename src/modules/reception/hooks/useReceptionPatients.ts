@@ -14,6 +14,9 @@ export const useReceptionPatients = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [totalElements, setTotalElements] = useState(0);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
+  const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 
   const fetchPatients = useCallback(async () => {
     try {
@@ -21,7 +24,9 @@ export const useReceptionPatients = () => {
       const response = await patientService.listSummary({ 
         page, 
         size: pageSize, 
-        search: debouncedSearchTerm 
+        search: debouncedSearchTerm,
+        sort,
+        ...debouncedColumnFilters
       });
       if (response.success && response.data) {
         setPatients(response.data.content);
@@ -61,6 +66,10 @@ export const useReceptionPatients = () => {
     pageSize,
     setPageSize: handlePageSizeChange,
     totalElements,
+    columnFilters,
+    setColumnFilters,
+    sort,
+    setSort,
     refresh: fetchPatients
   };
 };

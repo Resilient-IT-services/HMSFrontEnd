@@ -36,12 +36,16 @@ export const UserManagementPage = () => {
     setRoleFilter,
     activeFilter,
     setActiveFilter,
+    columnFilters,
+    setColumnFilters,
     refresh
   } = useAdminUsers();
 
   const columns: Column<UserSummaryDTO & { roles: Role[] }>[] = [
     {
       header: 'User Details',
+      filterable: true,
+      filterPlaceholder: 'Name or email...',
       render: (user) => (
         <div className="flex items-center gap-3">
           <Avatar name={user.fullName || user.username} />
@@ -217,6 +221,8 @@ export const UserManagementPage = () => {
               isLoading={loading}
               onRowDoubleClick={(user) => router.push(`/admin/users/${user.id}`)}
               emptyMessage="No staff members found matching your security criteria."
+              onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+              activeFilters={columnFilters}
             />
 
             <Pagination

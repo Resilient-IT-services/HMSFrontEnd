@@ -41,6 +41,9 @@ export const MedicineInventory = () => {
   // Pagination
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
+  const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 
   const fetchMedicines = useCallback(async () => {
     try {
@@ -48,7 +51,9 @@ export const MedicineInventory = () => {
       const response = await pharmacyApi.getMedicines({
         search: debouncedSearch,
         page: page,
-        size: pageSize
+        size: pageSize,
+        sort,
+        ...debouncedColumnFilters
       });
       if (response.success && response.data) {
         setMedicines(response.data.content);
@@ -190,6 +195,8 @@ export const MedicineInventory = () => {
   const columns: Column<MedicineResponse>[] = [
     {
       header: 'Medicine Details',
+      filterable: true,
+      filterPlaceholder: 'Search name...',
       render: (m) => (
         <div className="flex items-center gap-3">
           <Avatar name={m.name} variant="orange" />
@@ -202,6 +209,8 @@ export const MedicineInventory = () => {
     },
     {
       header: 'Generic Name',
+      filterable: true,
+      filterPlaceholder: 'Generic name...',
       render: (m) => (
         <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
       )
@@ -216,6 +225,18 @@ export const MedicineInventory = () => {
     },
     {
       header: 'Category',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Tablet', value: 'TABLET' },
+        { label: 'Syrup', value: 'SYRUP' },
+        { label: 'Capsule', value: 'CAPSULE' },
+        { label: 'Injection', value: 'INJECTION' },
+        { label: 'Ointment', value: 'OINTMENT' },
+        { label: 'Cream', value: 'CREAM' },
+        { label: 'Drops', value: 'DROPS' },
+        { label: 'Inhaler', value: 'INHALER' }
+      ],
       className: 'text-center',
       headerClassName: 'text-center',
       render: (m) => (
@@ -306,6 +327,8 @@ export const MedicineInventory = () => {
               onRowClick={handleRowClick}
               onRowDoubleClick={(m) => openEditModal(m.id)}
               rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
+              onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+              activeFilters={columnFilters}
             />
             <Pagination
               page={page}

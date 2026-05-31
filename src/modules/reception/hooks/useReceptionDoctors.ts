@@ -18,7 +18,10 @@ export const useReceptionDoctors = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
   const debouncedSearchTerm = useDebounce(searchTerm, 300);
+  const debouncedColumnFilters = useDebounce(columnFilters, 300);
   
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
   const [selectedDate, setSelectedDate] = useState(getLocalStartOfDayISO(undefined, hospitalTimezone));
@@ -28,12 +31,14 @@ export const useReceptionDoctors = () => {
   const fetchDoctors = useCallback(async () => {
     try {
       setLoading(true);
-      const department = selectedDepartment || undefined;
+      const department = selectedDepartment || debouncedColumnFilters.department || undefined;
       const res = await doctorService.list({ 
         page: 0, 
         size: 100, 
-        name: debouncedSearchTerm, 
-        department 
+        name: debouncedSearchTerm || debouncedColumnFilters.fullName, 
+        department,
+        sort,
+        ...debouncedColumnFilters
       });
       if (res.success && res.data) {
         const content = res.data.content;
@@ -121,6 +126,10 @@ export const useReceptionDoctors = () => {
     setSearchTerm,
     selectedDepartment,
     setSelectedDepartment,
+    columnFilters,
+    setColumnFilters,
+    sort,
+    setSort,
     departmentOptions,
     selectedDoctor,
     setSelectedDoctor,

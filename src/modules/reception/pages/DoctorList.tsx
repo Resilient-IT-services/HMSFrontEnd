@@ -20,6 +20,8 @@ export function DoctorList() {
     setSearchTerm,
     selectedDepartment,
     setSelectedDepartment,
+    columnFilters,
+    setColumnFilters,
     departmentOptions,
     selectedDoctor,
     setSelectedDoctor,
@@ -36,6 +38,8 @@ export function DoctorList() {
     { 
       header: 'Doctor Name', 
       mobilePosition: 'title',
+      filterable: true,
+      filterPlaceholder: 'Name...',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="size-10 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black uppercase">
@@ -51,6 +55,9 @@ export function DoctorList() {
     { 
       header: 'Department', 
       mobilePosition: 'subtitle',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: departmentOptions.map(d => ({ label: d, value: d })),
       render: (row) => (
         <span className="text-sm font-medium text-[var(--text-primary)]">{getPrimaryDepartment(row)}</span>
       )
@@ -58,6 +65,8 @@ export function DoctorList() {
     { 
       header: 'Contact', 
       mobilePosition: 'body',
+      filterable: true,
+      filterPlaceholder: 'Phone...',
       key: 'phone' 
     },
     {
@@ -135,8 +144,9 @@ export function DoctorList() {
                   onRowDoubleClick={(row) => viewSchedule(row)}
                   loadingMessage="Retrieving medical staff registry..."
                   emptyMessage="No doctors found matching your criteria."
+                  onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                  activeFilters={columnFilters}
                 />
-            </Card>
 
 
                 {/*<Card className="p-4">*/}
@@ -157,7 +167,7 @@ export function DoctorList() {
                 {/*   </div>*/}
                 {/*</Card>*/}
 
-
+            </Card>;
             </div>
         </div>
       </PageSurface>

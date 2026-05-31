@@ -24,13 +24,17 @@ export function PatientList() {
     setPage,
     pageSize,
     setPageSize,
-    totalElements
+    totalElements,
+    columnFilters,
+    setColumnFilters
   } = useReceptionPatients();
 
   const columns: Column<PatientSummaryDTO>[] = [
     {
       header: 'Patient Code',
       mobilePosition: 'meta',
+      filterable: true,
+      filterPlaceholder: 'ID...',
       render: (row) => (
         <span className="rounded bg-orange-50 px-2 py-1 font-mono text-xs font-bold text-orange-700">
           {row.patientCode || 'N/A'}
@@ -40,6 +44,8 @@ export function PatientList() {
     {
       header: 'Patient Profile',
       mobilePosition: 'title',
+      filterable: true,
+      filterPlaceholder: 'Name or phone...',
       render: (row) => (
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white bg-slate-100 font-bold uppercase text-slate-400 shadow-sm">
@@ -57,6 +63,13 @@ export function PatientList() {
       headerClassName: 'text-center',
       className: 'text-center',
       mobilePosition: 'subtitle',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Male', value: 'MALE' },
+        { label: 'Female', value: 'FEMALE' },
+        { label: 'Other', value: 'OTHER' }
+      ],
       render: (row) => <span className="capitalize">{row.gender.toLowerCase()}</span>
     },
     {
@@ -119,6 +132,8 @@ export function PatientList() {
               isLoading={loading}
               onRowDoubleClick={(row) => router.push(`/reception/patients/${row.id}`)}
               emptyMessage="No patient records found."
+              onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+              activeFilters={columnFilters}
             />
             <Pagination
               page={page}

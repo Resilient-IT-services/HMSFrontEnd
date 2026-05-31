@@ -16,6 +16,9 @@ export const useAdminUsers = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [roleFilter, setRoleFilter] = useState<string | undefined>();
   const [activeFilter, setActiveFilter] = useState<boolean | undefined>();
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
+  const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 
   const fetchData = useCallback(async () => {
     try {
@@ -25,7 +28,9 @@ export const useAdminUsers = () => {
         size: pageSize, 
         search: debouncedSearch, 
         role: roleFilter, 
-        active: activeFilter 
+        active: activeFilter,
+        sort,
+        ...debouncedColumnFilters
       });
       if (userRes.success && userRes.data) {
         const usersWithRoles = (userRes.data.content || []).map(u => {
@@ -96,6 +101,10 @@ export const useAdminUsers = () => {
     setRoleFilter: handleRoleFilterChange,
     activeFilter,
     setActiveFilter: handleActiveFilterChange,
+    columnFilters,
+    setColumnFilters,
+    sort,
+    setSort,
     refresh: fetchData
   };
 };
