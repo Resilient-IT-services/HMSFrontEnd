@@ -52,7 +52,7 @@ export const PharmacySalesPage = () => {
     }
     setSearchingPatient(true);
     try {
-      const res = await patientService.list(0, 5, val);
+      const res = await patientService.list({ page: 0, size: 5, search: val });
       if (res.success && res.data) setPatientSearchState(res.data.content);
     } finally {
       setSearchingPatient(false);

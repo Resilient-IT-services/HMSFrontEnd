@@ -18,7 +18,11 @@ export const useReceptionPatients = () => {
   const fetchPatients = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await patientService.listSummary(page, pageSize, debouncedSearchTerm);
+      const response = await patientService.listSummary({ 
+        page, 
+        size: pageSize, 
+        search: debouncedSearchTerm 
+      });
       if (response.success && response.data) {
         setPatients(response.data.content);
         setTotalElements(response.data.totalElements);

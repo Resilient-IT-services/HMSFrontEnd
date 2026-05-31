@@ -56,7 +56,7 @@ export default function AppointmentScheduling() {
   useEffect(() => {
     const init = async () => {
       try {
-        const docRes = await doctorService.list(0, 50);
+        const docRes = await doctorService.list({ page: 0, size: 50 });
         if (docRes.success && docRes.data) {
           setDoctors(docRes.data.content);
           if (doctorIdParam) {
@@ -80,7 +80,7 @@ export default function AppointmentScheduling() {
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (patientSearch.length >= 3 && !selectedPatient) {
-        const res = await patientService.list(0, 5, patientSearch);
+        const res = await patientService.list({ page: 0, size: 5, search: patientSearch });
         if (res.success && res.data) setSearchResults(res.data.content);
       } else {
         setSearchResults([]);

@@ -25,11 +25,15 @@ export const AdminDashboard = () => {
     setPage,
     pageSize,
     setPageSize,
+    statusFilter,
+    setStatusFilter,
+    columnFilters,
+    setColumnFilters,
     selectedHospital,
     isModalOpen,
     setIsModalOpen,
     handleViewDetails
-  } = useHospitals();
+    } = useHospitals();
 
   const [adminStats, setAdminStats] = useState({
     totalHospitals: 0,
@@ -57,9 +61,12 @@ export const AdminDashboard = () => {
     fetchData();
   }, []);
 
+
   const columns: Column<HospitalResponse>[] = [
     {
       header: 'Hospital Name & ID',
+      filterable: true,
+      filterPlaceholder: 'Name or ID...',
       render: (hospital) => (
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-orange-100 font-bold uppercase text-orange-700">
@@ -74,10 +81,20 @@ export const AdminDashboard = () => {
     },
     {
       header: 'City',
+      filterable: true,
+      filterPlaceholder: 'City...',
       render: (hospital) => hospital.city ?? 'N/A'
     },
     {
       header: 'Status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Operational', value: 'ACTIVE' },
+        { label: 'Inactive', value: 'INACTIVE' },
+        { label: 'Suspended', value: 'SUSPENDED' },
+        { label: 'Onboarding', value: 'ONBOARDING' }
+      ],
       render: (hospital) => (
           <div className="flex items-center gap-2">
             <div className={`h-2 w-2 rounded-full ${hospital.status === 'ACTIVE' ? 'bg-green-500' : 'bg-orange-500'}`} />
@@ -155,6 +172,8 @@ export const AdminDashboard = () => {
                     isLoading={loading}
                     onRowDoubleClick={(hospital) => router.push(`/super_admin/hospitals/${hospital.id}`)}
                     emptyMessage="No hospitals found matching your criteria."
+                    onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                    activeFilters={columnFilters}
                 />
                 <Pagination
                     page={page}

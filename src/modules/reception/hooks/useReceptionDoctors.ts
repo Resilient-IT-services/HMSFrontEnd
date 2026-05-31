@@ -29,7 +29,12 @@ export const useReceptionDoctors = () => {
     try {
       setLoading(true);
       const department = selectedDepartment || undefined;
-      const res = await doctorService.list(0, 100, debouncedSearchTerm, department);
+      const res = await doctorService.list({ 
+        page: 0, 
+        size: 100, 
+        name: debouncedSearchTerm, 
+        department 
+      });
       if (res.success && res.data) {
         const content = res.data.content;
         // The backend filters by name and department if provided. 

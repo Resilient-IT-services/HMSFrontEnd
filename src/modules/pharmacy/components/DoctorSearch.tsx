@@ -34,7 +34,7 @@ const DoctorSearch: React.FC<DoctorSearchProps> = ({ onSelect, defaultValue = ''
       
       setLoading(true);
       try {
-        const response = await doctorService.list(0, 5, debouncedSearch);
+        const response = await doctorService.list({ page: 0, size: 5, name: debouncedSearch });
         if (response.success && response.data) {
           setResults(response.data.content || []);
         }

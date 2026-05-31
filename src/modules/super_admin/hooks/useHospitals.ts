@@ -9,7 +9,10 @@ import { useDebounce } from '@/hooks/useDebounce';
 export const useHospitals = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchTerm, setSearchTerm] = useState('');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [sort, setSort] = useState<string | undefined>();
   const debouncedSearch = useDebounce(searchTerm, 500);
+  const debouncedColumnFilters = useDebounce(columnFilters, 500);
   
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [staffCount, setStaffCount] = useState(0);
@@ -24,9 +27,18 @@ export const useHospitals = () => {
   const fetchHospitals = useCallback(async () => {
     try {
       setLoading(true);
+      const params: any = {
+        page,
+        size: pageSize,
+        name: debouncedSearch || debouncedColumnFilters.name,
+        status: statusFilter === 'ALL' ? (debouncedColumnFilters.status || undefined) : statusFilter,
+        sort,
+        ...debouncedColumnFilters
+      };
+
       const [hospRes, userRes] = await Promise.all([
-        hospitalService.list(page, pageSize, debouncedSearch, statusFilter === 'ALL' ? undefined : statusFilter),
-        userService.listUsers(0, 1)
+        hospitalService.list(params),
+        userService.listUsers({ page: 0, size: 1 })
       ]);
 
       if (hospRes.success) {
@@ -41,7 +53,7 @@ export const useHospitals = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, debouncedSearch, statusFilter]);
+  }, [page, pageSize, debouncedSearch, statusFilter, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -83,6 +95,10 @@ export const useHospitals = () => {
     setSearchTerm,
     statusFilter,
     setStatusFilter,
+    columnFilters,
+    setColumnFilters,
+    sort,
+    setSort,
     stats,
     selectedHospital,
     isModalOpen,

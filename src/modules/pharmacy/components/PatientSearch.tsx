@@ -33,7 +33,7 @@ const PatientSearch: React.FC<PatientSearchProps> = ({ onSelect, defaultValue = 
       
       setLoading(true);
       try {
-        const response = await patientService.list(0, 5, debouncedSearch);
+        const response = await patientService.list({ page: 0, size: 5, search: debouncedSearch });
         if (response.success && response.data) {
           setResults(response.data.content || []);
         }

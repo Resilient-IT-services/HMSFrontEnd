@@ -94,7 +94,7 @@ export const PharmacyDashboard = () => {
 
         revenue = validSales.reduce((acc, sale) => acc + (Number(sale.totalAmount || 0)), 0);
         
-        recentSales = [...validSales].sort((a, b) => {
+        recentSales = validSales.toSorted((a, b) => {
           const dateA = dayjs(a.createdAt);
           const dateB = dayjs(b.createdAt);
           return dateB.diff(dateA);
@@ -173,19 +173,58 @@ export const PharmacyDashboard = () => {
     input.click();
   };
 
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+
   const filteredPrescriptions = useMemo(() => {
+    let result = prescriptions;
+    
+    // Global search
     const term = searchTerm.toLowerCase().trim();
-    if (!term) return prescriptions;
-    return prescriptions.filter((p) => 
-      p.patientName?.toLowerCase().includes(term) ||
-      p.id?.toString().toLowerCase().includes(term) ||
-      p.patientCode?.toLowerCase().includes(term)
-    );
-  }, [prescriptions, searchTerm]);
+    if (term) {
+      result = result.filter((p) => 
+        p.patientName?.toLowerCase().includes(term) ||
+        p.id?.toString().toLowerCase().includes(term) ||
+        p.patientCode?.toLowerCase().includes(term)
+      );
+    }
+
+    // Column filters
+    Object.entries(columnFilters).forEach(([key, value]) => {
+      if (!value) return;
+      const lowerValue = value.toLowerCase();
+      
+      switch (key) {
+        case 'id':
+        case 'Rx Ref': {
+          result = result.filter(p => p.id?.toString().toLowerCase().includes(lowerValue));
+          break;
+        }
+        case 'patientName':
+        case 'Patient': {
+          result = result.filter(p => p.patientName?.toLowerCase().includes(lowerValue));
+          break;
+        }
+        case 'doctorName':
+        case 'Doctor': {
+          result = result.filter(p => p.doctorName?.toLowerCase().includes(lowerValue));
+          break;
+        }
+        case 'status':
+        case 'Status': {
+          result = result.filter(p => p.status?.toLowerCase() === lowerValue);
+          break;
+        }
+      }
+    });
+
+    return result;
+  }, [prescriptions, searchTerm, columnFilters]);
 
   const prescriptionColumns: Column<PrescriptionResponse>[] = [
     {
       header: 'Rx Ref',
+      filterable: true,
+      filterPlaceholder: 'Rx Ref...',
       render: (p) => (
         <span className="font-semibold text-slate-800">
           #{p.id?.toString().slice(-6).toUpperCase() || 'N/A'}
@@ -194,6 +233,8 @@ export const PharmacyDashboard = () => {
     },
     {
       header: 'Patient',
+      filterable: true,
+      filterPlaceholder: 'Patient name...',
       render: (p) => (
         <div>
           <p className="font-semibold text-slate-800">{p.patientName}</p>
@@ -203,6 +244,8 @@ export const PharmacyDashboard = () => {
     },
     {
       header: 'Doctor',
+      filterable: true,
+      filterPlaceholder: 'Doctor...',
       render: (p) => (
         <div>
           <p className="text-slate-700">{p.doctorName || 'N/A'}</p>
@@ -216,6 +259,13 @@ export const PharmacyDashboard = () => {
     },
     {
       header: 'Status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Pending', value: 'PENDING' },
+        { label: 'Dispensed', value: 'DISPENSED' },
+        { label: 'Completed', value: 'COMPLETED' }
+      ],
       render: (p) => (
         <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${
           p.status === 'PENDING' ? 'bg-orange-50 text-orange-600' : 
@@ -381,12 +431,15 @@ export const PharmacyDashboard = () => {
                   </div>
                 </div>
                 <div className="overflow-x-auto min-w-full flex-1">
-                  <Table 
+                  <Table
                     columns={prescriptionColumns} 
                     data={filteredPrescriptions} 
                     isLoading={loading}
                     emptyMessage="No pending prescriptions."
+                    onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                    activeFilters={columnFilters}
                   />
+
                 </div>
               </div>
             </div>

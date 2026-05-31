@@ -4,6 +4,7 @@ import {
   PageResponse,
   PrescriptionResponse,
   PrescriptionDTO,
+  PrescriptionSummaryDTO,
   MedicineResponse,
   MedicineRequestDTO,
   MedicineSummaryDTO,
@@ -24,8 +25,13 @@ import { AxiosError } from 'axios';
 
 export const pharmacyService = {
   // Prescription Management
-  async listPrescriptions(params?: { search?: string; page?: number; size?: number; status?: string }): Promise<ApiResponse<PageResponse<PrescriptionResponse>>> {
+  async listPrescriptions(params?: { search?: string; page?: number; size?: number; status?: string; sort?: string }): Promise<ApiResponse<PageResponse<PrescriptionResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionResponse>>>('/pharmacy/prescriptions', { params });
+    return response.data;
+  },
+
+  async listPrescriptionsSummary(params?: { search?: string; page?: number; size?: number; status?: string; sort?: string }): Promise<ApiResponse<PageResponse<PrescriptionSummaryDTO>>> {
+    const response = await apiClient.get<ApiResponse<PageResponse<PrescriptionSummaryDTO>>>('/pharmacy/prescriptions/summary', { params });
     return response.data;
   },
 
@@ -45,17 +51,17 @@ export const pharmacyService = {
   },
 
   // Medicine Management
-  async listMedicines(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<MedicineResponse>>> {
+  async listMedicines(params?: { search?: string; page?: number; size?: number; sort?: string }): Promise<ApiResponse<PageResponse<MedicineResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineResponse>>>('/pharmacy/medicines', { params });
     return response.data;
   },
 
-  async listMedicinesSummary(params?: { search?: string; page?: number; size?: number }): Promise<ApiResponse<PageResponse<MedicineSummaryDTO>>> {
+  async listMedicinesSummary(params?: { search?: string; page?: number; size?: number; sort?: string }): Promise<ApiResponse<PageResponse<MedicineSummaryDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineSummaryDTO>>>('/pharmacy/medicines/summary', { params });
     return response.data;
   },
 
-  async listStock(params?: { lowStock?: boolean; page?: number; size?: number; search?: string; medicineId?: string }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
+  async listStock(params?: { lowStock?: boolean; page?: number; size?: number; search?: string; medicineId?: string; sort?: string }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/stock', { params });
     return response.data;
   },
@@ -103,6 +109,11 @@ export const pharmacyService = {
     return response.data;
   },
 
+  async exportStock(): Promise<Blob> {
+    const response = await apiClient.get('/pharmacy/stock/export', { responseType: 'blob' });
+    return response.data;
+  },
+
   // Sale & Returns
   async processSale(request: QuickPharmacySaleRequest): Promise<ApiResponse<QuickPharmacySaleResponse>> {
     const response = await apiClient.post<ApiResponse<QuickPharmacySaleResponse>>('/pharmacy/sales', request);
@@ -140,7 +151,7 @@ export const pharmacyService = {
     return response.data;
   },
 
-  async getLowStockAlerts(params?: { page?: number; size?: number; threshold?: number }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
+  async getLowStockAlerts(params?: { page?: number; size?: number; threshold?: number; sort?: string }): Promise<ApiResponse<PageResponse<PharmacyStockDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<PharmacyStockDTO>>>('/pharmacy/alerts/low-stock', { params });
     return response.data;
   },

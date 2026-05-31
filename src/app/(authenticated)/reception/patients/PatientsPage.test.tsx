@@ -119,7 +119,7 @@ describe('PatientsPage', () => {
     fireEvent.change(searchInput, { target: { value: 'Jane' } });
 
     // Should not call listSummary immediately due to debounce
-    expect(patientService.listSummary).not.toHaveBeenCalledWith(0, 10, 'Jane');
+    expect(patientService.listSummary).not.toHaveBeenCalledWith({ page: 0, size: 10, search: 'Jane' });
 
     // Fast-forward debounce time
     act(() => {
@@ -131,7 +131,11 @@ describe('PatientsPage', () => {
       await Promise.resolve();
     });
 
-    expect(patientService.listSummary).toHaveBeenCalledWith(0, DEFAULT_PAGE_SIZE, 'Jane');
+    expect(patientService.listSummary).toHaveBeenCalledWith({
+      page: 0,
+      size: DEFAULT_PAGE_SIZE,
+      search: 'Jane'
+    });
     vi.useRealTimers();
   });
 });

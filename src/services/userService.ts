@@ -2,14 +2,9 @@ import apiClient from './apiClient';
 import { ApiResponse, UserResponse, PageResponse, UserRequestDTO, UserSummaryDTO, AdminResetPasswordRequest } from '@/types/api';
 
 export const userService = {
-  async listUsers(page = 0, size = 20, search?: string, role?: string, active?: boolean, includeDeleted = false): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
-    const params: any = { page, size, includeDeleted };
-    if (search && search.trim()) params.search = search;
-    if (role) params.role = role;
-    if (active !== undefined) params.active = active;
-
+  async listUsers(params: { page?: number; size?: number; search?: string; role?: string; active?: boolean; includeDeleted?: boolean; sort?: string } = {}): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<UserSummaryDTO>>>('/users', {
-      params
+      params: { page: 0, size: 20, includeDeleted: false, ...params }
     });
     return response.data;
   },

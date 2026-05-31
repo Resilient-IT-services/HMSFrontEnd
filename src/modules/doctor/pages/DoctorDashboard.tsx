@@ -37,6 +37,8 @@ export const DoctorDashboard = () => {
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user || !hospitalTimezone) {
       setLoading(false);
@@ -53,7 +55,8 @@ export const DoctorDashboard = () => {
           size: DEFAULT_PAGE_SIZE, 
           from, 
           to, 
-          doctorId: user.id 
+          doctorId: user.id,
+          ...columnFilters
         }),
         doctorService.getRevenueSummary(user.id, from, to)
       ]);
@@ -185,6 +188,8 @@ export const DoctorDashboard = () => {
   const columns: Column<AppointmentResponse>[] = [
     {
       header: 'Token',
+      filterable: true,
+      filterPlaceholder: 'Token...',
       render: (appointment) => (
         <div className={cn(
           "h-12 w-20 shrink-0 rounded-lg bg-slate-100 text-center text-lg font-bold leading-[3rem] text-slate-400",
@@ -196,6 +201,8 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Patient Details',
+      filterable: true,
+      filterPlaceholder: 'Patient name...',
       render: (appointment) => (
         <div className="flex items-center gap-3">
           <Avatar name={appointment.patientName} size="sm" variant="slate" />
@@ -210,6 +217,9 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Status',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: Object.entries(APPOINTMENT_STATUS_METADATA).map(([k, v]) => ({ label: v.label, value: k })),
       render: (appointment) => {
         const metadata = APPOINTMENT_STATUS_METADATA[appointment.status] || { label: appointment.status, variant: 'slate' };
         return (
@@ -422,6 +432,8 @@ export const DoctorDashboard = () => {
                 isLoading={loading}
                 onRowDoubleClick={(appointment) => handleStartConsultation(appointment.id)}
                 emptyMessage="No patients in the queue for today."
+                onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                activeFilters={columnFilters}
               />
             </Card>
           </section>

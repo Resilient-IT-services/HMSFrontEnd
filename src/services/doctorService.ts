@@ -2,24 +2,18 @@ import apiClient from './apiClient';
 import { ApiResponse, PageResponse, DoctorStaffResponse, DoctorAvailabilityResponse, UserSummaryDTO, DoctorSlotDTO, DoctorSelectionDTO, DoctorRevenueSummaryDTO } from '@/types/api';
 
 export const doctorService = {
-  async list(
-    page = 0, 
-    size = 20, 
-    name?: string, 
-    department?: string, 
-    specialization?: string,
-    minFee?: number,
-    maxFee?: number
-  ): Promise<ApiResponse<PageResponse<DoctorStaffResponse>>> {
-    const params: any = { page, size };
-    if (name && name.trim()) params.name = name;
-    if (department) params.department = department;
-    if (specialization) params.specialization = specialization;
-    if (minFee !== undefined) params.minFee = minFee;
-    if (maxFee !== undefined) params.maxFee = maxFee;
-
+  async list(params: {
+    page?: number;
+    size?: number;
+    name?: string;
+    department?: string;
+    specialization?: string;
+    minFee?: number;
+    maxFee?: number;
+    sort?: string;
+  } = {}): Promise<ApiResponse<PageResponse<DoctorStaffResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<DoctorStaffResponse>>>('/staff/doctors', {
-      params
+      params: { page: 0, size: 20, ...params }
     });
     return response.data;
   },
@@ -41,11 +35,9 @@ export const doctorService = {
     return response.data;
   },
 
-  async listDoctors(page = 0, size = 20, search?: string): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
-    const params: any = { page, size };
-    if (search && search.trim()) params.search = search;
+  async listDoctors(params: { page?: number; size?: number; search?: string; sort?: string } = {}): Promise<ApiResponse<PageResponse<UserSummaryDTO>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<UserSummaryDTO>>>('/doctors', {
-      params
+      params: { page: 0, size: 20, ...params }
     });
     return response.data;
   },

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { Table, Column } from '@/components/ui/Table';
@@ -17,6 +17,8 @@ import { PageSurface } from '@/components/ui/PageSurface';
 
 export const PatientQueuePage = () => {
   const router = useRouter();
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+
   const {
     appointments,
     loading,
@@ -28,7 +30,7 @@ export const PatientQueuePage = () => {
     patientDetails,
     handleStartConsultation,
     refresh
-  } = useDoctorQueue();
+  } = useDoctorQueue(columnFilters);
 
   const calculateAge = (dob: string) => {
     const birthDate = new Date(dob);
@@ -44,6 +46,8 @@ export const PatientQueuePage = () => {
   const columns: Column<AppointmentResponse>[] = [
     {
       header: 'TOKEN',
+      filterable: true,
+      filterPlaceholder: 'Token...',
       render: (appointment) => (
         <span className={`font-bold ${appointment.status === 'CONSULTATION_STARTED' ? 'text-primary' : 'text-gray-900'}`}>
           #{formatToken(appointment)}
@@ -52,6 +56,8 @@ export const PatientQueuePage = () => {
     },
     {
       header: 'PATIENT NAME',
+      filterable: true,
+      filterPlaceholder: 'Patient name...',
       render: (appointment) => (
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-slate-100 font-bold uppercase text-slate-400">
@@ -84,6 +90,16 @@ export const PatientQueuePage = () => {
     },
     {
       header: 'STATUS',
+      filterable: true,
+      filterType: 'select',
+      filterOptions: [
+        { label: 'Consultation Started', value: 'CONSULTATION_STARTED' },
+        { label: 'Completed', value: 'COMPLETED' },
+        { label: 'Scheduled', value: 'SCHEDULED' },
+        { label: 'Cancelled', value: 'CANCELLED' },
+        { label: 'Vitals Recorded', value: 'VITALS_RECORDED' },
+        { label: 'Paid', value: 'PAID' }
+      ],
       render: (appointment) => {
         const variants: Record<string, 'orange' | 'emerald' | 'blue' | 'red' | 'slate'> = {
           CONSULTATION_STARTED: 'orange',
@@ -205,6 +221,8 @@ export const PatientQueuePage = () => {
             onRowDoubleClick={(appointment) => handleStartConsultation(appointment.id)}
             loadingMessage="Loading queue..."
             emptyMessage="No patients in the queue for today."
+            onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+            activeFilters={columnFilters}
           />
         </ContentPanel>
 

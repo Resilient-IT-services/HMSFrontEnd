@@ -11,13 +11,14 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { sortByToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
+import { useDebounce } from '@/hooks/useDebounce';
 import dayjs from '@/lib/dayjs';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
 const DOCTOR_QUEUE_STATUSES = new Set(['PAID', 'VITALS_RECORDED', 'CONSULTATION_STARTED']);
 
-export const useDoctorQueue = () => {
+export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
   const router = useRouter();
   const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
@@ -25,6 +26,7 @@ export const useDoctorQueue = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patientDetails, setPatientDetails] = useState<Record<string, PatientResponse>>({});
   const [activeTab, setActiveTab] = useState<'TODAY' | 'UPCOMING'>('TODAY');
+  const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user || !hospitalTimezone) {
@@ -44,7 +46,8 @@ export const useDoctorQueue = () => {
         size: 100, 
         from: fromParam, 
         to: toParam, 
-        doctorId: user.id 
+        doctorId: user.id,
+        ...debouncedColumnFilters
       });
 
       if (response.success && response.data) {
@@ -61,7 +64,7 @@ export const useDoctorQueue = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user, hospitalTimezone, activeTab]);
+  }, [user, hospitalTimezone, activeTab, debouncedColumnFilters]);
 
   // Fetch missing patient details
   useEffect(() => {

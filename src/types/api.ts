@@ -46,7 +46,7 @@ export type MedicineScheduleType = 'SCHEDULE_H' | 'SCHEDULE_G' | 'SCHEDULE_X' | 
 export type PharmacySaleType = 'VISIT' | 'WALKIN';
 export type PharmacySaleStatus = 'DRAFT' | 'COMPLETED' | 'CANCELLED';
 export type InventoryUnit = 'PIECE' | 'BOX' | 'STRIP' | 'BOTTLE' | 'PACK' | 'VIAL' | 'AMPULE';
-export type SourceType = 'APPOINTMENT' | 'PHARMACY_SALE_ITEM' | 'LAB_ORDER';
+export type SourceType = 'APPOINTMENT' | 'PHARMACY_SALE_ITEM' | 'LAB_ORDER' | 'CORRECTION' | 'TEST';
 export type AuditEntityName =
   | 'PATIENT'
   | 'APPOINTMENT'
@@ -743,6 +743,13 @@ export type PrescriptionResponse = PrescriptionDTO;
 export type InvoiceStatus = 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCELLED';
 export type InvoiceItemCategory = 'CONSULTATION' | 'PHARMACY' | 'LAB' | 'PROCEDURE';
 
+export interface TaxComponentDTO {
+  taxCode: string;
+  taxName: string;
+  taxRate: number;
+  taxAmount: number;
+}
+
 export interface InvoiceItemDTO {
   id: string;
   itemDescription: string;
@@ -750,6 +757,7 @@ export interface InvoiceItemDTO {
   quantity: number;
   unitPrice: number;
   subtotal: number;
+  taxableAmount?: number;
   taxAmount: number;
   discountAmount: number;
   netTotal: number;
@@ -757,6 +765,7 @@ export interface InvoiceItemDTO {
   sourceId: string;
   doctorId?: string;
   doctorName?: string;
+  appliedTaxes?: TaxComponentDTO[];
 }
 
 export interface InvoiceDTO {

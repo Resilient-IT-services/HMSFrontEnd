@@ -20,7 +20,13 @@ export const useAdminUsers = () => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const userRes = await userService.listUsers(page, pageSize, debouncedSearch, roleFilter, activeFilter);
+      const userRes = await userService.listUsers({ 
+        page, 
+        size: pageSize, 
+        search: debouncedSearch, 
+        role: roleFilter, 
+        active: activeFilter 
+      });
       if (userRes.success && userRes.data) {
         const usersWithRoles = (userRes.data.content || []).map(u => {
           const allRoles = new Set<string>();
