@@ -142,7 +142,7 @@ export const AdminDashboard = () => {
             backgroundClassName="bg-[#f8f9fb]"
             fontClassName="font-inter"
         >
-          <div className="space-y-8 py-4 md:py-8">
+          <div className="space-y-5 py-2 md:py-4">
             <PageHeading
                 title="Admin Overview"
                 description="Real-time health indicators and administrative network status."
@@ -157,8 +157,8 @@ export const AdminDashboard = () => {
               </Button>
             </PageHeading>
 
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <MetricCard label="Total Hospitals" value={adminStats.totalHospitals} icon="apartment" variant="orange" trend="+12%" layout="horizontal" />
                 <MetricCard label="Platform Users" value={adminStats.platformUsers} icon="group" variant="blue" trend="+5.4%" layout="horizontal" />
                 <MetricCard label="Active Now" value={adminStats.activeNow} icon="bolt" variant="emerald" pulse layout="horizontal" />

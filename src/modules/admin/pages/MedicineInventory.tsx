@@ -289,7 +289,7 @@ export const MedicineInventory = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-4 py-2 md:py-4">
           <PageHeading
             title="Medicine Master Catalog"
             description="Manage and monitor the central medicine inventory and pharmaceutical master data."

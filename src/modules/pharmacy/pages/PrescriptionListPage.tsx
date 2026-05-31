@@ -186,7 +186,7 @@ const PrescriptionListPage: React.FC = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-4 py-2 md:py-4">
           <PageHeading
             title="Prescription Queue"
             description="Access and process incoming digital prescriptions from doctors."

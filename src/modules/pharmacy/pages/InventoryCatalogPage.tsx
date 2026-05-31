@@ -94,13 +94,13 @@ const InventoryCatalogPage = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-4 py-2 md:py-4">
           <PageHeading
             title="Inventory Item Catalog"
             description="Manage the master list of all pharmaceutical and clinical items."
           />
 
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-slate-100 bg-slate-50/30">
               <div className="max-w-md">
                 <SearchInput 

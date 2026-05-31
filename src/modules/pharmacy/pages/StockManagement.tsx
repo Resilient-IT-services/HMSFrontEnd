@@ -209,7 +209,7 @@ export const StockManagement = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-4 py-2 md:py-4">
           <PageHeading
             title="Stock Inventory"
             description="Real-time pharmaceutical stock monitoring and batch distribution control."
@@ -228,10 +228,10 @@ export const StockManagement = () => {
             </Button>
           </PageHeading>
 
-          <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-4" />
+          <MetricsGrid items={metricItems} className="mb-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4" />
 
           <ContentPanel
-            className="mb-8"
+            className="mb-4"
             toolbar={(
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-1 items-center gap-4">
@@ -276,7 +276,7 @@ export const StockManagement = () => {
             />
           </ContentPanel>
 
-          <div className="grid grid-cols-1 gap-6 pb-12 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 pb-6 lg:grid-cols-2">
             <Card 
               title="Movement Analytics" 
               headerActions={<Badge variant="blue">Weekly View</Badge>}

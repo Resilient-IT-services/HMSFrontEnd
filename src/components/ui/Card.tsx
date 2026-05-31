@@ -20,9 +20,9 @@ export const Card: React.FC<CardProps> = ({
   noPadding = false
 }) => {
   return (
-    <section className={`rounded-xl md:rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--primary)]/30 ${noPadding ? '' : 'p-4 md:p-6'} ${className}`}>
+    <section className={`rounded-xl md:rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm transition-all hover:border-[var(--primary)]/30 ${noPadding ? '' : 'p-3 md:p-4'} ${className}`}>
       {(title || icon || headerActions) && (
-        <div className="mb-4 md:mb-6 flex items-center justify-between">
+        <div className="mb-3 md:mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2 md:gap-3">
             {icon && (
               <div className="rounded-lg md:rounded-xl bg-[var(--primary-light)] p-1.5 md:p-2 text-[var(--primary)] shrink-0">

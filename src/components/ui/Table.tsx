@@ -257,7 +257,7 @@ export const Table = <T,>({
                   <th
                     key={index}
                     className={cn(
-                      "px-6 py-4 font-black text-slate-700 text-[10px] uppercase tracking-widest relative group/header min-w-[120px]",
+                      "px-4 py-2.5 font-black text-slate-700 text-xs uppercase tracking-widest relative group/header min-w-[120px]",
                       column.sortable && "cursor-pointer hover:bg-slate-50 transition-colors",
                       column.headerClassName
                     )}
@@ -288,7 +288,7 @@ export const Table = <T,>({
                   const filterKey = column.sortKey || (column.key as string) || `filter_${column.header.replaceAll(/\s+/g, '_').toLowerCase()}_${index}`;
                   
                   return (
-                    <th key={index} className="px-6 py-2">
+                    <th key={index} className="px-4 py-2">
                       {column.filterable && onFilter && (
                         <div onClick={(e) => e.stopPropagation()}>
                           {column.renderFilter ? (
@@ -297,7 +297,7 @@ export const Table = <T,>({
                             <select
                               value={activeFilters[filterKey] || ''}
                               onChange={(e) => onFilter(filterKey, e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none cursor-pointer transition-all"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none cursor-pointer transition-all"
                             >
                               <option value="">All {column.header}</option>
                               {column.filterOptions?.map(opt => (
@@ -310,7 +310,7 @@ export const Table = <T,>({
                               placeholder={`Filter...`}
                               value={activeFilters[filterKey] || ''}
                               onChange={(e) => onFilter(filterKey, e.target.value)}
-                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold placeholder:text-slate-300 text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold placeholder:text-slate-300 text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
                             />
                           )}
                         </div>
@@ -341,7 +341,7 @@ export const Table = <T,>({
                   {columns.map((column, colIndex) => (
                     <td 
                       key={colIndex} 
-                      className={cn("px-6 py-5 text-sm text-slate-600 font-medium", column.className)}
+                      className={cn("px-4 py-3 text-sm text-slate-600 font-medium", column.className)}
                     >
                       {renderCellContent(item.row, column)}
                     </td>

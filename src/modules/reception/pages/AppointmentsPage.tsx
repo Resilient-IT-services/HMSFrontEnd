@@ -280,7 +280,7 @@ export const AppointmentsPage = () => {
       `}} />
 
         <PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter">
-          <div className="space-y-4 py-4 md:py-6 pb-24 flex flex-col min-h-[calc(100vh-120px)]">
+          <div className="space-y-4 py-2 md:py-4 pb-12 flex flex-col min-h-[calc(100vh-120px)]">
 
             {/* Header Row */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -302,24 +302,24 @@ export const AppointmentsPage = () => {
                           key={i}
                           onClick={() => handleTabClick(stat.filter)}
                           className={cn(
-                              "flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all shrink-0 active:scale-95",
+                              "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 active:scale-95",
                               isActive
                                   ? cn("bg-gradient-to-b text-white shadow-lg shadow-orange-600/20", stat.colorClass)
                                   : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-sm'
                           )}
                       >
                         <div className={cn(
-                            "w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]",
+                            "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]",
                             isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-500'
                         )}>
-                          <span className="material-symbols-outlined text-[18px]">{stat.icon}</span>
+                          <span className="material-symbols-outlined text-[16px]">{stat.icon}</span>
                         </div>
                         <div className="flex flex-col items-start leading-tight">
                       <span className={cn(
-                          "text-[10px] font-black uppercase tracking-tighter mb-0.5",
+                          "text-[9px] font-black uppercase tracking-tighter mb-0.5",
                           isActive ? 'text-white/80' : 'text-slate-500'
                       )}>{stat.label}</span>
-                          <span className={cn("text-base font-bold", isActive ? 'text-white' : 'text-slate-900')}>
+                          <span className={cn("text-sm font-bold", isActive ? 'text-white' : 'text-slate-900')}>
                         {stat.value || 0}
                       </span>
                         </div>

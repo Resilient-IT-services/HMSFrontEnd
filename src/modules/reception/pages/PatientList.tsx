@@ -105,7 +105,7 @@ export function PatientList() {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-5 py-2 md:py-4">
           <PageHeading
             title="Patient Directory"
             description="Access and manage comprehensive electronic health records."
@@ -115,7 +115,7 @@ export function PatientList() {
             </Button>
           </PageHeading>
 
-          <div className="mb-8">
+          <div className="mb-4">
             <div className="flex w-full items-center rounded-2xl border border-slate-100 bg-white p-2 shadow-sm max-w-md">
               <SearchInput
                 placeholder="Search by name, ID, or phone..."
@@ -125,7 +125,7 @@ export function PatientList() {
             </div>
           </div>
 
-          <ContentPanel className="mb-12 border-slate-100">
+          <ContentPanel className="mb-6 border-slate-100">
             <Table
               columns={columns}
               data={patients}

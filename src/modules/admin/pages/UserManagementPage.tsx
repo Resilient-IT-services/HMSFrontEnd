@@ -165,7 +165,7 @@ export const UserManagementPage = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-4 py-2 md:py-4">
           <PageHeading
             title="Identity & Access"
             description="Manage hospital staff credentials, institutional memberships, and role-based access controls."
@@ -176,7 +176,7 @@ export const UserManagementPage = () => {
           </PageHeading>
 
           <ContentPanel
-            className="mb-12"
+            className="mb-4"
             toolbar={(
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-1 items-center gap-4">
@@ -236,7 +236,7 @@ export const UserManagementPage = () => {
             />
           </ContentPanel>
 
-          <div className="grid grid-cols-1 gap-6 pb-12 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 pb-6 md:grid-cols-3">
           </div>
         </div>
       </PageSurface>

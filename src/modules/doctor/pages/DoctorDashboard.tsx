@@ -293,7 +293,7 @@ export const DoctorDashboard = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="space-y-8 py-4 md:py-8">
+        <div className="space-y-5 py-2 md:py-4">
           {/* Info Pills Row - Visible only on mobile */}
         <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide md:hidden">
           <MetricCard 
@@ -385,14 +385,14 @@ export const DoctorDashboard = () => {
           </div>
         </div>
 
-        <section className="mb-6 hidden md:block">
+        <section className="mb-4 hidden md:block">
           <div className="relative flex flex-col items-center justify-between gap-6 overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm lg:flex-row lg:p-8">
             <div className="relative z-10 w-full lg:w-auto">
               <PageHeading 
                 title={`Good morning, Dr. ${user?.fullName.split(' ')[0]}`}
                 description={`You have ${stats.total} consultations scheduled for today. ${stats.waiting} patients are currently in the queue.`}
               />
-              <div className="mt-6 flex flex-col gap-4 sm:flex-row">
+              <div className="mt-4 flex flex-col gap-4 sm:flex-row">
                 <Button onClick={handleStartNextConsultation} icon="play_arrow">
                   Start Next Consultation
                 </Button>
@@ -422,7 +422,7 @@ export const DoctorDashboard = () => {
           </div>
         </div>
 
-        <MetricsGrid items={metricItems} className="mb-8 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-6 hidden md:grid" />
+        <MetricsGrid items={metricItems} className="mb-6 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 lg:gap-4 hidden md:grid" />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <section className="lg:col-span-3">
