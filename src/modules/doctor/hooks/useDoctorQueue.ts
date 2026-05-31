@@ -168,7 +168,9 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
   };
 
   return {
-    appointments: activeTab === 'TODAY' ? sortByToken(appointments) : [...appointments].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime)),
+    appointments: activeTab === 'TODAY' 
+      ? sortByToken(appointments.filter(a => DOCTOR_QUEUE_STATUSES.has(a.status))) 
+      : [...appointments].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime)),
     loading,
     searchTerm,
     setSearchTerm,

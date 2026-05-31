@@ -11,6 +11,8 @@ import { AppointmentResponse, DoctorRevenueSummaryDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
+import { useDebounce } from '@/hooks/useDebounce';
+import { DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Table, Column } from '@/components/ui/Table';
