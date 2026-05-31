@@ -41,19 +41,14 @@ export const useReceptionDoctors = () => {
         ...debouncedColumnFilters
       });
       if (res.success && res.data) {
-        const content = res.data.content;
-        // The backend filters by name and department if provided. 
-        // We keep the client-side filter as a fallback for complex multi-department matching
-        // if the backend only matches primary department.
-        const filteredDoctors = department ? content.filter((doctor) => hasDepartment(doctor, department)) : content;
-        setDoctors(filteredDoctors);
+        setDoctors(res.data.content);
       }
     } catch (error) {
       console.error('Failed to fetch doctors', error);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearchTerm, selectedDepartment]);
+  }, [debouncedSearchTerm, selectedDepartment, debouncedColumnFilters, sort]);
 
   const fetchDepartmentOptions = useCallback(async () => {
     try {

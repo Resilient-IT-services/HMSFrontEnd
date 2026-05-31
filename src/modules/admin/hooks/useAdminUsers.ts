@@ -58,7 +58,7 @@ export const useAdminUsers = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, debouncedSearch, roleFilter, activeFilter]);
+  }, [page, pageSize, debouncedSearch, roleFilter, activeFilter, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     const trigger = async () => {

@@ -37,7 +37,7 @@ export const useReceptionPatients = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, debouncedSearchTerm]);
+  }, [page, pageSize, debouncedSearchTerm, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     const trigger = async () => {

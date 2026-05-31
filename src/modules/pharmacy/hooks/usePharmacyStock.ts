@@ -47,51 +47,8 @@ export const usePharmacyStock = () => {
         ...debouncedColumnFilters
       });
       if (response.success && response.data) {
-        let content = response.data.content || [];
-
-        // Client-side filtering fallback for filters not supported by backend
-        const today = dayjs().startOf('day');
-        const thirtyDaysFromNow = dayjs().add(30, 'day').endOf('day');
-
-        switch (statusFilter) {
-        case 'EXPIRED': {
-          content = content.filter(m => m.expiryDate && dayjs(m.expiryDate).isBefore(today));
-        
-        break;
-        }
-        case 'EXPIRING_SOON': {
-          content = content.filter(m => {
-            if (!m.expiryDate) return false;
-            const expDate = dayjs(m.expiryDate);
-            return expDate.isAfter(today.subtract(1, 'day')) && expDate.isBefore(thirtyDaysFromNow);
-          });
-        
-        break;
-        }
-        case 'LOW_STOCK': {
-          // Backend might already handle this, but ensuring consistency
-          content = content.filter(m => {
-            const qty = Number(m.quantity || 0);
-            const threshold = Number(m.reorderLevel || 50); // Fallback to 50 if 0, null, or undefined
-            return qty < threshold && qty > 0;
-          });
-        
-        break;
-        }
-        // No default
-        }
-
-        // Client-side search fallback
-        if (debouncedSearch) {
-          const searchLower = debouncedSearch.toLowerCase();
-          content = content.filter(m => 
-            m.medicineName.toLowerCase().includes(searchLower) || 
-            (m.batchNumber?.toLowerCase().includes(searchLower))
-          );
-        }
-
-        setMedicines(content);
-        setTotalElements(statusFilter === 'ALL' && !debouncedSearch ? response.data.totalElements : content.length);
+        setMedicines(response.data.content || []);
+        setTotalElements(response.data.totalElements);
       } else {
         setMedicines([]);
         setTotalElements(0);
@@ -102,7 +59,7 @@ export const usePharmacyStock = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, pageSize, debouncedSearch, statusFilter]);
+  }, [page, pageSize, debouncedSearch, statusFilter, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     const trigger = async () => {

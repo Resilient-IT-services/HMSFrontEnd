@@ -45,6 +45,7 @@ export const UserManagementPage = () => {
     {
       header: 'User Details',
       filterable: true,
+      sortKey: 'fullName',
       filterPlaceholder: 'Name or email...',
       render: (user) => (
         <div className="flex items-center gap-3">

@@ -617,23 +617,11 @@
         "operationId": "list",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -645,28 +633,14 @@
             }
           },
           {
-            "name": "role",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "active",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "includeDeleted",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -809,23 +783,11 @@
         "operationId": "listStock",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -837,21 +799,14 @@
             }
           },
           {
-            "name": "lowStock",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "boolean",
-              "default": false
-            }
-          },
-          {
-            "name": "medicineId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1003,23 +958,11 @@
         "operationId": "list_1",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -1031,16 +974,14 @@
             }
           },
           {
-            "name": "status",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string",
-              "enum": [
-                "PENDING",
-                "DISPENSED",
-                "CANCELLED"
-              ]
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1166,23 +1107,11 @@
         "operationId": "list_2",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -1191,6 +1120,17 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "allParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1282,23 +1222,11 @@
         "operationId": "list_3",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -1307,6 +1235,17 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "allParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1390,23 +1329,11 @@
         "operationId": "listItems",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -1415,6 +1342,17 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "allParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1468,27 +1406,15 @@
         "operationId": "list_4",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
-            }
-          },
-          {
-            "name": "name",
+            "name": "search",
             "in": "query",
             "required": false,
             "schema": {
@@ -1496,11 +1422,14 @@
             }
           },
           {
-            "name": "status",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string"
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -1712,23 +1641,11 @@
         "operationId": "list_7",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -1740,57 +1657,14 @@
             }
           },
           {
-            "name": "from",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "patientId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "doctorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "SCHEDULED",
-                "PAYMENT_PENDING",
-                "PAID",
-                "VITALS_RECORDED",
-                "CONSULTATION_STARTED",
-                "PRESCRIPTION_FINALIZED",
-                "COMPLETED",
-                "CANCELLED"
-              ]
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2090,7 +1964,15 @@
         "operationId": "getNurses",
         "parameters": [
           {
-            "name": "name",
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          },
+          {
+            "name": "search",
             "in": "query",
             "required": false,
             "schema": {
@@ -2098,31 +1980,14 @@
             }
           },
           {
-            "name": "department",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2179,7 +2044,15 @@
         "operationId": "getDoctors",
         "parameters": [
           {
-            "name": "name",
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          },
+          {
+            "name": "search",
             "in": "query",
             "required": false,
             "schema": {
@@ -2187,55 +2060,14 @@
             }
           },
           {
-            "name": "department",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "specialization",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "minFee",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "maxFee",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2736,23 +2568,11 @@
         "operationId": "listSummary",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -2764,16 +2584,14 @@
             }
           },
           {
-            "name": "status",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string",
-              "enum": [
-                "PENDING",
-                "DISPENSED",
-                "CANCELLED"
-              ]
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2799,23 +2617,11 @@
         "operationId": "listSummary_1",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -2824,6 +2630,17 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "allParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -2849,33 +2666,30 @@
         "operationId": "lowStockAlerts",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
-            "name": "size",
+            "name": "search",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "type": "string"
             }
           },
           {
-            "name": "threshold",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -3057,23 +2871,11 @@
         "operationId": "listSummary_2",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -3082,6 +2884,17 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "allParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -3258,23 +3071,11 @@
         "operationId": "list_5",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -3479,23 +3280,30 @@
         "operationId": "list_6",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
-            "name": "size",
+            "name": "search",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "type": "string"
+            }
+          },
+          {
+            "name": "allParams",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -3521,23 +3329,11 @@
         "operationId": "listSummary_3",
         "parameters": [
           {
-            "name": "page",
+            "name": "pageable",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 20
+              "$ref": "#/components/schemas/Pageable"
             }
           },
           {
@@ -3549,89 +3345,14 @@
             }
           },
           {
-            "name": "from",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "patientId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "doctorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "SCHEDULED",
-                "PAYMENT_PENDING",
-                "PAID",
-                "VITALS_RECORDED",
-                "CONSULTATION_STARTED",
-                "PRESCRIPTION_FINALIZED",
-                "COMPLETED",
-                "CANCELLED"
-              ]
-            }
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "patientName",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "doctor",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "sort",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -3665,57 +3386,14 @@
             }
           },
           {
-            "name": "from",
+            "name": "allParams",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "patientId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "doctorId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "enum": [
-                "SCHEDULED",
-                "PAYMENT_PENDING",
-                "PAID",
-                "VITALS_RECORDED",
-                "CONSULTATION_STARTED",
-                "PRESCRIPTION_FINALIZED",
-                "COMPLETED",
-                "CANCELLED"
-              ]
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
             }
           }
         ],
@@ -5620,6 +5298,27 @@
           },
           "payment": {
             "$ref": "#/components/schemas/PaymentInfo"
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

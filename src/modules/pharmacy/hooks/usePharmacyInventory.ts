@@ -27,19 +27,15 @@ export const usePharmacyInventory = () => {
       if (response.success && response.data) {
         setItems(response.data.content);
       } else {
-        // Mock data for demo
-        setItems([
-          { id: 'item-1', name: 'Disposable Syringe 5ml', category: 'Consumables', unit: 'PIECE', currentStock: 1200, createdAt: new Date().toISOString() },
-          { id: 'item-2', name: 'Surgical Gloves (Size 7)', category: 'Surgical', unit: 'PACK', currentStock: 450, createdAt: new Date().toISOString() },
-          { id: 'item-3', name: 'Absorbent Cotton 500g', category: 'Consumables', unit: 'PACK', currentStock: 85, createdAt: new Date().toISOString() },
-        ]);
+        setItems([]);
       }
     } catch (error) {
       console.error(error);
+      setItems([]);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch]);
+  }, [debouncedSearch, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     const trigger = async () => {

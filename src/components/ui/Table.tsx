@@ -285,7 +285,7 @@ export const Table = <T,>({
             {columns.some(c => c.filterable) && (
               <tr className="bg-slate-50/50 border-b border-slate-100">
                 {columns.map((column, index) => {
-                  const sortKey = column.sortKey || (column.key as string);
+                  const filterKey = column.sortKey || (column.key as string) || `filter_${column.header.replaceAll(/\s+/g, '_').toLowerCase()}_${index}`;
                   
                   return (
                     <th key={index} className="px-6 py-2">
@@ -295,8 +295,8 @@ export const Table = <T,>({
                              column.renderFilter(onFilter, activeFilters)
                           ) : column.filterType === 'select' ? (
                             <select
-                              value={activeFilters[sortKey] || ''}
-                              onChange={(e) => onFilter(sortKey, e.target.value)}
+                              value={activeFilters[filterKey] || ''}
+                              onChange={(e) => onFilter(filterKey, e.target.value)}
                               className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none cursor-pointer transition-all"
                             >
                               <option value="">All {column.header}</option>
@@ -308,8 +308,8 @@ export const Table = <T,>({
                             <input
                               type="text"
                               placeholder={`Filter...`}
-                              value={activeFilters[sortKey] || ''}
-                              onChange={(e) => onFilter(sortKey, e.target.value)}
+                              value={activeFilters[filterKey] || ''}
+                              onChange={(e) => onFilter(filterKey, e.target.value)}
                               className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-[10px] font-bold placeholder:text-slate-300 text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
                             />
                           )}

@@ -173,36 +173,8 @@ export const useReceptionAppointments = () => {
     });
   };
 
-  const filteredAppointments = useMemo(() => {
-    if (!hospitalTimezone) return [];
-    
-    const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
-    
-    const base = appointments.filter(app => {
-      const appHospitalDate = dayjs(app.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
-      const isToday = appHospitalDate === hospitalToday;
-      const isUpcoming = appHospitalDate > hospitalToday;
-
-      if (statusFilter === 'UPCOMING') {
-        if (!isUpcoming) return false;
-      } else if (statusFilter === 'ALL') {
-        if (!isToday) return false;
-      } else {
-        if (!activeFilters.statuses?.length && app.status !== statusFilter) return false;
-      }
-
-      return true;
-    });
-
-    // If API sort is not active or available, fallback to client-side token sort
-    if (!sortState) {
-        return sortByToken(base);
-    }
-    return base;
-  }, [appointments, statusFilter, activeFilters, sortState, hospitalTimezone]);
-
   return {
-    appointments: filteredAppointments,
+    appointments,
     loading,
     statusFilter,
     setStatusFilter,

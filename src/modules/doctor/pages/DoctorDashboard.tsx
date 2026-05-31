@@ -38,6 +38,7 @@ export const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 
   const fetchData = useCallback(async (isBackground = false) => {
     if (!user || !hospitalTimezone) {
@@ -56,7 +57,7 @@ export const DoctorDashboard = () => {
           from, 
           to, 
           doctorId: user.id,
-          ...columnFilters
+          ...debouncedColumnFilters
         }),
         doctorService.getRevenueSummary(user.id, from, to)
       ]);
@@ -82,7 +83,7 @@ export const DoctorDashboard = () => {
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user?.id, user?.fullName, hospitalTimezone]);
+  }, [user?.id, user?.fullName, hospitalTimezone, debouncedColumnFilters]);
 
   useEffect(() => {
     const trigger = async () => {

@@ -78,7 +78,7 @@ export const MedicineInventory = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, pageSize]); // Removed selectedMedicine from dependencies
+  }, [debouncedSearch, page, pageSize, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     const trigger = async () => {

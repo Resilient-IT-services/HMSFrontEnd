@@ -47,24 +47,19 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
         from: fromParam, 
         to: toParam, 
         doctorId: user.id,
+        search: searchTerm || undefined,
         ...debouncedColumnFilters
       });
 
       if (response.success && response.data) {
-        // Filter by current doctor as a safety measure
-        const doctorAppointments = response.data.content.filter((appointment) => {
-          return appointment.doctorId === user.id || 
-                 appointment.doctorName.toLowerCase().includes(user.fullName.toLowerCase());
-        });
-
-        setAppointments(doctorAppointments);
+        setAppointments(response.data.content);
       }
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [user, hospitalTimezone, activeTab, debouncedColumnFilters]);
+  }, [user, hospitalTimezone, activeTab, debouncedColumnFilters, searchTerm]);
 
   // Fetch missing patient details
   useEffect(() => {
@@ -172,33 +167,8 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
     }
   };
 
-  const filteredAppointments = useMemo(() => {
-    if (!hospitalTimezone) return [];
-
-    const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
-    
-    let base = appointments;
-    base = activeTab === 'TODAY' ? appointments.filter(a => {
-        const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
-        return appHospitalDate === hospitalToday && DOCTOR_QUEUE_STATUSES.has(a.status);
-      }) : appointments.filter(a => {
-        const appHospitalDate = dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD');
-        return appHospitalDate > hospitalToday && DOCTOR_QUEUE_STATUSES.has(a.status);
-      });
-    
-    const sorted = activeTab === 'TODAY' ? sortByToken(base) : [...base].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime));
-    
-    if (!searchTerm) return sorted;
-    const term = searchTerm.toLowerCase();
-    return sorted.filter(
-      (a) =>
-        a.patientName.toLowerCase().includes(term) ||
-        a.patientId.toLowerCase().includes(term)
-    );
-  }, [appointments, searchTerm, activeTab, hospitalTimezone]);
-
   return {
-    appointments: filteredAppointments,
+    appointments: activeTab === 'TODAY' ? sortByToken(appointments) : [...appointments].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime)),
     loading,
     searchTerm,
     setSearchTerm,
