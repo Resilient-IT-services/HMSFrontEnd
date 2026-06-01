@@ -23,7 +23,6 @@ const PrescriptionListPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showHistory, setShowHistory] = useState(false);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>('PENDING');
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [sort, setSort] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +34,7 @@ const PrescriptionListPage: React.FC = () => {
       setLoading(true);
       const response = await pharmacyApi.getPrescriptionsSummary({
         search: debouncedSearch,
-        status: showHistory ? (statusFilter === 'ALL' ? undefined : statusFilter) : 'PENDING',
+        status: showHistory ? undefined : 'PENDING',
         sort,
         ...debouncedColumnFilters
       });
@@ -49,7 +48,7 @@ const PrescriptionListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, showHistory, statusFilter, debouncedColumnFilters, sort]);
+  }, [debouncedSearch, showHistory, debouncedColumnFilters, sort]);
 
   useEffect(() => {
     void fetchPrescriptions();
