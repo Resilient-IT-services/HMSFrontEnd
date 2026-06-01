@@ -143,7 +143,10 @@ export const PharmacyDashboard = () => {
   }, [user?.currentHospitalId]);
 
   useEffect(() => {
-    void fetchDashboardData();
+    const trigger = async () => {
+      await fetchDashboardData(false);
+    };
+    void trigger();
   }, [fetchDashboardData]);
 
   const handleImportExcel = () => {
@@ -159,11 +162,12 @@ export const PharmacyDashboard = () => {
           const res = await pharmacyApi.importStock(file);
           if (res.success) {
             triggerGlobalToast('Stock imported successfully', 'success');
-            void fetchDashboardData();
+            void fetchDashboardData(true);
           } else {
             triggerGlobalToast(res.message || 'Import failed', 'error');
           }
         } catch (error) {
+          console.error('Import Error:', error);
           triggerGlobalToast('An error occurred during import', 'error');
         } finally {
           setImporting(false);

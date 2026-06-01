@@ -29,9 +29,9 @@ const PrescriptionListPage: React.FC = () => {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
-  const fetchPrescriptions = React.useCallback(async () => {
+  const fetchPrescriptions = React.useCallback(async (forceLoading = false) => {
     try {
-      setLoading(true);
+      if (forceLoading) setLoading(true);
       const response = await pharmacyApi.getPrescriptionsSummary({
         search: debouncedSearch,
         status: showHistory ? undefined : 'PENDING',
@@ -43,7 +43,8 @@ const PrescriptionListPage: React.FC = () => {
       } else {
         setError(response.message || 'Failed to fetch prescriptions');
       }
-    } catch {
+    } catch (error) {
+      console.error('Fetch prescriptions error:', error);
       setError('An unexpected error occurred');
     } finally {
       setLoading(false);
@@ -51,7 +52,10 @@ const PrescriptionListPage: React.FC = () => {
   }, [debouncedSearch, showHistory, debouncedColumnFilters, sort]);
 
   useEffect(() => {
-    void fetchPrescriptions();
+    const trigger = async () => {
+      await fetchPrescriptions(false);
+    };
+    void trigger();
   }, [fetchPrescriptions]);
 
   const handleCancel = async (id: string) => {
@@ -62,7 +66,7 @@ const PrescriptionListPage: React.FC = () => {
     try {
       const response = await pharmacyApi.cancelPrescription(id);
       if (response.success) {
-        void fetchPrescriptions();
+        void fetchPrescriptions(true);
       } else {
         alert(response.message || 'Failed to cancel prescription');
       }

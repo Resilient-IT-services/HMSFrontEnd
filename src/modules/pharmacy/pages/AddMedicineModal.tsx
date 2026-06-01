@@ -8,11 +8,12 @@ import { Modal } from '@/components/ui/Modal';
 import { MEDICINE_FORM_OPTIONS, MEDICINE_SCHEDULE_OPTIONS } from '@/utils/enumOptions';
 
 interface AddMedicineModalProps {
+  isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess }) => {
+const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<MedicineRequestDTO>({
     name: '',
@@ -100,7 +101,7 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
 
   return (
     <Modal
-      isOpen={true}
+      isOpen={isOpen}
       onClose={onClose}
       title="Add New Medicine"
       size="2xl"

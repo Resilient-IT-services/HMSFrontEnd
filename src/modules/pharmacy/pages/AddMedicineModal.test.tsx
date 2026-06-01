@@ -23,12 +23,12 @@ vi.mock('@/components/ui/Modal', () => ({
 
 describe('AddMedicineModal', () => {
   it('renders HSN Code field', () => {
-    render(<AddMedicineModal isOpen={true} onClose={() => {}} />);
+    render(<AddMedicineModal isOpen={true} onClose={() => {}} onSuccess={vi.fn()} />);
     expect(screen.getByPlaceholderText(/3004/i)).toBeInTheDocument();
   });
 
   it('updates HSN Code on change', () => {
-    render(<AddMedicineModal isOpen={true} onClose={() => {}} />);
+    render(<AddMedicineModal isOpen={true} onClose={() => {}} onSuccess={vi.fn()} />);
     const hsnInput = screen.getByPlaceholderText(/3004/i) as HTMLInputElement;
     fireEvent.change(hsnInput, { target: { value: '3004', name: 'hsnCode' } });
     expect(hsnInput.value).toBe('3004');

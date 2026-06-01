@@ -286,7 +286,7 @@ export function MedicineList() {
         </Modal>
 
         {/* Modals */}
-        {showAddModal && <AddMedicineModal onClose={() => setShowAddModal(false)} onSuccess={refresh} />}
+        {showAddModal && <AddMedicineModal isOpen={true} onClose={() => setShowAddModal(false)} onSuccess={refresh} />}
         {showEditModal && selectedMedicine && <EditMedicineModal medicine={selectedMedicine} onClose={() => setShowEditModal(false)} onSuccess={refresh} />}
     </MainLayout>
   );

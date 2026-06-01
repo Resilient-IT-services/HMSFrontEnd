@@ -16,15 +16,24 @@ export const usePharmacyStock = () => {
   const [importing, setImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'ALL');
-
-  useEffect(() => {
-    const status = searchParams.get('status');
-    if (status) {
-      setStatusFilter(status);
-    }
-  }, [searchParams]);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+
+  // Sync status filter with URL search params during render
+  const urlStatus = searchParams.get('status');
+  if (urlStatus && urlStatus !== statusFilter) {
+    setStatusFilter(urlStatus);
+  }
+
+  // Reset page when filters change during render
+  const [prevFilters, setPrevFilters] = useState({ searchTerm, statusFilter, pageSize });
+  if (prevFilters.searchTerm !== searchTerm || 
+      prevFilters.statusFilter !== statusFilter || 
+      prevFilters.pageSize !== pageSize) {
+    setPage(0);
+    setPrevFilters({ searchTerm, statusFilter, pageSize });
+  }
+
   const [totalElements, setTotalElements] = useState(0);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [sort, setSort] = useState<string | undefined>();
@@ -67,13 +76,6 @@ export const usePharmacyStock = () => {
     };
     void trigger();
   }, [fetchInventory]);
-
-  useEffect(() => {
-    const trigger = async () => {
-      setPage(0);
-    };
-    void trigger();
-  }, [debouncedSearch, statusFilter, pageSize]);
 
   const handleExport = async () => {
     try {

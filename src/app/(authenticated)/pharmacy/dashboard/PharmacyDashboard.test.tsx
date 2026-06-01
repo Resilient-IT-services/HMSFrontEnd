@@ -65,17 +65,29 @@ describe('PharmacyDashboard', () => {
       success: true,
       data: {
         content: [
-          { medicineName: 'Med 1', quantity: 10, reorderLevel: 50 },
-          { medicineName: 'Med 2', quantity: 5, reorderLevel: 20 },
-          { medicineName: 'Med 3', quantity: 2, reorderLevel: 10 },
+          { id: 's1', medicineId: 'm1', medicineName: 'Med 1', quantity: 10, reorderLevel: 50, batchNumber: 'B1', expiryDate: '2026-12-31', price: 100 },
+          { id: 's2', medicineId: 'm2', medicineName: 'Med 2', quantity: 5, reorderLevel: 20, batchNumber: 'B2', expiryDate: '2026-12-31', price: 200 },
+          { id: 's3', medicineId: 'm3', medicineName: 'Med 3', quantity: 2, reorderLevel: 10, batchNumber: 'B3', expiryDate: '2026-12-31', price: 300 },
         ],
         totalElements: 3,
+        page: 0,
+        size: 10,
+        totalPages: 1,
       },
     });
 
     vi.mocked(pharmacyApi.getSaleByPrescription).mockResolvedValue({
       success: true,
-      data: { totalAmount: 100 },
+      data: { 
+        saleId: 's1', 
+        saleNumber: 'SALE-001', 
+        invoiceId: 'i1', 
+        invoiceNumber: 'INV-001', 
+        totalAmount: 100, 
+        status: 'COMPLETED', 
+        createdAt: '2026-06-01T10:00:00',
+        items: []
+      },
     });
 
     render(
@@ -110,7 +122,7 @@ describe('PharmacyDashboard', () => {
         page: 0
       }
     });
-    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0 } });
+    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0, page: 0, size: 10, totalPages: 0 } });
 
     render(
       <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Pharmacist' } }) => state } })}>
@@ -146,7 +158,7 @@ describe('PharmacyDashboard', () => {
         page: 0
       }
     });
-    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0 } });
+    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0, page: 0, size: 10, totalPages: 0 } });
 
     render(
       <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Pharmacist' } }) => state } })}>

@@ -389,6 +389,7 @@ export const MedicineInventory = () => {
         {/* Add Medicine Modal */}
         {showAddModal && (
           <AddMedicineModal
+            isOpen={true}
             onClose={() => setShowAddModal(false)}
             onSuccess={fetchMedicines}
           />
