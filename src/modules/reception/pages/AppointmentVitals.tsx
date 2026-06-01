@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { FormField } from '@/components/ui/FormField';
 import { PageHeading } from '@/components/ui/PageHeading';
-import { InfoRow } from '@/components/ui/InfoRow';
 
 export const AppointmentVitals = () => {
   const router = useRouter();
@@ -37,7 +36,6 @@ export const AppointmentVitals = () => {
           <div className="p-10 text-center">
             <Badge variant="red" size="md" className="mb-2">Appointment Not Found</Badge>
             <p className="text-slate-900 font-black text-lg mb-4">Unable to locate the record.</p>
-            <Button icon="arrow_back" onClick={() => router.push('/reception/appointments')}>Return</Button>
           </div>
         </MainLayout>
     );
@@ -49,7 +47,6 @@ export const AppointmentVitals = () => {
   const handleFieldBlur = (fieldKey: string, value: string) => {
     validateField(fieldKey, value);
   };
-
 
   const handleInterceptedSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,7 +60,6 @@ export const AppointmentVitals = () => {
         <PageHeading
             title={isReadOnly ? "View Recorded Vitals" : "Clinical Vitals Intake"}
             description={isReadOnly ? "Viewing finalized physiological measurements for this visit." : "Capture primary physiological measurements to establish the patient's current health baseline."}
-            backHref="/reception/appointments"
         />
 
         {/* MASTER GRID WITH TIGHT SLATE LAYOUT */}
@@ -74,26 +70,46 @@ export const AppointmentVitals = () => {
 
             {/* Patient Card Layer */}
             <Card title="Patient Profile" className="p-3 shadow-sm border border-slate-200/60">
-              <div className="space-y-2.5">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                    <span className="material-symbols-outlined text-base font-bold">person</span>
-                  </div>
-                  <span className="font-bold text-slate-400 text-xs uppercase tracking-wider">Profile Verification</span>
-                </div>
+              <div className="space-y-3">
 
-                <div className="border-b border-slate-100 pb-2">
-                  <h3 className="text-base font-black text-slate-900 leading-tight uppercase truncate">{patient?.fullName || appointment.patientName}</h3>
-                  <div className="flex items-center gap-1.5 mt-1">
+                {/* Highlighted & Enlarged Orange Branded Name Container */}
+                <div className="border-b-2 border-slate-100 pb-2.5">
+                  <h3 className="text-xl font-black text-orange-600 tracking-tight uppercase truncate drop-shadow-sm">
+                    {patient?.fullName || appointment.patientName}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-1.5">
                     <Badge variant="blue" className="text-[10px] font-black px-2 py-0.5">{patientAge} Yrs</Badge>
                     <Badge variant="slate" className="text-[10px] font-black px-2 py-0.5">{patient?.gender || 'N/A'}</Badge>
                   </div>
                 </div>
 
-                <div className="space-y-1.5 text-xs font-bold text-slate-600">
-                  <InfoRow label="Patient ID" value={patient?.patientCode || '--'} icon="id_card" />
-                  <InfoRow label="Visit Token" value={appointment.tokenNumber || '--'} icon="confirmation_number" />
-                  <InfoRow label="Assigned Doctor" value={`Dr. ${appointment.doctorName}`} icon="medical_services" />
+                <div className="space-y-3 text-xs font-bold text-slate-600">
+                  {/* Patient ID Row */}
+                  <div className="flex items-center justify-between w-full border-b border-slate-50 pb-1.5">
+                    <div className="flex items-center gap-2 uppercase tracking-wider text-slate-400 text-[10px]">
+                      <span className="material-symbols-outlined text-base">id_card</span>
+                      <span>Patient ID</span>
+                    </div>
+                    <span className="text-slate-900 font-black font-mono text-sm">{patient?.patientCode || '--'}</span>
+                  </div>
+
+                  {/* Visit Token Row */}
+                  <div className="flex items-center justify-between w-full border-b border-slate-50 pb-1.5">
+                    <div className="flex items-center gap-2 uppercase tracking-wider text-slate-400 text-[10px]">
+                      <span className="material-symbols-outlined text-base">confirmation_number</span>
+                      <span>Visit Token</span>
+                    </div>
+                    <span className="text-slate-900 font-black font-mono text-sm">{appointment.tokenNumber || '--'}</span>
+                  </div>
+
+                  {/* Assigned Doctor Row */}
+                  <div className="flex items-center justify-between w-full pb-0.5">
+                    <div className="flex items-center gap-2 uppercase tracking-wider text-slate-400 text-[10px]">
+                      <span className="material-symbols-outlined text-base">medical_services</span>
+                      <span>Assigned Doctor</span>
+                    </div>
+                    <span className="text-slate-900 font-black text-sm">Dr. {appointment.doctorName}</span>
+                  </div>
                 </div>
               </div>
             </Card>
@@ -278,7 +294,7 @@ export const AppointmentVitals = () => {
 
                 </div>
 
-                {/* ACTION BUTTON TRIGGER */}
+
                 {!isReadOnly && (
                     <div className="pt-3.5 border-t border-slate-100 flex justify-end">
                       <Button

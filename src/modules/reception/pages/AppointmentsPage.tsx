@@ -242,7 +242,6 @@ export const AppointmentsPage = () => {
   const statConfig = [
     { label: 'Total Today', value: stats.total, filter: 'ALL', icon: 'analytics', colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
     { label: 'In Progress', value: stats.inProgress, filter: 'CONSULTATION_STARTED', icon: 'check_circle', colorClass: 'from-blue-600 to-blue-700 border-blue-800 shadow-blue-600/5' },
-    { label: 'Waiting Vitals', value: stats.waitingForVitals, filter: 'PAID', icon: 'analytics', colorClass: 'from-purple-600 to-purple-700 border-purple-800 shadow-purple-600/5' },
     { label: 'Completed', value: stats.completed, filter: 'COMPLETED', icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
     { label: 'Upcoming', value: stats.upcoming, filter: 'UPCOMING', icon: 'analytics', colorClass: 'from-indigo-600 to-indigo-700 border-indigo-800 shadow-indigo-600/5' },
   ];
@@ -275,7 +274,7 @@ export const AppointmentsPage = () => {
           top: 0; left: 0; width: 40%; height: 100%;
           background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
           transform: translateX(-150%) skewX(-25deg);
-          animation: shine-laser 3s infinite ease-in-out;
+          animation: shine-laser 2s infinite ease-in-out;
         }
       `}} />
 
