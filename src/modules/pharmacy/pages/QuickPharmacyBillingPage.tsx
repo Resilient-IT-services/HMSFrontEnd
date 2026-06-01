@@ -7,7 +7,8 @@ import {
   QuickPharmacySaleResponse,
   PharmacyStockDTO,
   PatientResponse,
-  DoctorStaffResponse
+  DoctorStaffResponse,
+  TaxComponentDTO
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatCurrency } from '@/utils/formatters';
@@ -21,6 +22,9 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 import { invoiceService } from '@/services/invoiceService';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
+import { taxService } from '@/services/taxService';
 
 import { doctorService } from '@/services/doctorService';
 
@@ -36,6 +40,10 @@ interface CartItem {
   discount: number;
   isOutOfStock?: boolean;
   isExpired?: boolean;
+  hsnCode?: string;
+  taxAmount?: number;
+  taxableAmount?: number;
+  appliedTaxes?: TaxComponentDTO[];
 }
 
 const findBatchesToFulfill = async (medicineId: string | undefined, medicineName: string, prescribedQty: number): Promise<{ batches: CartItem[], remaining: number }> => {
@@ -118,8 +126,82 @@ export default function QuickPharmacyBillingPage() {
   const [prescribedDoctorId, setPrescribedDoctorId] = useState<string | null>(null);
   const [visitId, setVisitId] = useState<string | null>(null);
 
+  const currentHospitalId = useSelector((state: RootState) => state.auth.user?.currentHospitalId);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMode, setPaymentMode] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
+  const [calculatingTaxes, setCalculatingTaxes] = useState(false);
+
+  const calculateTaxes = async (updatedCart: CartItem[]) => {
+    if (updatedCart.length === 0) return;
+    
+    setCalculatingTaxes(true);
+    try {
+      const results = await Promise.all(updatedCart.map(async (item) => {
+        if (!item.id || item.selectedQuantity <= 0) return item;
+        
+        const res = await taxService.calculate({
+          hospitalId: currentHospitalId || '',
+          itemType: 'MEDICINE',
+          itemCode: item.medicineId,
+          hsnOrSacCode: item.hsnCode,
+          quantity: item.selectedQuantity,
+          unitPrice: item.sellingPrice || 0,
+          taxableAmount: ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount
+        });
+        
+        if (res.success && res.data) {
+          return {
+            ...item,
+            taxAmount: res.data.totalTax,
+            taxableAmount: res.data.taxableAmount,
+            appliedTaxes: res.data.components
+          };
+        }
+        return item;
+      }));
+      setCart(results);
+    } catch (error) {
+      console.error('Tax calculation failed', error);
+    } finally {
+      setCalculatingTaxes(false);
+    }
+  };
+
+  useEffect(() => {
+    // debounce tax calculation to avoid too many API calls
+    const timer = setTimeout(() => {
+      if (cart.length > 0 && !calculatingTaxes) {
+        // Only calculate if taxAmount is missing or doesn't match current state
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [cart, calculatingTaxes]);
+
+  const totalTax = useMemo(() => {
+    let total = 0;
+    for (const item of cart) {
+      total += (item.taxAmount || 0);
+    }
+    return total;
+  }, [cart]);
+
+  const subtotal = useMemo(() => {
+    let total = 0;
+    for (const item of cart) {
+      total += ((item.sellingPrice || 0) * item.selectedQuantity);
+    }
+    return total;
+  }, [cart]);
+
+  const totalDiscount = useMemo(() => {
+    let total = 0;
+    for (const item of cart) {
+      total += item.discount;
+    }
+    return total;
+  }, [cart]);
+
+  const totalAmount = useMemo(() => subtotal - totalDiscount + totalTax, [subtotal, totalDiscount, totalTax]);
 
   // Group cart items by medicine name for a cleaner UI
   const groupedCart = useMemo(() => {
@@ -135,7 +217,7 @@ export default function QuickPharmacyBillingPage() {
       isExpired: boolean;
     }> = {};
 
-    cart.forEach(item => {
+    for (const item of cart) {
       if (!groups[item.medicineName]) {
         groups[item.medicineName] = {
           medicineName: item.medicineName,
@@ -153,18 +235,14 @@ export default function QuickPharmacyBillingPage() {
       g.totalStock += item.quantity;
       g.totalSelected += item.selectedQuantity;
       g.totalDiscount += item.discount;
-      g.totalPrice += ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount;
+      g.totalPrice += ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount + (item.taxAmount || 0);
       g.batches.push(item);
       if (!item.isOutOfStock) g.isOutOfStock = false;
       if (item.isExpired) g.isExpired = true;
-    });
+    }
 
     return Object.values(groups);
   }, [cart]);
-
-  const subtotal = useMemo(() => cart.reduce((acc, item) => acc + ((item.sellingPrice || 0) * item.selectedQuantity), 0), [cart]);
-  const totalDiscount = useMemo(() => cart.reduce((acc, item) => acc + item.discount, 0), [cart]);
-  const totalAmount = useMemo(() => subtotal - totalDiscount, [subtotal, totalDiscount]);
 
   const [manualAmountPaid, setManualAmountPaid] = useState<number | null>(null);
   const [isAutoPaid, setIsAutoPaid] = useState(true);
@@ -354,6 +432,7 @@ export default function QuickPharmacyBillingPage() {
           ...b,
           selectedQuantity: b.id === stock.id ? 1 : 0,
           discount: 0,
+          hsnCode: b.hsnCode, // Include hsnCode
           isOutOfStock: b.quantity <= 0,
           isExpired
         });
@@ -410,7 +489,9 @@ export default function QuickPharmacyBillingPage() {
           medicineBatchId: item.id!,
           quantity: item.selectedQuantity,
           discountAmount: Number(item.discount.toFixed(2)),
-          taxAmount: 0
+          taxAmount: Number((item.taxAmount || 0).toFixed(2)),
+          taxableAmount: Number((item.taxableAmount || 0).toFixed(2)),
+          appliedTaxes: item.appliedTaxes
         })),
         payment: { mode: paymentMode as any, amount: Number(amountPaid.toFixed(2)), referenceNumber },
         notes: ''
@@ -650,10 +731,46 @@ export default function QuickPharmacyBillingPage() {
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-md flex flex-col h-full overflow-hidden shrink-0">
               <div className="p-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
-                <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-4">Summary Checkout</h2>
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Summary Checkout</h2>
+                  <button 
+                    onClick={() => calculateTaxes(cart)} 
+                    disabled={calculatingTaxes || cart.length === 0}
+                    className="text-[9px] font-black uppercase text-orange-600 hover:text-orange-700 disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <span className={`material-symbols-outlined text-sm ${calculatingTaxes ? 'animate-spin' : ''}`}>sync</span>
+                    {calculatingTaxes ? 'Calculating...' : 'Recalculate Tax'}
+                  </button>
+                </div>
                 <div className="space-y-2 text-xs font-bold">
                   <div className="flex justify-between text-slate-500"><span>Subtotal</span><span>{formatCurrency(subtotal)}</span></div>
                   <div className="flex justify-between text-slate-500"><span>Total Discount</span><span className="text-green-600">-{formatCurrency(totalDiscount)}</span></div>
+                  <div className="flex justify-between text-slate-500">
+                    <div className="flex flex-col">
+                      <span>Applied Taxes</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {(() => {
+                          const aggregated: TaxComponentDTO[] = [];
+                          for (const item of cart) {
+                            for (const tax of (item.appliedTaxes || [])) {
+                              const existing = aggregated.find(a => a.taxCode === tax.taxCode);
+                              if (existing) {
+                                existing.taxAmount += tax.taxAmount;
+                              } else {
+                                aggregated.push({ ...tax });
+                              }
+                            }
+                          }
+                          return aggregated.map(tax => (
+                            <span key={tax.taxCode} className="text-[8px] font-black text-slate-400 uppercase bg-slate-100 px-1 py-0.5 rounded border border-slate-200">
+                              {tax.taxName}: {formatCurrency(tax.taxAmount)}
+                            </span>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                    <span>{formatCurrency(totalTax)}</span>
+                  </div>
                   <div className="pt-3 border-t border-dashed border-slate-200 flex justify-between items-end"><span className="text-[10px] font-black text-slate-900 uppercase">Grand Total</span><span className="text-2xl font-black text-orange-700 tracking-tight">{formatCurrency(totalAmount)}</span></div>
                 </div>
               </div>

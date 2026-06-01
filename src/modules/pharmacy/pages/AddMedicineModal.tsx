@@ -25,6 +25,7 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
     category: 'General',
     thresholdQuantity: 10,
     taxPercentage: 12,
+    hsnCode: '',
     currentStock: 0,
   });
 
@@ -208,6 +209,18 @@ const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ onClose, onSuccess 
               type="text"
             />
             {errors.manufacturer && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.manufacturer}</p>}
+          </div>
+
+          <div>
+            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">HSN Code</label>
+            <input 
+              name="hsnCode"
+              value={formData.hsnCode}
+              onChange={handleChange}
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold" 
+              placeholder="e.g. 3004" 
+              type="text"
+            />
           </div>
 
           <div>

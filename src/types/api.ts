@@ -511,6 +511,7 @@ export interface MedicineResponse {
   purchasePrice?: number;
   sellingPrice?: number;
   taxPercentage?: number;
+  hsnCode?: string;
   temperature?: string;
   humidity?: string;
   specialNotes?: string;
@@ -534,6 +535,7 @@ export interface MedicineSummaryDTO {
   manufacturer?: string;
   currentStock?: number;
   thresholdQuantity?: number;
+  hsnCode?: string;
 }
 
 export interface MedicineImportResponse {
@@ -568,6 +570,7 @@ export interface PharmacyStockDTO {
   price: number;
   purchasePrice?: number;
   sellingPrice?: number;
+  hsnCode?: string;
 }
 
 export interface StockRequest {
@@ -617,13 +620,17 @@ export interface QuickPharmacySaleRequest {
 
 export interface QuickPharmacySaleItem {
   id?: string;
+  medicineBatchId?: string;
   medicineId: string;
   medicineName?: string;
   batchNumber?: string;
   quantity: number;
   unitPrice?: number;
   discountAmount?: number;
+  taxableAmount?: number;
+  taxAmount?: number;
   netAmount?: number;
+  appliedTaxes?: TaxComponentDTO[];
 }
 
 export interface QuickPharmacySaleResponse {
@@ -632,6 +639,7 @@ export interface QuickPharmacySaleResponse {
   invoiceId: string;
   invoiceNumber: string;
   totalAmount: number;
+  taxAmount?: number;
   status: PharmacySaleStatus;
   paymentId?: string;
   receiptNumber?: string;
@@ -748,6 +756,59 @@ export interface TaxComponentDTO {
   taxName: string;
   taxRate: number;
   taxAmount: number;
+}
+
+export interface TaxMasterDTO {
+  id?: string;
+  code: string;
+  name: string;
+  taxType: string;
+  rate: number;
+  active: boolean;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+}
+
+export interface TaxGroupDTO {
+  id?: string;
+  name: string;
+  active: boolean;
+  taxes: TaxMasterDTO[];
+}
+
+export interface TaxRuleDTO {
+  id?: string;
+  priority?: number;
+  itemType: string;
+  hsnCode?: string;
+  sacCode?: string;
+  patientCategory?: string;
+  taxGroupId: string;
+  taxGroupName?: string;
+  effectiveFrom?: string;
+  effectiveTo?: string;
+}
+
+export interface TaxCalculationRequest {
+  hospitalId: string;
+  itemType: string;
+  itemCode?: string;
+  hsnOrSacCode?: string;
+  quantity: number;
+  unitPrice: number;
+  taxableAmount?: number;
+  billingState?: string;
+  hospitalState?: string;
+  invoiceDate?: string;
+  patientCategory?: string;
+  insuranceProvider?: string;
+}
+
+export interface TaxCalculationResult {
+  taxableAmount: number;
+  totalTax: number;
+  grandTotal: number;
+  components: TaxComponentDTO[];
 }
 
 export interface InvoiceItemDTO {

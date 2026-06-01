@@ -727,6 +727,180 @@
         }
       }
     },
+    "/api/v1/tax/config/rules": {
+      "get": {
+        "tags": [
+          "Taxation Configuration"
+        ],
+        "operationId": "getAllRules",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTaxRuleDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Taxation Configuration"
+        ],
+        "operationId": "createRule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxRuleDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseTaxRuleDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tax/config/masters": {
+      "get": {
+        "tags": [
+          "Taxation Configuration"
+        ],
+        "operationId": "getAllMasters",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTaxMasterDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Taxation Configuration"
+        ],
+        "operationId": "createMaster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxMasterDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseTaxMasterDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tax/config/groups": {
+      "get": {
+        "tags": [
+          "Taxation Configuration"
+        ],
+        "operationId": "getAllGroups",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseListTaxGroupDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Taxation Configuration"
+        ],
+        "operationId": "createGroup",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxGroupDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseTaxGroupDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tax/calculate": {
+      "post": {
+        "tags": [
+          "Taxation"
+        ],
+        "operationId": "calculate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaxCalculationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseTaxCalculationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/specializations": {
       "get": {
         "tags": [
@@ -4069,6 +4243,9 @@
           "sellingPrice": {
             "type": "number"
           },
+          "hsnCode": {
+            "type": "string"
+          },
           "taxPercentage": {
             "type": "number"
           },
@@ -4568,6 +4745,235 @@
           }
         }
       },
+      "TaxRuleDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "priority": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "hsnCode": {
+            "type": "string"
+          },
+          "sacCode": {
+            "type": "string"
+          },
+          "patientCategory": {
+            "type": "string"
+          },
+          "taxGroupId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "taxGroupName": {
+            "type": "string"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseTaxRuleDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TaxRuleDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "TaxMasterDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "taxType": {
+            "type": "string"
+          },
+          "rate": {
+            "type": "number"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseTaxMasterDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TaxMasterDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "TaxGroupDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "taxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxMasterDTO"
+            }
+          }
+        }
+      },
+      "ApiResponseTaxGroupDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TaxGroupDTO"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "TaxCalculationRequest": {
+        "type": "object",
+        "properties": {
+          "hospitalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "itemType": {
+            "type": "string"
+          },
+          "itemCode": {
+            "type": "string"
+          },
+          "hsnOrSacCode": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unitPrice": {
+            "type": "number"
+          },
+          "taxableAmount": {
+            "type": "number"
+          },
+          "billingState": {
+            "type": "string"
+          },
+          "hospitalState": {
+            "type": "string"
+          },
+          "invoiceDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "patientCategory": {
+            "type": "string"
+          },
+          "insuranceProvider": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseTaxCalculationResult": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "$ref": "#/components/schemas/TaxCalculationResult"
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "TaxCalculationResult": {
+        "type": "object",
+        "properties": {
+          "taxableAmount": {
+            "type": "number"
+          },
+          "totalTax": {
+            "type": "number"
+          },
+          "grandTotal": {
+            "type": "number"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxComponent"
+            }
+          }
+        }
+      },
+      "TaxComponent": {
+        "type": "object",
+        "properties": {
+          "taxCode": {
+            "type": "string"
+          },
+          "taxName": {
+            "type": "string"
+          },
+          "taxRate": {
+            "type": "number"
+          },
+          "taxAmount": {
+            "type": "number"
+          }
+        }
+      },
       "StockRequest": {
         "required": [
           "batchNumber",
@@ -4879,23 +5285,6 @@
             "items": {
               "$ref": "#/components/schemas/Item"
             }
-          }
-        }
-      },
-      "TaxComponent": {
-        "type": "object",
-        "properties": {
-          "taxCode": {
-            "type": "string"
-          },
-          "taxName": {
-            "type": "string"
-          },
-          "taxRate": {
-            "type": "number"
-          },
-          "taxAmount": {
-            "type": "number"
           }
         }
       },
@@ -5409,6 +5798,57 @@
             "items": {
               "$ref": "#/components/schemas/HospitalMembershipDTO"
             }
+          }
+        }
+      },
+      "ApiResponseListTaxRuleDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxRuleDTO"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "ApiResponseListTaxMasterDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxMasterDTO"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
+          }
+        }
+      },
+      "ApiResponseListTaxGroupDTO": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaxGroupDTO"
+            }
+          },
+          "error": {
+            "$ref": "#/components/schemas/ApiError"
           }
         }
       },
