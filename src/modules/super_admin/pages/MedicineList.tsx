@@ -81,6 +81,12 @@ export function MedicineList() {
       )
     },
     {
+      header: 'HSN Code',
+      render: (m) => (
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.hsnCode || '-'}</span>
+      )
+    },
+    {
       header: 'Actions',
       headerClassName: 'text-right',
       className: 'text-right',
@@ -267,8 +273,8 @@ export function MedicineList() {
               <h3 className="font-black text-xs uppercase tracking-widest text-primary leading-none mb-2">Requirement Protocol</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
                 Your Excel sheet must contain the following columns in order:
-                <span className="block mt-2 font-bold text-white/80">Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category, Threshold Quantity (Min Stock).</span>
-                <span className="block mt-1 text-[10px] text-primary font-bold italic">Note: Threshold Quantity should be in Column H (Index 7).</span>
+                <span className="block mt-2 font-bold text-white/80">Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category, Threshold Quantity (Min Stock), HSN Code.</span>
+                <span className="block mt-1 text-[10px] text-primary font-bold italic">Note: HSN Code should be in Column J (Index 9).</span>
               </p>
             </div>
 

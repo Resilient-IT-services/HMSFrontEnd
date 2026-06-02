@@ -178,6 +178,14 @@ export function LabTestsPage() {
                 <option value="MULTI_PARAMETER">MULTI_PARAMETER</option>
               </select>
             </div>
+            <div className="col-span-1">
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">HSN Code (Optional)</label>
+              <input value={formData.hsnCode || ''} onChange={(e) => setFormData({ ...formData, hsnCode: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="e.g. 3822" />
+            </div>
+            <div className="col-span-1">
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">SAC Code (Optional)</label>
+              <input value={formData.sacCode || ''} onChange={(e) => setFormData({ ...formData, sacCode: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="e.g. 9993" />
+            </div>
           </div>
           <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
             <Button type="button" variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>

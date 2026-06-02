@@ -224,6 +224,12 @@ export const MedicineInventory = () => {
       )
     },
     {
+      header: 'HSN Code',
+      render: (m) => (
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.hsnCode || '-'}</span>
+      )
+    },
+    {
       header: 'Category',
       filterable: true,
       filterType: 'select',

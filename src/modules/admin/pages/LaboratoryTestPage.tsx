@@ -59,6 +59,16 @@ const LaboratoryTestPage = () => {
       render: (t) => <span className="text-xs text-slate-600">{t.shortName || '-'}</span>
     },
     {
+      header: 'HSN/SAC',
+      render: (t) => (
+        <div className="flex flex-col">
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.hsnCode ? `HSN: ${t.hsnCode}` : ''}</span>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.sacCode ? `SAC: ${t.sacCode}` : ''}</span>
+          {!t.hsnCode && !t.sacCode && <span className="text-[10px] text-slate-300">-</span>}
+        </div>
+      )
+    },
+    {
       header: 'Status',
       className: 'text-center',
       headerClassName: 'text-center',

@@ -21,6 +21,8 @@ export interface LabTestDTO {
     resultType: string;
     tatValue?: number;
     tatUnit?: string;
+    hsnCode?: string;
+    sacCode?: string;
     active: boolean;
 }
 
@@ -115,6 +117,16 @@ export const labApi = {
     },
     deleteRange: async (id: string) => {
         const response = await apiClient.delete<ApiResponse<void>>(`/lab/parameters/ranges/${id}`);
+        return response.data;
+    },
+
+    // Pricing
+    getPricingByTest: async (testId: string) => {
+        const response = await apiClient.get<ApiResponse<any>>(`/lab/pricing/test/${testId}`);
+        return response.data;
+    },
+    savePricing: async (data: any) => {
+        const response = await apiClient.post<ApiResponse<any>>('/lab/pricing', data);
         return response.data;
     }
 };

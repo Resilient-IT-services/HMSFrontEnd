@@ -20,6 +20,8 @@ const AddLaboratoryTestModal: React.FC<AddLaboratoryTestModalProps> = ({ isOpen,
     testName: '',
     shortName: '',
     aliasName: '',
+    hsnCode: '',
+    sacCode: '9993', // Default SAC for medical services
     active: true,
   });
 
@@ -96,6 +98,31 @@ const AddLaboratoryTestModal: React.FC<AddLaboratoryTestModalProps> = ({ isOpen,
               type="text"
             />
             {errors.testName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.testName}</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">HSN Code</label>
+              <input 
+                name="hsnCode"
+                value={formData.hsnCode}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium" 
+                placeholder="e.g. 3822" 
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">SAC Code</label>
+              <input 
+                name="sacCode"
+                value={formData.sacCode}
+                onChange={handleChange}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium" 
+                placeholder="e.g. 9993" 
+                type="text"
+              />
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

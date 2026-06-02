@@ -981,6 +981,8 @@ export interface LaboratoryTestDTO {
   testName: string;
   shortName?: string;
   aliasName?: string;
+  hsnCode?: string;
+  sacCode?: string;
   active: boolean;
   createdAt?: string;
   updatedAt?: string;
