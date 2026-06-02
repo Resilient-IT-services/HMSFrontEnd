@@ -40,6 +40,16 @@ export function SettingsPage() {
       links: [
         { label: 'Departments & Specializations', href: '/settings/catalog', icon: 'list_alt' },
       ]
+    },
+    {
+      title: 'Laboratory Management',
+      icon: 'biotech',
+      description: 'Configure lab departments, tests catalog and result parameters.',
+      roles: ['ADMIN', 'SUPER_ADMIN'],
+      links: [
+        { label: 'Lab Departments', href: '/settings/lab/departments', icon: 'room_service' },
+        { label: 'Tests Catalog', href: '/settings/lab/tests', icon: 'experiment' },
+      ]
     }
   ];
 
