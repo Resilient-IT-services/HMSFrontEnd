@@ -961,6 +961,17 @@ export interface Department {
   active: boolean;
 }
 
+export interface LaboratoryTestDTO {
+  id?: string;
+  testCode: string;
+  testName: string;
+  shortName?: string;
+  aliasName?: string;
+  active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Specialization {
   id: string;
   name: string;
