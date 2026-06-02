@@ -49,6 +49,7 @@ export function SettingsPage() {
       links: [
         { label: 'Lab Departments', href: '/settings/lab/departments', icon: 'room_service' },
         { label: 'Tests Catalog', href: '/settings/lab/tests', icon: 'experiment' },
+        { label: 'Lab Pricing', href: '/settings/lab/pricing', icon: 'payments' },
       ]
     }
   ];
