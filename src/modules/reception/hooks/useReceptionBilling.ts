@@ -91,7 +91,7 @@ export const useReceptionBilling = () => {
     } finally {
       setCalculatingTax(false);
     }
-  }, [user?.currentHospitalId, hospital, doctor?.doctorId, patient?.address]);
+  }, [user, hospital, doctor, patient]);
 
   const fetchData = useCallback(async () => {
     if (!appointmentId) return;
@@ -236,7 +236,10 @@ export const useReceptionBilling = () => {
           amount: total,
           paymentMode: paymentMethod,
           invoiceId: invoice.id,
-          referenceNumber: `BILL-${Date.now()}`
+          referenceNumber: `BILL-${Date.now()}`,
+          taxAmount: invoice.taxAmount,
+          taxableAmount: invoice.taxableAmount,
+          appliedTaxes: invoice.items[0]?.appliedTaxes // Standard OPD usually has one item
         });
 
         if (res.success) {
@@ -262,7 +265,10 @@ export const useReceptionBilling = () => {
         payment: {
           amount: total,
           mode: paymentMethod,
-          referenceNumber: `BILL-${Date.now()}`
+          referenceNumber: `BILL-${Date.now()}`,
+          taxAmount: taxResult?.totalTax,
+          taxableAmount: taxResult?.taxableAmount,
+          appliedTaxes: taxResult?.components
         }
       });
 

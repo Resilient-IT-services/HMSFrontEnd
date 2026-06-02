@@ -293,6 +293,9 @@ export interface OPDPaymentInfo {
   amount: number;
   mode: 'CASH' | 'CARD' | 'UPI' | 'NEFT' | 'INSURANCE';
   referenceNumber?: string;
+  taxAmount?: number;
+  taxableAmount?: number;
+  appliedTaxes?: TaxComponentDTO[];
 }
 
 export interface OPDEncounterRequest {
@@ -845,6 +848,7 @@ export interface InvoiceDTO {
   status: InvoiceStatus;
   subtotalAmount: number;
   taxAmount: number;
+  taxableAmount?: number;
   discountAmount: number;
   totalAmount: number;
   amountPaid: number;
@@ -875,6 +879,9 @@ export interface RecordPaymentRequest {
   paymentMode: 'CASH' | 'CARD' | 'UPI' | 'NEFT' | 'INSURANCE';
   referenceNumber?: string;
   invoiceId?: string;
+  taxAmount?: number;
+  taxableAmount?: number;
+  appliedTaxes?: TaxComponentDTO[];
 }
 
 // Legacy compatibility (to be removed)

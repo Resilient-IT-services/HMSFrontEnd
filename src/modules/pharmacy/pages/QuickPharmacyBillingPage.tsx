@@ -99,7 +99,13 @@ const calculatePrescribedQuantity = (dosage?: string, duration?: string): number
 
   // Fallback to manual calculation: Dosage (1-0-1) * Days (5)
   const dosageParts = dosage.split('-');
-  const dailyFreq = dosageParts.reduce((acc, val) => acc + (Number.parseFloat(val) || 0), 0);
+  const dailyFreq = (() => {
+    let total = 0;
+    for (const val of dosageParts) {
+      total += (Number.parseFloat(val) || 0);
+    }
+    return total;
+  })();
 
   const daysMatch = duration.match(/^(\d+)/);
   const days = daysMatch ? Number.parseInt(daysMatch[1]) : 0;
@@ -133,7 +139,7 @@ export default function QuickPharmacyBillingPage() {
   const [paymentMode, setPaymentMode] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [calculatingTaxes, setCalculatingTaxes] = useState(false);
 
-  const calculateTaxes = async (updatedCart: CartItem[]) => {
+  const calculateTaxes = React.useCallback(async (updatedCart: CartItem[]) => {
     if (updatedCart.length === 0) {
       setCart([]);
       return;
@@ -183,7 +189,7 @@ export default function QuickPharmacyBillingPage() {
     } finally {
       setCalculatingTaxes(false);
     }
-  };
+  }, [currentHospitalId, hospital?.state, selectedPatient?.address]);
 
   useEffect(() => {
     // debounce tax calculation to avoid too many API calls
@@ -199,7 +205,7 @@ export default function QuickPharmacyBillingPage() {
       }
     }, 1000);
     return () => clearTimeout(timer);
-  }, [cart, calculatingTaxes, currentHospitalId]);
+  }, [cart, calculatingTaxes, currentHospitalId, calculateTaxes]);
 
   const totalTax = useMemo(() => {
     let total = 0;
@@ -398,7 +404,13 @@ export default function QuickPharmacyBillingPage() {
       return 0;
     });
 
-    const totalAvailable = relatedItems.reduce((acc, item) => acc + (item.isOutOfStock || item.isExpired ? 0 : item.quantity), 0);
+    const totalAvailable = (() => {
+      let total = 0;
+      for (const item of relatedItems) {
+        total += (item.isOutOfStock || item.isExpired ? 0 : item.quantity);
+      }
+      return total;
+    })();
 
     // Hard cap: Cannot exceed total available stock (unless it's an OOS placeholder from prescription)
     const hasRealBatches = relatedItems.some(item => item.id);
@@ -468,7 +480,13 @@ export default function QuickPharmacyBillingPage() {
 
   const updateGroupedDiscount = (medicineName: string, discount: number) => {
     const relatedItems = cart.filter(item => item.medicineName === medicineName);
-    const totalItemAmount = relatedItems.reduce((acc, item) => acc + ((item.sellingPrice || 0) * item.selectedQuantity), 0);
+    const totalItemAmount = (() => {
+      let total = 0;
+      for (const item of relatedItems) {
+        total += ((item.sellingPrice || 0) * item.selectedQuantity);
+      }
+      return total;
+    })();
     const safeDiscount = Math.max(0, Math.min(discount, totalItemAmount));
 
     if (discount > totalItemAmount) triggerGlobalToast(`Discount cannot exceed total amount`, 'error');

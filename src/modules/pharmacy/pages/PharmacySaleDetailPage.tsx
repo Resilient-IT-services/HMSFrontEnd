@@ -78,7 +78,14 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
     if (loading) return <MainLayout title="Sale Details" hideTitle><PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter"><LoadingSkeleton /></PageSurface></MainLayout>;
     if (!sale) return <MainLayout title="Sale Details" hideTitle><PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter"><div className="p-8 text-center font-bold text-slate-400 uppercase tracking-widest">Sale not found</div></PageSurface></MainLayout>;
 
-    const totalDiscount = sale.items.reduce((acc, item) => acc + (item.discountAmount || 0), 0);
+    const totalDiscount = (() => {
+        let total = 0;
+        for (const item of sale.items) {
+            total += (item.discountAmount || 0);
+        }
+        return total;
+    })();
+
     const subtotal = sale.totalAmount + totalDiscount;
 
     const loggedInHospitalName = user?.memberships.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
@@ -228,18 +235,24 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
                                 {sale.taxAmount !== undefined && sale.taxAmount > 0 && (
                                     <div className="mt-2 flex justify-end">
                                         <div className="flex flex-wrap gap-1 justify-end max-w-xs">
-                                            {/* Collect all unique tax components across all items */}
-                                            {Array.from(new Set(sale.items.flatMap(item => item.appliedTaxes || []).map(t => t.taxName))).map(taxName => {
-                                                const totalTaxForName = sale.items.reduce((acc, item) => {
-                                                    const tax = item.appliedTaxes?.find(t => t.taxName === taxName);
-                                                    return acc + (tax?.taxAmount || 0);
-                                                }, 0);
-                                                return (
-                                                    <span key={taxName} className="text-[8px] font-bold text-slate-400 uppercase">
-                                                        {taxName}: {formatCurrency(totalTaxForName)}
+                                            {(() => {
+                                                const aggregated: { taxName: string; taxAmount: number }[] = [];
+                                                for (const item of sale.items) {
+                                                    for (const tax of (item.appliedTaxes || [])) {
+                                                        const existing = aggregated.find(a => a.taxName === tax.taxName);
+                                                        if (existing) {
+                                                            existing.taxAmount += tax.taxAmount;
+                                                        } else {
+                                                            aggregated.push({ taxName: tax.taxName, taxAmount: tax.taxAmount });
+                                                        }
+                                                    }
+                                                }
+                                                return aggregated.map(tax => (
+                                                    <span key={tax.taxName} className="text-[8px] font-bold text-slate-400 uppercase">
+                                                        {tax.taxName}: {formatCurrency(tax.taxAmount)}
                                                     </span>
-                                                );
-                                            })}
+                                                ));
+                                            })()}
                                         </div>
                                     </div>
                                 )}
