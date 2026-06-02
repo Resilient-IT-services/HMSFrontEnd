@@ -118,6 +118,21 @@ export const PharmacySalesPage = () => {
     return () => clearTimeout(timer);
   }, [calculateTotalTaxes]);
 
+  const handlePatientSearch = async (val: string) => {
+    setPatientSearch(val);
+    if (val.length < 3) {
+      setPatientSearchState([]);
+      return;
+    }
+    setSearchingPatient(true);
+    try {
+      const res = await patientService.list({ page: 0, size: 5, search: val });
+      if (res.success && res.data) setPatientSearchState(res.data.content);
+    } finally {
+      setSearchingPatient(false);
+    }
+  };
+
   const grandTotal = subtotal + taxBreakdown.totalTax;
 
   const resolvePrice = async (medicineId: string, medicineName: string) => {

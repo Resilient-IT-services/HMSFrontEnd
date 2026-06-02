@@ -97,6 +97,10 @@ export function TaxRulesPage() {
     }
   };
 
+  const sortedRules = React.useMemo(() => {
+    return [...rules].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+  }, [rules]);
+
   return (
     <MainLayout title="Tax Rules">
       <div className="p-6 space-y-6">
