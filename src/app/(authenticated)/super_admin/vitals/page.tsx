@@ -1,5 +1,11 @@
-import { VitalsConfigPage } from '@/modules/super_admin/pages/VitalsConfigPage';
+'use client';
+
+import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Page() {
-  return <VitalsConfigPage />;
+  useEffect(() => {
+    redirect('/settings/clinical/vitals');
+  }, []);
+  return null;
 }

@@ -11,23 +11,33 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { patientService } from '@/services/patientService';
 import { invoiceService } from '@/services/invoiceService';
+import { hospitalService } from '@/services/hospitalService';
+import { taxService } from '@/services/taxService';
 import { useSearchParams } from 'next/navigation';
 
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 export const PharmacySalesPage = () => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
   const cart = useSelector((state: RootState) => state.pharmacy.cart);
+  const currentHospitalId = useSelector((state: RootState) => state.auth.user?.currentHospitalId);
+  
   const [loading, setLoading] = useState(false);
+  const [hospital, setHospital] = useState<any>(null);
   const [selectedPatient, setSelectedPatient] = useState<PatientResponse | null>(null);
   const [patientSearch, setPatientSearch] = useState('');
   const [patientResults, setPatientSearchState] = useState<PatientResponse[]>([]);
   const [searchingPatient, setSearchingPatient] = useState(false);
   
+  // Tax states
+  const [calculatingTax, setCalculatingTax] = useState(false);
+  const [taxBreakdown, setTaxBreakdown] = useState<{ totalTax: number, components: any[] }>({ totalTax: 0, components: [] });
+
   // Success Modal State
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastSale, setLastSale] = useState<QuickPharmacySaleResponse | null>(null);
@@ -44,24 +54,71 @@ export const PharmacySalesPage = () => {
     }
   }, [patientIdParam]);
 
-  const handlePatientSearch = async (val: string) => {
-    setPatientSearch(val);
-    if (val.length < 3) {
-      setPatientSearchState([]);
+  const subtotal = cart.reduce((acc, item) => acc + (Number(item.sellingPrice || 0) * Number(item.quantity || 0)), 0);
+
+  const calculateTotalTaxes = React.useCallback(async () => {
+    if (cart.length === 0 || !currentHospitalId) {
+      setTaxBreakdown({ totalTax: 0, components: [] });
       return;
     }
-    setSearchingPatient(true);
-    try {
-      const res = await patientService.list({ page: 0, size: 5, search: val });
-      if (res.success && res.data) setPatientSearchState(res.data.content);
-    } finally {
-      setSearchingPatient(false);
-    }
-  };
 
-  const subtotal = cart.reduce((acc, item) => acc + (Number(item.sellingPrice || 0) * Number(item.quantity || 0)), 0);
-  const tax = subtotal * 0.12;
-  const grandTotal = subtotal + tax;
+    setCalculatingTax(true);
+    try {
+      let hState = hospital?.state;
+      if (!hState) {
+        const hRes = await hospitalService.getById(currentHospitalId);
+        if (hRes.success && hRes.data) {
+          setHospital(hRes.data);
+          hState = hRes.data.state;
+        }
+      }
+
+      const results = await Promise.all(cart.map(async (item) => {
+        const res = await taxService.calculate({
+          hospitalId: currentHospitalId,
+          itemType: 'MEDICINE',
+          itemCode: item.id,
+          hsnOrSacCode: item.hsnCode,
+          quantity: item.quantity,
+          unitPrice: item.sellingPrice || 0,
+          taxableAmount: (item.sellingPrice || 0) * item.quantity,
+          hospitalState: hState,
+          billingState: selectedPatient?.address?.split(',').pop()?.trim() || hState,
+          isTaxInclusive: false
+        });
+        return res.success ? res.data : null;
+      }));
+
+      const totalTax = results.reduce((acc, r) => acc + (r?.totalTax || 0), 0);
+      
+      // Merge components for breakdown
+      const componentsMap = new Map();
+      results.forEach(r => {
+        r?.components.forEach(c => {
+          const existing = componentsMap.get(c.taxName) || 0;
+          componentsMap.set(c.taxName, existing + c.taxAmount);
+        });
+      });
+
+      setTaxBreakdown({
+        totalTax,
+        components: Array.from(componentsMap.entries()).map(([taxName, taxAmount]) => ({ taxName, taxAmount }))
+      });
+    } catch (error) {
+      console.error('Tax calculation failed', error);
+    } finally {
+      setCalculatingTax(false);
+    }
+  }, [cart, currentHospitalId, hospital, selectedPatient?.address]);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      calculateTotalTaxes();
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [calculateTotalTaxes]);
+
+  const grandTotal = subtotal + taxBreakdown.totalTax;
 
   const resolvePrice = async (medicineId: string, medicineName: string) => {
     let price = 0;
@@ -384,10 +441,20 @@ export const PharmacySalesPage = () => {
                       <span>Subtotal</span>
                       <span className="text-slate-800">₹{subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest italic">
-                      <span>GST (12%)</span>
-                      <span>₹{tax.toFixed(2)}</span>
-                    </div>
+                    
+                    {taxBreakdown.components.map((tax, i) => (
+                      <div key={i} className="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest italic">
+                        <span>{tax.taxName}</span>
+                        <span>₹{tax.taxAmount.toFixed(2)}</span>
+                      </div>
+                    ))}
+
+                    {calculatingTax && (
+                      <div className="flex justify-center py-1">
+                        <div className="w-4 h-4 border-2 border-orange-600/30 border-t-orange-600 rounded-full animate-spin"></div>
+                      </div>
+                    )}
+
                     <div className="pt-4 border-t-2 border-dashed border-slate-100 flex justify-between items-end">
                       <span className="text-sm font-black text-slate-800 uppercase tracking-tighter">Total Payable</span>
                       <span className="text-3xl font-black text-orange-700 leading-none">₹{grandTotal.toFixed(2)}</span>

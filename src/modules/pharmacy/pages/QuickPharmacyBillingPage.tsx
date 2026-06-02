@@ -25,6 +25,7 @@ import { invoiceService } from '@/services/invoiceService';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { taxService } from '@/services/taxService';
+import { hospitalService } from '@/services/hospitalService';
 
 import { doctorService } from '@/services/doctorService';
 
@@ -127,16 +128,30 @@ export default function QuickPharmacyBillingPage() {
   const [visitId, setVisitId] = useState<string | null>(null);
 
   const currentHospitalId = useSelector((state: RootState) => state.auth.user?.currentHospitalId);
+  const [hospital, setHospital] = useState<any>(null);
   const [cart, setCart] = useState<CartItem[]>([]);
   const [paymentMode, setPaymentMode] = useState<'CASH' | 'UPI' | 'CARD'>('CASH');
   const [calculatingTaxes, setCalculatingTaxes] = useState(false);
 
   const calculateTaxes = async (updatedCart: CartItem[]) => {
-    if (updatedCart.length === 0) return;
+    if (updatedCart.length === 0) {
+      setCart([]);
+      return;
+    }
     
     setCalculatingTaxes(true);
     try {
+      let hState = hospital?.state;
+      if (!hState && currentHospitalId) {
+        const hRes = await hospitalService.getById(currentHospitalId);
+        if (hRes.success && hRes.data) {
+          setHospital(hRes.data);
+          hState = hRes.data.state;
+        }
+      }
+
       const results = await Promise.all(updatedCart.map(async (item) => {
+        // Only calculate if it's a real batch with a selling price and quantity
         if (!item.id || item.selectedQuantity <= 0) return item;
         
         const res = await taxService.calculate({
@@ -146,7 +161,10 @@ export default function QuickPharmacyBillingPage() {
           hsnOrSacCode: item.hsnCode,
           quantity: item.selectedQuantity,
           unitPrice: item.sellingPrice || 0,
-          taxableAmount: ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount
+          taxableAmount: ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount,
+          hospitalState: hState,
+          billingState: selectedPatient?.address?.split(',').pop()?.trim() || hState,
+          isTaxInclusive: false // Sales are typically tax-exclusive
         });
         
         if (res.success && res.data) {
@@ -170,12 +188,18 @@ export default function QuickPharmacyBillingPage() {
   useEffect(() => {
     // debounce tax calculation to avoid too many API calls
     const timer = setTimeout(() => {
-      if (cart.length > 0 && !calculatingTaxes) {
-        // Only calculate if taxAmount is missing or doesn't match current state
+      const needsCalculation = cart.some(item => 
+        item.id && 
+        item.selectedQuantity > 0 && 
+        (item.taxAmount === undefined || item.taxAmount === 0)
+      );
+
+      if (needsCalculation && !calculatingTaxes && currentHospitalId) {
+        void calculateTaxes(cart);
       }
-    }, 500);
+    }, 1000);
     return () => clearTimeout(timer);
-  }, [cart, calculatingTaxes]);
+  }, [cart, calculatingTaxes, currentHospitalId]);
 
   const totalTax = useMemo(() => {
     let total = 0;

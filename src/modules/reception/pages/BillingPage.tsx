@@ -34,6 +34,8 @@ export const BillingPage = () => {
     handleMarkAsPaid,
     generateBill,
     invoice,
+    taxResult,
+    calculatingTax,
     isPaid
   } = useReceptionBilling();
 
@@ -221,6 +223,25 @@ export const BillingPage = () => {
                       </span>
                     )}
                   </div>
+
+                  {/* Taxes */}
+                  {(taxResult || (invoice && invoice.taxAmount > 0)) && (
+                    <div className="space-y-1.5 border-t border-slate-50 pt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs font-bold text-slate-600">Applied Taxes</span>
+                        <span className="font-black text-slate-900 text-sm">
+                          ₹{(invoice?.taxAmount ?? taxResult?.totalTax ?? 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 justify-end">
+                        {(invoice?.items[0]?.appliedTaxes || taxResult?.components || []).map((tax, i) => (
+                          <Badge key={i} variant="slate" className="text-[8px] px-1.5 py-0 rounded font-bold uppercase">
+                            {tax.taxName}: ₹{tax.taxAmount.toFixed(2)}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Amount Paid */}
                   {isPaid && (

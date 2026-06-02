@@ -4,25 +4,54 @@ import React from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
 import Link from 'next/link';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 
 export function SettingsPage() {
+  const { isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
+  const isSuper = isSuperMode || activeRole === 'SUPER_ADMIN';
+
   const settingsSections = [
     {
       title: 'Taxation Management',
       icon: 'percent',
       description: 'Manage tax masters, groups and rule-based application logic.',
+      roles: ['ADMIN', 'SUPER_ADMIN'],
       links: [
-        { label: 'Tax Masters', href: '/admin/settings/taxation/masters', icon: 'account_balance' },
-        { label: 'Tax Groups', href: '/admin/settings/taxation/groups', icon: 'account_tree' },
-        { label: 'Tax Rules', href: '/admin/settings/taxation/rules', icon: 'rule' },
+        { label: 'Tax Masters', href: '/settings/taxation/masters', icon: 'account_balance' },
+        { label: 'Tax Groups', href: '/settings/taxation/groups', icon: 'account_tree' },
+        { label: 'Tax Rules', href: '/settings/taxation/rules', icon: 'rule' },
+      ]
+    },
+    {
+      title: 'Clinical Configuration',
+      icon: 'clinical_notes',
+      description: 'Define clinical safety thresholds and medical policy standards.',
+      roles: ['SUPER_ADMIN'],
+      links: [
+        { label: 'Vitals Thresholds', href: '/settings/clinical/vitals', icon: 'health_metrics' },
+      ]
+    },
+    {
+      title: 'Master Catalog',
+      icon: 'database',
+      description: 'Manage hospital-wide catalogs for departments and specializations.',
+      roles: ['SUPER_ADMIN'],
+      links: [
+        { label: 'Departments & Specializations', href: '/settings/catalog', icon: 'list_alt' },
       ]
     }
   ];
 
+  const filteredSections = settingsSections.filter(section => {
+    if (isSuper) return true;
+    return section.roles.includes(activeRole || '');
+  });
+
   return (
     <MainLayout title="Settings">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-        {settingsSections.map((section) => (
+        {filteredSections.map((section) => (
           <Card key={section.title} className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <span className="material-symbols-outlined text-orange-700">{section.icon}</span>

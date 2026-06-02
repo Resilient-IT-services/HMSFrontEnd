@@ -7,7 +7,9 @@ import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { doctorService } from '@/services/doctorService';
 import { invoiceService } from '@/services/invoiceService';
-import { AppointmentResponse, PatientResponse, DoctorStaffResponse, InvoiceDTO } from '@/types/api';
+import { hospitalService } from '@/services/hospitalService';
+import { taxService } from '@/services/taxService';
+import { AppointmentResponse, PatientResponse, DoctorStaffResponse, InvoiceDTO, TaxCalculationResult, HospitalResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
 import { useSelector } from 'react-redux';
@@ -33,6 +35,7 @@ export const useReceptionBilling = () => {
   const [appointment, setAppointment] = useState<AppointmentResponse | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [doctor, setDoctor] = useState<DoctorStaffResponse | null>(null);
+  const [hospital, setHospital] = useState<HospitalResponse | null>(null);
   const [invoice, setInvoice] = useState<InvoiceDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [submittingPayment, setSubmittingPayment] = useState(false);
@@ -41,12 +44,54 @@ export const useReceptionBilling = () => {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'CARD' | 'UPI'>('CASH');
   const [discount, setDiscount] = useState(0);
 
+  const [taxResult, setTaxResult] = useState<TaxCalculationResult | null>(null);
+  const [calculatingTax, setCalculatingTax] = useState(false);
+
   const applyInvoiceData = (inv: InvoiceDTO | null) => {
     setInvoice(inv);
     if (inv) {
       setDiscount(inv.discountAmount || 0);
     }
   };
+
+  const calculateTax = useCallback(async (fee: number, disc: number) => {
+    if (!user?.currentHospitalId || fee <= 0) return;
+    
+    setCalculatingTax(true);
+    try {
+      // Get hospital state if not already fetched
+      let hState = hospital?.state;
+      if (!hState) {
+        const hRes = await hospitalService.getById(user.currentHospitalId);
+        if (hRes.success && hRes.data) {
+          setHospital(hRes.data);
+          hState = hRes.data.state;
+        }
+      }
+
+      const taxableAmount = Math.max(0, fee - disc);
+      const res = await taxService.calculate({
+        hospitalId: user.currentHospitalId,
+        itemType: 'CONSULTATION',
+        itemCode: doctor?.doctorId,
+        hsnOrSacCode: '9993', // SAC for medical services
+        quantity: 1,
+        unitPrice: fee,
+        taxableAmount,
+        hospitalState: hState,
+        billingState: patient?.address?.split(',').pop()?.trim() || hState, // Fallback to hospital state
+        isTaxInclusive: false
+      });
+
+      if (res.success && res.data) {
+        setTaxResult(res.data);
+      }
+    } catch (error) {
+      console.error('Tax Calculation Error:', error);
+    } finally {
+      setCalculatingTax(false);
+    }
+  }, [user?.currentHospitalId, hospital, doctor?.doctorId, patient?.address]);
 
   const fetchData = useCallback(async () => {
     if (!appointmentId) return;
@@ -161,8 +206,17 @@ export const useReceptionBilling = () => {
     return () => clearTimeout(timer);
   }, [appointmentId, fetchData, loadNewAppointmentBilling]);
 
+  useEffect(() => {
+    if (doctor?.consultationFee && !invoice) {
+      const timer = setTimeout(() => {
+        void calculateTax(doctor.consultationFee, discount);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [doctor?.consultationFee, discount, invoice, calculateTax]);
+
   const consultationFee = doctor?.consultationFee || 0;
-  const total = Math.max(0, consultationFee - discount);
+  const total = taxResult ? taxResult.grandTotal : Math.max(0, (invoice?.totalAmount ?? consultationFee) - discount);
 
   const getAppointmentSubmitErrorMessage = (error: unknown) => {
     if (isAxiosError(error) && error.response?.data?.message?.includes('already exists')) {
@@ -265,6 +319,8 @@ export const useReceptionBilling = () => {
     generateBill,
     downloadReceipt,
     invoice,
+    taxResult,
+    calculatingTax,
     isPaid: appointment?.status !== 'PAYMENT_PENDING'
   };
 };

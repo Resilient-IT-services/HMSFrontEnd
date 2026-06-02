@@ -13,10 +13,11 @@ export function TaxMastersPage() {
   const [masters, setMasters] = useState<TaxMasterDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newMaster, setNewMaster] = useState<TaxMasterDTO>({
     code: '',
     name: '',
-    taxType: 'GST',
+    taxType: 'CGST',
     rate: 0,
     active: true
   });
@@ -43,20 +44,47 @@ export function TaxMastersPage() {
     return () => clearTimeout(timer);
   }, [fetchMasters]);
 
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setNewMaster({ code: '', name: '', taxType: 'CGST', rate: 0, active: true });
+    setShowAddModal(true);
+  };
+
+  const handleOpenEdit = (master: TaxMasterDTO) => {
+    setEditingId(master.id!);
+    setNewMaster({ ...master });
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this tax master?')) return;
+    try {
+      const response = await taxService.deleteMaster(id);
+      if (response.success) {
+        triggerGlobalToast('Tax master deleted successfully', 'success');
+        void fetchMasters();
+      }
+    } catch (error) {
+      console.error('Failed to delete tax master', error);
+    }
+  };
+
   const handleAddMaster = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await taxService.createMaster(newMaster);
+      const response = editingId 
+        ? await taxService.updateMaster(editingId, newMaster)
+        : await taxService.createMaster(newMaster);
+
       if (response.success) {
-        triggerGlobalToast('Tax master created successfully', 'success');
+        triggerGlobalToast(`Tax master ${editingId ? 'updated' : 'created'} successfully`, 'success');
         setShowAddModal(false);
-        setNewMaster({ code: '', name: '', taxType: 'GST', rate: 0, active: true });
         void fetchMasters();
       } else {
-        triggerGlobalToast(response.message || 'Failed to create tax master', 'error');
+        triggerGlobalToast(response.message || `Failed to ${editingId ? 'update' : 'create'} tax master`, 'error');
       }
     } catch (error) {
-      console.error('Failed to create tax master', error);
+      console.error(`Failed to ${editingId ? 'update' : 'create'} tax master`, error);
       triggerGlobalToast('An error occurred', 'error');
     }
   };
@@ -69,7 +97,7 @@ export function TaxMastersPage() {
             <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Tax Masters</h1>
             <p className="text-sm text-slate-500 font-medium">Define individual tax components and rates.</p>
           </div>
-          <Button onClick={() => setShowAddModal(true)} className="bg-orange-700 hover:bg-orange-800">
+          <Button onClick={handleOpenAdd} className="bg-orange-700 hover:bg-orange-800">
             <span className="material-symbols-outlined mr-2">add</span>
             Add Tax Master
           </Button>
@@ -102,7 +130,7 @@ export function TaxMastersPage() {
                 </tr>
               ) : (
                 masters.map((master) => (
-                  <tr key={master.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={master.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <span className="text-xs font-black text-slate-700 bg-slate-100 px-2 py-1 rounded uppercase tracking-wider">
                         {master.code}
@@ -125,9 +153,20 @@ export function TaxMastersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-orange-600">
-                        <span className="material-symbols-outlined text-lg">edit</span>
-                      </button>
+                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => handleOpenEdit(master)}
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-orange-600"
+                        >
+                          <span className="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(master.id!)}
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-red-600"
+                        >
+                          <span className="material-symbols-outlined text-lg">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -140,7 +179,7 @@ export function TaxMastersPage() {
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title="Add Tax Master"
+        title={editingId ? "Edit Tax Master" : "Add Tax Master"}
         size="lg"
       >
         <form onSubmit={handleAddMaster} className="p-6 space-y-6">
@@ -162,9 +201,12 @@ export function TaxMastersPage() {
                 onChange={(e) => setNewMaster({ ...newMaster, taxType: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all"
               >
-                <option value="GST">GST</option>
+                <option value="CGST">CGST</option>
+                <option value="SGST">SGST</option>
+                <option value="IGST">IGST</option>
                 <option value="VAT">VAT</option>
                 <option value="CESS">CESS</option>
+                <option value="GST">GST (General)</option>
               </select>
             </div>
             <div className="col-span-2">

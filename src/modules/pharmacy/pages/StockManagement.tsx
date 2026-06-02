@@ -58,6 +58,21 @@ export const StockManagement = () => {
     input.click();
   };
 
+  const downloadTemplate = () => {
+    const headers = [
+      'Medicine Name', 'Batch Number', 'Expiry Date (YYYY-MM-DD)', 'Quantity', 
+      'Purchase Price', 'Selling Price', 'HSN Code', 'Supplier State', 'Tax Inclusive (Y/N)'
+    ];
+    const csvContent = "data:text/csv;charset=utf-8," + headers.join(",");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "stock_import_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   const columns: Column<PharmacyStockDTO>[] = [
     {
       header: 'Product Information',
@@ -177,7 +192,11 @@ export const StockManagement = () => {
             size="sm"
             icon="add_circle"
             className="h-8 w-8 p-0"
-            onClick={() => setSelectedMedicineForStock({ id: medicine.medicineId, name: medicine.medicineName })}
+            onClick={() => setSelectedMedicineForStock({ 
+              id: medicine.medicineId, 
+              name: medicine.medicineName,
+              hsnCode: medicine.hsnCode
+            })}
             title="Increase Stock"
           />
           <Button
@@ -214,6 +233,13 @@ export const StockManagement = () => {
             title="Stock Inventory"
             description="Real-time pharmaceutical stock monitoring and batch distribution control."
           >
+            <Button
+              variant="secondary"
+              icon="download"
+              onClick={downloadTemplate}
+            >
+              Download Template
+            </Button>
             <Button
               variant="secondary"
               icon={importing ? 'sync' : 'publish'}
@@ -316,6 +342,7 @@ export const StockManagement = () => {
         <QuickStockAddModal
           medicineId={selectedMedicineForStock.id}
           medicineName={selectedMedicineForStock.name}
+          hsnCode={selectedMedicineForStock.hsnCode}
           currentStock={medicines.find((medicine) => medicine.medicineId === selectedMedicineForStock.id)?.quantity || 0}
           onClose={() => setSelectedMedicineForStock(null)}
           onSuccess={refresh}

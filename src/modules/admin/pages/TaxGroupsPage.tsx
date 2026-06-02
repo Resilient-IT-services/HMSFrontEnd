@@ -14,6 +14,7 @@ export function TaxGroupsPage() {
   const [masters, setMasters] = useState<TaxMasterDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newGroup, setNewGroup] = useState<{
     name: string;
     active: boolean;
@@ -48,6 +49,35 @@ export function TaxGroupsPage() {
     return () => clearTimeout(timer);
   }, [fetchData]);
 
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setNewGroup({ name: '', active: true, taxIds: [] });
+    setShowAddModal(true);
+  };
+
+  const handleOpenEdit = (group: TaxGroupDTO) => {
+    setEditingId(group.id!);
+    setNewGroup({
+      name: group.name,
+      active: group.active,
+      taxIds: group.taxes.map(t => t.id!)
+    });
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this tax group?')) return;
+    try {
+      const response = await taxService.deleteGroup(id);
+      if (response.success) {
+        triggerGlobalToast('Tax group deleted successfully', 'success');
+        void fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to delete tax group', error);
+    }
+  };
+
   const handleAddGroup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newGroup.taxIds.length === 0) {
@@ -57,22 +87,25 @@ export function TaxGroupsPage() {
 
     try {
       const selectedTaxes = masters.filter(m => newGroup.taxIds.includes(m.id!));
-      const response = await taxService.createGroup({
+      const payload = {
         name: newGroup.name,
         active: newGroup.active,
         taxes: selectedTaxes
-      });
+      };
+
+      const response = editingId
+        ? await taxService.updateGroup(editingId, payload as any)
+        : await taxService.createGroup(payload as any);
 
       if (response.success) {
-        triggerGlobalToast('Tax group created successfully', 'success');
+        triggerGlobalToast(`Tax group ${editingId ? 'updated' : 'created'} successfully`, 'success');
         setShowAddModal(false);
-        setNewGroup({ name: '', active: true, taxIds: [] });
         void fetchData();
       } else {
-        triggerGlobalToast(response.message || 'Failed to create tax group', 'error');
+        triggerGlobalToast(response.message || `Failed to ${editingId ? 'update' : 'create'} tax group`, 'error');
       }
     } catch (error) {
-      console.error('Failed to create tax group', error);
+      console.error(`Failed to ${editingId ? 'update' : 'create'} tax group`, error);
       triggerGlobalToast('An error occurred', 'error');
     }
   };
@@ -94,7 +127,7 @@ export function TaxGroupsPage() {
             <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Tax Groups</h1>
             <p className="text-sm text-slate-500 font-medium">Bundle multiple taxes together (e.g. GST 18% = CGST 9% + SGST 9%).</p>
           </div>
-          <Button onClick={() => setShowAddModal(true)} className="bg-orange-700 hover:bg-orange-800">
+          <Button onClick={handleOpenAdd} className="bg-orange-700 hover:bg-orange-800">
             <span className="material-symbols-outlined mr-2">add</span>
             Add Tax Group
           </Button>
@@ -132,9 +165,20 @@ export function TaxGroupsPage() {
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     Total: {group.taxes.reduce((acc, t) => acc + t.rate, 0)}%
                   </span>
-                  <button className="text-slate-400 hover:text-orange-600 transition-colors">
-                    <span className="material-symbols-outlined text-lg">edit</span>
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={() => handleOpenEdit(group)}
+                      className="text-slate-400 hover:text-orange-600 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-lg">edit</span>
+                    </button>
+                    <button 
+                      onClick={() => handleDelete(group.id!)}
+                      className="text-slate-400 hover:text-red-600 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-lg">delete</span>
+                    </button>
+                  </div>
                 </div>
               </Card>
             ))
@@ -145,7 +189,7 @@ export function TaxGroupsPage() {
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title="Add Tax Group"
+        title={editingId ? "Edit Tax Group" : "Add Tax Group"}
         size="lg"
       >
         <form onSubmit={handleAddGroup} className="p-6 space-y-6">

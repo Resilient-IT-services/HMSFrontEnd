@@ -159,16 +159,6 @@ export function VitalsConfigPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {VITAL_TYPES.map((type) => {
-                      // Fallback mapping for legacy keys
-                      const legacyKeys: Record<string, string> = {
-                        'vitals_temperatureF': 'BODY_TEMPERATURE',
-                        'vitals_systolic': 'SYSTOLIC_BP',
-                        'vitals_diastolic': 'DIASTOLIC_BP',
-                        'vitals_heartRate': 'HEART_RATE',
-                        'vitals_oxygenLevel': 'OXYGEN_LEVEL',
-                        'vitals_weight': 'WEIGHT'
-                      };
-                      
                       const range = settings[type.value] || settings[legacyKeys[type.value]];
                       return (
                         <tr 

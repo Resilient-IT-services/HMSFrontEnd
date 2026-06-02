@@ -1,7 +1,11 @@
 'use client';
 
-import { TaxGroupsPage } from '@/modules/admin/pages/TaxGroupsPage';
+import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Page() {
-  return <TaxGroupsPage />;
+  useEffect(() => {
+    redirect('/settings/taxation/groups');
+  }, []);
+  return null;
 }

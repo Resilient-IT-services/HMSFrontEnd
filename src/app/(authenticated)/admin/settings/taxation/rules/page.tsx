@@ -1,7 +1,11 @@
 'use client';
 
-import { TaxRulesPage } from '@/modules/admin/pages/TaxRulesPage';
+import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Page() {
-  return <TaxRulesPage />;
+  useEffect(() => {
+    redirect('/settings/taxation/rules');
+  }, []);
+  return null;
 }

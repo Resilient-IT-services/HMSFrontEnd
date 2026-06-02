@@ -583,6 +583,9 @@ export interface StockRequest {
   sellingPrice: number;
   reorderLevel?: number;
   supplier?: string;
+  supplierState?: string;
+  taxInclusive?: boolean;
+  hsnCode?: string;
   gst?: number;
   rackLocation?: string;
 }
@@ -591,6 +594,9 @@ export interface PharmacySaleItem {
   medicineId?: string;
   medicineBatchId?: string;
   quantity: number;
+  unitPrice?: number;
+  discountAmount?: number;
+  taxAmount?: number;
 }
 
 export interface PharmacySaleRequest {
@@ -802,6 +808,7 @@ export interface TaxCalculationRequest {
   invoiceDate?: string;
   patientCategory?: string;
   insuranceProvider?: string;
+  isTaxInclusive?: boolean;
 }
 
 export interface TaxCalculationResult {

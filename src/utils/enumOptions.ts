@@ -167,6 +167,15 @@ export const AUDIT_ENTITY_NAME_OPTIONS: Option<AuditEntityName>[] = [
   { value: 'USER_CONTRACT', label: 'User Contract' }
 ];
 
+export const INDIAN_STATES = [
+  'Andaman and Nicobar Islands', 'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar',
+  'Chandigarh', 'Chhattisgarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Goa',
+  'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jammu and Kashmir', 'Jharkhand', 'Karnataka',
+  'Kerala', 'Ladakh', 'Lakshadweep', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya',
+  'Mizoram', 'Nagaland', 'Odisha', 'Puducherry', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu',
+  'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal'
+];
+
 export const VITAL_TYPE_OPTIONS: Option<VitalRangeConfigDTO['vitalType']>[] = [
   { value: 'BODY_TEMPERATURE', label: 'Body Temperature' },
   { value: 'SYSTOLIC_BP', label: 'Systolic BP' },

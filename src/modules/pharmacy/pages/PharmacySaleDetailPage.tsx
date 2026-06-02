@@ -211,12 +211,38 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
                                             <span>Total Discount:</span>
                                             <span>-{formatCurrency(totalDiscount)}</span>
                                         </div>
+                                        {sale.taxAmount !== undefined && sale.taxAmount > 0 && (
+                                            <div className="flex justify-between text-slate-600 font-medium">
+                                                <span>Total Tax:</span>
+                                                <span>{formatCurrency(sale.taxAmount)}</span>
+                                            </div>
+                                        )}
                                         <div className="border-t-2 border-double border-slate-300 pt-2 flex justify-between items-center text-slate-900">
                                             <span className="font-bold uppercase tracking-wider text-[10px]">Grand Total:</span>
                                             <span className="text-xl font-black tracking-tight">{formatCurrency(sale.totalAmount)}</span>
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Tax Breakdown (Optional detailed view) */}
+                                {sale.taxAmount !== undefined && sale.taxAmount > 0 && (
+                                    <div className="mt-2 flex justify-end">
+                                        <div className="flex flex-wrap gap-1 justify-end max-w-xs">
+                                            {/* Collect all unique tax components across all items */}
+                                            {Array.from(new Set(sale.items.flatMap(item => item.appliedTaxes || []).map(t => t.taxName))).map(taxName => {
+                                                const totalTaxForName = sale.items.reduce((acc, item) => {
+                                                    const tax = item.appliedTaxes?.find(t => t.taxName === taxName);
+                                                    return acc + (tax?.taxAmount || 0);
+                                                }, 0);
+                                                return (
+                                                    <span key={taxName} className="text-[8px] font-bold text-slate-400 uppercase">
+                                                        {taxName}: {formatCurrency(totalTaxForName)}
+                                                    </span>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Terms & Footer */}
                                 <div className="mt-8 pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 space-y-1 font-medium print:mt-12">

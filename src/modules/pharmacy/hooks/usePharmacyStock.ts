@@ -39,7 +39,7 @@ export const usePharmacyStock = () => {
   const [sort, setSort] = useState<string | undefined>();
   const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
   const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
-  const [selectedMedicineForStock, setSelectedMedicineForStock] = useState<{ id: string; name: string } | null>(null);
+  const [selectedMedicineForStock, setSelectedMedicineForStock] = useState<{ id: string; name: string; taxPercentage?: number; hsnCode?: string } | null>(null);
   const [selectedMedicineForView, setSelectedMedicineForView] = useState<{ id: string; name: string } | null>(null);
 
   const fetchInventory = useCallback(async () => {

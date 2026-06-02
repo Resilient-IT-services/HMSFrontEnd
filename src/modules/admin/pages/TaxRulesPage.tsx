@@ -14,6 +14,7 @@ export function TaxRulesPage() {
   const [groups, setGroups] = useState<TaxGroupDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [newRule, setNewRule] = useState<TaxRuleDTO>({
     itemType: 'MEDICINE',
     hsnCode: '',
@@ -46,9 +47,30 @@ export function TaxRulesPage() {
     return () => clearTimeout(timer);
   }, [fetchData]);
 
-  const sortedRules = React.useMemo(() => {
-    return rules.toSorted((a, b) => (a.priority || 0) - (b.priority || 0));
-  }, [rules]);
+  const handleOpenAdd = () => {
+    setEditingId(null);
+    setNewRule({ itemType: 'MEDICINE', hsnCode: '', sacCode: '', taxGroupId: '', priority: 1 });
+    setShowAddModal(true);
+  };
+
+  const handleOpenEdit = (rule: TaxRuleDTO) => {
+    setEditingId(rule.id!);
+    setNewRule({ ...rule });
+    setShowAddModal(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this tax rule?')) return;
+    try {
+      const response = await taxService.deleteRule(id);
+      if (response.success) {
+        triggerGlobalToast('Tax rule deleted successfully', 'success');
+        void fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to delete tax rule', error);
+    }
+  };
 
   const handleAddRule = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,17 +80,19 @@ export function TaxRulesPage() {
     }
 
     try {
-      const response = await taxService.createRule(newRule);
+      const response = editingId
+        ? await taxService.updateRule(editingId, newRule)
+        : await taxService.createRule(newRule);
+
       if (response.success) {
-        triggerGlobalToast('Tax rule created successfully', 'success');
+        triggerGlobalToast(`Tax rule ${editingId ? 'updated' : 'created'} successfully`, 'success');
         setShowAddModal(false);
-        setNewRule({ itemType: 'MEDICINE', hsnCode: '', sacCode: '', taxGroupId: '', priority: 1 });
         void fetchData();
       } else {
-        triggerGlobalToast(response.message || 'Failed to create tax rule', 'error');
+        triggerGlobalToast(response.message || `Failed to ${editingId ? 'update' : 'create'} tax rule`, 'error');
       }
     } catch (error) {
-      console.error('Failed to create tax rule', error);
+      console.error(`Failed to ${editingId ? 'update' : 'create'} tax rule`, error);
       triggerGlobalToast('An error occurred', 'error');
     }
   };
@@ -81,7 +105,7 @@ export function TaxRulesPage() {
             <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">Tax Rules</h1>
             <p className="text-sm text-slate-500 font-medium">Map items to tax groups using Item Type, HSN, or SAC codes.</p>
           </div>
-          <Button onClick={() => setShowAddModal(true)} className="bg-orange-700 hover:bg-orange-800">
+          <Button onClick={handleOpenAdd} className="bg-orange-700 hover:bg-orange-800">
             <span className="material-symbols-outlined mr-2">add</span>
             Add Tax Rule
           </Button>
@@ -113,7 +137,7 @@ export function TaxRulesPage() {
                 </tr>
               ) : (
                 sortedRules.map((rule) => (
-                  <tr key={rule.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={rule.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <span className="text-sm font-black text-slate-400">{rule.priority}</span>
                     </td>
@@ -129,9 +153,20 @@ export function TaxRulesPage() {
                       <span className="text-sm font-bold text-orange-700">{rule.taxGroupName || groups.find(g => g.id === rule.taxGroupId)?.name || 'Unknown Group'}</span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-orange-600">
-                        <span className="material-symbols-outlined text-lg">delete</span>
-                      </button>
+                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => handleOpenEdit(rule)}
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-orange-600"
+                        >
+                          <span className="material-symbols-outlined text-lg">edit</span>
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(rule.id!)}
+                          className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-red-600"
+                        >
+                          <span className="material-symbols-outlined text-lg">delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -144,7 +179,7 @@ export function TaxRulesPage() {
       <Modal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        title="Add Tax Rule"
+        title={editingId ? "Edit Tax Rule" : "Add Tax Rule"}
         size="lg"
       >
         <form onSubmit={handleAddRule} className="p-6 space-y-6">

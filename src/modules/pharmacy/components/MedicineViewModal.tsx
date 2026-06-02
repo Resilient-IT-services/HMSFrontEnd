@@ -136,6 +136,8 @@ const MedicineViewModal: React.FC<MedicineViewModalProps> = ({
                         { label: 'Manufacturer', value: medicine.manufacturer || 'N/A' },
                         { label: 'Strength', value: medicine.strength || 'N/A' },
                         { label: 'Form/Category', value: medicine.form || medicine.category || 'General' },
+                        { label: 'HSN Code', value: medicine.hsnCode || 'N/A' },
+                        { label: 'Tax Percentage', value: medicine.taxPercentage ? `${medicine.taxPercentage}%` : 'N/A' },
                       ].map((item, i) => (
                         <div key={i} className="bg-white p-4">
                           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.label}</p>
