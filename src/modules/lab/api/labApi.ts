@@ -24,6 +24,27 @@ export interface LabTestDTO {
     active: boolean;
 }
 
+export interface LabTestParameterDTO {
+    id?: string;
+    testId: string;
+    parameterName: string;
+    unit?: string;
+    displayOrder?: number;
+}
+
+export interface LabReferenceRangeDTO {
+    id?: string;
+    parameterId: string;
+    gender: string;
+    minAge?: number;
+    maxAge?: number;
+    ageUnit: string;
+    minValue?: number;
+    maxValue?: number;
+    criticalMin?: number;
+    criticalMax?: number;
+}
+
 export const labApi = {
     // Departments
     getDepartments: async () => {
@@ -58,6 +79,42 @@ export const labApi = {
     },
     deleteTest: async (id: string) => {
         const response = await apiClient.delete<ApiResponse<void>>(`/lab/tests/${id}`);
+        return response.data;
+    },
+
+    // Parameters
+    getParametersByTest: async (testId: string) => {
+        const response = await apiClient.get<ApiResponse<LabTestParameterDTO[]>>(`/lab/parameters/test/${testId}`);
+        return response.data;
+    },
+    createParameter: async (data: LabTestParameterDTO) => {
+        const response = await apiClient.post<ApiResponse<LabTestParameterDTO>>('/lab/parameters', data);
+        return response.data;
+    },
+    updateParameter: async (id: string, data: LabTestParameterDTO) => {
+        const response = await apiClient.put<ApiResponse<LabTestParameterDTO>>(`/lab/parameters/${id}`, data);
+        return response.data;
+    },
+    deleteParameter: async (id: string) => {
+        const response = await apiClient.delete<ApiResponse<void>>(`/lab/parameters/${id}`);
+        return response.data;
+    },
+
+    // Ranges
+    getRangesByParameter: async (parameterId: string) => {
+        const response = await apiClient.get<ApiResponse<LabReferenceRangeDTO[]>>(`/lab/parameters/${parameterId}/ranges`);
+        return response.data;
+    },
+    createRange: async (data: LabReferenceRangeDTO) => {
+        const response = await apiClient.post<ApiResponse<LabReferenceRangeDTO>>('/lab/parameters/ranges', data);
+        return response.data;
+    },
+    updateRange: async (id: string, data: LabReferenceRangeDTO) => {
+        const response = await apiClient.put<ApiResponse<LabReferenceRangeDTO>>(`/lab/parameters/ranges/${id}`, data);
+        return response.data;
+    },
+    deleteRange: async (id: string) => {
+        const response = await apiClient.delete<ApiResponse<void>>(`/lab/parameters/ranges/${id}`);
         return response.data;
     }
 };

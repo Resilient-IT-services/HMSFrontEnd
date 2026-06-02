@@ -129,6 +129,15 @@ export function LabTestsPage() {
                     <td className="px-6 py-4 font-bold text-slate-600 text-xs uppercase">{test.departmentName}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            icon="settings" 
+                            className="h-8 p-1 text-[10px] font-black uppercase tracking-tighter"
+                            href={`/settings/lab/tests/${test.id}/parameters`}
+                        >
+                            Params
+                        </Button>
                         <button onClick={() => handleOpenEdit(test)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-orange-600"><span className="material-symbols-outlined text-lg">edit</span></button>
                         <button onClick={() => handleDelete(test.id!)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-red-600"><span className="material-symbols-outlined text-lg">delete</span></button>
                       </div>
