@@ -157,7 +157,11 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
                                     <div className="space-y-1">
                                         <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Patient Details</p>
                                         <p className="font-black text-slate-800 text-sm uppercase">{sale.customerName || 'Walk-in Customer'}</p>
-                                        <p className="text-slate-600 font-medium">Contact: {sale.customerPhone || 'N/A'}</p>
+                                        {sale.patientCode ? (
+                                            <p className="text-slate-600 font-medium">Patient ID: <span className="font-bold text-slate-900">{sale.patientCode}</span></p>
+                                        ) : (
+                                            <p className="text-slate-600 font-medium">Contact: {sale.customerPhone || 'N/A'}</p>
+                                        )}
                                     </div>
                                     <div className="text-right space-y-1">
                                         <p className="text-slate-400 font-bold uppercase tracking-wider text-[10px]">Meta Info</p>

@@ -8,6 +8,7 @@ import { catalogService } from '@/services/catalogService';
 import { HospitalResponse } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { HOSPITAL_STATUS_OPTIONS } from '@/utils/enumOptions';
+import { INDIAN_STATES, INDIAN_STATES_CITIES } from '@/utils/indianStates';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { Button } from '@/components/ui/Button';
 
@@ -248,44 +249,62 @@ export function EditHospital({ id }: { id: string }) {
                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                           />
                         </div>
-                        <div>
-                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">City *</label>
-                          <input 
-                            className={`form-input font-bold ${errors.city ? 'border-red-500' : ''}`}
-                            type="text" 
-                            value={formData.city}
-                            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            required
-                          />
-                          {errors.city && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.city}</p>}
-                        </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">State</label>
-                            <input 
-                              className="form-input font-bold" 
-                              type="text" 
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">State *</label>
+                            <select 
+                              className={`form-input font-bold ${errors.state ? 'border-red-500' : ''}`}
                               value={formData.state}
-                              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Pincode *</label>
-                            <input 
-                              className={`form-input font-bold ${errors.pincode ? 'border-red-500' : ''}`}
-                              type="text" 
-                              value={formData.pincode}
-                              maxLength={6}
                               onChange={(e) => {
-                                const val = e.target.value;
-                                if (val === '' || (/^\d+$/.test(val) && val.length <= 6)) {
-                                  setFormData({ ...formData, pincode: val });
-                                }
+                                const newState = e.target.value;
+                                setFormData({ ...formData, state: newState, city: '' });
+                                if (errors.state) setErrors(prev => ({ ...prev, state: '' }));
                               }}
                               required
-                            />
-                            {errors.pincode && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.pincode}</p>}
+                            >
+                              <option value="">Select State</option>
+                              {INDIAN_STATES.map(state => (
+                                <option key={state} value={state}>{state}</option>
+                              ))}
+                            </select>
+                            {errors.state && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.state}</p>}
                           </div>
+                          <div>
+                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">City *</label>
+                            <select 
+                              className={`form-input font-bold ${errors.city ? 'border-red-500' : ''}`}
+                              value={formData.city}
+                              onChange={(e) => {
+                                setFormData({ ...formData, city: e.target.value });
+                                if (errors.city) setErrors(prev => ({ ...prev, city: '' }));
+                              }}
+                              disabled={!formData.state}
+                              required
+                            >
+                              <option value="">Select City</option>
+                              {formData.state && INDIAN_STATES_CITIES[formData.state]?.map(city => (
+                                <option key={city} value={city}>{city}</option>
+                              ))}
+                            </select>
+                            {errors.city && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.city}</p>}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Pincode *</label>
+                          <input 
+                            className={`form-input font-bold ${errors.pincode ? 'border-red-500' : ''}`}
+                            type="text" 
+                            value={formData.pincode}
+                            maxLength={6}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '' || (/^\d+$/.test(val) && val.length <= 6)) {
+                                setFormData({ ...formData, pincode: val });
+                              }
+                            }}
+                            required
+                          />
+                          {errors.pincode && <p className="text-red-500 text-[10px] font-bold mt-1 uppercase">{errors.pincode}</p>}
                         </div>
                       </div>
                     </div>

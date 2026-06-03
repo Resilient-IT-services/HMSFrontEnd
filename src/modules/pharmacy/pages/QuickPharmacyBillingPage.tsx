@@ -573,7 +573,10 @@ export default function QuickPharmacyBillingPage() {
     }
   };
 
-  const renderHeader = () => (
+  const renderHeader = () => {
+    const isVisitLocked = !!(searchParams.get('prescriptionId') || searchParams.get('patientId'));
+
+    return (
       <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-3 mb-4 shrink-0">
         <div className="min-w-0">
           <h1 className="text-xl font-black text-slate-900 uppercase tracking-tight truncate">Quick Patient Visit Pharmacy Billing</h1>
@@ -600,14 +603,21 @@ export default function QuickPharmacyBillingPage() {
               <button
                   key={option.value}
                   onClick={() => setSaleType(option.value)}
-                  className={`flex-1 xl:flex-none px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${saleType === option.value ? 'bg-white shadow-md text-orange-700' : 'text-slate-400 hover:text-slate-600'}`}
+                  disabled={isVisitLocked && option.value === 'WALKIN'}
+                  className={`flex-1 xl:flex-none px-4 py-1.5 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${
+                      saleType === option.value 
+                          ? 'bg-white shadow-md text-orange-700' 
+                          : 'text-slate-400 hover:text-slate-600'
+                  } ${isVisitLocked && option.value === 'WALKIN' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title={isVisitLocked && option.value === 'WALKIN' ? "Walk-in mode is disabled when dispensing for a specific visit" : ""}
               >
                 {option.label}
               </button>
           ))}
         </div>
       </div>
-  );
+    );
+  };
 
   return (
       <MainLayout title="Pharmacy Billing" hideTitle>
