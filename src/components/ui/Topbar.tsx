@@ -8,6 +8,7 @@ import GlobalSearch from './GlobalSearch';
 import { cn } from '@/lib/cn';
 
 import { useLayout } from '@/context/LayoutContext';
+import HospitalSelector from './HospitalSelector';
 
 const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
   const { headerActions, isCompressed, toggleCompressed } = useLayout();
@@ -26,19 +27,11 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleHospitalSwitch = (hospitalId: string) => {
-    dispatch(setCurrentHospitalId(hospitalId));
-    setIsProfileOpen(false);
-    globalThis.location.reload();
-  };
-
   const handleRoleSwitch = (role: Role) => {
     dispatch(setActiveRole(role));
     setIsProfileOpen(false);
     globalThis.location.reload();
   };
-  
-  const currentHospitalName = user?.memberships.find(h => h.hospitalId === user.currentHospitalId)?.hospitalName || 'System Level';
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
 
@@ -84,12 +77,12 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
         </div>
         <div className="hidden md:flex items-center h-full px-6">
           <GlobalSearch />
-          <div className="h-8 w-px bg-gray-200 mx-6"></div>
-          <h2 className="font-headline-sm text-gray-700 uppercase tracking-widest text-[10px] font-black max-w-[150px] lg:max-w-[300px] truncate">{currentHospitalName}</h2>
         </div>
       </div>
 
       <div className="flex items-center gap-2 lg:gap-4 px-4 lg:px-6">
+        <HospitalSelector />
+
         {headerActions && (
           <div className="hidden sm:flex items-center gap-3">
             {headerActions}
@@ -154,25 +147,6 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
                     )}
                 </div>
             }
-                {user?.memberships && user.memberships.length > 1 && (
-                  <div className="px-2 py-1 border-t border-[var(--border)] mt-1">
-                    <p className="px-3 py-2 text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Hospital</p>
-                    {user.memberships.map(h => (
-                      <button
-                        key={h.hospitalId}
-                        onClick={() => handleHospitalSwitch(h.hospitalId)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${user.currentHospitalId === h.hospitalId ? 'text-[var(--primary)]' : 'text-[var(--text-primary)]'}`}
-                      >
-                        <span className="material-symbols-outlined text-xl">apartment</span>
-                        <div className="text-left">
-                          <p className="text-sm font-bold leading-none">{h.hospitalName}</p>
-                          <p className="text-[10px] text-[var(--text-secondary)] mt-1">{h.hospitalCode}</p>
-                        </div>
-                        {user.currentHospitalId === h.hospitalId && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
                 <div className="p-2 border-t border-[var(--border)] mt-1">
                   <button

@@ -11,6 +11,7 @@ import { getFilteredMenuItems } from '@/lib/navigation';
 import { useLayout } from '@/context/LayoutContext';
 import { cn } from '@/lib/cn';
 import HelpDeskModal from '@/components/HelpDeskModal';
+import HospitalSelector from './HospitalSelector';
 
 const Sidebar = () => {
   const pathname = usePathname();
