@@ -14,6 +14,7 @@ import { formatToken } from '@/utils/tokenHelper';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { Button } from '@/components/ui/Button';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useClickOutside } from '@/hooks/useClickOutside';
 import { PageSurface } from '@/components/ui/PageSurface';
 
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
@@ -76,15 +77,7 @@ const LabTestSearchInput = ({
     void fetchTests();
   }, [debouncedSearch]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(wrapperRef, () => setShowResults(false));
 
   return (
     <div className="relative w-full" ref={wrapperRef}>
@@ -180,15 +173,7 @@ const MedicineSearchInput = ({
     void fetchMedicines();
   }, [debouncedSearch]);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-        setShowResults(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(wrapperRef, () => setShowResults(false));
 
   return (
     <div className="relative w-full" ref={wrapperRef}>

@@ -57,7 +57,9 @@ export function LabTestParametersPage({ testId }: Props) {
     }, [testId]);
 
     useEffect(() => {
-        fetchParameters();
+        Promise.resolve().then(() => {
+            fetchParameters();
+        });
     }, [fetchParameters]);
 
     const handleOpenAddParam = () => {

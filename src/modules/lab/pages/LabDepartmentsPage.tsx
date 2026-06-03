@@ -33,7 +33,9 @@ export function LabDepartmentsPage() {
   }, []);
 
   useEffect(() => {
-    fetchDepartments();
+    Promise.resolve().then(() => {
+      fetchDepartments();
+    });
   }, [fetchDepartments]);
 
   const handleOpenAdd = () => {

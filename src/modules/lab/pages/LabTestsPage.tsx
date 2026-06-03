@@ -40,7 +40,9 @@ export function LabTestsPage() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    Promise.resolve().then(() => {
+      fetchData();
+    });
   }, [fetchData]);
 
   const handleOpenAdd = () => {

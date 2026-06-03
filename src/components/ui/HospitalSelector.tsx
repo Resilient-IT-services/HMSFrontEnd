@@ -19,7 +19,7 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({ className }) => {
   const [loading, setLoading] = useState(false);
 
   // Logic to highlight if hospital context is missing when on hospital-specific pages
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const pathname = globalThis.window === undefined ? '' : globalThis.location.pathname;
   const needsContext = pathname.includes('/lab/') || 
                        pathname.includes('/settings/lab') || 
                        pathname.includes('/reports') ||
