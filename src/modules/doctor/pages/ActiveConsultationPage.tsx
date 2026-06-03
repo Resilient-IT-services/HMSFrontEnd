@@ -274,6 +274,7 @@ export const ActiveConsultationPage = () => {
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [investigations, setInvestigations] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
 
   useEffect(() => {
     const fetchAppointmentData = async () => {
@@ -371,6 +372,22 @@ export const ActiveConsultationPage = () => {
 
   const saveConsultation = async (silent = false) => {
     if (!appointmentId || !appointment) return false;
+
+    // Validate mandatory prescription fields if not silent
+    if (!silent) {
+      const medicineItems = prescriptions.filter(p => p.medicine);
+      const hasIncomplete = medicineItems.some(p => 
+        (!p.freqM && !p.freqA && !p.freqN) || 
+        (!p.duration || p.duration <= 0)
+      );
+
+      if (hasIncomplete) {
+        setShowValidation(true);
+        triggerGlobalToast('Frequency and duration are mandatory for all medications', 'error');
+        return false;
+      }
+    }
+
     try {
       const updateData = {
         patientId: appointment.patientId,
@@ -409,6 +426,19 @@ export const ActiveConsultationPage = () => {
   };
 
   const handleComplete = async () => {
+    // Validate mandatory prescription fields
+    const medicineItems = prescriptions.filter(p => p.medicine);
+    const hasIncomplete = medicineItems.some(p => 
+      (!p.freqM && !p.freqA && !p.freqN) || 
+      (!p.duration || p.duration <= 0)
+    );
+
+    if (hasIncomplete) {
+      setShowValidation(true);
+      triggerGlobalToast('Frequency and duration are mandatory for all medications', 'error');
+      return;
+    }
+
     const saved = await saveConsultation(true);
     if (!saved) return;
     try {
@@ -542,59 +572,64 @@ export const ActiveConsultationPage = () => {
                       <div className="col-span-1"></div>
                     </div>
 
-                    {prescriptions.map((p) => (
-                      <div key={p.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/50 p-2 md:p-3 rounded-2xl border border-slate-100 hover:border-orange-200 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative">
-                        <div className="col-span-12 md:col-span-5">
-                          <MedicineSearchInput value={p.medicine} onChange={(val) => updatePrescriptionRow(p.id, 'medicine', val)} onSelect={(med) => selectMedicine(p.id, med)} />
-                          {p.medicine && (
-                             <div className="mt-1 flex items-center gap-1.5 px-1">
-                                <span className={`w-1.5 h-1.5 rounded-full ${p.inStock ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
-                                <span className={`text-[9px] font-black uppercase ${p.inStock ? 'text-emerald-600' : 'text-red-600'}`}>
-                                  {p.inStock ? 'Available' : 'Out of Stock'}
-                                </span>
-                             </div>
-                          )}
+                    {prescriptions.map((p) => {
+                      const hasFreq = p.freqM || p.freqA || p.freqN;
+                      const hasDuration = p.duration && p.duration > 0;
+                      
+                      return (
+                        <div key={p.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/50 p-2 md:p-3 rounded-2xl border border-slate-100 hover:border-orange-200 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative">
+                          <div className="col-span-12 md:col-span-5">
+                            <MedicineSearchInput value={p.medicine} onChange={(val) => updatePrescriptionRow(p.id, 'medicine', val)} onSelect={(med) => selectMedicine(p.id, med)} />
+                            {p.medicine && (
+                               <div className="mt-1 flex items-center gap-1.5 px-1">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${p.inStock ? 'bg-emerald-500' : 'bg-red-500'}`}></span>
+                                  <span className={`text-[9px] font-black uppercase ${p.inStock ? 'text-emerald-600' : 'text-red-600'}`}>
+                                    {p.inStock ? 'Available' : 'Out of Stock'}
+                                  </span>
+                               </div>
+                            )}
+                          </div>
+                          <div className={`col-span-8 md:col-span-4 flex items-center gap-1 bg-white border ${showValidation && p.medicine && !hasFreq ? 'border-red-500 animate-pulse' : 'border-slate-200'} rounded-xl p-1 shadow-sm transition-colors`}>
+                            {[ { l: 'MORNING', f: 'freqM' }, { l: 'AFTERNOON', f: 'freqA' }, { l: 'NIGHT', f: 'freqN' } ].map(time => (
+                              <div key={time.f} className="flex flex-col items-center flex-1 border-r last:border-0 border-slate-100 py-1">
+                                <span className="text-[7px] font-black text-slate-400 mb-0.5">{time.l}</span>
+                                <input
+                                  type="text"
+                                  className="w-full text-center text-sm font-black text-slate-900 outline-none bg-transparent h-7 focus:text-orange-600 transition-colors"
+                                  placeholder="-"
+                                  value={p[time.f]}
+                                  onChange={(e) => updatePrescriptionRow(p.id, time.f, e.target.value)}
+                                  maxLength={1}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                          <div className="col-span-3 md:col-span-2 flex items-center gap-1">
+                            <input
+                              type="number"
+                              className={`w-12 sm:w-16 px-2 py-2 bg-white border ${showValidation && p.medicine && !hasDuration ? 'border-red-500 animate-pulse' : 'border-slate-200'} rounded-lg text-xs font-black text-slate-900 outline-none focus:border-slate-400 text-center shadow-sm transition-colors`}
+                              placeholder="0"
+                              value={p.duration || ''}
+                              onChange={(e) => updatePrescriptionRow(p.id, 'duration', Number.parseInt(e.target.value) || 0)}
+                            />
+                            <select
+                              className="flex-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 h-8 outline-none px-1"
+                              value={p.durationUnit}
+                              onChange={(e) => updatePrescriptionRow(p.id, 'durationUnit', e.target.value)}
+                            >
+                              <option value="days">Days</option>
+                              <option value="weeks">Weeks</option>
+                              <option value="months">Months</option>
+                            </select>
+                          </div>
+                          <div className="col-span-1 flex justify-end">
+                            <button onClick={() => removePrescriptionRow(p.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all md:opacity-0 group-hover:opacity-100">
+                              <span className="material-symbols-outlined text-lg">delete_sweep</span>
+                            </button>
+                          </div>
                         </div>
-                        <div className="col-span-8 md:col-span-4 flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
-                          {[ { l: 'MORNING', f: 'freqM' }, { l: 'AFTERNOON', f: 'freqA' }, { l: 'NIGHT', f: 'freqN' } ].map(time => (
-                            <div key={time.f} className="flex flex-col items-center flex-1 border-r last:border-0 border-slate-100 py-1">
-                              <span className="text-[7px] font-black text-slate-400 mb-0.5">{time.l}</span>
-                              <input
-                                type="text"
-                                className="w-full text-center text-sm font-black text-slate-900 outline-none bg-transparent h-7 focus:text-orange-600 transition-colors"
-                                placeholder="-"
-                                value={p[time.f]}
-                                onChange={(e) => updatePrescriptionRow(p.id, time.f, e.target.value)}
-                                maxLength={1}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                        <div className="col-span-3 md:col-span-2 flex items-center gap-1">
-                          <input
-                            type="number"
-                            className="w-12 sm:w-16 px-2 py-2 bg-white border border-slate-200 rounded-lg text-xs font-black text-slate-900 outline-none focus:border-slate-400 text-center shadow-sm"
-                            placeholder="0"
-                            value={p.duration || ''}
-                            onChange={(e) => updatePrescriptionRow(p.id, 'duration', Number.parseInt(e.target.value) || 0)}
-                          />
-                          <select
-                            className="flex-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 h-8 outline-none px-1"
-                            value={p.durationUnit}
-                            onChange={(e) => updatePrescriptionRow(p.id, 'durationUnit', e.target.value)}
-                          >
-                            <option value="days">Days</option>
-                            <option value="weeks">Weeks</option>
-                            <option value="months">Months</option>
-                          </select>
-                        </div>
-                        <div className="col-span-1 flex justify-end">
-                          <button onClick={() => removePrescriptionRow(p.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all md:opacity-0 group-hover:opacity-100">
-                            <span className="material-symbols-outlined text-lg">delete_sweep</span>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {prescriptions.length === 0 && (
                       <div className="py-24 text-center text-slate-300 border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
                         <span className="material-symbols-outlined text-5xl mb-3 opacity-20">medical_services</span>
