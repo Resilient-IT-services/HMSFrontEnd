@@ -142,5 +142,9 @@ export const labApi = {
     saveResults: async (data: { orderTestId: string, results: any[] }) => {
         const response = await apiClient.post<ApiResponse<void>>('/lab/orders/results', data);
         return response.data;
+    },
+    getReportPreview: async (orderId: string) => {
+        const response = await apiClient.get<ApiResponse<any>>(`/lab/reports/preview/${orderId}`);
+        return response.data;
     }
 };

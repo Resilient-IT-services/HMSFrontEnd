@@ -7,13 +7,17 @@ import { labApi } from '../api/labApi';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/cn';
 import { LabResultEntryModal } from '../components/LabResultEntryModal';
+import { LabReportPreviewModal } from '../components/LabReportPreviewModal';
 
 export const LabQueuePage = () => {
     const [queue, setQueue] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTest, setSelectedTest] = useState<any>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
     const fetchQueue = async () => {
         setLoading(true);
@@ -38,7 +42,12 @@ export const LabQueuePage = () => {
             testCode: test.testCode,
             patientName: order.patientName
         });
-        setIsModalOpen(true);
+        setIsResultModalOpen(true);
+    };
+
+    const handleViewReport = (orderId: string) => {
+        setSelectedOrderId(orderId);
+        setIsReportModalOpen(true);
     };
 
     useEffect(() => {
@@ -81,10 +90,15 @@ export const LabQueuePage = () => {
                                                 <div className="flex items-center gap-3 text-slate-400 text-[10px] font-bold mt-2 uppercase tracking-tight">
                                                     <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">calendar_today</span>{new Date(order.orderedAt).toLocaleString()}</span>
                                                     <span>•</span>
-                                                    <span className="text-orange-600 font-black">{order.status}</span>
+                                                    <span className={cn("font-black", order.status === 'COMPLETED' ? 'text-emerald-600' : 'text-orange-600')}>{order.status}</span>
                                                 </div>
                                             </div>
                                         </div>
+                                        {order.status === 'COMPLETED' && (
+                                            <div className="flex items-center gap-2">
+                                                <Button size="sm" icon="description" variant="secondary" className="font-black text-[10px]" onClick={() => handleViewReport(order.id)}>View Report</Button>
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="bg-slate-50/50 border-t border-slate-100 p-4">
                                         <div className="flex flex-wrap gap-2">
@@ -113,10 +127,18 @@ export const LabQueuePage = () => {
 
                 {selectedTest && (
                     <LabResultEntryModal 
-                        isOpen={isModalOpen}
-                        onClose={() => { setIsModalOpen(false); setSelectedTest(null); }}
+                        isOpen={isResultModalOpen}
+                        onClose={() => { setIsResultModalOpen(false); setSelectedTest(null); }}
                         onSuccess={fetchQueue}
                         orderTest={selectedTest}
+                    />
+                )}
+
+                {selectedOrderId && (
+                    <LabReportPreviewModal 
+                        isOpen={isReportModalOpen}
+                        onClose={() => { setIsReportModalOpen(false); setSelectedOrderId(null); }}
+                        orderId={selectedOrderId}
                     />
                 )}
             </PageSurface>
