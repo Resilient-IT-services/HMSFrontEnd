@@ -976,12 +976,22 @@ export interface Department {
   active: boolean;
 }
 
+export interface LabDepartmentDTO {
+  id: string;
+  hospitalId?: string;
+  code?: string;
+  name: string;
+  active: boolean;
+}
+
 export interface LaboratoryTestDTO {
   id?: string;
   testCode: string;
   testName: string;
   shortName?: string;
   aliasName?: string;
+  departmentId?: string;
+  departmentName?: string;
   hsnCode?: string;
   sacCode?: string;
   active: boolean;

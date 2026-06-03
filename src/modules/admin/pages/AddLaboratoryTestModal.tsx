@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { laboratoryApi } from '@/services/laboratoryService';
-import { LaboratoryTestDTO } from '@/types/api';
+import { LaboratoryTestDTO, LabDepartmentDTO } from '@/types/api';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
 
@@ -15,11 +15,13 @@ interface AddLaboratoryTestModalProps {
 
 const AddLaboratoryTestModal: React.FC<AddLaboratoryTestModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState<LabDepartmentDTO[]>([]);
   const [formData, setFormData] = useState<LaboratoryTestDTO>({
     testCode: '',
     testName: '',
     shortName: '',
     aliasName: '',
+    departmentId: '',
     hsnCode: '',
     sacCode: '9993', // Default SAC for medical services
     active: true,
@@ -27,16 +29,34 @@ const AddLaboratoryTestModal: React.FC<AddLaboratoryTestModalProps> = ({ isOpen,
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  useEffect(() => {
+    if (isOpen) {
+      const fetchDepartments = async () => {
+        try {
+          const res = await laboratoryApi.getDepartments();
+          if (res.success && res.data) {
+            setDepartments(res.data.filter(d => d.active));
+          }
+        } catch (error) {
+          console.error('Failed to fetch departments:', error);
+          triggerGlobalToast('Failed to load departments', 'error');
+        }
+      };
+      fetchDepartments();
+    }
+  }, [isOpen]);
+
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.testCode?.trim()) newErrors.testCode = 'Test Code is required';
     if (!formData.testName?.trim()) newErrors.testName = 'Test Name is required';
+    if (!formData.departmentId) newErrors.departmentId = 'Department is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
@@ -74,17 +94,35 @@ const AddLaboratoryTestModal: React.FC<AddLaboratoryTestModalProps> = ({ isOpen,
     >
       <form onSubmit={handleSubmit} className="p-6 space-y-6">
         <div className="grid grid-cols-1 gap-6">
-          <div>
-            <label className="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">Test Code *</label>
-            <input 
-              name="testCode"
-              value={formData.testCode}
-              onChange={handleChange}
-              className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium ${errors.testCode ? 'border-red-500' : 'border-slate-200'}`} 
-              placeholder="e.g. CBC001" 
-              type="text"
-            />
-            {errors.testCode && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.testCode}</p>}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">Test Code *</label>
+              <input 
+                name="testCode"
+                value={formData.testCode}
+                onChange={handleChange}
+                className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium ${errors.testCode ? 'border-red-500' : 'border-slate-200'}`} 
+                placeholder="e.g. CBC001" 
+                type="text"
+              />
+              {errors.testCode && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.testCode}</p>}
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase text-slate-500 mb-2 ml-1">Department *</label>
+              <select
+                name="departmentId"
+                value={formData.departmentId}
+                onChange={handleChange}
+                className={`w-full bg-slate-50 border rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all font-medium ${errors.departmentId ? 'border-red-500' : 'border-slate-200'}`}
+              >
+                <option value="">Select Department</option>
+                {departments.map(dept => (
+                  <option key={dept.id} value={dept.id}>{dept.name}</option>
+                ))}
+              </select>
+              {errors.departmentId && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.departmentId}</p>}
+            </div>
           </div>
 
           <div>
@@ -152,7 +190,7 @@ const AddLaboratoryTestModal: React.FC<AddLaboratoryTestModalProps> = ({ isOpen,
         </div>
 
         <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
-          <Button variant="secondary" onClick={onClose} disabled={loading}>
+          <Button variant="secondary" type="button" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
           <Button type="submit" isLoading={loading}>
