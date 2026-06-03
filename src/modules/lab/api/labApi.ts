@@ -128,5 +128,19 @@ export const labApi = {
     savePricing: async (data: any) => {
         const response = await apiClient.post<ApiResponse<any>>('/lab/pricing', data);
         return response.data;
+    },
+
+    // Orders
+    createOrder: async (data: { patientId: string, encounterId: string, testIds: string[], packageIds: string[] }) => {
+        const response = await apiClient.post<ApiResponse<any>>('/lab/orders', data);
+        return response.data;
+    },
+    getQueue: async () => {
+        const response = await apiClient.get<ApiResponse<any[]>>('/lab/orders/queue');
+        return response.data;
+    },
+    saveResults: async (data: { orderTestId: string, results: any[] }) => {
+        const response = await apiClient.post<ApiResponse<void>>('/lab/orders/results', data);
+        return response.data;
     }
 };

@@ -44,17 +44,10 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({ className }) => {
         }
       };
       fetchHospitals();
-    } else if (user?.memberships) {
-      const memberHospitals = user.memberships.map(m => ({
-        id: m.hospitalId,
-        name: m.hospitalName || 'Unknown Hospital',
-        code: m.hospitalCode || ''
-      })) as HospitalResponse[];
-      setHospitals(memberHospitals);
     }
-  }, [isSuperMode, user?.superuser, user?.memberships]);
+  }, [isSuperMode, user?.superuser]);
 
-  if (!user || (hospitals.length <= 1 && !isSuperMode)) {
+  if (!user?.superuser || !isSuperMode) {
     return null;
   }
 

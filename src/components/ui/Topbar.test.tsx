@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import Topbar from './Topbar';
 import { Provider } from 'react-redux';
@@ -8,6 +8,20 @@ import authReducer from '@/state/authSlice';
 // Mock GlobalSearch to simplify Topbar testing
 vi.mock('./GlobalSearch', () => ({
   default: () => <div data-testid="global-search">Search</div>
+}));
+
+vi.mock('@/services/hospitalService', () => ({
+  hospitalService: {
+    list: vi.fn(() => Promise.resolve({
+      success: true,
+      data: {
+        content: [
+          { id: '1', name: 'Hosp 1', code: 'H1' },
+          { id: '2', name: 'Hosp 2', code: 'H2' }
+        ]
+      }
+    }))
+  }
 }));
 
 const mockUser = {
@@ -56,7 +70,11 @@ describe('Topbar', () => {
     renderWithRedux();
     expect(screen.getByText('CareFlow')).toBeInTheDocument();
     expect(screen.getByText('testuser')).toBeInTheDocument();
-    expect(screen.getByText('Test Hospital')).toBeInTheDocument();
+  });
+
+  it('renders hospital selector for superadmin', async () => {
+    renderWithRedux({ isSuperMode: true, user: { ...mockUser, superuser: true } });
+    expect(await screen.findByText('All Hospitals')).toBeInTheDocument();
   });
 
   it('opens profile dropdown on click', () => {
@@ -67,18 +85,26 @@ describe('Topbar', () => {
     expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
-  it('handles hospital switch', () => {
-    const multiHospitalUser = {
+  it('handles hospital switch for superadmin', async () => {
+    const superUser = {
       ...mockUser,
+      superuser: true,
       memberships: [
         { hospitalId: '1', hospitalName: 'Hosp 1', hospitalCode: 'H1', roleAssignments: [] },
         { hospitalId: '2', hospitalName: 'Hosp 2', hospitalCode: 'H2', roleAssignments: [] }
       ]
     };
-    renderWithRedux({ user: multiHospitalUser });
-    const profileButton = screen.getByText('testuser').closest('button');
-    fireEvent.click(profileButton!);
+    renderWithRedux({ isSuperMode: true, user: superUser });
     
-    expect(screen.getByText('Hosp 2')).toBeInTheDocument();
+    const selector = await screen.findByRole('combobox');
+    
+    // Wait for options to be populated
+    await waitFor(() => {
+        expect(screen.getByText('Hosp 2')).toBeInTheDocument();
+    });
+
+    fireEvent.change(selector, { target: { value: '2' } });
+    
+    expect((selector as HTMLSelectElement).value).toBe('2');
   });
 });

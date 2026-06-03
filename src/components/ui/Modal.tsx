@@ -2,6 +2,8 @@
 
 import React, { useEffect } from 'react';
 
+import { cn } from '@/lib/cn';
+
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full' | 'auto';
 
 interface ModalProps {
@@ -57,7 +59,10 @@ export const Modal: React.FC<ModalProps> = ({
 
       {/* Modal Container */}
       <div 
-        className={`relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[90vw] md:w-[40vw] h-[70vh]`}
+        className={cn(
+          "relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[90vw] h-[70vh]",
+          sizeClasses[size]
+        )}
         style={width ? { width, maxWidth: '100%' } : {}}
       >
         {!hideHeader && (

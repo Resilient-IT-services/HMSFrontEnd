@@ -17,6 +17,115 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { PageSurface } from '@/components/ui/PageSurface';
 
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
+import { labApi } from '@/modules/lab/api/labApi';
+
+const LabTestSearchInput = ({ 
+  value, 
+  onChange, 
+  onSelect,
+  error
+}: { 
+  value: string; 
+  onChange: (val: string) => void;
+  onSelect: (test: any) => void;
+  error?: boolean;
+}) => {
+  const [searchTerm, setSearchTerm] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
+  const [results, setResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const debouncedSearch = useDebounce(searchTerm, 300);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const lastFetchedSearch = useRef('');
+
+  if (value !== prevValue) {
+    setSearchTerm(value);
+    setPrevValue(value);
+  }
+
+  useEffect(() => {
+    const fetchTests = async () => {
+      const trimmedSearch = debouncedSearch?.trim() || '';
+      if (trimmedSearch.length < 2) {
+        setResults([]);
+        return;
+      }
+      if (trimmedSearch === lastFetchedSearch.current) return;
+
+      setLoading(true);
+      try {
+        const res = await labApi.getTests(); // Current API gets all, ideally needs search params
+        if (res.success && res.data) {
+          const filtered = res.data.filter(t => 
+            t.testName.toLowerCase().includes(trimmedSearch.toLowerCase()) || 
+            t.testCode.toLowerCase().includes(trimmedSearch.toLowerCase())
+          );
+          lastFetchedSearch.current = trimmedSearch;
+          setResults(filtered.slice(0, 10));
+        } else {
+          setResults([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch tests:', error);
+        setResults([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchTests();
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative w-full" ref={wrapperRef}>
+      <input
+        type="text"
+        className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold outline-none transition-all text-slate-900 ${
+          error ? 'border-red-500' : 'border-slate-200 focus:border-slate-400'
+        }`}
+        placeholder="Search lab test..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          onChange(e.target.value);
+          setShowResults(true);
+        }}
+        onFocus={() => setShowResults(true)}
+      />
+
+      {showResults && (searchTerm.length >= 2 || results.length > 0) && (
+        <div className="absolute z-[100] w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
+          {loading && <div className="p-3 text-xs text-slate-400 font-bold italic">Searching...</div>}
+          {results.map((test) => (
+            <button
+              key={test.id}
+              className="w-full text-left px-4 py-2.5 hover:bg-slate-50 border-b border-slate-50 last:border-0 transition-colors flex items-center justify-between group"
+              onClick={() => {
+                onSelect(test);
+                setShowResults(false);
+              }}
+            >
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{test.testName}</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{test.testCode} • {test.departmentName}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MedicineSearchInput = ({ 
   value, 
@@ -163,6 +272,7 @@ export const ActiveConsultationPage = () => {
   const [complaints, setComplaints] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [investigations, setInvestigations] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
@@ -220,6 +330,23 @@ export const ActiveConsultationPage = () => {
 
   const removePrescriptionRow = (id: string) => {
     setPrescriptions(prescriptions.filter(p => p.id !== id));
+  };
+
+  const addInvestigationRow = () => {
+    setInvestigations([...investigations, { id: Date.now().toString(), testId: '', testName: '', testCode: '' }]);
+  };
+
+  const removeInvestigationRow = (id: string) => {
+    setInvestigations(investigations.filter(i => i.id !== id));
+  };
+
+  const updateInvestigationRow = (id: string, test: any) => {
+    setInvestigations(investigations.map(i => i.id === id ? {
+      ...i,
+      testId: test.id,
+      testName: test.testName,
+      testCode: test.testCode
+    } : i));
   };
 
   const updatePrescriptionRow = (id: string, field: string, value: any) => {
@@ -285,13 +412,28 @@ export const ActiveConsultationPage = () => {
     const saved = await saveConsultation(true);
     if (!saved) return;
     try {
+      // 1. Create Lab Order if investigations exist
+      if (investigations.length > 0 && appointment) {
+        const testIds = investigations.filter(i => i.testId).map(i => i.testId);
+        if (testIds.length > 0) {
+          await labApi.createOrder({
+            patientId: appointment.patientId,
+            encounterId: appointment.id,
+            testIds: testIds,
+            packageIds: []
+          });
+        }
+      }
+
+      // 2. Complete Consultation
       const statusRes = await appointmentService.completeConsultation(appointmentId!);
       if (statusRes.success) {
         triggerGlobalToast('Consultation completed', 'success');
         router.push('/doctor/dashboard');
       }
     } catch (error) {
-      console.error('Failed to complete:', error);
+      console.error('Failed to complete consultation workflow:', error);
+      triggerGlobalToast('Error completing consultation', 'error');
     }
   };
 
@@ -469,6 +611,42 @@ export const ActiveConsultationPage = () => {
                     <p className="text-[10px] font-bold text-orange-800 leading-relaxed uppercase tracking-tight">
                       Total units will be auto-calculated for pharmacy dispensing. Ensure dosage and duration are accurate.
                     </p>
+                  </div>
+                </div>
+
+                {/* Investigations Section */}
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm mt-6 flex flex-col">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex flex-col">
+                      <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-blue-600">biotech</span> Investigations
+                      </h3>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Order lab tests & diagnostic procedures</span>
+                    </div>
+                    <button onClick={addInvestigationRow} className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 bg-blue-600 px-5 py-2.5 rounded-xl shadow-lg shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95 outline-none focus:ring-0">
+                      <span className="material-symbols-outlined text-sm">add_circle</span> Add Lab Test
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {investigations.map((i) => (
+                      <div key={i.id} className="grid grid-cols-12 gap-4 items-center bg-slate-50/50 p-2 md:p-3 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative">
+                        <div className="col-span-11">
+                          <LabTestSearchInput value={i.testName} onChange={() => {}} onSelect={(test) => updateInvestigationRow(i.id, test)} />
+                        </div>
+                        <div className="col-span-1 flex justify-end">
+                          <button onClick={() => removeInvestigationRow(i.id)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all md:opacity-0 group-hover:opacity-100">
+                            <span className="material-symbols-outlined text-lg">delete_sweep</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {investigations.length === 0 && (
+                      <div className="py-12 text-center text-slate-300 border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
+                        <span className="material-symbols-outlined text-4xl mb-2 opacity-20">microscope</span>
+                        <p className="text-[10px] font-black uppercase tracking-wider">No investigations ordered.</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
