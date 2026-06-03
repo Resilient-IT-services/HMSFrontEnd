@@ -68,7 +68,7 @@ export const useHospitals = () => {
       setPage(0);
     };
     void trigger();
-  }, [debouncedSearch, statusFilter, pageSize]);
+  }, [debouncedSearch, statusFilter, pageSize, debouncedColumnFilters]);
 
   const stats = useMemo(() => ({
     totalFacilities: totalElements,

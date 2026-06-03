@@ -65,6 +65,7 @@ export const AdminDashboard = () => {
   const columns: Column<HospitalResponse>[] = [
     {
       header: 'Hospital Name & ID',
+      sortKey: 'name',
       filterable: true,
       filterPlaceholder: 'Name or ID...',
       render: (hospital) => (
@@ -81,12 +82,14 @@ export const AdminDashboard = () => {
     },
     {
       header: 'City',
+      sortKey: 'city',
       filterable: true,
       filterPlaceholder: 'City...',
       render: (hospital) => hospital.city ?? 'N/A'
     },
     {
       header: 'Status',
+      sortKey: 'status',
       filterable: true,
       filterType: 'select',
       filterOptions: [
@@ -136,7 +139,7 @@ export const AdminDashboard = () => {
   ];
 
   return (
-      <MainLayout title="Admin Overview">
+      <MainLayout title="@Admin Overview">
         <PageSurface
             maxWidthClassName="max-w-[1600px]"
             backgroundClassName="bg-[#f8f9fb]"
