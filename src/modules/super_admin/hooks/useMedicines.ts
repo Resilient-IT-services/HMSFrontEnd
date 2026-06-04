@@ -11,6 +11,7 @@ export const useMedicines = () => {
   const [totalMedicines, setTotalMedicines] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   const [page, setPage] = useState(0);
@@ -28,7 +29,8 @@ export const useMedicines = () => {
       const response = await pharmacyService.listMedicines({ 
         search: debouncedSearch, 
         page: page,
-        size: pageSize 
+        size: pageSize,
+        category: categoryFilter === 'ALL' ? undefined : categoryFilter
       });
       if (response.success && response.data) {
         setMedicines(response.data.content);
@@ -43,7 +45,7 @@ export const useMedicines = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, pageSize, selectedMedicine]);
+  }, [debouncedSearch, page, pageSize, categoryFilter, selectedMedicine]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -54,6 +56,11 @@ export const useMedicines = () => {
 
   const handleSearchTermChange = (term: string) => {
     setSearchTerm(term);
+    setPage(0);
+  };
+
+  const handleCategoryFilterChange = (category: string) => {
+    setCategoryFilter(category);
     setPage(0);
   };
 
@@ -116,6 +123,8 @@ export const useMedicines = () => {
     loading,
     searchTerm,
     setSearchTerm: handleSearchTermChange,
+    categoryFilter,
+    setCategoryFilter: handleCategoryFilterChange,
     page,
     setPage,
     pageSize,
