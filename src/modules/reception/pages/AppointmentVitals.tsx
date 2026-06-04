@@ -27,7 +27,8 @@ export const AppointmentVitals = () => {
     fieldErrors,
     saving,
     handleSave,
-    validateField
+    validateField,
+    vitalRanges // Superadmin panel boundaries pull karne ke liye
   } = useReceptionVitals();
 
   if (!appointment) {
@@ -43,15 +44,37 @@ export const AppointmentVitals = () => {
 
   const isReadOnly = ['CONSULTATION_STARTED', 'PRESCRIPTION_FINALIZED', 'COMPLETED', 'CANCELLED'].includes(appointment.status);
 
-  // REAL-TIME INDIVIDUAL FIELD BOUNDARY CHECKER ON BLUR
+  // Superadmin Panel Boundary Mapping with Fallbacks
+  const tempConfig = {
+    F: { 
+      min: vitalRanges.BODY_TEMPERATURE?.minValue || 95, 
+      max: vitalRanges.BODY_TEMPERATURE?.maxValue || 108 
+    },
+    C: { 
+      min: 35, 
+      max: 42.2 
+    }
+  };
+
+  // Real-time Validation Trigger on Blur
   const handleFieldBlur = (fieldKey: string, value: string) => {
     validateField(fieldKey, value);
+  };
+
+  // Unit Switcher: Toggles Unit and instantly re-validates the existing text
+  const handleUnitToggle = (unit: 'F' | 'C') => {
+    setDisplayTempUnit(unit);
+    if (temperature) {
+      // Small timeout taaki state properly update ho sake backend trigger se pehle
+      setTimeout(() => {
+        validateField('temperature', temperature);
+      }, 10);
+    }
   };
 
   const handleInterceptedSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isReadOnly) return;
-
     void handleSave();
   };
 
@@ -71,8 +94,6 @@ export const AppointmentVitals = () => {
             {/* Patient Card Layer */}
             <Card title="Patient Profile" className="p-3 shadow-sm border border-slate-200/60">
               <div className="space-y-3">
-
-                {/* Highlighted & Enlarged Orange Branded Name Container */}
                 <div className="border-b-2 border-slate-100 pb-2.5">
                   <h3 className="text-xl font-black text-orange-600 tracking-tight uppercase truncate drop-shadow-sm">
                     {patient?.fullName || appointment.patientName}
@@ -84,7 +105,6 @@ export const AppointmentVitals = () => {
                 </div>
 
                 <div className="space-y-3 text-xs font-bold text-slate-600">
-                  {/* Patient ID Row */}
                   <div className="flex items-center justify-between w-full border-b border-slate-50 pb-1.5">
                     <div className="flex items-center gap-2 uppercase tracking-wider text-slate-400 text-[10px]">
                       <span className="material-symbols-outlined text-base">id_card</span>
@@ -93,7 +113,6 @@ export const AppointmentVitals = () => {
                     <span className="text-slate-900 font-black font-mono text-sm">{patient?.patientCode || '--'}</span>
                   </div>
 
-                  {/* Visit Token Row */}
                   <div className="flex items-center justify-between w-full border-b border-slate-50 pb-1.5">
                     <div className="flex items-center gap-2 uppercase tracking-wider text-slate-400 text-[10px]">
                       <span className="material-symbols-outlined text-base">confirmation_number</span>
@@ -102,7 +121,6 @@ export const AppointmentVitals = () => {
                     <span className="text-slate-900 font-black font-mono text-sm">{appointment.tokenNumber || '--'}</span>
                   </div>
 
-                  {/* Assigned Doctor Row */}
                   <div className="flex items-center justify-between w-full pb-0.5">
                     <div className="flex items-center gap-2 uppercase tracking-wider text-slate-400 text-[10px]">
                       <span className="material-symbols-outlined text-base">medical_services</span>
@@ -207,7 +225,7 @@ export const AppointmentVitals = () => {
                     </div>
                   </FormField>
 
-                  {/* 3. Temperature Input Block with SWITCH TOGGLE CONTROLS */}
+                  {/* 3. Temperature Input Block with SWITCH TOGGLE CONTROLS & DYNAMIC VALIDATION */}
                   <FormField
                       label={
                         <div className="flex justify-between items-center w-full font-bold text-slate-700 text-xs">
@@ -221,18 +239,25 @@ export const AppointmentVitals = () => {
                           <div className="flex border border-slate-300/80 rounded-md overflow-hidden bg-slate-100 p-0.5 scale-110 origin-right shrink-0 shadow-sm">
                             <button
                                 type="button" disabled={isReadOnly}
-                                onClick={() => setDisplayTempUnit('F')}
+                                onClick={() => handleUnitToggle('F')}
                                 className={`px-3 py-0.5 text-[11px] font-extrabold rounded transition-all uppercase tracking-wide ${displayTempUnit === 'F' ? 'bg-orange-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >°F</button>
                             <button
                                 type="button" disabled={isReadOnly}
-                                onClick={() => setDisplayTempUnit('C')}
+                                onClick={() => handleUnitToggle('C')}
                                 className={`px-3 py-0.5 text-[11px] font-extrabold rounded transition-all uppercase tracking-wide ${displayTempUnit === 'C' ? 'bg-orange-700 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                             >°C</button>
                           </div>
                         </div>
                       }
-                      error={fieldErrors.temperature}
+                      /* GHOST ERROR FIXED: error block tabhi generate hoga jab fieldErrors exist karega */
+                      error={
+                        fieldErrors.temperature
+                            ? (fieldErrors.temperature.toLowerCase().includes('required')
+                                ? 'Temperature is required'
+                                : `Temperature must be between ${tempConfig[displayTempUnit].min} and ${tempConfig[displayTempUnit].max} °${displayTempUnit}`)
+                            : undefined
+                      }
                   >
                     <div className="relative mt-1">
                       <input
@@ -293,7 +318,6 @@ export const AppointmentVitals = () => {
                   </FormField>
 
                 </div>
-
 
                 {!isReadOnly && (
                     <div className="pt-3.5 border-t border-slate-100 flex justify-end">
