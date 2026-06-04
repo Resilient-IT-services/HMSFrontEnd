@@ -51,7 +51,9 @@ export const LabQueuePage = () => {
     };
 
     useEffect(() => {
-        void fetchQueue();
+        Promise.resolve().then(() => {
+            void fetchQueue();
+        });
     }, []);
 
     return (

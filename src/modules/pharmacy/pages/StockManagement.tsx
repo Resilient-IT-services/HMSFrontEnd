@@ -68,7 +68,7 @@ export const StockManagement = () => {
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", "stock_import_template.csv");
-    document.body.appendChild(link);
+    document.body.append(link);
     link.click();
     link.remove();
   };

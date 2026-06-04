@@ -5,7 +5,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
-import { MedicineResponse, MedicineSummaryDTO } from '@/types/api';
+import { MedicineResponse } from '@/types/api';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
@@ -22,6 +22,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { FileSpreadsheet, CheckCircle2, RefreshCw, AlertCircle, Trash2, HelpCircle } from 'lucide-react';
 
 export const MedicineInventory = () => {
   const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
@@ -58,8 +59,7 @@ export const MedicineInventory = () => {
       if (response.success && response.data) {
         setMedicines(response.data.content);
         setTotalMedicines(response.data.totalElements);
-        
-        // Auto-select first medicine if none selected and it's the first page
+
         if (response.data.content.length > 0 && !selectedMedicine && page === 0) {
           const firstId = response.data.content[0].id;
           const detailRes = await pharmacyApi.getMedicineById(firstId);
@@ -78,7 +78,7 @@ export const MedicineInventory = () => {
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, page, pageSize, debouncedColumnFilters, sort]);
+  }, [debouncedSearch, page, pageSize, debouncedColumnFilters, sort, selectedMedicine]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -109,7 +109,6 @@ export const MedicineInventory = () => {
   };
 
   const openEditModal = async (id: string) => {
-    // If clicking edit, we should ensure the selectedMedicine is updated first if it's not the same
     if (selectedMedicine?.id !== id) {
       const detailRes = await pharmacyApi.getMedicineById(id);
       if (detailRes.success && detailRes.data) {
@@ -133,31 +132,30 @@ export const MedicineInventory = () => {
       const response = await pharmacyApi.importMedicines(importFile);
       if (response.success && response.data) {
         const { importedRows, skippedRows, failedRows, errorFileBase64 } = response.data;
-        
+
         if (failedRows === 0 && importedRows === 0 && skippedRows > 0) {
           triggerGlobalToast('All medicines in the file already exist in the database.', 'info');
         } else {
           triggerGlobalToast(
-            `Import Results - Success: ${importedRows}, Skipped: ${skippedRows}, Failed: ${failedRows}`, 
-            failedRows > 0 ? 'warning' : 'success'
+              `Import Results - Success: ${importedRows}, Skipped: ${skippedRows}, Failed: ${failedRows}`,
+              failedRows > 0 ? 'warning' : 'success'
           );
         }
 
         if (errorFileBase64) {
-          // Trigger automatic download of feedback file
           const byteCharacters = atob(errorFileBase64);
           const byteArray = new Uint8Array(byteCharacters.length);
           for (let i = 0; i < byteCharacters.length; i++) {
             byteArray[i] = byteCharacters.codePointAt(i)!;
           }
           const blob = new Blob([byteArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          
+
           const link = document.createElement('a');
           link.href = globalThis.URL.createObjectURL(blob);
           link.download = 'Medicine_Import_Feedback.xlsx';
           link.click();
-          
-          alert('Import completed with some issues. Please check the downloaded "Medicine_Import_Feedback.xlsx" file for details, fix the errors, and re-upload.');
+
+          alert('Import completed with some issues. Please check the downloaded "Medicine_Import_Feedback.xlsx" file for details.');
         }
 
         setShowImportModal(false);
@@ -198,13 +196,13 @@ export const MedicineInventory = () => {
       filterable: true,
       filterPlaceholder: 'Search name...',
       render: (m) => (
-        <div className="flex items-center gap-3">
-          <Avatar name={m.name} variant="orange" />
-          <div>
-            <p className="text-sm font-bold leading-tight text-slate-900">{m.name}</p>
-            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{m.manufacturer || 'Unknown Manufacturer'} • {m.strength}</p>
+          <div className="flex items-center gap-3">
+            <Avatar name={m.name} variant="orange" />
+            <div>
+              <p className="text-sm font-bold leading-tight text-slate-900">{m.name}</p>
+              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{m.manufacturer || 'Unknown Manufacturer'} • {m.strength}</p>
+            </div>
           </div>
-        </div>
       )
     },
     {
@@ -212,13 +210,13 @@ export const MedicineInventory = () => {
       filterable: true,
       filterPlaceholder: 'Generic name...',
       render: (m) => (
-        <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
+          <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
       )
     },
     {
       header: 'Composition',
       render: (m) => (
-        <span className="text-[10px] text-slate-500 font-medium line-clamp-2 max-w-[200px]" title={m.composition}>
+          <span className="text-[10px] text-slate-500 font-medium line-clamp-2 max-w-[200px]" title={m.composition}>
           {m.composition || '-'}
         </span>
       )
@@ -226,7 +224,7 @@ export const MedicineInventory = () => {
     {
       header: 'HSN Code',
       render: (m) => (
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.hsnCode || '-'}</span>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.hsnCode || '-'}</span>
       )
     },
     {
@@ -246,7 +244,7 @@ export const MedicineInventory = () => {
       className: 'text-center',
       headerClassName: 'text-center',
       render: (m) => (
-        <Badge variant="slate" size="sm">{m.form || m.category}</Badge>
+          <Badge variant="slate" size="sm">{m.form || m.category}</Badge>
       )
     },
     {
@@ -254,7 +252,7 @@ export const MedicineInventory = () => {
       className: 'text-center',
       headerClassName: 'text-center',
       render: (m) => (
-        <span className="text-xs font-bold text-orange-600">{m.thresholdQuantity ?? m.reorderLevel ?? 10}</span>
+          <span className="text-xs font-bold text-orange-600">{m.thresholdQuantity ?? m.reorderLevel ?? 10}</span>
       )
     },
     {
@@ -262,198 +260,268 @@ export const MedicineInventory = () => {
       className: 'text-right',
       headerClassName: 'text-right',
       render: (m) => (
-        <div className="flex justify-end items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="edit"
-            onClick={(e) => {
-              e.stopPropagation();
-              void openEditModal(m.id);
-            }}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="delete"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              setMedicineToDelete({ id: m.id, name: m.name });
-              setShowDeleteModal(true);
-            }}
-          />
-        </div>
+          <div className="flex justify-end items-center gap-2">
+            <Button
+                variant="secondary"
+                size="sm"
+                icon="edit"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void openEditModal(m.id);
+                }}
+            />
+            <Button
+                variant="secondary"
+                size="sm"
+                icon="delete"
+                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMedicineToDelete({ id: m.id, name: m.name });
+                  setShowDeleteModal(true);
+                }}
+            />
+          </div>
       )
     }
   ];
 
   return (
-    <MainLayout title="Medicine Master Catalog">
-      <PageSurface
-        maxWidthClassName="max-w-[1600px]"
-        backgroundClassName="bg-[#f8f9fb]"
-        fontClassName="font-inter"
-      >
-        <div className="space-y-4 py-2 md:py-4">
-          <PageHeading
-            title="Medicine Master Catalog"
-            description="Manage and monitor the central medicine inventory and pharmaceutical master data."
-          >
-            <div className="flex gap-2">
-              <Button variant="secondary" icon="file_upload" onClick={() => setShowImportModal(true)}>
-                Import
-              </Button>
-              <Button icon="add" onClick={() => setShowAddModal(true)}>
-                Add Medicine
-              </Button>
-            </div>
-          </PageHeading>
+      <MainLayout title="Medicine Master Catalog">
+        <PageSurface
+            maxWidthClassName="max-w-[1600px]"
+            backgroundClassName="bg-[#f8f9fb]"
+            fontClassName="font-inter"
+        >
+          <div className="space-y-4 py-2 md:py-4">
+            <PageHeading
+                title="Medicine Master Catalog"
+                description="Manage and monitor the central medicine inventory and pharmaceutical master data."
+            >
+              <div className="flex gap-2">
+                <Button variant="secondary" icon="file_upload" onClick={() => setShowImportModal(true)}>
+                  Import
+                </Button>
+                <Button icon="add" onClick={() => setShowAddModal(true)}>
+                  Add Medicine
+                </Button>
+              </div>
+            </PageHeading>
 
-          <ContentPanel
-            toolbar={(
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex flex-1 items-center gap-4">
-                  <div className="w-full max-w-xl">
-                    <SearchInput
-                      placeholder="Search catalog by medicine name, generic name..."
-                      value={searchTerm}
-                      onChange={(e) => handleSearchChange(e.target.value)}
+            <ContentPanel
+                toolbar={(
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex flex-1 items-center gap-4">
+                        <div className="w-full max-w-xl">
+                          <SearchInput
+                              placeholder="Search catalog by medicine name, generic name..."
+                              value={searchTerm}
+                              onChange={(e) => handleSearchChange(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => fetchMedicines()} />
+                    </div>
+                )}
+            >
+              <Table
+                  columns={columns}
+                  data={medicines}
+                  isLoading={loading}
+                  onRowClick={handleRowClick}
+                  onRowDoubleClick={(m) => openEditModal(m.id)}
+                  rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
+                  onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
+                  activeFilters={columnFilters}
+              />
+              <Pagination
+                  page={page}
+                  totalElements={totalMedicines}
+                  pageSize={pageSize}
+                  onPageChange={setPage}
+                  onPageSizeChange={handlePageSizeChange}
+                  label="medicines"
+              />
+            </ContentPanel>
+          </div>
+
+          {/* New Custom Sexy Framework Import Modal */}
+          {showImportModal && (
+              <Modal
+                  isOpen={showImportModal}
+                  onClose={() => setShowImportModal(false)}
+                  title="Import Inventory Sheet"
+                  width="430px"
+              >
+                <div className="p-4 flex flex-col h-auto bg-[var(--surface)] overflow-hidden justify-start items-stretch">
+
+                  {/* Micro Info bar */}
+                  <div className="mb-3.5 flex gap-2 items-center p-2.5 bg-[var(--primary-light)]/10 border border-[var(--primary-light)]/20 rounded-xl">
+                    <AlertCircle className="size-3.5 text-[var(--primary)] shrink-0" />
+                    <p className="text-[10px] font-bold text-[var(--text-primary)] uppercase tracking-wide opacity-80">
+                      System auto-skips duplicate entries smoothly.
+                    </p>
+                  </div>
+
+                  {/* High Tech Dropzone */}
+                  <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border rounded-xl p-5 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center min-h-[115px] h-auto relative overflow-hidden group ${
+                          importFile
+                              ? 'border-emerald-500 bg-emerald-50/10'
+                              : 'border-[var(--border)] bg-[var(--background)]/40 hover:border-[var(--primary)]'
+                      }`}
+                  >
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept=".csv, .xlsx, .xls"
+                        onChange={handleFileChange}
                     />
+
+                    {importFile ? (
+                        <div className="flex flex-col items-center gap-1.5 animate-in scale-in-95 duration-150">
+                          <div className="size-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+                            <CheckCircle2 className="size-4" />
+                          </div>
+                          <div className="text-center px-1">
+                            <p className="text-xs font-bold text-[var(--text-primary)] max-w-[260px] truncate">
+                              {importFile.name}
+                            </p>
+                            <p className="text-[9px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">
+                              {(importFile.size / 1024).toFixed(1)} KB • Ready
+                            </p>
+                          </div>
+                          <span className="text-[9px] text-[var(--primary)] font-black uppercase tracking-wider flex items-center gap-1 mt-1 bg-[var(--primary-light)]/40 px-2.5 py-1 rounded-lg">
+                            <RefreshCw className="size-2.5" /> Change
+                          </span>
+                        </div>
+                    ) : (
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="size-9 rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm text-[var(--primary)] flex items-center justify-center transition-transform group-hover:-translate-y-0.5">
+                            <FileSpreadsheet className="size-4.5" />
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                              Choose spreadsheet template
+                            </p>
+                            <p className="text-[10px] text-slate-400 font-medium">
+                              Supports standard .xlsx, .xls, or .csv formats
+                            </p>
+                          </div>
+                        </div>
+                    )}
+                  </div>
+
+                  {/* Clean Non-Stretching Action bar */}
+                  <div className="mt-4 grid grid-cols-2 gap-3 flex-initial">
+                    <button
+                        onClick={() => setShowImportModal(false)}
+                        className="py-2.5 bg-[var(--background)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs font-bold uppercase tracking-wider transition-all hover:bg-[var(--border)]"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                        onClick={confirmImport}
+                        disabled={!importFile || loading}
+                        className={`py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-center shadow-sm ${
+                            !importFile || loading
+                                ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
+                                : 'bg-[var(--primary)] text-white hover:opacity-95 shadow-[var(--primary-light)]/40 hover:shadow-md'
+                        }`}
+                    >
+                      {loading ? 'Processing...' : 'Start Import'}
+                    </button>
                   </div>
                 </div>
-                <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => fetchMedicines()} />
-              </div>
-            )}
-          >
-            <Table
-              columns={columns}
-              data={medicines}
-              isLoading={loading}
-              onRowClick={handleRowClick}
-              onRowDoubleClick={(m) => openEditModal(m.id)}
-              rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
-              onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
-              activeFilters={columnFilters}
-            />
-            <Pagination
-              page={page}
-              totalElements={totalMedicines}
-              pageSize={pageSize}
-              onPageChange={setPage}
-              onPageSizeChange={handlePageSizeChange}
-              label="medicines"
-            />
-          </ContentPanel>
-        </div>
+              </Modal>
+          )}
 
-        {/* Excel Import Modal */}
-        {showImportModal && (
-          <Modal
-            isOpen={showImportModal}
-            onClose={() => setShowImportModal(false)}
-            title="Import Medicines"
-          >
-            <div className="p-6 text-center">
-              <div className="w-20 h-20 bg-orange-100 text-orange-700 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <span className="material-symbols-outlined text-4xl">file_upload</span>
-              </div>
-              <p className="text-slate-500 mt-2 font-medium">Duplicate medicines will be automatically identified and skipped.</p>
+          {/* Add Medicine Modal */}
+          {showAddModal && (
+              <AddMedicineModal
+                  isOpen={true}
+                  onClose={() => setShowAddModal(false)}
+                  onSuccess={fetchMedicines}
+              />
+          )}
 
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="mt-8 border-4 border-dashed border-slate-100 rounded-[2rem] p-12 hover:border-orange-500/20 hover:bg-orange-50/30 transition-all cursor-pointer group"
-              >
-                <input type="file" ref={fileInputRef} className="hidden" accept=".csv, .xlsx, .xls" onChange={handleFileChange} />
-                {importFile ? (
-                  <div className="flex items-center justify-center gap-4">
-                    <span className="material-symbols-outlined text-4xl text-emerald-600">task</span>
-                    <p className="font-black text-slate-800">{importFile.name}</p>
-                  </div>
-                ) : (
-                  <p className="text-slate-400 font-black text-xs uppercase tracking-widest">Select Excel File</p>
-                )}
-              </div>
+          {/* Edit Medicine Modal */}
+          {showEditModal && selectedMedicine && (
+              <EditMedicineModal
+                  medicine={selectedMedicine}
+                  onClose={() => setShowEditModal(false)}
+                  onSuccess={fetchMedicines}
+              />
+          )}
 
-              <div className="mt-10 flex gap-4">
-                <Button variant="secondary" fullWidth onClick={() => setShowImportModal(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  fullWidth
-                  onClick={confirmImport}
-                  disabled={!importFile || loading}
-                  isLoading={loading}
-                >
-                  Start Import
-                </Button>
-              </div>
-            </div>
-          </Modal>
-        )}
-
-        {/* Add Medicine Modal */}
-        {showAddModal && (
-          <AddMedicineModal
-            isOpen={true}
-            onClose={() => setShowAddModal(false)}
-            onSuccess={fetchMedicines}
-          />
-        )}
-
-        {/* Edit Medicine Modal */}
-        {showEditModal && selectedMedicine && (
-          <EditMedicineModal
-            medicine={selectedMedicine}
-            onClose={() => setShowEditModal(false)}
-            onSuccess={fetchMedicines}
-          />
-        )}
-
-        {/* Delete Confirmation Modal */}
-        {showDeleteModal && medicineToDelete && (
-          <Modal
-            isOpen={showDeleteModal}
-            onClose={() => {
-              setShowDeleteModal(false);
-              setMedicineToDelete(null);
-            }}
-            title="Confirm Deletion"
-            size="sm"
-          >
-            <div className="p-8 text-center">
-              <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="material-symbols-outlined text-4xl">delete_forever</span>
-              </div>
-              <h3 className="text-xl font-black text-slate-800 mb-2">Delete Medicine?</h3>
-              <p className="text-slate-500 text-sm">
-                Are you sure you want to remove <span className="font-bold text-slate-800">"{medicineToDelete.name}"</span> from the master catalog? This action cannot be undone.
-              </p>
-
-              <div className="mt-10 flex gap-4">
-                <Button
-                  variant="secondary"
-                  fullWidth
-                  onClick={() => {
+          {/* Ultra-Sexy & High Contrast Unique Delete Confirmation Modal */}
+          {showDeleteModal && medicineToDelete && (
+              <Modal
+                  isOpen={showDeleteModal}
+                  onClose={() => {
                     setShowDeleteModal(false);
                     setMedicineToDelete(null);
                   }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  fullWidth
-                  className="bg-red-600 hover:bg-red-700 shadow-red-200 text-white"
-                  onClick={handleDeleteMedicine}
-                  isLoading={loading}
-                >
-                  Delete Medicine
-                </Button>
-              </div>
-            </div>
-          </Modal>
-        )}
-      </PageSurface>
-    </MainLayout>
+                  title="Inventory Action Required"
+                  width="420px"
+              >
+                <div className="p-4 flex flex-col h-auto max-h-fit justify-start items-stretch bg-[var(--surface)] overflow-hidden">
+
+                  {/* Modern Horizontal Alert Stripe header layout style */}
+                  <div className="flex gap-3.5 items-center p-3 bg-[var(--error-light)]/10 border border-[var(--error-light)]/20 rounded-xl mb-4 text-left">
+                    <div className="size-9 rounded-xl bg-[var(--error-light)] text-[var(--error)] flex items-center justify-center shrink-0 border border-[var(--error)]/10 shadow-sm shadow-[var(--error-light)]/30">
+                      <Trash2 className="size-4.5" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wide">
+                        Confirm Permanent Deletion
+                      </h4>
+                      <p className="text-[10px] text-[var(--text-secondary)] font-medium mt-0.5">
+                        This sequence will remove master data variables.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Inline focus prompt card context block */}
+                  <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)]/50 text-center mb-4">
+                    <p className="text-[11px] font-medium text-[var(--text-secondary)]">
+                      Are you sure you want to completely erase
+                    </p>
+                    <p className="text-sm font-bold text-[var(--text-primary)] truncate max-w-full px-2 mt-1 bg-[var(--surface)] py-1.5 rounded-lg border border-[var(--border)]">
+                      {medicineToDelete.name}
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase mt-2 tracking-wider flex items-center justify-center gap-1">
+                      <HelpCircle className="size-3 text-[var(--error)]" /> This record pipeline cannot be reversed
+                    </p>
+                  </div>
+
+                  {/* Tightly bound flush actions grid layout matrix */}
+                  <div className="grid grid-cols-2 gap-3 w-full">
+                    <button
+                        type="button"
+                        onClick={() => {
+                          setShowDeleteModal(false);
+                          setMedicineToDelete(null);
+                        }}
+                        className="py-2.5 bg-[var(--background)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs font-bold uppercase tracking-wider transition-all hover:bg-[var(--border)]"
+                    >
+                      Cancel Action
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleDeleteMedicine}
+                        disabled={loading}
+                        className="py-2.5 bg-[var(--error)] text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-all shadow-sm shadow-[var(--error-light)]/40 hover:opacity-95"
+                    >
+                      {loading ? 'Purging...' : 'Delete Master'}
+                    </button>
+                  </div>
+                </div>
+              </Modal>
+          )}
+        </PageSurface>
+      </MainLayout>
   );
 };

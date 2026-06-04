@@ -18,6 +18,25 @@ import { SearchInput } from '@/components/ui/SearchInput';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 
+const DEFAULT_CATEGORY_OPTIONS = [
+  'TABLET',
+  'CAPSULE',
+  'SYRUP',
+  'INJECTION',
+  'OINTMENT',
+  'CREAM',
+  'DROPS',
+  'INHALER'
+];
+
+const formatCategoryLabel = (value: string) =>
+  value
+    .toLowerCase()
+    .replaceAll('_', ' ')
+    .split(' ')
+    .map((word) => word ? `${word[0].toUpperCase()}${word.slice(1)}` : word)
+    .join(' ');
+
 export function MedicineList() {
   const {
     medicines,
@@ -25,6 +44,8 @@ export function MedicineList() {
     loading,
     searchTerm,
     setSearchTerm,
+    categoryFilter,
+    setCategoryFilter,
     page,
     setPage,
     pageSize,
@@ -44,10 +65,20 @@ export function MedicineList() {
     refresh
   } = useMedicines();
 
+  const categoryOptions = React.useMemo(() => {
+    const values = new Set(DEFAULT_CATEGORY_OPTIONS);
+    medicines.forEach((medicine) => {
+      const category = medicine.form || medicine.category;
+      if (category) values.add(category);
+    });
+    return [...values].toSorted((a, b) => formatCategoryLabel(a).localeCompare(formatCategoryLabel(b)));
+  }, [medicines]);
+
   // Define Columns for the generic Table
   const columns: Column<MedicineResponse>[] = [
     {
       header: 'Medicine Details',
+
       render: (m) => (
         <div className="flex items-center gap-3">
           <Avatar name={m.name} variant="orange" />
@@ -60,6 +91,7 @@ export function MedicineList() {
     },
     {
       header: 'Generic Name',
+
       render: (m) => (
         <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
       )
@@ -144,13 +176,30 @@ export function MedicineList() {
               <ContentPanel
                 toolbar={(
                   <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex flex-1 items-center gap-4">
-                      <div className="w-full max-w-xl">
+                    <div className="flex flex-1 flex-wrap items-center gap-3">
+                      <div className="w-full min-w-[240px] max-w-xl flex-1">
                         <SearchInput
                           placeholder="Search by name, generic name or composition..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                      </div>
+                      <div className="relative w-full sm:w-48">
+                        <select
+                          value={categoryFilter}
+                          onChange={(e) => setCategoryFilter(e.target.value)}
+                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-xs font-black uppercase tracking-widest text-slate-600 outline-none transition-all hover:border-slate-300 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20"
+                        >
+                          <option value="ALL">All Category</option>
+                          {categoryOptions.map((category) => (
+                            <option key={category} value={category}>
+                              {formatCategoryLabel(category)}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">
+                          expand_more
+                        </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
