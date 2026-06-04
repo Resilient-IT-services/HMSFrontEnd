@@ -385,5 +385,6 @@ export const AppointmentsPage = () => {
           </Link>
         </div>
       </MainLayout>
+
   );
 };
