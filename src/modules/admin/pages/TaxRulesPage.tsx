@@ -1,5 +1,5 @@
 'use client';
-{"username":"lab_tech","fullName":"Lab Tech","email":"cshukla@synoptek.com","phone":"+918983617372","dob":"1986-12-23","gender":"MALE","password":"admin123","superuser":false,"active":true,"status":"ACTIVE","memberships":[{"hospitalId":"abe2b5e1-472a-4edb-97da-3351616f0110","roleAssignments":[{"roleCode":"LAB_TECHNICIAN","departments":["Radiology","Pathology & Laboratory"],"active":true,"assignmentId":""}],"hospitalName":"Appolo hospital"}],"labTechInfo":{"licenseNo":"Lab456","specialty":"Path"}}
+
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { Card } from '@/components/ui/Card';
