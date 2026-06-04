@@ -10,51 +10,17 @@ import { PatientHistoryDetailView } from '../components/MedicalHistory/PatientHi
 export const MedicalHistoryPage = () => {
   const {
     patientId,
-    historyAppointments,
-    patientDetails,
     selectedPatient,
     patientVisits,
     selectedVisit,
     loading,
-    searchTerm,
-    setSearchTerm,
-    appointmentsPage,
-    setAppointmentsPage,
-    appointmentsTotalElements,
-    pageSize,
-    setPageSize,
-    handleSearch,
-    selectPatient,
     handleSelectVisit,
     clearSelection
   } = useMedicalHistory();
 
   if (!patientId) {
     return (
-      <MainLayout title="Medical History" hideTitle>
-        <PageSurface
-          maxWidthClassName="max-w-[1600px]"
-          backgroundClassName="bg-[#f8f9fb]"
-          fontClassName="font-inter"
-        >
-          <div className="space-y-8 py-4 md:py-8">
-            <HistoryDirectoryView 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              handleSearch={handleSearch}
-              loading={loading}
-              historyAppointments={historyAppointments}
-              patientDetails={patientDetails}
-              selectPatient={selectPatient}
-              appointmentsPage={appointmentsPage}
-              appointmentsTotalElements={appointmentsTotalElements}
-              setAppointmentsPage={setAppointmentsPage}
-              pageSize={pageSize}
-              setPageSize={setPageSize}
-            />
-          </div>
-        </PageSurface>
-      </MainLayout>
+      <HistoryDirectoryView />
     );
   }
 

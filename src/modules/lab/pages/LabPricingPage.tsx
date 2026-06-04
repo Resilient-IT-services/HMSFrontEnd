@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/Button';
 import { labApi, LabTestDTO } from '../api/labApi';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
-import { formatCurrency } from '@/utils/formatters';
 
 export function LabPricingPage() {
     const [tests, setTests] = useState<LabTestDTO[]>([]);

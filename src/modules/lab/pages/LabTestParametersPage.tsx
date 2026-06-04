@@ -15,13 +15,11 @@ interface Props {
 
 export function LabTestParametersPage({ testId }: Props) {
     const [parameters, setParameters] = useState<LabTestParameterDTO[]>([]);
-    const [loading, setLoading] = useState(true);
     const [showParamModal, setShowParamModal] = useState(false);
     const [showRangeModal, setShowRangeModal] = useState(false);
     
     const [selectedParam, setSelectedParam] = useState<LabTestParameterDTO | null>(null);
     const [ranges, setRanges] = useState<LabReferenceRangeDTO[]>([]);
-    const [loadingRanges, setLoadingRanges] = useState(false);
 
     const [editingParamId, setEditingParamId] = useState<string | null>(null);
     const [paramFormData, setParamFormData] = useState<LabTestParameterDTO>({
@@ -46,13 +44,10 @@ export function LabTestParametersPage({ testId }: Props) {
 
     const fetchParameters = useCallback(async () => {
         try {
-            setLoading(true);
             const res = await labApi.getParametersByTest(testId);
             if (res.success && res.data) setParameters(res.data);
         } catch (error) {
             console.error(error);
-        } finally {
-            setLoading(false);
         }
     }, [testId]);
 
@@ -92,11 +87,10 @@ export function LabTestParametersPage({ testId }: Props) {
 
     const fetchRanges = async (paramId: string) => {
         try {
-            setLoadingRanges(true);
             const res = await labApi.getRangesByParameter(paramId);
             if (res.success && res.data) setRanges(res.data);
-        } finally {
-            setLoadingRanges(false);
+        } catch (error) {
+            console.error(error);
         }
     };
 

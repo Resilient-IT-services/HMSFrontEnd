@@ -100,7 +100,7 @@ describe('DoctorDashboard', () => {
       </Provider>,
     );
 
-    expect(screen.getByText(/Upcoming Patient Queue/i)).toBeInTheDocument();
+    expect(screen.getByText(/Live Active Patient Queue/i)).toBeInTheDocument();
 
     await waitFor(() => {
       expect(appointmentService.list).toHaveBeenCalledWith({
@@ -111,7 +111,7 @@ describe('DoctorDashboard', () => {
         doctorId: 'doctor-1'
       });
       expect(screen.getAllByText('Jane Roe')[0]).toBeInTheDocument();
-      expect(screen.getAllByText(/1000/)[0]).toBeInTheDocument();
+      expect(screen.getAllByText(/₹1,000/)[0]).toBeInTheDocument();
     });
   });
 

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { useReceptionVitals } from '@/modules/reception/hooks/useReceptionVitals';
 import { Button } from '@/components/ui/Button';
@@ -11,7 +10,6 @@ import { FormField } from '@/components/ui/FormField';
 import { PageHeading } from '@/components/ui/PageHeading';
 
 export const AppointmentVitals = () => {
-  const router = useRouter();
   const {
     appointment,
     patient,
