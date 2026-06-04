@@ -126,9 +126,7 @@ export const AppointmentsPage = () => {
       header: 'Token',
       mobilePosition: 'meta',
       sortable: true,
-      filterable: true,
-      sortKey: 'token',
-      filterPlaceholder: 'Token...',
+      sortKey: 'tokenNumber',
       render: (app) => <span className="font-bold text-slate-900">{formatToken(app)}</span>
     },
     {
@@ -165,7 +163,7 @@ export const AppointmentsPage = () => {
       mobilePosition: 'body',
       sortable: true,
       filterable: true,
-      sortKey: 'doctor',
+      sortKey: 'doctorName',
       filterPlaceholder: 'Filter doctor...',
       render: (app) => (
           <div>
