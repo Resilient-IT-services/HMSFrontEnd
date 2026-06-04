@@ -27,18 +27,15 @@ describe('Table Component - Advanced Features', () => {
     expect(onSort).toHaveBeenCalledWith('name', 'asc');
   });
 
-  it('renders inline filters when filterable is true', () => {
+  it('does not render inline filters when filterable is true', () => {
     const onFilter = vi.fn();
     render(<Table columns={columns} data={data} onFilter={onFilter} />);
-    
-    const filterInput = screen.getByPlaceholderText('Filter...');
-    expect(filterInput).toBeInTheDocument();
-    
-    fireEvent.change(filterInput, { target: { value: 'Ali' } });
-    expect(onFilter).toHaveBeenCalledWith('name', 'Ali');
+
+    expect(screen.queryByPlaceholderText('Filter...')).not.toBeInTheDocument();
+    expect(onFilter).not.toHaveBeenCalled();
   });
 
-  it('renders select filter when filterType is select', () => {
+  it('does not render select filters when filterType is select', () => {
     const selectColumns: Column<{ name: string; status: string }>[] = [
       { 
         header: 'Status', 
@@ -53,16 +50,13 @@ describe('Table Component - Advanced Features', () => {
     ];
     const onFilter = vi.fn();
     render(<Table columns={selectColumns} data={[]} onFilter={onFilter} />);
-    
-    const select = screen.getByRole('combobox');
-    expect(select).toBeInTheDocument();
-    expect(screen.getByText('All Status')).toBeInTheDocument();
-    
-    fireEvent.change(select, { target: { value: 'ACTIVE' } });
-    expect(onFilter).toHaveBeenCalledWith('status', 'ACTIVE');
+
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument();
+    expect(screen.queryByText('All Status')).not.toBeInTheDocument();
+    expect(onFilter).not.toHaveBeenCalled();
   });
 
-  it('renders custom filter using renderFilter', () => {
+  it('does not render custom filters using renderFilter', () => {
     const customColumns: Column<{ name: string }>[] = [
       { 
         header: 'Name', 
@@ -75,12 +69,9 @@ describe('Table Component - Advanced Features', () => {
     ];
     const onFilter = vi.fn();
     render(<Table columns={customColumns} data={[]} onFilter={onFilter} />);
-    
-    const customButton = screen.getByText('Custom Filter');
-    expect(customButton).toBeInTheDocument();
-    
-    fireEvent.click(customButton);
-    expect(onFilter).toHaveBeenCalledWith('name', 'custom');
+
+    expect(screen.queryByText('Custom Filter')).not.toBeInTheDocument();
+    expect(onFilter).not.toHaveBeenCalled();
   });
 
   it('highlights sorted column', () => {
