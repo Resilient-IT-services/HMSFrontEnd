@@ -55,6 +55,20 @@ describe('authSlice', () => {
     expect(state.user?.roles).toContain('SUPER_ADMIN');
   });
 
+  it('should include LAB_TECHNICIAN role if assigned', () => {
+    const labTechUser: UserProfileResponse = { 
+      ...mockUser, 
+      memberships: [{ 
+        hospitalId: "hosp-1", 
+        hospitalName: 'Hospital A', 
+        hospitalCode: 'HA', 
+        roleAssignments: [{ assignmentId: 'lt1', roleCode: 'LAB_TECHNICIAN', departments: ['Lab'], active: true }]
+      }] 
+    };
+    const state = authReducer(undefined, setUser(labTechUser));
+    expect(state.user?.roles).toContain('LAB_TECHNICIAN');
+  });
+
   it('should handle setSuperMode', () => {
     let state = authReducer(undefined, setSuperMode(true));
     expect(state.isSuperMode).toBe(true);
