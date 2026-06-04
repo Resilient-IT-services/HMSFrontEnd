@@ -65,7 +65,8 @@ const SelectRolePage = () => {
       'PHARMACIST': 'pharmacy',
       'ADMIN': 'admin',
       'SUPER_ADMIN': 'super_admin',
-      'NURSE': 'nurse'
+      'NURSE': 'nurse',
+      'LAB_TECHNICIAN': 'lab'
     };
     const path = rolePathMap[role] || role.toLowerCase();
     const targetPath = `/${path}/dashboard`;

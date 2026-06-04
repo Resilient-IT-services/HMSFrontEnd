@@ -198,6 +198,7 @@ export const UserManagementPage = () => {
                     <option value="NURSE">Nursing Staff</option>
                     <option value="RECEPTIONIST">Receptionist</option>
                     <option value="PHARMACIST">Pharmacist</option>
+                    <option value="LAB_TECHNICIAN">Lab Technician</option>
                   </select>
                   <select
                     value={activeFilter === undefined ? '' : String(activeFilter)}

@@ -44,12 +44,34 @@ const renderWithRedux = (initialState = {}) => {
 };
 
 describe('SelectRolePage', () => {
-  it('renders and allows selection', () => {
+  it('renders and allows selection of common roles', () => {
     renderWithRedux();
     
     expect(screen.getByText('Doctor')).toBeInTheDocument();
     expect(screen.getByText('Administrator')).toBeInTheDocument();
     
     fireEvent.click(screen.getByText('Doctor'));
+  });
+
+  it('renders and allows selection of LAB_TECHNICIAN role', () => {
+    renderWithRedux({
+      user: { ...mockUser, roles: ['LAB_TECHNICIAN'] }
+    });
+    
+    expect(screen.getByText('Lab Technician')).toBeInTheDocument();
+    expect(screen.getByText('Laboratory tests, sample analysis, and diagnostic reporting.')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByText('Lab Technician'));
+  });
+
+  it('renders and allows selection of SUPER_ADMIN role', () => {
+    renderWithRedux({
+      user: { ...mockUser, roles: ['SUPER_ADMIN'] }
+    });
+    
+    expect(screen.getByText('Super Admin')).toBeInTheDocument();
+    expect(screen.getByText('System-wide configuration, multi-facility oversight, and security.')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByText('Super Admin'));
   });
 });

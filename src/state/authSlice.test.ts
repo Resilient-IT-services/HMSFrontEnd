@@ -49,6 +49,12 @@ describe('authSlice', () => {
     expect(state.isAuthenticated).toBe(true);
   });
 
+  it('should include SUPER_ADMIN role if user is superuser', () => {
+    const superUser = { ...mockUser, superuser: true, memberships: [] };
+    const state = authReducer(undefined, setUser(superUser));
+    expect(state.user?.roles).toContain('SUPER_ADMIN');
+  });
+
   it('should handle setSuperMode', () => {
     let state = authReducer(undefined, setSuperMode(true));
     expect(state.isSuperMode).toBe(true);

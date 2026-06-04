@@ -157,8 +157,6 @@ npm run dev
 ❌ No business logic in UI  
 ❌ No direct API calls (use `services/`)  
 ❌ Do not introduce a second auth flow without updating `src/services/apiClient.ts` and this README  
-❌ No `labTechInfo` or unused legacy DTOs  
-
 ✔ Role-assignment based departments  
 ✔ API contract adherence (api-docs.json)  
 ✔ Mandatory 70% test coverage  
