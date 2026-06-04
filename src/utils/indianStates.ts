@@ -37,4 +37,4 @@ export const INDIAN_STATES_CITIES: Record<string, string[]> = {
   "West Bengal": ["Kolkata", "Howrah", "Asansol", "Siliguri", "Durgapur", "Bardhaman", "Malda", "Baharampur", "Habra", "Kharagpur"]
 };
 
-export const INDIAN_STATES = Object.keys(INDIAN_STATES_CITIES).sort();
+export const INDIAN_STATES = Object.keys(INDIAN_STATES_CITIES).toSorted();

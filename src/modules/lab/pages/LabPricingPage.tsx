@@ -35,7 +35,9 @@ export function LabPricingPage() {
     }, []);
 
     useEffect(() => {
-        fetchData();
+        Promise.resolve().then(() => {
+            fetchData();
+        });
     }, [fetchData]);
 
     const handleOpenEdit = async (test: LabTestDTO) => {

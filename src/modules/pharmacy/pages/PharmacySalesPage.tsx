@@ -102,7 +102,7 @@ export const PharmacySalesPage = () => {
 
       setTaxBreakdown({
         totalTax,
-        components: Array.from(componentsMap.entries()).map(([taxName, taxAmount]) => ({ taxName, taxAmount }))
+        components: [...componentsMap.entries()].map(([taxName, taxAmount]) => ({ taxName, taxAmount }))
       });
     } catch (error) {
       console.error('Tax calculation failed', error);

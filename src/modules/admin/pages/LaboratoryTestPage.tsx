@@ -37,7 +37,9 @@ const LaboratoryTestPage = () => {
   }, []);
 
   useEffect(() => {
-    void fetchTests();
+    Promise.resolve().then(() => {
+      void fetchTests();
+    });
   }, [fetchTests]);
 
   const columns: Column<LaboratoryTestDTO>[] = [

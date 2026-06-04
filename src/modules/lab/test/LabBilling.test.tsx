@@ -25,7 +25,7 @@ const calculateBill = (
 describe('Laboratory Billing UI Logic', () => {
 
     it('Flow: Should calculate correct bill for CBC with CGST+SGST (Intra-state)', () => {
-        const basePrice = 300.00;
+        const basePrice = 300;
         const discount = 0;
         const taxComponents = [
             { name: 'CGST', rate: 2.5 },
@@ -41,10 +41,10 @@ describe('Laboratory Billing UI Logic', () => {
     });
 
     it('Flow: Should calculate correct bill for Emergency test with IGST (Inter-state)', () => {
-        const emergencyPrice = 500.00;
-        const discount = 50.00;
+        const emergencyPrice = 500;
+        const discount = 50;
         const taxComponents = [
-            { name: 'IGST', rate: 5.0 }
+            { name: 'IGST', rate: 5 }
         ];
 
         const bill = calculateBill(emergencyPrice, discount, taxComponents);

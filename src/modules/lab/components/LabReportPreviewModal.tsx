@@ -41,7 +41,7 @@ export const LabReportPreviewModal: React.FC<LabReportPreviewModalProps> = ({
     }, [isOpen, orderId]);
 
     const handlePrint = () => {
-        window.print();
+        globalThis.print();
     };
 
     return (

@@ -51,7 +51,7 @@ export const pharmacyService = {
   },
 
   // Medicine Management
-  async listMedicines(params?: { search?: string; page?: number; size?: number; sort?: string }): Promise<ApiResponse<PageResponse<MedicineResponse>>> {
+  async listMedicines(params?: { search?: string; page?: number; size?: number; category?: string; sort?: string }): Promise<ApiResponse<PageResponse<MedicineResponse>>> {
     const response = await apiClient.get<ApiResponse<PageResponse<MedicineResponse>>>('/pharmacy/medicines', { params });
     return response.data;
   },

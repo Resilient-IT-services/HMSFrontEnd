@@ -189,7 +189,7 @@ export default function QuickPharmacyBillingPage() {
     } finally {
       setCalculatingTaxes(false);
     }
-  }, [currentHospitalId, hospital?.state, selectedPatient?.address]);
+  }, [currentHospitalId, hospital, selectedPatient?.address]);
 
   useEffect(() => {
     // debounce tax calculation to avoid too many API calls
