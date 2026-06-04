@@ -74,7 +74,9 @@ export const Table = <T,>({
   renderMobileCard,
   hideHeaderOnMobile = true,
   onSort,
-  activeSort
+  activeSort,
+  onFilter,
+  activeFilters = {}
 }: TableProps<T>) => {
 
   const handleSort = (column: Column<T>) => {
@@ -278,6 +280,46 @@ export const Table = <T,>({
                 );
               })}
             </tr>
+
+            {/* Secondary Header Row (Inline Filters) */}
+            {columns.some(c => c.filterable) && (
+              <tr className="bg-slate-50/50 border-b border-slate-100">
+                {columns.map((column, index) => {
+                  const filterKey = column.sortKey || (column.key as string) || `filter_${column.header.replaceAll(/\s+/g, '_').toLowerCase()}_${index}`;
+
+                  return (
+                    <th key={index} className="px-4 py-2">
+                      {column.filterable && onFilter && (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          {column.renderFilter ? (
+                             column.renderFilter(onFilter, activeFilters)
+                          ) : column.filterType === 'select' ? (
+                            <select
+                              value={activeFilters[filterKey] || ''}
+                              onChange={(e) => onFilter(filterKey, e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none cursor-pointer transition-all"
+                            >
+                              <option value="">All {column.header}</option>
+                              {column.filterOptions?.map(opt => (
+                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              type="text"
+                              placeholder={column.filterPlaceholder || `Filter...`}
+                              value={activeFilters[filterKey] || ''}
+                              onChange={(e) => onFilter(filterKey, e.target.value)}
+                              className="w-full bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold placeholder:text-slate-300 text-slate-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 outline-none transition-all"
+                            />
+                          )}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
+              </tr>
+            )}
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
             {isLoading ? (
