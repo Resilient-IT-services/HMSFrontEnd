@@ -13,8 +13,6 @@ import MainLayout from '@/components/ui/MainLayout';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
-import { ContentPanel } from '@/components/ui/ContentPanel';
-import { SearchInput } from '@/components/ui/SearchInput';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 
@@ -44,8 +42,8 @@ export function MedicineList() {
     loading,
     searchTerm,
     setSearchTerm,
-    categoryFilter,
-    setCategoryFilter,
+    categoryFilter: selectedCategory,
+    setCategoryFilter: setSelectedCategory,
     page,
     setPage,
     pageSize,
@@ -65,7 +63,7 @@ export function MedicineList() {
     refresh
   } = useMedicines();
 
-  const categoryOptions = React.useMemo(() => {
+  const categories = React.useMemo(() => {
     const values = new Set(DEFAULT_CATEGORY_OPTIONS);
     medicines.forEach((medicine) => {
       const category = medicine.form || medicine.category;
@@ -172,43 +170,69 @@ export function MedicineList() {
           </PageHeading>
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <div className="xl:col-span-2 space-y-6">
-              <ContentPanel
-                toolbar={(
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex flex-1 flex-wrap items-center gap-3">
-                      <div className="w-full min-w-[240px] max-w-xl flex-1">
-                        <SearchInput
-                          placeholder="Search by name, generic name or composition..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                      </div>
-                      <div className="relative w-full sm:w-48">
-                        <select
-                          value={categoryFilter}
-                          onChange={(e) => setCategoryFilter(e.target.value)}
-                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-xs font-black uppercase tracking-widest text-slate-600 outline-none transition-all hover:border-slate-300 focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20"
-                        >
-                          <option value="ALL">All Category</option>
-                          {categoryOptions.map((category) => (
-                            <option key={category} value={category}>
-                              {formatCategoryLabel(category)}
-                            </option>
-                          ))}
-                        </select>
-                        <span className="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[18px] text-slate-400">
-                          expand_more
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-[10px] font-black text-slate-500 uppercase">{totalMedicines} Medicines</span>
-                      <Button variant="secondary" icon="refresh" isLoading={loading} onClick={() => refresh()} />
-                    </div>
+            <div className="xl:col-span-3 space-y-6">
+              <div className="bg-white rounded-[2rem] border border-slate-200 p-6 space-y-6 overflow-visible">
+                <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                      width: "100%",
+                      overflow: "visible"
+                    }}
+                >
+                  
+                  <input
+                    type="text"
+                    placeholder="Search by name, generic name or composition..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-12 w-[65%] rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none"                  />
+
+                  <div
+                    style={{
+                      width: "220px",
+                      minWidth: "220px",
+                      height: "48px",
+                      background: "#ffffff",
+                      border: "1px solid #cbd5e1",
+                      borderRadius: "16px",
+                      display: "flex",
+                      alignItems: "center",
+                      padding: "0 12px"
+                    }}
+                  >
+                    <select
+                      value={selectedCategory || ""}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      style={{
+                        width: "100%",
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        cursor: "pointer"
+                      }}
+                    >
+                      <option value="">All Category</option>
+
+                      {categories.map((category) => (
+                        <option key={category} value={category}>
+                          {formatCategoryLabel(category)}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
-              >
+
+                  <button
+                    onClick={() => refresh()}
+                    className="h-12 w-12 rounded-2xl border border-slate-200 bg-white flex items-center justify-center"
+                  >
+                    ↻
+                  </button>
+                </div>
+
                 {loading && medicines.length === 0 ? (
                   <div className="p-12"><LoadingSkeleton /></div>
                 ) : (
@@ -228,73 +252,7 @@ export function MedicineList() {
                   onPageSizeChange={setPageSize}
                   label="medicines"
                 />
-              </ContentPanel>
-            </div>
-
-            {/* Details Panel */}
-            <div className="space-y-6">
-              {selectedMedicine ? (
-                <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-xl overflow-hidden sticky top-8">
-                  <div className="p-8 bg-slate-900 text-white">
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="p-4 bg-white/10 rounded-2xl backdrop-blur-md">
-                        <span className="material-symbols-outlined text-3xl">medication</span>
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-black">{selectedMedicine.name}</h3>
-                        <p className="text-[10px] font-black uppercase text-white/50 tracking-widest">{selectedMedicine.manufacturer || 'N/A'}</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                        <p className="text-[9px] font-black uppercase text-white/40 mb-1">Schedule Drug</p>
-                              <p className="text-xs font-bold text-primary">{selectedMedicine.scheduleType || 'OTC'}</p>
-                      </div>
-                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                        <p className="text-[9px] font-black uppercase text-white/40 mb-1">Strength</p>
-                        <p className="text-xs font-bold">{selectedMedicine.strength || 'N/A'}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-8 space-y-6">
-                    <div>
-                      <p className="text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Composition / Salt</p>
-                      <p className="text-sm font-bold text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100 italic">
-                        {selectedMedicine.composition || 'No composition data recorded.'}
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                        <span className="text-xs text-slate-400 font-bold uppercase">Generic Name</span>
-                        <span className="text-sm font-black text-slate-800">{selectedMedicine.genericName}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                        <span className="text-xs text-slate-400 font-bold uppercase">Form Factor</span>
-                        <span className="text-sm font-black text-slate-800">{selectedMedicine.form || selectedMedicine.category}</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3 border-b border-slate-50">
-                        <span className="text-xs text-slate-400 font-bold uppercase">Current Stock</span>
-                        <span className="text-sm font-black text-emerald-600">{selectedMedicine.currentStock} Units</span>
-                      </div>
-                      <div className="flex justify-between items-center py-3">
-                        <span className="text-xs text-slate-400 font-bold uppercase">Low Stock Threshold</span>
-                        <span className="text-sm font-black text-orange-600">{selectedMedicine.thresholdQuantity ?? selectedMedicine.reorderLevel ?? 10} Units</span>
-                      </div>
-                    </div>
-                    <button 
-                      onClick={() => setShowEditModal(true)}
-                      className="w-full py-4 bg-slate-100 text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
-                    >
-                      Edit Medicine Details
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 p-20 text-center flex flex-col items-center justify-center h-[500px]">
-                  <span className="material-symbols-outlined text-6xl text-slate-200 mb-4">info</span>
-                  <p className="text-slate-400 font-bold">Select a medicine to view detailed information.</p>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         </div>
