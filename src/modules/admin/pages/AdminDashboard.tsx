@@ -112,14 +112,22 @@ export const AdminDashboard = () => {
               <UserPlus className="w-3.5 h-3.5" /> Hire User
             </button>
             <button 
+              onClick={() => router.push('/admin/laboratory-tests')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold rounded-lg hover:bg-emerald-100 transition-all"
             >
-              <IndianRupee className="w-3.5 h-3.5" /> Subscriptions
+              <Activity className="w-3.5 h-3.5" /> Add Lab Test
             </button>
             <button 
+              onClick={() => router.push('/admin/medicines')}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-100 text-xs font-bold rounded-lg hover:bg-purple-100 transition-all"
             >
-              <Download className="w-3.5 h-3.5" /> Export Audit
+              <Plus className="w-3.5 h-3.5" /> Add Medicine
+            </button>
+            <button 
+              onClick={() => router.push('/admin/medicines')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 border border-orange-100 text-xs font-bold rounded-lg hover:bg-orange-100 transition-all"
+            >
+              <Download className="w-3.5 h-3.5" /> Import Medicine
             </button>
           </div>
         </div>
@@ -130,7 +138,7 @@ export const AdminDashboard = () => {
           <KpiCard icon={<Users />} title="Platform Users" value={kpis?.totalUsers || 0} trend="8.4%" color="purple" />
           <KpiCard icon={<UserCheck />} title="Active Now" value={kpis?.activeUsersToday || 0} trend="5.7%" color="green" isActiveIndicator />
           <KpiCard icon={<Award />} title="Doctors" value={kpis?.totalDoctors || 0} trend="9.3%" color="orange" />
-          <KpiCard icon={<IndianRupee />} title="Revenue" value={`₹${((kpis?.totalRevenue || 0) / 100000).toFixed(1)}L`} trend="15%" color="indigo" />
+          <KpiCard icon={<IndianRupee />} title="Revenue" value={`₹${((kpis?.totalRevenue || 0) / 100_000).toFixed(1)}L`} trend="15%" color="indigo" />
           <KpiCard icon={<PlusSquare />} title="New Hosp." value={`+${kpis?.newHospitalsThisMonth || 0}`} trend="33%" color="pink" />
           <KpiCard icon={<UserRound />} title="Patients" value={kpis?.totalPatients || 0} trend="11%" color="emerald" />
           <KpiCard icon={<BarChart />} title="Uptime" value={kpis?.systemUptime || '99.9%'} color="violet" subText="Last 30 days" />

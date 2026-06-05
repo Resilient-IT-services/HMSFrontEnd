@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SuperAdminDashboard from './page';
 import { adminService } from '@/services/adminService';
 import { hospitalService } from '@/services/hospitalService';
+import StoreProvider from '@/state/StoreProvider';
 
 // Mock services
 vi.mock('@/services/adminService', () => ({
@@ -43,7 +44,7 @@ describe('SuperAdminDashboard', () => {
           totalUsers: 10,
           activeUsersToday: 2,
           totalDoctors: 3,
-          totalRevenue: 500000,
+          totalRevenue: 500_000,
           newHospitalsThisMonth: 1,
           totalPatients: 50,
           systemUptime: '99.9%'
@@ -74,7 +75,11 @@ describe('SuperAdminDashboard', () => {
       }
     } as any);
 
-    render(<SuperAdminDashboard />);
+    render(
+      <StoreProvider>
+        <SuperAdminDashboard />
+      </StoreProvider>
+    );
 
     await waitFor(() => {
       // Metric values are displayed in multiple places (desktop and mobile grids)

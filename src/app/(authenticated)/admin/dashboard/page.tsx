@@ -45,13 +45,8 @@ export default function AdminDashboardPage() {
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
   const fetchData = async () => {
     try {
-      setLoading(true);
       const [summaryRes, hospitalsRes] = await Promise.all([
         adminService.getDashboardSummary(),
         hospitalService.list({ size: 5 })
@@ -66,6 +61,13 @@ export default function AdminDashboardPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const init = async () => {
+      await fetchData();
+    };
+    init();
+  }, []);
 
   if (loading) {
     return (
@@ -120,7 +122,7 @@ export default function AdminDashboardPage() {
         <KpiCard icon={<Users />} title="Platform Users" value={kpis?.totalUsers || 0} trend="8.4%" color="purple" />
         <KpiCard icon={<UserCheck />} title="Active Users" value={kpis?.activeUsersToday || 0} trend="5.7%" color="green" isActiveIndicator />
         <KpiCard icon={<Award />} title="Doctors" value={kpis?.totalDoctors || 0} trend="9.3%" color="orange" />
-        <KpiCard icon={<IndianRupee />} title="Revenue" value={`₹${(kpis?.totalRevenue || 0) / 100000}L`} trend="15%" color="indigo" />
+        <KpiCard icon={<IndianRupee />} title="Revenue" value={`₹${(kpis?.totalRevenue || 0) / 100_000}L`} trend="15%" color="indigo" />
         <KpiCard icon={<PlusSquare />} title="New Hosp." value={`+${kpis?.newHospitalsThisMonth || 0}`} trend="33%" color="pink" />
         <KpiCard icon={<UserRound />} title="Patients" value={kpis?.totalPatients || 0} trend="11%" color="emerald" />
         <KpiCard icon={<BarChart />} title="Uptime" value={kpis?.systemUptime || '99.9%'} color="violet" subText="Last 30 days" />
