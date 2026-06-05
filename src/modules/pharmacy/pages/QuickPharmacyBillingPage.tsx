@@ -164,12 +164,12 @@ export default function QuickPharmacyBillingPage() {
           hospitalId: currentHospitalId || '',
           itemType: 'MEDICINE',
           itemCode: item.medicineId,
-          hsnOrSacCode: item.hsnCode,
+          hsnOrSacCode: item.hsnCode || '3004', // Default HSN for medicines if missing
           quantity: item.selectedQuantity,
           unitPrice: item.sellingPrice || 0,
-          taxableAmount: ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount,
-          hospitalState: hState,
-          billingState: selectedPatient?.address?.split(',').pop()?.trim() || hState,
+          taxableAmount: Math.max(0, ((item.sellingPrice || 0) * item.selectedQuantity) - item.discount),
+          hospitalState: hState || '',
+          billingState: selectedPatient?.address?.split(',').pop()?.trim() || hState || '',
           isTaxInclusive: false // Sales are typically tax-exclusive
         });
         
@@ -519,23 +519,27 @@ export default function QuickPharmacyBillingPage() {
     setIsSubmitting(true);
     try {
       const payload: QuickPharmacySaleRequest = {
-        saleType,
+        saleType: visitId ? 'VISIT' : 'WALKIN',
         patientId: selectedPatient?.id,
         visitId: visitId || undefined,
         prescriptionId: prescriptionId || undefined,
-        doctorId: selectedDoctor?.userId || prescribedDoctorId || undefined,
+        doctorId: selectedDoctor?.doctorId || prescribedDoctorId || undefined,
         externalDoctorName,
         customerName: saleType === 'WALKIN' ? customerName : selectedPatient?.fullName,
         customerPhone: saleType === 'WALKIN' ? customerPhone : selectedPatient?.phone,
         items: validItems.map(item => ({
+          medicineId: item.medicineId!,
           medicineBatchId: item.id!,
           quantity: item.selectedQuantity,
+          unitPrice: item.sellingPrice || 0,
           discountAmount: Number(item.discount.toFixed(2)),
-          taxAmount: Number((item.taxAmount || 0).toFixed(2)),
-          taxableAmount: Number((item.taxableAmount || 0).toFixed(2)),
-          appliedTaxes: item.appliedTaxes
+          taxAmount: Number((item.taxAmount || 0).toFixed(2))
         })),
-        payment: { mode: paymentMode as any, amount: Number(amountPaid.toFixed(2)), referenceNumber },
+        payment: { 
+          mode: paymentMode as any, 
+          amount: Number(amountPaid.toFixed(2)), 
+          referenceNumber: referenceNumber.trim() || undefined 
+        },
         notes: ''
       };
 

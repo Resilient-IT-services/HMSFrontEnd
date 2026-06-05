@@ -78,8 +78,8 @@ export const useReceptionBilling = () => {
         quantity: 1,
         unitPrice: fee,
         taxableAmount,
-        hospitalState: hState,
-        billingState: patient?.address?.split(',').pop()?.trim() || hState, // Fallback to hospital state
+        hospitalState: hState || '',
+        billingState: patient?.address?.split(',').pop()?.trim() || hState || '', // Fallback to hospital state
         isTaxInclusive: false
       });
 
