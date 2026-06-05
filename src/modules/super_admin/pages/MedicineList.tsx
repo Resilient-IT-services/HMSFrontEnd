@@ -175,7 +175,7 @@ export function MedicineList() {
                 <div className="flex items-center gap-4 w-full">
                   <input
                     type="text"
-                    placeholder="Search by name, generic name or composition..."
+                    placeholder="Search by name, generic name, composition or HSN code..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="h-12 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none"
