@@ -130,10 +130,12 @@ export const AdminDashboard = () => {
           <div className="col-span-12 lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">Top Performing Hospitals</h4>
-              <select className="text-[10px] font-bold border-slate-200 rounded-lg p-1 bg-slate-50">
-                <option>This Month</option>
-                <option>Last Quarter</option>
-              </select>
+              <button 
+                onClick={() => router.push('/super_admin/hospitals')}
+                className="text-[#ff6b2b] text-[10px] font-black uppercase tracking-widest hover:underline"
+              >
+                View All
+              </button>
             </div>
             <div className="space-y-6">
               {summary?.topHospitals.map((h, idx) => (
@@ -156,8 +158,13 @@ export const AdminDashboard = () => {
           {/* Recent User Registrations */}
           <div className="col-span-12 lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">Recent Registrations</h4>
-              <button className="text-[#ff6b2b] text-[10px] font-black uppercase tracking-widest hover:underline">View All</button>
+              <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">Users</h4>
+              <button 
+                onClick={() => router.push('/admin/users')}
+                className="text-[#ff6b2b] text-[10px] font-black uppercase tracking-widest hover:underline"
+              >
+                View All
+              </button>
             </div>
             <div className="space-y-5">
               {summary?.recentRegistrations.map((u, idx) => (
