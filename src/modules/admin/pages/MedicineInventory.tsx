@@ -314,7 +314,7 @@ export const MedicineInventory = () => {
                       <div className="flex flex-1 items-center gap-4">
                         <div className="w-full max-w-xl">
                           <SearchInput
-                              placeholder="Search catalog by medicine name, generic name..."
+                              placeholder="Search by name, generic name, composition or HSN code..."
                               value={searchTerm}
                               onChange={(e) => handleSearchChange(e.target.value)}
                           />

@@ -11,7 +11,7 @@ export const useMedicines = () => {
   const [totalMedicines, setTotalMedicines] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   const [page, setPage] = useState(0);
@@ -30,7 +30,7 @@ export const useMedicines = () => {
         search: debouncedSearch, 
         page: page,
         size: pageSize,
-        category: categoryFilter === 'ALL' ? undefined : categoryFilter
+        category: categoryFilter || undefined
       });
       if (response.success && response.data) {
         setMedicines(response.data.content);

@@ -23,7 +23,7 @@ export const ContentPanel: React.FC<ContentPanelProps> = ({
   flush = true,
 }) => {
   return (
-    <section className={cn('overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm', className)}>
+    <section className={cn('overflow-visible rounded-2xl border border-slate-200 bg-white shadow-sm', className)}>
       {toolbar && (
         <div className={cn('border-b border-slate-100 bg-slate-50/30 p-4', toolbarClassName)}>
           {toolbar}
