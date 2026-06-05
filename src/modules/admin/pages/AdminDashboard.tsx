@@ -36,9 +36,12 @@ import {
   Download
 } from 'lucide-react';
 import { Modal } from '@/components/ui/Modal';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 
 export const AdminDashboard = () => {
   const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.auth);
   const {
     hospitals,
     loading: tableLoading,
@@ -89,29 +92,37 @@ export const AdminDashboard = () => {
   return (
     <MainLayout title="Admin Overview">
       <div className="p-4 md:p-8 bg-[#f9f9ff] min-h-screen font-inter">
-        {/* Header Section */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        {/* WELCOME SECTION & QUICK ACTIONS */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">ADMIN OVERVIEW</h1>
-            <p className="text-slate-500 text-sm font-medium">Real-time platform metrics and network health.</p>
+            <h1 className="text-xl font-bold text-slate-800">Welcome back, {user?.fullName || 'Super Admin'}!</h1>
+            <p className="text-sm text-slate-500 mt-0.5">Here's what's happening across the platform today.</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => router.push('/admin/users/create')}
-              className="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-slate-50 transition-all"
-            >
-              <UserPlus className="w-4 h-4 text-slate-500" />
-              Hire User
-            </button>
+          <div className="flex flex-wrap items-center gap-2">
             <button 
               onClick={() => router.push('/super_admin/hospitals/create')}
-              className="px-4 py-2 bg-[#ff6b2b] text-white rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-orange-600 shadow-lg shadow-orange-200 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 border border-blue-100 text-xs font-bold rounded-lg hover:bg-blue-100 transition-all"
             >
-              <Plus className="w-4 h-4" />
-              Onboard Hospital
+              <PlusSquare className="w-3.5 h-3.5" /> Onboard Hospital
+            </button>
+            <button 
+              onClick={() => router.push('/admin/users/create')}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 border border-slate-200 text-xs font-bold rounded-lg hover:bg-slate-100 transition-all"
+            >
+              <UserPlus className="w-3.5 h-3.5" /> Hire User
+            </button>
+            <button 
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-100 text-xs font-bold rounded-lg hover:bg-emerald-100 transition-all"
+            >
+              <IndianRupee className="w-3.5 h-3.5" /> Subscriptions
+            </button>
+            <button 
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-100 text-xs font-bold rounded-lg hover:bg-purple-100 transition-all"
+            >
+              <Download className="w-3.5 h-3.5" /> Export Audit
             </button>
           </div>
-        </header>
+        </div>
 
         {/* KPI Grid (8 Cards) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
@@ -130,7 +141,7 @@ export const AdminDashboard = () => {
           <div className="col-span-12 lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">Top Performing Hospitals</h4>
-              <button 
+              <button
                 onClick={() => router.push('/super_admin/hospitals')}
                 className="text-[#ff6b2b] text-[10px] font-black uppercase tracking-widest hover:underline"
               >
@@ -159,7 +170,7 @@ export const AdminDashboard = () => {
           <div className="col-span-12 lg:col-span-6 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">Users</h4>
-              <button 
+              <button
                 onClick={() => router.push('/admin/users')}
                 className="text-[#ff6b2b] text-[10px] font-black uppercase tracking-widest hover:underline"
               >
@@ -181,60 +192,6 @@ export const AdminDashboard = () => {
                   <span className="text-[10px] font-black text-slate-300 uppercase">{u.timeAgo}</span>
                 </div>
               ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-12 gap-6 mb-8">
-          {/* Alerts & Health */}
-          <div className="col-span-12 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-full">
-              <div className="flex items-center justify-between mb-6">
-                <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">System Alerts</h4>
-                <div className="h-2 w-2 rounded-full bg-red-500 animate-ping"></div>
-              </div>
-              <div className="space-y-4">
-                {summary?.alerts.map((a, idx) => (
-                  <div key={idx} className="flex gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${getAlertBgColor(a.type)}`}>
-                      {a.type === 'LICENSE' ? <AlertTriangle className="w-4 h-4 text-red-500" /> : <Server className="w-4 h-4 text-orange-500" />}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-700 leading-tight">{a.message}</p>
-                      <p className="text-[10px] font-black text-slate-300 uppercase mt-1">{a.timeAgo}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-full">
-              <div className="flex items-center justify-between mb-6">
-                <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider">Platform Health</h4>
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">Online</span>
-              </div>
-              <div className="space-y-4">
-                <HealthRow icon={<Server />} label="API Infrastructure" status={summary?.health.apiStatus || 'Healthy'} />
-                <HealthRow icon={<Database />} label="Core Database" status={summary?.health.dbStatus || 'Healthy'} />
-                <HealthRow icon={<ShieldCheck />} label="Security & Auth" status={summary?.health.authStatus || 'Healthy'} />
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-4">
-                  <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Aggregate Uptime</span>
-                  <span className="text-sm font-black text-emerald-600 tracking-tighter">{summary?.health.overallUptime || '99.98%'}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Quick Actions */}
-          <div className="col-span-12 lg:col-span-4">
-            <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-full">
-              <h4 className="font-black text-slate-900 text-sm uppercase tracking-wider mb-6">Priority Actions</h4>
-              <div className="space-y-3">
-                <QuickActionButton icon={<PlusSquare className="text-blue-500" />} label="Onboard New Hospital" onClick={() => router.push('/super_admin/hospitals/create')} />
-                <QuickActionButton icon={<UserPlus className="text-blue-500" />} label="Add Platform User" onClick={() => router.push('/admin/users/create')} />
-                <QuickActionButton icon={<IndianRupee className="text-blue-500" />} label="Manage Subscriptions" />
-                <QuickActionButton icon={<Download className="text-blue-500" />} label="Export Platform Audit" />
-              </div>
             </div>
           </div>
         </div>
@@ -365,63 +322,59 @@ export const AdminDashboard = () => {
 // Helper Components
 function KpiCard({ icon, title, value, trend, color, subText, isActiveIndicator }: any) {
   const colors: any = {
-    blue: 'bg-blue-50 text-blue-500 shadow-blue-100',
-    purple: 'bg-purple-50 text-purple-500 shadow-purple-100',
-    green: 'bg-green-50 text-green-500 shadow-green-100',
-    orange: 'bg-orange-50 text-[#ff6b2b] shadow-orange-100',
-    indigo: 'bg-indigo-50 text-indigo-500 shadow-indigo-100',
-    pink: 'bg-pink-50 text-pink-500 shadow-pink-100',
-    emerald: 'bg-emerald-50 text-emerald-500 shadow-emerald-100',
-    violet: 'bg-violet-50 text-violet-500 shadow-violet-100',
+    blue: 'bg-blue-50 text-blue-600',
+    purple: 'bg-purple-50 text-purple-600',
+    green: 'bg-emerald-50 text-emerald-600',
+    orange: 'bg-orange-50 text-orange-600',
+    indigo: 'bg-amber-50 text-amber-500',
+    pink: 'bg-rose-50 text-rose-600',
+    emerald: 'bg-emerald-50 text-emerald-600',
+    violet: 'bg-indigo-50 text-indigo-500',
   };
 
   return (
-    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-2">
-        <div className={`w-10 h-10 flex items-center justify-center rounded-xl shadow-inner ${colors[color]}`}>
-          {React.cloneElement(icon, { size: 20 })}
-        </div>
-        {isActiveIndicator && <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.6)]"></div>}
+    <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between h-full">
+      <div className="flex items-start justify-between">
+        <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug break-words">{title}</p>
+        <span className={`p-1.5 rounded-lg ${colors[color]}`}>
+          {React.cloneElement(icon, { className: 'w-4 h-4' })}
+        </span>
       </div>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
-      <h3 className="text-lg font-black text-slate-800 tracking-tighter">{value}</h3>
-      {trend && (
-        <p className="text-[10px] text-emerald-500 font-black flex items-center mt-1">
-          <TrendingUp className="w-3 h-3 mr-1" /> {trend}
-        </p>
-      )}
-      {subText && <p className="text-[9px] font-black text-slate-300 uppercase mt-1 tracking-tighter">{subText}</p>}
+      <div className="mt-4">
+        <div className="flex items-center gap-2">
+          <h3 className="text-2xl font-bold text-slate-800">{value}</h3>
+          {isActiveIndicator && <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>}
+        </div>
+        {trend && (
+          <p className="text-[10px] text-emerald-500 font-bold flex items-center mt-1">
+            <TrendingUp className="w-3 h-3 mr-1" /> {trend}
+          </p>
+        )}
+        {subText && <p className="text-[10px] font-medium text-slate-400 mt-1">{subText}</p>}
+      </div>
     </div>
   );
 }
 
 function HealthRow({ icon, label, status }: any) {
   return (
-    <div className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 transition-colors">
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-slate-50 rounded-lg text-emerald-500">
-          {React.cloneElement(icon, { size: 16 })}
-        </div>
-        <span className="text-xs font-bold text-slate-600">{label}</span>
+    <div className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
+      <div className="flex items-center gap-2">
+        <span className="w-1.5 h-3 bg-emerald-500 rounded-sm"></span>
+        <span className="text-xs font-medium text-slate-700">{label}</span>
       </div>
-      <span className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-full font-black uppercase tracking-widest">{status}</span>
+      <span className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg font-bold">{status}</span>
     </div>
   );
 }
 
 function QuickActionButton({ icon, label, onClick }: any) {
   return (
-    <button 
+    <button
       onClick={onClick}
-      className="w-full flex items-center justify-between p-3.5 bg-slate-50 hover:bg-orange-50 rounded-2xl group transition-all border border-transparent hover:border-orange-100"
+      className="w-full py-2 bg-blue-50 text-blue-600 border border-blue-100 text-xs font-bold rounded-xl mt-3 hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5"
     >
-      <div className="flex items-center gap-3">
-        <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-          {React.cloneElement(icon, { size: 16 })}
-        </div>
-        <span className="text-xs font-bold text-slate-700">{label}</span>
-      </div>
-      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#ff6b2b] group-hover:translate-x-1 transition-all" />
+      {React.cloneElement(icon, { className: 'w-3.5 h-3.5' })} {label}
     </button>
   );
 }
