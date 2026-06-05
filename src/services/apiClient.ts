@@ -2,6 +2,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { store } from '@/state/store';
 import { logout } from '@/state/authSlice';
 import { CONFIG } from '@/utils/config';
+import { triggerToast } from '@/utils/toast';
 
 declare module 'axios' {
   export interface AxiosRequestConfig {
@@ -18,14 +19,6 @@ const apiClient = axios.create({
   },
 });
 
-// Helper to trigger toasts without importing UI components (avoids circular dependency)
-const triggerToast = (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
-  if (globalThis.window !== undefined) {
-    globalThis.dispatchEvent(new CustomEvent('show-toast', { detail: { message, type } }));
-  }
-};
-
-
 apiClient.interceptors.request.use((config) => {
   const token = globalThis.window === undefined ? null : localStorage.getItem("token");
 
@@ -41,7 +34,6 @@ apiClient.interceptors.request.use((config) => {
 
   return config;
 });
-
 
 apiClient.interceptors.response.use(
     (response: AxiosResponse) => {
