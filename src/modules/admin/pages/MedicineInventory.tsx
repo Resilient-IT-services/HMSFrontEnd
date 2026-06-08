@@ -39,7 +39,7 @@ export const MedicineInventory = () => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Pagination
+
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
