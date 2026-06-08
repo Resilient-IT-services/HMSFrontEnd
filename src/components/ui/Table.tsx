@@ -281,6 +281,44 @@ export const Table = <T,>({
               })}
             </tr>
 
+            {/* Filter Row */}
+            {columns.some(c => c.filterable || c.renderFilter) && (
+              <tr className={cn(
+                "bg-slate-50/30 border-b border-slate-100",
+                hideHeaderOnMobile ? "hidden lg:table-row" : "table-row"
+              )}>
+                {columns.map((column, index) => (
+                  <th key={index} className="px-4 py-2 bg-white/50">
+                    {column.filterable && column.filterType !== 'select' && !column.renderFilter && column.key && (
+                      <input
+                        type="text"
+                        placeholder={column.filterPlaceholder || "Filter..."}
+                        value={activeFilters[column.key as string] || ''}
+                        onChange={(e) => onFilter?.(column.key as string, e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-[11px] font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all placeholder:text-slate-300 shadow-sm"
+                      />
+                    )}
+
+                    {column.filterable && column.filterType === 'select' && column.key && (
+                      <select
+                        value={activeFilters[column.key as string] || ''}
+                        onChange={(e) => onFilter?.(column.key as string, e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-[11px] font-bold text-slate-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all cursor-pointer shadow-sm appearance-none"
+                      >
+                        <option value="">All {column.header}</option>
+                        {column.filterOptions?.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+
+                    {column.renderFilter?.((key, value) => onFilter?.(key, value), activeFilters)}
+                  </th>
+                ))}
+              </tr>
+            )}
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">
             {isLoading ? (

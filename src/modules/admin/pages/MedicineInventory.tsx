@@ -193,8 +193,6 @@ export const MedicineInventory = () => {
   const columns: Column<MedicineResponse>[] = [
     {
       header: 'Medicine Details',
-      filterable: true,
-      filterPlaceholder: 'Search name...',
       render: (m) => (
           <div className="flex items-center gap-3">
             <Avatar name={m.name} variant="orange" />
@@ -207,8 +205,6 @@ export const MedicineInventory = () => {
     },
     {
       header: 'Generic Name',
-      filterable: true,
-      filterPlaceholder: 'Generic name...',
       render: (m) => (
           <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
       )
@@ -229,18 +225,6 @@ export const MedicineInventory = () => {
     },
     {
       header: 'Category',
-      filterable: true,
-      filterType: 'select',
-      filterOptions: [
-        { label: 'Tablet', value: 'TABLET' },
-        { label: 'Syrup', value: 'SYRUP' },
-        { label: 'Capsule', value: 'CAPSULE' },
-        { label: 'Injection', value: 'INJECTION' },
-        { label: 'Ointment', value: 'OINTMENT' },
-        { label: 'Cream', value: 'CREAM' },
-        { label: 'Drops', value: 'DROPS' },
-        { label: 'Inhaler', value: 'INHALER' }
-      ],
       className: 'text-center',
       headerClassName: 'text-center',
       render: (m) => (
