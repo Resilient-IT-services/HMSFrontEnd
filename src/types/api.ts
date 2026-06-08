@@ -308,6 +308,53 @@ export interface OPDEncounterRequest {
 
 // ... other types ...
 
+// Admin Dashboard types
+export interface AdminDashboardKpiStats {
+  totalHospitals: number;
+  totalUsers: number;
+  activeUsersToday: number;
+  totalDoctors: number;
+  totalRevenue: number;
+  newHospitalsThisMonth: number;
+  totalPatients: number;
+  systemUptime: string;
+}
+
+export interface AdminDashboardTopHospital {
+  name: string;
+  patientCount: number;
+  performancePercentage: number;
+}
+
+export interface AdminDashboardRecentRegistration {
+  fullName: string;
+  role: string;
+  timeAgo: string;
+  initials: string;
+}
+
+export interface AdminDashboardSystemAlert {
+  message: string;
+  timeAgo: string;
+  type: 'LICENSE' | 'SERVER' | 'STOCK';
+}
+
+export interface AdminDashboardPlatformHealth {
+  apiStatus: string;
+  dbStatus: string;
+  authStatus: string;
+  overallUptime: string;
+}
+
+export interface AdminDashboardSummary {
+  kpis: AdminDashboardKpiStats;
+  topHospitals: AdminDashboardTopHospital[];
+  recentRegistrations: AdminDashboardRecentRegistration[];
+  alerts: AdminDashboardSystemAlert[];
+  health: AdminDashboardPlatformHealth;
+}
+
+// ... rest of the file ...
 export interface UpdateBillingStatusRequest {
   status: 'DRAFT' | 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCELLED';
   paymentMethod?: string;

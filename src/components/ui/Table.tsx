@@ -75,6 +75,8 @@ export const Table = <T,>({
   hideHeaderOnMobile = true,
   onSort,
   activeSort,
+  onFilter,
+  activeFilters = {},
 }: TableProps<T>) => {
 
   const handleSort = (column: Column<T>) => {
@@ -278,6 +280,40 @@ export const Table = <T,>({
                 );
               })}
             </tr>
+
+            {/* Filter Row */}
+            {columns.some(c => c.filterable) && (
+              <tr className="bg-slate-50/50 border-b border-slate-100 hidden lg:table-row">
+                {columns.map((column, index) => (
+                  <td key={index} className="px-4 py-2">
+                    {column.filterable && (
+                      column.renderFilter ? (
+                        column.renderFilter(onFilter!, activeFilters)
+                      ) : column.filterType === 'select' ? (
+                        <select
+                          className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                          value={activeFilters[column.sortKey || (column.key as string)] || ''}
+                          onChange={(e) => onFilter?.(column.sortKey || (column.key as string), e.target.value)}
+                        >
+                          <option value="">All {column.header}</option>
+                          {column.filterOptions?.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type="text"
+                          placeholder={column.filterPlaceholder || "Filter..."}
+                          className="w-full px-2 py-1 text-xs border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+                          value={activeFilters[column.sortKey || (column.key as string)] || ''}
+                          onChange={(e) => onFilter?.(column.sortKey || (column.key as string), e.target.value)}
+                        />
+                      )
+                    )}
+                  </td>
+                ))}
+              </tr>
+            )}
 
           </thead>
           <tbody className="divide-y divide-slate-100 bg-white">

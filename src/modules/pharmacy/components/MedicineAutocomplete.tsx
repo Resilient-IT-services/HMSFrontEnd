@@ -58,7 +58,8 @@ const MedicineAutocomplete: React.FC<MedicineAutocompleteProps> = ({
             currentStock: item.quantity === undefined ? item.currentStock : item.quantity,
             batchNumber: item.batchNumber,
             expiryDate: item.expiryDate,
-            sellingPrice: item.sellingPrice || item.price
+            sellingPrice: item.sellingPrice || item.price,
+            hsnCode: item.hsnCode
           }));
           setResults(normalized as any);
         }

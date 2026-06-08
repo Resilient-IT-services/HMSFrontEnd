@@ -77,13 +77,13 @@ export const PharmacySalesPage = () => {
         const res = await taxService.calculate({
           hospitalId: currentHospitalId,
           itemType: 'MEDICINE',
-          itemCode: item.id,
-          hsnOrSacCode: item.hsnCode,
+          itemCode: (item as any).medicineId || item.id,
+          hsnOrSacCode: (item as any).hsnCode || '3004',
           quantity: item.quantity,
           unitPrice: item.sellingPrice || 0,
-          taxableAmount: (item.sellingPrice || 0) * item.quantity,
-          hospitalState: hState,
-          billingState: selectedPatient?.address?.split(',').pop()?.trim() || hState,
+          taxableAmount: Math.max(0, (item.sellingPrice || 0) * item.quantity),
+          hospitalState: hState || '',
+          billingState: selectedPatient?.address?.split(',').pop()?.trim() || hState || '',
           isTaxInclusive: false
         });
         return res.success ? res.data : null;
@@ -211,17 +211,21 @@ export const PharmacySalesPage = () => {
     setLoading(true);
     try {
       const saleItems = cart.map(item => ({
-        medicineId: item.id,
-        quantity: item.quantity
+        medicineId: (item as any).medicineId || item.id,
+        medicineBatchId: (item as any).medicineId ? item.id : undefined,
+        quantity: item.quantity,
+        unitPrice: item.sellingPrice || 0,
+        taxAmount: 0
       }));
 
       const response = await pharmacyApi.createSale({ 
+        saleType: visitIdParam ? 'VISIT' : 'WALKIN',
         patientId: selectedPatient.id,
         visitId: visitIdParam || undefined,
         items: saleItems,
         payment: {
           mode: 'CASH',
-          amount: grandTotal
+          amount: Number(grandTotal.toFixed(2))
         }
       } as any);
       

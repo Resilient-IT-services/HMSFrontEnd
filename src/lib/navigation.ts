@@ -36,7 +36,6 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
     { name: 'Prescriptions', icon: 'prescriptions', href: effectiveRole === 'PHARMACIST' ? '/pharmacy/prescriptions' : '/doctor/prescriptions', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'Pharmacy Billing', icon: 'point_of_sale', href: '/pharmacy/sales', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'Medicine Master', icon: 'medication', href: '/admin/medicines', roles: ['ADMIN', 'SUPER_ADMIN'] },
-    { name: 'Laboratory Master', icon: 'biotech', href: '/settings/lab/tests', roles: ['ADMIN', 'SUPER_ADMIN'] },
     { name: 'Inventory', icon: 'inventory_2', href: '/pharmacy/stock', roles: ['PHARMACIST', 'ADMIN'] },
     { name: 'Users', icon: 'person', href: '/admin/users', roles: ['ADMIN', 'SUPER_ADMIN'] },
     { name: 'Hospitals', icon: 'apartment', href: '/super_admin/hospitals', roles: ['SUPER_ADMIN'] },

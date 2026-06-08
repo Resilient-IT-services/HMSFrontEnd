@@ -108,7 +108,7 @@ export default function AppointmentScheduling() {
              const firstFree = res.data.sessions.find(s => s.available);
              if (firstFree) {
                 setSelectedSession(firstFree);
-                setEditableTime(firstFree.startTime);
+                setEditableTime(firstFree.nextSuggestedTime || firstFree.startTime);
              }
           }
         }

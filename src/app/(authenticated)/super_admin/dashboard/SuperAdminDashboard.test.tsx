@@ -3,11 +3,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import SuperAdminDashboard from './page';
 import { adminService } from '@/services/adminService';
 import { hospitalService } from '@/services/hospitalService';
+import StoreProvider from '@/state/StoreProvider';
 
 // Mock services
 vi.mock('@/services/adminService', () => ({
   adminService: {
     getAdminStats: vi.fn(),
+    getDashboardSummary: vi.fn(),
   },
 }));
 
@@ -34,13 +36,28 @@ describe('SuperAdminDashboard', () => {
   });
 
   it('renders stats and welcome message', async () => {
-    vi.mocked(adminService.getAdminStats).mockResolvedValue({
+    vi.mocked(adminService.getDashboardSummary).mockResolvedValue({
       success: true,
       data: {
-        totalHospitals: 5,
-        totalUsers: 10,
-        activeUsers: 2,
-        totalDoctors: 3
+        kpis: {
+          totalHospitals: 5,
+          totalUsers: 10,
+          activeUsersToday: 2,
+          totalDoctors: 3,
+          totalRevenue: 500_000,
+          newHospitalsThisMonth: 1,
+          totalPatients: 50,
+          systemUptime: '99.9%'
+        },
+        topHospitals: [],
+        recentRegistrations: [],
+        alerts: [],
+        health: {
+          apiStatus: 'Healthy',
+          dbStatus: 'Healthy',
+          authStatus: 'Healthy',
+          overallUptime: '99.9%'
+        }
       }
     } as any);
 
@@ -58,12 +75,16 @@ describe('SuperAdminDashboard', () => {
       }
     } as any);
 
-    render(<SuperAdminDashboard />);
+    render(
+      <StoreProvider>
+        <SuperAdminDashboard />
+      </StoreProvider>
+    );
 
     await waitFor(() => {
       // Metric values are displayed in multiple places (desktop and mobile grids)
       // We check for presence of at least one instance of each key stat
-      expect(screen.getAllByText('05').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('5').length).toBeGreaterThan(0);
       expect(screen.getAllByText('10').length).toBeGreaterThan(0);
       
       // Check for Admin Overview in the MainLayout mock
