@@ -173,56 +173,43 @@ export function MedicineList() {
             <div className="xl:col-span-3 space-y-6">
               <div className="bg-white rounded-[2rem] border border-slate-200 p-6 space-y-6">
                 <div className="flex items-center gap-4 w-full">
-                  <input
-                    type="text"
-                    placeholder="Search by name, generic name, composition or HSN code..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="h-12 flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none"
-                  />
 
-                  <div
-                    style={{
-                      width: "220px",
-                      minWidth: "220px",
-                      height: "48px",
-                      background: "#ffffff",
-                      border: "1px solid #cbd5e1",
-                      borderRadius: "16px",
-                      display: "flex",
-                      alignItems: "center",
-                      padding: "0 12px"
-                    }}
-                  >
+                  {/* Search */}
+                  <div className="flex-1">
+                    <input
+                        type="text"
+                        placeholder="Search by name, generic name, composition or HSN code..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none"
+                    />
+                  </div>
+
+                  {/* Category Filter */}
+                  <div className="w-[220px] shrink-0">
                     <select
-                      value={selectedCategory || ""}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      style={{
-                        width: "100%",
-                        border: "none",
-                        outline: "none",
-                        background: "transparent",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        cursor: "pointer"
-                      }}
+                        value={selectedCategory || ""}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold outline-none"
                     >
                       <option value="">All Category</option>
 
                       {categories.map((category) => (
-                        <option key={category} value={category}>
-                          {formatCategoryLabel(category)}
-                        </option>
+                          <option key={category} value={category}>
+                            {formatCategoryLabel(category)}
+                          </option>
                       ))}
                     </select>
                   </div>
 
+                  {/* Refresh */}
                   <button
-                    onClick={() => refresh()}
-                    className="h-12 w-12 rounded-2xl border border-slate-200 bg-white flex items-center justify-center"
+                      onClick={() => refresh()}
+                      className="h-12 w-12 shrink-0 rounded-2xl border border-slate-200 bg-white flex items-center justify-center"
                   >
                     ↻
                   </button>
+
                 </div>
 
                 {loading && medicines.length === 0 ? (
