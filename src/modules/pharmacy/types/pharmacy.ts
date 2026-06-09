@@ -1,4 +1,4 @@
-import { PrescriptionDTO, PatientResponse, AppointmentResponse } from '@/types/api';
+import { PrescriptionDTO, AppointmentResponse } from '@/types/api';
 
 export interface PrescriptionItem extends PrescriptionDTO {
   medicineName: string;

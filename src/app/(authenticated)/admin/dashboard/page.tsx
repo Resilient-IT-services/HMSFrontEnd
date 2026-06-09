@@ -2,15 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import {
-  Activity,
-  LayoutGrid,
-  Building2,
   Users,
-  BarChart3,
-  Package,
-  FileText,
-  Settings,
-  LogOut,
   Search,
   Bell,
   HelpCircle,
@@ -37,7 +29,7 @@ import {
 } from 'lucide-react';
 import { adminService } from '@/services/adminService';
 import { hospitalService } from '@/services/hospitalService';
-import { AdminDashboardSummary, HospitalResponse, PageResponse } from '@/types/api';
+import { AdminDashboardSummary, HospitalResponse } from '@/types/api';
 import { triggerToast } from '@/utils/toast';
 
 export default function AdminDashboardPage() {

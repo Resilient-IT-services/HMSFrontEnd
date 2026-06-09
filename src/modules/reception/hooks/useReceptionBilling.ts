@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { isAxiosError } from 'axios';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
@@ -18,7 +18,6 @@ import { RootState } from '@/state/store';
 const APPOINTMENT_CONFLICT_MESSAGE = 'Appointment already exists for this patient with the same doctor at the selected time';
 
 export const useReceptionBilling = () => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { user, hospitalTimezone } = useSelector((state: RootState) => state.auth);
 

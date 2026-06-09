@@ -16,7 +16,6 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({ className }) => {
   const dispatch = useDispatch();
   const { user, isSuperMode } = useSelector((state: RootState) => state.auth);
   const [hospitals, setHospitals] = useState<HospitalResponse[]>([]);
-  const [loading, setLoading] = useState(false);
 
   // Logic to highlight if hospital context is missing when on hospital-specific pages
   const pathname = globalThis.window === undefined ? '' : globalThis.location.pathname;
@@ -31,7 +30,6 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({ className }) => {
   useEffect(() => {
     if (user?.superuser && isSuperMode) {
       const fetchHospitals = async () => {
-        setLoading(true);
         try {
           const res = await hospitalService.list({ page: 0, size: 100, status: 'ACTIVE' });
           if (res.success && res.data) {
@@ -39,8 +37,6 @@ const HospitalSelector: React.FC<HospitalSelectorProps> = ({ className }) => {
           }
         } catch (error) {
           console.error('Failed to fetch hospitals for selector:', error);
-        } finally {
-          setLoading(false);
         }
       };
       fetchHospitals();

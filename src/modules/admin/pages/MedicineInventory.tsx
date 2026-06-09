@@ -39,11 +39,10 @@ export const MedicineInventory = () => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-  const [sort, setSort] = useState<string | undefined>();
+  const [sort] = useState<string | undefined>();
   const debouncedColumnFilters = useDebounce(columnFilters, DEFAULT_DEBOUNCE_MS);
 
   const fetchMedicines = useCallback(async () => {
@@ -329,7 +328,7 @@ export const MedicineInventory = () => {
             </ContentPanel>
           </div>
 
-          {/* New Custom Sexy Framework Import Modal */}
+          {/* Import Modal */}
           {showImportModal && (
               <Modal
                   isOpen={showImportModal}
@@ -337,10 +336,10 @@ export const MedicineInventory = () => {
                   title="Import Inventory Sheet"
                   width="430px"
               >
-                <div className="p-4 flex flex-col h-auto bg-[var(--surface)] overflow-hidden justify-start items-stretch">
+                <div className="p-4 flex flex-col gap-4 bg-[var(--surface)]">
 
                   {/* Micro Info bar */}
-                  <div className="mb-3.5 flex gap-2 items-center p-2.5 bg-[var(--primary-light)]/10 border border-[var(--primary-light)]/20 rounded-xl">
+                  <div className="flex gap-2 items-center p-2.5 bg-[var(--primary-light)]/10 border border-[var(--primary-light)]/20 rounded-xl">
                     <AlertCircle className="size-3.5 text-[var(--primary)] shrink-0" />
                     <p className="text-[10px] font-bold text-[var(--text-primary)] uppercase tracking-wide opacity-80">
                       System auto-skips duplicate entries smoothly.
@@ -350,7 +349,7 @@ export const MedicineInventory = () => {
                   {/* High Tech Dropzone */}
                   <div
                       onClick={() => fileInputRef.current?.click()}
-                      className={`border rounded-xl p-5 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center min-h-[115px] h-auto relative overflow-hidden group ${
+                      className={`border rounded-xl p-5 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center min-h-[115px] relative group ${
                           importFile
                               ? 'border-emerald-500 bg-emerald-50/10'
                               : 'border-[var(--border)] bg-[var(--background)]/40 hover:border-[var(--primary)]'
@@ -398,8 +397,8 @@ export const MedicineInventory = () => {
                     )}
                   </div>
 
-                  {/* Clean Non-Stretching Action bar */}
-                  <div className="mt-4 grid grid-cols-2 gap-3 flex-initial">
+                  {/* Clean Actions */}
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                         onClick={() => setShowImportModal(false)}
                         className="py-2.5 bg-[var(--background)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs font-bold uppercase tracking-wider transition-all hover:bg-[var(--border)]"
@@ -440,7 +439,7 @@ export const MedicineInventory = () => {
               />
           )}
 
-          {/* Ultra-Sexy & High Contrast Unique Delete Confirmation Modal */}
+          {/* Delete Confirmation Modal */}
           {showDeleteModal && medicineToDelete && (
               <Modal
                   isOpen={showDeleteModal}
@@ -451,10 +450,10 @@ export const MedicineInventory = () => {
                   title="Inventory Action Required"
                   width="420px"
               >
-                <div className="p-4 flex flex-col h-auto max-h-fit justify-start items-stretch bg-[var(--surface)] overflow-hidden">
+                <div className="p-4 flex flex-col gap-4 bg-[var(--surface)]">
 
-                  {/* Modern Horizontal Alert Stripe header layout style */}
-                  <div className="flex gap-3.5 items-center p-3 bg-[var(--error-light)]/10 border border-[var(--error-light)]/20 rounded-xl mb-4 text-left">
+                  {/* Modern Horizontal Alert Stripe */}
+                  <div className="flex gap-3.5 items-center p-3 bg-[var(--error-light)]/10 border border-[var(--error-light)]/20 rounded-xl text-left">
                     <div className="size-9 rounded-xl bg-[var(--error-light)] text-[var(--error)] flex items-center justify-center shrink-0 border border-[var(--error)]/10 shadow-sm shadow-[var(--error-light)]/30">
                       <Trash2 className="size-4.5" />
                     </div>
@@ -468,8 +467,8 @@ export const MedicineInventory = () => {
                     </div>
                   </div>
 
-                  {/* Inline focus prompt card context block */}
-                  <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)]/50 text-center mb-4">
+                  {/* Inline focus prompt card */}
+                  <div className="p-3.5 rounded-xl border border-[var(--border)] bg-[var(--background)]/50 text-center">
                     <p className="text-[11px] font-medium text-[var(--text-secondary)]">
                       Are you sure you want to completely erase
                     </p>
@@ -481,7 +480,7 @@ export const MedicineInventory = () => {
                     </p>
                   </div>
 
-                  {/* Tightly bound flush actions grid layout matrix */}
+                  {/* Actions grid */}
                   <div className="grid grid-cols-2 gap-3 w-full">
                     <button
                         type="button"

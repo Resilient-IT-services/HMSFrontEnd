@@ -3,22 +3,20 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '../api/pharmacyApi';
-import { PrescriptionResponse, PharmacyStockDTO, PharmacySaleResponse, QuickPharmacySaleResponse } from '@/types/api';
+import { PrescriptionResponse, PharmacyStockDTO, QuickPharmacySaleResponse } from '@/types/api';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { Table, Column } from '@/components/ui/Table';
-import { SearchInput } from '@/components/ui/SearchInput';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { 
   FileText, Hourglass, CheckCircle2, AlertTriangle, Calendar, 
   IndianRupee, Plus, Search, PlusCircle, Download, 
-  ArrowUp, ArrowRight, Eye, Activity
+  ArrowRight, Eye, Activity
 } from 'lucide-react';
 
 import dayjs from 'dayjs';
-import { reportService } from '@/services/reportService';
 
 export const PharmacyDashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -26,7 +24,6 @@ export const PharmacyDashboard = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
   const [recentSalesData, setRecentSalesData] = useState<any[]>([]);
   const [lowStockAlerts, setLowStockAlerts] = useState<PharmacyStockDTO[]>([]);
-  const [expiryAlerts, setExpiryAlerts] = useState<PharmacyStockDTO[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [importing, setImporting] = useState(false);
@@ -124,7 +121,6 @@ export const PharmacyDashboard = () => {
       setRecentSalesData(recentSales.slice(0, 3));
       setPrescriptions(pendingList);
       setLowStockAlerts(lowStockList.slice(0, 3));
-      setExpiryAlerts(expiringSoonList.slice(0, 3));
       setMetrics({
         totalPrescriptionsToday: pendingCount + completedCount + cancelledCount,
         pendingPrescriptions: pendingCount,
@@ -140,7 +136,7 @@ export const PharmacyDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [user?.currentHospitalId]);
+  }, []);
 
   useEffect(() => {
     const trigger = async () => {

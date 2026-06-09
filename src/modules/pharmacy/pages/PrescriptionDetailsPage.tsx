@@ -8,21 +8,17 @@ import PatientInfoCard from '../components/PatientInfoCard';
 import MedicineTable from '../components/MedicineTable';
 import LoadingSkeleton from '../components/LoadingSkeleton';
 import EmptyState from '../components/EmptyState';
-import { Modal } from '@/components/ui/Modal';
 import PatientProfileModal from './PatientProfileModal';
 import PatientHistoryModal from './PatientHistoryModal';
-import { useToast } from '@/components/ui/Toast';
 
 const PrescriptionDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { showToast } = useToast();
   
   const [prescription, setPrescription] = useState<PrescriptionDTO | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [dispensing, setDispensing] = useState(false);
   
   const [showProfile, setShowProfile] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
@@ -118,15 +114,10 @@ const PrescriptionDetailsPage: React.FC = () => {
             
             <button 
               onClick={handleDispense}
-              disabled={dispensing}
-              className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm ${
-                dispensing 
-                ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                : 'bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.98]'
-              }`}
+              className="w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 shadow-sm bg-[var(--primary)] text-white hover:opacity-90 active:scale-[0.98]"
             >
               <span className="material-symbols-outlined">medication_liquid</span>
-              {dispensing ? 'Processing...' : 'Proceed to Billing'}
+              Proceed to Billing
             </button>
           </div>
 

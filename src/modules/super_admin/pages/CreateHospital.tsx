@@ -9,7 +9,6 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { HOSPITAL_STATUS_OPTIONS } from '@/utils/enumOptions';
 import { INDIAN_STATES, INDIAN_STATES_CITIES } from '@/utils/indianStates';
 import { PageSurface } from '@/components/ui/PageSurface';
-import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 
 export function CreateHospital() {

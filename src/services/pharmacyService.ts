@@ -13,8 +13,6 @@ import {
   InventoryItemRequestDTO,
   StockTransactionRequestDTO,
   StockRequest,
-  PharmacySaleRequest,
-  PharmacySaleResponse,
   QuickPharmacySaleRequest,
   QuickPharmacySaleResponse,
   PharmacyReturnRequest,

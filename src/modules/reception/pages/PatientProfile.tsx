@@ -2,18 +2,16 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
-import { Card } from '@/components/ui/Card';
 import { patientService } from '@/services/patientService';
 import { appointmentService } from '@/services/appointmentService';
 import { PatientResponse, AppointmentResponse } from '@/types/api';
-import { triggerGlobalToast } from '@/components/ui/Toast';
-import { Badge } from '@/components/ui/Badge';
 import { CalendarDays, Edit, Cake, MapPin, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Avatar } from '@/components/ui/Avatar';
 import { Tabs } from '@/components/ui/Tabs';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { Card } from '@/components/ui/Card';
 
 export function PatientProfile({ id }: { id: string }) {
   const router = useRouter();

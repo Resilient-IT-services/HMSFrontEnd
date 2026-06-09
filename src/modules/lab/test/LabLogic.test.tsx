@@ -1,6 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import React from 'react';
+import { describe, it, expect } from 'vitest';
 
 // Logic to test (extracted for pure unit testing of business rules in UI)
 const determineStatus = (value: number, range: { min: number, max: number, cMin: number, cMax: number }) => {

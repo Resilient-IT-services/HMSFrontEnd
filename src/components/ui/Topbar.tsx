@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setActiveRole, setCurrentHospitalId } from '@/state/authSlice';
+import { setActiveRole } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { Role } from '@/types/api';
 import GlobalSearch from './GlobalSearch';

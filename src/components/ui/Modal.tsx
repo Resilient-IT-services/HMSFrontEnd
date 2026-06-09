@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect } from 'react';
-
 import { cn } from '@/lib/cn';
 
 type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full' | 'auto';
@@ -26,15 +25,15 @@ const sizeClasses: Record<ModalSize, string> = {
   auto: 'w-auto'
 };
 
-export const Modal: React.FC<ModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  children, 
-  size = 'md',
-  width,
-  hideHeader = false
-}) => {
+export const Modal: React.FC<ModalProps> = ({
+                                              isOpen,
+                                              onClose,
+                                              title,
+                                              children,
+                                              size = 'md',
+                                              width,
+                                              hideHeader = false
+                                            }) => {
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : 'unset';
     const handleEsc = (e: KeyboardEvent) => {
@@ -50,39 +49,40 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 animate-in fade-in" 
-        onClick={onClose}
-      ></div>
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden">
+        {/* Backdrop */}
+        <div
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 animate-in fade-in"
+            onClick={onClose}
+        ></div>
 
-      {/* Modal Container */}
-      <div 
-        className={cn(
-          "relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[90vw] h-[70vh]",
-          sizeClasses[size]
-        )}
-        style={width ? { width, maxWidth: '100%' } : {}}
-      >
-        {!hideHeader && (
-          <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-white shrink-0">
-            <div className="space-y-0.5">
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">{title}</h3>
-            </div>
-            <button 
-              onClick={onClose}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all group active:scale-90"
-            >
-              <span className="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-300">close</span>
-            </button>
+        {/* Modal Container: h-[70vh] ko hatakar h-auto aur max-h-[85vh] kar diya hai */}
+        <div
+            className={cn(
+                "relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[90vw] h-auto max-h-[85vh]",
+                sizeClasses[size]
+            )}
+            style={width ? { width, maxWidth: '100%' } : {}}
+        >
+          {!hideHeader && (
+              <div className="px-6 py-4 border-b border-slate-50 flex justify-between items-center bg-white shrink-0">
+                <div className="space-y-0.5">
+                  <h3 className="text-lg font-black text-slate-900 tracking-tight">{title}</h3>
+                </div>
+                <button
+                    onClick={onClose}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all group active:scale-90"
+                >
+                  <span className="material-symbols-outlined text-lg group-hover:rotate-90 transition-transform duration-300">close</span>
+                </button>
+              </div>
+          )}
+
+          {/* min-h-0 lagaya taaki flex-1 content size sahi se handle kare bina stretch hue */}
+          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar p-1">
+            {children}
           </div>
-        )}
-        
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
-          {children}
         </div>
       </div>
-    </div>
   );
 };

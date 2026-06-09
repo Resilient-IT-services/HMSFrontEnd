@@ -4,21 +4,18 @@ import React, { useEffect, useState, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { AppointmentSummaryDTO } from '@/types/api';
-import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL } from '@/utils/constants';
 import { Pill, Microscope, Stethoscope, Info, Droplets } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
-import dayjs from '@/lib/dayjs';
 import { PageSurface } from '@/components/ui/PageSurface';
 
 export function TokenQueue() {
   const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [appointments, setAppointments] = useState<AppointmentSummaryDTO[]>([]);
   const [totalInQueue, setTotalInQueue] = useState(0);
-  const [loading, setLoading] = useState(true);
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -36,8 +33,6 @@ export function TokenQueue() {
       }
     } catch (error) {
       console.error('Failed to fetch queue', error);
-    } finally {
-      setLoading(false);
     }
   }, [hospitalTimezone]);
 
@@ -52,12 +47,12 @@ export function TokenQueue() {
     return () => clearInterval(interval);
   }, [fetchQueue]);
 
-  const getDepartmentQueue = (dept: string) => {
+  const getDepartmentQueue = () => {
     // For now, filtering by specialization if available or just mocking grouping
     return appointments.filter(a => a.status === 'SCHEDULED');
   };
 
-  const opdQueue = getDepartmentQueue('OPD');
+  const opdQueue = getDepartmentQueue();
 
   return (
     <MainLayout title="Live Token Status" hideTitle>

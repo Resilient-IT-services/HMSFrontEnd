@@ -3,7 +3,6 @@
 import {useState, useEffect, useCallback, useMemo, useRef} from 'react';
 import { appointmentService } from '@/services/appointmentService';
 import { AppointmentSummaryDTO, AppointmentStatus } from '@/types/api';
-import { sortByToken } from '@/utils/tokenHelper';
 import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 
 import { useSelector } from 'react-redux';
@@ -92,7 +91,8 @@ export const useReceptionAppointments = () => {
       const sortParam = sort ? `${sort.key},${sort.direction}` : undefined;
 
       // Prepare API column filters (exclude from/to handled separately)
-      const { from: _from, to: _to, ...apiColFilters } = colFilters;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { from: _, to: __, ...apiColFilters } = colFilters;
 
       const [appRes, statsRes] = await Promise.all([
         appointmentService.listSummary({

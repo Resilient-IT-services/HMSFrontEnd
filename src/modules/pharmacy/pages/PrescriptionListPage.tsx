@@ -3,13 +3,9 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { pharmacyApi } from '../api/pharmacyApi';
 import { PrescriptionSummaryDTO } from '@/types/api';
-import LoadingSkeleton from '../components/LoadingSkeleton';
 import EmptyState from '../components/EmptyState';
 import { useDebounce } from '@/hooks/useDebounce';
-
 import MainLayout from '@/components/ui/MainLayout';
-import Link from 'next/link';
-
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Table, Column } from '@/components/ui/Table';
@@ -17,6 +13,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { SearchInput } from '@/components/ui/SearchInput';
+import { useCallback } from 'react';
 
 const PrescriptionListPage: React.FC = () => {
   const [prescriptions, setPrescriptions] = useState<PrescriptionSummaryDTO[]>([]);
@@ -29,7 +26,7 @@ const PrescriptionListPage: React.FC = () => {
   const debouncedSearch = useDebounce(searchTerm, 500);
   const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
-  const fetchPrescriptions = React.useCallback(async (forceLoading = false) => {
+  const fetchPrescriptions = useCallback(async (forceLoading = false) => {
     try {
       if (forceLoading) setLoading(true);
       const response = await pharmacyApi.getPrescriptionsSummary({
@@ -58,7 +55,7 @@ const PrescriptionListPage: React.FC = () => {
     void trigger();
   }, [fetchPrescriptions]);
 
-  const handleCancel = async (id: string) => {
+  const handleCancel = useCallback(async (id: string) => {
     if (!globalThis.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
       return;
     }
@@ -75,7 +72,7 @@ const PrescriptionListPage: React.FC = () => {
       const errorMessage = error.response?.data?.message || error.message || 'An unexpected error occurred';
       alert(`Error: ${errorMessage}`);
     }
-  };
+  }, [fetchPrescriptions]);
 
   const columns: Column<PrescriptionSummaryDTO>[] = useMemo(() => [
     {
@@ -180,7 +177,7 @@ const PrescriptionListPage: React.FC = () => {
         </div>
       )
     }
-  ], []);
+  ], [handleCancel]);
 
   return (
     <MainLayout title="Prescription Queue" hideTitle>

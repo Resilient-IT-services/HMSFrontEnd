@@ -3,8 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { adminService } from '@/services/adminService';
-import { hospitalService } from '@/services/hospitalService';
-import { AdminDashboardSummary, HospitalResponse, PageResponse } from '@/types/api';
+import { AdminDashboardSummary } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import { useHospitals } from '@/modules/super_admin/hooks/useHospitals';
 import { triggerToast } from '@/utils/toast';
@@ -20,17 +19,9 @@ import {
   BarChart,
   TrendingUp,
   Search,
-  Bell,
-  HelpCircle,
   UserPlus,
   Plus,
-  AlertTriangle,
-  Server,
-  Database,
-  ShieldCheck,
-  ChevronRight,
   Eye,
-  LineChart,
   Edit3,
   MoreVertical,
   Download
@@ -44,14 +35,6 @@ export const AdminDashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const {
     hospitals,
-    loading: tableLoading,
-    totalElements,
-    page,
-    setPage,
-    pageSize,
-    setPageSize,
-    columnFilters,
-    setColumnFilters,
     selectedHospital,
     isModalOpen,
     setIsModalOpen,
@@ -364,36 +347,9 @@ function KpiCard({ icon, title, value, trend, color, subText, isActiveIndicator 
   );
 }
 
-function HealthRow({ icon, label, status }: any) {
-  return (
-    <div className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
-      <div className="flex items-center gap-2">
-        <span className="w-1.5 h-3 bg-emerald-500 rounded-sm"></span>
-        <span className="text-xs font-medium text-slate-700">{label}</span>
-      </div>
-      <span className="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-lg font-bold">{status}</span>
-    </div>
-  );
-}
-
-function QuickActionButton({ icon, label, onClick }: any) {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full py-2 bg-blue-50 text-blue-600 border border-blue-100 text-xs font-bold rounded-xl mt-3 hover:bg-blue-100 transition-all flex items-center justify-center gap-1.5"
-    >
-      {React.cloneElement(icon, { className: 'w-3.5 h-3.5' })} {label}
-    </button>
-  );
-}
-
 function getUserBgColor(role: string) {
   if (role === 'Doctor') return 'bg-orange-100 text-[#ff6b2b]';
   if (role === 'Pharmacist') return 'bg-emerald-100 text-emerald-600';
   if (role === 'Hospital Admin') return 'bg-blue-100 text-blue-600';
   return 'bg-indigo-100 text-indigo-600';
-}
-
-function getAlertBgColor(type: string) {
-  return type === 'LICENSE' ? 'bg-red-50 shadow-red-50' : 'bg-orange-50 shadow-orange-50';
 }

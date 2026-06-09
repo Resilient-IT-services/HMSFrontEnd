@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { pharmacyApi } from '../api/pharmacyApi';
 import { patientService } from '@/services/patientService';
 import { AppointmentResponse, PrescriptionDTO } from '@/types/api';
 import { Modal } from '@/components/ui/Modal';

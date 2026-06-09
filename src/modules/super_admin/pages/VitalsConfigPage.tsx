@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
-import { Card } from '@/components/ui/Card';
 import { adminService } from '@/services/adminService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';

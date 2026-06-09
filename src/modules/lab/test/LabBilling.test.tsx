@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // Business Logic for UI: Calculate Bill Summary
 const calculateBill = (

@@ -1,7 +1,6 @@
 import React from 'react';
 import { PrescriptionSummaryDTO } from '@/types/api';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { pharmacyApi } from '../api/pharmacyApi';
 
 interface PrescriptionTableProps {
@@ -11,8 +10,6 @@ interface PrescriptionTableProps {
 }
 
 const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, loading, onRefresh }) => {
-  const router = useRouter();
-
   const handleCancel = async (id: string) => {
     if (!globalThis.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
       return;

@@ -39,7 +39,6 @@ export const StockManagement = () => {
     setSelectedMedicineForView,
     handleExport,
     handleImport,
-    handleDelete,
     refresh,
     stats
   } = usePharmacyStock();

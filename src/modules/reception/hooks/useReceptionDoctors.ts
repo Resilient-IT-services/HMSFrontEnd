@@ -7,7 +7,6 @@ import { doctorService } from '@/services/doctorService';
 import { catalogService } from '@/services/catalogService';
 import { DoctorStaffResponse, SessionInfo } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
-import { hasDepartment } from '@/utils/staffDisplay';
 import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 import dayjs from '@/lib/dayjs';
 

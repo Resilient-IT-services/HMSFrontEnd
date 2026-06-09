@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { pharmacyApi } from '../api/pharmacyApi';
 import { MedicineResponse, PharmacyStockDTO } from '@/types/api';
-import LoadingSkeleton from './LoadingSkeleton';
 
 interface MedicineViewModalProps {
   medicineId: string;
