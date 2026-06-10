@@ -313,6 +313,7 @@ export interface AdminDashboardKpiStats {
   totalHospitals: number;
   totalUsers: number;
   activeUsersToday: number;
+  operationalUsers: number;
   totalDoctors: number;
   totalRevenue: number;
   newHospitalsThisMonth: number;

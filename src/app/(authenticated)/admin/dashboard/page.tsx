@@ -112,7 +112,7 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
         <KpiCard icon={<Building />} title="Total Hospitals" value={kpis?.totalHospitals || 0} trend="12%" color="blue" />
         <KpiCard icon={<Users />} title="Platform Users" value={kpis?.totalUsers || 0} trend="8.4%" color="purple" />
-        <KpiCard icon={<UserCheck />} title="Active Users" value={kpis?.activeUsersToday || 0} trend="5.7%" color="green" isActiveIndicator />
+        <KpiCard icon={<UserCheck />} title="Operational" value={kpis?.operationalUsers || 0} trend="5.7%" color="green" isActiveIndicator />
         <KpiCard icon={<Award />} title="Doctors" value={kpis?.totalDoctors || 0} trend="9.3%" color="orange" />
         <KpiCard icon={<IndianRupee />} title="Revenue" value={`₹${(kpis?.totalRevenue || 0) / 100_000}L`} trend="15%" color="indigo" />
         <KpiCard icon={<PlusSquare />} title="New Hosp." value={`+${kpis?.newHospitalsThisMonth || 0}`} trend="33%" color="pink" />

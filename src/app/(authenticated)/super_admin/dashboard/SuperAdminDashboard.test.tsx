@@ -43,6 +43,7 @@ describe('SuperAdminDashboard', () => {
           totalHospitals: 5,
           totalUsers: 10,
           activeUsersToday: 2,
+          operationalUsers: 8,
           totalDoctors: 3,
           totalRevenue: 500_000,
           newHospitalsThisMonth: 1,

@@ -38,7 +38,9 @@ export const AdminDashboard = () => {
     selectedHospital,
     isModalOpen,
     setIsModalOpen,
-    handleViewDetails
+    handleViewDetails,
+    searchTerm,
+    setSearchTerm
   } = useHospitals();
 
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null);
@@ -116,15 +118,14 @@ export const AdminDashboard = () => {
         </div>
 
         {/* KPI Grid (8 Cards) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
           <KpiCard icon={<Building />} title="Total Hospitals" value={kpis?.totalHospitals || 0} trend="12%" color="blue" />
           <KpiCard icon={<Users />} title="Platform Users" value={kpis?.totalUsers || 0} trend="8.4%" color="purple" />
-          <KpiCard icon={<UserCheck />} title="Active Now" value={kpis?.activeUsersToday || 0} trend="5.7%" color="green" isActiveIndicator />
+          <KpiCard icon={<UserCheck />} title="Operational" value={kpis?.operationalUsers || 0} trend="5.7%" color="green" isActiveIndicator />
           <KpiCard icon={<Award />} title="Doctors" value={kpis?.totalDoctors || 0} trend="9.3%" color="orange" />
           <KpiCard icon={<IndianRupee />} title="Revenue" value={`₹${((kpis?.totalRevenue || 0) / 100_000).toFixed(1)}L`} trend="15%" color="indigo" />
           <KpiCard icon={<PlusSquare />} title="New Hosp." value={`+${kpis?.newHospitalsThisMonth || 0}`} trend="33%" color="pink" />
           <KpiCard icon={<UserRound />} title="Patients" value={kpis?.totalPatients || 0} trend="11%" color="emerald" />
-          <KpiCard icon={<BarChart />} title="Uptime" value={kpis?.systemUptime || '99.9%'} color="violet" subText="Last 30 days" />
         </div>
 
         <div className="grid grid-cols-12 gap-6 mb-8">
@@ -201,11 +202,10 @@ export const AdminDashboard = () => {
                   className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-xs font-bold focus:outline-none focus:ring-2 focus:ring-orange-100 w-64"
                   placeholder="Search network node..."
                   type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <button className="p-2 bg-slate-50 border border-slate-100 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors">
-                <Download className="w-4 h-4" />
-              </button>
             </div>
           </div>
           <div className="overflow-x-auto">

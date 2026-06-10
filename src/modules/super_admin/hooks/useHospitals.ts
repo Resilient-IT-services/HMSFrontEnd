@@ -30,7 +30,7 @@ export const useHospitals = () => {
       const params: any = {
         page,
         size: pageSize,
-        name: debouncedSearch || debouncedColumnFilters.name,
+        search: debouncedSearch,
         status: statusFilter === 'ALL' ? (debouncedColumnFilters.status || undefined) : statusFilter,
         sort,
         ...debouncedColumnFilters
