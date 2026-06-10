@@ -36,7 +36,9 @@ const PrescriptionListPage: React.FC = () => {
         ...debouncedColumnFilters
       });
       if (response.success && response.data) {
-        setPrescriptions(response.data.content);
+        // Filter out prescriptions with 0 items as a safeguard
+        const filteredContent = response.data.content.filter(p => (p.itemCount || 0) > 0);
+        setPrescriptions(filteredContent);
       } else {
         setError(response.message || 'Failed to fetch prescriptions');
       }

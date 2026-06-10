@@ -13,6 +13,7 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { PageSurface } from '@/components/ui/PageSurface';
@@ -260,6 +261,7 @@ export const ActiveConsultationPage = () => {
   const [investigations, setInvestigations] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
+  const [showEmptyPrescriptionModal, setShowEmptyPrescriptionModal] = useState(false);
 
   useEffect(() => {
     const fetchAppointmentData = async () => {
@@ -424,6 +426,15 @@ export const ActiveConsultationPage = () => {
       return;
     }
 
+    if (medicineItems.length === 0) {
+      setShowEmptyPrescriptionModal(true);
+      return;
+    }
+
+    await performComplete();
+  };
+
+  const performComplete = async () => {
     const saved = await saveConsultation(true);
     if (!saved) return;
     try {
@@ -693,6 +704,44 @@ export const ActiveConsultationPage = () => {
           date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
           tokenDisplay={formatToken(appointment)}
         />
+      )}
+
+      {showEmptyPrescriptionModal && (
+        <Modal
+          isOpen={showEmptyPrescriptionModal}
+          onClose={() => setShowEmptyPrescriptionModal(false)}
+          title="Empty Prescription"
+          width="360px"
+          hideHeader
+        >
+          <div className="p-8 text-center">
+            <div className="w-16 h-16 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-inner">
+              <span className="material-symbols-outlined text-3xl">medical_services</span>
+            </div>
+            <h4 className="text-xl font-black text-slate-900 mb-3 tracking-tight">Empty Prescription?</h4>
+            <p className="text-xs font-bold text-slate-500 mb-8 leading-relaxed px-2">
+              You are completing this consultation without adding any medications. No record will be sent to the pharmacy.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                className="w-full h-12 font-black shadow-lg shadow-orange-600/20"
+                onClick={async () => {
+                  setShowEmptyPrescriptionModal(false);
+                  await performComplete();
+                }}
+              >
+                Yes, Complete Now
+              </Button>
+              <Button
+                variant="secondary"
+                className="w-full h-11 font-black border-none text-slate-400 hover:text-slate-600 bg-transparent"
+                onClick={() => setShowEmptyPrescriptionModal(false)}
+              >
+                Cancel & Go Back
+              </Button>
+            </div>
+          </div>
+        </Modal>
       )}
     </MainLayout>
   );

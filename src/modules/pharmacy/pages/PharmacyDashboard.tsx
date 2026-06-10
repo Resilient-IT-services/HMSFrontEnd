@@ -65,8 +65,10 @@ export const PharmacyDashboard = () => {
 
       // 1. PROCESS PRESCRIPTIONS & REVENUE
       if (pendingRes.status === 'fulfilled' && pendingRes.value.success) {
-        pendingList = (pendingRes.value.data?.content as unknown as PrescriptionResponse[]) || [];
-        pendingCount = pendingRes.value.data?.totalElements || pendingList.length;
+        const rawPending = (pendingRes.value.data?.content as unknown as PrescriptionResponse[]) || [];
+        // Filter out prescriptions with 0 items
+        pendingList = rawPending.filter(p => (p.items?.length || 0) > 0);
+        pendingCount = pendingList.length; // Use local count for accurate dashboard metrics
       }
       
       if (dispensedRes.status === 'fulfilled' && dispensedRes.value.success) {
