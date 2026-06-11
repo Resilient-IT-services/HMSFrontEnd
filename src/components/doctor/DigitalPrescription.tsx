@@ -20,6 +20,7 @@ interface DigitalPrescriptionProps {
   complaints: string;
   diagnosis: string;
   prescriptions: PrescriptionRow[];
+  investigations?: { id: string, testName: string, testCode: string }[];
   vitals: {
     heartRate: string;
     temp: string;
@@ -191,6 +192,25 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
 
                   </div>
                 </>
+              )}
+
+              {/* Investigations - Only on Page 1 if they exist */}
+              {index === 0 && investigations && investigations.length > 0 && (
+                <div className="mb-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="material-symbols-outlined text-blue-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>biotech</span>
+                    <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-widest">Ordered Investigations</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2 border border-slate-100 rounded-xl p-4 bg-slate-50/30">
+                    {investigations.map((inv) => (
+                      <div key={inv.id} className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                        <span className="text-xs sm:text-sm font-bold text-slate-700">{inv.testName}</span>
+                        <span className="text-[10px] text-slate-400 font-black uppercase">({inv.testCode})</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Prescription Table */}

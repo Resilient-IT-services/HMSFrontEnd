@@ -293,6 +293,17 @@ export const ActiveConsultationPage = () => {
             setPrescriptions([{ id: '1', medicineId: '', medicine: '', freqM: '', freqA: '', freqN: '', duration: 0, durationUnit: 'days', inStock: true }]);
           }
 
+          if (res.data.prescription?.labItems) {
+            setInvestigations(res.data.prescription.labItems.map((item, idx) => ({
+              id: item.id || `existing-lab-${idx}`,
+              testId: item.testId,
+              testName: item.testName,
+              testCode: ''
+            })));
+          } else {
+            setInvestigations([]);
+          }
+
           const pRes = await patientService.get(res.data.patientId);
           if (pRes.success && pRes.data) setPatient(pRes.data);
 
@@ -399,7 +410,12 @@ export const ActiveConsultationPage = () => {
               dosage: `${fM}-${fA}-${fN}`,
               duration: `${p.duration} ${p.durationUnit} (Total: ${total} units)`
             };
-          })
+          }),
+          labItems: investigations.filter(i => i.testId).map(i => ({
+            testId: i.testId,
+            testName: i.testName,
+            notes: ''
+          }))
         }
       };
       const res = await appointmentService.updateConsultation(appointmentId, updateData as any);
@@ -426,7 +442,7 @@ export const ActiveConsultationPage = () => {
       return;
     }
 
-    if (medicineItems.length === 0) {
+    if (medicineItems.length === 0 && investigations.length === 0) {
       setShowEmptyPrescriptionModal(true);
       return;
     }
@@ -438,20 +454,7 @@ export const ActiveConsultationPage = () => {
     const saved = await saveConsultation(true);
     if (!saved) return;
     try {
-      // 1. Create Lab Order if investigations exist
-      if (investigations.length > 0 && appointment) {
-        const testIds = investigations.filter(i => i.testId).map(i => i.testId);
-        if (testIds.length > 0) {
-          await labApi.createOrder({
-            patientId: appointment.patientId,
-            encounterId: appointment.id,
-            testIds: testIds,
-            packageIds: []
-          });
-        }
-      }
-
-      // 2. Complete Consultation
+      // Complete Consultation
       const statusRes = await appointmentService.completeConsultation(appointmentId!);
       if (statusRes.success) {
         triggerGlobalToast('Consultation completed', 'success');
@@ -694,6 +697,7 @@ export const ActiveConsultationPage = () => {
             dosage: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
             duration: `${p.duration} ${p.durationUnit} (Total: ${calculateTotal(p)} units)`
           }))}
+          investigations={investigations.filter(i => i.testId)}
           vitals={{
             heartRate: appointment?.vitals?.heartRate?.toString() || '--',
             temp: appointment?.vitals?.temperature?.toString() || '--',

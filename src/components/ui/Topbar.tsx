@@ -8,7 +8,6 @@ import GlobalSearch from './GlobalSearch';
 import { cn } from '@/lib/cn';
 
 import { useLayout } from '@/context/LayoutContext';
-import HospitalSelector from './HospitalSelector';
 
 const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
   const { headerActions, isCompressed, toggleCompressed } = useLayout();
@@ -81,7 +80,32 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
       </div>
 
       <div className="flex items-center gap-2 lg:gap-4 px-4 lg:px-6">
-        <HospitalSelector />
+        {/* Sleek Hospital/Global Context Badge */}
+        <div className="flex items-center gap-3">
+          {isSuperMode ? (
+            <div className="flex items-center gap-3 px-4 py-2 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-xl shadow-slate-900/20 ring-1 ring-white/10 group transition-all duration-300 hover:scale-[1.02]">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center border border-orange-500/30">
+                <span className="material-symbols-outlined text-orange-500 text-[20px] animate-pulse">language</span>
+              </div>
+              <div className="flex flex-col leading-tight pr-1">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Master Center</span>
+                <span className="text-[11px] font-black text-white uppercase tracking-widest">Global Logic</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-2xl border border-slate-200 shadow-sm hover:border-primary/30 transition-all duration-300 cursor-default group hover:shadow-md hover:shadow-primary/5">
+              <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20 group-hover:bg-primary/20 transition-colors">
+                 <span className="material-symbols-outlined text-primary text-[20px]">apartment</span>
+              </div>
+              <div className="flex flex-col leading-tight pr-1">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Operating At</span>
+                <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+                   {user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName || 'System STANDALONE'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
 
         {headerActions && (
           <div className="hidden sm:flex items-center gap-3">
