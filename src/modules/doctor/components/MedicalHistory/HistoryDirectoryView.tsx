@@ -37,14 +37,11 @@ export const HistoryDirectoryView = () => {
   // History Modal States
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyList, setHistoryList] = useState<AppointmentResponse[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [detailedHistoryRecord, setDetailedHistoryRecord] = useState<AppointmentResponse | null>(null);
-  const [loadingDetailedRecord, setLoadingDetailedRecord] = useState(false);
-  const [selectedPatientName, setSelectedPatientName] = useState('');
 
   const fetchDetailedRecord = async (appointmentId: string) => {
-    setTimeout(() => setLoadingDetailedRecord(true), 0);
+    await Promise.resolve();
     try {
       const res = await appointmentService.get(appointmentId);
       if (res.success && res.data) {
@@ -52,8 +49,6 @@ export const HistoryDirectoryView = () => {
       }
     } catch (error) {
       console.error('Failed to fetch detailed record:', error);
-    } finally {
-      setLoadingDetailedRecord(false);
     }
   };
 
@@ -70,9 +65,7 @@ export const HistoryDirectoryView = () => {
   }, [currentHistoryIndex, historyList, showHistoryModal]);
 
   const handleReviewCase = async (app: AppointmentResponse) => {
-    setSelectedPatientName(app.patientName);
     setShowHistoryModal(true);
-    setLoadingHistory(true);
     setCurrentHistoryIndex(0);
     setDetailedHistoryRecord(null);
 
@@ -93,8 +86,6 @@ export const HistoryDirectoryView = () => {
     } catch (error) {
       console.error('Failed to fetch history:', error);
       triggerGlobalToast('Failed to load history', 'error');
-    } finally {
-      setLoadingHistory(false);
     }
   };
 
@@ -141,6 +132,7 @@ export const HistoryDirectoryView = () => {
     if (!user || !hospitalTimezone) return;
 
     try {
+      await Promise.resolve();
       setLoading(true);
       const fromUTC = dayjs(startDate).tz(hospitalTimezone).startOf('day').toISOString();
       const toUTC = dayjs(endDate).tz(hospitalTimezone).endOf('day').toISOString();

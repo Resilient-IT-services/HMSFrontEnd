@@ -276,11 +276,9 @@ export const ActiveConsultationPage = () => {
   const [showEmptyPrescriptionModal, setShowEmptyPrescriptionModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyList, setHistoryList] = useState<AppointmentResponse[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'meds' | 'labs'>('meds');
   const [detailedHistoryRecord, setDetailedHistoryRecord] = useState<AppointmentResponse | null>(null);
-  const [loadingDetailedRecord, setLoadingDetailedRecord] = useState(false);
 
   useEffect(() => {
     const fetchDetailedRecord = async () => {
@@ -309,6 +307,7 @@ export const ActiveConsultationPage = () => {
         return;
       }
 
+      await Promise.resolve();
       setLoadingDetailedRecord(true);
       try {
         const res = await appointmentService.get(currentRecord.id);
@@ -323,18 +322,15 @@ export const ActiveConsultationPage = () => {
     };
 
     if (showHistoryModal && historyList.length > 0) {
-      setTimeout(() => {
-        void fetchDetailedRecord();
-      }, 0);
+      void fetchDetailedRecord();
     }
-  }, [currentHistoryIndex, historyList, showHistoryModal, appointmentId, appointment, complaints, diagnosis, prescriptions, investigations]);
+  }, [currentHistoryIndex, historyList, showHistoryModal, appointmentId, appointment, complaints, diagnosis, prescriptions, investigations, vitals]);
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     if (!appointment?.patientId || !appointment?.doctorId) return;
-    setTimeout(() => {
-      setLoadingHistory(true);
-      setCurrentHistoryIndex(0);
-    }, 0);
+    await Promise.resolve();
+    setLoadingHistory(true);
+    setCurrentHistoryIndex(0);
     try {
       const res = await appointmentService.list({
         patientId: appointment.patientId,
@@ -356,7 +352,7 @@ export const ActiveConsultationPage = () => {
     } finally {
       setLoadingHistory(false);
     }
-  };
+  }, [appointment?.patientId, appointment?.doctorId, appointment?.appointmentTime, appointmentId]);
 
   useEffect(() => {
     if (showHistoryModal) {
@@ -365,7 +361,7 @@ export const ActiveConsultationPage = () => {
       }, 0);
       return () => clearTimeout(t);
     }
-  }, [showHistoryModal]);
+  }, [showHistoryModal, fetchHistory]);
 
   useEffect(() => {
     const fetchAppointmentData = async () => {

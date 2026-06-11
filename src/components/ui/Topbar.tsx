@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
 import { RootState } from '@/state/store';
 import { setActiveRole, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
@@ -11,6 +12,7 @@ import { ROLE_PATH_MAP } from '@/utils/constants';
 import { useLayout } from '@/context/LayoutContext';
 
 const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
+  const router = useRouter();
   const { headerActions, isCompressed, toggleCompressed } = useLayout();
   const dispatch = useDispatch();
   const { user, isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
@@ -27,41 +29,15 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleRoleSwitch = (role: Role) => {
-    dispatch(setActiveRole(role));
-    setIsProfileOpen(false);
-    const path = ROLE_PATH_MAP[role] || '';
-    globalThis.location.href = `/${path}`;
-  };
-
   const handleContextSwitch = (hospitalId: string, role: Role) => {
     dispatch(setCurrentHospitalId(hospitalId));
     dispatch(setActiveRole(role));
     setIsProfileOpen(false);
     const path = ROLE_PATH_MAP[role] || '';
-    globalThis.location.href = `/${path}`;
+    router.push(`/${path}`);
   };
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'DOCTOR': { return 'stethoscope';
-      }
-      case 'ADMIN': { return 'admin_panel_settings';
-      }
-      case 'RECEPTIONIST': { return 'desk';
-      }
-      case 'PHARMACIST': { return 'prescriptions';
-      }
-      case 'NURSE': { return 'vital_signs';
-      }
-      case 'SUPER_ADMIN': { return 'shield_person';
-      }
-      default: { return 'person';
-      }
-    }
-  };
 
   return (
     <header className={cn(

@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import MainLayout from '@/components/ui/MainLayout';
 import { AppointmentSummaryDTO } from '@/types/api';
 import { useRouter } from 'next/navigation';
@@ -127,11 +129,14 @@ export const AppointmentsPage = () => {
     void refresh();
   }, [refresh]);
 
+  const hospitalTimezone = useSelector((state: RootState) => state.auth.hospitalTimezone);
+
   const { totalTodayAppointments, completedAppointments, upcomingAppointments } = useMemo(() => {
-    const todayStart = dayjs().startOf('day').valueOf();
-    const todayEnd = dayjs().endOf('day').valueOf();
-    const tomorrowStart = dayjs().add(1, 'day').startOf('day').valueOf();
-    const futureEnd = dayjs().add(30, 'days').endOf('day').valueOf();
+    const now = hospitalTimezone ? dayjs().tz(hospitalTimezone) : dayjs();
+    const todayStart = now.startOf('day').valueOf();
+    const todayEnd = now.endOf('day').valueOf();
+    const tomorrowStart = now.add(1, 'day').startOf('day').valueOf();
+    const futureEnd = now.add(30, 'days').endOf('day').valueOf();
 
     const upcomingAllowedStatuses = new Set(['SCHEDULED', 'PAYMENT_PENDING', 'PAID', 'VITALS_RECORDED']);
 
@@ -149,16 +154,12 @@ export const AppointmentsPage = () => {
              upcomingAllowedStatuses.has(app.status);
     });
 
-    console.log('TOTAL TODAY', today.length);
-    console.log('COMPLETED', completed.length);
-    console.log('UPCOMING', upcoming.length);
-
     return {
       totalTodayAppointments: today,
       completedAppointments: completed,
       upcomingAppointments: upcoming
     };
-  }, [rawAppointments]);
+  }, [rawAppointments, hospitalTimezone]);
 
   const displayAppointments = useMemo(() => {
     if (statusFilter === 'UPCOMING') return upcomingAppointments;

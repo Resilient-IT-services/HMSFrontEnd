@@ -66,7 +66,6 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
     // Auto dismiss dynamic timeline trigger
-    const generatedId = Math.random().toString(36).slice(2, 9);
     setTimeout(() => {
       setToasts((currentToasts) => currentToasts.filter((t) => t.message.trim().toLowerCase() !== normalizedNewMessage));
     }, 5000);

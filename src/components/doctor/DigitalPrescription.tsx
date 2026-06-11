@@ -87,8 +87,8 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   const pages: { meds: PrescriptionRow[], labs: any[] }[] = [];
   
   // Split meds and labs into logical chunks
-  let currentMeds = [...filteredPrescriptions];
-  let currentLabs = [...investigations];
+  const currentMeds = [...filteredPrescriptions];
+  const currentLabs = [...investigations];
 
   // Page 1
   pages.push({
