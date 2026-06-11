@@ -112,25 +112,8 @@ export const DoctorDashboard = () => {
 
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
-  // Fallback / Placeholder Registry Engine if database contains less than 3 records
   const dynamicHistoriesWidgetData = useMemo(() => {
-    const baseData = [...recentHistories];
-
-    // Fallback list agar real entries kam ho to UI populate rakhne ke liye
-    const placeholders = [
-      { id: 'mock-1', patientName: 'Jasmin Bano', diagnosis: 'Chronic Hypertension', appointmentTime: dayjs().subtract(1, 'day').toISOString() },
-      { id: 'mock-2', patientName: 'Vasim Akram', diagnosis: 'Type-2 Diabetes Mellitus', appointmentTime: dayjs().subtract(2, 'day').toISOString() },
-      { id: 'mock-3', patientName: 'Kalyan Desur', diagnosis: 'Acute Gastroenteritis', appointmentTime: dayjs().subtract(3, 'day').toISOString() }
-    ];
-
-    // Loop chalakar verify karega ki full grid me kam se kam 3 data blocks render ho rahe ho
-    while (baseData.length < 3) {
-      const nextPlaceholder = placeholders[baseData.length];
-      if (!nextPlaceholder) break;
-      baseData.push(nextPlaceholder as unknown as AppointmentResponse);
-    }
-
-    return baseData.slice(0, 5); // Max capacity up to 5 elements inside container
+    return recentHistories.slice(0, 5);
   }, [recentHistories]);
 
   // Metrics Processors
