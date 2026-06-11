@@ -773,6 +773,13 @@ export interface PrescriptionItemDTO {
   duration: string;
 }
 
+export interface PrescriptionLabItemDTO {
+  id?: string;
+  testId: string;
+  testName: string;
+  notes?: string;
+}
+
 export interface PrescriptionDTO {
   id?: string;
   patientId?: string;
@@ -783,6 +790,7 @@ export interface PrescriptionDTO {
   appointmentId?: string;
   visitId?: string;
   items: PrescriptionItemDTO[];
+  labItems?: PrescriptionLabItemDTO[];
   createdAt?: string;
   phone: string;
   status?: string;
