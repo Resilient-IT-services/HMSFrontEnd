@@ -125,9 +125,9 @@ export const DoctorDashboard = () => {
     // Explicit condition logic mapping: Sum of waiting, active and completed
     const totalLoadToday = waiting + active + completed;
 
-    // Calculation condition logic formula: Load multiplied by consultation rate
+    // Calculation condition logic formula: Use API revenue summary if available, fallback to manual calculation
     const feeRate = typeof consultationFee === 'number' ? consultationFee : 0;
-    const earnings = totalLoadToday * feeRate;
+    const earnings = revenueSummary?.totalRevenue ?? (totalLoadToday * feeRate);
 
     return {
       total: totalLoadToday,
