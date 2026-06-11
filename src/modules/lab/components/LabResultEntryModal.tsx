@@ -9,36 +9,31 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 interface LabResultEntryModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void;
-    orderTest: {
-        id: string;
-        testId: string;
-        testName: string;
-        testCode: string;
-        patientName: string;
-    };
+    orderTestId: string;
 }
 
-export const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
+const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
     isOpen,
     onClose,
-    onSuccess,
-    orderTest
+    orderTestId
 }) => {
     const [parameters, setParameters] = useState<LabTestParameterDTO[]>([]);
     const [results, setResults] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
+    // In a real scenario, we'd fetch the test details (name, code) using orderTestId.
+    // For MVP, we'll just fetch the parameters directly.
+    const [testId, setTestId] = useState<string | null>(null);
+
     useEffect(() => {
-        if (isOpen && orderTest.testId) {
+        if (isOpen && orderTestId) {
             const fetchParams = async () => {
-                setLoading(true);
                 try {
-                    const res = await labApi.getParametersByTest(orderTest.testId);
+                    setLoading(true);
+                    const res = await labApi.getParametersByOrderTest(orderTestId);
                     if (res.success && res.data) {
                         setParameters(res.data);
-                        // Initialize results map
                         const initial: Record<string, string> = {};
                         res.data.forEach(p => {
                             if (p.id) initial[p.id] = '';
@@ -52,26 +47,25 @@ export const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
                     setLoading(false);
                 }
             };
-            void fetchParams();
+            fetchParams();
         }
-    }, [isOpen, orderTest.testId]);
+    }, [isOpen, orderTestId]);
 
     const handleSave = async () => {
         setSaving(true);
         try {
             const payload = {
-                orderTestId: orderTest.id,
+                orderTestId: orderTestId,
                 results: Object.entries(results).map(([paramId, value]) => ({
                     parameterId: paramId,
                     value: value,
-                    abnormal: false, // Could add logic for range checking here
+                    abnormal: false,
                     critical: false
                 }))
             };
             const res = await labApi.saveResults(payload);
             if (res.success) {
                 triggerGlobalToast('Results saved successfully', 'success');
-                onSuccess();
                 onClose();
             }
         } catch (error) {
@@ -83,23 +77,17 @@ export const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`Result Entry: ${orderTest.testName}`} size="xl">
+        <Modal isOpen={isOpen} onClose={onClose} title={`Test Result Entry`} size="xl">
             <div className="space-y-6">
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex justify-between items-center">
-                    <div>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Patient</p>
-                        <p className="text-sm font-black text-slate-900">{orderTest.patientName}</p>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Test Code</p>
-                        <p className="text-sm font-black text-slate-700">{orderTest.testCode}</p>
-                    </div>
-                </div>
-
                 {loading ? (
-                    <div className="py-10 text-center italic text-slate-400 font-bold">Loading parameters...</div>
+                    <div className="py-10 text-center italic text-slate-400 font-bold">Loading test parameters...</div>
+                ) : parameters.length === 0 ? (
+                    <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-100 flex flex-col gap-2">
+                       <p className="text-sm font-bold text-orange-600">No parameters defined for this test.</p>
+                       <p className="text-xs text-orange-500/70">Please configure the global test master to include parameters.</p>
+                    </div>
                 ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 p-4">
                         {parameters.map((param) => (
                             <div key={param.id} className="grid grid-cols-12 gap-4 items-center">
                                 <div className="col-span-6">
@@ -110,7 +98,7 @@ export const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
                                     <input
                                         type="text"
                                         className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold text-slate-900 outline-none focus:border-orange-500 transition-all"
-                                        placeholder="Enter value"
+                                        placeholder={`Enter ${param.parameterName} value`}
                                         value={results[param.id!] || ''}
                                         onChange={(e) => setResults({ ...results, [param.id!]: e.target.value })}
                                     />
@@ -120,7 +108,7 @@ export const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
                     </div>
                 )}
 
-                <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
+                <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 p-4">
                     <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
                     <Button onClick={handleSave} isLoading={saving} disabled={loading || parameters.length === 0}>Complete & Save</Button>
                 </div>
@@ -128,3 +116,5 @@ export const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
         </Modal>
     );
 };
+
+export default LabResultEntryModal;

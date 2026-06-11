@@ -1,149 +1,182 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { PageSurface } from '@/components/ui/PageSurface';
-import { labApi } from '../api/labApi';
-import { triggerGlobalToast } from '@/components/ui/Toast';
-import { Card } from '@/components/ui/Card';
+import { PageHeading } from '@/components/ui/PageHeading';
+import { ContentPanel } from '@/components/ui/ContentPanel';
+import { Table, Column } from '@/components/ui/Table';
+import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { cn } from '@/lib/cn';
-import { LabResultEntryModal } from '../components/LabResultEntryModal';
-import { LabReportPreviewModal } from '../components/LabReportPreviewModal';
+import { labApi, LabQueueItemDTO } from '@/modules/lab/api/labApi';
+import { triggerGlobalToast } from '@/components/ui/Toast';
+import { formatDateTime } from '@/utils/formatters';
+import LabResultEntryModal from '../components/LabResultEntryModal';
 
-export const LabQueuePage = () => {
-    const [queue, setQueue] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [selectedTest, setSelectedTest] = useState<any>(null);
-    const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
-    const [isResultModalOpen, setIsResultModalOpen] = useState(false);
-    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+const LabQueuePage = () => {
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'SAMPLE_COLLECTED' | 'PROCESSING'>('PENDING');
+  const [queue, setQueue] = useState<LabQueueItemDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Modals
+  const [selectedOrderTestId, setSelectedOrderTestId] = useState<string | null>(null);
+  const [isResultModalOpen, setIsResultModalOpen] = useState(false);
 
-    const fetchQueue = async () => {
-        setLoading(true);
-        try {
-            const res = await labApi.getQueue();
-            if (res.success && res.data) {
-                setQueue(res.data);
-            }
-        } catch (error) {
-            console.error('Failed to fetch lab queue:', error);
-            triggerGlobalToast('Failed to load queue', 'error');
-        } finally {
-            setLoading(false);
+  const fetchQueue = useCallback(async () => {
+    try {
+      setLoading(true);
+      // We use the paged queue endpoint, defaulting to a large page for MVP
+      const res = await labApi.getPagedQueue(activeTab, 0, 100);
+      if (res.success && res.data) {
+        setQueue(res.data.content);
+      }
+    } catch (error) {
+      console.error('Failed to fetch lab queue:', error);
+      triggerGlobalToast('Failed to load queue', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    fetchQueue();
+  }, [fetchQueue]);
+
+  const handleCollectSample = async (orderTestId: string) => {
+    try {
+      setLoading(true);
+      const res = await labApi.collectSample(orderTestId);
+      if (res.success) {
+        triggerGlobalToast(`Sample Collected: ${res.data}`, 'success');
+        fetchQueue();
+      }
+    } catch (error: any) {
+      console.error('Failed to collect sample:', error);
+      triggerGlobalToast(error.response?.data?.message || 'Failed to collect sample', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnterResult = (orderTestId: string) => {
+    setSelectedOrderTestId(orderTestId);
+    setIsResultModalOpen(true);
+  };
+
+  const columns: Column<LabQueueItemDTO>[] = [
+    {
+      header: 'Order Info',
+      render: (item) => (
+        <div>
+          <p className="text-sm font-bold text-slate-800">{item.orderNumber}</p>
+          <p className="text-[10px] text-slate-400 font-bold">{formatDateTime(item.orderedAt)}</p>
+        </div>
+      )
+    },
+    {
+      header: 'Patient Details',
+      render: (item) => (
+        <div>
+          <p className="text-sm font-bold text-slate-800">{item.patientName}</p>
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.patientId}</p>
+        </div>
+      )
+    },
+    {
+      header: 'Test Name',
+      render: (item) => <span className="text-sm font-bold text-slate-700">{item.testName}</span>
+    },
+    {
+      header: 'Referred By',
+      render: (item) => <span className="text-xs font-bold text-slate-600">{item.doctorName || 'Self'}</span>
+    },
+    {
+      header: 'Status',
+      render: (item) => (
+        <Badge 
+          variant={item.status === 'PENDING' ? 'orange' : item.status === 'SAMPLE_COLLECTED' ? 'blue' : 'emerald'} 
+          size="sm"
+        >
+          {item.status.replace('_', ' ')}
+        </Badge>
+      )
+    },
+    {
+      header: 'Action',
+      className: 'text-right',
+      headerClassName: 'text-right',
+      render: (item) => {
+        if (item.status === 'PENDING') {
+          return (
+            <Button size="sm" onClick={() => handleCollectSample(item.orderTestId)}>
+              Collect Sample
+            </Button>
+          );
         }
-    };
+        if (item.status === 'SAMPLE_COLLECTED' || item.status === 'PROCESSING') {
+          return (
+            <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item.orderTestId)}>
+              Enter Result
+            </Button>
+          );
+        }
+        return null;
+      }
+    }
+  ];
 
-    const handleProcessTest = (order: any, test: any) => {
-        setSelectedTest({
-            id: test.id,
-            testId: test.testId,
-            testName: test.testName,
-            testCode: test.testCode,
-            patientName: order.patientName
-        });
-        setIsResultModalOpen(true);
-    };
+  return (
+    <MainLayout title="Laboratory Work Queue">
+      <PageSurface>
+        <div className="space-y-4 py-4">
+          <PageHeading
+            title="Laboratory Queue"
+            description="Manage sample collections and process test results."
+          />
 
-    const handleViewReport = (orderId: string) => {
-        setSelectedOrderId(orderId);
-        setIsReportModalOpen(true);
-    };
+          <div className="flex border-b border-slate-200 mb-6">
+            <button
+              onClick={() => setActiveTab('PENDING')}
+              className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
+                activeTab === 'PENDING' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Pending Collection
+            </button>
+            <button
+              onClick={() => setActiveTab('SAMPLE_COLLECTED')}
+              className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
+                activeTab === 'SAMPLE_COLLECTED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Ready for Processing
+            </button>
+          </div>
 
-    useEffect(() => {
-        Promise.resolve().then(() => {
-            void fetchQueue();
-        });
-    }, []);
+          <ContentPanel>
+            <Table
+              columns={columns}
+              data={queue}
+              isLoading={loading}
+              emptyMessage={`No ${activeTab.replace('_', ' ').toLowerCase()} orders found.`}
+            />
+          </ContentPanel>
+        </div>
 
-    return (
-        <MainLayout title="Laboratory Queue">
-            <PageSurface backgroundClassName="bg-slate-50">
-                <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-2xl font-black text-slate-900">Patient Test Queue</h2>
-                            <p className="text-sm text-slate-500 font-medium">Manage pending investigations and sample collections</p>
-                        </div>
-                        <Button onClick={fetchQueue} icon="refresh" variant="secondary" className="font-black text-xs h-10">Refresh Queue</Button>
-                    </div>
-
-                    {loading ? (
-                        <div className="py-20 text-center italic text-slate-400 font-bold">Loading queue...</div>
-                    ) : queue.length === 0 ? (
-                        <Card className="py-20 text-center">
-                            <span className="material-symbols-outlined text-6xl text-slate-200 mb-4">clinical_notes</span>
-                            <p className="text-slate-400 font-bold">No pending lab orders found for this hospital.</p>
-                        </Card>
-                    ) : (
-                        <div className="grid gap-4">
-                            {queue.map((order) => (
-                                <Card key={order.id} className="p-0 overflow-hidden border-slate-200 hover:border-orange-200 transition-all group">
-                                    <div className="p-4 md:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                        <div className="flex items-start gap-4">
-                                            <div className="w-12 h-12 rounded-2xl bg-orange-600/10 flex items-center justify-center shrink-0">
-                                                <span className="material-symbols-outlined text-orange-600">person</span>
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h3 className="text-lg font-black text-slate-900 leading-none">{order.patientName}</h3>
-                                                    <span className="bg-slate-100 text-slate-500 text-[10px] font-black px-2 py-0.5 rounded border border-slate-200 uppercase tracking-widest">{order.orderNumber}</span>
-                                                </div>
-                                                <div className="flex items-center gap-3 text-slate-400 text-[10px] font-bold mt-2 uppercase tracking-tight">
-                                                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-xs">calendar_today</span>{new Date(order.orderedAt).toLocaleString()}</span>
-                                                    <span>•</span>
-                                                    <span className={cn("font-black", order.status === 'COMPLETED' ? 'text-emerald-600' : 'text-orange-600')}>{order.status}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {order.status === 'COMPLETED' && (
-                                            <div className="flex items-center gap-2">
-                                                <Button size="sm" icon="description" variant="secondary" className="font-black text-[10px]" onClick={() => handleViewReport(order.id)}>View Report</Button>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="bg-slate-50/50 border-t border-slate-100 p-4">
-                                        <div className="flex flex-wrap gap-2">
-                                            {order.tests?.map((test: any) => (
-                                                <div key={test.id} className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 flex items-center gap-2 shadow-sm group/test">
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${test.status === 'PENDING' ? 'bg-orange-500 animate-pulse' : 'bg-emerald-500'}`}></span>
-                                                    <span className="text-[10px] font-black text-slate-700">{test.testName}</span>
-                                                    <span className="text-[8px] font-bold text-slate-400 bg-slate-50 px-1 rounded uppercase tracking-widest">{test.testCode}</span>
-                                                    {test.status === 'PENDING' && (
-                                                        <button 
-                                                            onClick={() => handleProcessTest(order, test)}
-                                                            className="ml-2 bg-orange-600 text-white text-[8px] font-black uppercase px-2 py-0.5 rounded hover:bg-orange-700 transition-colors"
-                                                        >
-                                                            Enter Results
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </Card>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {selectedTest && (
-                    <LabResultEntryModal 
-                        isOpen={isResultModalOpen}
-                        onClose={() => { setIsResultModalOpen(false); setSelectedTest(null); }}
-                        onSuccess={fetchQueue}
-                        orderTest={selectedTest}
-                    />
-                )}
-
-                {selectedOrderId && (
-                    <LabReportPreviewModal 
-                        isOpen={isReportModalOpen}
-                        onClose={() => { setIsReportModalOpen(false); setSelectedOrderId(null); }}
-                        orderId={selectedOrderId}
-                    />
-                )}
-            </PageSurface>
-        </MainLayout>
-    );
+        {isResultModalOpen && selectedOrderTestId && (
+            <LabResultEntryModal 
+              isOpen={true}
+              onClose={() => {
+                setIsResultModalOpen(false);
+                setSelectedOrderTestId(null);
+                fetchQueue();
+              }}
+              orderTestId={selectedOrderTestId}
+            />
+        )}
+      </PageSurface>
+    </MainLayout>
+  );
 };
+
+export default LabQueuePage;
