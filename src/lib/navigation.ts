@@ -24,9 +24,15 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
     },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: ['ADMIN'] },
-    { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { name: 'Lab Queue', icon: 'biotech', href: '/lab/queue', roles: ['LAB_TECHNICIAN', 'ADMIN'] },
+    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: [] }, // Kept for reference but hidden from sidebar as per previous roles config
+    { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
+    
+    // Lab Specific Routes
+    { name: 'Lab Queue', icon: 'biotech', href: '/lab/queue', roles: ['LAB_TECHNICIAN'] },
+    { name: 'Lab Dashboard', icon: 'science', href: '/admin/lab-dashboard', roles: ['ADMIN'] },
+    { name: 'Lab Settings', icon: 'settings_b_roll', href: '/admin/lab-settings', roles: ['ADMIN'] },
+    { name: 'Master Tests', icon: 'biotech', href: '/admin/lab-tests', roles: ['SUPER_ADMIN'] },
+
     {
       name: 'History',
       icon: 'history_edu',

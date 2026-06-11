@@ -1035,7 +1035,6 @@ export interface Department {
 
 export interface LabDepartmentDTO {
   id: string;
-  hospitalId?: string;
   code?: string;
   name: string;
   active: boolean;

@@ -225,6 +225,7 @@ export const PharmacyDashboard = () => {
   const prescriptionColumns: Column<PrescriptionResponse>[] = [
     {
       header: 'Rx Ref',
+      key: 'id',
       filterable: true,
       filterPlaceholder: 'Rx Ref...',
       render: (p) => (
@@ -235,6 +236,7 @@ export const PharmacyDashboard = () => {
     },
     {
       header: 'Patient',
+      key: 'patientName',
       filterable: true,
       filterPlaceholder: 'Patient name...',
       render: (p) => (
@@ -246,6 +248,7 @@ export const PharmacyDashboard = () => {
     },
     {
       header: 'Doctor',
+      key: 'doctorName',
       filterable: true,
       filterPlaceholder: 'Doctor...',
       render: (p) => (
@@ -261,6 +264,7 @@ export const PharmacyDashboard = () => {
     },
     {
       header: 'Status',
+      key: 'status',
       filterable: true,
       filterType: 'select',
       filterOptions: [

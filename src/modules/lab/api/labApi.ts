@@ -1,9 +1,8 @@
 import apiClient from '@/services/apiClient';
-import { ApiResponse } from '@/types/api';
+import { ApiResponse, PageResponse } from '@/types/api';
 
 export interface LabDepartmentDTO {
     id?: string;
-    hospitalId?: string;
     code: string;
     name: string;
     active: boolean;
@@ -11,7 +10,6 @@ export interface LabDepartmentDTO {
 
 export interface LabTestDTO {
     id?: string;
-    hospitalId?: string;
     testCode: string;
     testName: string;
     shortName?: string;
@@ -47,7 +45,63 @@ export interface LabReferenceRangeDTO {
     criticalMax?: number;
 }
 
+export interface HospitalLabDashboardStatsDTO {
+    activeLocalTests: number;
+    todayPendingOrders: number;
+    todayProcessingOrders: number;
+    todayVerifiedReports: number;
+    todayEstimatedRevenue: number;
+}
+
+export interface HospitalLabTestConfigDTO {
+    testId: string;
+    testCode: string;
+    testName: string;
+    departmentName?: string;
+    enabled: boolean;
+    tatValue?: number;
+    tatUnit?: string;
+    standardPrice?: number;
+    emergencyPrice?: number;
+}
+
+export interface LabQueueItemDTO {
+    orderId: string;
+    orderTestId: string;
+    orderNumber: string;
+    patientId: string;
+    patientName: string;
+    doctorName: string;
+    testName: string;
+    status: string;
+    orderedAt: string;
+}
+
 export const labApi = {
+    // Hospital Admin Features
+    getDashboardStats: async () => {
+        const response = await apiClient.get<ApiResponse<HospitalLabDashboardStatsDTO>>('/hospital/lab/dashboard/stats');
+        return response.data;
+    },
+    getAdminTests: async () => {
+        const response = await apiClient.get<ApiResponse<HospitalLabTestConfigDTO[]>>('/hospital/lab/settings/tests');
+        return response.data;
+    },
+    configureAdminTest: async (data: HospitalLabTestConfigDTO) => {
+        const response = await apiClient.put<ApiResponse<void>>('/hospital/lab/settings/tests', data);
+        return response.data;
+    },
+    // Technician Features
+    getPagedQueue: async (status?: string, page = 0, size = 20) => {
+        const response = await apiClient.get<ApiResponse<PageResponse<LabQueueItemDTO>>>('/lab/orders/queue/paged', {
+            params: { status, page, size }
+        });
+        return response.data;
+    },
+    collectSample: async (orderTestId: string) => {
+        const response = await apiClient.post<ApiResponse<string>>(`/lab/orders/tests/${orderTestId}/collect`);
+        return response.data;
+    },
     // Departments
     getDepartments: async () => {
         const response = await apiClient.get<ApiResponse<LabDepartmentDTO[]>>('/lab/departments');
@@ -87,6 +141,10 @@ export const labApi = {
     // Parameters
     getParametersByTest: async (testId: string) => {
         const response = await apiClient.get<ApiResponse<LabTestParameterDTO[]>>(`/lab/parameters/test/${testId}`);
+        return response.data;
+    },
+    getParametersByOrderTest: async (orderTestId: string) => {
+        const response = await apiClient.get<ApiResponse<LabTestParameterDTO[]>>(`/lab/orders/tests/${orderTestId}/parameters`);
         return response.data;
     },
     createParameter: async (data: LabTestParameterDTO) => {
