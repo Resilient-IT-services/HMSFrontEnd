@@ -221,7 +221,6 @@ export const DoctorDashboard = () => {
       render: (p) => (
           <div>
             <p className="text-slate-700 font-medium">Dr. {p.doctorName || 'N/A'}</p>
-            <p className="text-[10px] text-slate-400 font-normal">CareFlow Physician</p>
           </div>
       )
     },
