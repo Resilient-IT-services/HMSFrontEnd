@@ -2,6 +2,9 @@
 
 import React, { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
+import dayjs from '@/lib/dayjs';
 import MainLayout from '@/components/ui/MainLayout';
 import { Table, Column } from '@/components/ui/Table';
 import { AppointmentResponse } from '@/types/api';
@@ -18,6 +21,7 @@ import {
 
 export const PatientQueuePage = () => {
   const router = useRouter();
+  const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [statusFilter, setStatusFilter] = useState('ALL'); // Dropdown filter state tracking
 
@@ -93,7 +97,11 @@ export const PatientQueuePage = () => {
     },
     {
       header: 'Visit Time',
-      render: (p) => <span className="text-slate-500 font-medium text-xs">{p.appointmentTime.split('T')[1]?.slice(0, 5) || '--:--'}</span>
+      render: (p) => (
+          <span className="text-slate-600 font-medium text-xs">
+          {dayjs(p.appointmentTime).tz(hospitalTimezone || 'Asia/Kolkata').format('hh:mm A')}
+        </span>
+      )
     },
     {
       header: 'Status',

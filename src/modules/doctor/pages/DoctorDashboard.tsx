@@ -12,11 +12,10 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken, sortByToken } from '@/utils/tokenHelper';
 import { normalizeAppointmentData, syncExpiredAppointments } from '@/utils/appointmentHelper';
 import { useDebounce } from '@/hooks/useDebounce';
-import { DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 import { Table, Column } from '@/components/ui/Table';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { useConsultationFee } from '@/hooks/useConsultationFee';
-import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_PAGE_SIZE } from '@/utils/constants';
+import { DASHBOARD_REFRESH_INTERVAL, DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
 import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import Link from 'next/link';
@@ -24,7 +23,7 @@ import dayjs from '@/lib/dayjs';
 
 // Pharmacy Style Lucid Icons Integration
 import {
-  FileText, Hourglass, CheckCircle2, AlertTriangle,
+  FileText, Hourglass, CheckCircle2,
   IndianRupee, Plus, Search, ClipboardList, ArrowRight, Eye,
   Clock, History
 } from 'lucide-react';
@@ -67,7 +66,7 @@ export const DoctorDashboard = () => {
           ...debouncedColumnFilters
         }),
         doctorService.getRevenueSummary(user.id, from, to),
-        // Bina from/to parameters ke global broad range pull taaki history purani bhi aa sake
+        // Global broad range pull for tracking histories
         appointmentService.list({
           page: 0,
           size: 10,
@@ -112,8 +111,9 @@ export const DoctorDashboard = () => {
 
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL, !!user);
 
+  // Exact 3 entries tracking logic for recent histories
   const dynamicHistoriesWidgetData = useMemo(() => {
-    return recentHistories.slice(0, 5);
+    return recentHistories.slice(0, 3);
   }, [recentHistories]);
 
   // Metrics Processors
@@ -121,22 +121,22 @@ export const DoctorDashboard = () => {
     const waiting = appointments.filter((a) => a.status === 'PAID' || a.status === 'VITALS_RECORDED').length;
     const active = appointments.filter((a) => a.status === 'CONSULTATION_STARTED').length;
     const completed = appointments.filter((a) => a.status === 'COMPLETED').length;
-    const cancelled = appointments.filter((a) => a.status === 'CANCELLED').length;
-    const earnedAppointments = appointments.filter(a => a.status !== 'CANCELLED' && a.status !== 'PAYMENT_PENDING');
 
-    const earnings = (revenueSummary?.totalRevenue && revenueSummary.totalRevenue > 0)
-        ? revenueSummary.totalRevenue
-        : (typeof consultationFee === 'number' ? earnedAppointments.length * consultationFee : 0);
+    // Explicit condition logic mapping: Sum of waiting, active and completed
+    const totalLoadToday = waiting + active + completed;
+
+    // Calculation condition logic formula: Load multiplied by consultation rate
+    const feeRate = typeof consultationFee === 'number' ? consultationFee : 0;
+    const earnings = totalLoadToday * feeRate;
 
     return {
-      total: revenueSummary?.totalAppointments ?? totalElements,
+      total: totalLoadToday,
       waiting,
       active,
       completed,
-      cancelled,
       earnings
     };
-  }, [appointments, revenueSummary, totalElements, consultationFee]);
+  }, [appointments, consultationFee]);
 
   const queue = useMemo(() => {
     if (!hospitalTimezone) return [];
@@ -221,7 +221,6 @@ export const DoctorDashboard = () => {
       render: (p) => (
           <div>
             <p className="text-slate-700 font-medium">Dr. {p.doctorName || 'N/A'}</p>
-            <p className="text-[10px] text-slate-400 font-normal">CareFlow Physician</p>
           </div>
       )
     },
@@ -247,9 +246,25 @@ export const DoctorDashboard = () => {
     {
       header: 'Action',
       render: (p) => (
-          <button onClick={() => handleStartConsultation(p.id)} className="text-slate-400 hover:text-slate-600 transition-all">
-            <Eye className="w-4 h-4 mx-auto" />
-          </button>
+          <div className="flex items-center justify-center min-h-[32px]">
+            {/* Conditional Check applied to eliminate extra eye icons when resume button is present */}
+            {p.status === 'CONSULTATION_STARTED' ? (
+                <button
+                    onClick={() => handleStartConsultation(p.id)}
+                    className="px-3 py-1 bg-orange-50 text-orange-600 border border-orange-200 text-[10px] font-bold uppercase tracking-wider rounded-full hover:bg-orange-100 active:scale-95 transition-all shadow-sm shrink-0"
+                >
+                  Resume
+                </button>
+            ) : (
+                <button
+                    onClick={() => handleStartConsultation(p.id)}
+                    className="text-slate-400 hover:text-slate-600 transition-all flex items-center justify-center p-1 rounded-md hover:bg-slate-100"
+                    title="View Patient Details"
+                >
+                  <Eye className="w-4 h-4" />
+                </button>
+            )}
+          </div>
       ),
       className: 'text-center'
     }
@@ -257,7 +272,6 @@ export const DoctorDashboard = () => {
 
   return (
       <MainLayout title="Doctor Console" hideTitle>
-        {/* 3D Glass sliding reflection effects injection block */}
         <style jsx global>{`
           @keyframes dynamicGlassSlide {
             0% { transform: translateX(-150%) skewX(-25deg); }
@@ -310,8 +324,8 @@ export const DoctorDashboard = () => {
               </div>
             </div>
 
-            {/* 6-Column KPI Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            {/* Reconfigured 5-Column Grid Layout */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div className="flex items-start justify-between">
                   <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Total Load<br/>Today</p>
@@ -354,16 +368,6 @@ export const DoctorDashboard = () => {
 
               <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div className="flex items-start justify-between">
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Cancelled<br/>Encounters</p>
-                  <span className="p-1.5 bg-rose-50 text-rose-600 rounded-lg"><AlertTriangle className="w-4 h-4" /></span>
-                </div>
-                <div className="mt-4">
-                  <h3 className="text-2xl font-bold text-slate-800">{stats.cancelled}</h3>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
-                <div className="flex items-start justify-between">
                   <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Today&apos;s Gross<br/>Earnings</p>
                   <span className="p-1.5 bg-amber-50 text-amber-500 rounded-lg"><IndianRupee className="w-4 h-4" /></span>
                 </div>
@@ -376,7 +380,7 @@ export const DoctorDashboard = () => {
             {/* MAIN TWIN PANEL LAYOUT FRAME */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-              {/* LEFT COLLATERAL PANEL: EXTENDED QUEUE CONFIGURATION */}
+              {/* LEFT PANEL: PATIENT QUEUE */}
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4 min-h-[600px] flex flex-col">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -411,7 +415,7 @@ export const DoctorDashboard = () => {
               {/* RIGHT SIDEBAR WIDGET PANELS */}
               <div className="space-y-6">
 
-                {/* Medical History Widget - ALWAYS VISIBLE MINIMUM 3 ENTRIES */}
+                {/* Medical History Widget */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
