@@ -420,12 +420,13 @@ export const HistoryDirectoryView = () => {
               notes: lab.notes
             })) || []}
             vitals={{
-              heartRate: detailedHistoryRecord.vitals?.heartRate?.toString() || '--',
-              temp: detailedHistoryRecord.vitals?.temperature?.toString() || '--',
+              heartRate: detailedHistoryRecord.vitals?.heartRate?.toString() ?? '--',
+              temp: detailedHistoryRecord.vitals?.temperature?.toString() ?? '--',
               bp: detailedHistoryRecord.vitals?.bloodPressure || '--',
-              weight: detailedHistoryRecord.vitals?.weight?.toString() || '--',
-              spo2: detailedHistoryRecord.vitals?.oxygenLevel?.toString() || '--'
+              weight: detailedHistoryRecord.vitals?.weight?.toString() ?? '--',
+              spo2: detailedHistoryRecord.vitals?.oxygenLevel?.toString() ?? '--'
             }}
+
             date={dayjs(detailedHistoryRecord.appointmentTime).format('DD MMM YYYY')}
             isHistoryView
             currentHistoryIndex={currentHistoryIndex}

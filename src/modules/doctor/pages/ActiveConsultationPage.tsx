@@ -8,7 +8,7 @@ import MainLayout from '@/components/ui/MainLayout';
 import { appointmentService } from '@/services/appointmentService';
 import { patientService } from '@/services/patientService';
 import { hospitalService } from '@/services/hospitalService';
-import { AppointmentResponse, PatientResponse, HospitalResponse } from '@/types/api';
+import { AppointmentResponse, PatientResponse, HospitalResponse, VitalsDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatToken } from '@/utils/tokenHelper';
 import DigitalPrescription from '@/components/doctor/DigitalPrescription';
@@ -253,7 +253,7 @@ export const ActiveConsultationPage = () => {
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - birthDate.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-    return age;
+    return Math.max(0, age);
   };
 
   const searchParams = useSearchParams();
@@ -268,6 +268,7 @@ export const ActiveConsultationPage = () => {
 
   const [complaints, setComplaints] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
+  const [vitals, setVitals] = useState<VitalsDTO | null>(null);
   const [prescriptions, setPrescriptions] = useState<any[]>([]);
   const [investigations, setInvestigations] = useState<any[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -291,6 +292,7 @@ export const ActiveConsultationPage = () => {
           ...appointment!,
           chiefComplaints: complaints,
           diagnosis: diagnosis,
+          vitals: vitals || appointment?.vitals,
           prescription: {
             ...appointment!.prescription,
             items: prescriptions.filter(p => p.medicine).map(p => ({
@@ -371,7 +373,7 @@ export const ActiveConsultationPage = () => {
           setAppointment(res.data);
           setComplaints(res.data.chiefComplaints || '');
           setDiagnosis(res.data.diagnosis || '');
-
+          setVitals(res.data.vitals || null);
           if (res.data.prescription?.items) {
             setPrescriptions(res.data.prescription.items.map((item, idx) => {
               const dosageParts = (item.dosage || '0-0-0').split('-');
@@ -524,6 +526,10 @@ export const ActiveConsultationPage = () => {
         }
       };
       const res = await appointmentService.updateConsultation(appointmentId, updateData as any);
+      if (res.success && res.data) {
+        setAppointment(res.data);
+        setVitals(res.data.vitals || null);
+      }
       if (res.success && !silent) triggerGlobalToast('Saved successfully', 'success');
       return res.success;
     } catch (error) {
@@ -634,20 +640,21 @@ export const ActiveConsultationPage = () => {
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2 px-1">
                     <span className="material-symbols-outlined text-sm">analytics</span> Patient Vitals
                   </h3>
-                  <div className="grid grid-cols-5 gap-1.5">
+                  <div className="grid grid-cols-6 gap-1.5">
                     {[
-                      { label: 'Heart Rate', value: appointment.vitals?.heartRate, unit: 'BPM', icon: 'favorite', color: 'text-orange-600', bg: 'bg-orange-50' },
-                      { label: 'Temp', value: appointment.vitals?.temperature, unit: '°F', icon: 'device_thermostat', color: 'text-blue-600', bg: 'bg-blue-50' },
-                      { label: 'Weight', value: appointment.vitals?.weight, unit: 'kg', icon: 'monitor_weight', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-                      { label: 'BP', value: appointment.vitals?.bloodPressure, unit: '', icon: 'blood_pressure', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-                      { label: 'SpO2', value: appointment.vitals?.oxygenLevel, unit: '%', icon: 'air', color: 'text-cyan-600', bg: 'bg-cyan-50' }
+                      { label: 'Heart Rate', value: vitals?.heartRate, unit: 'BPM', icon: 'favorite', color: 'text-orange-600', bg: 'bg-orange-50' },
+                      { label: 'Temp', value: vitals?.temperature, unit: '°F', icon: 'device_thermostat', color: 'text-blue-600', bg: 'bg-blue-50' },
+                      { label: 'Weight', value: vitals?.weight, unit: 'kg', icon: 'monitor_weight', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                      { label: 'BP', value: vitals?.bloodPressure, unit: '', icon: 'blood_pressure', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+                      { label: 'SpO2', value: vitals?.oxygenLevel, unit: '%', icon: 'air', color: 'text-cyan-600', bg: 'bg-cyan-50' },
+                      { label: 'Resp', value: vitals?.respiratoryRate, unit: '/m', icon: 'airwave', color: 'text-slate-600', bg: 'bg-slate-50' }
                     ].map((v) => (
                       <div key={v.label} className={`${v.bg} p-2 rounded-xl border border-white/50 shadow-inner flex flex-col justify-center min-w-0`}>
                         <span className="text-[8px] uppercase font-black text-slate-500/70 block mb-0.5 truncate">{v.label}</span>
                         <div className={`flex items-center gap-1 ${v.color}`}>
                           <span className="material-symbols-outlined text-[14px] shrink-0">{v.icon}</span>
                           <span className="font-black text-[11px] sm:text-xs truncate">
-                            {v.value || '--'}
+                            {v.value ?? '--'}
                             <small className="text-[8px] ml-0.5 opacity-60">{v.unit}</small>
                           </span>
                         </div>
@@ -756,7 +763,7 @@ export const ActiveConsultationPage = () => {
                                     className={`w-12 sm:w-16 px-2 py-2 bg-white border ${showValidation && p.medicine && !hasDuration ? 'border-red-500 animate-pulse' : 'border-slate-200'} rounded-lg text-xs font-black text-slate-900 outline-none focus:border-slate-400 text-center shadow-sm transition-colors`}
                                     placeholder="0"
                                     value={p.duration || ''}
-                                    onChange={(e) => updatePrescriptionRow(p.id, 'duration', Number.parseInt(e.target.value) || 0)}
+                                    onChange={(e) => updatePrescriptionRow(p.id, 'duration', Math.max(0, Number.parseInt(e.target.value) || 0))}
                                   />
                                   <select
                                     className="flex-1 bg-white border border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 h-8 outline-none px-1"
@@ -841,11 +848,11 @@ export const ActiveConsultationPage = () => {
             notes: i.notes
           }))}
           vitals={{
-            heartRate: appointment?.vitals?.heartRate?.toString() || '--',
-            temp: appointment?.vitals?.temperature?.toString() || '--',
-            bp: appointment?.vitals?.bloodPressure || '--',
-            weight: appointment?.vitals?.weight?.toString() || '--',
-            spo2: appointment?.vitals?.oxygenLevel?.toString() || '--'
+            heartRate: (vitals?.heartRate ?? appointment?.vitals?.heartRate)?.toString() || '--',
+            temp: (vitals?.temperature ?? appointment?.vitals?.temperature)?.toString() || '--',
+            bp: vitals?.bloodPressure || appointment?.vitals?.bloodPressure || '--',
+            weight: (vitals?.weight ?? appointment?.vitals?.weight)?.toString() || '--',
+            spo2: (vitals?.oxygenLevel ?? appointment?.vitals?.oxygenLevel)?.toString() || '--'
           }}
           date={new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
           tokenDisplay={formatToken(appointment)}
@@ -912,11 +919,11 @@ export const ActiveConsultationPage = () => {
             notes: lab.notes
           })) || []}
           vitals={{
-            heartRate: detailedHistoryRecord.vitals?.heartRate?.toString() || '--',
-            temp: detailedHistoryRecord.vitals?.temperature?.toString() || '--',
+            heartRate: detailedHistoryRecord.vitals?.heartRate?.toString() ?? '--',
+            temp: detailedHistoryRecord.vitals?.temperature?.toString() ?? '--',
             bp: detailedHistoryRecord.vitals?.bloodPressure || '--',
-            weight: detailedHistoryRecord.vitals?.weight?.toString() || '--',
-            spo2: detailedHistoryRecord.vitals?.oxygenLevel?.toString() || '--'
+            weight: detailedHistoryRecord.vitals?.weight?.toString() ?? '--',
+            spo2: detailedHistoryRecord.vitals?.oxygenLevel?.toString() ?? '--'
           }}
           date={new Date(detailedHistoryRecord.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
           isHistoryView
