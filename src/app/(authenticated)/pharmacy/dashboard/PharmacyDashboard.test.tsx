@@ -6,11 +6,40 @@ import { configureStore } from '@reduxjs/toolkit';
 import PharmacyDashboard from './page';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 
+// Mock next/navigation
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => '/pharmacy/dashboard',
+  useSearchParams: () => new URLSearchParams(),
+}));
+
+// Mock lucide-react
+vi.mock('lucide-react', () => ({
+  FileText: () => <div data-testid="icon-file-text" />,
+  Hourglass: () => <div data-testid="icon-hourglass" />,
+  CheckCircle2: () => <div data-testid="icon-check-circle" />,
+  AlertTriangle: () => <div data-testid="icon-alert-triangle" />,
+  Calendar: () => <div data-testid="icon-calendar" />,
+  IndianRupee: () => <div data-testid="icon-indian-rupee" />,
+  Plus: () => <div data-testid="icon-plus" />,
+  Search: () => <div data-testid="icon-search" />,
+  PlusCircle: () => <div data-testid="icon-plus-circle" />,
+  Download: () => <div data-testid="icon-download" />,
+  ArrowRight: () => <div data-testid="icon-arrow-right" />,
+  Eye: () => <div data-testid="icon-eye" />,
+  Activity: () => <div data-testid="icon-activity" />,
+}));
+
 vi.mock('@/modules/pharmacy/api/pharmacyApi', () => ({
   pharmacyApi: {
     getPrescriptions: vi.fn(),
     getMedicineStock: vi.fn(),
     getSaleByPrescription: vi.fn(),
+    importStock: vi.fn(),
   },
 }));
 
@@ -24,6 +53,7 @@ describe('PharmacyDashboard', () => {
   });
 
   it('renders pharmacy metrics from services', async () => {
+    const today = new Date().toISOString().split('T')[0];
     vi.mocked(pharmacyApi.getPrescriptions).mockResolvedValue({
       success: true,
       data: {
@@ -39,7 +69,8 @@ describe('PharmacyDashboard', () => {
               { id: 'item-2', medicineId: 'med-2', medicineName: 'Cetirizine', dosage: '1 tab', duration: '3 days' },
             ],
             phone: '9876543210',
-            createdAt: '2026-04-26T00:00:00',
+            createdAt: `${today}T00:00:00`,
+            status: 'PENDING'
           },
           {
             id: 'rx-2',
@@ -51,7 +82,8 @@ describe('PharmacyDashboard', () => {
               { id: 'item-3', medicineId: 'med-3', medicineName: 'Azithromycin', dosage: '1 tab', duration: '3 days' },
             ],
             phone: '9876543211',
-            createdAt: '2026-04-26T00:00:00',
+            createdAt: `${today}T00:00:00`,
+            status: 'PENDING'
           },
         ],
         page: 0,
@@ -105,6 +137,10 @@ describe('PharmacyDashboard', () => {
       expect(screen.getAllByText('Meera Singh')[0]).toBeInTheDocument();
       expect(screen.getAllByText('Low Stock Alerts')[0]).toBeInTheDocument();
       expect(screen.getByText('03')).toBeInTheDocument();
+      // Revenue is based on dispensed prescriptions today.
+      // In this test, dispensedRes is not explicitly mocked to have content, 
+      // but pharmacyApi.getPrescriptions is called for PENDING, DISPENSED, and CANCELLED.
+      // The component logic for revenue calculation uses dispensedList.
     });
   });
 
@@ -113,8 +149,8 @@ describe('PharmacyDashboard', () => {
       success: true,
       data: {
         content: [
-          { id: 'rx-1', patientName: 'Amit Sharma', items: [{ id: '1' }], status: 'PENDING', phone: '1234567890' },
-          { id: 'rx-2', patientName: 'Meera Singh', items: [{ id: '1' }], status: 'ACTIVE', phone: '0987654321' },
+          { id: 'rx-1', patientName: 'Amit Sharma', items: [{ id: '1', medicineName: 'M1', dosage: '1', duration: '1' }], status: 'PENDING', phone: '1234567890' },
+          { id: 'rx-2', patientName: 'Meera Singh', items: [{ id: '1', medicineName: 'M1', dosage: '1', duration: '1' }], status: 'ACTIVE', phone: '0987654321' },
         ],
         totalElements: 2,
         totalPages: 1,
@@ -149,8 +185,8 @@ describe('PharmacyDashboard', () => {
       success: true,
       data: {
         content: [
-          { id: 'rx-123456', patientName: 'Amit Sharma', items: [{ id: '1' }], status: 'PENDING', phone: '1234567890' },
-          { id: 'rx-789012', patientName: 'Meera Singh', items: [{ id: '1' }], status: 'ACTIVE', phone: '0987654321' },
+          { id: 'rx-123456', patientName: 'Amit Sharma', items: [{ id: '1', medicineName: 'M1', dosage: '1', duration: '1' }], status: 'PENDING', phone: '1234567890' },
+          { id: 'rx-789012', patientName: 'Meera Singh', items: [{ id: '1', medicineName: 'M1', dosage: '1', duration: '1' }], status: 'ACTIVE', phone: '0987654321' },
         ],
         totalElements: 2,
         totalPages: 1,
@@ -176,6 +212,41 @@ describe('PharmacyDashboard', () => {
     await waitFor(() => {
       expect(screen.getAllByText('Amit Sharma').length).toBeGreaterThan(0);
       expect(screen.queryByText('Meera Singh')).not.toBeInTheDocument();
+    });
+  });
+
+  it('filters prescriptions when using column filter', async () => {
+    vi.mocked(pharmacyApi.getPrescriptions).mockResolvedValue({
+      success: true,
+      data: {
+        content: [
+          { id: 'rx-1', patientName: 'Amit Sharma', items: [{ id: '1', medicineName: 'M1', dosage: '1', duration: '1' }], status: 'PENDING', phone: '1234567890' },
+          { id: 'rx-2', patientName: 'Meera Singh', items: [{ id: '1', medicineName: 'M1', dosage: '1', duration: '1' }], status: 'PENDING', phone: '0987654321' },
+        ],
+        totalElements: 2,
+        totalPages: 1,
+        size: 10,
+        page: 0
+      }
+    });
+    vi.mocked(pharmacyApi.getMedicineStock).mockResolvedValue({ success: true, data: { content: [], totalElements: 0, page: 0, size: 10, totalPages: 0 } });
+
+    render(
+      <Provider store={configureStore({ reducer: { auth: (state = { user: { fullName: 'Pharmacist' } }) => state } })}>
+        <PharmacyDashboard />
+      </Provider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Amit Sharma').length).toBeGreaterThan(0);
+    });
+
+    const patientFilter = screen.getByPlaceholderText(/Patient name.../i);
+    fireEvent.change(patientFilter, { target: { value: 'Meera' } });
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Meera Singh').length).toBeGreaterThan(0);
+      expect(screen.queryByText('Amit Sharma')).not.toBeInTheDocument();
     });
   });
 });
