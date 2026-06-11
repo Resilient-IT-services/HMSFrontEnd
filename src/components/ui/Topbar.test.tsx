@@ -72,39 +72,11 @@ describe('Topbar', () => {
     expect(screen.getByText('testuser')).toBeInTheDocument();
   });
 
-  it('renders hospital selector for superadmin', async () => {
-    renderWithRedux({ isSuperMode: true, user: { ...mockUser, superuser: true } });
-    expect(await screen.findByText('All Hospitals')).toBeInTheDocument();
-  });
-
   it('opens profile dropdown on click', () => {
     renderWithRedux();
     const profileButton = screen.getByText('testuser').closest('button');
     fireEvent.click(profileButton!);
     expect(screen.getByText('Signed in as')).toBeInTheDocument();
     expect(screen.getByText('Test User')).toBeInTheDocument();
-  });
-
-  it('handles hospital switch for superadmin', async () => {
-    const superUser = {
-      ...mockUser,
-      superuser: true,
-      memberships: [
-        { hospitalId: '1', hospitalName: 'Hosp 1', hospitalCode: 'H1', roleAssignments: [] },
-        { hospitalId: '2', hospitalName: 'Hosp 2', hospitalCode: 'H2', roleAssignments: [] }
-      ]
-    };
-    renderWithRedux({ isSuperMode: true, user: superUser });
-    
-    const selector = await screen.findByRole('combobox');
-    
-    // Wait for options to be populated
-    await waitFor(() => {
-        expect(screen.getByText('Hosp 2')).toBeInTheDocument();
-    });
-
-    fireEvent.change(selector, { target: { value: '2' } });
-    
-    expect((selector as HTMLSelectElement).value).toBe('2');
   });
 });

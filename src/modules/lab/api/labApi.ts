@@ -3,7 +3,6 @@ import { ApiResponse } from '@/types/api';
 
 export interface LabDepartmentDTO {
     id?: string;
-    hospitalId?: string;
     code: string;
     name: string;
     active: boolean;
@@ -11,7 +10,6 @@ export interface LabDepartmentDTO {
 
 export interface LabTestDTO {
     id?: string;
-    hospitalId?: string;
     testCode: string;
     testName: string;
     shortName?: string;
@@ -47,7 +45,40 @@ export interface LabReferenceRangeDTO {
     criticalMax?: number;
 }
 
+export interface HospitalLabDashboardStatsDTO {
+    activeLocalTests: number;
+    todayPendingOrders: number;
+    todayProcessingOrders: number;
+    todayVerifiedReports: number;
+    todayEstimatedRevenue: number;
+}
+
+export interface HospitalLabTestConfigDTO {
+    testId: string;
+    testCode: string;
+    testName: string;
+    departmentName?: string;
+    enabled: boolean;
+    tatValue?: number;
+    tatUnit?: string;
+    standardPrice?: number;
+    emergencyPrice?: number;
+}
+
 export const labApi = {
+    // Hospital Admin Features
+    getDashboardStats: async () => {
+        const response = await apiClient.get<ApiResponse<HospitalLabDashboardStatsDTO>>('/hospital/lab/dashboard/stats');
+        return response.data;
+    },
+    getAdminTests: async () => {
+        const response = await apiClient.get<ApiResponse<HospitalLabTestConfigDTO[]>>('/hospital/lab/settings/tests');
+        return response.data;
+    },
+    configureAdminTest: async (data: HospitalLabTestConfigDTO) => {
+        const response = await apiClient.put<ApiResponse<void>>('/hospital/lab/settings/tests', data);
+        return response.data;
+    },
     // Departments
     getDepartments: async () => {
         const response = await apiClient.get<ApiResponse<LabDepartmentDTO[]>>('/lab/departments');
