@@ -85,8 +85,8 @@ export const appointmentService = {
     return response.data;
   },
 
-  async completeConsultation(appointmentId: string, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
-    const response = await apiClient.put<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/complete`, undefined, config);
+  async completeConsultation(appointmentId: string, request?: Partial<AppointmentResponse>, config?: AxiosRequestConfig): Promise<ApiResponse<AppointmentResponse>> {
+    const response = await apiClient.put<ApiResponse<AppointmentResponse>>(`/appointments/${appointmentId}/complete`, request, config);
     return response.data;
   },
 
