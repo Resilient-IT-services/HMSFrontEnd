@@ -41,26 +41,23 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   complaints,
   diagnosis,
   prescriptions,
-  investigations,
+  investigations = [],
   vitals,
   date,
   tokenDisplay,
 }) => {
   const [followUpDate] = React.useState<string>(() => 
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
   );
 
   if (!isOpen) return null;
 
-  const patientAge = () => {
-    if (!patient?.dob) return '--';
-    const birthDate = new Date(patient.dob);
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
     const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
     return age;
   };
 
@@ -70,244 +67,238 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
 
   const filteredPrescriptions = prescriptions.filter(p => p.medicine);
   
-  // Pagination Logic
-  const rowsPerPageFirst = 4;
-  const rowsPerPageOthers = 10;
+  // Advanced Pagination Logic for Professional Document
+  // Page 1 has header, patient info, vitals, clinical info, and SOME meds
+  // Subsequent pages have header and more meds/labs
+  const ITEMS_PER_PAGE_FIRST = 6;
+  const ITEMS_PER_PAGE_OTHERS = 15;
   
-  const prescriptionPages: PrescriptionRow[][] = [];
-  if (filteredPrescriptions.length === 0) {
-    prescriptionPages.push([]);
-  } else {
-    prescriptionPages.push(filteredPrescriptions.slice(0, rowsPerPageFirst));
-    for (let i = rowsPerPageFirst; i < filteredPrescriptions.length; i += rowsPerPageOthers) {
-      prescriptionPages.push(filteredPrescriptions.slice(i, i + rowsPerPageOthers));
-    }
+  const pages: { meds: PrescriptionRow[], labs: any[] }[] = [];
+  
+  // Split meds and labs into logical chunks
+  let currentMeds = [...filteredPrescriptions];
+  let currentLabs = [...investigations];
+
+  // Page 1
+  pages.push({
+    meds: currentMeds.splice(0, ITEMS_PER_PAGE_FIRST),
+    labs: currentMeds.length === 0 ? currentLabs.splice(0, 8) : [] // Only add labs if meds finished or small
+  });
+
+  // Overflow pages
+  while (currentMeds.length > 0 || currentLabs.length > 0) {
+    pages.push({
+      meds: currentMeds.splice(0, ITEMS_PER_PAGE_OTHERS),
+      labs: currentMeds.length === 0 ? currentLabs.splice(0, ITEMS_PER_PAGE_OTHERS) : []
+    });
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-black/60 backdrop-blur-sm overflow-y-auto pt-4 sm:pt-10 pb-12 prescription-modal-overlay">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center bg-slate-900/80 backdrop-blur-md overflow-y-auto pt-6 pb-12 prescription-modal-overlay no-scrollbar">
       {/* Backdrop for closing */}
       <div className="fixed inset-0 no-print" onClick={onClose}></div>
       
-      {/* Floating Action Buttons - Improved for mobile */}
-      <div className="fixed top-4 sm:top-6 right-4 sm:right-10 z-[110] flex gap-2 sm:gap-3 no-print">
+      {/* Action Controls */}
+      <div className="fixed top-6 right-10 z-[110] flex gap-3 no-print">
         <button 
           onClick={handlePrint}
-          className="flex items-center gap-2 bg-orange-600 text-white px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-bold hover:bg-orange-700 transition-all shadow-xl active:scale-95 text-xs sm:text-base"
+          className="flex items-center gap-2 bg-orange-600 text-white px-8 py-3 rounded-2xl font-black hover:bg-orange-700 transition-all shadow-2xl active:scale-95 text-sm uppercase tracking-widest"
         >
-          <span className="material-symbols-outlined text-sm sm:text-base">print</span>
-          <span className="hidden xs:inline">Print PDF</span>
-          <span className="xs:hidden">Print</span>
+          <span className="material-symbols-outlined text-lg">print</span> Print Document
         </button>
         <button 
           onClick={onClose}
-          className="bg-white text-gray-700 p-2 sm:p-3 rounded-xl shadow-xl hover:bg-gray-50 transition-all border border-gray-200"
+          className="bg-white/10 text-white p-3 rounded-2xl shadow-xl hover:bg-white/20 transition-all backdrop-blur-md border border-white/20"
         >
-          <span className="material-symbols-outlined text-sm sm:text-base">close</span>
+          <span className="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      {/* Pages Wrapper */}
-      <div className="flex flex-col gap-6 sm:gap-8 items-center w-full px-4 sm:px-0 prescription-pages-container">
-        {prescriptionPages.map((pageRows, index) => (
+      {/* Prescription Document Pages */}
+      <div className="flex flex-col gap-10 items-center w-full px-4 sm:px-0 prescription-pages-container">
+        {pages.map((pageData, index) => (
           <div 
             key={index} 
-            className="relative w-full max-w-[210mm] min-h-[auto] lg:min-h-[297mm] bg-white shadow-2xl p-6 sm:p-[15mm] flex flex-col print-page animate-in fade-in zoom-in duration-300 rounded-2xl lg:rounded-none"
+            className="relative w-full max-w-[210mm] min-h-[297mm] bg-white shadow-2xl flex flex-col print-page animate-in fade-in slide-in-from-bottom-4 duration-500 rounded-none overflow-hidden font-inter"
           >
-            {/* Header: Branding & Address */}
-            <div className="flex flex-col sm:flex-row justify-between items-start border-b-2 border-orange-600 pb-6 sm:pb-8 mb-6 sm:mb-8 gap-4 sm:gap-0">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-orange-600 rounded-lg flex items-center justify-center text-white font-extrabold text-lg sm:text-xl">C</div>
-                  <h1 className="text-xl sm:text-3xl font-black text-orange-700 leading-tight">{hospital?.name || 'CareFlow Hospital'}</h1>
-                </div>
-                <div className="text-xs sm:text-sm text-slate-500 max-w-xs pt-2">
-                  {hospital?.address && <p>{hospital.address}</p>}
-                  <p>{hospital?.city}{hospital?.state ? `, ${hospital.state}` : ''} {hospital?.pincode}</p>
+            {/* Header: Hospital Branding - Simplified */}
+            <div className="p-8 sm:p-10 border-b border-slate-200 flex justify-between items-center shrink-0">
+              <div className="space-y-0.5">
+                <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">{hospital?.name || 'LAARA HMS'}</h2>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{hospital?.address || 'Healthcare Management System'}</p>
+                <div className="mt-2 flex items-center gap-2">
+                   <span className="text-[10px] font-black text-orange-600 uppercase tracking-wider">Dr. {doctor?.fullName}</span>
+                   <span className="text-[8px] font-bold text-slate-300">•</span>
+                   <span className="text-[9px] font-bold text-slate-500 uppercase italic tracking-tight">{doctor?.doctorInfo?.specialization || 'Consultant'}</span>
                 </div>
               </div>
-              <div className="sm:text-right space-y-1">
-                <p className="text-xs sm:text-sm font-bold text-orange-600 uppercase tracking-widest">Contact Details</p>
-                <p className="text-[10px] sm:text-xs text-slate-500 font-medium">emergency@careflow.health</p>
-                <p className="text-[10px] sm:text-xs text-slate-500 font-medium">www.careflow.health</p>
+              <div className="text-right">
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Consultation Date</p>
+                 <p className="text-sm font-black text-slate-900">{date}</p>
+                 {tokenDisplay && (
+                   <span className="mt-1 inline-block text-[9px] font-black bg-slate-100 text-slate-600 px-2 py-0.5 rounded uppercase tracking-widest">#{tokenDisplay}</span>
+                 )}
               </div>
             </div>
 
-            {/* Content Area */}
-            <div className="flex-1 flex flex-col">
-              {index === 0 && (
-                <>
-                  <div className="border border-slate-200 rounded-xl px-4 py-3 sm:px-5 sm:py-4 flex flex-col sm:flex-row justify-between sm:items-center mb-6 bg-slate-50 gap-4">
-
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[9px] sm:text-[10px] uppercase text-slate-400 font-black tracking-widest">
-                            Patient
-                        </span>
-                        {tokenDisplay && (
-                          <span className="bg-orange-600/10 text-orange-700 text-[8px] sm:text-[9px] font-black px-1.5 py-0.5 rounded border border-orange-600/20 uppercase">
-                            {tokenDisplay}
-                          </span>
-                        )}
-                      </div>
-                      <span className="font-bold text-slate-900 text-sm sm:text-base">
-                        {patient?.fullName} / {patientAge()} yrs / {vitals.weight} kg
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 items-center text-[10px] sm:text-sm font-bold text-slate-600">
-                      <span className="flex items-center gap-1.5"><span className="text-orange-600 text-sm">favorite</span> {vitals.heartRate} <span className="text-[8px] text-slate-400">BPM</span></span>
-                      <span className="flex items-center gap-1.5"><span className="text-blue-600 text-sm">device_thermostat</span> {vitals.temp}</span>
-                      <span className="flex items-center gap-1.5"><span className="text-emerald-600 text-sm">blood_pressure</span> {vitals.bp}</span>
-                      {vitals.spo2 && <span className="flex items-center gap-1.5"><span className="text-purple-600 text-sm">air</span> {vitals.spo2}%</span>}
-                    </div>
-
-                    <div className="sm:text-right border-t sm:border-t-0 pt-3 sm:pt-0">
-                      <span className="text-[9px] sm:text-[10px] uppercase text-slate-400 font-black tracking-widest">
-                          Date
-                      </span>
-                      <p className="font-bold text-slate-900 text-sm sm:text-base">{date}</p>
-                    </div>
+            {/* Page 1 Specific Sections */}
+            {index === 0 && (
+              <>
+                {/* Patient Profile Bar - Clean & Simple */}
+                <div className="px-10 py-4 flex justify-between items-center gap-6 border-b border-slate-100 bg-slate-50/50 shrink-0">
+                  <div className="flex items-center gap-8">
+                     <div>
+                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Patient</span>
+                       <span className="text-xs font-black text-slate-900 uppercase">{patient?.fullName}</span>
+                     </div>
+                     <div className="w-px h-6 bg-slate-200"></div>
+                     <div>
+                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Age / Sex</span>
+                       <span className="text-xs font-bold text-slate-700">{patient?.dob ? calculateAge(patient.dob) : '--'} Yrs • {patient?.gender}</span>
+                     </div>
+                     <div className="w-px h-6 bg-slate-200"></div>
+                     <div>
+                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Patient ID</span>
+                       <span className="text-xs font-mono font-bold text-slate-600 uppercase">{patient?.patientCode || 'PT-NEW'}</span>
+                     </div>
                   </div>
+                  <div className="text-right">
+                     <span className="text-[9px] font-black text-emerald-600 px-2 py-0.5 bg-emerald-50 rounded border border-emerald-100 uppercase tracking-widest">Validated Rx</span>
+                  </div>
+                </div>
 
-                  {/* Clinical Observations - Only on Page 1 */}
-                  <div className="flex flex-col gap-6 mb-10">
-
-                    <div className="border-l-4 border-slate-200 pl-4 py-2">
-                      <h3 className="text-[9px] sm:text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">
-                        Chief Complaints
-                      </h3>
-                      <p className="text-sm sm:text-lg font-medium text-slate-700 italic leading-relaxed">
-                        "{complaints || 'No complaints recorded'}"
-                      </p>
+                {/* Vitals Grid - Simplified Inline */}
+                <div className="px-10 py-4 flex items-center justify-between gap-4 border-b border-slate-100 bg-white shrink-0">
+                  {[
+                    { label: 'Heart Rate', value: vitals.heartRate, unit: 'bpm', color: 'text-orange-600' },
+                    { label: 'Temperature', value: vitals.temp, unit: '°F', color: 'text-blue-600' },
+                    { label: 'Weight', value: vitals.weight, unit: 'kg', color: 'text-indigo-600' },
+                    { label: 'BP', value: vitals.bp, unit: 'mmHg', color: 'text-emerald-600' },
+                    { label: 'SpO2', value: vitals.spo2, unit: '%', color: 'text-cyan-600' }
+                  ].map((v, i) => (
+                    <div key={i} className="flex flex-col">
+                      <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{v.label}</span>
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-sm font-black text-slate-800">{v.value || '--'}</span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase">{v.unit}</span>
+                      </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div className="border-l-4 border-orange-600 pl-4 py-2">
-                      <h3 className="text-[9px] sm:text-[10px] font-black text-orange-600 mb-2 uppercase tracking-widest">
-                        Diagnosis
-                      </h3>
-                      <p className="text-base sm:text-xl font-bold text-slate-900">
+                {/* Clinical Content - Compact */}
+                <div className="grid grid-cols-2 border-b border-slate-100 shrink-0 divide-x divide-slate-100">
+                  <div className="p-8 space-y-2">
+                     <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                       <span className="w-1 h-1 bg-slate-400 rounded-full"></span> Chief Complaints
+                     </h3>
+                     <div className="text-xs font-medium text-slate-700 leading-relaxed italic">
+                        {complaints || 'No specific complaints recorded.'}
+                     </div>
+                  </div>
+                  <div className="p-8 space-y-2">
+                     <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                       <span className="w-1 h-1 bg-orange-500 rounded-full"></span> Clinical Diagnosis
+                     </h3>
+                     <div className="text-sm font-black text-slate-900 leading-relaxed uppercase tracking-tight">
                         {diagnosis || 'General Checkup'}
-                      </p>
-                    </div>
-
-                  </div>
-                </>
-              )}
-
-              {/* Investigations - Only on Page 1 if they exist */}
-              {index === 0 && investigations && investigations.length > 0 && (
-                <div className="mb-8">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="material-symbols-outlined text-blue-600 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>biotech</span>
-                    <h3 className="text-xs sm:text-sm font-black text-slate-900 uppercase tracking-widest">Ordered Investigations</h3>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 border border-slate-100 rounded-xl p-4 bg-slate-50/30">
-                    {investigations.map((inv) => (
-                      <div key={inv.id} className="flex flex-col border-b border-slate-100 last:border-0 pb-2 mb-1 sm:border-0 sm:pb-0 sm:mb-0">
-                        <div className="flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600"></span>
-                          <span className="text-xs sm:text-sm font-bold text-slate-700">{inv.testName}</span>
-                          <span className="text-[10px] text-slate-400 font-black uppercase">({inv.testCode})</span>
-                        </div>
-                        {inv.notes && (
-                          <p className="text-[10px] text-slate-500 italic pl-3.5 mt-0.5 leading-tight">Note: {inv.notes}</p>
-                        )}
-                      </div>
-                    ))}
+                     </div>
                   </div>
                 </div>
-              )}
-
-              {/* Prescription Table */}
-              <div className="flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-orange-600 text-2xl sm:text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>prescriptions</span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900 uppercase tracking-tight">
-                  Medication Plan {prescriptionPages.length > 1 ? `(Page ${index + 1})` : ''}
-                </h2>
-              </div>
-              <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                <table className="w-full text-left border-collapse min-w-[500px] sm:min-w-0">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Medicine & Dosage</th>
-                      <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Frequency</th>
-                      <th className="p-3 sm:p-4 text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Instructions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {pageRows.map((p) => (
-                      <tr key={p.id}>
-                        <td className="p-3 sm:p-4">
-                          <p className="font-bold text-slate-900 text-sm sm:text-base">{p.medicine}</p>
-                          {p.composition && (
-                            <p className="text-[9px] text-orange-600 font-black italic mb-1 uppercase tracking-tight">
-                              Salts: {p.composition}
-                            </p>
-                          )}
-                          <p className="text-[10px] text-slate-400 font-medium">Prescribed Medicine</p>
-                        </td>
-                        <td className="p-3 sm:p-4 text-center">
-                          <span className="font-bold text-slate-700 text-xs sm:text-sm whitespace-nowrap">{p.frequency}</span>
-                        </td>
-                        <td className="p-3 sm:p-4">
-                          <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">{p.instructions}</p>
-                        </td>
-                      </tr>
-                    ))}
-                    {pageRows.length === 0 && index === 0 && (
-                      <tr>
-                        <td colSpan={3} className="p-10 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No medications prescribed</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Footer: Signatures & QR */}
-            <div className="mt-auto pt-8 border-t border-slate-200">
-              <div className="flex flex-col sm:flex-row items-end gap-8 sm:gap-12">
-                <div className="w-full sm:w-auto space-y-3 sm:space-y-4">
-                  <p className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">FOLLOW-UP APPOINTMENT</p>
-                  <div className="flex items-center gap-2 text-orange-600 font-black text-sm sm:text-base">
-                    <span className="material-symbols-outlined text-sm sm:text-base">calendar_today</span>
-                    <span>{followUpDate}</span>
-                  </div>
-                  <p className="text-[10px] sm:text-xs text-slate-500 font-medium">Please bring this document for the next visit.</p>
-                </div>
-                
-                <div className="flex-1 hidden sm:block"></div>
-
-                <div className="w-full sm:w-auto text-right flex flex-col items-end">
-                  <div className="border-t border-slate-900 w-full pt-3">
-                    <p className="text-sm sm:text-base font-black text-slate-900">Dr. {doctor?.fullName || 'Marcus Sterling'}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-500 font-bold uppercase tracking-wider">{doctor?.doctorInfo?.specialization || 'Senior Consultant'}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-400 font-medium uppercase">Reg No: {doctor?.doctorInfo?.licenseNumber || 'MED-88291-S'}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Page Number Indicator */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em]">
-              Page {index + 1} of {prescriptionPages.length}
-            </div>
-
-            {/* Print Note - Only on the last page */}
-            {index === prescriptionPages.length - 1 && (
-              <div className="mt-8 text-center text-[8px] sm:text-[10px] text-slate-300 font-black uppercase tracking-[0.2em] no-print">
-                Generated by CareFlow Medical Systems
-              </div>
+              </>
             )}
+
+            {/* Treatment Content (Meds & Labs) */}
+            <div className="flex-1 p-8 flex flex-col gap-8">
+               {/* Medications Section */}
+               {pageData.meds.length > 0 && (
+                 <section className="space-y-3">
+                    <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
+                      <span className="material-symbols-outlined text-orange-600 text-sm">medication</span> Prescribed Medications
+                    </h3>
+                    <div className="overflow-hidden border border-slate-200 rounded-lg">
+                       <table className="w-full text-left border-collapse">
+                          <thead>
+                             <tr className="bg-slate-50 border-b border-slate-200">
+                                <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Medicine Details</th>
+                                <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Dosage</th>
+                                <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Duration</th>
+                             </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                             {pageData.meds.map((med, idx) => (
+                               <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
+                                 <td className="px-4 py-3">
+                                   <div className="text-[12px] font-black text-slate-900">{med.medicine}</div>
+                                   {med.composition && <div className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">{med.composition}</div>}
+                                 </td>
+                                 <td className="px-4 py-3 text-center">
+                                   <div className="text-[11px] font-black text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-100 inline-block min-w-[60px]">{med.frequency}</div>
+                                 </td>
+                                 <td className="px-4 py-3 text-right">
+                                   <div className="text-[10px] font-bold text-slate-500 uppercase">{med.duration}</div>
+                                 </td>
+                               </tr>
+                             ))}
+                          </tbody>
+                       </table>
+                    </div>
+                 </section>
+               )}
+
+               {/* Lab Investigations Section */}
+               {pageData.labs.length > 0 && (
+                 <section className="space-y-3">
+                    <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
+                      <span className="material-symbols-outlined text-blue-600 text-sm">biotech</span> Laboratory Investigations
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                       {pageData.labs.map((lab, idx) => (
+                         <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex flex-col gap-1">
+                            <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{lab.testName}</span>
+                            {lab.notes && <span className="text-[9px] font-medium text-slate-400 italic leading-relaxed border-t border-slate-200/60 pt-1 mt-1">Note: {lab.notes}</span>}
+                         </div>
+                       ))}
+                    </div>
+                 </section>
+               )}
+            </div>
+
+            {/* Formal Document Footer */}
+            <div className="p-8 border-t border-slate-100 flex justify-between items-end shrink-0">
+              <div className="space-y-1">
+                 <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Advice / Follow-up</p>
+                 <div className="text-[10px] font-bold text-slate-600 max-w-sm">
+                    Review with reports in {followUpDate} or as advised. Please strictly follow the prescribed dosages.
+                 </div>
+              </div>
+              <div className="text-right">
+                 <div className="h-px w-40 bg-slate-300 mb-2 ml-auto"></div>
+                 <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Dr. {doctor?.fullName}</p>
+                 <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter">Digitally Authorized Prescription</p>
+              </div>
+            </div>
+
+            {/* Document Pagination Indicator */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-[9px] text-slate-300 font-black uppercase tracking-[0.3em]">
+               Page {index + 1} of {pages.length}
+            </div>
           </div>
         ))}
       </div>
 
       <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+
         @media screen {
           .print-page {
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
           }
         }
         
@@ -320,15 +311,13 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
           html, body {
             height: auto !important;
             overflow: visible !important;
+            background: white !important;
           }
 
           body {
             visibility: hidden;
-            background: white !important;
             margin: 0 !important;
             padding: 0 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
           }
 
           .prescription-modal-overlay {
@@ -340,7 +329,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             overflow: visible !important;
             display: block !important;
             visibility: visible !important;
-            background: none !important;
+            background: white !important;
             padding: 0 !important;
             margin: 0 !important;
             z-index: auto !important;
@@ -358,7 +347,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             position: relative !important;
             width: 210mm !important;
             height: 297mm !important;
-            padding: 15mm !important;
+            padding: 0 !important;
             margin: 0 !important;
             box-shadow: none !important;
             border: none !important;
