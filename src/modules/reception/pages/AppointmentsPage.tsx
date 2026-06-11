@@ -108,7 +108,7 @@ export const AppointmentsPage = () => {
   const [isOrangeHovered, setIsOrangeHovered] = useState(false);
 
   const {
-    appointments,
+    appointments: rawAppointments,
     loading,
     statusFilter,
     setStatusFilter,
@@ -120,6 +120,16 @@ export const AppointmentsPage = () => {
     stats,
     resetFilters
   } = useReceptionAppointments();
+
+  const appointments = useMemo(() => {
+    if (statusFilter === 'UPCOMING') {
+      const now = new Date();
+      return rawAppointments.filter(
+        app => app.status === 'SCHEDULED' && new Date(app.appointmentTime) > now
+      );
+    }
+    return rawAppointments;
+  }, [rawAppointments, statusFilter]);
 
   const columns: Column<AppointmentSummaryDTO>[] = useMemo(() => [
     {
@@ -239,16 +249,16 @@ export const AppointmentsPage = () => {
 
   const statConfig = [
     { label: 'Total Today', value: stats.total, filter: 'ALL', icon: 'analytics', colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
-    { label: 'In Progress', value: stats.inProgress, filter: 'CONSULTATION_STARTED', icon: 'check_circle', colorClass: 'from-blue-600 to-blue-700 border-blue-800 shadow-blue-600/5' },
+    { label: 'In Progress', value: stats.inProgress, filter: 'CONSULTATION_STARTED', icon: 'check_circle', colorClass: 'from-blue-600 to-blue-700 border-blue-800 shadow-blue-800/5' },
     { label: 'Completed', value: stats.completed, filter: 'COMPLETED', icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
-    { label: 'Upcoming', value: stats.upcoming, filter: 'UPCOMING', icon: 'analytics', colorClass: 'from-indigo-600 to-indigo-700 border-indigo-800 shadow-indigo-600/5' },
+    { label: 'Upcoming', value: statusFilter === 'UPCOMING' ? appointments.length : stats.upcoming, filter: 'UPCOMING', icon: 'analytics', colorClass: 'from-indigo-600 to-indigo-700 border-indigo-800 shadow-indigo-600/5' },
   ];
 
   const handleTabClick = (filterType: string) => {
     setStatusFilter(filterType as any);
     setColumnFilters((prev) => ({
       ...prev,
-      from: filterType === 'UPCOMING' ? dayjs().add(1, 'day').startOf('day').toISOString() : dayjs().startOf('day').toISOString(),
+      from: filterType === 'UPCOMING' ? dayjs().toISOString() : dayjs().startOf('day').toISOString(),
       to: filterType === 'UPCOMING' ? dayjs().add(30, 'days').endOf('day').toISOString() : dayjs().endOf('day').toISOString(),
     }));
     if (activeFilters.statuses?.length) resetFilters();

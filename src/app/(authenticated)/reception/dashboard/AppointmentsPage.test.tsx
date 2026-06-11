@@ -127,8 +127,8 @@ describe('TodayAppointmentsPage', () => {
     }, { timeout: 10_000 });
   }, 10_000);
 
-  it.skip('shows future appointments only in UPCOMING tab', async () => {
-    (appointmentService.list as any).mockResolvedValue({
+  it('shows future appointments only in UPCOMING tab', async () => {
+    (appointmentService.listSummary as any).mockResolvedValue({
       success: true,
       data: {
         content: mockAppointments,
@@ -137,7 +137,6 @@ describe('TodayAppointmentsPage', () => {
     });
     (doctorService.list as any).mockResolvedValue({
       success: true,
-
       data: { content: mockDoctors }
     });
 
@@ -156,9 +155,17 @@ describe('TodayAppointmentsPage', () => {
     const upcomingTab = screen.getByText('Upcoming');
     fireEvent.click(upcomingTab);
 
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-    expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
-    expect(screen.getByText('Future Patient')).toBeInTheDocument();
+    // John Doe has status SCHEDULED but time is NOW (which we should treat as past for Upcoming)
+    // Jane Smith has status CHECKED_IN
+    // Future Patient has status SCHEDULED and time is TOMORROW
+    await waitFor(() => {
+      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+      expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
+      expect(screen.getAllByText('Future Patient')[0]).toBeInTheDocument();
+    });
+
+    // Check that the Upcoming count matches (1 in our case)
+    expect(screen.getByText('1')).toBeInTheDocument();
   });
 
   it.skip('filters appointments by search term', async () => {

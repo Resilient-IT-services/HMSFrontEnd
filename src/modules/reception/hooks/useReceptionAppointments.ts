@@ -86,7 +86,7 @@ export const useReceptionAppointments = () => {
     try {
       const statusesToUse = filters.statuses && filters.statuses.length > 0 
         ? filters.statuses.join(',') 
-        : (statusFilter === 'ALL' || statusFilter === 'UPCOMING' ? undefined : statusFilter);
+        : (statusFilter === 'ALL' ? undefined : (statusFilter === 'UPCOMING' ? 'SCHEDULED' : statusFilter));
 
       const sortParam = sort ? `${sort.key},${sort.direction}` : undefined;
 
