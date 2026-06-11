@@ -15,7 +15,7 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       name: 'Dashboard', 
       icon: effectiveRole === 'RECEPTIONIST' ? 'calendar_today' : 'dashboard', 
       href: `/${dashboardPath}/dashboard`, 
-      roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE'] 
+      roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE', 'LAB_TECHNICIAN'] 
     },
     { 
       name: effectiveRole === 'DOCTOR' ? 'Queue' : 'Patients', 
@@ -28,7 +28,9 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
     
     // Lab Specific Routes
-    { name: 'Lab Queue', icon: 'biotech', href: '/lab/queue', roles: ['LAB_TECHNICIAN'] },
+    { name: 'Lab Queue', icon: 'biotech', href: '/lab_technician/queue', roles: ['LAB_TECHNICIAN'] },
+    { name: 'Lab Reports', icon: 'description', href: '/lab_technician/reports', roles: ['LAB_TECHNICIAN'] },
+    { name: 'Lab Inventory', icon: 'inventory', href: '/lab_technician/inventory', roles: ['LAB_TECHNICIAN'] },
     { name: 'Lab Dashboard', icon: 'science', href: '/admin/lab-dashboard', roles: ['ADMIN'] },
     { name: 'Lab Settings', icon: 'settings_b_roll', href: '/admin/lab-settings', roles: ['ADMIN'] },
     { name: 'Master Tests', icon: 'biotech', href: '/admin/lab-tests', roles: ['SUPER_ADMIN'] },

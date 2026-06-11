@@ -22,7 +22,8 @@ export const ROLE_PATH_MAP: Record<string, string> = {
   'PHARMACIST': 'pharmacy',
   'ADMIN': 'admin',
   'SUPER_ADMIN': 'super_admin',
-  'NURSE': 'nurse'
+  'NURSE': 'nurse',
+  'LAB_TECHNICIAN': 'lab_technician'
 };
 
 export const LOW_STOCK_THRESHOLD = 10;
