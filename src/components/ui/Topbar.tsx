@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/state/store';
-import { setActiveRole } from '@/state/authSlice';
+import { setActiveRole, setCurrentHospitalId } from '@/state/authSlice';
 import { authService } from '@/services/authService';
 import { Role } from '@/types/api';
 import GlobalSearch from './GlobalSearch';
 import { cn } from '@/lib/cn';
+import { ROLE_PATH_MAP } from '@/utils/constants';
 
 import { useLayout } from '@/context/LayoutContext';
 
@@ -29,7 +30,16 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
   const handleRoleSwitch = (role: Role) => {
     dispatch(setActiveRole(role));
     setIsProfileOpen(false);
-    globalThis.location.reload();
+    const path = ROLE_PATH_MAP[role] || '';
+    globalThis.location.href = `/${path}`;
+  };
+
+  const handleContextSwitch = (hospitalId: string, role: Role) => {
+    dispatch(setCurrentHospitalId(hospitalId));
+    dispatch(setActiveRole(role));
+    setIsProfileOpen(false);
+    const path = ROLE_PATH_MAP[role] || '';
+    globalThis.location.href = `/${path}`;
   };
 
   const roleLabel = isSuperMode ? 'SUPER ADMIN' : (activeRole || 'Select Role');
@@ -112,47 +122,75 @@ const Topbar: React.FC<{ isVisible?: boolean }> = ({ isVisible = true }) => {
 
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-72 bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="p-4 border-b border-[var(--border)] bg-[var(--background)]/50">
-                  <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">Signed in as</p>
-                  <p className="text-sm font-black text-[var(--text-primary)]">{user?.fullName || user?.username}</p>
+                <div className="p-4 border-b border-[var(--border)] bg-[var(--background)]/50 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-widest mb-1">Signed in as</p>
+                    <p className="text-sm font-black text-[var(--text-primary)]">{user?.fullName || user?.username}</p>
+                  </div>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleCompressed();
+                    }}
+                    className={cn(
+                      "flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-all",
+                      isCompressed 
+                        ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/20" 
+                        : "bg-white border-slate-200 text-slate-400 hover:border-orange-200 hover:text-orange-600"
+                    )}
+                  >
+                    <span className="material-symbols-outlined text-[14px]">density_medium</span>
+                    <span className="text-[9px] font-black uppercase tracking-tighter">Compressed</span>
+                  </button>
                 </div>
 
-                {!user?.superuser &&
-                <div className="px-2 py-1">
-                  <div className="flex items-center justify-between px-3 py-2">
-                    <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Available Roles</p>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCompressed();
-                      }}
-                      className={cn(
-                        "flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-all",
-                        isCompressed 
-                          ? "bg-orange-600 border-orange-600 text-white shadow-sm shadow-orange-600/20" 
-                          : "bg-white border-slate-200 text-slate-400 hover:border-orange-200 hover:text-orange-600"
-                      )}
-                    >
-                      <span className="material-symbols-outlined text-[14px]">density_medium</span>
-                      <span className="text-[9px] font-black uppercase tracking-tighter">Compressed</span>
-                    </button>
+                {user?.memberships && user.memberships.length > 0 && (
+                  <div className="px-2 py-1 bg-slate-50/50">
+                    <div className="px-3 py-2">
+                      <p className="text-[10px] font-black text-[var(--text-secondary)] uppercase tracking-widest">Switch Context (Hospital & Role)</p>
+                    </div>
+                    <div className="space-y-3 px-1 pb-2">
+                      {user.memberships.map((membership) => {
+                        const isActiveHospital = user.currentHospitalId === membership.hospitalId;
+                        const roles = membership.roleAssignments?.map(ra => ra.roleCode) || membership.roles || [];
+                        
+                        return (
+                          <div key={membership.hospitalId} className={`p-2.5 rounded-2xl border transition-all ${isActiveHospital ? 'bg-white border-orange-200 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`}>
+                            <div className="flex items-center gap-2 mb-2 px-1">
+                              <span className={`material-symbols-outlined text-[16px] ${isActiveHospital ? 'text-orange-600' : 'text-slate-400'}`}>apartment</span>
+                              <span className={`text-[10px] font-black uppercase tracking-wider truncate flex-1 ${isActiveHospital ? 'text-slate-900' : 'text-slate-600'}`}>
+                                {membership.hospitalName}
+                              </span>
+                              {isActiveHospital && (
+                                <span className="bg-orange-100 text-orange-600 text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter">Current</span>
+                              )}
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-1.5">
+                              {roles.map((roleCode) => {
+                                const isActiveRole = isActiveHospital && activeRole === roleCode;
+                                return (
+                                  <button
+                                    key={roleCode}
+                                    onClick={() => handleContextSwitch(membership.hospitalId, roleCode as Role)}
+                                    className={cn(
+                                      "px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-tight transition-all border",
+                                      isActiveRole 
+                                        ? "bg-orange-600 border-orange-600 text-white shadow-sm" 
+                                        : "bg-slate-50 border-slate-100 text-slate-500 hover:border-orange-200 hover:text-orange-600"
+                                    )}
+                                  >
+                                    {roleCode}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                    {user?.roles?.filter(r => r !== 'SUPER_ADMIN' || !isSuperMode).map(role => (
-                        <button
-                          key={role}
-                          onClick={() => handleRoleSwitch(role)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-xl transition-all hover:bg-[var(--background)] ${activeRole === role ? 'text-[var(--primary)] bg-[var(--primary-light)]/50' : 'text-[var(--text-primary)]'}`}
-                        >
-                          <span className="material-symbols-outlined text-xl">
-                            {getRoleIcon(role)}
-                          </span>
-                          <span className="text-sm font-bold">{role}</span>
-                          {activeRole === role && <span className="material-symbols-outlined ml-auto text-sm">check_circle</span>}
-                        </button>
-                      )
-                    )}
-                </div>
-            }
+                )}
 
                 <div className="p-2 border-t border-[var(--border)] mt-1">
                   <button
