@@ -438,6 +438,7 @@ export interface AppointmentResponse {
   patientName: string;
   patientCode?: string;
   patientAge?: number;
+  patientDob?: string;
   patientGender?: Gender;
   doctorId: string;
   doctorName: string;

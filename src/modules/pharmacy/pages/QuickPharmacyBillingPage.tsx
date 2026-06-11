@@ -315,7 +315,9 @@ export default function QuickPharmacyBillingPage() {
 
   // eslint-disable-next-line sonarjs/cognitive-complexity
   const loadPrescriptionData = async (rxId: string) => {
-    setPrescriptionId(rxId);
+    setTimeout(() => {
+      setPrescriptionId(rxId);
+    }, 0);
     const res = await pharmacyApi.getPrescriptionById(rxId);
     if (res.success && res.data) {
       const rx = res.data;
@@ -392,28 +394,28 @@ export default function QuickPharmacyBillingPage() {
   }, [searchParams]);
 
   const updateGroupedQuantity = (medicineName: string, totalQty: number) => {
-    const relatedItems = [...cart].filter(item => item.medicineName === medicineName);
-
     // Sort batches: Non-expired first, then by oldest expiry date first (FIFO)
-    relatedItems.sort((a, b) => {
-      if (a.isExpired && !b.isExpired) return 1;
-      if (!a.isExpired && b.isExpired) return -1;
-      if (a.expiryDate && b.expiryDate) {
-        return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
-      }
-      return 0;
-    });
+    const sortedRelatedItems = [...cart]
+      .filter(item => item.medicineName === medicineName)
+      .toSorted((a, b) => {
+        if (a.isExpired && !b.isExpired) return 1;
+        if (!a.isExpired && b.isExpired) return -1;
+        if (a.expiryDate && b.expiryDate) {
+          return new Date(a.expiryDate).getTime() - new Date(b.expiryDate).getTime();
+        }
+        return 0;
+      });
 
     const totalAvailable = (() => {
       let total = 0;
-      for (const item of relatedItems) {
+      for (const item of sortedRelatedItems) {
         total += (item.isOutOfStock || item.isExpired ? 0 : item.quantity);
       }
       return total;
     })();
 
     // Hard cap: Cannot exceed total available stock (unless it's an OOS placeholder from prescription)
-    const hasRealBatches = relatedItems.some(item => item.id);
+    const hasRealBatches = sortedRelatedItems.some(item => item.id);
     const maxQty = hasRealBatches ? totalAvailable : totalQty;
 
     const safeTotalQty = Math.max(0, Math.min(totalQty, maxQty));
@@ -425,7 +427,7 @@ export default function QuickPharmacyBillingPage() {
     let remaining = safeTotalQty;
     const itemQtys: Record<string, number> = {};
 
-    relatedItems.forEach(item => {
+    sortedRelatedItems.forEach(item => {
       const key = item.id || `oos-${item.medicineName}`;
       const stock = (item.isOutOfStock || item.isExpired) ? 0 : item.quantity;
       const take = Math.min(remaining, stock);
@@ -434,7 +436,7 @@ export default function QuickPharmacyBillingPage() {
     });
 
     if (remaining > 0 && !hasRealBatches) {
-      const oosItem = relatedItems.find(item => !item.id);
+      const oosItem = sortedRelatedItems.find(item => !item.id);
       if (oosItem) itemQtys[`oos-${oosItem.medicineName}`] = remaining;
     }
 

@@ -30,6 +30,12 @@ interface DigitalPrescriptionProps {
   };
   date: string;
   tokenDisplay?: string;
+  // History Mode Props
+  isHistoryView?: boolean;
+  currentHistoryIndex?: number;
+  totalHistoryRecords?: number;
+  onNavigateOlder?: () => void;
+  onNavigateNewer?: () => void;
 }
 
 const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
@@ -45,6 +51,11 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   vitals,
   date,
   tokenDisplay,
+  isHistoryView = false,
+  currentHistoryIndex = 0,
+  totalHistoryRecords = 0,
+  onNavigateOlder,
+  onNavigateNewer,
 }) => {
   const [followUpDate] = React.useState<string>(() => 
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -99,18 +110,46 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
       <div className="fixed inset-0 no-print" onClick={onClose}></div>
       
       {/* Action Controls */}
-      <div className="fixed top-6 right-10 z-[110] flex gap-3 no-print">
+      <div className="fixed top-6 right-10 z-[110] flex items-center gap-2 no-print">
+        {isHistoryView && (
+          <div className="flex items-center bg-slate-900/90 backdrop-blur-xl border border-white/10 p-1 rounded-xl shadow-2xl mr-2">
+             <button 
+                onClick={onNavigateOlder}
+                disabled={currentHistoryIndex === 0}
+                className={`p-2 rounded-lg transition-all ${currentHistoryIndex === 0 ? 'text-white/10 cursor-not-allowed' : 'text-white hover:bg-white/10 active:scale-95'}`}
+                title="Older Record"
+             >
+                <span className="material-symbols-outlined text-base">arrow_back</span>
+             </button>
+             
+             <div className="px-3 flex flex-col items-center min-w-[80px]">
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">History</span>
+                <span className="text-[10px] font-black text-orange-400 mt-0.5">{currentHistoryIndex + 1} / {totalHistoryRecords}</span>
+             </div>
+
+             <button 
+                onClick={onNavigateNewer}
+                disabled={currentHistoryIndex === totalHistoryRecords - 1}
+                className={`p-2 rounded-lg transition-all ${currentHistoryIndex === totalHistoryRecords - 1 ? 'text-white/10 cursor-not-allowed' : 'text-white hover:bg-white/10 active:scale-95'}`}
+                title="Newer Record"
+             >
+                <span className="material-symbols-outlined text-base">arrow_forward</span>
+             </button>
+          </div>
+        )}
+        
         <button 
           onClick={handlePrint}
-          className="flex items-center gap-2 bg-orange-600 text-white px-8 py-3 rounded-2xl font-black hover:bg-orange-700 transition-all shadow-2xl active:scale-95 text-sm uppercase tracking-widest"
+          className="flex items-center gap-2 bg-orange-600 text-white px-5 py-2.5 rounded-xl font-black hover:bg-orange-700 transition-all shadow-xl active:scale-95 text-[10px] uppercase tracking-widest border border-orange-500/20"
         >
-          <span className="material-symbols-outlined text-lg">print</span> Print Document
+          <span className="material-symbols-outlined text-base">print</span> Print
         </button>
+        
         <button 
           onClick={onClose}
-          className="bg-white/10 text-white p-3 rounded-2xl shadow-xl hover:bg-white/20 transition-all backdrop-blur-md border border-white/20"
+          className="bg-slate-800 text-white p-2.5 rounded-xl shadow-xl hover:bg-slate-700 transition-all border border-white/50 backdrop-blur-md"
         >
-          <span className="material-symbols-outlined">close</span>
+          <span className="material-symbols-outlined text-base leading-none">close</span>
         </button>
       </div>
 
@@ -188,19 +227,19 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
 
                 {/* Clinical Content - Compact */}
                 <div className="grid grid-cols-2 border-b border-slate-100 shrink-0 divide-x divide-slate-100">
-                  <div className="p-8 space-y-2">
+                  <div className="p-8 space-y-2 overflow-hidden">
                      <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                        <span className="w-1 h-1 bg-slate-400 rounded-full"></span> Chief Complaints
                      </h3>
-                     <div className="text-xs font-medium text-slate-700 leading-relaxed italic">
+                     <div className="text-xs font-medium text-slate-700 leading-relaxed italic break-words whitespace-pre-wrap">
                         {complaints || 'No specific complaints recorded.'}
                      </div>
                   </div>
-                  <div className="p-8 space-y-2">
+                  <div className="p-8 space-y-2 overflow-hidden">
                      <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                        <span className="w-1 h-1 bg-orange-500 rounded-full"></span> Clinical Diagnosis
                      </h3>
-                     <div className="text-sm font-black text-slate-900 leading-relaxed uppercase tracking-tight">
+                     <div className="text-sm font-black text-slate-900 leading-relaxed uppercase tracking-tight break-words whitespace-pre-wrap">
                         {diagnosis || 'General Checkup'}
                      </div>
                   </div>
@@ -236,7 +275,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                                    <div className="text-[11px] font-black text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-100 inline-block min-w-[60px]">{med.frequency}</div>
                                  </td>
                                  <td className="px-4 py-3 text-right">
-                                   <div className="text-[10px] font-bold text-slate-500 uppercase">{med.duration}</div>
+                                   <div className="text-[10px] font-bold text-slate-500 uppercase">{med.instructions}</div>
                                  </td>
                                </tr>
                              ))}
@@ -308,14 +347,24 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             margin: 0;
           }
           
+          /* Hide everything else */
+          body * {
+            visibility: hidden !important;
+          }
+
+          /* Show only the prescription document */
+          .prescription-modal-overlay, 
+          .prescription-modal-overlay *,
+          .prescription-pages-container,
+          .print-page,
+          .print-page * {
+            visibility: visible !important;
+          }
+
           html, body {
             height: auto !important;
             overflow: visible !important;
             background: white !important;
-          }
-
-          body {
-            visibility: hidden;
             margin: 0 !important;
             padding: 0 !important;
           }
@@ -328,7 +377,6 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
             height: auto !important;
             overflow: visible !important;
             display: block !important;
-            visibility: visible !important;
             background: white !important;
             padding: 0 !important;
             margin: 0 !important;
@@ -337,32 +385,32 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
 
           .prescription-pages-container {
             display: block !important;
-            gap: 0 !important;
-            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
           }
 
           .print-page {
-            visibility: visible !important;
             display: flex !important;
-            position: relative !important;
+            flex-direction: column !important;
             width: 210mm !important;
             height: 297mm !important;
-            padding: 0 !important;
-            margin: 0 !important;
+            padding: 15mm !important; /* Proper print margins */
+            margin: 0 auto !important;
             box-shadow: none !important;
             border: none !important;
             background: white !important;
             page-break-after: always !important;
             break-after: page !important;
             border-radius: 0 !important;
-          }
-
-          .print-page * {
-            visibility: visible !important;
+            overflow: visible !important;
           }
 
           .no-print {
             display: none !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
           }
         }
       `}</style>

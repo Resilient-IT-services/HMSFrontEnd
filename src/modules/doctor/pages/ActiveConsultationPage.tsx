@@ -57,7 +57,7 @@ const LabTestSearchInput = ({
 
       setLoading(true);
       try {
-        const res = await labApi.getTests(); // Current API gets all, ideally needs search params
+        const res = await labApi.getTests(); 
         if (res.success && res.data) {
           const filtered = res.data.filter(t => 
             t.testName.toLowerCase().includes(trimmedSearch.toLowerCase()) || 
@@ -246,6 +246,16 @@ const calculateTotal = (p: any) => {
 };
 
 export const ActiveConsultationPage = () => {
+  const calculateAge = (dob: string) => {
+    if (!dob) return '--';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return age;
+  };
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const appointmentId = searchParams.get('appointmentId');
@@ -276,7 +286,6 @@ export const ActiveConsultationPage = () => {
       const currentRecord = historyList[currentHistoryIndex];
       if (!currentRecord) return;
       
-      // If it's the current appointment, we already have the data in state
       if (currentRecord.id === appointmentId) {
         setDetailedHistoryRecord({
           ...appointment!,
@@ -312,27 +321,27 @@ export const ActiveConsultationPage = () => {
     };
 
     if (showHistoryModal && historyList.length > 0) {
-      void fetchDetailedRecord();
+      setTimeout(() => {
+        void fetchDetailedRecord();
+      }, 0);
     }
   }, [currentHistoryIndex, historyList, showHistoryModal, appointmentId, appointment, complaints, diagnosis, prescriptions, investigations]);
 
   const fetchHistory = async () => {
     if (!appointment?.patientId || !appointment?.doctorId) return;
-    setLoadingHistory(true);
-    setCurrentHistoryIndex(0);
+    setTimeout(() => {
+      setLoadingHistory(true);
+      setCurrentHistoryIndex(0);
+    }, 0);
     try {
       const res = await appointmentService.list({
         patientId: appointment.patientId,
-        // Removed doctorId filter to show full patient history across all doctors
         size: 50
       });
       if (res.success && res.data) {
-        // Include current appointment and past ones, sort by time descending
-        // This allows the doctor to see "Current Session" in the history modal if it has data
         const filtered = res.data.content
           .filter(a => (a.status === 'COMPLETED' || a.status === 'PRESCRIPTION_FINALIZED' || a.status === 'CONSULTATION_STARTED' || a.id === appointmentId))
-          .sort((a, b) => {
-            // If it's the current appointment, always put it at the top
+          .toSorted((a, b) => {
             if (a.id === appointmentId) return -1;
             if (b.id === appointmentId) return 1;
             return new Date(b.appointmentTime).getTime() - new Date(a.appointmentTime).getTime();
@@ -388,7 +397,7 @@ export const ActiveConsultationPage = () => {
               id: item.id || `existing-lab-${idx}`,
               testId: item.testId,
               testName: item.testName,
-              testCode: ''
+              notes: item.notes || ''
             })));
           } else {
             setInvestigations([]);
@@ -468,7 +477,6 @@ export const ActiveConsultationPage = () => {
   const saveConsultation = async (silent = false) => {
     if (!appointmentId || !appointment) return false;
 
-    // Validate mandatory prescription fields if not silent
     if (!silent) {
       const medicineItems = prescriptions.filter(p => p.medicine);
       const hasIncomplete = medicineItems.some(p => 
@@ -526,7 +534,6 @@ export const ActiveConsultationPage = () => {
   };
 
   const handleComplete = async () => {
-    // Validate mandatory prescription fields
     const medicineItems = prescriptions.filter(p => p.medicine);
     const hasIncomplete = medicineItems.some(p => 
       (!p.freqM && !p.freqA && !p.freqN) || 
@@ -583,7 +590,6 @@ export const ActiveConsultationPage = () => {
         }
       };
 
-      // Complete Consultation with full payload to ensure data is persisted
       const statusRes = await appointmentService.completeConsultation(appointmentId!, updateData as any);
       if (statusRes.success) {
         triggerGlobalToast('Consultation completed successfully', 'success');
@@ -598,21 +604,11 @@ export const ActiveConsultationPage = () => {
   if (loading) return <MainLayout title="Active Consultation">Loading...</MainLayout>;
   if (!appointment) return <MainLayout title="Active Consultation">Not found</MainLayout>;
 
-  const calculateAge = (dob: string) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
-    return age;
-  };
-
   return (
     <MainLayout title={`Consultation: ${appointment.patientName}`}>
       <PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter">
         <div className="space-y-6 py-4">
           <div className="flex flex-col h-full">
-            {/* Header Area */}
             <div className="p-5 border-b border-slate-200 bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sticky top-0 z-20 shadow-sm rounded-2xl">
               <div>
                 <div className="flex items-center gap-3">
@@ -633,7 +629,6 @@ export const ActiveConsultationPage = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-12 gap-6">
-              {/* Left Column: Patient Info & Vitals */}
               <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
                 <div className="bg-white rounded-2xl border border-slate-200 p-3 shadow-sm">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2 px-1">
@@ -677,10 +672,8 @@ export const ActiveConsultationPage = () => {
                 </div>
               </div>
 
-              {/* Right Column: Prescription & Lab Tabs */}
               <div className="col-span-12 lg:col-span-8">
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-full min-h-[700px]">
-                  {/* Tab Header */}
                   <div className="flex items-center justify-between border-b border-slate-100 p-4 sm:p-6 bg-slate-50/30 rounded-t-2xl">
                     <div className="flex bg-slate-100 p-1 rounded-xl">
                       <button 
@@ -787,17 +780,9 @@ export const ActiveConsultationPage = () => {
                         {prescriptions.length === 0 && (
                           <div className="py-24 text-center text-slate-300 border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
                             <span className="material-symbols-outlined text-5xl mb-3 opacity-20">medical_services</span>
-                            <p className="text-sm font-bold">No medications added to the plan.</p>
+                            <p className="text-sm font-bold">No medications added.</p>
                           </div>
                         )}
-                        <div className="mt-8 p-4 bg-orange-600/5 rounded-2xl border border-orange-600/10 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-orange-600/10 flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-orange-600">calculate</span>
-                          </div>
-                          <p className="text-[10px] font-bold text-orange-800 leading-relaxed uppercase tracking-tight">
-                            Total units will be auto-calculated for pharmacy dispensing. Ensure dosage and duration are accurate.
-                          </p>
-                        </div>
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -811,7 +796,7 @@ export const ActiveConsultationPage = () => {
                                     <div className="mt-3">
                                       <textarea 
                                         className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none text-[11px] font-bold text-slate-600 resize-none h-20 focus:border-blue-300 transition-all shadow-sm"
-                                        placeholder="Add specific instructions for this test (e.g., fasting required, preferred time)..."
+                                        placeholder="Add specific instructions for this test..."
                                         value={i.notes || ''}
                                         onChange={(e) => updateInvestigationRow(i.id, 'notes', e.target.value)}
                                       />
@@ -831,14 +816,6 @@ export const ActiveConsultationPage = () => {
                             <p className="text-sm font-bold">No investigations ordered.</p>
                           </div>
                         )}
-                        <div className="mt-8 p-4 bg-blue-600/5 rounded-2xl border border-blue-600/10 flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-blue-600/10 flex items-center justify-center shrink-0">
-                            <span className="material-symbols-outlined text-blue-600">info</span>
-                          </div>
-                          <p className="text-[10px] font-bold text-blue-800 leading-relaxed uppercase tracking-tight">
-                            Lab orders will be generated automatically upon completion. Ensure test names are selected correctly.
-                          </p>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -854,10 +831,15 @@ export const ActiveConsultationPage = () => {
           isOpen={showPreview} onClose={() => setShowPreview(false)} patient={patient} doctor={user} hospital={hospital} complaints={complaints} diagnosis={diagnosis}
           prescriptions={prescriptions.filter(p => p.medicine).map(p => ({
             ...p,
-            dosage: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
-            duration: `${p.duration} ${p.durationUnit} (Total: ${calculateTotal(p)} units)`
+            frequency: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
+            instructions: `${p.duration} ${p.durationUnit} (Total: ${calculateTotal(p)} units)`
           }))}
-          investigations={investigations.filter(i => i.testId)}
+          investigations={investigations.filter(i => i.testId).map(i => ({
+            id: i.id,
+            testName: i.testName,
+            testCode: '',
+            notes: i.notes
+          }))}
           vitals={{
             heartRate: appointment?.vitals?.heartRate?.toString() || '--',
             temp: appointment?.vitals?.temperature?.toString() || '--',
@@ -865,7 +847,7 @@ export const ActiveConsultationPage = () => {
             weight: appointment?.vitals?.weight?.toString() || '--',
             spo2: appointment?.vitals?.oxygenLevel?.toString() || '--'
           }}
-          date={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+          date={new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
           tokenDisplay={formatToken(appointment)}
         />
       )}
@@ -884,7 +866,7 @@ export const ActiveConsultationPage = () => {
             </div>
             <h4 className="text-xl font-black text-slate-900 mb-3 tracking-tight">Empty Prescription?</h4>
             <p className="text-xs font-bold text-slate-500 mb-8 leading-relaxed px-2">
-              You are completing this consultation without adding any medications. No record will be sent to the pharmacy.
+              You are completing this consultation without adding any medications.
             </p>
             <div className="flex flex-col gap-3">
               <Button
@@ -908,236 +890,41 @@ export const ActiveConsultationPage = () => {
         </Modal>
       )}
 
-      {showHistoryModal && (
-        <Modal
+      {showHistoryModal && detailedHistoryRecord && (
+        <DigitalPrescription
           isOpen={showHistoryModal}
           onClose={() => setShowHistoryModal(false)}
-          title={`Patient Clinical Archive: ${appointment.patientName}`}
-          width="1100px"
-        >
-          <div className="flex flex-col h-[85vh] font-inter bg-slate-50">
-            {loadingHistory ? (
-              <div className="flex-1 flex flex-col items-center justify-center bg-white">
-                <div className="w-12 h-12 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Retrieving Medical Timeline...</p>
-              </div>
-            ) : historyList.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center bg-white text-slate-300">
-                <span className="material-symbols-outlined text-6xl mb-4 opacity-20">history_off</span>
-                <p className="text-sm font-black uppercase tracking-widest">No Past Consultations Found</p>
-              </div>
-            ) : (
-              <div className="flex flex-col h-full overflow-hidden">
-                {/* Carousel Header / Navigation */}
-                <div className="flex items-center justify-between px-8 py-4 bg-white border-b border-slate-200 shrink-0 z-10">
-                  <div className="flex items-center gap-4">
-                    <div className="flex bg-slate-100 p-1 rounded-xl shadow-inner border border-slate-200">
-                      <button 
-                        onClick={() => setCurrentHistoryIndex(prev => Math.max(0, prev - 1))}
-                        disabled={currentHistoryIndex === 0}
-                        className={`px-4 py-2 rounded-lg text-[11px] font-black transition-all flex items-center gap-2 ${currentHistoryIndex === 0 ? 'text-slate-300 cursor-not-allowed' : 'bg-white text-orange-600 shadow-sm hover:bg-orange-50 active:scale-95'}`}
-                      >
-                        <span className="material-symbols-outlined text-base">arrow_back</span> Older Records
-                      </button>
-                      <button 
-                        onClick={() => setCurrentHistoryIndex(prev => Math.min(historyList.length - 1, prev + 1))}
-                        disabled={currentHistoryIndex === historyList.length - 1}
-                        className={`px-4 py-2 rounded-lg text-[11px] font-black transition-all flex items-center gap-2 ${currentHistoryIndex === historyList.length - 1 ? 'text-slate-300 cursor-not-allowed' : 'bg-white text-orange-600 shadow-sm hover:bg-orange-50 active:scale-95'}`}
-                      >
-                        Newer <span className="material-symbols-outlined text-base">arrow_forward</span>
-                      </button>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Viewing History</span>
-                      <span className="text-[11px] font-black text-slate-600">Case {currentHistoryIndex + 1} of {historyList.length}</span>
-                    </div>
-                  </div>
-                  
-                  {detailedHistoryRecord && (
-                    <div className="text-right">
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] block">Encounter Date</span>
-                      <span className="text-sm font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">{new Date(detailedHistoryRecord.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4 sm:p-10 bg-slate-50/50 no-scrollbar scroll-smooth">
-                  {loadingDetailedRecord ? (
-                    <div className="h-full flex flex-col items-center justify-center">
-                      <div className="w-10 h-10 border-4 border-slate-200 border-t-orange-600 rounded-full animate-spin mb-4"></div>
-                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Reconstructing Medical Document...</p>
-                    </div>
-                  ) : detailedHistoryRecord ? (
-                    <div className="bg-white border border-slate-200 shadow-xl rounded-xl max-w-5xl mx-auto flex flex-col animate-in fade-in zoom-in-95 duration-500 overflow-hidden">
-                      {/* Document Header - Simplified */}
-                      <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white shrink-0">
-                        <div className="space-y-0.5">
-                          <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase leading-none">{hospital?.name || 'LAARA HMS'}</h2>
-                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{hospital?.address || 'Healthcare Management System'}</p>
-                          <div className="mt-2 flex items-center gap-2">
-                             <span className="text-[10px] font-black text-orange-600 uppercase tracking-wider">Dr. {detailedHistoryRecord.doctorName}</span>
-                             <span className="text-[8px] font-bold text-slate-300">•</span>
-                             <span className="text-[9px] font-bold text-slate-500 uppercase italic tracking-tight">{detailedHistoryRecord.departmentName || 'Medical Consultant'}</span>
-                          </div>
-                        </div>
-                        <div className="text-right flex flex-col items-end">
-                           <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-white mb-2 shadow-lg shadow-slate-900/20">
-                              <span className="material-symbols-outlined text-2xl">medical_services</span>
-                           </div>
-                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Medical Record</span>
-                        </div>
-                      </div>
-
-                      {/* Patient Summary Row - Clean & Simple */}
-                      <div className="px-10 py-4 flex justify-between items-center gap-6 border-b border-slate-100 bg-slate-50/50 shrink-0">
-                        <div className="flex items-center gap-8">
-                           <div>
-                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Patient Name</span>
-                             <span className="text-xs font-black text-slate-900 uppercase">{detailedHistoryRecord.patientName}</span>
-                           </div>
-                           <div className="w-px h-6 bg-slate-200"></div>
-                           <div>
-                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Age / Sex</span>
-                             <span className="text-xs font-bold text-slate-700">{patient?.dob ? calculateAge(patient.dob) : '--'} Yrs • {patient?.gender}</span>
-                           </div>
-                           <div className="w-px h-6 bg-slate-200"></div>
-                           <div>
-                             <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">UHID (System ID)</span>
-                             <span className="text-xs font-mono font-bold text-slate-600 uppercase">{detailedHistoryRecord.patientCode || 'N/A'}</span>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Record ID</span>
-                           <span className="text-[10px] font-black text-orange-600 font-mono">#{detailedHistoryRecord.id.slice(-8).toUpperCase()}</span>
-                        </div>
-                      </div>
-
-                      {/* Vitals Grid - Simplified Inline */}
-                      <div className="px-10 py-4 grid grid-cols-5 gap-3 border-b border-slate-100 bg-white">
-                        {[
-                          { label: 'Heart Rate', value: detailedHistoryRecord.vitals?.heartRate, unit: 'bpm' },
-                          { label: 'Temperature', value: detailedHistoryRecord.vitals?.temperature, unit: '°F' },
-                          { label: 'Weight', value: detailedHistoryRecord.vitals?.weight, unit: 'kg' },
-                          { label: 'Blood Pressure', value: detailedHistoryRecord.vitals?.bloodPressure, unit: 'mmHg' },
-                          { label: 'Oxygen Level', value: detailedHistoryRecord.vitals?.oxygenLevel, unit: '%' }
-                        ].map((v, i) => (
-                          <div key={i} className="flex flex-col">
-                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">{v.label}</span>
-                            <div className="flex items-baseline gap-0.5">
-                              <span className="text-sm font-black text-slate-800">{v.value || '--'}</span>
-                              <span className="text-[8px] font-bold text-slate-400 uppercase">{v.unit}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Clinical Content - Compact Side-by-Side */}
-                      <div className="flex-1 p-8 space-y-8 bg-white overflow-y-auto">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 divide-x divide-slate-100">
-                          <section className="space-y-2">
-                             <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                               <span className="w-1 h-1 bg-slate-400 rounded-full"></span> Chief Complaints
-                             </h3>
-                             <div className="text-xs font-medium text-slate-700 leading-relaxed italic">
-                                {detailedHistoryRecord.chiefComplaints || detailedHistoryRecord.notes || 'No specific complaints recorded.'}
-                             </div>
-                          </section>
-                          <section className="pl-10 space-y-2">
-                             <h3 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                               <span className="w-1 h-1 bg-orange-500 rounded-full"></span> Final Diagnosis
-                             </h3>
-                             <div className="text-[13px] font-black text-slate-900 leading-relaxed uppercase tracking-tight">
-                                {detailedHistoryRecord.diagnosis || 'Diagnosis Pending.'}
-                             </div>
-                          </section>
-                        </div>
-
-                        {/* Medications Management Table */}
-                        <section className="space-y-3">
-                          <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
-                            <span className="material-symbols-outlined text-orange-600 text-sm">medication</span> Prescribed Medications
-                          </h3>
-                          <div className="overflow-hidden border border-slate-200 rounded-lg">
-                             <table className="w-full text-left border-collapse">
-                                <thead>
-                                   <tr className="bg-slate-50 border-b border-slate-200">
-                                      <th className="px-4 py-2 text-[9px] font-black text-slate-500 uppercase tracking-widest">Medicine & Dosage</th>
-                                      <th className="px-4 py-2 text-[9px] font-black text-slate-500 uppercase tracking-widest text-center">Frequency</th>
-                                      <th className="px-4 py-2 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Duration</th>
-                                   </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100">
-                                   {detailedHistoryRecord.prescription?.items && detailedHistoryRecord.prescription.items.length > 0 ? (
-                                      detailedHistoryRecord.prescription.items.map((med, idx) => (
-                                        <tr key={idx} className="hover:bg-slate-50/30 transition-colors group">
-                                          <td className="px-4 py-3">
-                                            <div className="text-[12px] font-black text-slate-900">{med.medicineName}</div>
-                                          </td>
-                                          <td className="px-4 py-3 text-center">
-                                             <span className="text-[11px] font-black text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-100 inline-block min-w-[60px] tracking-wider">{med.dosage}</span>
-                                          </td>
-                                          <td className="px-4 py-3 text-right">
-                                             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{med.duration}</span>
-                                          </td>
-                                        </tr>
-                                      ))
-                                   ) : (
-                                      <tr>
-                                         <td colSpan={3} className="px-4 py-10 text-center text-[10px] font-bold text-slate-300 uppercase italic">No medications prescribed</td>
-                                      </tr>
-                                   )}
-                                </tbody>
-                             </table>
-                          </div>
-                        </section>
-
-                        {/* Laboratory Diagnostics Section */}
-                        {detailedHistoryRecord.prescription?.labItems && detailedHistoryRecord.prescription.labItems.length > 0 && (
-                          <section className="space-y-3">
-                             <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2 border-b border-slate-100 pb-2">
-                               <span className="material-symbols-outlined text-blue-600 text-sm">biotech</span> Laboratory Investigations
-                             </h3>
-                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {detailedHistoryRecord.prescription.labItems.map((lab, idx) => (
-                                  <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex flex-col gap-1 hover:bg-white hover:shadow-sm transition-all">
-                                     <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{lab.testName}</span>
-                                     {lab.notes && (
-                                       <div className="mt-1 border-t border-slate-200/60 pt-1">
-                                          <span className="text-[9px] font-medium text-slate-400 italic leading-relaxed">Note: {lab.notes}</span>
-                                       </div>
-                                     )}
-                                  </div>
-                                ))}
-                             </div>
-                          </section>
-                        )}
-                      </div>
-
-                      {/* Formal Footer & Signature */}
-                      <div className="p-8 border-t border-slate-100 flex justify-between items-end bg-slate-50/30 shrink-0">
-                        <div className="space-y-1">
-                           <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Advice / Follow-up</p>
-                           <div className="text-[10px] font-bold text-slate-600 max-w-sm">
-                              Review with reports in 5-7 days or as advised. Please strictly follow the prescribed dosages.
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           <div className="h-px w-40 bg-slate-300 mb-2 ml-auto"></div>
-                           <p className="text-[10px] font-black text-slate-900 uppercase tracking-widest leading-none">Dr. {detailedHistoryRecord.doctorName}</p>
-                           <p className="text-[8px] font-bold text-slate-400 mt-1 uppercase tracking-tighter italic">Digitally Authorized Record</p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center bg-white border border-slate-200 rounded-3xl text-slate-300">
-                      <p className="text-xs font-black uppercase tracking-[0.4em] italic">Data Stream Interrupted</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </Modal>
+          patient={patient}
+          doctor={null} 
+          hospital={hospital}
+          complaints={detailedHistoryRecord.chiefComplaints || detailedHistoryRecord.notes || ''}
+          diagnosis={detailedHistoryRecord.diagnosis || ''}
+          prescriptions={detailedHistoryRecord.prescription?.items?.map((item: any, idx: number) => ({
+            id: item.id || `hist-${idx}`,
+            medicine: item.medicineName,
+            frequency: item.dosage,
+            instructions: item.duration,
+          })) || []}
+          investigations={detailedHistoryRecord.prescription?.labItems?.map((lab: any, idx: number) => ({
+            id: lab.id || `hist-lab-${idx}`,
+            testName: lab.testName,
+            testCode: '',
+            notes: lab.notes
+          })) || []}
+          vitals={{
+            heartRate: detailedHistoryRecord.vitals?.heartRate?.toString() || '--',
+            temp: detailedHistoryRecord.vitals?.temperature?.toString() || '--',
+            bp: detailedHistoryRecord.vitals?.bloodPressure || '--',
+            weight: detailedHistoryRecord.vitals?.weight?.toString() || '--',
+            spo2: detailedHistoryRecord.vitals?.oxygenLevel?.toString() || '--'
+          }}
+          date={new Date(detailedHistoryRecord.appointmentTime).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+          isHistoryView
+          currentHistoryIndex={currentHistoryIndex}
+          totalHistoryRecords={historyList.length}
+          onNavigateOlder={() => setCurrentHistoryIndex(prev => Math.max(0, prev - 1))}
+          onNavigateNewer={() => setCurrentHistoryIndex(prev => Math.min(historyList.length - 1, prev + 1))}
+        />
       )}
     </MainLayout>
   );
