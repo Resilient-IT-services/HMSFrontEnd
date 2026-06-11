@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { AppointmentSummaryDTO } from '@/types/api';
 import { useRouter } from 'next/navigation';
@@ -32,29 +32,30 @@ const DateRangeFilter = ({
   const hasFilter = !!(activeFilters.from || activeFilters.to);
 
   const label = fromDate && toDate
-      ? `${fromDate.format('MMM D')} - ${toDate.format('MMM D')}`
-      : 'Filter Date...';
+    ? (fromDate.isSame(toDate, 'day')
+      ? `📅 ${fromDate.format('DD MMM YYYY')}`
+      : `📅 ${fromDate.format('DD MMM')} - ${toDate.format('DD MMM')}`)
+    : '📅 Date Range';
 
   return (
-      <div className="relative w-full">
+      <div className="relative">
         <button
             onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
             className={cn(
-                "w-full flex items-center justify-between gap-1.5 px-2 py-1 rounded-lg transition-all text-[10px] font-bold border active:scale-95",
+                "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all text-xs font-bold active:scale-95 whitespace-nowrap",
                 hasFilter
-                    ? "bg-slate-50 text-slate-900 border-slate-400 shadow-sm"
-                    : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600"
+                    ? "bg-white text-slate-900 border-orange-300 shadow-sm hover:border-orange-400"
+                    : "bg-white text-slate-500 border-slate-200 hover:border-orange-400 hover:text-slate-700 shadow-sm"
             )}
         >
-          <span className="truncate">{label}</span>
-          <span className="material-symbols-outlined text-[14px] text-orange-500 shrink-0">calendar_month</span>
+          <span>{label}</span>
         </button>
 
         {isOpen && (
             <>
               <div className="fixed inset-0 z-[110] bg-slate-900/10 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
               <div
-                  className="absolute top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[280px] flex flex-col gap-4 normal-case tracking-normal animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="absolute top-full right-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[280px] flex flex-col gap-4 normal-case tracking-normal animate-in fade-in slide-in-from-top-2 duration-150"
                   onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-1">
@@ -74,20 +75,20 @@ const DateRangeFilter = ({
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Start Date & Time</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Start Date</label>
                     <input
-                        type="datetime-local"
-                        value={activeFilters.from ? dayjs(activeFilters.from).format('YYYY-MM-DDTHH:mm') : ''}
-                        onChange={(e) => onFilter('from', e.target.value ? dayjs(e.target.value).toISOString() : '')}
+                        type="date"
+                        value={activeFilters.from ? dayjs(activeFilters.from).format('YYYY-MM-DD') : ''}
+                        onChange={(e) => onFilter('from', e.target.value ? dayjs(e.target.value).startOf('day').toISOString() : '')}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none transition-all"
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">End Date & Time</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">End Date</label>
                     <input
-                        type="datetime-local"
-                        value={activeFilters.to ? dayjs(activeFilters.to).format('YYYY-MM-DDTHH:mm') : ''}
-                        onChange={(e) => onFilter('to', e.target.value ? dayjs(e.target.value).toISOString() : '')}
+                        type="date"
+                        value={activeFilters.to ? dayjs(activeFilters.to).format('YYYY-MM-DD') : ''}
+                        onChange={(e) => onFilter('to', e.target.value ? dayjs(e.target.value).endOf('day').toISOString() : '')}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none transition-all"
                     />
                   </div>
@@ -117,19 +118,53 @@ export const AppointmentsPage = () => {
     columnFilters,
     setColumnFilters,
     activeFilters,
-    stats,
-    resetFilters
+    resetFilters,
+    refresh
   } = useReceptionAppointments();
 
-  const appointments = useMemo(() => {
-    if (statusFilter === 'UPCOMING') {
-      const now = new Date();
-      return rawAppointments.filter(
-        app => app.status === 'SCHEDULED' && new Date(app.appointmentTime) > now
-      );
-    }
-    return rawAppointments;
-  }, [rawAppointments, statusFilter]);
+  // Reload data on mount to ensure freshness
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const { totalTodayAppointments, completedAppointments, upcomingAppointments } = useMemo(() => {
+    const todayStart = dayjs().startOf('day').valueOf();
+    const todayEnd = dayjs().endOf('day').valueOf();
+    const tomorrowStart = dayjs().add(1, 'day').startOf('day').valueOf();
+    const futureEnd = dayjs().add(30, 'days').endOf('day').valueOf();
+
+    const upcomingAllowedStatuses = new Set(['SCHEDULED', 'PAYMENT_PENDING', 'PAID', 'VITALS_RECORDED']);
+
+    const today = rawAppointments.filter(app => {
+      const appDate = dayjs(app.appointmentTime).valueOf();
+      return appDate >= todayStart && appDate <= todayEnd;
+    });
+
+    const completed = today.filter(app => app.status === 'COMPLETED');
+
+    const upcoming = rawAppointments.filter(app => {
+      const appDate = dayjs(app.appointmentTime).valueOf();
+      return appDate >= tomorrowStart && 
+             appDate <= futureEnd &&
+             upcomingAllowedStatuses.has(app.status);
+    });
+
+    console.log('TOTAL TODAY', today.length);
+    console.log('COMPLETED', completed.length);
+    console.log('UPCOMING', upcoming.length);
+
+    return {
+      totalTodayAppointments: today,
+      completedAppointments: completed,
+      upcomingAppointments: upcoming
+    };
+  }, [rawAppointments]);
+
+  const displayAppointments = useMemo(() => {
+    if (statusFilter === 'UPCOMING') return upcomingAppointments;
+    if (statusFilter === 'COMPLETED') return completedAppointments;
+    return totalTodayAppointments;
+  }, [statusFilter, totalTodayAppointments, completedAppointments, upcomingAppointments]);
 
   const columns: Column<AppointmentSummaryDTO>[] = useMemo(() => [
     {
@@ -248,20 +283,16 @@ export const AppointmentsPage = () => {
   ], [router]);
 
   const statConfig = [
-    { label: 'Total Today', value: stats.total, filter: 'ALL', icon: 'analytics', colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
-    { label: 'In Progress', value: stats.inProgress, filter: 'CONSULTATION_STARTED', icon: 'check_circle', colorClass: 'from-blue-600 to-blue-700 border-blue-800 shadow-blue-800/5' },
-    { label: 'Completed', value: stats.completed, filter: 'COMPLETED', icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
-    { label: 'Upcoming', value: statusFilter === 'UPCOMING' ? appointments.length : stats.upcoming, filter: 'UPCOMING', icon: 'analytics', colorClass: 'from-indigo-600 to-indigo-700 border-indigo-800 shadow-indigo-600/5' },
+    { label: 'Total Today', value: totalTodayAppointments.length, filter: 'ALL', icon: 'analytics', colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
+    { label: 'Completed', value: completedAppointments.length, filter: 'COMPLETED', icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
+    { label: 'Upcoming', value: upcomingAppointments.length, filter: 'UPCOMING', icon: 'analytics', colorClass: 'from-indigo-600 to-indigo-700 border-indigo-800 shadow-indigo-600/5' },
   ];
 
   const handleTabClick = (filterType: string) => {
     setStatusFilter(filterType as any);
-    setColumnFilters((prev) => ({
-      ...prev,
-      from: filterType === 'UPCOMING' ? dayjs().toISOString() : dayjs().startOf('day').toISOString(),
-      to: filterType === 'UPCOMING' ? dayjs().add(30, 'days').endOf('day').toISOString() : dayjs().endOf('day').toISOString(),
-    }));
-    if (activeFilters.statuses?.length) resetFilters();
+    if (activeFilters.statuses?.length) {
+      resetFilters();
+    }
   };
 
   return (
@@ -340,7 +371,7 @@ export const AppointmentsPage = () => {
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-[500px] overflow-hidden">
               <Table
                   columns={columns}
-                  data={appointments}
+                  data={displayAppointments}
                   isLoading={loading}
                   onRowDoubleClick={(app) => app.status !== 'COMPLETED' && router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
                   emptyMessage="No appointments found for today."

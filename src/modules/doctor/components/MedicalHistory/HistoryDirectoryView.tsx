@@ -61,7 +61,10 @@ export const HistoryDirectoryView = () => {
     if (showHistoryModal && historyList.length > 0) {
       const currentRecord = historyList[currentHistoryIndex];
       if (currentRecord) {
-        void fetchDetailedRecord(currentRecord.id);
+        const t = setTimeout(() => {
+          void fetchDetailedRecord(currentRecord.id);
+        }, 0);
+        return () => clearTimeout(t);
       }
     }
   }, [currentHistoryIndex, historyList, showHistoryModal]);
@@ -169,7 +172,10 @@ export const HistoryDirectoryView = () => {
   }, [user, hospitalTimezone, startDate, endDate]);
 
   useEffect(() => {
-    void fetchData();
+    const t = setTimeout(() => {
+      void fetchData();
+    }, 0);
+    return () => clearTimeout(t);
   }, [fetchData]);
 
   const filteredAppointments = useMemo(() => {

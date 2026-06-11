@@ -43,39 +43,6 @@ vi.mock('@/components/ui/MainLayout', () => ({
   )
 }));
 
-const mockAppointments = [
-  {
-    id: '1',
-    patientId: 'p1',
-    patientName: 'John Doe',
-    doctorId: '101',
-    doctorName: 'Dr. Smith',
-    appointmentTime: new Date().toISOString(),
-    status: 'SCHEDULED',
-    reason: 'Checkup'
-  },
-  {
-    id: '2',
-    patientId: 'p2',
-    patientName: 'Jane Smith',
-    doctorId: '102',
-    doctorName: 'Dr. Jones',
-    appointmentTime: new Date().toISOString(),
-    status: 'CHECKED_IN',
-    reason: 'Followup'
-  },
-  {
-    id: '3',
-    patientId: 'p3',
-    patientName: 'Future Patient',
-    doctorId: '101',
-    doctorName: 'Dr. Smith',
-    appointmentTime: new Date(Date.now() + 86_400_000).toISOString(), // Tomorrow
-    status: 'SCHEDULED',
-    reason: 'Checkup'
-  }
-];
-
 const mockDoctors = [
   { id: '101', fullName: 'Dr. Smith', specializations: ['General'] },
   { id: '102', fullName: 'Dr. Jones', specializations: ['Cardio'] }
@@ -88,18 +55,56 @@ describe('TodayAppointmentsPage', () => {
     vi.clearAllMocks();
     (appointmentService.getStats as any).mockResolvedValue({
       success: true,
-      data: { total: 3, upcoming: 1, byStatus: { 'SCHEDULED': 2, 'CHECKED_IN': 1 } }
+      data: { total: 0, upcoming: 0, byStatus: {} }
     });
   });
 
-  it('renders correctly and fetches today\'s appointments only', async () => {
+  it('renders correctly and filters appointments by source of truth', async () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const mockAppointments = [
+      {
+        id: '1',
+        patientId: 'p1',
+        patientName: 'Today Scheduled',
+        doctorId: '101',
+        doctorName: 'Dr. Smith',
+        appointmentTime: `${todayStr}T10:00:00.000Z`,
+        status: 'SCHEDULED',
+        reason: 'Checkup'
+      },
+      {
+        id: '2',
+        patientId: 'p2',
+        patientName: 'Today Completed',
+        doctorId: '102',
+        doctorName: 'Dr. Jones',
+        appointmentTime: `${todayStr}T11:00:00.000Z`,
+        status: 'COMPLETED',
+        reason: 'Followup'
+      },
+      {
+        id: '3',
+        patientId: 'p3',
+        patientName: 'Tomorrow Scheduled',
+        doctorId: '101',
+        doctorName: 'Dr. Smith',
+        appointmentTime: `${tomorrowStr}T10:00:00.000Z`,
+        status: 'SCHEDULED',
+        reason: 'Checkup'
+      }
+    ];
+
     (appointmentService.listSummary as any).mockResolvedValue({
       success: true,
       data: {
-        content: mockAppointments.slice(0, 2),
-        totalElements: 2,
+        content: mockAppointments,
+        totalElements: 3,
         totalPages: 1,
-        size: 100,
+        size: 500,
         number: 0
       }
     });
@@ -121,113 +126,37 @@ describe('TodayAppointmentsPage', () => {
 
     expect(screen.getByRole('heading', { name: "Today's Appointments", level: 1 })).toBeInTheDocument();
     
+    // Default tab is TOTAL TODAY, should show today's appointments (Scheduled and Completed)
     await waitFor(() => {
-      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Today Scheduled')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Today Completed')[0]).toBeInTheDocument();
+      expect(screen.queryByText('Tomorrow Scheduled')).not.toBeInTheDocument();
     }, { timeout: 10_000 });
-  }, 10_000);
 
-  it('shows future appointments only in UPCOMING tab', async () => {
-    (appointmentService.listSummary as any).mockResolvedValue({
-      success: true,
-      data: {
-        content: mockAppointments,
-        totalElements: 3
-      }
-    });
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
-    });
+    // Check counts (2 total today, 1 completed, 1 upcoming)
+    const card2 = screen.getByText('2'); // Total Today
+    expect(card2).toBeInTheDocument();
 
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <TodayAppointmentsPage />
-        </LayoutProvider>
-      </Provider>
-    );
+    const ones = screen.getAllByText('1'); // Completed and Upcoming both have 1
+    expect(ones.length).toBeGreaterThanOrEqual(2);
+
+    // Switch to COMPLETED
+    const completedTab = screen.getByText('Completed');
+    fireEvent.click(completedTab);
 
     await waitFor(() => {
-      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
+      expect(screen.queryByText('Today Scheduled')).not.toBeInTheDocument();
+      expect(screen.getAllByText('Today Completed')[0]).toBeInTheDocument();
     });
 
+    // Switch to UPCOMING
     const upcomingTab = screen.getByText('Upcoming');
     fireEvent.click(upcomingTab);
 
-    // John Doe has status SCHEDULED but time is NOW (which we should treat as past for Upcoming)
-    // Jane Smith has status CHECKED_IN
-    // Future Patient has status SCHEDULED and time is TOMORROW
     await waitFor(() => {
-      expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-      expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument();
-      expect(screen.getAllByText('Future Patient')[0]).toBeInTheDocument();
+      expect(screen.queryByText('Today Scheduled')).not.toBeInTheDocument();
+      expect(screen.queryByText('Today Completed')).not.toBeInTheDocument();
+      expect(screen.getAllByText('Tomorrow Scheduled')[0]).toBeInTheDocument();
     });
-
-    // Check that the Upcoming count matches (1 in our case)
-    expect(screen.getByText('1')).toBeInTheDocument();
-  });
-
-  it.skip('filters appointments by search term', async () => {
-    (appointmentService.list as any).mockResolvedValue({
-      success: true,
-      data: {
-        content: mockAppointments,
-        totalElements: 3
-      }
-    });
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
-    });
-
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <TodayAppointmentsPage />
-        </LayoutProvider>
-      </Provider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
-    });
-
-    const searchInput = screen.getByPlaceholderText('Search patient...');
-    fireEvent.change(searchInput, { target: { value: 'Jane' } });
-
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-    expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
-  });
-
-  it('filters appointments by status', async () => {
-    (appointmentService.list as any).mockResolvedValue({
-      success: true,
-      data: {
-        content: mockAppointments,
-        totalElements: 2
-      }
-    });
-    (doctorService.list as any).mockResolvedValue({
-      success: true,
-      data: { content: mockDoctors }
-    });
-
-    render(
-      <Provider store={store}>
-        <LayoutProvider>
-          <TodayAppointmentsPage />
-        </LayoutProvider>
-      </Provider>
-    );
-
-    await waitFor(() => {
-      expect(screen.getAllByText('John Doe')[0]).toBeInTheDocument();
-    });
-
-    const todayTotalCard = screen.getAllByText('Total Today')[0];
-    fireEvent.click(todayTotalCard);
-
-    expect(screen.getAllByText('Jane Smith')[0]).toBeInTheDocument();
-  });
+  }, 10_000);
 });

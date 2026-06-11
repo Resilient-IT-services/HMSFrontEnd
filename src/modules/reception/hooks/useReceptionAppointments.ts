@@ -9,7 +9,6 @@ import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getHospitalDayRangeUTC } from '@/utils/dateValidator';
 import dayjs from '@/lib/dayjs';
 
 export const useReceptionAppointments = () => {
@@ -21,13 +20,13 @@ export const useReceptionAppointments = () => {
   // Column-wise Filter and Sort State
   const [sortState, setSortState] = useState<{ key: string, direction: 'asc' | 'desc' } | null>(null);
   
-  // Default range: Midnight to now (local hospital time)
+  // Default range: Today's start to 30 days from now's end (local hospital time)
   const initialRange = useMemo(() => {
     if (!hospitalTimezone) return { from: '', to: '' };
     const now = dayjs().tz(hospitalTimezone);
     return {
       from: now.startOf('day').toISOString(),
-      to: now.toISOString()
+      to: now.add(30, 'days').endOf('day').toISOString()
     };
   }, [hospitalTimezone]);
 
@@ -37,7 +36,7 @@ export const useReceptionAppointments = () => {
   }));
 
   // Update column filters if initialRange changes (e.g. timezone loaded)
-  // We do this during render to avoid cascading renders in React 19
+  // We do this during render to avoid synchronous setState in useEffect
   if (initialRange.from && !columnFilters.from) {
       setColumnFilters(prev => ({
           ...prev,
@@ -56,27 +55,17 @@ export const useReceptionAppointments = () => {
   });
 
   const [activeFilters, setActiveFilters] = useState<{ statuses?: string[]; paymentStatuses?: string[] }>({});
-  const [stats, setStats] = useState({
-    total: 0,
-    inProgress: 0,
-    upcoming: 0,
-    paymentPending: 0,
-    waitingForVitals: 0,
-    completed: 0,
-    cancelled: 0,
-  });
-
+  
   const lastFetchKey = useRef<string>('');
 
   const fetchData = useCallback(async (isBackground = false, filters = activeFilters, colFilters = debouncedColumnFilters, sort = sortState) => {
     if (!hospitalTimezone) return;
 
-    // Determine time range: Priority to column filters, fallback to today's range
-    const todayRange = getHospitalDayRangeUTC(hospitalTimezone);
-    const fromParam = colFilters.from || (statusFilter === 'UPCOMING' ? undefined : todayRange.from);
-    const toParam = colFilters.to || (statusFilter === 'UPCOMING' ? undefined : todayRange.to);
+    // Determined time range from initial pool or current filters
+    const fromParam = colFilters.from || initialRange.from;
+    const toParam = colFilters.to || initialRange.to;
 
-    const fetchKey = `${hospitalTimezone}-${statusFilter}-${JSON.stringify(colFilters)}-${JSON.stringify(sort)}-${JSON.stringify(filters)}`;
+    const fetchKey = `${hospitalTimezone}-${JSON.stringify(colFilters)}-${JSON.stringify(sort)}-${JSON.stringify(filters)}`;
     
     // Prevent duplicate calls if params haven't changed (unless it's a background refresh)
     if (!isBackground && lastFetchKey.current === fetchKey) return;
@@ -84,9 +73,11 @@ export const useReceptionAppointments = () => {
 
     if (!isBackground) setLoading(true);
     try {
+      // For the single source of truth approach, we fetch everything in the range
+      // and let the component handle the specific tab filtering.
       const statusesToUse = filters.statuses && filters.statuses.length > 0 
         ? filters.statuses.join(',') 
-        : (statusFilter === 'ALL' ? undefined : (statusFilter === 'UPCOMING' ? 'SCHEDULED' : statusFilter));
+        : undefined;
 
       const sortParam = sort ? `${sort.key},${sort.direction}` : undefined;
 
@@ -94,48 +85,32 @@ export const useReceptionAppointments = () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { from: _, to: __, ...apiColFilters } = colFilters;
 
-      const [appRes, statsRes] = await Promise.all([
-        appointmentService.listSummary({
-          page: 0,
-          size: 100,
-          from: fromParam,
-          to: toParam,
-          status: statusesToUse,
-          paymentStatus: filters.paymentStatuses?.join(','),
-          sort: sortParam,
-          ...apiColFilters
-        }),
-        appointmentService.getStats(todayRange.from, todayRange.to)
-      ]);
+      const response = await appointmentService.listSummary({
+        page: 0,
+        size: 500, // Increased size to get the "pool" of appointments for the 30-day window
+        from: fromParam,
+        to: toParam,
+        status: statusesToUse,
+        paymentStatus: filters.paymentStatuses?.join(','),
+        sort: sortParam,
+        ...apiColFilters
+      });
 
-      if (appRes.success && appRes.data) {
-        setAppointments(appRes.data.content);
-      }
-
-      if (statsRes.success && statsRes.data) {
-        const statusStats = statsRes.data.byStatus;
-        setStats({
-          total: statsRes.data.total,
-          inProgress: statusStats['CONSULTATION_STARTED'] || 0,
-          upcoming: statsRes.data.upcoming || 0,
-          paymentPending: statusStats['PAYMENT_PENDING'] || 0,
-          waitingForVitals: statusStats['PAID'] || 0,
-          completed: statusStats['COMPLETED'] || 0,
-          cancelled: statusStats['CANCELLED'] || 0,
-        });
+      if (response.success && response.data) {
+        setAppointments(response.data.content);
       }
     } catch (error) {
       console.error('Failed to fetch data', error);
     } finally {
       if (!isBackground) setLoading(false);
     }
-  }, [statusFilter, activeFilters, debouncedColumnFilters, sortState, hospitalTimezone]);
+  }, [hospitalTimezone, debouncedColumnFilters, sortState, activeFilters, initialRange.from, initialRange.to]);
 
   useEffect(() => {
-    const trigger = async () => {
-      await fetchData();
-    };
-    void trigger();
+    const t = setTimeout(() => {
+        void fetchData();
+    }, 0);
+    return () => clearTimeout(t);
   }, [fetchData]);
 
   useAutoRefresh(fetchData, DASHBOARD_REFRESH_INTERVAL);
@@ -187,7 +162,6 @@ export const useReceptionAppointments = () => {
     advancedFilters,
     setAdvancedFilters,
     activeFilters,
-    stats,
     applyFilters,
     resetFilters,
     removeFilter,

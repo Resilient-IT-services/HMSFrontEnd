@@ -360,7 +360,10 @@ export const ActiveConsultationPage = () => {
 
   useEffect(() => {
     if (showHistoryModal) {
-      void fetchHistory();
+      const t = setTimeout(() => {
+        void fetchHistory();
+      }, 0);
+      return () => clearTimeout(t);
     }
   }, [showHistoryModal]);
 
