@@ -16,7 +16,7 @@ import dayjs from '@/lib/dayjs';
 
 import { useAutoRefresh } from '@/hooks/useAutoRefresh';
 
-const DOCTOR_QUEUE_STATUSES = new Set(['PAID', 'VITALS_RECORDED', 'CONSULTATION_STARTED']);
+const DOCTOR_QUEUE_STATUSES = new Set(['SCHEDULED', 'VITALS_RECORDED']);
 
 export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
   const router = useRouter();
@@ -47,12 +47,15 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
         from: fromParam, 
         to: toParam, 
         doctorId: user.id,
+        status: [...DOCTOR_QUEUE_STATUSES].join(','),
         search: searchTerm || undefined,
         ...debouncedColumnFilters
       });
 
       if (response.success && response.data) {
-        setAppointments(response.data.content);
+        // Defensive filtering at the API response handling layer
+        const filteredData = response.data.content.filter(a => DOCTOR_QUEUE_STATUSES.has(a.status));
+        setAppointments(filteredData);
       }
     } catch (error) {
       console.error('Failed to fetch patient queue', error);
@@ -110,7 +113,8 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
     const hospitalToday = dayjs().tz(hospitalTimezone).format('YYYY-MM-DD');
     const todayApps = appointments.filter(a => dayjs(a.appointmentTime).tz(hospitalTimezone).format('YYYY-MM-DD') === hospitalToday);
 
-    const waiting = todayApps.filter((a) => a.status === 'PAID' || a.status === 'VITALS_RECORDED').length;
+    // After filtering at the API layer, all appointments in state should be "waiting" or "scheduled"
+    const waiting = todayApps.filter((a) => a.status === 'SCHEDULED' || a.status === 'VITALS_RECORDED').length;
     const inProgress = todayApps.filter((a) => a.status === 'CONSULTATION_STARTED').length;
     const completed = todayApps.filter((a) => a.status === 'COMPLETED').length;
 
@@ -136,7 +140,7 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
         return;
       }
 
-      const allowedStatuses = ['PAID', 'VITALS_RECORDED'];
+      const allowedStatuses = ['SCHEDULED', 'VITALS_RECORDED'];
       if (!allowedStatuses.includes(appointment.status)) {
         const messages: Record<string, string> = {
           'SCHEDULED': 'Consultation cannot be started as payment is pending/vitals not recorded',
@@ -169,7 +173,7 @@ export const useDoctorQueue = (columnFilters: Record<string, string> = {}) => {
 
   return {
     appointments: activeTab === 'TODAY' 
-      ? sortByToken(appointments.filter(a => DOCTOR_QUEUE_STATUSES.has(a.status))) 
+      ? sortByToken(appointments) 
       : [...appointments].toSorted((a, b) => a.appointmentTime.localeCompare(b.appointmentTime)),
     loading,
     searchTerm,
