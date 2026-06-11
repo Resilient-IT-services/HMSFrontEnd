@@ -41,6 +41,7 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
   complaints,
   diagnosis,
   prescriptions,
+  investigations,
   vitals,
   date,
   tokenDisplay,
