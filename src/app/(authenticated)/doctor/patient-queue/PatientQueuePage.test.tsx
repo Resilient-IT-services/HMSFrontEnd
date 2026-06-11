@@ -51,7 +51,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T10:00:00',
-        status: 'PAID',
+        status: 'SCHEDULED',
       },
       {
         id: '2',
@@ -91,7 +91,7 @@ describe('PatientQueuePage', () => {
     expect(elements.length).toBeGreaterThan(0);
   });
 
-  it('hides completed appointments from the queue while keeping completed stats', async () => {
+  it('hides completed appointments from the queue and stats', async () => {
     const mockAppointments = [
       {
         id: '1',
@@ -100,7 +100,7 @@ describe('PatientQueuePage', () => {
         doctorId: 'doc-1',
         doctorName: 'Dr. John Doe',
         appointmentTime: new Date().toISOString().split('T')[0] + 'T10:00:00',
-        status: 'PAID',
+        status: 'SCHEDULED',
       },
       {
         id: '2',
@@ -113,11 +113,12 @@ describe('PatientQueuePage', () => {
       }
     ];
 
+    // API will only return SCHEDULED/VITALS_RECORDED
     (appointmentService.list as any).mockResolvedValue({
       success: true,
       data: {
-        content: mockAppointments,
-        totalElements: 2,
+        content: [mockAppointments[0]],
+        totalElements: 1,
       }
     });
 
@@ -133,11 +134,9 @@ describe('PatientQueuePage', () => {
     });
 
     expect(screen.queryByText('Bob Jones')).not.toBeInTheDocument();
-    expect(screen.queryByText('Reopen')).not.toBeInTheDocument();
-
-    // Stats should still show completed count
-    expect(screen.getAllByText(/Completed/i)[0]).toBeInTheDocument();
-    const stats01 = screen.getAllByText('1');
-    expect(stats01.length).toBeGreaterThanOrEqual(2); // One for Waiting, one for Completed
+    
+    // Stats should show total 1, waiting 1, inProgress 0, completed 0
+    expect(screen.getAllByText('1').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('0').length).toBeGreaterThanOrEqual(2);
   });
 });

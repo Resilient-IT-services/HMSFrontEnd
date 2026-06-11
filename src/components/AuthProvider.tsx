@@ -10,6 +10,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Role } from '@/types/api';
 import { setDefaultTimezone } from '@/lib/dayjs';
 
+import { ROLE_PATH_MAP } from '@/utils/constants';
+
 const PUBLIC_ROUTES = new Set(['/login', '/privacy', '/terms', '/forgot-password']);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -156,16 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleAuthenticatedRedirect = useCallback(() => {
     if (pathname === '/login' || pathname === '/select-hospital' || pathname === '/select-role') {
-      const rolePathMap: Record<string, string> = {
-        'RECEPTIONIST': 'reception',
-        'DOCTOR': 'doctor',
-        'PHARMACIST': 'pharmacy',
-        'ADMIN': 'admin',
-        'SUPER_ADMIN': 'super_admin',
-        'NURSE': 'nurse'
-      };
-
-      const path = rolePathMap[activeRole!] || activeRole!.toLowerCase();
+      const path = ROLE_PATH_MAP[activeRole!] || activeRole!.toLowerCase();
       const targetPath = `/${path}/dashboard`;
       
       if (pathname !== targetPath) {

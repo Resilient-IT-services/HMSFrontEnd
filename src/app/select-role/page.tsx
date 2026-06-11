@@ -7,6 +7,7 @@ import { setActiveRole, setCurrentHospitalId } from '@/state/authSlice';
 import { Role } from '@/types/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { ROLE_PATH_MAP } from '@/utils/constants';
 
 const roleDisplayData: Record<string, { icon: string, title: string, description: string }> = {
   'DOCTOR': {
@@ -59,16 +60,7 @@ const SelectRolePage = () => {
   const handleSelect = (role: Role) => {
     dispatch(setActiveRole(role));
     
-    const rolePathMap: Record<string, string> = {
-      'RECEPTIONIST': 'reception',
-      'DOCTOR': 'doctor',
-      'PHARMACIST': 'pharmacy',
-      'ADMIN': 'admin',
-      'SUPER_ADMIN': 'super_admin',
-      'NURSE': 'nurse',
-      'LAB_TECHNICIAN': 'lab'
-    };
-    const path = rolePathMap[role] || role.toLowerCase();
+    const path = ROLE_PATH_MAP[role] || role.toLowerCase();
     const targetPath = `/${path}/dashboard`;
     router.push(targetPath);
   };

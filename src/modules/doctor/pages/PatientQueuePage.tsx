@@ -267,10 +267,7 @@ export const PatientQueuePage = () => {
                         aria-label="Filter queue entries by status category"
                     >
                       <option value="ALL">ALL STATUSES</option>
-                      <option value="CONSULTATION_STARTED">IN PROGRESS</option>
-                      <option value="COMPLETED">COMPLETED</option>
                       <option value="SCHEDULED">SCHEDULED</option>
-                      <option value="CANCELLED">CANCELLED</option>
                       <option value="VITALS_RECORDED">VITALS RECORDED</option>
                     </select>
                   </div>
