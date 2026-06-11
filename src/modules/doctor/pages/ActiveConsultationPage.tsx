@@ -636,26 +636,35 @@ export const ActiveConsultationPage = () => {
 
             <div className="mt-6 grid grid-cols-12 gap-6">
               <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-                <div className="bg-white rounded-2xl border border-slate-200 p-3 shadow-sm">
+                <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
                   <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2 px-1">
                     <span className="material-symbols-outlined text-sm">analytics</span> Patient Vitals
                   </h3>
-                  <div className="grid grid-cols-6 gap-1.5">
+                  <div className="grid grid-cols-5 gap-1.5">
                     {[
                       { label: 'Heart Rate', value: vitals?.heartRate, unit: 'BPM', icon: 'favorite', color: 'text-orange-600', bg: 'bg-orange-50' },
                       { label: 'Temp', value: vitals?.temperature, unit: '°F', icon: 'device_thermostat', color: 'text-blue-600', bg: 'bg-blue-50' },
                       { label: 'Weight', value: vitals?.weight, unit: 'kg', icon: 'monitor_weight', color: 'text-indigo-600', bg: 'bg-indigo-50' },
                       { label: 'BP', value: vitals?.bloodPressure, unit: '', icon: 'blood_pressure', color: 'text-emerald-600', bg: 'bg-emerald-50' },
                       { label: 'SpO2', value: vitals?.oxygenLevel, unit: '%', icon: 'air', color: 'text-cyan-600', bg: 'bg-cyan-50' },
-                      { label: 'Resp', value: vitals?.respiratoryRate, unit: '/m', icon: 'airwave', color: 'text-slate-600', bg: 'bg-slate-50' }
                     ].map((v) => (
                       <div key={v.label} className={`${v.bg} p-2 rounded-xl border border-white/50 shadow-inner flex flex-col justify-center min-w-0`}>
                         <span className="text-[8px] uppercase font-black text-slate-500/70 block mb-0.5 truncate">{v.label}</span>
                         <div className={`flex items-center gap-1 ${v.color}`}>
                           <span className="material-symbols-outlined text-[14px] shrink-0">{v.icon}</span>
                           <span className="font-black text-[11px] sm:text-xs truncate">
-                            {v.value ?? '--'}
-                            <small className="text-[8px] ml-0.5 opacity-60">{v.unit}</small>
+                            {v.label === 'BP' && v.value?.toString().includes('/') ? (
+                              <span className="inline-flex flex-col items-center leading-none">
+                                <span>{v.value.toString().split('/')[0]}</span>
+                                <span className="w-full h-px bg-current opacity-30 my-0.5"></span>
+                                <span>{v.value.toString().split('/')[1]}</span>
+                              </span>
+                            ) : (
+                              <>
+                                {v.value ?? '--'}
+                                <small className="text-[8px] ml-0.5 opacity-60">{v.unit}</small>
+                              </>
+                            )}
                           </span>
                         </div>
                       </div>
