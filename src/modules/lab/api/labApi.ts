@@ -77,8 +77,94 @@ export interface LabQueueItemDTO {
     orderedAt: string;
 }
 
+export interface LabPackageDTO {
+    id?: string;
+    packageCode: string;
+    packageName: string;
+    active: boolean;
+    testIds: string[];
+}
+
+export interface LabInventoryItemDTO {
+    id?: string;
+    itemCode: string;
+    itemName: string;
+    unit: string;
+    availableQty?: number;
+    reorderLevel?: number;
+}
+
+export interface LabMachineDTO {
+    id?: string;
+    machineCode: string;
+    machineName: string;
+    manufacturer: string;
+    serialNumber: string;
+}
+
 export const labApi = {
-    // Hospital Admin Features
+    // ... existing methods ...
+    // Packages
+    getPackages: async () => {
+        const response = await apiClient.get<ApiResponse<LabPackageDTO[]>>('/lab/packages');
+        return response.data;
+    },
+    createPackage: async (data: LabPackageDTO) => {
+        const response = await apiClient.post<ApiResponse<LabPackageDTO>>('/lab/packages', data);
+        return response.data;
+    },
+    updatePackage: async (id: string, data: LabPackageDTO) => {
+        const response = await apiClient.put<ApiResponse<LabPackageDTO>>(`/lab/packages/${id}`, data);
+        return response.data;
+    },
+    deletePackage: async (id: string) => {
+        const response = await apiClient.delete<ApiResponse<void>>(`/lab/packages/${id}`);
+        return response.data;
+    },
+
+    // Inventory
+    getInventory: async () => {
+        const response = await apiClient.get<ApiResponse<LabInventoryItemDTO[]>>('/lab/inventory');
+        return response.data;
+    },
+    createInventoryItem: async (data: LabInventoryItemDTO) => {
+        const response = await apiClient.post<ApiResponse<LabInventoryItemDTO>>('/lab/inventory/items', data);
+        return response.data;
+    },
+    recordInventoryTransaction: async (itemId: string, quantity: number, type: 'ADD' | 'REMOVE') => {
+        const response = await apiClient.post<ApiResponse<void>>('/lab/inventory/transactions', null, {
+            params: { itemId, quantity, type }
+        });
+        return response.data;
+    },
+
+    // Machines
+    getMachines: async () => {
+        const response = await apiClient.get<ApiResponse<LabMachineDTO[]>>('/lab/machines');
+        return response.data;
+    },
+    createMachine: async (data: LabMachineDTO) => {
+        const response = await apiClient.post<ApiResponse<LabMachineDTO>>('/lab/machines', data);
+        return response.data;
+    },
+    updateMachine: async (id: string, data: LabMachineDTO) => {
+        const response = await apiClient.put<ApiResponse<LabMachineDTO>>(`/lab/machines/${id}`, data);
+        return response.data;
+    },
+    deleteMachine: async (id: string) => {
+        const response = await apiClient.delete<ApiResponse<void>>(`/lab/machines/${id}`);
+        return response.data;
+    },
+
+    // Verification
+    verifyResult: async (orderTestId: string, remarks: string, status: 'VERIFIED' | 'REJECTED') => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/tests/${orderTestId}/verify`, null, {
+            params: { remarks, status }
+        });
+        return response.data;
+    },
+
+    // Existing methods
     getDashboardStats: async () => {
         const response = await apiClient.get<ApiResponse<HospitalLabDashboardStatsDTO>>('/hospital/lab/dashboard/stats');
         return response.data;

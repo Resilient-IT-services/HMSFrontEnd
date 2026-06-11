@@ -14,7 +14,7 @@ import { formatDateTime } from '@/utils/formatters';
 import LabResultEntryModal from '../components/LabResultEntryModal';
 
 const LabQueuePage = () => {
-  const [activeTab, setActiveTab] = useState<'PENDING' | 'SAMPLE_COLLECTED' | 'PROCESSING'>('PENDING');
+  const [activeTab, setActiveTab] = useState<'PENDING' | 'SAMPLE_COLLECTED' | 'PROCESSING' | 'COMPLETED'>('PENDING');
   const [queue, setQueue] = useState<LabQueueItemDTO[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -25,7 +25,6 @@ const LabQueuePage = () => {
   const fetchQueue = useCallback(async () => {
     try {
       setLoading(true);
-      // We use the paged queue endpoint, defaulting to a large page for MVP
       const res = await labApi.getPagedQueue(activeTab, 0, 100);
       if (res.success && res.data) {
         setQueue(res.data.content);
@@ -39,8 +38,11 @@ const LabQueuePage = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    fetchQueue();
-  }, [fetchQueue]);
+        const init = async () => {
+            await fetchQueue();
+        };
+        init();
+    }, [activeTab, fetchQueue]); // Fetch when activeTab changes
 
   const handleCollectSample = async (orderTestId: string) => {
     try {
@@ -61,6 +63,24 @@ const LabQueuePage = () => {
   const handleEnterResult = (orderTestId: string) => {
     setSelectedOrderTestId(orderTestId);
     setIsResultModalOpen(true);
+  };
+
+  const handleVerify = async (orderTestId: string, status: 'VERIFIED' | 'REJECTED') => {
+    const remarks = prompt(`Enter remarks for ${status.toLowerCase()}:`);
+    if (remarks === null) return;
+
+    try {
+        setLoading(true);
+        const res = await labApi.verifyResult(orderTestId, remarks, status);
+        if (res.success) {
+            triggerGlobalToast(`Result ${status.toLowerCase()} successfully`, 'success');
+            fetchQueue();
+        }
+    } catch (error) {
+        console.error('Failed to verify:', error);
+    } finally {
+        setLoading(false);
+    }
   };
 
   const columns: Column<LabQueueItemDTO>[] = [
@@ -92,14 +112,21 @@ const LabQueuePage = () => {
     },
     {
       header: 'Status',
-      render: (item) => (
-        <Badge 
-          variant={item.status === 'PENDING' ? 'orange' : item.status === 'SAMPLE_COLLECTED' ? 'blue' : 'emerald'} 
-          size="sm"
-        >
-          {item.status.replace('_', ' ')}
-        </Badge>
-      )
+      render: (item) => {
+        let variant: 'orange' | 'blue' | 'emerald' | 'slate' = 'slate';
+        if (item.status === 'PENDING') variant = 'orange';
+        if (item.status === 'SAMPLE_COLLECTED') variant = 'blue';
+        if (item.status === 'COMPLETED' || item.status === 'VERIFIED') variant = 'emerald';
+        
+        return (
+          <Badge 
+            variant={variant} 
+            size="sm"
+          >
+            {item.status.replace('_', ' ')}
+          </Badge>
+        );
+      }
     },
     {
       header: 'Action',
@@ -120,6 +147,18 @@ const LabQueuePage = () => {
             </Button>
           );
         }
+        if (item.status === 'COMPLETED') {
+            return (
+                <div className="flex justify-end gap-2">
+                    <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item.orderTestId, 'VERIFIED')}>
+                        Verify
+                    </Button>
+                    <Button size="sm" variant="danger" onClick={() => handleVerify(item.orderTestId, 'REJECTED')}>
+                        Reject
+                    </Button>
+                </div>
+            );
+        }
         return null;
       }
     }
@@ -131,7 +170,7 @@ const LabQueuePage = () => {
         <div className="space-y-4 py-4">
           <PageHeading
             title="Laboratory Queue"
-            description="Manage sample collections and process test results."
+            description="Manage sample collections, process results, and verify reports."
           />
 
           <div className="flex border-b border-slate-200 mb-6">
@@ -150,6 +189,14 @@ const LabQueuePage = () => {
               }`}
             >
               Ready for Processing
+            </button>
+            <button
+              onClick={() => setActiveTab('COMPLETED')}
+              className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
+                activeTab === 'COMPLETED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Pending Verification
             </button>
           </div>
 

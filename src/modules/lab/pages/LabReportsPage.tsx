@@ -39,8 +39,11 @@ const LabReportsPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchReports();
-  }, [fetchReports]);
+        const init = async () => {
+            await fetchReports();
+        };
+        init();
+    }, [fetchReports]);
 
   const handlePreviewReport = (orderId: string) => {
     setSelectedOrderId(orderId);
