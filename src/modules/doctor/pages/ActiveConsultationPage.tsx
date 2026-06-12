@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
@@ -279,6 +279,8 @@ export const ActiveConsultationPage = () => {
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'meds' | 'labs'>('meds');
   const [detailedHistoryRecord, setDetailedHistoryRecord] = useState<AppointmentResponse | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [loadingDetailedRecord, setLoadingDetailedRecord] = useState(false);
 
   useEffect(() => {
     const fetchDetailedRecord = async () => {
