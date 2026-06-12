@@ -143,12 +143,13 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <form data-testid="stock-form" onSubmit={handleSubmit} className="p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Batch */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Batch Number</label>
+              <label htmlFor="batchNumber" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Batch Number</label>
               <input
+                id="batchNumber"
                 required
                 name="batchNumber"
                 value={formData.batchNumber}
@@ -160,8 +161,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* HSN Code */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">HSN Code</label>
+              <label htmlFor="hsnCode" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">HSN Code</label>
               <input
+                id="hsnCode"
                 name="hsnCode"
                 value={formData.hsnCode}
                 onChange={handleChange}
@@ -172,8 +174,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* Manufacturing Date */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Mfg Date</label>
+              <label htmlFor="manufacturingDate" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Mfg Date</label>
               <input
+                id="manufacturingDate"
                 type="date"
                 name="manufacturingDate"
                 value={formData.manufacturingDate}
@@ -184,8 +187,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* Expiry */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Expiry Date</label>
+              <label htmlFor="expiryDate" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Expiry Date</label>
               <input
+                id="expiryDate"
                 required
                 type="date"
                 name="expiryDate"
@@ -197,8 +201,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* Supplier Name */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Supplier Name</label>
+              <label htmlFor="supplier" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Supplier Name</label>
               <input
+                id="supplier"
                 name="supplier"
                 value={formData.supplier}
                 onChange={handleChange}
@@ -209,8 +214,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* Supplier State */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Supplier State</label>
+              <label htmlFor="supplierState" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Supplier State</label>
               <select
+                id="supplierState"
                 name="supplierState"
                 value={formData.supplierState}
                 onChange={handleChange}
@@ -225,8 +231,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* Quantity */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Quantity to Add</label>
+              <label htmlFor="quantity" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Quantity to Add</label>
               <input
+                id="quantity"
                 required
                 type="number"
                 name="quantity"
@@ -239,8 +246,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
 
             {/* Reorder Level */}
             <div>
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Label (Units)</label>
+              <label htmlFor="reorderLevel" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Label (Units)</label>
               <input
+                id="reorderLevel"
                 type="number"
                 name="reorderLevel"
                 value={formData.reorderLevel}
@@ -253,8 +261,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
             {/* Pricing Section */}
             <div className="md:col-span-2 grid grid-cols-2 gap-6">
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Unit Cost (₹)</label>
+                <label htmlFor="purchasePrice" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Unit Cost (₹)</label>
                 <input
+                  id="purchasePrice"
                   required
                   type="number"
                   step="0.01"
@@ -267,8 +276,9 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Retail Price (₹)</label>
+                <label htmlFor="sellingPrice" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Retail Price (₹)</label>
                 <input
+                  id="sellingPrice"
                   required
                   type="number"
                   step="0.01"

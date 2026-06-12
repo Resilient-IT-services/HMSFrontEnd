@@ -269,6 +269,10 @@ export const labApi = {
         const response = await apiClient.get<ApiResponse<any>>(`/lab/pricing/test/${testId}`);
         return response.data;
     },
+    getAllPricing: async () => {
+        const response = await apiClient.get<ApiResponse<any[]>>('/lab/pricing');
+        return response.data;
+    },
     savePricing: async (data: any) => {
         const response = await apiClient.post<ApiResponse<any>>('/lab/pricing', data);
         return response.data;
@@ -289,6 +293,24 @@ export const labApi = {
     },
     getReportPreview: async (orderId: string) => {
         const response = await apiClient.get<ApiResponse<any>>(`/lab/reports/preview/${orderId}`);
+        return response.data;
+    },
+
+    // Recommendations
+    getRecommendations: async (page = 0, size = 20, search?: string) => {
+        const response = await apiClient.get<ApiResponse<PageResponse<any>>>('/pharmacy/prescriptions/lab-recommendations', {
+            params: { page, size, search }
+        });
+        return response.data;
+    },
+    createOrderFromRecommendation: async (data: {
+        prescriptionId: string;
+        testIds: string[];
+        paymentMode: string;
+        amountPaid: number;
+        referenceNumber?: string;
+    }) => {
+        const response = await apiClient.post<ApiResponse<any>>('/lab/orders/from-recommendation', data);
         return response.data;
     }
 };

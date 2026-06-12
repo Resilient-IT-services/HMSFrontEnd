@@ -27,7 +27,7 @@ export const HistoryDirectoryView = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL'); 
+  const [statusFilter, setStatusFilter] = useState('COMPLETED'); 
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
 
   // Pagination State
@@ -353,12 +353,10 @@ export const HistoryDirectoryView = () => {
                         }}
                         className="bg-transparent outline-none text-xs font-bold uppercase cursor-pointer pr-1 appearance-none"
                     >
-                      <option value="ALL">ALL STATUSES</option>
-                      <option value="COMPLETED">COMPLETED</option>
-                      <option value="CANCELLED">CANCELLED</option>
-                      <option value="SCHEDULED">SCHEDULED</option>
-                      <option value="CONSULTATION_STARTED">IN PROGRESS</option>
-                      <option value="VITALS_RECORDED">VITALS RECORDED</option>
+                      <option value="ALL">All Records</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="PRESCRIPTION_FINALIZED">Finalized</option>
+                      <option value="CANCELLED">Cancelled</option>
                     </select>
                   </div>
                 </div>

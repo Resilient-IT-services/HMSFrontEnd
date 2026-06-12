@@ -1,5 +1,5 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 const files = [
   'src/modules/admin/pages/HospitalLabSettingsPage.tsx',
@@ -16,7 +16,7 @@ files.forEach(file => {
     let content = fs.readFileSync(filePath, 'utf8');
     
     // Pattern to match useEffect calling fetch...()
-    content = content.replace(
+    content = content.replaceAll(
       /useEffect\(\(\) => \{\s+(fetch[a-zA-Z0-9_]+)\(\);\s+\}, \[\1\]\);/g,
       `useEffect(() => {
         const init = async () => {
@@ -27,7 +27,7 @@ files.forEach(file => {
     );
     
     // Pattern for LabQueuePage
-    content = content.replace(
+    content = content.replaceAll(
       /useEffect\(\(\) => \{\s+fetchQueue\(\);\s+\/\/\s+eslint-disable-next-line.*?\s+\}, \[activeTab\]\);/g,
       `useEffect(() => {
         const init = async () => {
@@ -38,9 +38,9 @@ files.forEach(file => {
     );
 
     // Number conversions
-    content = content.replace(/isNaN\(/g, 'Number.isNaN(');
-    content = content.replace(/parseFloat\(/g, 'Number.parseFloat(');
-    content = content.replace(/parseInt\(/g, 'Number.parseInt(');
+    content = content.replaceAll('isNaN(', 'Number.isNaN(');
+    content = content.replaceAll('parseFloat(', 'Number.parseFloat(');
+    content = content.replaceAll('parseInt(', 'Number.parseInt(');
 
     fs.writeFileSync(filePath, content);
     console.log('Fixed', file);
