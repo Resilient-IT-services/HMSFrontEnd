@@ -1,4 +1,4 @@
-export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST' | 'PHARMACIST' | 'LAB_TECHNICIAN';
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'DOCTOR' | 'NURSE' | 'RECEPTIONIST' | 'PHARMACIST' | 'LAB_ADMIN';
 export type UserAccountStatus = 'ACTIVE' | 'INACTIVE';
 
 export interface ApiError {
@@ -106,7 +106,7 @@ export interface PharmacistInfo {
   qualification: string;
 }
 
-export interface LabTechInfo {
+export interface LabAdminInfo {
   specialty: string;
   licenseNo: string;
 }
@@ -210,7 +210,7 @@ export interface UserResponse {
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
-  labTechInfo?: LabTechInfo;
+  labAdminInfo?: LabAdminInfo;
   receptionistInfo?: ReceptionistInfo;
   memberships: HospitalMembershipDTO[];
   roles?: Role[]; // Computed on frontend for convenience
@@ -240,7 +240,7 @@ export interface UserRequestDTO {
   doctorInfo?: DoctorInfo;
   nurseInfo?: NurseInfo;
   pharmacistInfo?: PharmacistInfo;
-  labTechInfo?: LabTechInfo;
+  labAdminInfo?: LabAdminInfo;
   receptionistInfo?: ReceptionistInfo;
   memberships?: HospitalMembershipDTO[];
 }

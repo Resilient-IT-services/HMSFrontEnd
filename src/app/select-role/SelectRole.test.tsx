@@ -53,15 +53,15 @@ describe('SelectRolePage', () => {
     fireEvent.click(screen.getByText('Doctor'));
   });
 
-  it('renders and allows selection of LAB_TECHNICIAN role', () => {
+  it('renders and allows selection of LAB_ADMIN role', () => {
     renderWithRedux({
-      user: { ...mockUser, roles: ['LAB_TECHNICIAN'] }
+      user: { ...mockUser, roles: ['LAB_ADMIN'] }
     });
     
-    expect(screen.getByText('Lab Technician')).toBeInTheDocument();
+    expect(screen.getByText('Lab Admin')).toBeInTheDocument();
     expect(screen.getByText('Laboratory tests, sample analysis, and diagnostic reporting.')).toBeInTheDocument();
     
-    fireEvent.click(screen.getByText('Lab Technician'));
+    fireEvent.click(screen.getByText('Lab Admin'));
   });
 
   it('renders and allows selection of SUPER_ADMIN role', () => {

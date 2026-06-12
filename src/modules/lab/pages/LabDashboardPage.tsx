@@ -127,7 +127,7 @@ const LabDashboardPage = () => {
               <ContentPanel className="h-full">
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-black text-slate-800">Recent Pending Orders</h3>
-                  <Link href="/lab_technician/queue">
+                  <Link href="/lab_admin/queue">
                     <Button variant="ghost" size="sm" className="font-bold text-primary">
                       View Full Queue <span className="material-symbols-outlined ml-1">arrow_forward</span>
                     </Button>
@@ -147,15 +147,15 @@ const LabDashboardPage = () => {
               <Card className="p-6">
                 <h3 className="text-lg font-black text-slate-800 mb-4">Quick Actions</h3>
                 <div className="space-y-3">
-                  <Link href="/lab_technician/queue" className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors group">
+                  <Link href="/lab_admin/queue" className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-primary hover:bg-primary/5 transition-colors group">
                     <span className="material-symbols-outlined text-primary text-2xl group-hover:scale-110 transition-transform">biotech</span>
                     <span className="font-bold text-slate-700">Go to Work Queue</span>
                   </Link>
-                  <Link href="/lab_technician/reports" className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-colors group">
+                  <Link href="/lab_admin/reports" className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-colors group">
                     <span className="material-symbols-outlined text-emerald-500 text-2xl group-hover:scale-110 transition-transform">description</span>
                     <span className="font-bold text-slate-700">Lab Reports</span>
                   </Link>
-                  <Link href="/lab_technician/inventory" className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group">
+                  <Link href="/lab_admin/inventory" className="flex items-center gap-3 p-4 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-colors group">
                     <span className="material-symbols-outlined text-blue-500 text-2xl group-hover:scale-110 transition-transform">inventory</span>
                     <span className="font-bold text-slate-700">Inventory Status</span>
                   </Link>

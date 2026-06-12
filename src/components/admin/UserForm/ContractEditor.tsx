@@ -95,7 +95,7 @@ export const ContractEditor: React.FC<ContractEditorProps> = ({
           {renderFieldError('contractHospital')}
           
           <div className="flex flex-wrap gap-1.5 md:gap-2 mt-2 md:mt-4">
-            {['DOCTOR', 'NURSE', 'RECEPTIONIST', 'PHARMACIST', 'LAB_TECHNICIAN', 'ADMIN'].map(role => {
+            {['DOCTOR', 'NURSE', 'RECEPTIONIST', 'PHARMACIST', 'LAB_ADMIN', 'ADMIN'].map(role => {
               const isSelected = !!newContract.roleAssignments?.find(r => r.roleCode === role);
               return (
                 <button key={role} type="button" onClick={() => {

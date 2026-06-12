@@ -287,7 +287,7 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
           </div>
         )}
 
-        {assignedRoles.includes('LAB_TECHNICIAN') && formData.labTechInfo && (
+        {assignedRoles.includes('LAB_ADMIN') && formData.labAdminInfo && (
           <div className="bg-white border border-gray-200 rounded-xl p-4 md:p-6 space-y-4 shadow-sm">
             <div className="flex items-center gap-3 border-b border-gray-50 pb-3">
               <span className="material-symbols-outlined text-purple-600 text-xl">biotech</span>
@@ -300,8 +300,8 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
                       className="form-input" 
                       type="text" 
                       placeholder="e.g. Pathology, Radiology" 
-                      value={formData.labTechInfo.specialty} 
-                      onChange={(e) => setFormData({ ...formData, labTechInfo: { ...formData.labTechInfo!, specialty: e.target.value } })} 
+                      value={formData.labAdminInfo.specialty} 
+                      onChange={(e) => setFormData({ ...formData, labAdminInfo: { ...formData.labAdminInfo!, specialty: e.target.value } })} 
                     />
                 </div>
                 <div className="flex flex-col gap-1.5">
@@ -310,8 +310,8 @@ export const UserFormProfileTab: React.FC<UserFormProfileTabProps> = ({
                       className={`form-input ${validationErrors.licenseNo ? 'border-error' : ''}`} 
                       type="text" 
                       placeholder="e.g. LAB-7654321" 
-                      value={formData.labTechInfo.licenseNo} 
-                      onChange={(e) => setFormData({ ...formData, labTechInfo: { ...formData.labTechInfo!, licenseNo: e.target.value } })} 
+                      value={formData.labAdminInfo.licenseNo} 
+                      onChange={(e) => setFormData({ ...formData, labAdminInfo: { ...formData.labAdminInfo!, licenseNo: e.target.value } })} 
                     />
                     {renderFieldError('licenseNo')}
                 </div>

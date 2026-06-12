@@ -29,7 +29,7 @@ export const ROLE_OPTIONS: Option<Role>[] = [
   { value: 'NURSE', label: 'Nurse' },
   { value: 'RECEPTIONIST', label: 'Receptionist' },
   { value: 'PHARMACIST', label: 'Pharmacist' },
-  { value: 'LAB_TECHNICIAN', label: 'Lab Technician' }
+  { value: 'LAB_ADMIN', label: 'Lab Admin' }
 ];
 
 export const USER_ACCOUNT_STATUS_OPTIONS: Option<UserAccountStatus>[] = [

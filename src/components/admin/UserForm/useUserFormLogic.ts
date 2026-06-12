@@ -53,7 +53,7 @@ const cleanPharmacistInfo = (info: UserRequestDTO['pharmacistInfo']) => {
   return { ...info, pciRegNo: info.pciRegNo?.trim() };
 };
 
-const cleanLabTechInfo = (info: UserRequestDTO['labTechInfo']) => {
+const cleanLabAdminInfo = (info: UserRequestDTO['labAdminInfo']) => {
   if (!info) return;
   return { ...info, licenseNo: info.licenseNo?.trim(), specialty: info.specialty?.trim() };
 };
@@ -92,7 +92,7 @@ const mapInitialDataToForm = (initialData?: UserFullProfileDTO): UserRequestDTO 
   } : undefined,
   nurseInfo: initialData?.nurseInfo,
   pharmacistInfo: initialData?.pharmacistInfo,
-  labTechInfo: initialData?.labTechInfo,
+  labAdminInfo: initialData?.labAdminInfo,
   receptionistInfo: initialData?.receptionistInfo ? {
     ...initialData.receptionistInfo,
     languagesSpoken: { fluencies: initialData.receptionistInfo.languagesSpoken?.fluencies || [] }
@@ -112,7 +112,7 @@ const validateProfessionalDetails = (assignedRoles: string[], formData: UserRequ
   if (assignedRoles.includes('PHARMACIST') && formData.pharmacistInfo && !formData.pharmacistInfo.pciRegNo?.trim()) {
     errors.pciRegNo = 'PCI Registration number is required';
   }
-  if (assignedRoles.includes('LAB_TECHNICIAN') && formData.labTechInfo && !formData.labTechInfo.licenseNo?.trim()) {
+  if (assignedRoles.includes('LAB_ADMIN') && formData.labAdminInfo && !formData.labAdminInfo.licenseNo?.trim()) {
     errors.licenseNo = 'License number is required';
   }
 };
@@ -164,8 +164,8 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
         next.pharmacistInfo = { pciRegNo: '', qualification: '' };
         updated = true;
       }
-      if (assignedRoles.includes('LAB_TECHNICIAN') && !next.labTechInfo) {
-        next.labTechInfo = { licenseNo: '', specialty: '' };
+      if (assignedRoles.includes('LAB_ADMIN') && !next.labAdminInfo) {
+        next.labAdminInfo = { licenseNo: '', specialty: '' };
         updated = true;
       }
       if (assignedRoles.includes('RECEPTIONIST') && !next.receptionistInfo) {
@@ -211,7 +211,7 @@ export const useUserFormLogic = (initialData?: UserFullProfileDTO, isEdit?: bool
         doctorInfo: cleanDoctorInfo(formData.doctorInfo),
         nurseInfo: cleanNurseInfo(formData.nurseInfo),
         pharmacistInfo: cleanPharmacistInfo(formData.pharmacistInfo),
-        labTechInfo: cleanLabTechInfo(formData.labTechInfo),
+        labAdminInfo: cleanLabAdminInfo(formData.labAdminInfo),
         receptionistInfo: cleanReceptionistInfo(formData.receptionistInfo),
         status: formData.active ? 'ACTIVE' : 'INACTIVE'
       };

@@ -15,7 +15,7 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       name: 'Dashboard', 
       icon: effectiveRole === 'RECEPTIONIST' ? 'calendar_today' : 'dashboard', 
       href: `/${dashboardPath}/dashboard`, 
-      roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE', 'LAB_TECHNICIAN'] 
+      roles: ['RECEPTIONIST', 'DOCTOR', 'PHARMACIST', 'ADMIN', 'SUPER_ADMIN', 'NURSE', 'LAB_ADMIN'] 
     },
     { 
       name: effectiveRole === 'DOCTOR' ? 'Queue' : 'Patients', 
@@ -28,11 +28,11 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
     
     // Lab Specific Routes
-    { name: 'Lab Queue', icon: 'biotech', href: '/lab_technician/queue', roles: ['LAB_TECHNICIAN', 'PATHOLOGIST'] },
-    { name: 'Lab Reports', icon: 'description', href: '/lab_technician/reports', roles: ['LAB_TECHNICIAN', 'PATHOLOGIST'] },
-    { name: 'Lab Inventory', icon: 'inventory', href: '/lab_technician/inventory', roles: ['LAB_TECHNICIAN'] },
-    { name: 'Lab Packages', icon: 'package', href: '/lab_technician/packages', roles: ['LAB_TECHNICIAN', 'ADMIN'] },
-    { name: 'Lab Machines', icon: 'precision_manufacturing', href: '/lab_technician/machines', roles: ['LAB_TECHNICIAN', 'ADMIN'] },
+    { name: 'Lab Queue', icon: 'biotech', href: '/lab_admin/queue', roles: ['LAB_ADMIN', 'PATHOLOGIST'] },
+    { name: 'Lab Reports', icon: 'description', href: '/lab_admin/reports', roles: ['LAB_ADMIN', 'PATHOLOGIST'] },
+    { name: 'Lab Inventory', icon: 'inventory', href: '/lab_admin/inventory', roles: ['LAB_ADMIN'] },
+    { name: 'Lab Packages', icon: 'package', href: '/lab_admin/packages', roles: ['LAB_ADMIN', 'ADMIN'] },
+    { name: 'Lab Machines', icon: 'precision_manufacturing', href: '/lab_admin/machines', roles: ['LAB_ADMIN', 'ADMIN'] },
     { name: 'Lab Dashboard', icon: 'science', href: '/admin/lab-dashboard', roles: ['ADMIN'] },
     { name: 'Lab Settings', icon: 'settings_b_roll', href: '/admin/lab-settings', roles: ['ADMIN'] },
     { name: 'Master Tests', icon: 'biotech', href: '/admin/lab-tests', roles: ['SUPER_ADMIN'] },
