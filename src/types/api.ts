@@ -793,7 +793,7 @@ export interface PrescriptionDTO {
   items: PrescriptionItemDTO[];
   labItems?: PrescriptionLabItemDTO[];
   createdAt?: string;
-  phone: string;
+  phone?: string;
   status?: string;
 }
 

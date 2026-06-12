@@ -300,7 +300,7 @@ export const ActiveConsultationPage = () => {
               dosage: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
               duration: `${p.duration} ${p.durationUnit}`
             })) as any,
-            labItems: investigations.filter(i => i.testId).map(i => ({
+            labItems: investigations.filter(i => i.testName).map(i => ({
               testName: i.testName,
               notes: i.notes || ''
             })) as any
@@ -513,14 +513,14 @@ export const ActiveConsultationPage = () => {
             const multiplier = p.durationUnit === 'weeks' ? 7 : (p.durationUnit === 'months' ? 30 : 1);
             const total = daily * (p.duration || 0) * multiplier;
             return {
-              medicineId: p.medicineId,
+              medicineId: p.medicineId && p.medicineId !== '' ? p.medicineId : null,
               medicineName: p.medicine,
               dosage: `${fM}-${fA}-${fN}`,
               duration: `${p.duration} ${p.durationUnit} (Total: ${total} units)`
             };
           }),
-          labItems: investigations.filter(i => i.testId).map(i => ({
-            testId: i.testId,
+          labItems: investigations.filter(i => i.testName).map(i => ({
+            testId: i.testId && i.testId !== '' ? i.testId : null,
             testName: i.testName,
             notes: i.notes || ''
           }))
@@ -542,6 +542,7 @@ export const ActiveConsultationPage = () => {
 
   const handleComplete = async () => {
     const medicineItems = prescriptions.filter(p => p.medicine);
+    const investigationItems = investigations.filter(i => i.testName);
     const hasIncomplete = medicineItems.some(p => 
       (!p.freqM && !p.freqA && !p.freqN) || 
       (!p.duration || p.duration <= 0)
@@ -553,7 +554,7 @@ export const ActiveConsultationPage = () => {
       return;
     }
 
-    if (medicineItems.length === 0 && investigations.length === 0) {
+    if (medicineItems.length === 0 && investigationItems.length === 0) {
       setShowEmptyPrescriptionModal(true);
       return;
     }
@@ -583,14 +584,14 @@ export const ActiveConsultationPage = () => {
             const multiplier = p.durationUnit === 'weeks' ? 7 : (p.durationUnit === 'months' ? 30 : 1);
             const total = daily * (p.duration || 0) * multiplier;
             return {
-              medicineId: p.medicineId,
+              medicineId: p.medicineId && p.medicineId !== '' ? p.medicineId : null,
               medicineName: p.medicine,
               dosage: `${fM}-${fA}-${fN}`,
               duration: `${p.duration} ${p.durationUnit} (Total: ${total} units)`
             };
           }),
-          labItems: investigations.filter(i => i.testId).map(i => ({
-            testId: i.testId,
+          labItems: investigations.filter(i => i.testName).map(i => ({
+            testId: i.testId && i.testId !== '' ? i.testId : null,
             testName: i.testName,
             notes: i.notes || ''
           }))
@@ -710,7 +711,7 @@ export const ActiveConsultationPage = () => {
                         <span className="material-symbols-outlined text-lg">biotech</span>
                         Investigations
                         <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${activeTab === 'labs' ? 'bg-blue-100' : 'bg-slate-200'}`}>
-                          {investigations.filter(i => i.testId).length}
+                          {investigations.filter(i => i.testName).length}
                         </span>
                       </button>
                     </div>
@@ -851,7 +852,7 @@ export const ActiveConsultationPage = () => {
             frequency: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
             instructions: `${p.duration} ${p.durationUnit} (Total: ${calculateTotal(p)} units)`
           }))}
-          investigations={investigations.filter(i => i.testId).map(i => ({
+          investigations={investigations.filter(i => i.testName).map(i => ({
             id: i.id,
             testName: i.testName,
             testCode: '',
