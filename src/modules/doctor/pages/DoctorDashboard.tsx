@@ -127,16 +127,25 @@ export const DoctorDashboard = () => {
 
     // Calculation condition logic formula: Use API revenue summary if available, fallback to manual calculation
     const feeRate = typeof consultationFee === 'number' ? consultationFee : 0;
-    const earnings = revenueSummary?.totalRevenue ?? (totalLoadToday * feeRate);
+    const earnings = revenueSummary?.totalRevenue ?? (completed * feeRate);
+
+    // Percentage Calculation for Multi-Segment Ring
+    const totalForRing = totalLoadToday || 1;
+    const waitingPercent = (waiting / totalForRing) * 100;
+    const activePercent = (active / totalForRing) * 100;
+    const completedPercent = (completed / totalForRing) * 100;
 
     return {
       total: totalLoadToday,
       waiting,
       active,
       completed,
-      earnings
+      earnings,
+      waitingPercent,
+      activePercent,
+      completedPercent
     };
-  }, [appointments, consultationFee]);
+    }, [appointments, consultationFee, revenueSummary]);
 
   const queue = useMemo(() => {
     if (!hospitalTimezone) return [];
@@ -199,8 +208,9 @@ export const DoctorDashboard = () => {
   const columns: Column<AppointmentResponse>[] = [
     {
       header: 'Token',
+      className: 'break-words whitespace-normal',
       render: (p) => (
-          <span className={`px-2.5 py-1 rounded-lg text-xs font-black font-mono ${
+          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black font-mono ${
               p.status === 'CONSULTATION_STARTED' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'
           }`}>
           {formatToken(p)}
@@ -209,29 +219,33 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Patient',
+      className: 'break-words whitespace-normal max-w-[120px]',
       render: (p) => (
           <div>
-            <p className="font-semibold text-slate-800">{p.patientName}</p>
-            <p className="text-[10px] text-slate-400 font-normal">PID: {p.patientCode || p.patientId || 'N/A'}</p>
+            <p className="font-semibold text-slate-800 text-xs">{p.patientName}</p>
+            <p className="text-[9px] text-slate-400 font-normal">PID: {p.patientCode || p.patientId || 'N/A'}</p>
           </div>
       )
     },
     {
       header: 'Doctor',
+      className: 'break-words whitespace-normal',
       render: (p) => (
           <div>
-            <p className="text-slate-700 font-medium">Dr. {p.doctorName || 'N/A'}</p>
+            <p className="text-slate-700 font-medium text-xs">Dr. {p.doctorName || 'N/A'}</p>
           </div>
       )
     },
     {
       header: 'Notes / Complaints',
-      render: (p) => <span className="font-medium text-slate-600 text-xs truncate max-w-[150px] inline-block">{p.notes || 'Routine Checkup'}</span>,
+      className: 'break-words whitespace-normal max-w-[150px]',
+      render: (p) => <span className="font-medium text-slate-600 text-xs inline-block">{p.notes || 'Routine Checkup'}</span>,
     },
     {
       header: 'Status',
+      className: 'break-words whitespace-normal max-w-[100px]',
       render: (p) => (
-          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wide ${
+          <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide ${
               p.status === 'CONSULTATION_STARTED' ? 'bg-blue-50 text-blue-600' :
                   p.status === 'VITALS_RECORDED' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'
           }`}>
@@ -241,17 +255,19 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Time',
-      render: (p) => <span className="text-slate-500 font-medium text-xs">{dayjs(p.appointmentTime).format('hh:mm A')}</span>
+      className: 'break-words whitespace-normal',
+      render: (p) => <span className="text-slate-500 font-medium text-[10px]">{dayjs(p.appointmentTime).format('hh:mm A')}</span>
     },
     {
       header: 'Action',
+      className: 'text-center break-words whitespace-normal',
       render: (p) => (
           <div className="flex items-center justify-center min-h-[32px]">
             {/* Conditional Check applied to eliminate extra eye icons when resume button is present */}
             {p.status === 'CONSULTATION_STARTED' ? (
                 <button
                     onClick={() => handleStartConsultation(p.id)}
-                    className="px-3 py-1 bg-orange-50 text-orange-600 border border-orange-200 text-[10px] font-bold uppercase tracking-wider rounded-full hover:bg-orange-100 active:scale-95 transition-all shadow-sm shrink-0"
+                    className="px-2 py-1 bg-orange-50 text-orange-600 border border-orange-200 text-[9px] font-bold uppercase tracking-wider rounded-full hover:bg-orange-100 active:scale-95 transition-all shadow-sm shrink-0"
                 >
                   Resume
                 </button>
@@ -265,8 +281,7 @@ export const DoctorDashboard = () => {
                 </button>
             )}
           </div>
-      ),
-      className: 'text-center'
+      )
     }
   ];
 
@@ -289,6 +304,11 @@ export const DoctorDashboard = () => {
             );
             transform: skewX(-25deg);
             animation: dynamicGlassSlide 3.5s infinite ease-in-out;
+          }
+          @media (max-width: 1024px) {
+            table {
+              font-size: 11px;
+            }
           }
         `}</style>
 
@@ -382,7 +402,7 @@ export const DoctorDashboard = () => {
 
               {/* LEFT PANEL: PATIENT QUEUE */}
               <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4 min-h-[600px] flex flex-col">
+                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm space-y-4 min-h-[600px] flex flex-col max-w-full w-full overflow-hidden">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <h3 className="text-sm font-bold text-slate-800">Live Active Patient Queue</h3>
                     <div className="flex flex-wrap items-center gap-2">
@@ -399,7 +419,7 @@ export const DoctorDashboard = () => {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto min-w-full flex-1">
+                  <div className="w-full max-w-full overflow-hidden flex-1">
                     <Table
                         columns={columns}
                         data={filteredQueue}
@@ -407,6 +427,7 @@ export const DoctorDashboard = () => {
                         emptyMessage="No pending patients found in queue."
                         onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
                         activeFilters={columnFilters}
+                        rowClassName="border-b border-slate-50 last:border-none"
                     />
                   </div>
                 </div>
@@ -484,9 +505,32 @@ export const DoctorDashboard = () => {
                     <div className="relative w-24 h-24 flex items-center justify-center">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                         <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        
+                        {/* Multi-segment Progress Paths */}
                         <path
-                            className="text-orange-600"
-                            strokeDasharray={`${Math.round((stats.completed / (stats.total || 1)) * 100)}, 100`}
+                            className="text-orange-500"
+                            strokeDasharray={`${stats.waitingPercent}, 100`}
+                            strokeDashoffset="0"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                        <path
+                            className="text-blue-500"
+                            strokeDasharray={`${stats.activePercent}, 100`}
+                            strokeDashoffset={`-${stats.waitingPercent}`}
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            stroke="currentColor"
+                            fill="none"
+                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        />
+                        <path
+                            className="text-emerald-500"
+                            strokeDasharray={`${stats.completedPercent}, 100`}
+                            strokeDashoffset={`-${stats.waitingPercent + stats.activePercent}`}
                             strokeWidth="3"
                             strokeLinecap="round"
                             stroke="currentColor"

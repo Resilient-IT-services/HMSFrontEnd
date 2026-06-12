@@ -241,8 +241,8 @@ export const Table = <T,>({
       </div>
 
       {/* Desktop Table View (shown at lg breakpoint and above) */}
-      <div className="hidden lg:block w-full">
-        <table className="w-full text-left border-collapse">
+      <div className="hidden lg:block w-full overflow-hidden">
+        <table className="w-full text-left border-collapse table-fixed">
           <thead className="z-20">
             {/* Primary Header Row (Titles & Sorting) */}
             <tr className={cn(
@@ -257,7 +257,7 @@ export const Table = <T,>({
                   <th
                     key={index}
                     className={cn(
-                      "px-4 py-2.5 font-black text-slate-700 text-xs uppercase tracking-widest relative group/header min-w-[120px]",
+                      "px-2 py-2.5 font-black text-slate-700 text-[10px] uppercase tracking-widest relative group/header whitespace-normal break-words",
                       column.sortable && "cursor-pointer hover:bg-slate-50 transition-colors",
                       column.headerClassName
                     )}
@@ -267,7 +267,7 @@ export const Table = <T,>({
                       {column.header}
                       {column.sortable && (
                         <span className={cn(
-                          "material-symbols-outlined text-[16px] transition-all",
+                          "material-symbols-outlined text-[14px] transition-all",
                           isSorted ? "text-orange-600" : "text-slate-300 opacity-0 group-hover/header:opacity-100"
                         )}>
                           {isSorted 
@@ -288,7 +288,7 @@ export const Table = <T,>({
                 hideHeaderOnMobile ? "hidden lg:table-row" : "table-row"
               )}>
                 {columns.map((column, index) => (
-                  <th key={index} className="px-4 py-2 bg-white/50">
+                  <th key={index} className="px-2 py-2 bg-white/50">
                     {column.filterable && column.filterType !== 'select' && !column.renderFilter && column.key && (
                       <input
                         type="text"
@@ -340,7 +340,7 @@ export const Table = <T,>({
                   {columns.map((column, colIndex) => (
                     <td 
                       key={colIndex} 
-                      className={cn("px-4 py-3 text-sm text-slate-600 font-medium", column.className)}
+                      className={cn("px-2 py-3 text-xs text-slate-600 font-medium whitespace-normal break-words", column.className)}
                     >
                       {renderCellContent(item.row, column)}
                     </td>
