@@ -253,7 +253,7 @@ export const StockManagement = () => {
             </Button>
           </PageHeading>
 
-          <MetricsGrid items={metricItems} className="mb-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4" />
+          <MetricsGrid items={metricItems} className="mb-4" />
 
           <ContentPanel
             className="mb-4"

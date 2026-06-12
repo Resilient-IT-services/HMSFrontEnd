@@ -161,27 +161,27 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
     <div 
       {...commonProps}
       className={cn(
-        "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col items-center text-center hover:shadow-md transition-shadow",
+        "bg-white rounded-2xl border border-slate-100 shadow-sm w-full h-[180px] p-6 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow",
         commonProps.className
       )}
     >
-      <div className={`p-3 ${v.bg} ${v.text} rounded-xl mb-3`}>
+      <div className={`p-3 ${v.bg} ${v.text} rounded-xl mb-3 shrink-0`}>
         <span className="material-symbols-outlined text-2xl">{icon}</span>
       </div>
-      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className="text-2xl font-black text-slate-900 leading-none font-headline-md">
+      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 truncate w-full">{label}</p>
+      <p className="text-2xl font-black text-slate-900 leading-none font-headline-md truncate w-full">
         <span data-testid={valueTestId} className="font-headline-md">
           {formatValue(value)}
         </span>
       </p>
       {trend && (
-        <p className="text-[10px] font-bold text-emerald-600 mt-2 flex items-center gap-1">
+        <p className="text-[10px] font-bold text-emerald-600 mt-2 flex items-center gap-1 shrink-0">
           <span className="material-symbols-outlined text-xs">trending_up</span>
           {trend}
         </p>
       )}
       {subValue && (
-        <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tighter">{subValue}</p>
+        <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-tighter shrink-0">{subValue}</p>
       )}
     </div>
   );

@@ -8,29 +8,26 @@ interface MetricsGridProps {
   usePillsOnMobile?: boolean;
 }
 
-export const MetricsGrid: React.FC<MetricsGridProps> = ({ 
-  items, 
-  className,
-  usePillsOnMobile = true 
-}) => {
+export const MetricsGrid: React.FC<MetricsGridProps> = ({
+                                                          items,
+                                                          className,
+                                                          usePillsOnMobile = true
+                                                        }) => {
   return (
-    <div className={cn(
-      'flex flex-wrap items-center gap-2 sm:grid sm:grid-cols-2 lg:grid-cols-4 sm:gap-6',
-      className
-    )}>
-      {items.map((item) => (
-        <div key={`${item.label}-${item.icon}-${item.variant ?? 'slate'}`} className={cn(
-          "shrink-0",
-          !usePillsOnMobile && "w-full sm:w-auto"
-        )}>
-          <div className={cn(usePillsOnMobile ? 'sm:hidden' : 'hidden')}>
-            <MetricCard {...item} layout="pill" />
-          </div>
-          <div className={cn(usePillsOnMobile ? 'hidden sm:block' : 'block')}>
-            <MetricCard {...item} />
-          </div>
-        </div>
-      ))}
-    </div>
+      <div
+          className={cn(
+              'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6',
+              className
+          )}
+      >
+        {items.map((item) => (
+            <div
+                key={`${item.label}-${item.icon}-${item.variant ?? 'slate'}`}
+                className="w-full h-full"
+            >
+              <MetricCard {...item} />
+            </div>
+        ))}
+      </div>
   );
 };
