@@ -16,6 +16,8 @@ export interface LabTestDTO {
     aliasName?: string;
     departmentId: string;
     departmentName?: string;
+    category: 'LAB' | 'RADIOLOGY' | 'CARDIOLOGY';
+    resultEntryType: 'PARAMETER' | 'NARRATIVE';
     resultType: string;
     tatValue?: number;
     tatUnit?: string;
@@ -30,6 +32,9 @@ export interface LabTestParameterDTO {
     parameterName: string;
     unit?: string;
     displayOrder?: number;
+    resultValue?: string;
+    abnormal?: boolean;
+    critical?: boolean;
 }
 
 export interface LabReferenceRangeDTO {
@@ -73,6 +78,8 @@ export interface LabQueueItemDTO {
     patientName: string;
     doctorName: string;
     testName: string;
+    category: string;
+    resultEntryType: string;
     status: string;
     orderedAt: string;
 }
@@ -188,6 +195,10 @@ export const labApi = {
         const response = await apiClient.post<ApiResponse<string>>(`/lab/orders/tests/${orderTestId}/collect`);
         return response.data;
     },
+    markProcessing: async (orderTestId: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/tests/${orderTestId}/process`);
+        return response.data;
+    },
     // Departments
     getDepartments: async () => {
         const response = await apiClient.get<ApiResponse<LabDepartmentDTO[]>>('/lab/departments');
@@ -287,7 +298,7 @@ export const labApi = {
         const response = await apiClient.get<ApiResponse<any[]>>('/lab/orders/queue');
         return response.data;
     },
-    saveResults: async (data: { orderTestId: string, results: any[] }) => {
+    saveResults: async (data: { orderTestId: string, findings?: string, results?: any[] }) => {
         const response = await apiClient.post<ApiResponse<void>>('/lab/orders/results', data);
         return response.data;
     },

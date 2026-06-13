@@ -20,7 +20,14 @@ interface DigitalPrescriptionProps {
   complaints: string;
   diagnosis: string;
   prescriptions: PrescriptionRow[];
-  investigations?: { id: string, testName: string, testCode: string, notes?: string }[];
+  investigations?: { 
+    id: string, 
+    testName: string, 
+    testCode: string, 
+    notes?: string,
+    status?: string,
+    labOrderTestId?: string
+  }[];
   vitals: {
     heartRate: string;
     temp: string;
@@ -293,9 +300,35 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                        {pageData.labs.map((lab, idx) => (
-                         <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex flex-col gap-1">
-                            <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{lab.testName}</span>
+                         <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex flex-col gap-1 relative group/lab">
+                            <div className="flex justify-between items-start">
+                                <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{lab.testName}</span>
+                                {lab.status && (
+                                    <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${
+                                        lab.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' : 
+                                        lab.status === 'ORDERED' ? 'bg-blue-100 text-blue-700' :
+                                        lab.status === 'DECLINED' ? 'bg-red-100 text-red-700' :
+                                        'bg-slate-100 text-slate-500'
+                                    }`}>
+                                        {lab.status}
+                                    </span>
+                                )}
+                            </div>
                             {lab.notes && <span className="text-[9px] font-medium text-slate-400 italic leading-relaxed border-t border-slate-200/60 pt-1 mt-1">Note: {lab.notes}</span>}
+                            
+                            {/* Audit / View Report (Only in History Mode, No Print) */}
+                            {isHistoryView && lab.status === 'COMPLETED' && (
+                                <button 
+                                    className="mt-2 text-[9px] font-black text-primary uppercase tracking-widest hover:underline no-print flex items-center gap-1 self-start"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        alert('Feature coming soon: View Detailed Report');
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-[12px]">visibility</span>
+                                    View Report
+                                </button>
+                            )}
                          </div>
                        ))}
                     </div>

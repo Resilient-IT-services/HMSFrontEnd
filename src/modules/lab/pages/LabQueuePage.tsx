@@ -13,16 +13,34 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatDateTime } from '@/utils/formatters';
 import LabResultEntryModal from '../components/LabResultEntryModal';
 
+const categoryConfig: Record<string, { label: string, variant: any }> = {
+  LAB: { label: 'Lab', variant: 'orange' },
+  RADIOLOGY: { label: 'Radiology', variant: 'blue' },
+  CARDIOLOGY: { label: 'Cardiology', variant: 'emerald' }
+};
+
+const statusMapping: Record<string, { label: string, variant: any }> = {
+  PENDING: { label: 'Pending', variant: 'slate' },
+  SAMPLE_COLLECTED: { label: 'Sample Collected', variant: 'blue' },
+  PROCESSING: { label: 'In Processing', variant: 'indigo' },
+  RESULT_ENTERED: { label: 'Result Entered', variant: 'orange' },
+  VERIFIED: { label: 'Verified', variant: 'emerald' },
+  RECOMMENDED: { label: 'Recommended', variant: 'slate' }
+};
+
 const LabQueuePage = () => {
-  const [activeTab, setActiveTab] = useState<'RECOMMENDED' | 'PENDING' | 'SAMPLE_COLLECTED' | 'PROCESSING' | 'COMPLETED'>('RECOMMENDED');
+  const [activeTab, setActiveTab] = useState<'RECOMMENDED' | 'PENDING' | 'SAMPLE_COLLECTED' | 'PROCESSING' | 'RESULT_ENTERED' | 'VERIFIED'>('RECOMMENDED');
   const [queue, setQueue] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Modals
   const [selectedRecommendation, setSelectedRecommendation] = useState<any | null>(null);
-  const [selectedOrderTestId, setSelectedOrderTestId] = useState<string | null>(null);
+  const [selectedOrderTest, setSelectedOrderTest] = useState<any | null>(null);
   const [isResultModalOpen, setIsResultModalOpen] = useState(false);
   const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+  
+  const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
+  const [verifyData, setVerifyData] = useState<{ id: string, status: 'VERIFIED' | 'REJECTED' } | null>(null);
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -33,7 +51,7 @@ const LabQueuePage = () => {
           setQueue(res.data.content);
         }
       } else {
-        const res = await labApi.getPagedQueue(activeTab, 0, 100);
+        const res = await labApi.getPagedQueue(activeTab === 'VERIFIED' ? 'VERIFIED' : activeTab, 0, 100);
         if (res.success && res.data) {
           setQueue(res.data.content);
         }
@@ -69,8 +87,24 @@ const LabQueuePage = () => {
     }
   };
 
-  const handleEnterResult = (orderTestId: string) => {
-    setSelectedOrderTestId(orderTestId);
+  const handleMarkProcessing = async (orderTestId: string) => {
+    try {
+      setLoading(true);
+      const res = await labApi.markProcessing(orderTestId);
+      if (res.success) {
+        triggerGlobalToast('Test marked as Processing', 'success');
+        fetchQueue();
+      }
+    } catch (error: any) {
+      console.error('Failed to mark processing:', error);
+      triggerGlobalToast(error.response?.data?.message || 'Failed to mark processing', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnterResult = (orderTest: any) => {
+    setSelectedOrderTest(orderTest);
     setIsResultModalOpen(true);
   };
 
@@ -79,19 +113,26 @@ const LabQueuePage = () => {
     setIsBillingModalOpen(true);
   };
 
-  const handleVerify = async (orderTestId: string, status: 'VERIFIED' | 'REJECTED') => {
-    const remarks = prompt(`Enter remarks for ${status.toLowerCase()}:`);
-    if (remarks === null) return;
+  const handleVerify = (orderTestId: string, status: 'VERIFIED' | 'REJECTED') => {
+    setVerifyData({ id: orderTestId, status });
+    setIsVerifyModalOpen(true);
+  };
+
+  const handleConfirmVerify = async (remarks: string) => {
+    if (!verifyData) return;
 
     try {
         setLoading(true);
-        const res = await labApi.verifyResult(orderTestId, remarks, status);
+        const res = await labApi.verifyResult(verifyData.id, remarks, verifyData.status);
         if (res.success) {
-            triggerGlobalToast(`Result ${status.toLowerCase()} successfully`, 'success');
+            triggerGlobalToast(`Result ${verifyData.status.toLowerCase()} successfully`, 'success');
+            setIsVerifyModalOpen(false);
+            setVerifyData(null);
             fetchQueue();
         }
     } catch (error) {
         console.error('Failed to verify:', error);
+        triggerGlobalToast('Failed to verify result', 'error');
     } finally {
         setLoading(false);
     }
@@ -121,11 +162,18 @@ const LabQueuePage = () => {
       )
     },
     {
-      header: activeTab === 'RECOMMENDED' ? 'Items' : 'Test Name',
+      header: activeTab === 'RECOMMENDED' ? 'Items' : 'Test & Category',
       render: (item) => (
-          <span className="text-sm font-bold text-slate-700">
-            {activeTab === 'RECOMMENDED' ? `${item.itemCount} Tests Recommended` : item.testName}
-          </span>
+          <div>
+            <p className="text-sm font-bold text-slate-700">
+              {activeTab === 'RECOMMENDED' ? `${item.itemCount} Tests Recommended` : item.testName}
+            </p>
+            {!activeTab.includes('RECOMMENDED') && item.category && (
+              <Badge variant={categoryConfig[item.category]?.variant || 'slate'} size="sm" className="mt-1">
+                {categoryConfig[item.category]?.label || item.category}
+              </Badge>
+            )}
+          </div>
       )
     },
     {
@@ -135,19 +183,15 @@ const LabQueuePage = () => {
     {
       header: 'Status',
       render: (item) => {
-        let variant: 'orange' | 'blue' | 'emerald' | 'slate' = 'slate';
         const status = activeTab === 'RECOMMENDED' ? 'RECOMMENDED' : item.status;
-        
-        if (status === 'PENDING') variant = 'orange';
-        if (status === 'SAMPLE_COLLECTED') variant = 'blue';
-        if (status === 'COMPLETED' || status === 'VERIFIED') variant = 'emerald';
+        const config = statusMapping[status] || { label: status, variant: 'slate' };
         
         return (
           <Badge 
-            variant={variant} 
+            variant={config.variant} 
             size="sm"
           >
-            {status.replace('_', ' ')}
+            {config.label}
           </Badge>
         );
       }
@@ -164,30 +208,55 @@ const LabQueuePage = () => {
                 </Button>
             );
         }
+        
         if (item.status === 'PENDING') {
           return (
-            <Button size="sm" onClick={() => handleCollectSample(item.orderTestId)}>
-              Collect Sample
+            <div className="flex justify-end gap-2">
+              {item.category === 'LAB' ? (
+                <Button size="sm" onClick={() => handleCollectSample(item.orderTestId)}>
+                  Collect Sample
+                </Button>
+              ) : (
+                <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
+                  Enter Findings
+                </Button>
+              )}
+            </div>
+          );
+        }
+        
+        if (item.status === 'SAMPLE_COLLECTED') {
+          return (
+            <Button size="sm" onClick={() => handleMarkProcessing(item.orderTestId)}>
+              Mark Processing
             </Button>
           );
         }
-        if (item.status === 'SAMPLE_COLLECTED' || item.status === 'PROCESSING') {
+
+        if (item.status === 'PROCESSING') {
           return (
-            <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item.orderTestId)}>
+            <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
               Enter Result
             </Button>
           );
         }
-        if (item.status === 'COMPLETED') {
+        
+        if (item.status === 'RESULT_ENTERED') {
+          return (
+            <div className="flex justify-end gap-2">
+                <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item.orderTestId, 'VERIFIED')}>
+                    Verify
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
+                    Edit Result
+                </Button>
+            </div>
+          );
+        }
+        
+        if (item.status === 'VERIFIED') {
             return (
-                <div className="flex justify-end gap-2">
-                    <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item.orderTestId, 'VERIFIED')}>
-                        Verify
-                    </Button>
-                    <Button size="sm" variant="danger" onClick={() => handleVerify(item.orderTestId, 'REJECTED')}>
-                        Reject
-                    </Button>
-                </div>
+              <Badge variant="emerald">Verified</Badge>
             );
         }
         return null;
@@ -204,10 +273,10 @@ const LabQueuePage = () => {
             description="Manage sample collections, process results, and verify reports."
           />
 
-          <div className="flex border-b border-slate-200 mb-6">
+          <div className="flex border-b border-slate-200 mb-6 overflow-x-auto">
             <button
                 onClick={() => setActiveTab('RECOMMENDED')}
-                className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
+                className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${
                     activeTab === 'RECOMMENDED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
                 }`}
             >
@@ -215,27 +284,43 @@ const LabQueuePage = () => {
             </button>
             <button
               onClick={() => setActiveTab('PENDING')}
-              className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
+              className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${
                 activeTab === 'PENDING' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
-              Pending Collection
+              Pending
             </button>
             <button
               onClick={() => setActiveTab('SAMPLE_COLLECTED')}
-              className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
+              className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${
                 activeTab === 'SAMPLE_COLLECTED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
-              Ready for Processing
+              Collected
             </button>
             <button
-              onClick={() => setActiveTab('COMPLETED')}
-              className={`px-6 py-3 text-sm font-bold border-b-2 transition-colors ${
-                activeTab === 'COMPLETED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+              onClick={() => setActiveTab('PROCESSING')}
+              className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${
+                activeTab === 'PROCESSING' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Processing
+            </button>
+            <button
+              onClick={() => setActiveTab('RESULT_ENTERED')}
+              className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${
+                activeTab === 'RESULT_ENTERED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
               Pending Verification
+            </button>
+            <button
+              onClick={() => setActiveTab('VERIFIED')}
+              className={`px-6 py-3 text-sm font-bold border-b-2 whitespace-nowrap transition-colors ${
+                activeTab === 'VERIFIED' ? 'border-primary text-primary' : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              Verified
             </button>
           </div>
 
@@ -249,15 +334,17 @@ const LabQueuePage = () => {
           </ContentPanel>
         </div>
 
-        {isResultModalOpen && selectedOrderTestId && (
+        {isResultModalOpen && selectedOrderTest && (
             <LabResultEntryModal 
               isOpen={true}
               onClose={() => {
                 setIsResultModalOpen(false);
-                setSelectedOrderTestId(null);
+                setSelectedOrderTest(null);
                 fetchQueue();
               }}
-              orderTestId={selectedOrderTestId}
+              orderTestId={selectedOrderTest.orderTestId}
+              testName={selectedOrderTest.testName}
+              resultEntryType={selectedOrderTest.resultEntryType}
             />
         )}
 
@@ -272,9 +359,53 @@ const LabQueuePage = () => {
                 recommendationId={selectedRecommendation.id}
             />
         )}
+
+        {isVerifyModalOpen && verifyData && (
+            <LabVerificationModal
+                isOpen={true}
+                onClose={() => {
+                    setIsVerifyModalOpen(false);
+                    setVerifyData(null);
+                }}
+                status={verifyData.status}
+                onConfirm={handleConfirmVerify}
+            />
+        )}
       </PageSurface>
     </MainLayout>
   );
+};
+
+// --- Lab Verification Modal ---
+const LabVerificationModal = ({ isOpen, onClose, status, onConfirm }: { isOpen: boolean, onClose: () => void, status: 'VERIFIED' | 'REJECTED', onConfirm: (remarks: string) => void }) => {
+    const [remarks, setRemarks] = useState('');
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title={`${status === 'VERIFIED' ? 'Verify' : 'Reject'} Lab Result`} size="md">
+            <div className="p-4 space-y-4">
+                <div>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                        Verification Remarks
+                    </label>
+                    <textarea
+                        className="w-full h-32 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium outline-none focus:bg-white focus:border-primary transition-all resize-none"
+                        placeholder={status === 'VERIFIED' ? "Enter 'OK' or specific notes for the doctor..." : "Reason for rejection..."}
+                        value={remarks}
+                        onChange={(e) => setRemarks(e.target.value)}
+                    />
+                </div>
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button 
+                        variant={status === 'VERIFIED' ? 'primary' : 'danger'} 
+                        onClick={() => onConfirm(remarks || (status === 'VERIFIED' ? 'OK' : 'Rejected'))}
+                    >
+                        Confirm {status === 'VERIFIED' ? 'Verification' : 'Rejection'}
+                    </Button>
+                </div>
+            </div>
+        </Modal>
+    );
 };
 
 // --- Lab Billing Modal ---

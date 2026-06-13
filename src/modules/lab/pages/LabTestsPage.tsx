@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { labApi, LabDepartmentDTO, LabTestDTO } from '../api/labApi';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
 
 export function LabTestsPage() {
   const [tests, setTests] = useState<LabTestDTO[]>([]);
@@ -18,7 +19,9 @@ export function LabTestsPage() {
     testCode: '',
     testName: '',
     departmentId: '',
-    resultType: 'NUMERIC',
+    category: 'LAB',
+    resultEntryType: 'PARAMETER',
+    resultType: 'PARAMETER',
     active: true
   });
 
@@ -47,7 +50,15 @@ export function LabTestsPage() {
 
   const handleOpenAdd = () => {
     setEditingId(null);
-    setFormData({ testCode: '', testName: '', departmentId: '', resultType: 'NUMERIC', active: true });
+    setFormData({ 
+        testCode: '', 
+        testName: '', 
+        departmentId: '', 
+        category: 'LAB',
+        resultEntryType: 'PARAMETER',
+        resultType: 'PARAMETER', 
+        active: true 
+    });
     setShowModal(true);
   };
 
@@ -111,15 +122,16 @@ export function LabTestsPage() {
               <tr className="bg-slate-50 border-b border-slate-200">
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Code</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Test Name</th>
+                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Category</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Department</th>
                 <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-400">Loading...</td></tr>
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">Loading...</td></tr>
               ) : tests.length === 0 ? (
-                <tr><td colSpan={4} className="px-6 py-12 text-center text-slate-400">No tests defined yet.</td></tr>
+                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">No tests defined yet.</td></tr>
               ) : (
                 tests.map((test) => (
                   <tr key={test.id} className="hover:bg-slate-50/50 transition-colors group">
@@ -127,6 +139,11 @@ export function LabTestsPage() {
                     <td className="px-6 py-4">
                         <p className="font-bold text-slate-800 text-sm">{test.testName}</p>
                         <p className="text-[10px] text-slate-400 font-medium">{test.shortName || 'No short name'}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                        <Badge variant={test.category === 'LAB' ? 'orange' : test.category === 'RADIOLOGY' ? 'blue' : 'emerald'} size="sm">
+                            {test.category}
+                        </Badge>
                     </td>
                     <td className="px-6 py-4 font-bold text-slate-600 text-xs uppercase">{test.departmentName}</td>
                     <td className="px-6 py-4 text-right">
@@ -173,20 +190,23 @@ export function LabTestsPage() {
               </select>
             </div>
             <div className="col-span-1">
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Result Type</label>
-              <select value={formData.resultType} onChange={(e) => setFormData({ ...formData, resultType: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all">
-                <option value="NUMERIC">NUMERIC</option>
-                <option value="TEXT">TEXT</option>
-                <option value="MULTI_PARAMETER">MULTI_PARAMETER</option>
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Test Category</label>
+              <select value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value as any })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" required>
+                <option value="LAB">PATHOLOGY / LAB</option>
+                <option value="RADIOLOGY">RADIOLOGY (X-RAY/MRI)</option>
+                <option value="CARDIOLOGY">CARDIOLOGY (ECG/ECHO)</option>
+              </select>
+            </div>
+            <div className="col-span-1">
+              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">Result Format</label>
+              <select value={formData.resultEntryType} onChange={(e) => setFormData({ ...formData, resultEntryType: e.target.value as any, resultType: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" required>
+                <option value="PARAMETER">PARAMETER BASED (GRID)</option>
+                <option value="NARRATIVE">NARRATIVE (TEXT/REPORT)</option>
               </select>
             </div>
             <div className="col-span-1">
               <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">HSN Code (Optional)</label>
               <input value={formData.hsnCode || ''} onChange={(e) => setFormData({ ...formData, hsnCode: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="e.g. 3822" />
-            </div>
-            <div className="col-span-1">
-              <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">SAC Code (Optional)</label>
-              <input value={formData.sacCode || ''} onChange={(e) => setFormData({ ...formData, sacCode: e.target.value })} className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-bold outline-none focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 transition-all" placeholder="e.g. 9993" />
             </div>
           </div>
           <div className="flex justify-end gap-3 pt-6 border-t border-slate-100">
