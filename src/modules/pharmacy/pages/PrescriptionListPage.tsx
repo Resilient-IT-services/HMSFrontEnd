@@ -29,10 +29,20 @@ const PrescriptionListPage: React.FC = () => {
   const fetchPrescriptions = useCallback(async (forceLoading = false) => {
     try {
       if (forceLoading) setLoading(true);
+      
+      const term = debouncedSearch.trim();
+      const apiSearch = term.startsWith('#') ? term.substring(1) : term;
+      
+      // If search term is 3-8 chars and purely hex, it's likely an Rx ID (partial UUID).
+      // We avoid sending it as 'search' to the server because the server's name-based 
+      // search would return zero results, while our local filtering can find it in the list.
+      const isRxIdSearch = /^[0-9a-fA-F]{3,8}$/.test(apiSearch);
+
       const response = await pharmacyApi.getPrescriptionsSummary({
-        search: debouncedSearch,
+        search: isRxIdSearch ? undefined : apiSearch,
         status: showHistory ? undefined : 'PENDING',
         sort,
+        size: 200, // Fetch a larger batch to make local ID filtering effective
         ...debouncedColumnFilters
       });
       if (response.success && response.data) {
@@ -49,6 +59,21 @@ const PrescriptionListPage: React.FC = () => {
       setLoading(false);
     }
   }, [debouncedSearch, showHistory, debouncedColumnFilters, sort]);
+
+  const filteredPrescriptions = useMemo(() => {
+    const term = searchTerm.toLowerCase().trim();
+    if (!term) return prescriptions;
+    
+    // Strip '#' for comparison with the ID
+    const cleanTerm = term.startsWith('#') ? term.substring(1) : term;
+    
+    return prescriptions.filter(p => 
+      p.patientName?.toLowerCase().includes(term) ||
+      p.id?.toLowerCase().includes(cleanTerm) ||
+      p.doctorName?.toLowerCase().includes(term) ||
+      p.patientCode?.toLowerCase().includes(term)
+    );
+  }, [prescriptions, searchTerm]);
 
   useEffect(() => {
     const trigger = async () => {
@@ -79,8 +104,6 @@ const PrescriptionListPage: React.FC = () => {
   const columns: Column<PrescriptionSummaryDTO>[] = useMemo(() => [
     {
       header: 'Prescription ID',
-      filterable: true,
-      filterPlaceholder: 'Rx ID...',
       render: (p) => (
         <span className="font-medium text-[var(--text-primary)] text-xs bg-slate-100 px-2 py-1 rounded">
           #{p.id.substring(0, 8).toUpperCase()}
@@ -89,8 +112,6 @@ const PrescriptionListPage: React.FC = () => {
     },
     {
       header: 'Patient Name',
-      filterable: true,
-      filterPlaceholder: 'Patient...',
       render: (p) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 text-xs font-bold uppercase">
@@ -105,8 +126,6 @@ const PrescriptionListPage: React.FC = () => {
     },
     {
       header: 'Doctor',
-      filterable: true,
-      filterPlaceholder: 'Doctor...',
       render: (p) => <span className="text-sm font-medium text-slate-700">{p.doctorName}</span>
     },
     {
@@ -121,13 +140,6 @@ const PrescriptionListPage: React.FC = () => {
     },
     {
       header: 'Status',
-      filterable: true,
-      filterType: 'select',
-      filterOptions: [
-        { label: 'Pending', value: 'PENDING' },
-        { label: 'Dispensed', value: 'DISPENSED' },
-        { label: 'Cancelled', value: 'CANCELLED' }
-      ],
       className: 'text-center',
       headerClassName: 'text-center',
       render: (p) => {
@@ -230,7 +242,7 @@ const PrescriptionListPage: React.FC = () => {
             ) : (
               <Table
                 columns={columns}
-                data={prescriptions}
+                data={filteredPrescriptions}
                 isLoading={loading}
                 emptyMessage="No prescriptions found in the queue."
                 onFilter={(key, val) => setColumnFilters(prev => ({ ...prev, [key]: val }))}
