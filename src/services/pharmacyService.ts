@@ -199,5 +199,10 @@ export const pharmacyService = {
         data: { totalElements: 0 }
       };
     }
+  },
+
+  async getDashboardStats(): Promise<ApiResponse<PharmacyDashboardStatsDTO>> {
+    const response = await apiClient.get<ApiResponse<PharmacyDashboardStatsDTO>>('/pharmacy/dashboard/stats');
+    return response.data;
   }
 };
