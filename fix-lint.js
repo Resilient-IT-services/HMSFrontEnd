@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports, unicorn/prefer-module, sonarjs/slow-regex */
 const fs = require('node:fs');
 const path = require('node:path');
 

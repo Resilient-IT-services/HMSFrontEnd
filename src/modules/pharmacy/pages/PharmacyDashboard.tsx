@@ -10,6 +10,7 @@ import { RootState } from '@/state/store';
 import { Table, Column } from '@/components/ui/Table';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { 
   FileText, Hourglass, CheckCircle2, AlertTriangle, Calendar, 
   IndianRupee, Plus, Search, PlusCircle, Download, 
@@ -37,21 +38,27 @@ export const PharmacyDashboard = () => {
     cancelledPrescriptions: 0,
     lowStockCount: 0,
     expiringCount: 0,
-    todayRevenue: 0
+    todayRevenue: 0,
+    totalBatches: 0,
+    totalMedicines: 0
   });
+
+  const [statsError, setStatsError] = useState<string | null>(null);
 
   const fetchDashboardData = useCallback(async (showLoading = true) => {
     try {
       if (showLoading) setLoading(true);
+      setStatsError(null);
 
       const today = dayjs().startOf('day');
       const thirtyDaysFromNow = dayjs().add(30, 'day').endOf('day');
 
-      const [pendingRes, dispensedRes, cancelledRes, stockRes] = await Promise.allSettled([
+      const [pendingRes, dispensedRes, cancelledRes, stockRes, statsRes] = await Promise.allSettled([
         pharmacyApi.getPrescriptions({ status: 'PENDING', size: 100 }),
         pharmacyApi.getPrescriptions({ status: 'DISPENSED', size: 100 }),
         pharmacyApi.getPrescriptions({ status: 'CANCELLED', size: 100 }),
-        pharmacyApi.getMedicineStock({ size: 1000 })
+        pharmacyApi.getMedicineStock({ size: 1000 }),
+        pharmacyApi.getDashboardStats()
       ]);
 
       let pendingList: PrescriptionResponse[] = [];
@@ -62,6 +69,22 @@ export const PharmacyDashboard = () => {
       let allStock: PharmacyStockDTO[] = [];
       let dispensedList: PrescriptionResponse[] = [];
       let recentSales: any[] = [];
+      
+      let apiLowStockCount = 0;
+      let apiExpiringSoonCount = 0;
+      let apiTotalBatches = 0;
+      let apiTotalMedicines = 0;
+
+      // 0. PROCESS STATS
+      if (statsRes.status === 'fulfilled' && statsRes.value.success && statsRes.value.data) {
+        const s = statsRes.value.data;
+        apiLowStockCount = s.lowStockCount;
+        apiExpiringSoonCount = s.expiringSoonCount;
+        apiTotalBatches = s.totalBatches;
+        apiTotalMedicines = s.totalMedicines;
+      } else if (statsRes.status === 'rejected' || (statsRes.status === 'fulfilled' && !statsRes.value.success)) {
+        setStatsError('Failed to fetch some dashboard statistics');
+      }
 
       // 1. PROCESS PRESCRIPTIONS & REVENUE
       if (pendingRes.status === 'fulfilled' && pendingRes.value.success) {
@@ -128,9 +151,11 @@ export const PharmacyDashboard = () => {
         pendingPrescriptions: pendingCount,
         completedPrescriptions: completedCount,
         cancelledPrescriptions: cancelledCount,
-        lowStockCount: lowStockList.length,
-        expiringCount: expiringSoonList.length,
-        todayRevenue: revenue
+        lowStockCount: apiLowStockCount || lowStockList.length,
+        expiringCount: apiExpiringSoonCount || expiringSoonList.length,
+        todayRevenue: revenue,
+        totalBatches: apiTotalBatches,
+        totalMedicines: apiTotalMedicines
       });
 
     } catch (error) {
@@ -345,15 +370,22 @@ export const PharmacyDashboard = () => {
             </div>
           </div>
 
+          {statsError && (
+            <div className="bg-rose-50 border border-rose-100 text-rose-600 px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              {statsError}
+            </div>
+          )}
+
           {/* TOP KPI CARDS */}
-          <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 gap-4">
             <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
               <div className="flex items-start justify-between">
                 <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Total Prescriptions<br/>Today</p>
                 <span className="p-1.5 bg-blue-50 text-blue-600 rounded-lg"><FileText className="w-4 h-4" /></span>
               </div>
               <div className="mt-4">
-                <h3 className="text-2xl font-bold text-slate-800">{metrics.totalPrescriptionsToday}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : metrics.totalPrescriptionsToday}</h3>
               </div>
             </div>
 
@@ -363,7 +395,7 @@ export const PharmacyDashboard = () => {
                 <span className="p-1.5 bg-orange-50 text-orange-600 rounded-lg"><Hourglass className="w-4 h-4" /></span>
               </div>
               <div className="mt-4">
-                <h3 className="text-2xl font-bold text-slate-800">{metrics.pendingPrescriptions}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : metrics.pendingPrescriptions}</h3>
               </div>
             </div>
 
@@ -373,7 +405,27 @@ export const PharmacyDashboard = () => {
                 <span className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg"><CheckCircle2 className="w-4 h-4" /></span>
               </div>
               <div className="mt-4">
-                <h3 className="text-2xl font-bold text-slate-800">{metrics.completedPrescriptions}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : metrics.completedPrescriptions}</h3>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Total<br/>Medicines</p>
+                <span className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg"><Activity className="w-4 h-4" /></span>
+              </div>
+              <div className="mt-4">
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : metrics.totalMedicines}</h3>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Total<br/>Stock Batches</p>
+                <span className="p-1.5 bg-slate-50 text-slate-600 rounded-lg"><PlusCircle className="w-4 h-4" /></span>
+              </div>
+              <div className="mt-4">
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : metrics.totalBatches}</h3>
               </div>
             </div>
 
@@ -383,7 +435,7 @@ export const PharmacyDashboard = () => {
                 <span className="p-1.5 bg-rose-50 text-rose-600 rounded-lg"><AlertTriangle className="w-4 h-4" /></span>
               </div>
               <div className="mt-4">
-                <h3 className="text-2xl font-bold text-slate-800">{metrics.lowStockCount < 10 ? `0${metrics.lowStockCount}` : metrics.lowStockCount}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : (metrics.lowStockCount < 10 && metrics.lowStockCount > 0 ? `0${metrics.lowStockCount}` : metrics.lowStockCount)}</h3>
                 <Link href="/pharmacy/stock?status=LOW_STOCK" className="text-[11px] text-orange-600 font-bold flex items-center gap-0.5 mt-1 hover:underline">
                   View details <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -392,11 +444,11 @@ export const PharmacyDashboard = () => {
 
             <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-col justify-between">
               <div className="flex items-start justify-between">
-                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Expiring<br/>This Month</p>
+                <p className="text-[11px] font-bold text-slate-500 uppercase tracking-tight leading-snug">Expiring<br/>Soon</p>
                 <span className="p-1.5 bg-purple-50 text-purple-600 rounded-lg"><Calendar className="w-4 h-4" /></span>
               </div>
               <div className="mt-4">
-                <h3 className="text-2xl font-bold text-slate-800">{metrics.expiringCount}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : metrics.expiringCount}</h3>
                 <Link href="/pharmacy/stock?status=EXPIRING_SOON" className="text-[11px] text-orange-600 font-bold flex items-center gap-0.5 mt-1 hover:underline">
                   View details <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -409,7 +461,7 @@ export const PharmacyDashboard = () => {
                 <span className="p-1.5 bg-amber-50 text-amber-500 rounded-lg"><IndianRupee className="w-4 h-4" /></span>
               </div>
               <div className="mt-4">
-                <h3 className="text-2xl font-bold text-slate-800">₹{metrics.todayRevenue.toLocaleString('en-IN')}</h3>
+                <h3 className="text-2xl font-bold text-slate-800">{loading ? '...' : `₹${metrics.todayRevenue.toLocaleString('en-IN')}`}</h3>
               </div>
             </div>
           </div>
@@ -508,55 +560,17 @@ export const PharmacyDashboard = () => {
               {/*  </Link>*/}
               {/*</div>*/}
 
-              {/* TODAY'S PERFORMANCE */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-slate-800">Today&apos;s Performance</h3>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="space-y-3 text-xs font-semibold">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 w-20">
-                        <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                        <span className="text-slate-400">Pending</span>
-                      </div>
-                      <span className="text-slate-800 font-bold">{metrics.pendingPrescriptions}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 w-20">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span className="text-slate-400">Completed</span>
-                      </div>
-                      <span className="text-slate-800 font-bold">{metrics.completedPrescriptions}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 w-20">
-                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                        <span className="text-slate-400">Cancelled</span>
-                      </div>
-                      <span className="text-slate-800 font-bold">{metrics.cancelledPrescriptions}</span>
-                    </div>
-                  </div>
-                  <div className="relative w-24 h-24 flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                      <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                      <path 
-                        className="text-blue-600" 
-                        strokeDasharray={`${Math.round((metrics.completedPrescriptions / (metrics.totalPrescriptionsToday || 1)) * 100)}, 100`} 
-                        strokeWidth="3" 
-                        strokeLinecap="round" 
-                        stroke="currentColor" 
-                        fill="none" 
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                      />
-                    </svg>
-                    <div className="absolute text-center">
-                      <p className="text-base font-bold text-slate-800 leading-none">{Math.round((metrics.completedPrescriptions / (metrics.totalPrescriptionsToday || 1)) * 100)}%</p>
-                      <p className="text-[8px] text-slate-400 font-bold tracking-tight uppercase mt-0.5">Rate</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* TODAY'S PERFORMANCE Pie Chart */}
+              <MetricCard 
+                label="Today's Performance"
+                layout="chart"
+                chartData={{
+                  pending: metrics.pendingPrescriptions,
+                  completed: metrics.completedPrescriptions,
+                  cancelled: metrics.cancelledPrescriptions
+                }}
+                subValue={`${Math.round((metrics.completedPrescriptions / (metrics.totalPrescriptionsToday || 1)) * 100)}% Dispense Rate`}
+              />
 
               {/* RECENT BILLING */}
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">

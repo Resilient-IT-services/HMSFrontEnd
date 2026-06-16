@@ -35,6 +35,12 @@ export const usePharmacyStock = () => {
   }
 
   const [totalElements, setTotalElements] = useState(0);
+  const [stats, setStats] = useState({
+    totalBatches: 0,
+    totalMedicines: 0,
+    lowStockCount: 0,
+    expiringSoonCount: 0
+  });
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [sort, setSort] = useState<string | undefined>();
   const debouncedSearch = useDebounce(searchTerm, DEFAULT_DEBOUNCE_MS);
@@ -45,25 +51,33 @@ export const usePharmacyStock = () => {
   const fetchInventory = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await pharmacyApi.getMedicineStock({ 
-        size: pageSize, 
-        page, 
-        search: debouncedSearch,
-        lowStock: statusFilter === 'LOW_STOCK',
-        expired: statusFilter === 'EXPIRED',
-        expiringSoon: statusFilter === 'EXPIRING_SOON',
-        sort,
-        ...debouncedColumnFilters
-      });
-      if (response.success && response.data) {
-        setMedicines(response.data.content || []);
-        setTotalElements(response.data.totalElements);
+      const [inventoryRes, statsRes] = await Promise.all([
+        pharmacyApi.getMedicineStock({ 
+          size: pageSize, 
+          page, 
+          search: debouncedSearch,
+          lowStock: statusFilter === 'LOW_STOCK',
+          expired: statusFilter === 'EXPIRED',
+          expiringSoon: statusFilter === 'EXPIRING_SOON',
+          sort,
+          ...debouncedColumnFilters
+        }),
+        pharmacyApi.getDashboardStats()
+      ]);
+
+      if (inventoryRes.success && inventoryRes.data) {
+        setMedicines(inventoryRes.data.content || []);
+        setTotalElements(inventoryRes.data.totalElements);
       } else {
         setMedicines([]);
         setTotalElements(0);
       }
+
+      if (statsRes.success && statsRes.data) {
+        setStats(statsRes.data);
+      }
     } catch (error) {
-      console.error('Fetch Inventory Error:', error);
+      console.error('Fetch Inventory/Stats Error:', error);
       setMedicines([]);
     } finally {
       setLoading(false);
@@ -182,19 +196,7 @@ export const usePharmacyStock = () => {
   };
 
   // KPI Calculations
-  const uniqueMedicinesCount = new Set(medicines.map(m => m.medicineId)).size;
   const totalStockUnits = medicines.reduce((acc, m) => acc + (m.quantity || 0), 0);
-  const lowStockCount = medicines.filter(m => {
-    const qty = Number(m.quantity || 0);
-    const threshold = Number(m.reorderLevel || 50);
-    return qty > 0 && qty < threshold;
-  }).length;
-  const expiringSoonCount = medicines.filter(m => {
-    if (!m.expiryDate) return false;
-    const expDate = dayjs(m.expiryDate);
-    const thirtyDaysFromNow = dayjs().add(30, 'day');
-    return expDate.isBefore(thirtyDaysFromNow);
-  }).length;
 
   return {
     medicines,
@@ -223,11 +225,11 @@ export const usePharmacyStock = () => {
     handleAdjust,
     refresh: fetchInventory,
     stats: {
-      totalElements,
-      uniqueMedicinesCount,
+      totalElements, // Keep this as paginated/filtered total batches
+      uniqueMedicinesCount: stats.totalMedicines,
       totalStockUnits,
-      lowStockCount,
-      expiringSoonCount
+      lowStockCount: stats.lowStockCount,
+      expiringSoonCount: stats.expiringSoonCount
     }
   };
 };

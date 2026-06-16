@@ -22,6 +22,7 @@ import Link from 'next/link';
 import dayjs from '@/lib/dayjs';
 
 // Pharmacy Style Lucid Icons Integration
+import { MetricCard } from '@/components/ui/MetricCard';
 import {
   FileText, Hourglass, CheckCircle2,
   IndianRupee, Plus, Search, ClipboardList, ArrowRight, Eye,
@@ -39,7 +40,6 @@ export const DoctorDashboard = () => {
   const [appointments, setAppointments] = useState<AppointmentResponse[]>([]);
   const [revenueSummary, setRevenueSummary] = useState<DoctorRevenueSummaryDTO | null>(null);
   const [recentHistories, setRecentHistories] = useState<AppointmentResponse[]>([]);
-  const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
@@ -84,7 +84,6 @@ export const DoctorDashboard = () => {
 
         const normalized = normalizeAppointmentData(filtered);
         setAppointments(normalized);
-        setTotalElements(appRes.data.totalElements);
         syncExpiredAppointments(filtered);
       }
 
@@ -473,80 +472,17 @@ export const DoctorDashboard = () => {
                   </Link>
                 </div>
 
-                {/* Live Queue Counter Progress Radial Ring */}
-                <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-sm font-bold text-slate-800">Queue Management Pulse</h3>
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <div className="space-y-3 text-xs font-semibold">
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 w-20">
-                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                          <span className="text-slate-400">Waiting</span>
-                        </div>
-                        <span className="text-slate-800 font-bold">{stats.waiting}</span>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 w-20">
-                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                          <span className="text-slate-400">In Progress</span>
-                        </div>
-                        <span className="text-slate-800 font-bold">{stats.active}</span>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-1.5 w-20">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                          <span className="text-slate-400">Completed</span>
-                        </div>
-                        <span className="text-slate-800 font-bold">{stats.completed}</span>
-                      </div>
-                    </div>
-                    <div className="relative w-24 h-24 flex items-center justify-center">
-                      <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                        <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        
-                        {/* Multi-segment Progress Paths */}
-                        <path
-                            className="text-orange-500"
-                            strokeDasharray={`${stats.waitingPercent}, 100`}
-                            strokeDashoffset="0"
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                        <path
-                            className="text-blue-500"
-                            strokeDasharray={`${stats.activePercent}, 100`}
-                            strokeDashoffset={`-${stats.waitingPercent}`}
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                        <path
-                            className="text-emerald-500"
-                            strokeDasharray={`${stats.completedPercent}, 100`}
-                            strokeDashoffset={`-${stats.waitingPercent + stats.activePercent}`}
-                            strokeWidth="3"
-                            strokeLinecap="round"
-                            stroke="currentColor"
-                            fill="none"
-                            d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        />
-                      </svg>
-                      <div className="absolute text-center">
-                        <p className="text-base font-bold text-slate-800 leading-none">
-                          {Math.round((stats.completed / (stats.total || 1)) * 100) || 0}%
-                        </p>
-                        <p className="text-[8px] text-slate-400 font-bold tracking-tight uppercase mt-0.5">Rate</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                {/* Live Queue Counter Progress Pie Chart */}
+                <MetricCard 
+                  label="Queue Management Pulse"
+                  layout="chart"
+                  chartData={{
+                    waiting: stats.waiting,
+                    active: stats.active,
+                    completed: stats.completed
+                  }}
+                  subValue={`${Math.round((stats.completed / (stats.total || 1)) * 100) || 0}% Completion Rate`}
+                />
 
                 {/* Integrated Revenue & Earnings Breakdown */}
                 <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">

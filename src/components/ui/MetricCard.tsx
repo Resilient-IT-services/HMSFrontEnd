@@ -1,19 +1,62 @@
 import React from 'react';
 import { cn } from '@/lib/cn';
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  Legend, 
+  Tooltip
+} from 'recharts';
 
 export interface MetricCardProps {
   label: string;
-  value: React.ReactNode;
-  icon: string;
+  value?: React.ReactNode;
+  icon?: string;
   variant?: 'slate' | 'emerald' | 'blue' | 'orange' | 'purple' | 'indigo' | 'red';
   trend?: string;
   subValue?: string;
-  layout?: 'centered' | 'horizontal' | 'compact' | 'pill';
+  layout?: 'centered' | 'horizontal' | 'compact' | 'pill' | 'chart';
   progressBar?: number; // percentage 0-100
   tag?: string;
   valueTestId?: string;
   onClick?: () => void;
+  chartData?: Record<string, number>;
 }
+
+const CATEGORY_COLORS: Record<string, string> = {
+  pending: '#f97316',   // Orange
+  waiting: '#f97316',   // Orange
+  completed: '#3b82f6', // Blue (per req: Blue/Green)
+  dispensed: '#10b981', // Green
+  cancelled: '#ef4444', // Red
+  active: '#6366f1',    // Indigo
+  processing: '#6366f1' // Indigo
+};
+
+const DEFAULT_COLOR = '#94a3b8'; // Slate-400
+
+const RADIAN = Math.PI / 180;
+const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+  const x = cx + radius * Math.cos(-midAngle * RADIAN);
+  const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+  if (percent < 0.05) return null; // Don't show labels for very small slices
+
+  return (
+    <text 
+      x={x} 
+      y={y} 
+      fill="white" 
+      textAnchor={x > cx ? 'start' : 'end'} 
+      dominantBaseline="central"
+      className="text-[10px] font-bold"
+    >
+      {`${(percent * 100).toFixed(0)}%`}
+    </text>
+  );
+};
 
 export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
   label,
@@ -27,7 +70,8 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
   tag,
   valueTestId,
   pulse,
-  onClick
+  onClick,
+  chartData
 }) => {
   const variants = {
     slate: { text: 'text-slate-600', bg: 'bg-slate-100', progress: 'bg-slate-600' },
@@ -51,9 +95,75 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
   const commonProps = {
     onClick,
     className: cn(
-      onClick && "cursor-pointer transition-all active:scale-95"
+      "bg-white rounded-2xl border border-slate-100 shadow-sm transition-all hover:shadow-md",
+      onClick && "cursor-pointer active:scale-[0.98]"
     )
   };
+
+  // Chart Layout
+  if (layout === 'chart' || chartData) {
+    const data = Object.entries(chartData || {}).map(([name, val]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      value: val,
+      color: CATEGORY_COLORS[name.toLowerCase()] || DEFAULT_COLOR
+    })).filter(item => item.value > 0);
+
+    const total = data.reduce((acc, curr) => acc + curr.value, 0);
+
+    return (
+      <div {...commonProps} className={cn(commonProps.className, "p-6 flex flex-col h-[300px]")}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{label}</h3>
+          {icon && <span className={cn("material-symbols-outlined", v.text)}>{icon}</span>}
+        </div>
+        
+        <div className="flex-1 min-h-0 relative">
+          {total > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={renderCustomizedLabel}
+                  outerRadius={80}
+                  innerRadius={40}
+                  fill="#8884d8"
+                  dataKey="value"
+                  animationDuration={1000}
+                >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip 
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                  itemStyle={{ fontWeight: 'bold', fontSize: '12px' }}
+                />
+                <Legend 
+                  verticalAlign="bottom" 
+                  align="center"
+                  formatter={(value) => <span className="text-[10px] font-bold text-slate-500 uppercase">{value}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-slate-400 space-y-2">
+              <span className="material-symbols-outlined text-4xl opacity-20">pie_chart</span>
+              <p className="text-xs font-bold uppercase tracking-widest opacity-40">No Data Available</p>
+            </div>
+          )}
+        </div>
+        
+        {total > 0 && subValue && (
+          <div className="mt-2 pt-2 border-t border-slate-50 text-center">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{subValue}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   if (layout === 'pill') {
     return (
@@ -63,8 +173,8 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
         className={cn(
           "relative flex items-center gap-1 px-2.5 py-0.5 rounded-full border transition-all shadow-sm shrink-0 group/pill outline-none focus:ring-1 focus:ring-orange-500/30",
           variant === 'slate' ? "bg-slate-50 border-slate-200" : cn(v.bg, "border-transparent"),
-          onClick && "cursor-pointer active:scale-95",
-          commonProps.className
+          commonProps.className,
+          "bg-transparent border-none shadow-none hover:shadow-none" // Overriding commonProps for pill
         )}
       >
         {/* Tooltip */}
@@ -86,7 +196,7 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
       <div 
         {...commonProps}
         className={cn(
-          "bg-white p-6 rounded-xl border border-slate-200 hover:shadow-md transition-all",
+          "p-6",
           commonProps.className
         )}
       >
@@ -122,7 +232,7 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
       <div 
         {...commonProps}
         className={cn(
-          "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow group",
+          "p-6 group",
           commonProps.className
         )}
       >
@@ -161,7 +271,7 @@ export const MetricCard: React.FC<MetricCardProps & { pulse?: boolean }> = ({
     <div 
       {...commonProps}
       className={cn(
-        "bg-white rounded-2xl border border-slate-100 shadow-sm w-full h-[180px] p-6 flex flex-col items-center justify-center text-center hover:shadow-md transition-shadow",
+        "w-full h-[180px] p-6 flex flex-col items-center justify-center text-center",
         commonProps.className
       )}
     >

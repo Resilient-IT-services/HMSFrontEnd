@@ -735,6 +735,13 @@ export interface PharmacySaleResponse {
   items: PharmacySaleItem[];
 }
 
+export interface PharmacyDashboardStatsDTO {
+  totalBatches: number;
+  totalMedicines: number;
+  lowStockCount: number;
+  expiringSoonCount: number;
+}
+
 export interface PharmacyReturnRequest {
   saleItemId: string;
   quantity: number;
