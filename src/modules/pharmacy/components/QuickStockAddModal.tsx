@@ -159,18 +159,7 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
               />
             </div>
 
-            {/* HSN Code */}
-            <div>
-              <label htmlFor="hsnCode" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">HSN Code</label>
-              <input
-                id="hsnCode"
-                name="hsnCode"
-                value={formData.hsnCode}
-                onChange={handleChange}
-                placeholder="e.g. 3004"
-                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all"
-              />
-            </div>
+
 
             {/* Manufacturing Date */}
             <div>
@@ -244,19 +233,7 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
               />
             </div>
 
-            {/* Reorder Level */}
-            <div>
-              <label htmlFor="reorderLevel" className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Low Stock Label (Units)</label>
-              <input
-                id="reorderLevel"
-                type="number"
-                name="reorderLevel"
-                value={formData.reorderLevel}
-                onChange={handleChange}
-                placeholder="e.g. 50"
-                className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all"
-              />
-            </div>
+
 
             {/* Pricing Section */}
             <div className="md:col-span-2 grid grid-cols-2 gap-6">

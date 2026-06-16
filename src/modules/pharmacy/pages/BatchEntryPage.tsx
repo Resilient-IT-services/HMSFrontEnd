@@ -156,16 +156,7 @@ export const BatchEntryPage = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-black uppercase text-slate-500 mb-2 ml-1">HSN Code</label>
-                    <input 
-                      name="hsnCode"
-                      value={formData.hsnCode}
-                      onChange={handleChange}
-                      placeholder="e.g. 3004"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
-                    />
-                  </div>
+
 
                   <div>
                     <label className="block text-xs font-black uppercase text-slate-500 mb-2 ml-1">Manufacturing Date</label>
@@ -203,17 +194,7 @@ export const BatchEntryPage = () => {
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-black uppercase text-slate-500 mb-2 ml-1">Reorder Level</label>
-                    <input 
-                      type="number"
-                      name="reorderLevel"
-                      value={formData.reorderLevel}
-                      onChange={handleChange}
-                      placeholder="e.g. 10"
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-orange-500/20 outline-none transition-all"
-                    />
-                  </div>
+
 
                   <div>
                     <label className="block text-xs font-black uppercase text-slate-500 mb-2 ml-1">Supplier Name</label>
