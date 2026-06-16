@@ -6,12 +6,15 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Card } from '@/components/ui/Card';
 import { labApi, HospitalLabDashboardStatsDTO } from '@/modules/lab/api/labApi';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const HospitalAdminDashboard = () => {
+  const router = useRouter();
   const [stats, setStats] = useState<HospitalLabDashboardStatsDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useSelector((state: RootState) => state.auth);
@@ -49,68 +52,36 @@ const HospitalAdminDashboard = () => {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <MetricCard 
+                label="Laboratory Operations Overview"
+                layout="chart"
+                chartData={{
+                  pending: stats?.todayPendingOrders || 0,
+                  processing: stats?.todayProcessingOrders || 0,
+                  completed: stats?.todayVerifiedReports || 0
+                }}
+                subValue={`Total Actions: ${(stats?.todayPendingOrders || 0) + (stats?.todayProcessingOrders || 0) + (stats?.todayVerifiedReports || 0)}`}
+              />
               
-              {/* Active Tests */}
-              <Card className="p-6 border-l-4 border-l-primary flex flex-col justify-between hover:shadow-lg transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Active Tests</p>
-                    <h3 className="text-3xl font-black text-slate-800">{stats?.activeLocalTests || 0}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-primary text-2xl">science</span>
-                  </div>
-                </div>
-                <Link href="/admin/lab-settings" className="text-sm font-bold text-primary hover:underline flex items-center gap-1">
-                  Manage Settings <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </Link>
-              </Card>
+              <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Active Tests (Keep as count card but maybe use MetricCard) */}
+                <MetricCard 
+                  label="Active Local Tests"
+                  value={stats?.activeLocalTests || 0}
+                  icon="science"
+                  variant="blue"
+                  subValue="Manage in settings"
+                  onClick={() => router.push('/admin/lab-settings')}
+                />
 
-              {/* Pending Orders */}
-              <Card className="p-6 border-l-4 border-l-amber-500 flex flex-col justify-between hover:shadow-lg transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Pending Collection</p>
-                    <h3 className="text-3xl font-black text-slate-800">{stats?.todayPendingOrders || 0}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-amber-500 text-2xl">pending_actions</span>
-                  </div>
-                </div>
-                <p className="text-xs font-bold text-slate-400">Orders awaiting sample collection today</p>
-              </Card>
-
-              {/* Processing Orders */}
-              <Card className="p-6 border-l-4 border-l-blue-500 flex flex-col justify-between hover:shadow-lg transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">In Processing</p>
-                    <h3 className="text-3xl font-black text-slate-800">{stats?.todayProcessingOrders || 0}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-blue-500 text-2xl">microbiology</span>
-                  </div>
-                </div>
-                <p className="text-xs font-bold text-slate-400">Samples currently being analyzed</p>
-              </Card>
-
-              {/* Verified Reports */}
-              <Card className="p-6 border-l-4 border-l-emerald-500 flex flex-col justify-between hover:shadow-lg transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Verified Reports</p>
-                    <h3 className="text-3xl font-black text-slate-800">{stats?.todayVerifiedReports || 0}</h3>
-                  </div>
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-emerald-500 text-2xl">verified</span>
-                  </div>
-                </div>
-                <p className="text-xs font-bold text-emerald-500 bg-emerald-50 inline-block px-2 py-1 rounded-md mt-auto self-start">
-                  Ready for patients
-                </p>
-              </Card>
-
+                <Card className="p-6 border-slate-100 flex flex-col justify-center items-center text-center">
+                  <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Reports Status</p>
+                  <p className="text-xs font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">
+                    {stats?.todayVerifiedReports || 0} Verified Today
+                  </p>
+                </Card>
+              </div>
             </div>
           )}
 

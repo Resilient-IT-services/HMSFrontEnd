@@ -10,6 +10,7 @@ import { RootState } from '@/state/store';
 import { Table, Column } from '@/components/ui/Table';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { triggerGlobalToast } from '@/components/ui/Toast';
+import { MetricCard } from '@/components/ui/MetricCard';
 import { 
   FileText, Hourglass, CheckCircle2, AlertTriangle, Calendar, 
   IndianRupee, Plus, Search, PlusCircle, Download, 
@@ -508,55 +509,17 @@ export const PharmacyDashboard = () => {
               {/*  </Link>*/}
               {/*</div>*/}
 
-              {/* TODAY'S PERFORMANCE */}
-              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-slate-800">Today&apos;s Performance</h3>
-                </div>
-                <div className="flex items-center justify-between mt-2">
-                  <div className="space-y-3 text-xs font-semibold">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 w-20">
-                        <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                        <span className="text-slate-400">Pending</span>
-                      </div>
-                      <span className="text-slate-800 font-bold">{metrics.pendingPrescriptions}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 w-20">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span className="text-slate-400">Completed</span>
-                      </div>
-                      <span className="text-slate-800 font-bold">{metrics.completedPrescriptions}</span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-1.5 w-20">
-                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
-                        <span className="text-slate-400">Cancelled</span>
-                      </div>
-                      <span className="text-slate-800 font-bold">{metrics.cancelledPrescriptions}</span>
-                    </div>
-                  </div>
-                  <div className="relative w-24 h-24 flex items-center justify-center">
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                      <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                      <path 
-                        className="text-blue-600" 
-                        strokeDasharray={`${Math.round((metrics.completedPrescriptions / (metrics.totalPrescriptionsToday || 1)) * 100)}, 100`} 
-                        strokeWidth="3" 
-                        strokeLinecap="round" 
-                        stroke="currentColor" 
-                        fill="none" 
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                      />
-                    </svg>
-                    <div className="absolute text-center">
-                      <p className="text-base font-bold text-slate-800 leading-none">{Math.round((metrics.completedPrescriptions / (metrics.totalPrescriptionsToday || 1)) * 100)}%</p>
-                      <p className="text-[8px] text-slate-400 font-bold tracking-tight uppercase mt-0.5">Rate</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* TODAY'S PERFORMANCE Pie Chart */}
+              <MetricCard 
+                label="Today's Performance"
+                layout="chart"
+                chartData={{
+                  pending: metrics.pendingPrescriptions,
+                  completed: metrics.completedPrescriptions,
+                  cancelled: metrics.cancelledPrescriptions
+                }}
+                subValue={`${Math.round((metrics.completedPrescriptions / (metrics.totalPrescriptionsToday || 1)) * 100)}% Dispense Rate`}
+              />
 
               {/* RECENT BILLING */}
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
