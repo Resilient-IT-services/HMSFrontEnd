@@ -54,6 +54,7 @@ export const MedicineInventory = () => {
         page: page,
         size: pageSize,
         sort,
+        itemType: 'MEDICINE',
         ...debouncedColumnFilters
       });
       if (response.success && response.data) {
