@@ -301,39 +301,7 @@ export const StockManagement = () => {
             />
           </ContentPanel>
 
-          <div className="grid grid-cols-1 gap-6 pb-6 lg:grid-cols-2">
-            <Card 
-              title="Movement Analytics" 
-              headerActions={<Badge variant="blue">Weekly View</Badge>}
-            >
-              <div className="flex h-48 items-end justify-between gap-4 px-2">
-                {[60, 85, 45, 70, 55, 95, 75].map((height, index) => (
-                  <div key={index} className={`w-full rounded-xl transition-all ${index % 2 === 0 ? 'bg-slate-100 hover:bg-orange-200' : 'bg-slate-900 shadow-lg hover:opacity-80'}`} style={{ height: `${height}%` }} />
-                ))}
-              </div>
-              <div className="mt-6 flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-              </div>
-            </Card>
 
-            <Card title="Recent Activity">
-              <div className="space-y-6">
-                {[
-                  { title: 'Stock replenishment successful', detail: 'Amoxicillin | Batch #AMX-01 | 5m ago', color: 'bg-emerald-500' },
-                  { title: 'Inventory threshold warning', detail: 'Paracetamol | 12 units left | 1h ago', color: 'bg-orange-500' },
-                  { title: 'Bulk export completed', detail: 'System User | CSV Format | 3h ago', color: 'bg-blue-500', muted: true }
-                ].map((item) => (
-                  <div key={item.title} className={`flex items-start gap-4 ${item.muted ? 'opacity-50' : ''}`}>
-                    <div className={`mt-1 h-12 w-1.5 rounded-full ${item.color}`} />
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">{item.title}</p>
-                      <p className="mt-1 text-[10px] font-bold uppercase text-slate-400">{item.detail}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
         </div>
       </PageSurface>
 
