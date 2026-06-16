@@ -41,6 +41,7 @@ vi.mock('@/modules/pharmacy/api/pharmacyApi', () => ({
     getSaleByPrescription: vi.fn(),
     importStock: vi.fn(),
     getDashboardStats: vi.fn(),
+    getSales: vi.fn(),
   },
 }));
 
@@ -119,6 +120,29 @@ describe('PharmacyDashboard', () => {
       },
     });
 
+    vi.mocked(pharmacyApi.getSales).mockResolvedValue({
+      success: true,
+      data: {
+        content: [
+          {
+            saleId: 's1', 
+            saleNumber: 'SALE-001', 
+            invoiceId: 'i1', 
+            invoiceNumber: 'INV-001', 
+            totalAmount: 100, 
+            status: 'COMPLETED', 
+            saleType: 'VISIT',
+            createdAt: today, 
+            items: [] 
+          }
+        ],
+        totalElements: 1,
+        page: 0,
+        size: 50,
+        totalPages: 1
+      }
+    });
+
     vi.mocked(pharmacyApi.getSaleByPrescription).mockResolvedValue({
       success: true,
       data: { 
@@ -128,9 +152,10 @@ describe('PharmacyDashboard', () => {
         invoiceNumber: 'INV-001', 
         totalAmount: 100, 
         status: 'COMPLETED', 
-        createdAt: '2026-06-01T10:00:00',
-        items: []
-      },
+        saleType: 'VISIT',
+        createdAt: today, 
+        items: [] 
+      }
     });
 
     render(

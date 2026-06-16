@@ -97,30 +97,14 @@ export const PharmacyDashboard = () => {
       if (dispensedRes.status === 'fulfilled' && dispensedRes.value.success) {
         dispensedList = (dispensedRes.value.data?.content as unknown as PrescriptionResponse[]) || [];
         completedCount = dispensedRes.value.data?.totalElements || dispensedList.length;
-        
-        // Use completed prescriptions to fetch their sales details
-        const todayDispensed = dispensedList.filter(p => dayjs(p.createdAt || Date.now()).isSame(today, 'day'));
-        
-        // Fetch the sales data for these prescriptions to get exact revenue and invoice details
-        const salesPromises = todayDispensed.slice(0, 15).map(p => 
-          pharmacyApi.getSaleByPrescription(p.id!).catch(() => null)
-        );
-        
-        const salesResults = await Promise.all(salesPromises);
-        
-        const validSales = salesResults
-          .filter((res): res is { success: true; data: QuickPharmacySaleResponse } => 
-            !!(res?.success && res.data)
-          )
-          .map(res => res.data);
+      }
 
-        revenue = validSales.reduce((acc, sale) => acc + (Number(sale.totalAmount || 0)), 0);
-        
-        recentSales = validSales.toSorted((a, b) => {
-          const dateA = dayjs(a.createdAt);
-          const dateB = dayjs(b.createdAt);
-          return dateB.diff(dateA);
-        });
+      // Fetch all sales (Visit + Walk-in) for today to calculate revenue and recent billing
+      const allSalesRes = await pharmacyApi.getSales({ size: 50, sort: 'createdAt,desc' });
+      if (allSalesRes.success && allSalesRes.data) {
+        const todaySales = allSalesRes.data.content.filter(s => dayjs(s.createdAt).isSame(today, 'day'));
+        revenue = todaySales.reduce((acc, sale) => acc + (Number(sale.totalAmount || 0)), 0);
+        recentSales = todaySales;
       }
 
       if (cancelledRes.status === 'fulfilled' && cancelledRes.value.success) {
