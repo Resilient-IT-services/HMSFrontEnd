@@ -19,7 +19,8 @@ import {
   PharmacyReturnRequest,
   PharmacyReturnResponse,
   QuickPharmacySaleRequest,
-  QuickPharmacySaleResponse
+  QuickPharmacySaleResponse,
+  PharmacyDashboardStatsDTO
 } from '@/types/api';
 import { LOW_STOCK_THRESHOLD, EXPIRY_ALERT_DAYS } from '@/utils/constants';
 
@@ -222,6 +223,11 @@ export const pharmacyApi = {
     const response = await apiClient.get<ApiResponse<any[]>>('/pharmacy/recent-customers', {
       params: { search }
     });
+    return response.data;
+  },
+
+  getDashboardStats: async () => {
+    const response = await apiClient.get<ApiResponse<PharmacyDashboardStatsDTO>>('/pharmacy/dashboard/stats');
     return response.data;
   }
 };
