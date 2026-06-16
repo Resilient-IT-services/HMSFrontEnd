@@ -35,7 +35,6 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
     { name: 'Lab Machines', icon: 'precision_manufacturing', href: '/lab_admin/machines', roles: ['LAB_ADMIN', 'ADMIN'] },
     { name: 'Lab Dashboard', icon: 'science', href: '/admin/lab-dashboard', roles: ['ADMIN'] },
     { name: 'Lab Settings', icon: 'settings_b_roll', href: '/admin/lab-settings', roles: ['ADMIN'] },
-    { name: 'Master Tests', icon: 'biotech', href: '/admin/lab-tests', roles: ['SUPER_ADMIN'] },
 
     {
       name: 'History',

@@ -55,13 +55,8 @@ describe('PharmacyDashboard', () => {
     vi.mocked(pharmacyApi.getDashboardStats).mockResolvedValue({
       success: true,
       data: {
-        totalPrescriptionsToday: 10,
-        pendingPrescriptions: 5,
-        completedPrescriptions: 3,
-        cancelledPrescriptions: 2,
         lowStockCount: 3,
         expiringSoonCount: 1,
-        todayRevenue: 500,
         totalBatches: 20,
         totalMedicines: 15
       }
