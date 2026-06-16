@@ -17,7 +17,8 @@ import {
   QuickPharmacySaleResponse,
   PharmacyReturnRequest,
   PharmacyReturnResponse,
-  InventoryStockDTO
+  InventoryStockDTO,
+  PharmacyDashboardStatsDTO
 } from '@/types/api';
 import { AxiosError } from 'axios';
 
