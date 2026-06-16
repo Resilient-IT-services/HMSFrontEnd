@@ -16,6 +16,8 @@ interface EditMedicineModalProps {
 const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<MedicineRequestDTO>({
+    itemType: medicine.itemType || 'MEDICINE',
+    department: medicine.department,
     name: medicine.name,
     genericName: medicine.genericName || '',
     composition: medicine.composition || '',
@@ -28,6 +30,10 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
     taxPercentage: medicine.taxPercentage || 12,
     hsnCode: medicine.hsnCode || '',
     currentStock: medicine.currentStock || 0,
+    itemCode: medicine.itemCode,
+    baseUnit: medicine.baseUnit,
+    isBatchTracked: medicine.isBatchTracked,
+    isExpiryTracked: medicine.isExpiryTracked,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -35,10 +41,12 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
   const validate = () => {
     const newErrors: Record<string, string> = {};
     if (!formData.name?.trim()) newErrors.name = 'Medicine name is required';
-    if (!formData.genericName?.trim()) newErrors.genericName = 'Generic name is required';
-    if (!formData.composition?.trim()) newErrors.composition = 'Salt/Composition is required';
-    if (!formData.strength?.trim()) newErrors.strength = 'Strength is required';
-    if (!formData.form) newErrors.form = 'Form is required';
+    if (formData.itemType === 'MEDICINE') {
+      if (!formData.genericName?.trim()) newErrors.genericName = 'Generic name is required';
+      if (!formData.composition?.trim()) newErrors.composition = 'Salt/Composition is required';
+      if (!formData.strength?.trim()) newErrors.strength = 'Strength is required';
+      if (!formData.form) newErrors.form = 'Form is required';
+    }
     if (!formData.manufacturer?.trim()) newErrors.manufacturer = 'Manufacturer is required';
     
     if (formData.thresholdQuantity !== undefined && formData.thresholdQuantity < 0) newErrors.thresholdQuantity = 'Threshold quantity cannot be negative';
@@ -110,73 +118,77 @@ const EditMedicineModal: React.FC<EditMedicineModalProps> = ({ medicine, onClose
             {errors.name && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.name}</p>}
           </div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Generic Name</label>
-            <input 
-              name="genericName"
-              value={formData.genericName}
-              onChange={handleChange}
-              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.genericName ? 'border-red-500' : 'border-slate-200'}`}
-              placeholder="e.g. Acetaminophen" 
-              type="text"
-            />
-            {errors.genericName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.genericName}</p>}
-          </div>
+          {formData.itemType === 'MEDICINE' && (
+            <>
+              <div>
+                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Generic Name</label>
+                <input 
+                  name="genericName"
+                  value={formData.genericName}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.genericName ? 'border-red-500' : 'border-slate-200'}`}
+                  placeholder="e.g. Acetaminophen" 
+                  type="text"
+                />
+                {errors.genericName && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.genericName}</p>}
+              </div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Strength</label>
-            <input 
-              name="strength"
-              value={formData.strength}
-              onChange={handleChange}
-              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.strength ? 'border-red-500' : 'border-slate-200'}`}
-              placeholder="e.g. 500mg, 5ml" 
-              type="text"
-            />
-            {errors.strength && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.strength}</p>}
-          </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Strength</label>
+                <input 
+                  name="strength"
+                  value={formData.strength}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold ${errors.strength ? 'border-red-500' : 'border-slate-200'}`}
+                  placeholder="e.g. 500mg, 5ml" 
+                  type="text"
+                />
+                {errors.strength && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.strength}</p>}
+              </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Salt / Composition</label>
-            <textarea 
-              name="composition"
-              value={formData.composition}
-              onChange={handleChange}
-              rows={2}
-              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none ${errors.composition ? 'border-red-500' : 'border-slate-200'}`}
-              placeholder="List chemical composition..." 
-            />
-            {errors.composition && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.composition}</p>}
-          </div>
+              <div className="md:col-span-2">
+                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Salt / Composition</label>
+                <textarea 
+                  name="composition"
+                  value={formData.composition}
+                  onChange={handleChange}
+                  rows={2}
+                  className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold resize-none ${errors.composition ? 'border-red-500' : 'border-slate-200'}`}
+                  placeholder="List chemical composition..." 
+                />
+                {errors.composition && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.composition}</p>}
+              </div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Form / Category</label>
-            <select 
-              name="form"
-              value={formData.form}
-              onChange={handleChange}
-              className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer ${errors.form ? 'border-red-500' : 'border-slate-200'}`}
-            >
-              {MEDICINE_FORM_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-            {errors.form && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.form}</p>}
-          </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Form / Category</label>
+                <select 
+                  name="form"
+                  value={formData.form}
+                  onChange={handleChange}
+                  className={`w-full bg-slate-50 border rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer ${errors.form ? 'border-red-500' : 'border-slate-200'}`}
+                >
+                  {MEDICINE_FORM_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                {errors.form && <p className="text-[10px] font-bold text-red-500 uppercase mt-1 ml-1">{errors.form}</p>}
+              </div>
 
-          <div>
-            <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Schedule Drug</label>
-            <select 
-              name="scheduleType"
-              value={formData.scheduleType}
-              onChange={handleChange}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
-            >
-              {MEDICINE_SCHEDULE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Schedule Drug</label>
+                <select 
+                  name="scheduleType"
+                  value={formData.scheduleType}
+                  onChange={handleChange}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-blue-500/10 focus:border-orange-500 outline-none transition-all font-bold appearance-none cursor-pointer"
+                >
+                  {MEDICINE_SCHEDULE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
           <div className="md:col-span-2">
             <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 ml-1 tracking-widest">Manufacturer</label>

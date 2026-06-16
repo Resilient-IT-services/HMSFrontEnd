@@ -43,6 +43,8 @@ export type BloodGroup =
 export type DoctorAvailabilityExceptionType = 'FULL_DAY_OFF' | 'MODIFIED' | 'ADDED';
 export type MedicineForm = 'TABLET' | 'SYRUP' | 'INJECTION' | 'CAPSULE' | 'OINTMENT' | 'CREAM' | 'DROPS' | 'INHALER';
 export type MedicineScheduleType = 'SCHEDULE_H' | 'SCHEDULE_G' | 'SCHEDULE_X' | 'OTC';
+export type DepartmentType = 'PHARMACY' | 'LABORATORY';
+export type ItemType = 'MEDICINE' | 'CONSUMABLE';
 export type PharmacySaleType = 'VISIT' | 'WALKIN';
 export type PharmacySaleStatus = 'DRAFT' | 'COMPLETED' | 'CANCELLED';
 export type InventoryUnit = 'PIECE' | 'BOX' | 'STRIP' | 'BOTTLE' | 'PACK' | 'VIAL' | 'AMPULE';
@@ -549,12 +551,16 @@ export interface DoctorResponse {
 // Pharmacy types
 export interface MedicineResponse {
   id: string;
+  itemType: ItemType;
+  department?: DepartmentType;
   name: string;
+  itemCode?: string;
+  category?: string;
+  baseUnit?: string;
   genericName?: string;
   composition?: string;
   strength?: string;
   form?: MedicineForm;
-  category?: string;
   manufacturer?: string;
   batchNumber?: string;
   expiryDate?: string;
@@ -569,6 +575,8 @@ export interface MedicineResponse {
   humidity?: string;
   specialNotes?: string;
   scheduleType?: MedicineScheduleType;
+  isBatchTracked?: boolean;
+  isExpiryTracked?: boolean;
   /** @deprecated use scheduleType */
   scheduleDrug?: string;
   /** @deprecated use scheduleType */
@@ -579,16 +587,22 @@ export type MedicineRequestDTO = Omit<MedicineResponse, 'id'> & { id?: string };
 
 export interface MedicineSummaryDTO {
   id: string;
+  itemType: ItemType;
+  department?: DepartmentType;
   name: string;
+  itemCode?: string;
+  category?: string;
+  baseUnit?: string;
   genericName?: string;
   composition?: string;
   strength?: string;
   form?: MedicineForm;
-  category?: string;
   manufacturer?: string;
   currentStock?: number;
   thresholdQuantity?: number;
   hsnCode?: string;
+  isBatchTracked?: boolean;
+  isExpiryTracked?: boolean;
 }
 
 export interface MedicineImportResponse {

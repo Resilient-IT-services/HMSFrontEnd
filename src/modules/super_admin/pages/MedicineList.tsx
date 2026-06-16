@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { Table, Column } from '@/components/ui/Table';
 import { MedicineResponse } from '@/types/api';
 import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
@@ -15,8 +15,10 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
+import { cn } from '@/lib/cn';
+import { pharmacyService } from '@/services/pharmacyService';
 
-const DEFAULT_CATEGORY_OPTIONS = [
+const CATEGORY_OPTIONS = [
   'TABLET',
   'CAPSULE',
   'SYRUP',
@@ -24,10 +26,16 @@ const DEFAULT_CATEGORY_OPTIONS = [
   'OINTMENT',
   'CREAM',
   'DROPS',
-  'INHALER'
+  'INHALER',
+  'GEL',
+  'LOTION',
+  'POWDER',
+  'SPRAY',
+  'SUSPENSION',
+  'VACCINE'
 ];
 
-const formatCategoryLabel = (value: string) =>
+const formatLabel = (value: string) =>
   value
     .toLowerCase()
     .replaceAll('_', ' ')
@@ -42,8 +50,8 @@ export function MedicineList() {
     loading,
     searchTerm,
     setSearchTerm,
-    categoryFilter: selectedCategory,
-    setCategoryFilter: setSelectedCategory,
+    categoryFilter,
+    setCategoryFilter,
     page,
     setPage,
     pageSize,
@@ -61,225 +69,198 @@ export function MedicineList() {
     handleUpload,
     handleDeleteMedicine,
     refresh
-  } = useMedicines();
+  } = useMedicines('MEDICINE');
 
-  const categories = React.useMemo(() => {
-    const values = new Set(DEFAULT_CATEGORY_OPTIONS);
-    medicines.forEach((medicine) => {
-      const category = medicine.form || medicine.category;
-      if (category) values.add(category);
-    });
-    return [...values].toSorted((a, b) => formatCategoryLabel(a).localeCompare(formatCategoryLabel(b)));
-  }, [medicines]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Define Columns for the generic Table
-  const columns: Column<MedicineResponse>[] = [
+  const closeEditModal = () => {
+    setShowEditModal(false);
+    setSelectedMedicine(null);
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await pharmacyService.downloadMedicineTemplate();
+      const url = globalThis.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Medicine_Import_Template.xlsx';
+      document.body.append(a);
+      a.click();
+      globalThis.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Download error', error);
+    }
+  };
+
+  const medicineColumns: Column<MedicineResponse>[] = [
     {
-      header: 'Medicine Details',
-
+      header: 'Product Details',
+      width: '30%',
       render: (m) => (
         <div className="flex items-center gap-3">
-          <Avatar name={m.name} variant="orange" />
+          <Avatar name={m.name} variant="orange" className="h-8 w-8 text-[10px]" />
           <div>
-            <p className="text-sm font-bold leading-tight text-slate-900">{m.name}</p>
-            <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{m.manufacturer || 'Unknown Manufacturer'} • {m.strength}</p>
+            <p className="text-[13px] font-bold text-slate-900 leading-tight">{m.name}</p>
+            <p className="text-[9px] font-bold uppercase text-slate-400">{m.manufacturer || 'General'}</p>
           </div>
         </div>
       )
     },
     {
-      header: 'Generic Name',
-
+      header: 'Composition / Generic',
+      width: '30%',
       render: (m) => (
-        <span className="text-xs font-bold text-slate-700">{m.genericName}</span>
+        <div className="max-w-[300px]">
+          <p className="text-[11px] font-semibold text-slate-600 truncate">{m.genericName || '-'}</p>
+          <p className="text-[9px] text-slate-400 truncate" title={m.composition}>{m.composition || '-'}</p>
+        </div>
       )
     },
     {
-      header: 'Composition',
+      header: 'Type / Str',
+      width: '15%',
       render: (m) => (
-        <span className="text-[10px] text-slate-500 font-medium line-clamp-2 max-w-[200px]" title={m.composition}>
-          {m.composition || '-'}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[10px] font-bold text-slate-700">{m.strength || 'N/A'}</span>
+          <span className="text-[9px] font-medium text-slate-400 uppercase">{m.form || m.category || 'General'}</span>
+        </div>
       )
     },
     {
-      header: 'Category',
-      headerClassName: 'text-center',
-      className: 'text-center',
+      header: 'Tracking',
+      width: '12%',
       render: (m) => (
-        <Badge variant="slate" size="sm">{m.form || m.category}</Badge>
-      )
-    },
-    {
-      header: 'HSN Code',
-      render: (m) => (
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{m.hsnCode || '-'}</span>
+        <div className="flex gap-2">
+          <div className={cn("size-2 rounded-full shadow-inner", m.isBatchTracked ? "bg-emerald-500" : "bg-slate-100")} title="Batch"></div>
+          <div className={cn("size-2 rounded-full shadow-inner", m.isExpiryTracked ? "bg-emerald-500" : "bg-slate-100")} title="Expiry"></div>
+          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">B/E</span>
+        </div>
       )
     },
     {
       header: 'Actions',
-      headerClassName: 'text-right',
-      className: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '120px',
       render: (m) => (
-        <div className="flex items-center justify-end gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="edit"
-            onClick={(e) => {
-              e.stopPropagation();
-              setSelectedMedicine(m);
-              setShowEditModal(true);
-            }}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="delete"
-            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDeleteMedicine(m.id, m.name);
-            }}
-          />
+        <div className="flex items-center justify-center gap-1">
+          <button 
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setSelectedMedicine(m); setShowEditModal(true); }}
+            className="p-1.5 hover:bg-slate-100 rounded text-slate-400 hover:text-primary transition-colors"
+            title="Edit"
+          >
+            <span className="material-symbols-outlined text-[18px]">edit</span>
+          </button>
+          <button 
+            type="button"
+            onClick={(e) => { e.stopPropagation(); handleDeleteMedicine(m.id, m.name); }}
+            className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors"
+            title="Delete"
+          >
+            <span className="material-symbols-outlined text-[18px]">delete</span>
+          </button>
         </div>
       )
     }
   ];
 
   return (
-    <MainLayout title="Medicine Master Catalog">
-      <PageSurface
-        maxWidthClassName="max-w-[1600px]"
-        backgroundClassName="bg-[#f8f9fb]"
-        fontClassName="font-inter"
-      >
-        <div className="space-y-8 py-4 md:py-8">
-          <PageHeading
-            title="Medicine Master Management"
-            description="Global catalog for all hospitals. Manage or bulk import via Excel."
-          >
+    <MainLayout title="Medicine Catalog">
+      <PageSurface maxWidthClassName="max-w-[1400px]" backgroundClassName="bg-white">
+        <div className="space-y-8 py-4">
+          <PageHeading title="Medicine Master Catalog" description="Global centralized database for pharmaceutical products.">
             <div className="flex gap-2">
-              <Button variant="secondary" icon="upload_file" onClick={() => setShowImportModal(true)}>
-                Import Excel
-              </Button>
-              <Button icon="add" onClick={() => setShowAddModal(true)}>
-                Add Medicine
-              </Button>
+              <Button variant="secondary" icon="upload_file" onClick={() => setShowImportModal(true)} className="text-[11px]">Import Medicine</Button>
+              <Button icon="add" onClick={() => setShowAddModal(true)} className="text-[11px]">Add New Medicine</Button>
             </div>
           </PageHeading>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-            <div className="xl:col-span-3 space-y-6">
-              <div className="bg-white rounded-[2rem] border border-slate-200 p-6 space-y-6">
-                <div className="flex items-center gap-4 w-full">
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex items-center gap-4">
+            <div className="flex items-center flex-1 bg-white border border-slate-200 rounded-xl px-4 shadow-sm focus-within:border-primary transition-all">
+              <span className="material-symbols-outlined text-slate-400 mr-2">search</span>
+              <input
+                type="text"
+                placeholder="Search globally by name, brand, composition..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="h-10 flex-1 bg-transparent text-sm font-semibold outline-none placeholder:text-slate-300"
+              />
+            </div>
 
-                  {/* Search */}
-                  <div className="flex-1">
-                    <input
-                        type="text"
-                        placeholder="Search by name, generic name, composition or HSN code..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm font-medium outline-none"
-                    />
-                  </div>
+            <div className="w-[200px] shrink-0">
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="h-10 w-full bg-white border border-slate-200 rounded-xl px-4 text-sm font-bold outline-none focus:border-primary transition-all appearance-none cursor-pointer shadow-sm"
+                style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', backgroundSize: '16px' }}
+              >
+                <option value="">All Categories</option>
+                {CATEGORY_OPTIONS.map(opt => (
+                  <option key={opt} value={opt}>{formatLabel(opt)}</option>
+                ))}
+              </select>
+            </div>
 
-                  {/* Category Filter */}
-                  <div className="w-[220px] shrink-0">
-                    <select
-                        value={selectedCategory || ""}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold outline-none"
-                    >
-                      <option value="">All Category</option>
+            <button type="button" onClick={() => refresh()} className="p-2 hover:bg-slate-200 rounded-lg transition-colors shrink-0" title="Refresh">
+              <span className="material-symbols-outlined text-[20px] text-slate-400">refresh</span>
+            </button>
+          </div>
 
-                      {categories.map((category) => (
-                          <option key={category} value={category}>
-                            {formatCategoryLabel(category)}
-                          </option>
-                      ))}
-                    </select>
-                  </div>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Pharmaceutical Master List</h2>
+              <span className="text-[9px] font-black text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">{totalMedicines} Products</span>
+            </div>
+            
+            <div className="min-h-[500px]">
+              {loading && medicines.length === 0 ? (
+                <div className="p-24 text-center"><LoadingSkeleton /></div>
+              ) : (
+                <Table columns={medicineColumns} data={medicines} isLoading={loading} hideHeaderOnMobile={false} emptyMessage="No medicines found." />
+              )}
+            </div>
 
-                  {/* Refresh */}
-                  <button
-                      onClick={() => refresh()}
-                      className="h-12 w-12 shrink-0 rounded-2xl border border-slate-200 bg-white flex items-center justify-center"
-                  >
-                    ↻
-                  </button>
-
-                </div>
-
-                {loading && medicines.length === 0 ? (
-                  <div className="p-12"><LoadingSkeleton /></div>
-                ) : (
-                  <Table 
-                    columns={columns} 
-                    data={medicines} 
-                    isLoading={loading}
-                    onRowClick={(m) => setSelectedMedicine(m)}
-                    rowClassName={(m) => selectedMedicine?.id === m.id ? 'bg-primary/5 border-l-4 border-primary' : ''}
-                  />
-                )}
-                <Pagination
+            <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+               <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">Global Catalog v1.2</p>
+               <Pagination
                   page={page}
                   totalElements={totalMedicines}
                   pageSize={pageSize}
                   onPageChange={setPage}
                   onPageSizeChange={setPageSize}
-                  label="medicines"
+                  label="total global catalog items"
                 />
-              </div>
             </div>
           </div>
         </div>
       </PageSurface>
 
-        {/* Import Modal */}
-        <Modal
-          isOpen={showImportModal}
-          onClose={() => setShowImportModal(false)}
-          title="Bulk Import Medicines"
-          size="2xl"
-        >
-          <div className="p-8 space-y-8">
-            <div className="border-2 border-dashed border-slate-200 rounded-[2rem] p-12 flex flex-col items-center justify-center gap-4 bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative group">
-              <input type="file" accept=".xlsx, .xls" onChange={handleFileChange} className="absolute inset-0 opacity-0 cursor-pointer" />
-              <div className="w-16 h-16 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center text-slate-400 group-hover:scale-110 group-hover:text-primary transition-all duration-300">
-                <span className="material-symbols-outlined text-4xl">cloud_upload</span>
-              </div>
-              <p className="font-black text-slate-600 text-sm uppercase tracking-tight">{file ? file.name : 'Click or Drag Excel File'}</p>
-              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Supported formats: .xlsx, .xls</p>
-            </div>
-
-            <div className="bg-slate-900 text-white p-6 rounded-[1.5rem] space-y-3 relative overflow-hidden shadow-xl shadow-slate-900/10">
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-8xl opacity-10 -rotate-12">info</span>
-              <h3 className="font-black text-xs uppercase tracking-widest text-primary leading-none mb-2">Requirement Protocol</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Your Excel sheet must contain the following columns in order:
-                <span className="block mt-2 font-bold text-white/80">Name, Generic Name, Composition, Strength, Form, Manufacturer, Schedule Type, Category, Threshold Quantity (Min Stock), HSN Code.</span>
-                <span className="block mt-1 text-[10px] text-primary font-bold italic">Note: HSN Code should be in Column J (Index 9).</span>
-              </p>
-            </div>
-
-            <div className="flex gap-4 pt-4">
-              <button onClick={() => setShowImportModal(false)} className="flex-1 py-4 border border-slate-200 rounded-2xl font-black text-xs uppercase tracking-widest text-slate-500 hover:bg-slate-50 transition-all active:scale-95">Cancel</button>
-              <button 
-                onClick={handleUpload} 
-                disabled={!file || loading} 
-                className="flex-1 py-4 bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary/20 hover:bg-primary-dark transition-all active:scale-95 disabled:opacity-40"
-              >
-                {loading ? 'Processing Batch...' : 'Begin Bulk Import'}
-              </button>
-            </div>
+      {/* Modals */}
+      <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Bulk Import Medicines" size="xl">
+        <div className="p-10 space-y-6 text-center">
+          <div className="flex justify-end -mt-4 mb-2">
+            <button 
+              onClick={handleDownloadTemplate}
+              className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-sm">download</span>
+              Download Sample Template
+            </button>
           </div>
-        </Modal>
+          <div onClick={() => fileInputRef.current?.click()} className="border-4 border-dashed border-slate-100 rounded-[3rem] p-16 bg-slate-50/50 hover:bg-slate-50 transition-all cursor-pointer group relative overflow-hidden">
+            <input type="file" ref={fileInputRef} className="hidden" accept=".xlsx, .xls" onChange={handleFileChange} />
+            <span className="material-symbols-outlined text-6xl text-slate-300 mb-4 group-hover:text-orange-500 transition-all">cloud_upload</span>
+            <p className="font-black text-slate-600 uppercase tracking-tight">{file ? file.name : 'Select Medicine Sheet'}</p>
+          </div>
+          <Button className="w-full py-5 rounded-2xl font-black uppercase tracking-widest" onClick={handleUpload} disabled={!file || loading}>Start Import Process</Button>
+        </div>
+      </Modal>
 
-        {/* Modals */}
-        {showAddModal && <AddMedicineModal isOpen={true} onClose={() => setShowAddModal(false)} onSuccess={refresh} />}
-        {showEditModal && selectedMedicine && <EditMedicineModal medicine={selectedMedicine} onClose={() => setShowEditModal(false)} onSuccess={refresh} />}
+      {showAddModal && <AddMedicineModal isOpen={true} onClose={() => setShowAddModal(false)} onSuccess={refresh} />}
+      {showEditModal && selectedMedicine && <EditMedicineModal medicine={selectedMedicine} onClose={closeEditModal} onSuccess={refresh} />}
     </MainLayout>
   );
 }

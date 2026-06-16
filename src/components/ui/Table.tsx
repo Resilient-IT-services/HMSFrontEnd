@@ -12,6 +12,7 @@ export interface Column<T> {
   /** Custom render function for complex HTML/Components */
   render?: (row: T) => React.ReactNode;
   /** Custom width or alignment */
+  width?: string;
   className?: string;
   headerClassName?: string;
   /** Sorting capability */

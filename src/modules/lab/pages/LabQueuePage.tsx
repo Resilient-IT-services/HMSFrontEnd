@@ -40,7 +40,7 @@ const LabQueuePage = () => {
   const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
   
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
-  const [verifyData, setVerifyData] = useState<{ id: string, status: 'VERIFIED' | 'REJECTED' } | null>(null);
+  const [verifyData, setVerifyData] = useState<any | null>(null);
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -68,7 +68,7 @@ const LabQueuePage = () => {
         const init = async () => {
             await fetchQueue();
         };
-        init();
+        void init();
     }, [activeTab, fetchQueue]); // Fetch when activeTab changes
 
   const handleCollectSample = async (orderTestId: string) => {
@@ -77,7 +77,7 @@ const LabQueuePage = () => {
       const res = await labApi.collectSample(orderTestId);
       if (res.success) {
         triggerGlobalToast(`Sample Collected: ${res.data}`, 'success');
-        fetchQueue();
+        void fetchQueue();
       }
     } catch (error: any) {
       console.error('Failed to collect sample:', error);
@@ -93,7 +93,7 @@ const LabQueuePage = () => {
       const res = await labApi.markProcessing(orderTestId);
       if (res.success) {
         triggerGlobalToast('Test marked as Processing', 'success');
-        fetchQueue();
+        void fetchQueue();
       }
     } catch (error: any) {
       console.error('Failed to mark processing:', error);
@@ -113,8 +113,8 @@ const LabQueuePage = () => {
     setIsBillingModalOpen(true);
   };
 
-  const handleVerify = (orderTestId: string, status: 'VERIFIED' | 'REJECTED') => {
-    setVerifyData({ id: orderTestId, status });
+  const handleVerify = (item: any, status: 'VERIFIED' | 'REJECTED') => {
+    setVerifyData({ ...item, verificationStatus: status });
     setIsVerifyModalOpen(true);
   };
 
@@ -123,12 +123,12 @@ const LabQueuePage = () => {
 
     try {
         setLoading(true);
-        const res = await labApi.verifyResult(verifyData.id, remarks, verifyData.status);
+        const res = await labApi.verifyResult(verifyData.orderTestId, remarks, verifyData.verificationStatus);
         if (res.success) {
-            triggerGlobalToast(`Result ${verifyData.status.toLowerCase()} successfully`, 'success');
+            triggerGlobalToast(`Result ${verifyData.verificationStatus.toLowerCase()} successfully`, 'success');
             setIsVerifyModalOpen(false);
             setVerifyData(null);
-            fetchQueue();
+            void fetchQueue();
         }
     } catch (error) {
         console.error('Failed to verify:', error);
@@ -367,7 +367,7 @@ const LabQueuePage = () => {
                     setIsVerifyModalOpen(false);
                     setVerifyData(null);
                 }}
-                status={verifyData.status}
+                item={verifyData}
                 onConfirm={handleConfirmVerify}
             />
         )}
@@ -377,23 +377,79 @@ const LabQueuePage = () => {
 };
 
 // --- Lab Verification Modal ---
-const LabVerificationModal = ({ isOpen, onClose, status, onConfirm }: { isOpen: boolean, onClose: () => void, status: 'VERIFIED' | 'REJECTED', onConfirm: (remarks: string) => void }) => {
+const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: boolean, onClose: () => void, item: any, onConfirm: (remarks: string) => void }) => {
     const [remarks, setRemarks] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [parameters, setParameters] = useState<any[]>([]);
+    const [findings, setFindings] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchResults = async () => {
+            setLoading(true);
+            try {
+                if (item.resultEntryType?.toUpperCase() === 'PARAMETER') {
+                    const res = await labApi.getParametersByOrderTest(item.orderTestId);
+                    if (res.success) setParameters(res.data || []);
+                } else {
+                    // For narrative, we might need an API to get narrative results.
+                    // Assuming for now findings might be in item or fetched differently.
+                    // If your API doesn't provide narrative result here, we can add it.
+                    setFindings(item.findings || 'Findings already recorded.');
+                }
+            } catch (error) {
+                console.error('Failed to fetch results for verification:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (isOpen && item) void fetchResults();
+    }, [isOpen, item]);
+
+    const status = item.verificationStatus;
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`${status === 'VERIFIED' ? 'Verify' : 'Reject'} Lab Result`} size="md">
-            <div className="p-4 space-y-4">
+        <Modal isOpen={isOpen} onClose={onClose} title={`${status === 'VERIFIED' ? 'Verify' : 'Reject'} Result: ${item.testName}`} size="lg">
+            <div className="p-6 space-y-6">
+                {/* Result Display Section */}
+                <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 space-y-4">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-2">Entered Results</h4>
+                    
+                    {loading ? (
+                        <div className="py-4 text-center italic text-slate-400 text-xs">Loading data...</div>
+                    ) : item.resultEntryType?.toUpperCase() === 'PARAMETER' ? (
+                        <div className="space-y-3">
+                            {parameters.length > 0 ? parameters.map((param, idx) => (
+                                <div key={idx} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
+                                    <span className="font-bold text-slate-600">{param.parameterName}</span>
+                                    <div className="text-right">
+                                        <span className={`font-black ${param.abnormal ? 'text-red-600' : 'text-slate-900'}`}>
+                                            {param.resultValue} {param.unit}
+                                        </span>
+                                    </div>
+                                </div>
+                            )) : (
+                                <p className="text-xs text-slate-400 italic">No parameter data found.</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="p-2">
+                             <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{findings || item.findings || 'Findings recorded.'}</p>
+                        </div>
+                    )}
+                </div>
+
                 <div>
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 ml-1">
                         Verification Remarks
                     </label>
                     <textarea
-                        className="w-full h-32 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium outline-none focus:bg-white focus:border-primary transition-all resize-none"
+                        className="w-full h-32 bg-white border border-slate-200 rounded-xl p-3 text-sm font-medium outline-none focus:border-primary transition-all resize-none shadow-inner"
                         placeholder={status === 'VERIFIED' ? "Enter 'OK' or specific notes for the doctor..." : "Reason for rejection..."}
                         value={remarks}
                         onChange={(e) => setRemarks(e.target.value)}
                     />
                 </div>
+                
                 <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
                     <Button variant="secondary" onClick={onClose}>Cancel</Button>
                     <Button 

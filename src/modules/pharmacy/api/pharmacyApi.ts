@@ -78,6 +78,15 @@ export const pharmacyApi = {
     return response.data;
   },
 
+  importInventoryItems: async (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<any>('/medicine-master/import-inventory-items', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
   getMedicineStock: async (params?: { 
     search?: string; 
     page?: number; 

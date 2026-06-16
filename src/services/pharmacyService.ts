@@ -89,10 +89,29 @@ export const pharmacyService = {
     return response.data;
   },
 
+  async downloadMedicineTemplate(): Promise<Blob> {
+    const response = await apiClient.get('/pharmacy/medicines/template', { responseType: 'blob' });
+    return response.data;
+  },
+
+  async downloadConsumableTemplate(): Promise<Blob> {
+    const response = await apiClient.get('/medicine-master/consumables/template', { responseType: 'blob' });
+    return response.data;
+  },
+
   async importMaster(file: File): Promise<ApiResponse<void>> {
     const formData = new FormData();
     formData.append('file', file);
     const response = await apiClient.post<ApiResponse<void>>('/pharmacy/medicines/import', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
+  async importInventoryItems(file: File): Promise<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<any>('/medicine-master/import-inventory-items', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;

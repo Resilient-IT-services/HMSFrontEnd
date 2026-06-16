@@ -16,6 +16,7 @@ interface AddMedicineModalProps {
 const AddMedicineModal: React.FC<AddMedicineModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<MedicineRequestDTO>({
+    itemType: 'MEDICINE',
     name: '',
     genericName: '',
     composition: '',

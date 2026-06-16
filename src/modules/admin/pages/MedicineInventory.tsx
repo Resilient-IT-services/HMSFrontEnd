@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
+import { pharmacyService } from '@/services/pharmacyService';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { MedicineResponse } from '@/types/api';
@@ -121,6 +122,23 @@ export const MedicineInventory = () => {
     const file = e.target.files?.[0];
     if (file) {
       setImportFile(file);
+    }
+  };
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const blob = await pharmacyService.downloadMedicineTemplate();
+      const url = globalThis.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'Medicine_Import_Template.xlsx';
+      document.body.append(a);
+      a.click();
+      globalThis.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (error) {
+      console.error('Download error', error);
+      triggerGlobalToast('Failed to download template', 'error');
     }
   };
 
@@ -341,9 +359,17 @@ export const MedicineInventory = () => {
                   {/* Micro Info bar */}
                   <div className="flex gap-2 items-center p-2.5 bg-[var(--primary-light)]/10 border border-[var(--primary-light)]/20 rounded-xl">
                     <AlertCircle className="size-3.5 text-[var(--primary)] shrink-0" />
-                    <p className="text-[10px] font-bold text-[var(--text-primary)] uppercase tracking-wide opacity-80">
-                      System auto-skips duplicate entries smoothly.
-                    </p>
+                    <div className="flex-1 flex justify-between items-center">
+                      <p className="text-[10px] font-bold text-[var(--text-primary)] uppercase tracking-wide opacity-80">
+                        System auto-skips duplicate entries.
+                      </p>
+                      <button 
+                        onClick={handleDownloadTemplate}
+                        className="text-[10px] font-black text-[var(--primary)] hover:underline uppercase tracking-widest flex items-center gap-1"
+                      >
+                        <RefreshCw className="size-2.5" /> Template
+                      </button>
+                    </div>
                   </div>
 
                   {/* High Tech Dropzone */}

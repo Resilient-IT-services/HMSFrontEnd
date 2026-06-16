@@ -28,7 +28,7 @@ const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
     const [saving, setSaving] = useState(false);
 
     useEffect(() => {
-        if (isOpen && orderTestId && resultEntryType === 'PARAMETER') {
+        if (isOpen && orderTestId && resultEntryType?.toUpperCase() === 'PARAMETER') {
             const fetchParams = async () => {
                 try {
                     setLoading(true);
@@ -48,7 +48,7 @@ const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
                     setLoading(false);
                 }
             };
-            fetchParams();
+            void fetchParams();
         }
     }, [isOpen, orderTestId, resultEntryType]);
 
@@ -57,9 +57,9 @@ const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
         try {
             const payload = {
                 orderTestId: orderTestId,
-                findings: resultEntryType === 'NARRATIVE' ? findings : undefined,
-                results: resultEntryType === 'PARAMETER' ? Object.entries(results).map(([paramId, value]) => ({
-                    parameterId: paramId,
+                findings: resultEntryType?.toUpperCase() === 'NARRATIVE' ? findings : undefined,
+                results: resultEntryType?.toUpperCase() === 'PARAMETER' ? Object.entries(results).map(([parameterId, value]) => ({
+                    parameterId: parameterId,
                     value: value,
                     abnormal: false,
                     critical: false
@@ -79,11 +79,11 @@ const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title={`${testName} - Result Entry`} size={resultEntryType === 'NARRATIVE' ? '2xl' : 'xl'}>
+        <Modal isOpen={isOpen} onClose={onClose} title={`${testName} - Result Entry`} size={resultEntryType?.toUpperCase() === 'NARRATIVE' ? '2xl' : 'xl'}>
             <div className="space-y-6">
                 {loading ? (
                     <div className="py-10 text-center italic text-slate-400 font-bold">Loading test parameters...</div>
-                ) : resultEntryType === 'NARRATIVE' ? (
+                ) : resultEntryType?.toUpperCase() === 'NARRATIVE' ? (
                     <div className="p-4 space-y-3">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Findings / Report Text</label>
                         <textarea
@@ -122,8 +122,8 @@ const LabResultEntryModal: React.FC<LabResultEntryModalProps> = ({
 
                 <div className="flex justify-end gap-3 pt-6 border-t border-slate-100 p-4">
                     <Button variant="secondary" onClick={onClose} disabled={saving}>Cancel</Button>
-                    <Button onClick={handleSave} isLoading={saving} disabled={loading || (resultEntryType === 'PARAMETER' && parameters.length === 0)}>
-                        {resultEntryType === 'NARRATIVE' ? 'Complete Findings' : 'Complete & Save'}
+                    <Button onClick={handleSave} isLoading={saving} disabled={loading || (resultEntryType?.toUpperCase() === 'PARAMETER' && parameters.length === 0)}>
+                        {resultEntryType?.toUpperCase() === 'NARRATIVE' ? 'Complete Findings' : 'Complete & Save'}
                     </Button>
                 </div>
             </div>
