@@ -112,10 +112,13 @@ export const PharmacySalesPage = () => {
 
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      calculateTotalTaxes();
+      const needsCalculation = cart.some(item => (item as any).taxAmount === undefined);
+      if (needsCalculation && !calculatingTax && currentHospitalId) {
+        calculateTotalTaxes();
+      }
     }, 1000);
     return () => clearTimeout(timer);
-  }, [calculateTotalTaxes]);
+  }, [cart, calculatingTax, currentHospitalId, calculateTotalTaxes]);
 
   const handlePatientSearch = async (val: string) => {
     setPatientSearch(val);
@@ -200,8 +203,15 @@ export const PharmacySalesPage = () => {
     triggerGlobalToast(`${medicine.name} added to cart`, 'success');
   };
 
+  const resetPage = () => {
+    dispatch(clearCart());
+    setSelectedPatient(null);
+    setPatientSearch('');
+    setTaxBreakdown({ totalTax: 0, components: [] });
+  };
+
   const handleCheckout = async () => {
-    if (cart.length === 0) return;
+    if (cart.length === 0 || loading) return;
     if (!selectedPatient) {
       triggerGlobalToast('Please select a patient before checkout', 'warning');
       return;
@@ -214,7 +224,7 @@ export const PharmacySalesPage = () => {
         medicineBatchId: (item as any).medicineId ? item.id : undefined,
         quantity: item.quantity,
         unitPrice: item.sellingPrice || 0,
-        taxAmount: 0
+        taxAmount: (item as any).taxAmount || 0
       }));
 
       const response = await pharmacyApi.createSale({ 
@@ -232,9 +242,9 @@ export const PharmacySalesPage = () => {
         setLastSale(response.data);
         setShowSuccessModal(true);
         triggerGlobalToast('Sale completed and bill generated', 'success');
-        dispatch(clearCart());
-        setSelectedPatient(null);
-        setPatientSearch('');
+        resetPage();
+      } else {
+        triggerGlobalToast(response.message || 'Failed to complete sale', 'error');
       }
     } catch (error) {
       console.error(error);
@@ -502,7 +512,10 @@ export const PharmacySalesPage = () => {
         {/* Success Modal */}
         <Modal
             isOpen={showSuccessModal}
-            onClose={() => setShowSuccessModal(false)}
+            onClose={() => {
+              setShowSuccessModal(false);
+              resetPage();
+            }}
             title="Sale Completed Successfully"
         >
           <div className="p-8 text-center">
@@ -529,7 +542,10 @@ export const PharmacySalesPage = () => {
                   size="lg"
                   fullWidth
                   icon="add_shopping_cart"
-                  onClick={() => setShowSuccessModal(false)}
+                  onClick={() => {
+                    setShowSuccessModal(false);
+                    resetPage();
+                  }}
                   className="text-[10px] font-black uppercase tracking-wider"
               >
                 New Billing

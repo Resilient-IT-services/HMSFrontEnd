@@ -197,7 +197,7 @@ export default function QuickPharmacyBillingPage() {
       const needsCalculation = cart.some(item => 
         item.id && 
         item.selectedQuantity > 0 && 
-        (item.taxAmount === undefined || item.taxAmount === 0)
+        item.taxAmount === undefined
       );
 
       if (needsCalculation && !calculatingTaxes && currentHospitalId) {
@@ -284,6 +284,23 @@ export default function QuickPharmacyBillingPage() {
   // Success Modal State
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [lastSale, setLastSale] = useState<QuickPharmacySaleResponse | null>(null);
+
+  const resetForm = () => {
+    setCart([]);
+    setSelectedPatient(null);
+    setSelectedDoctor(null);
+    setExternalDoctorName('');
+    setCustomerName('');
+    setCustomerPhone('');
+    setPrescriptionId(null);
+    setPrescriptionStatus(null);
+    setPrescribedDoctorId(null);
+    setVisitId(null);
+    setReferenceNumber('');
+    setManualAmountPaid(null);
+    setIsAutoPaid(true);
+    initialized.current = false;
+  };
 
   const validateSale = () => {
     if (cart.length === 0) return false;
@@ -549,14 +566,15 @@ export default function QuickPharmacyBillingPage() {
       if (response.success && response.data) {
         setLastSale(response.data);
         setShowSuccessModal(true);
+        resetForm(); // Reset all form state on success
         triggerGlobalToast('Sale completed successfully', 'success');
       } else {
         triggerGlobalToast(response.message || 'Failed to create sale', 'error');
-        setIsSubmitting(false);
       }
     } catch (error: any) {
       console.error(error);
       triggerGlobalToast(error.response?.data?.message || 'An error occurred', 'error');
+    } finally {
       setIsSubmitting(false);
     }
   };
@@ -909,7 +927,10 @@ export default function QuickPharmacyBillingPage() {
         {/* Success Modal */}
         <Modal
             isOpen={showSuccessModal}
-            onClose={() => setShowSuccessModal(false)}
+            onClose={() => {
+              setShowSuccessModal(false);
+              resetForm();
+            }}
             title="Sale Completed Successfully"
         >
           <div className="p-8 text-center">
