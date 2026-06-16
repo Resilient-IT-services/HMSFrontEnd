@@ -23,9 +23,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { FileSpreadsheet, CheckCircle2, RefreshCw, AlertCircle, Trash2, HelpCircle } from 'lucide-react';
-import LoadingSkeleton from '@/modules/pharmacy/components/LoadingSkeleton';
-import { cn } from '@/lib/cn';
+import { FileSpreadsheet, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
 
 export function ConsumableCatalog() {
   const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
