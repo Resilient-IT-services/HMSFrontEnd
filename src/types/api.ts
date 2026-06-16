@@ -714,6 +714,7 @@ export interface QuickPharmacySaleResponse {
   totalAmount: number;
   taxAmount?: number;
   status: PharmacySaleStatus;
+  saleType: PharmacySaleType;
   paymentId?: string;
   receiptNumber?: string;
   customerName?: string;

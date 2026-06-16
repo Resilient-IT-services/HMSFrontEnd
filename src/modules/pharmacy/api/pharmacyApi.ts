@@ -218,6 +218,13 @@ export const pharmacyApi = {
     return response.data;
   },
 
+  getSales: async (params?: { search?: string; page?: number; size?: number; saleType?: string; sort?: string } & Record<string, any>) => {
+    const queryParams: any = { ...params };
+    if (queryParams.search !== undefined && !queryParams.search.trim()) delete queryParams.search;
+    const response = await apiClient.get<ApiResponse<PageResponse<QuickPharmacySaleResponse>>>('/pharmacy/sales', { params: queryParams });
+    return response.data;
+  },
+
   getSale: async (id: string) => {
     const response = await apiClient.get<ApiResponse<QuickPharmacySaleResponse>>(`/pharmacy/sales/${id}`);
     return response.data;
