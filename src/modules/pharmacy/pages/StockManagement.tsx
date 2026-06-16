@@ -10,7 +10,6 @@ import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
 import { Table, Column } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
@@ -38,6 +37,7 @@ export const StockManagement = () => {
     selectedMedicineForView,
     setSelectedMedicineForView,
     handleExport,
+    handleDownloadTemplate,
     handleImport,
     refresh,
     stats
@@ -55,21 +55,6 @@ export const StockManagement = () => {
       }
     });
     input.click();
-  };
-
-  const downloadTemplate = () => {
-    const headers = [
-      'Medicine Name', 'Batch Number', 'Expiry Date (YYYY-MM-DD)', 'Quantity', 
-      'Purchase Price', 'Selling Price', 'HSN Code', 'Supplier State', 'Tax Inclusive (Y/N)'
-    ];
-    const csvContent = "data:text/csv;charset=utf-8," + headers.join(",");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "stock_import_template.csv");
-    document.body.append(link);
-    link.click();
-    link.remove();
   };
 
   const columns: Column<PharmacyStockDTO>[] = [
@@ -235,7 +220,7 @@ export const StockManagement = () => {
             <Button
               variant="secondary"
               icon="download"
-              onClick={downloadTemplate}
+              onClick={handleDownloadTemplate}
             >
               Download Template
             </Button>

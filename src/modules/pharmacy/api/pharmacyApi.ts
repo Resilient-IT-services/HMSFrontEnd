@@ -156,6 +156,13 @@ export const pharmacyApi = {
     return response.data;
   },
 
+  downloadStockTemplate: async () => {
+    const response = await apiClient.get('/pharmacy/stock/template', {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
   exportStockExcel: async () => {
     const response = await apiClient.get('/pharmacy/stock/export', {
       responseType: 'blob'

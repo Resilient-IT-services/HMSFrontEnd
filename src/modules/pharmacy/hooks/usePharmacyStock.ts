@@ -109,6 +109,26 @@ export const usePharmacyStock = () => {
     }
   };
 
+  const handleDownloadTemplate = async () => {
+    try {
+      setLoading(true);
+      const response = await pharmacyApi.downloadStockTemplate();
+      const url = globalThis.URL.createObjectURL(new Blob([response]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'stock_import_template.xlsx');
+      document.body.append(link);
+      link.click();
+      link.remove();
+      globalThis.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download template failed', error);
+      triggerGlobalToast('Failed to download template', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleImport = async (file: File) => {
     try {
       setImporting(true);
@@ -219,6 +239,7 @@ export const usePharmacyStock = () => {
     selectedMedicineForView,
     setSelectedMedicineForView,
     handleExport,
+    handleDownloadTemplate,
     handleImport,
     handleDelete,
     handleAdjust,
