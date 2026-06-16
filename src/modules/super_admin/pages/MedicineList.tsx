@@ -14,7 +14,6 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
 import { Avatar } from '@/components/ui/Avatar';
-import { Badge } from '@/components/ui/Badge';
 import { cn } from '@/lib/cn';
 import { pharmacyService } from '@/services/pharmacyService';
 

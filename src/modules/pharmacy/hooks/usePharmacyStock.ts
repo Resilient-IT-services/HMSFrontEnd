@@ -7,7 +7,6 @@ import { PharmacyStockDTO } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
 import { useDebounce } from '@/hooks/useDebounce';
 import { DEFAULT_PAGE_SIZE, DEFAULT_DEBOUNCE_MS } from '@/utils/constants';
-import dayjs from '@/lib/dayjs';
 
 export const usePharmacyStock = () => {
   const searchParams = useSearchParams();

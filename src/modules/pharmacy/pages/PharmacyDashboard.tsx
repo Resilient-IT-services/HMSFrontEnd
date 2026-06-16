@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import { pharmacyApi } from '../api/pharmacyApi';
-import { PrescriptionResponse, PharmacyStockDTO, QuickPharmacySaleResponse } from '@/types/api';
+import { PrescriptionResponse, PharmacyStockDTO } from '@/types/api';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
