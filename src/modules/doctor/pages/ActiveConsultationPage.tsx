@@ -279,8 +279,6 @@ export const ActiveConsultationPage = () => {
   const [currentHistoryIndex, setCurrentHistoryIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'meds' | 'labs'>('meds');
   const [detailedHistoryRecord, setDetailedHistoryRecord] = useState<AppointmentResponse | null>(null);
-  const [loadingHistory, setLoadingHistory] = useState(false);
-  const [loadingDetailedRecord, setLoadingDetailedRecord] = useState(false);
 
   useEffect(() => {
     const fetchDetailedRecord = async () => {
@@ -310,7 +308,6 @@ export const ActiveConsultationPage = () => {
       }
 
       await Promise.resolve();
-      setLoadingDetailedRecord(true);
       try {
         const res = await appointmentService.get(currentRecord.id);
         if (res.success && res.data) {
@@ -318,8 +315,6 @@ export const ActiveConsultationPage = () => {
         }
       } catch (error) {
         console.error('Failed to fetch detailed record:', error);
-      } finally {
-        setLoadingDetailedRecord(false);
       }
     };
 
@@ -331,7 +326,6 @@ export const ActiveConsultationPage = () => {
   const fetchHistory = useCallback(async () => {
     if (!appointment?.patientId || !appointment?.doctorId) return;
     await Promise.resolve();
-    setLoadingHistory(true);
     setCurrentHistoryIndex(0);
     try {
       const res = await appointmentService.list({
@@ -351,10 +345,8 @@ export const ActiveConsultationPage = () => {
     } catch (error) {
       console.error('Failed to fetch history:', error);
       triggerGlobalToast('Failed to load history', 'error');
-    } finally {
-      setLoadingHistory(false);
     }
-  }, [appointment?.patientId, appointment?.doctorId, appointment?.appointmentTime, appointmentId]);
+  }, [appointment, appointmentId]);
 
   useEffect(() => {
     if (showHistoryModal) {

@@ -460,10 +460,6 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
         return allPrices.find(p => p.testId === testId)?.standardPrice || 0;
     };
 
-    const getTestName = (testId: string) => {
-        return allTests.find(t => t.id === testId)?.testName || 'Unknown Test';
-    };
-
     const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0);
 
     const filteredTests = allTests.filter(t => 

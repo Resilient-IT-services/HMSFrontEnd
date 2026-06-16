@@ -16,7 +16,6 @@ import {
   IndianRupee,
   PlusSquare,
   UserRound,
-  BarChart,
   TrendingUp,
   Search,
   UserPlus,

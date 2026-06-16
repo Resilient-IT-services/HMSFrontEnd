@@ -5,13 +5,11 @@ import { cn } from '@/lib/cn';
 interface MetricsGridProps {
   items: MetricCardProps[];
   className?: string;
-  usePillsOnMobile?: boolean;
 }
 
 export const MetricsGrid: React.FC<MetricsGridProps> = ({
                                                           items,
-                                                          className,
-                                                          usePillsOnMobile = true
+                                                          className
                                                         }) => {
   return (
       <div

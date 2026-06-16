@@ -6,7 +6,6 @@ import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { Table, Column } from '@/components/ui/Table';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { labApi, LabMachineDTO } from '../api/labApi';
