@@ -251,7 +251,7 @@ export const PharmacyDashboard = () => {
       render: (p) => (
         <div>
           <p className="font-semibold text-slate-800">{p.patientName}</p>
-          <p className="text-[10px] text-slate-400 font-normal">PID: {p.patientCode || p.patientId || 'N/A'}</p>
+          <p className="text-[10px] text-slate-400 font-normal">PID: P-{p.id?.toString().slice(-4).toUpperCase() || 'N/A'}</p>
         </div>
       )
     },
