@@ -18,9 +18,11 @@ import {
 } from 'lucide-react';
 
 import dayjs from 'dayjs';
+import { formatRxNumber } from '@/utils/formatters';
 
 export const PharmacyDashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
+  const hospitalName = user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
   
   const [prescriptions, setPrescriptions] = useState<PrescriptionResponse[]>([]);
   const [recentSalesData, setRecentSalesData] = useState<any[]>([]);
@@ -223,7 +225,9 @@ export const PharmacyDashboard = () => {
       switch (key) {
         case 'id':
         case 'Rx Ref': {
-          result = result.filter(p => p.id?.toString().toLowerCase().includes(lowerValue));
+          result = result.filter(p =>
+            formatRxNumber(p.prescriptionNumber, p.id, p.createdAt, hospitalName).toLowerCase().includes(lowerValue)
+          );
           break;
         }
         case 'patientName':
@@ -255,7 +259,7 @@ export const PharmacyDashboard = () => {
       filterPlaceholder: 'Rx Ref...',
       render: (p) => (
         <span className="font-semibold text-slate-800">
-          #{p.id?.toString().slice(-6).toUpperCase() || 'N/A'}
+          {formatRxNumber(p.prescriptionNumber, p.id, p.createdAt, hospitalName)}
         </span>
       )
     },
@@ -267,7 +271,7 @@ export const PharmacyDashboard = () => {
       render: (p) => (
         <div>
           <p className="font-semibold text-slate-800">{p.patientName}</p>
-          <p className="text-[10px] text-slate-400 font-normal">PID: P-{p.id?.toString().slice(-4).toUpperCase() || 'N/A'}</p>
+          <p className="text-[10px] text-slate-400 font-normal">PID: {p.patientCode || 'N/A'}</p>
         </div>
       )
     },

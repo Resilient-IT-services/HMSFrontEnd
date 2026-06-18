@@ -2,14 +2,16 @@ import React from 'react';
 import { PrescriptionSummaryDTO } from '@/types/api';
 import Link from 'next/link';
 import { pharmacyApi } from '../api/pharmacyApi';
+import { formatRxNumber } from '@/utils/formatters';
 
 interface PrescriptionTableProps {
   prescriptions: PrescriptionSummaryDTO[];
   loading?: boolean;
   onRefresh?: () => void;
+  hospitalName?: string;
 }
 
-const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, loading, onRefresh }) => {
+const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, loading, onRefresh, hospitalName }) => {
   const handleCancel = async (id: string) => {
     if (!globalThis.confirm('Are you sure you want to cancel this prescription? This action cannot be undone.')) {
       return;
@@ -62,7 +64,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
             >
               <td className="px-6 py-4">
                 <span className="font-medium text-[var(--text-primary)] text-xs bg-slate-100 px-2 py-1 rounded">
-                  #{prescription.id.substring(0, 8).toUpperCase()}
+                  {formatRxNumber(prescription.prescriptionNumber, prescription.id, prescription.createdAt, hospitalName)}
                 </span>
               </td>
               <td className="px-6 py-4">

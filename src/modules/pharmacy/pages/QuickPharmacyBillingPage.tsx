@@ -11,7 +11,7 @@ import {
   TaxComponentDTO
 } from '@/types/api';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import { formatCurrency } from '@/utils/formatters';
+import { formatCurrency, formatRxNumber } from '@/utils/formatters';
 import { useRouter, useSearchParams } from 'next/navigation';
 import MedicineStockSearch from '../components/MedicineStockSearch';
 import PatientSearch from '../components/PatientSearch';
@@ -609,7 +609,7 @@ export default function QuickPharmacyBillingPage() {
           {saleType === 'VISIT' && prescriptionId && (
               <div className="flex items-center gap-2 mt-0.5">
             <span className="inline-block text-[9px] font-black text-orange-700 uppercase bg-orange-50 px-2 py-0.5 rounded border border-orange-200">
-              Prescription ID :-{prescriptionId.substring(0, 8).toUpperCase()}
+              Prescription ID :-{formatRxNumber(undefined, prescriptionId ?? undefined, undefined, hospital?.name)}
             </span>
                 <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded border ${
                     prescriptionStatus === 'PENDING' ? 'bg-orange-100 text-orange-700 border-orange-200' :

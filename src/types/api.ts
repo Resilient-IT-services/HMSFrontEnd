@@ -805,6 +805,7 @@ export interface PrescriptionLabItemDTO {
 
 export interface PrescriptionDTO {
   id?: string;
+  prescriptionNumber?: string;
   patientId?: string;
   patientName?: string;
   patientCode?: string;
@@ -821,6 +822,7 @@ export interface PrescriptionDTO {
 
 export interface PrescriptionSummaryDTO {
   id: string;
+  prescriptionNumber?: string;
   patientId: string;
   patientName: string;
   patientCode?: string;

@@ -10,10 +10,15 @@ import LoadingSkeleton from '../components/LoadingSkeleton';
 import EmptyState from '../components/EmptyState';
 import PatientProfileModal from './PatientProfileModal';
 import PatientHistoryModal from './PatientHistoryModal';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
+import { formatRxNumber } from '@/utils/formatters';
 
 const PrescriptionDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const hospitalName = user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
   
   const [prescription, setPrescription] = useState<PrescriptionDTO | null>(null);
   const [patient, setPatient] = useState<PatientResponse | null>(null);
@@ -69,7 +74,7 @@ const PrescriptionDetailsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--text-primary)]">Dispense Medicines</h1>
-          <p className="text-[var(--text-secondary)]">Order Ref: <span className="font-semibold text-[var(--text-primary)]">#RX-{prescription.id}</span></p>
+          <p className="text-[var(--text-secondary)]">Order Ref: <span className="font-semibold text-[var(--text-primary)]">{formatRxNumber(prescription.prescriptionNumber, prescription.id, prescription.createdAt, hospitalName)}</span></p>
         </div>
         <div className="flex gap-3 no-print">
           <button 

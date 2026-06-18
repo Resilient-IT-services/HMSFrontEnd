@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { labApi } from '@/modules/lab/api/labApi';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import { formatDateTime } from '@/utils/formatters';
+import { formatDateTime, formatRxNumber } from '@/utils/formatters';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import LabResultEntryModal from '../components/LabResultEntryModal';
 
 const categoryConfig: Record<string, { label: string, variant: any }> = {
@@ -29,6 +31,9 @@ const statusMapping: Record<string, { label: string, variant: any }> = {
 };
 
 const LabQueuePage = () => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const hospitalName = user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
+
   const [activeTab, setActiveTab] = useState<'RECOMMENDED' | 'PENDING' | 'SAMPLE_COLLECTED' | 'PROCESSING' | 'RESULT_ENTERED' | 'VERIFIED'>('RECOMMENDED');
   const [queue, setQueue] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,7 +149,7 @@ const LabQueuePage = () => {
       render: (item) => (
         <div>
           <p className="text-sm font-bold text-slate-800">
-            {activeTab === 'RECOMMENDED' ? `RX-${item.id.substring(0, 8).toUpperCase()}` : item.orderNumber}
+            {activeTab === 'RECOMMENDED' ? formatRxNumber(item.prescriptionNumber, item.id, item.createdAt, hospitalName) : item.orderNumber}
           </p>
           <p className="text-[10px] text-slate-400 font-bold">{formatDateTime(activeTab === 'RECOMMENDED' ? item.createdAt : item.orderedAt)}</p>
         </div>

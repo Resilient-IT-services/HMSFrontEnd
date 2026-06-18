@@ -14,8 +14,13 @@ import { Button } from '@/components/ui/Button';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { SearchInput } from '@/components/ui/SearchInput';
 import { useCallback } from 'react';
+import { formatRxNumber } from '@/utils/formatters';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 
 const PrescriptionListPage: React.FC = () => {
+  const { user } = useSelector((state: RootState) => state.auth);
+  const hospitalName = user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
   const [prescriptions, setPrescriptions] = useState<PrescriptionSummaryDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,17 +37,11 @@ const PrescriptionListPage: React.FC = () => {
       
       const term = debouncedSearch.trim();
       const apiSearch = term.startsWith('#') ? term.substring(1) : term;
-      
-      // If search term is 3-8 chars and purely hex, it's likely an Rx ID (partial UUID).
-      // We avoid sending it as 'search' to the server because the server's name-based 
-      // search would return zero results, while our local filtering can find it in the list.
-      const isRxIdSearch = /^[0-9a-fA-F]{3,8}$/.test(apiSearch);
 
       const response = await pharmacyApi.getPrescriptionsSummary({
-        search: isRxIdSearch ? undefined : apiSearch,
+        search: apiSearch || undefined,
         status: showHistory ? undefined : 'PENDING',
         sort,
-        size: 200, // Fetch a larger batch to make local ID filtering effective
         ...debouncedColumnFilters
       });
       if (response.success && response.data) {
@@ -64,15 +63,17 @@ const PrescriptionListPage: React.FC = () => {
     const term = searchTerm.toLowerCase().trim();
     if (!term) return prescriptions;
     
-    // Strip '#' for comparison with the ID
     const cleanTerm = term.startsWith('#') ? term.substring(1) : term;
-    
-    return prescriptions.filter(p => 
-      p.patientName?.toLowerCase().includes(term) ||
-      p.id?.toLowerCase().includes(cleanTerm) ||
-      p.doctorName?.toLowerCase().includes(term) ||
-      p.patientCode?.toLowerCase().includes(term)
-    );
+
+    return prescriptions.filter(p => {
+      const rxDisplay = formatRxNumber(p.prescriptionNumber, p.id, p.createdAt, hospitalName).toLowerCase();
+      return (
+        p.patientName?.toLowerCase().includes(term) ||
+        rxDisplay.includes(cleanTerm) ||
+        p.doctorName?.toLowerCase().includes(term) ||
+        p.patientCode?.toLowerCase().includes(term)
+      );
+    });
   }, [prescriptions, searchTerm]);
 
   useEffect(() => {
@@ -106,7 +107,7 @@ const PrescriptionListPage: React.FC = () => {
       header: 'Prescription ID',
       render: (p) => (
         <span className="font-medium text-[var(--text-primary)] text-xs bg-slate-100 px-2 py-1 rounded">
-          #{p.id.substring(0, 8).toUpperCase()}
+          {formatRxNumber(p.prescriptionNumber, p.id, p.createdAt, hospitalName)}
         </span>
       )
     },
