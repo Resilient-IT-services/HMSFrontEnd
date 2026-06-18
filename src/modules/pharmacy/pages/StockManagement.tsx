@@ -263,7 +263,7 @@ export const StockManagement = () => {
                     <option value="EXPIRING_SOON">Expiring Soon</option>
                   </select>
                 </div>
-                <Button variant="secondary" icon="download" onClick={handleExport}>Export Excel</Button>
+                <Button variant="secondary" icon="download" onClick={handleExport}>Export Data</Button>
               </div>
             )}
           >
