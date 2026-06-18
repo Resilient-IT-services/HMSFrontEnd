@@ -3,10 +3,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import GlobalSearch from './GlobalSearch';
 import { searchService } from '@/services/searchService';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 vi.mock('next/navigation', () => ({
   useRouter: vi.fn(),
+}));
+
+vi.mock('react-redux', () => ({
+  useSelector: vi.fn(),
 }));
 
 vi.mock('@/services/searchService', () => ({
@@ -21,6 +26,7 @@ describe('GlobalSearch', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (useRouter as any).mockReturnValue({ push: mockPush });
+    (useSelector as any).mockReturnValue({ activeRole: 'ADMIN', isSuperMode: false });
   });
 
   it('does not trigger search on mount when query is empty', async () => {

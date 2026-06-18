@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
 import { searchService } from '@/services/searchService';
 import { SearchResultDTO as SearchResult } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -15,6 +17,12 @@ const GlobalSearch: React.FC = () => {
   const debouncedQuery = useDebounce(query, DEFAULT_DEBOUNCE_MS);
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
+  const { activeRole, isSuperMode } = useSelector((state: RootState) => state.auth);
+
+  const isSuperAdmin = isSuperMode || activeRole === 'SUPER_ADMIN';
+  const isReceptionist = activeRole === 'RECEPTIONIST';
+  const isDoctor = activeRole === 'DOCTOR';
+  const isPharmacist = activeRole === 'PHARMACIST';
 
   useEffect(() => {
     const handleSearch = async () => {
@@ -28,7 +36,16 @@ const GlobalSearch: React.FC = () => {
       try {
         const res = await searchService.search(debouncedQuery);
         if (res.success && res.data) {
-          setResults(res.data.content || []);
+          let content = res.data.content || [];
+          
+          // Filter results based on role requirements
+          if (isSuperAdmin) {
+            content = content.filter(r => r.type !== 'PATIENT');
+          } else if (isReceptionist || isDoctor) {
+            content = content.filter(r => r.type === 'PATIENT');
+          }
+
+          setResults(content);
           setIsOpen(true);
         }
       } catch (error) {
@@ -38,8 +55,10 @@ const GlobalSearch: React.FC = () => {
       }
     };
 
-    handleSearch();
-  }, [debouncedQuery]);
+    if (!isPharmacist) {
+      handleSearch();
+    }
+  }, [debouncedQuery, isSuperAdmin, isReceptionist, isDoctor, isPharmacist]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,6 +69,8 @@ const GlobalSearch: React.FC = () => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (isPharmacist) return null;
 
   const handleSelect = (result: SearchResult) => {
     router.push(result.link);
@@ -70,12 +91,18 @@ const GlobalSearch: React.FC = () => {
     }
   };
 
+  const getPlaceholder = () => {
+    if (isSuperAdmin) return "Search Hospitals, Users...";
+    if (isReceptionist || isDoctor) return "Search Patients...";
+    return "Search Hospitals, Users, Patients...";
+  };
+
   return (
     <div className="hidden md:flex items-center relative ml-4" ref={searchRef}>
       <span className="material-symbols-outlined absolute left-3 text-gray-400 text-lg">search</span>
       <input 
         className="bg-surface-container-low border-none rounded-lg pl-10 pr-4 py-2 text-sm w-80 focus:ring-2 focus:ring-primary-container outline-none" 
-        placeholder="Search Hospitals, Users, Patients..." 
+        placeholder={getPlaceholder()} 
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
