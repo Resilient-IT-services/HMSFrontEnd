@@ -119,9 +119,10 @@ export function MedicineList() {
     },
     {
       header: 'Type / Str',
+      className: 'text-center',
       width: '15%',
       render: (m) => (
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col items-center gap-0.5">
           <span className="text-[10px] font-bold text-slate-700">{m.strength || 'N/A'}</span>
           <span className="text-[9px] font-medium text-slate-400 uppercase">{m.form || m.category || 'General'}</span>
         </div>
@@ -129,9 +130,10 @@ export function MedicineList() {
     },
     {
       header: 'Tracking',
+      className: 'text-center',
       width: '12%',
       render: (m) => (
-        <div className="flex gap-2">
+        <div className="flex justify-center gap-2">
           <div className={cn("size-2 rounded-full shadow-inner", m.isBatchTracked ? "bg-emerald-500" : "bg-slate-100")} title="Batch"></div>
           <div className={cn("size-2 rounded-full shadow-inner", m.isExpiryTracked ? "bg-emerald-500" : "bg-slate-100")} title="Expiry"></div>
           <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest ml-1">B/E</span>
@@ -141,25 +143,24 @@ export function MedicineList() {
     {
       header: 'Actions',
       className: 'text-center',
-      headerClassName: 'text-center',
       width: '120px',
       render: (m) => (
-        <div className="flex items-center justify-center gap-1">
+        <div className="flex justify-center items-center gap-2">
           <button 
             type="button"
             onClick={(e) => { e.stopPropagation(); setSelectedMedicine(m); setShowEditModal(true); }}
-            className="p-1.5 hover:bg-slate-100 rounded text-slate-400 hover:text-primary transition-colors"
+            className="p-2 rounded-lg border hover:bg-slate-100 transition"
             title="Edit"
           >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
+            ✏️
           </button>
           <button 
             type="button"
             onClick={(e) => { e.stopPropagation(); handleDeleteMedicine(m.id, m.name); }}
-            className="p-1.5 hover:bg-red-50 rounded text-slate-400 hover:text-red-500 transition-colors"
+            className="p-2 rounded-lg border hover:bg-slate-100 transition"
             title="Delete"
           >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
+            🗑️
           </button>
         </div>
       )
