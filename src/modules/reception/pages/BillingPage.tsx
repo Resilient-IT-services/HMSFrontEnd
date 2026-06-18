@@ -281,7 +281,7 @@ export const BillingPage = () => {
                     {isVitalsEnabled && !isReadOnly && (
                         <Button size="md" icon="vital_signs" onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${appointment.id}`)} className="w-full text-[10px] font-black uppercase sm:w-auto">{appointment.status === 'VITALS_RECORDED' ? 'Edit Vitals' : 'Proceed to Vitals'}</Button>
                     )}
-                    {isReadOnly && <Button variant="secondary" size="md" icon="close" onClick={() => router.push('/reception/appointments')} className="w-full text-[10px] font-black uppercase sm:w-auto">Close</Button>}
+                    {isReadOnly && <Button variant="secondary" size="md" icon="close" onClick={() => router.push('/reception/dashboard')} className="w-full text-[10px] font-black uppercase sm:w-auto">Close</Button>}
                   </>
               )}
             </div>
