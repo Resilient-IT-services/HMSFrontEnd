@@ -319,7 +319,7 @@ export function ConsumableCatalog() {
 
         {/* Import Modal */}
         {showImportModal && (
-          <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Bulk Consumables Ingestion" width="430px">
+          <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Bulk Consumables " width="430px">
             <div className="p-4 flex flex-col gap-4 bg-[var(--surface)]">
               <div className="flex justify-end -mt-2 mb-1">
                 <button onClick={handleDownloadTemplate} className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest flex items-center gap-1">

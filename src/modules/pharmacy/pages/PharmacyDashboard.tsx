@@ -346,11 +346,7 @@ export const PharmacyDashboard = () => {
                 {importing ? <Activity className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
                 Import Stock
               </button>
-              <Link href="/pharmacy/reports">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 border border-orange-100 text-xs font-bold rounded-lg hover:bg-orange-100 transition-all">
-                  <FileText className="w-3.5 h-3.5" /> Generate Report
-                </button>
-              </Link>
+
             </div>
           </div>
 

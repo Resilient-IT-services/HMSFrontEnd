@@ -246,7 +246,6 @@ export const AdminDashboard = () => {
                       <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => handleViewDetails(h)} className="p-2 text-slate-400 hover:text-[#ff6b2b] hover:bg-orange-50 rounded-lg transition-all"><Eye className="w-4 h-4" /></button>
                         <button onClick={() => router.push(`/super_admin/hospitals/${h.id}`)} className="p-2 text-slate-400 hover:text-[#ff6b2b] hover:bg-orange-50 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>
-                        <button className="p-2 text-slate-400 hover:text-[#ff6b2b] hover:bg-orange-50 rounded-lg transition-all"><MoreVertical className="w-4 h-4" /></button>
                       </div>
                     </td>
                   </tr>
