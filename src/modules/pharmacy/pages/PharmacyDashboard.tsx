@@ -344,7 +344,7 @@ export const PharmacyDashboard = () => {
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-100 text-xs font-bold rounded-lg hover:bg-purple-100 transition-all disabled:opacity-50"
               >
                 {importing ? <Activity className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-                Import Excel
+                Import Stock
               </button>
               <Link href="/pharmacy/reports">
                 <button className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-orange-600 border border-orange-100 text-xs font-bold rounded-lg hover:bg-orange-100 transition-all">

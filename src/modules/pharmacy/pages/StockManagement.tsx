@@ -231,7 +231,7 @@ export const StockManagement = () => {
               disabled={importing}
               isLoading={importing}
             >
-              Import Excel
+              Import Stock
             </Button>
             <Button icon="inventory" href="/pharmacy/batch-entry">
               Add Batch Stock
