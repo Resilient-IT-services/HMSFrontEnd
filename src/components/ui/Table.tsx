@@ -258,13 +258,17 @@ export const Table = <T,>({
                   <th
                     key={index}
                     className={cn(
-                      "px-2 py-2.5 font-black text-slate-700 text-[10px] uppercase tracking-widest relative group/header whitespace-normal break-words",
+                      "py-2.5 font-black text-slate-700 text-[10px] uppercase tracking-widest relative group/header whitespace-normal break-words",
                       column.sortable && "cursor-pointer hover:bg-slate-50 transition-colors",
+                      column.className,
                       column.headerClassName
                     )}
                     onClick={() => handleSort(column)}
                   >
-                    <div className="flex items-center gap-2 pr-6">
+                    <div className={cn(
+                      "w-full flex items-center gap-2",
+                      (column.className?.includes('text-center') || column.headerClassName?.includes('text-center')) ? "justify-center" : "justify-start px-2"
+                    )}>
                       {column.header}
                       {column.sortable && (
                         <span className={cn(
@@ -341,9 +345,14 @@ export const Table = <T,>({
                   {columns.map((column, colIndex) => (
                     <td 
                       key={colIndex} 
-                      className={cn("px-2 py-3 text-xs text-slate-600 font-medium whitespace-normal break-words", column.className)}
+                      className={cn("py-3 text-xs text-slate-600 font-medium whitespace-normal break-words", column.className)}
                     >
-                      {renderCellContent(item.row, column)}
+                      <div className={cn(
+                        "w-full flex items-center",
+                        (column.className?.includes('text-center') || column.headerClassName?.includes('text-center')) ? "justify-center" : "justify-start px-2"
+                      )}>
+                        {renderCellContent(item.row, column)}
+                      </div>
                     </td>
                   ))}
                 </tr>

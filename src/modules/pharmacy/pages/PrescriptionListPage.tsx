@@ -205,9 +205,9 @@ const PrescriptionListPage: React.FC = () => {
             title="Prescription Queue"
             description="Access and process incoming digital prescriptions from doctors."
           >
-            <Button icon="point_of_sale" className="bg-orange-700" href="/pharmacy/billing">
-              Walk-in Billing
-            </Button>
+            {/*<Button icon="point_of_sale" className="bg-orange-700" href="/pharmacy/billing">*/}
+            {/*  Walk-in Billing*/}
+            {/*</Button>*/}
           </PageHeading>
 
           <ContentPanel
