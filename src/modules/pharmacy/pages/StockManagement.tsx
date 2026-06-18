@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import MainLayout from '@/components/ui/MainLayout';
 import QuickStockAddModal from '@/modules/pharmacy/components/QuickStockAddModal';
 import MedicineViewModal from '@/modules/pharmacy/components/MedicineViewModal';
@@ -15,6 +15,8 @@ import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { MetricsGrid } from '@/components/ui/MetricsGrid';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { Modal } from '@/components/ui/Modal';
+import { FileSpreadsheet, CheckCircle2, RefreshCw, AlertCircle, FileDown } from 'lucide-react';
 
 export const StockManagement = () => {
   const {
@@ -43,18 +45,22 @@ export const StockManagement = () => {
     stats
   } = usePharmacyStock();
 
-  const handleImportClick = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.csv, .xlsx, .xls';
-    input.addEventListener('change', async (event: Event) => {
-      const inputElement = event.target as HTMLInputElement;
-      const file = inputElement.files?.[0];
-      if (file) {
-        await handleImport(file);
-      }
-    });
-    input.click();
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImportFile(file);
+    }
+  };
+
+  const confirmImport = async () => {
+    if (!importFile) return;
+    await handleImport(importFile);
+    setShowImportModal(false);
+    setImportFile(null);
   };
 
   const columns: Column<PharmacyStockDTO>[] = [
@@ -219,15 +225,8 @@ export const StockManagement = () => {
           >
             <Button
               variant="secondary"
-              icon="download"
-              onClick={handleDownloadTemplate}
-            >
-              Download Template
-            </Button>
-            <Button
-              variant="secondary"
-              icon={importing ? 'sync' : 'publish'}
-              onClick={handleImportClick}
+              icon={importing ? 'sync' : 'file_upload'}
+              onClick={() => setShowImportModal(true)}
               disabled={importing}
               isLoading={importing}
             >
@@ -289,6 +288,103 @@ export const StockManagement = () => {
 
         </div>
       </PageSurface>
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <Modal
+          isOpen={showImportModal}
+          onClose={() => setShowImportModal(false)}
+          title="Import Inventory Sheet"
+          width="430px"
+        >
+          <div className="p-4 flex flex-col gap-4 bg-[var(--surface)]">
+            <div className="flex gap-2 items-center p-2.5 bg-[var(--primary-light)]/10 border border-[var(--primary-light)]/20 rounded-xl">
+              <AlertCircle className="size-3.5 text-[var(--primary)] shrink-0" />
+              <div className="flex-1 flex justify-between items-center">
+                <p className="text-[10px] font-bold text-[var(--text-primary)] uppercase tracking-wide opacity-80">
+                  System auto-skips duplicate entries.
+                </p>
+                <button 
+                  onClick={handleDownloadTemplate}
+                  className="text-[10px] font-black text-[var(--primary)] hover:underline uppercase tracking-widest flex items-center gap-1"
+                >
+                  <FileDown className="size-6.5 " /> Download Template
+                </button>
+              </div>
+            </div>
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className={`border rounded-xl p-5 text-center transition-all duration-300 cursor-pointer flex flex-col items-center justify-center min-h-[115px] relative group ${
+                importFile
+                  ? 'border-emerald-500 bg-emerald-50/10'
+                  : 'border-[var(--border)] bg-[var(--background)]/40 hover:border-[var(--primary)]'
+              }`}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".csv, .xlsx, .xls"
+                onChange={handleFileChange}
+              />
+
+              {importFile ? (
+                <div className="flex flex-col items-center gap-1.5 animate-in scale-in-95 duration-150">
+                  <div className="size-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-200">
+                    <CheckCircle2 className="size-4" />
+                  </div>
+                  <div className="text-center px-1">
+                    <p className="text-xs font-bold text-[var(--text-primary)] max-w-[260px] truncate">
+                      {importFile.name}
+                    </p>
+                    <p className="text-[9px] text-slate-400 font-bold tracking-wider uppercase mt-0.5">
+                      {(importFile.size / 1024).toFixed(1)} KB • Ready
+                    </p>
+                  </div>
+                  <span className="text-[9px] text-[var(--primary)] font-black uppercase tracking-wider flex items-center gap-1 mt-1 bg-[var(--primary-light)]/40 px-2.5 py-1 rounded-lg">
+                    <RefreshCw className="size-2.5" /> Change
+                  </span>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="size-9 rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm text-[var(--primary)] flex items-center justify-center transition-transform group-hover:-translate-y-0.5">
+                    <FileSpreadsheet className="size-4.5" />
+                  </div>
+                  <div className="space-y-0.5">
+                    <p className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                      Choose File to Import
+                    </p>
+                    <p className="text-[10px] text-slate-400 font-medium">
+                      Supports standard .xlsx or .xls formats
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="py-2.5 bg-[var(--background)] border border-[var(--border)] text-[var(--text-primary)] rounded-xl text-xs font-bold uppercase tracking-wider transition-all hover:bg-[var(--border)]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmImport}
+                disabled={!importFile || importing}
+                className={`py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-center shadow-sm ${
+                  !importFile || importing
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200 shadow-none'
+                    : 'bg-[var(--primary)] text-white hover:opacity-95 shadow-[var(--primary-light)]/40 hover:shadow-md'
+                }`}
+              >
+                {importing ? 'Processing...' : 'Start Import'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {selectedMedicineForStock && (
         <QuickStockAddModal
