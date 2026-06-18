@@ -51,12 +51,28 @@ export const PharmacyDashboard = () => {
       setStatsError(null);
 
       const today = dayjs().startOf('day');
+      const todayEnd = dayjs().endOf('day');
       const thirtyDaysFromNow = dayjs().add(30, 'day').endOf('day');
 
       const [pendingRes, dispensedRes, cancelledRes, stockRes, statsRes] = await Promise.allSettled([
-        pharmacyApi.getPrescriptions({ status: 'PENDING', size: 100 }),
-        pharmacyApi.getPrescriptions({ status: 'DISPENSED', size: 100 }),
-        pharmacyApi.getPrescriptions({ status: 'CANCELLED', size: 100 }),
+        pharmacyApi.getPrescriptions({ 
+          status: 'PENDING', 
+          size: 100,
+          from: today.toISOString(),
+          to: todayEnd.toISOString()
+        }),
+        pharmacyApi.getPrescriptions({ 
+          status: 'DISPENSED', 
+          size: 100,
+          from: today.toISOString(),
+          to: todayEnd.toISOString()
+        }),
+        pharmacyApi.getPrescriptions({ 
+          status: 'CANCELLED', 
+          size: 100,
+          from: today.toISOString(),
+          to: todayEnd.toISOString()
+        }),
         pharmacyApi.getMedicineStock({ size: 1000 }),
         pharmacyApi.getDashboardStats()
       ]);
