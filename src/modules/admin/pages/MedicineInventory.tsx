@@ -23,7 +23,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { FileSpreadsheet, CheckCircle2, RefreshCw, AlertCircle, Trash2, HelpCircle } from 'lucide-react';
+import {FileSpreadsheet, CheckCircle2, RefreshCw, AlertCircle, Trash2, HelpCircle, FileDown} from 'lucide-react';
 
 export const MedicineInventory = () => {
   const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
@@ -368,7 +368,7 @@ export const MedicineInventory = () => {
                         onClick={handleDownloadTemplate}
                         className="text-[10px] font-black text-[var(--primary)] hover:underline uppercase tracking-widest flex items-center gap-1"
                       >
-                        <RefreshCw className="size-2.5" /> Template
+                        <FileDown className="size-6.5 " /> Download Template
                       </button>
                     </div>
                   </div>
@@ -414,10 +414,10 @@ export const MedicineInventory = () => {
                           </div>
                           <div className="space-y-0.5">
                             <p className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                              Choose spreadsheet template
+                              Choose File to Import
                             </p>
                             <p className="text-[10px] text-slate-400 font-medium">
-                              Supports standard .xlsx, .xls, or .csv formats
+                              Supports standard .xlsx or .xls  formats
                             </p>
                           </div>
                         </div>

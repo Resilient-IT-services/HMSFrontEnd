@@ -23,7 +23,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
-import { FileSpreadsheet, CheckCircle2, AlertCircle, Trash2 } from 'lucide-react';
+import {FileSpreadsheet, CheckCircle2, AlertCircle, Trash2, FileDown} from 'lucide-react';
 
 export function ConsumableCatalog() {
   const [medicines, setMedicines] = useState<MedicineResponse[]>([]);
@@ -323,7 +323,7 @@ export function ConsumableCatalog() {
             <div className="p-4 flex flex-col gap-4 bg-[var(--surface)]">
               <div className="flex justify-end -mt-2 mb-1">
                 <button onClick={handleDownloadTemplate} className="text-[10px] font-black text-primary hover:underline uppercase tracking-widest flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">download</span>
+                  <FileDown className="size-6.5 " />
                   Download Template
                 </button>
               </div>
@@ -341,7 +341,7 @@ export function ConsumableCatalog() {
                 ) : (
                   <div className="flex flex-col items-center gap-2">
                     <div className="size-9 rounded-xl bg-[var(--surface)] border border-[var(--border)] shadow-sm text-blue-600 flex items-center justify-center"><FileSpreadsheet className="size-4.5" /></div>
-                    <p className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Choose spreadsheet template</p>
+                    <p className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">Choose File to Import</p>
                   </div>
                 )}
               </div>
