@@ -9,7 +9,7 @@ interface PageHeaderProps {
   hideGlobalSearch?: boolean;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ title, headerActions, hideGlobalSearch = false }) => {
+export const PageHeader: React.FC<PageHeaderProps> = ({ title, headerActions, hideGlobalSearch = false }) => {
   const { setTitle, setHeaderActions, setHideGlobalSearch } = useLayout();
 
   useEffect(() => {
@@ -26,5 +26,3 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, headerActions, hideGloba
 
   return null;
 };
-
-export default PageHeader;

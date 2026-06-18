@@ -24,7 +24,13 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
     },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: [] }, // Kept for reference but hidden from sidebar as per previous roles config
+    { 
+      name: 'IPD', 
+      icon: 'hotel', 
+      href: '/ipd/dashboard', 
+      roles: ['ADMIN', 'NURSE', 'RECEPTIONIST'] 
+    },
+    { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: [] }, 
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
     
     // Lab Specific Routes

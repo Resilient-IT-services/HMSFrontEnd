@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import PageHeader from './PageHeader';
+import { PageHeader } from './PageHeader';
 
 interface MainLayoutProps {
   children: React.ReactNode;

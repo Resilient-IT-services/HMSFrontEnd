@@ -51,6 +51,16 @@ export function SettingsPage() {
         { label: 'Tests Catalog', href: '/settings/lab/tests', icon: 'experiment' },
         { label: 'Lab Pricing', href: '/settings/lab/pricing', icon: 'payments' },
       ]
+    },
+    {
+      title: 'Ward Management',
+      icon: 'hotel',
+      description: 'Manage hospital wards, beds, and inpatient infrastructure.',
+      roles: ['ADMIN', 'SUPER_ADMIN'],
+      links: [
+        { label: 'Ward Configuration', href: '/settings/wards', icon: 'door_open' },
+        { label: 'Bed Configuration', href: '/settings/beds', icon: 'bed' },
+      ]
     }
   ];
 

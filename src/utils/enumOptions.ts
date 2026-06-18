@@ -20,7 +20,29 @@ import type {
   VitalRangeConfigDTO
 } from '@/types/api';
 
+import { WardType, BedStatus, AdmissionStatus } from '@/types/ipd';
+
 type Option<T extends string> = { value: T; label: string };
+
+export const WARD_TYPE_OPTIONS: Option<WardType>[] = [
+  { value: 'GENERAL', label: 'General' },
+  { value: 'SEMI_PRIVATE', label: 'Semi-Private' },
+  { value: 'PRIVATE', label: 'Private' },
+  { value: 'ICU', label: 'ICU' }
+];
+
+export const BED_STATUS_OPTIONS: Option<BedStatus>[] = [
+  { value: 'AVAILABLE', label: 'Available' },
+  { value: 'OCCUPIED', label: 'Occupied' },
+  { value: 'CLEANING', label: 'Cleaning' },
+  { value: 'MAINTENANCE', label: 'Maintenance' }
+];
+
+export const ADMISSION_STATUS_OPTIONS: Option<AdmissionStatus>[] = [
+  { value: 'ADMITTED', label: 'Admitted' },
+  { value: 'DISCHARGED', label: 'Discharged' },
+  { value: 'CANCELLED', label: 'Cancelled' }
+];
 
 export const ROLE_OPTIONS: Option<Role>[] = [
   { value: 'SUPER_ADMIN', label: 'Super Admin' },
