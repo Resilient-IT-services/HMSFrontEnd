@@ -12,6 +12,8 @@ import { triggerGlobalToast } from '@/components/ui/Toast';
 import { formatCurrency } from '@/utils/formatters';
 import { invoiceService } from '@/services/invoiceService';
 import { Button } from '@/components/ui/Button';
+import { ContentPanel } from '@/components/ui/ContentPanel';
+import { SearchInput } from '@/components/ui/SearchInput';
 import dayjs from 'dayjs';
 
 const BillingHistoryPage = () => {
@@ -20,14 +22,14 @@ const BillingHistoryPage = () => {
   const [search, setSearch] = useState('');
   const [saleType, setSaleType] = useState('ALL');
   const [page, setPage] = useState(0);
-  const [size] = useState(10);
+  const [pageSize, setPageSize] = useState(10);
 
   const fetchSales = useCallback(async () => {
     setLoading(true);
     try {
       const params: any = {
         page,
-        size,
+        size: pageSize,
         search: search.trim() || undefined,
         saleType: saleType === 'ALL' ? undefined : saleType,
         sort: 'createdAt,desc'
@@ -42,7 +44,7 @@ const BillingHistoryPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [page, size, search, saleType]);
+  }, [page, pageSize, search, saleType]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -140,65 +142,63 @@ const BillingHistoryPage = () => {
         backgroundClassName="bg-[#f8f9fb]"
         fontClassName="font-inter"
       >
-        <div className="py-4 md:py-8 space-y-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <PageHeading
-              title="Billing History"
-              description="View and manage all pharmacy sales including Walk-ins and Visit prescriptions."
-            />
-            
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="relative w-full md:w-64">
-                <input
-                  type="text"
-                  placeholder="Search by Invoice, Name, Phone..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-4 focus:ring-orange-500/10 outline-none transition-all"
-                />
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-              </div>
-              
-              <select
-                value={saleType}
-                onChange={(e) => setSaleType(e.target.value)}
-                className="px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 outline-none focus:ring-4 focus:ring-orange-500/10 transition-all min-w-[150px]"
-              >
-                <option value="ALL">All Sales</option>
-                <option value="WALKIN">Walk-in Only</option>
-                <option value="VISIT">Prescriptions Only</option>
-              </select>
-              
-              <Button
-                variant="secondary"
-                icon="refresh"
-                onClick={fetchSales}
-                disabled={loading}
-              >
-                Refresh
-              </Button>
-            </div>
-          </div>
+        <div className="py-2 md:py-4 space-y-4">
+          <PageHeading
+            title="Billing History"
+            description="View and manage all pharmacy sales including Walk-ins and Visit prescriptions."
+          >
+            <Button
+              variant="secondary"
+              icon="refresh"
+              onClick={fetchSales}
+              disabled={loading}
+            >
+              Refresh Data
+            </Button>
+          </PageHeading>
 
-          <div className="bg-white rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+          <ContentPanel
+            className="mb-4"
+            toolbar={(
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-1 items-center gap-4">
+                  <div className="w-full max-w-sm">
+                    <SearchInput
+                      placeholder="Search by Invoice, Name, Phone..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
+                  
+                  <select
+                    value={saleType}
+                    onChange={(e) => setSaleType(e.target.value)}
+                    className="min-w-[160px] cursor-pointer rounded-xl border-none bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm outline-none transition-colors hover:bg-slate-50"
+                  >
+                    <option value="ALL">All Sales</option>
+                    <option value="WALKIN">Walk-in Only</option>
+                    <option value="VISIT">Prescriptions Only</option>
+                  </select>
+                </div>
+              </div>
+            )}
+          >
             <Table
               columns={columns}
               data={data?.content || []}
               isLoading={loading}
               emptyMessage="No billing records found matching your criteria."
             />
-          </div>
 
-          {data && data.totalElements > 0 && (
-            <div className="flex justify-center mt-8">
-              <Pagination
-                page={page}
-                totalElements={data.totalElements}
-                pageSize={size}
-                onPageChange={setPage}
-              />
-            </div>
-          )}
+            <Pagination
+              page={page}
+              totalElements={data?.totalElements || 0}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+              label="bills"
+            />
+          </ContentPanel>
         </div>
       </PageSurface>
     </MainLayout>
