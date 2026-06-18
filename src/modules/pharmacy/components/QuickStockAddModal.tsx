@@ -73,6 +73,35 @@ const QuickStockAddModal: React.FC<QuickStockAddModalProps> = ({
       return;
     }
 
+    // Date Validations
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (formData.manufacturingDate) {
+      const mfgDate = new Date(formData.manufacturingDate);
+      if (mfgDate > new Date()) {
+        triggerGlobalToast('Manufacturing date cannot be in the future', 'error');
+        return;
+      }
+    }
+
+    if (formData.expiryDate) {
+      const expDate = new Date(formData.expiryDate);
+      if (expDate < today) {
+        triggerGlobalToast('Expiry date cannot be in the past', 'error');
+        return;
+      }
+    }
+
+    if (formData.manufacturingDate && formData.expiryDate) {
+      const mfgDate = new Date(formData.manufacturingDate);
+      const expDate = new Date(formData.expiryDate);
+      if (expDate <= mfgDate) {
+        triggerGlobalToast('Expiry date must be after manufacturing date', 'error');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
 
