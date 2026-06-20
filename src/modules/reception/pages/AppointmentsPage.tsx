@@ -170,6 +170,8 @@ export const AppointmentsPage = () => {
   const columns: Column<AppointmentSummaryDTO>[] = useMemo(() => [
     {
       header: 'Token',
+      headerClassName: 'text-center font-bold text-slate-700',
+      className: 'text-center',
       mobilePosition: 'meta',
       sortable: true,
       sortKey: 'tokenNumber',
@@ -177,6 +179,8 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'VISIT DATE & TIME',
+      headerClassName: 'text-left font-bold text-slate-700',
+      className: 'text-left',
       mobilePosition: 'title',
       sortable: true,
       filterable: true,
@@ -192,6 +196,8 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Patient',
+      headerClassName: 'text-left font-bold text-slate-700',
+      className: 'text-left',
       mobilePosition: 'subtitle',
       sortable: true,
       filterable: true,
@@ -206,6 +212,8 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Doctor',
+      headerClassName: 'text-left font-bold text-slate-700',
+      className: 'text-left',
       mobilePosition: 'body',
       sortable: true,
       filterable: true,
@@ -220,6 +228,8 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Status',
+      headerClassName: 'text-center font-bold text-slate-700',
+      className: 'text-center',
       mobilePosition: 'meta',
       sortable: true,
       filterable: true,
@@ -237,7 +247,7 @@ export const AppointmentsPage = () => {
         const badgeText = isVitalsNotRecorded ? 'Vitals Not Recorded' : app.status.replace('_', ' ');
 
         return (
-            <div className="shadow-sm inline-block">
+            <div className="shadow-sm inline-block text-center">
               <Badge variant={variants[app.status] || 'slate'}>{badgeText}</Badge>
             </div>
         );
@@ -245,8 +255,8 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'Actions',
-      headerClassName: 'text-right pr-4',
-      className: 'text-right pr-4',
+      headerClassName: 'text-center font-bold text-slate-700',
+      className: 'text-center',
       mobilePosition: 'action',
       render: (app) => {
         const isVitalsNotRecorded = ['SCHEDULED', 'PAYMENT_PENDING', 'PAID'].includes(app.status);
@@ -259,11 +269,11 @@ export const AppointmentsPage = () => {
         const vitalsButtonText = isVitalsNotRecorded ? 'Edit Vitals' : isVitalsRecorded ? 'View Vitals' : 'Vitals';
 
         return (
-            <div className="flex items-center justify-end gap-2 w-full">
+            <div className="flex items-center justify-center gap-2 w-full">
               {shouldShowVitalsButton && (
                   <button
                       onClick={() => router.push(`/reception/appointments/vitals?appointmentId=${app.id}`)}
-                      className="flex items-center justify-center gap-2 px-4 py-2 h-9 rounded-full bg-orange-600 text-white shadow-md hover:bg-orange-700 shadow-[0_3px_8px_rgba(234,88,12,0.2),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-95 text-xs font-black uppercase tracking-wider select-none border-none outline-none"
+                      className="flex items-center justify-center gap-2 px-4 py-2 h-9 rounded-full bg-orange-600 text-white shadow-md hover:bg-orange-700 shadow-[0_3px_8px_rgba(234,88,12,0.2),inset_0_1px_0_rgba(255,255,255,0.2)] transition-all active:scale-95 text-xs font-black uppercase tracking-wider select-none border-none outline-none cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-sm font-bold leading-none">vital_signs</span>
                     <span>{vitalsButtonText}</span>
