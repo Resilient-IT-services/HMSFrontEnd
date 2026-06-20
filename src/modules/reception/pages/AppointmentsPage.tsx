@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
 import MainLayout from '@/components/ui/MainLayout';
@@ -13,13 +13,13 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Table, Column } from '@/components/ui/Table';
 import { cn } from '@/lib/cn';
-import { APPOINTMENT_STATUS_OPTIONS } from '@/utils/enumOptions';
 import { formatDateTime } from '@/utils/formatters';
 import dayjs from '@/lib/dayjs';
 import { PageSurface } from '@/components/ui/PageSurface';
 
+
 /**
- * 3D Glassmorphic Date Range Filter
+ * 3D Glassmorphic Date Range Filter (Compact Header Version)
  */
 const DateRangeFilter = ({
                            onFilter,
@@ -29,46 +29,44 @@ const DateRangeFilter = ({
   activeFilters: Record<string, string>
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const fromDate = activeFilters.from ? dayjs(activeFilters.from) : null;
-  const toDate = activeFilters.to ? dayjs(activeFilters.to) : null;
   const hasFilter = !!(activeFilters.from || activeFilters.to);
 
-  const label = fromDate && toDate
-    ? (fromDate.isSame(toDate, 'day')
-      ? `📅 ${fromDate.format('DD MMM YYYY')}`
-      : `📅 ${fromDate.format('DD MMM')} - ${toDate.format('DD MMM')}`)
-    : '📅 Date Range';
+  // Auto-close dropdown 300ms after both dates are selected
+  useEffect(() => {
+    if (activeFilters.from && activeFilters.to) {
+      const timer = setTimeout(() => {
+        setIsOpen(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [activeFilters.from, activeFilters.to]);
 
   return (
-      <div className="relative">
+      <div className="relative inline-block text-left" onClick={(e) => e.stopPropagation()}>
         <button
             onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
-            className={cn(
-                "flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all text-xs font-bold active:scale-95 whitespace-nowrap",
-                hasFilter
-                    ? "bg-white text-slate-900 border-orange-300 shadow-sm hover:border-orange-400"
-                    : "bg-white text-slate-500 border-slate-200 hover:border-orange-400 hover:text-slate-700 shadow-sm"
-            )}
+            className="px-3 py-2 border border-orange-200 bg-orange-100 hover:bg-orange-200 cursor-pointer rounded-none"
+            title="Date Range Filter"
         >
-          <span>{label}</span>
+          <span className="material-symbols-outlined text-[15px] font-bold">calendar_month</span>
         </button>
 
         {isOpen && (
             <>
-              <div className="fixed inset-0 z-[110] bg-slate-900/10 backdrop-blur-sm" onClick={() => setIsOpen(false)} />
+              <div className="fixed inset-0 z-[110]" onClick={() => setIsOpen(false)} />
               <div
-                  className="absolute top-full right-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[280px] flex flex-col gap-4 normal-case tracking-normal animate-in fade-in slide-in-from-top-2 duration-150"
+                  className="absolute top-full left-0 mt-2 p-4 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[120] min-w-[260px] flex flex-col gap-4 normal-case tracking-normal animate-in fade-in slide-in-from-top-2 duration-150 text-slate-700"
                   onClick={(e) => e.stopPropagation()}
               >
                 <div className="flex items-center justify-between border-b border-slate-50 pb-2 mb-1">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-orange-600 text-sm">calendar_month</span>
-                    <span className="text-xs font-black text-slate-900 uppercase tracking-tight">Date Range</span>
+                    <span className="text-xs font-black text-slate-900 uppercase tracking-tight">Filter Date Range</span>
                   </div>
                   {hasFilter && (
                       <button
                           onClick={() => { onFilter('from', ''); onFilter('to', ''); setIsOpen(false); }}
-                          className="text-[10px] font-bold text-orange-600 hover:underline"
+                          className="text-[10px] font-bold text-orange-600 hover:underline cursor-pointer"
                       >
                         Reset
                       </button>
@@ -81,8 +79,8 @@ const DateRangeFilter = ({
                     <input
                         type="date"
                         value={activeFilters.from ? dayjs(activeFilters.from).format('YYYY-MM-DD') : ''}
-                        onChange={(e) => onFilter('from', e.target.value ? dayjs(e.target.value).startOf('day').toISOString() : '')}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-700 outline-none transition-all"
+                        disabled
+                        className="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-500 cursor-not-allowed"
                     />
                   </div>
                   <div className="space-y-1.5">
@@ -95,10 +93,6 @@ const DateRangeFilter = ({
                     />
                   </div>
                 </div>
-
-                <Button className="w-full shadow-lg shadow-orange-600/20 mt-2" onClick={() => setIsOpen(false)}>
-                  Apply Range
-                </Button>
               </div>
             </>
         )}
@@ -109,6 +103,8 @@ const DateRangeFilter = ({
 export const AppointmentsPage = () => {
   const router = useRouter();
   const [isOrangeHovered, setIsOrangeHovered] = useState(false);
+
+
 
   const {
     appointments: rawAppointments,
@@ -124,12 +120,45 @@ export const AppointmentsPage = () => {
     refresh
   } = useReceptionAppointments();
 
+  const handleFilterChange = useCallback((key: string, value: string) => {
+    if (statusFilter === 'UPCOMING' && key === 'from') return;
+    setColumnFilters(prev => ({ ...prev, [key]: value }));
+  }, [statusFilter, setColumnFilters]);
+
+  useEffect(() => {
+    if (statusFilter === 'UPCOMING') {
+      const today = dayjs().startOf('day').toISOString();
+
+      setColumnFilters(prev => ({
+        ...prev,
+        from: today
+      }));
+    } else {
+      setColumnFilters(prev => ({
+        ...prev,
+        from: '',
+        to: ''
+      }));
+    }
+  }, [statusFilter, setColumnFilters]);
+
   // Reload data on mount to ensure freshness
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
   const hospitalTimezone = useSelector((state: RootState) => state.auth.hospitalTimezone);
+
+  const filteredAppointments = useMemo(() => {
+    return rawAppointments.filter(app => {
+      const appDate = dayjs(app.appointmentTime);
+
+      if (columnFilters.from && appDate.isBefore(dayjs(columnFilters.from))) return false;
+      if (columnFilters.to && appDate.isAfter(dayjs(columnFilters.to))) return false;
+
+      return true;
+    });
+  }, [rawAppointments, columnFilters]);
 
   const { totalTodayAppointments, completedAppointments, upcomingAppointments } = useMemo(() => {
     const now = hospitalTimezone ? dayjs().tz(hospitalTimezone) : dayjs();
@@ -140,14 +169,14 @@ export const AppointmentsPage = () => {
 
     const upcomingAllowedStatuses = new Set(['SCHEDULED', 'PAYMENT_PENDING', 'PAID', 'VITALS_RECORDED']);
 
-    const today = rawAppointments.filter(app => {
+    const today = filteredAppointments.filter(app => {
       const appDate = dayjs(app.appointmentTime).valueOf();
       return appDate >= todayStart && appDate <= todayEnd;
     });
 
     const completed = today.filter(app => app.status === 'COMPLETED');
 
-    const upcoming = rawAppointments.filter(app => {
+    const upcoming = filteredAppointments.filter(app => {
       const appDate = dayjs(app.appointmentTime).valueOf();
       return appDate >= tomorrowStart && 
              appDate <= futureEnd &&
@@ -159,7 +188,7 @@ export const AppointmentsPage = () => {
       completedAppointments: completed,
       upcomingAppointments: upcoming
     };
-  }, [rawAppointments, hospitalTimezone]);
+  }, [filteredAppointments, hospitalTimezone]);
 
   const displayAppointments = useMemo(() => {
     if (statusFilter === 'UPCOMING') return upcomingAppointments;
@@ -183,13 +212,19 @@ export const AppointmentsPage = () => {
       className: 'text-left',
       mobilePosition: 'title',
       sortable: true,
-      filterable: true,
       sortKey: 'appointmentTime',
-      renderFilter: (onFilter, activeFilters) => (
-          <DateRangeFilter onFilter={onFilter} activeFilters={activeFilters} />
+      renderHeader: () => (
+          <div className="flex items-center gap-1.5 justify-start">
+            <span>VISIT DATE & TIME</span>
+            {statusFilter === 'UPCOMING' && (
+              <div className="flex items-center gap-2">
+                <DateRangeFilter onFilter={handleFilterChange} activeFilters={columnFilters} />
+              </div>
+            )}
+          </div>
       ),
       render: (app) => (
-          <div className="flex flex-col">
+          <div className="flex items-center gap-1">
             <span className="font-medium text-slate-900">{formatDateTime(app.appointmentTime)}</span>
           </div>
       )
@@ -200,9 +235,7 @@ export const AppointmentsPage = () => {
       className: 'text-left',
       mobilePosition: 'subtitle',
       sortable: true,
-      filterable: true,
       sortKey: 'patientName',
-      filterPlaceholder: 'Patient name...',
       render: (app) => (
           <div>
             <p className="font-bold text-slate-900">{app.patientName}</p>
@@ -216,9 +249,7 @@ export const AppointmentsPage = () => {
       className: 'text-left',
       mobilePosition: 'body',
       sortable: true,
-      filterable: true,
       sortKey: 'doctorName',
-      filterPlaceholder: 'Filter doctor...',
       render: (app) => (
           <div>
             <p className="font-medium text-slate-700">{app.doctorName}</p>
@@ -232,10 +263,7 @@ export const AppointmentsPage = () => {
       className: 'text-center',
       mobilePosition: 'meta',
       sortable: true,
-      filterable: true,
       sortKey: 'status',
-      filterType: 'select',
-      filterOptions: APPOINTMENT_STATUS_OPTIONS,
       render: (app) => {
         const variants: Record<string, any> = {
           SCHEDULED: 'orange', PAYMENT_PENDING: 'orange', PAID: 'orange',
@@ -291,7 +319,7 @@ export const AppointmentsPage = () => {
         );
       }
     }
-  ], [router]);
+  ], [router, columnFilters, statusFilter, handleFilterChange]);
 
   const statConfig = [
     { label: 'Total Today', value: totalTodayAppointments.length, filter: 'ALL', icon: 'analytics', colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
@@ -379,7 +407,7 @@ export const AppointmentsPage = () => {
             </div>
 
             {/* Table Container Section */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-[500px] overflow-hidden">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-auto overflow-visible">
               <Table
                   columns={columns}
                   data={displayAppointments}
@@ -436,6 +464,7 @@ export const AppointmentsPage = () => {
             </div>
           </Link>
         </div>
+
       </MainLayout>
 
   );

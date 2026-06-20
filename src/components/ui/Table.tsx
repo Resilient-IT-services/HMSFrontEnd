@@ -24,6 +24,8 @@ export interface Column<T> {
   filterOptions?: { label: string, value: string }[];
   /** Custom filter rendering */
   renderFilter?: (onFilter: (key: string, value: string) => void, activeFilters: Record<string, string>) => React.ReactNode;
+  /** Custom header rendering */
+  renderHeader?: (column: Column<T>) => React.ReactNode;
   /** 
    * How to treat this column on mobile:
    * - 'title': Primary information, usually top-left.
@@ -242,7 +244,7 @@ export const Table = <T,>({
       </div>
 
       {/* Desktop Table View (shown at lg breakpoint and above) */}
-      <div className="hidden lg:block w-full overflow-hidden">
+      <div className="hidden lg:block w-full overflow-visible">
         <table className="w-full text-left border-collapse table-fixed">
           <thead className="z-20">
             {/* Primary Header Row (Titles & Sorting) */}
@@ -269,7 +271,7 @@ export const Table = <T,>({
                       "w-full flex items-center gap-2",
                       (column.className?.includes('text-center') || column.headerClassName?.includes('text-center')) ? "justify-center" : "justify-start px-2"
                     )}>
-                      {column.header}
+                      {column.renderHeader ? column.renderHeader(column) : column.header}
                       {column.sortable && (
                         <span className={cn(
                           "material-symbols-outlined text-[14px] transition-all",
