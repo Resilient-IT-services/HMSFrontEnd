@@ -187,68 +187,74 @@ export function HospitalList() {
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     title="Facility Master Profile"
-                    size="xl"
+                    width="680px"
                 >
-                    <div className="grid grid-cols-1 lg:grid-cols-12 font-inter text-slate-900 bg-white">
+                    <div className="flex flex-col lg:flex-row w-full font-inter text-slate-900 bg-white">
 
-                        {/* Left Info Section - Clean Light Background */}
-                        <div className="lg:col-span-5 bg-slate-50 p-6 sm:p-8 border-b lg:border-b-0 lg:border-r border-slate-200">
-                            <div className="mb-8">
-                                <div className="flex items-center gap-2 mb-3">
+                        {/* Left Info Section - Soft Light Gradient Background */}
+                        <div className="w-full lg:w-[42%] bg-gradient-to-br from-orange-50/70 via-slate-50/50 to-orange-100/15 p-6 sm:p-8 flex flex-col justify-between gap-8 border-b lg:border-b-0 lg:border-r border-slate-200 shrink-0">
+                            <div>
+                                <div className="flex items-center gap-2 mb-4">
                                     <div className="h-2 w-2 rounded-full bg-orange-600 animate-pulse" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-orange-600">
-                    Network Node Overview
-                  </span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600">
+                                        Network Node Overview
+                                    </span>
                                 </div>
-                                <h3 className="text-3xl font-black text-slate-900 leading-tight tracking-tight">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-orange-100 border border-orange-200 font-black text-2xl uppercase text-orange-700 shadow-sm mb-4">
+                                    {selectedHospital.name.slice(0, 2)}
+                                </div>
+                                <h3 className="text-2xl font-black text-slate-900 leading-tight tracking-tight">
                                     {selectedHospital.name}
                                 </h3>
-                                <p className="text-sm font-bold text-slate-400 mt-2 flex items-center gap-1.5 uppercase tracking-wide">
-                                    <span className="material-symbols-outlined text-base">fingerprint</span>
-                                    Facility ID: {selectedHospital.code}
-                                </p>
+                                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-500 mt-3 w-fit shadow-sm">
+                                    <span className="material-symbols-outlined text-sm text-orange-600">fingerprint</span>
+                                    <span>Facility ID: <span className="font-mono text-slate-800 font-bold">{selectedHospital.code}</span></span>
+                                </div>
                             </div>
 
-                            <div className="space-y-5">
-                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Operational Status</p>
+                            <div className="space-y-4 mt-8 lg:mt-0">
+                                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Operational Status</p>
                                     <div className="flex items-center justify-between">
-                    <span className={`text-sm font-black uppercase ${selectedHospital.status === 'ACTIVE' ? 'text-emerald-600' : 'text-orange-600'}`}>
-                      {selectedHospital.status === 'ACTIVE' ? 'Operational' : selectedHospital.status}
-                    </span>
-                                        <span className={`h-8 w-8 rounded-full flex items-center justify-center ${selectedHospital.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'}`}>
-                      <span className="material-symbols-outlined text-xl">{selectedHospital.status === 'ACTIVE' ? 'check_circle' : 'warning'}</span>
-                    </span>
+                                        <span className={`text-sm font-black uppercase tracking-wider ${selectedHospital.status === 'ACTIVE' ? 'text-emerald-600' : 'text-orange-600'}`}>
+                                            {selectedHospital.status === 'ACTIVE' ? 'Operational' : selectedHospital.status}
+                                        </span>
+                                        <span className={`h-8 w-8 rounded-lg flex items-center justify-center ${selectedHospital.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'}`}>
+                                            <span className="material-symbols-outlined text-lg">{selectedHospital.status === 'ACTIVE' ? 'check_circle' : 'warning'}</span>
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">System Timezone</p>
+                                <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-sm hover:border-slate-300 transition-all">
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">System Timezone</p>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-bold text-slate-800">{selectedHospital.timezone || 'Asia/Kolkata'}</span>
-                                        <span className="material-symbols-outlined text-slate-400">schedule</span>
+                                        <span className="h-8 w-8 rounded-lg flex items-center justify-center bg-slate-50 text-slate-400">
+                                            <span className="material-symbols-outlined text-lg">schedule</span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         {/* Right Detailed Grid Section - White Clean Background */}
-                        <div className="lg:col-span-7 p-6 sm:p-8 bg-white max-h-[80vh] overflow-y-auto custom-scrollbar">
-
+                        <div className="w-full lg:w-[58%] p-6 sm:p-8 bg-white flex flex-col gap-6">
                             {/* Registration & Legal Details */}
-                            <div className="mb-8">
-                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <span className="h-1 w-4 bg-orange-600 rounded-full" />
-                                    Legal Identifiers
-                                </h4>
+                            <div>
+                                <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                                    <span className="material-symbols-outlined text-slate-400 text-lg">verified_user</span>
+                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Legal Identifiers
+                                    </h4>
+                                </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Reg. Number</p>
-                                        <p className="text-sm font-black text-slate-900">{selectedHospital.registrationNo || 'N/A'}</p>
+                                    <div className="p-3.5 bg-slate-50 hover:bg-slate-100/60 transition-colors rounded-xl border border-slate-100">
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Reg. Number</p>
+                                        <p className="text-xs font-bold text-slate-800 font-mono">{selectedHospital.registrationNo || 'N/A'}</p>
                                     </div>
-                                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">GSTIN Identity</p>
-                                        <p className="text-sm font-black text-orange-600 tracking-wider">
+                                    <div className="p-3.5 bg-slate-50 hover:bg-slate-100/60 transition-colors rounded-xl border border-slate-100">
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">GSTIN Identity</p>
+                                        <p className="text-xs font-bold text-orange-600 tracking-wider font-mono">
                                             {selectedHospital.gstin || 'Not Provided'}
                                         </p>
                                     </div>
@@ -256,17 +262,19 @@ export function HospitalList() {
                             </div>
 
                             {/* Department Catalog */}
-                            <div className="mb-8">
-                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <span className="h-1 w-4 bg-orange-600 rounded-full" />
-                                    Service Departments
-                                </h4>
+                            <div>
+                                <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                                    <span className="material-symbols-outlined text-slate-400 text-lg">medical_services</span>
+                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Service Departments
+                                    </h4>
+                                </div>
                                 <div className="flex flex-wrap gap-2">
                                     {selectedHospital.departments && selectedHospital.departments.length > 0 ? (
                                         selectedHospital.departments.map((dept: string) => (
-                                            <span key={dept} className="px-3 py-1.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase tracking-tight shadow-sm hover:border-orange-200 transition-all">
-                        {dept}
-                      </span>
+                                            <span key={dept} className="px-3 py-1.5 bg-orange-50 border border-orange-100/80 text-orange-700 hover:bg-orange-100/50 hover:border-orange-200 rounded-lg text-xs font-bold uppercase tracking-wide transition-all shadow-sm">
+                                                {dept}
+                                            </span>
                                         ))
                                     ) : (
                                         <p className="text-xs text-slate-400 italic">No departments configured.</p>
@@ -276,34 +284,35 @@ export function HospitalList() {
 
                             {/* Address Matrix */}
                             <div>
-                                <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
-                                    <span className="h-1 w-4 bg-orange-600 rounded-full" />
-                                    Physical Infrastructure
-                                </h4>
-                                <div className="bg-orange-50/50 p-5 rounded-[2rem] border border-orange-100/50">
+                                <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-3">
+                                    <span className="material-symbols-outlined text-slate-400 text-lg">location_on</span>
+                                    <h4 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        Physical Infrastructure
+                                    </h4>
+                                </div>
+                                <div className="bg-orange-50/20 p-5 rounded-2xl border border-orange-100/40">
                                     <div className="mb-4">
-                                        <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest mb-1">Full Address</p>
-                                        <p className="text-sm font-bold text-slate-800 leading-relaxed italic">
+                                        <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wider mb-1">Full Address</p>
+                                        <p className="text-xs font-bold text-slate-800 leading-relaxed">
                                             {selectedHospital.address || 'N/A'}
                                         </p>
                                     </div>
-                                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-orange-200/30">
+                                    <div className="grid grid-cols-3 gap-4 pt-4 border-t border-orange-200/20">
                                         <div>
-                                            <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest mb-1">City</p>
-                                            <p className="text-sm font-black text-slate-900">{selectedHospital.city || 'N/A'}</p>
+                                            <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wider mb-1">City</p>
+                                            <p className="text-xs font-bold text-slate-900">{selectedHospital.city || 'N/A'}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest mb-1">State</p>
-                                            <p className="text-sm font-black text-slate-900">{selectedHospital.state || 'N/A'}</p>
+                                            <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wider mb-1">State</p>
+                                            <p className="text-xs font-bold text-slate-900">{selectedHospital.state || 'N/A'}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest mb-1">Pincode</p>
-                                            <p className="text-sm font-black text-slate-900 tracking-widest">{selectedHospital.pincode || 'N/A'}</p>
+                                            <p className="text-[9px] font-bold text-orange-600 uppercase tracking-wider mb-1">Pincode</p>
+                                            <p className="text-xs font-bold text-slate-900 tracking-wider font-mono">{selectedHospital.pincode || 'N/A'}</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </Modal>
