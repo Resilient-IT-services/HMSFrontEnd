@@ -66,6 +66,7 @@ export const StockManagement = () => {
   const columns: Column<PharmacyStockDTO>[] = [
     {
       header: 'Product Information',
+      width: '280px',
       filterable: true,
       filterPlaceholder: 'Search name...',
       render: (medicine) => (
@@ -84,6 +85,7 @@ export const StockManagement = () => {
     },
     {
       header: 'Batch & Expiry',
+      width: '160px',
       filterable: true,
       filterPlaceholder: 'Batch...',
       render: (medicine) => (
@@ -102,6 +104,7 @@ export const StockManagement = () => {
     },
     {
       header: 'Levels',
+      width: '180px',
       render: (medicine) => (
         <div className="min-w-[100px] space-y-1.5">
           <div className="flex items-end justify-between">
@@ -124,8 +127,9 @@ export const StockManagement = () => {
     },
     {
       header: 'Unit Price',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '140px',
       render: (medicine) => (
         <div>
           <p className="text-sm font-black tracking-tighter text-slate-900">Rs. {medicine.price?.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
@@ -146,6 +150,7 @@ export const StockManagement = () => {
       ],
       className: 'text-center',
       headerClassName: 'text-center',
+      width: '140px',
       render: (medicine) => {
         const qty = Number(medicine.quantity || 0);
         const reorderLevel = Number(medicine.reorderLevel || 50); // Fallback to 50 if 0, undefined, or null
@@ -173,10 +178,11 @@ export const StockManagement = () => {
     },
     {
       header: 'Actions',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '120px',
       render: (medicine) => (
-        <div className="flex items-center justify-end gap-1.5">
+        <div className="flex items-center justify-center gap-1.5">
           <Button
             variant="secondary"
             size="sm"
@@ -197,8 +203,6 @@ export const StockManagement = () => {
             onClick={() => setSelectedMedicineForView({ id: medicine.medicineId, name: medicine.medicineName })}
             title="View Profile"
           />
-
-
         </div>
       )
     }

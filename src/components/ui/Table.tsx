@@ -245,7 +245,7 @@ export const Table = <T,>({
 
       {/* Desktop Table View (shown at lg breakpoint and above) */}
       <div className="hidden lg:block w-full overflow-visible">
-        <table className="w-full text-left border-collapse table-fixed">
+        <table className="w-full table-fixed border-collapse">
           <thead className="z-20">
             {/* Primary Header Row (Titles & Sorting) */}
             <tr className={cn(
@@ -259,18 +259,19 @@ export const Table = <T,>({
                 return (
                   <th
                     key={index}
-                    className={cn(
-                      "py-2.5 font-black text-slate-700 text-[10px] uppercase tracking-widest relative group/header whitespace-normal break-words",
-                      column.sortable && "cursor-pointer hover:bg-slate-50 transition-colors",
-                      column.className,
-                      column.headerClassName
-                    )}
+                    className={`
+                      px-4 py-3
+                      text-sm font-semibold text-slate-600
+                      text-center
+                      align-middle
+                      whitespace-nowrap
+                      ${column.sortable ? 'cursor-pointer hover:bg-slate-50 transition-colors' : ''}
+                      ${column.headerClassName || ''}
+                    `}
+                    style={{ width: column.width }}
                     onClick={() => handleSort(column)}
                   >
-                    <div className={cn(
-                      "w-full flex items-center gap-2",
-                      (column.className?.includes('text-center') || column.headerClassName?.includes('text-center')) ? "justify-center" : "justify-start px-2"
-                    )}>
+                    <div className="flex items-center justify-center gap-2">
                       {column.renderHeader ? column.renderHeader(column) : column.header}
                       {column.sortable && (
                         <span className={cn(
@@ -345,16 +346,18 @@ export const Table = <T,>({
                   className={cn("hover:bg-slate-50/80 group", item.className)}
                 >
                   {columns.map((column, colIndex) => (
-                    <td 
-                      key={colIndex} 
-                      className={cn("py-3 text-xs text-slate-600 font-medium whitespace-normal break-words", column.className)}
+                    <td
+                      key={colIndex}
+                      className={`
+                        px-4 py-3
+                        text-sm text-slate-800
+                        text-center
+                        align-middle
+                        ${column.className || ''}
+                      `}
+                      style={{ width: column.width }}
                     >
-                      <div className={cn(
-                        "w-full flex items-center",
-                        (column.className?.includes('text-center') || column.headerClassName?.includes('text-center')) ? "justify-center" : "justify-start px-2"
-                      )}>
-                        {renderCellContent(item.row, column)}
-                      </div>
+                      {renderCellContent(item.row, column)}
                     </td>
                   ))}
                 </tr>

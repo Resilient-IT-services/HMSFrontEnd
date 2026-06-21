@@ -74,8 +74,11 @@ const BillingHistoryPage = () => {
   const columns: Column<QuickPharmacySaleResponse>[] = [
     {
       header: 'Date & Time',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '150px',
       render: (item: QuickPharmacySaleResponse) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center justify-center">
           <span className="font-bold text-slate-800">{dayjs(item.createdAt).format('DD MMM YYYY')}</span>
           <span className="text-[10px] text-slate-400 font-medium uppercase">{dayjs(item.createdAt).format('hh:mm A')}</span>
         </div>
@@ -83,12 +86,18 @@ const BillingHistoryPage = () => {
     },
     {
       header: 'Invoice #',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '140px',
       render: (item: QuickPharmacySaleResponse) => <span className="font-black text-slate-900">{item.invoiceNumber || item.saleNumber}</span>
     },
     {
       header: 'Customer / Patient',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '240px',
       render: (item: QuickPharmacySaleResponse) => (
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center justify-center">
           <span className="font-bold text-slate-800">{item.customerName || 'N/A'}</span>
           {item.customerPhone && <span className="text-[10px] text-slate-400 font-medium">{item.customerPhone}</span>}
           {item.patientCode && <span className="text-[10px] text-orange-600 font-bold uppercase">ID: {item.patientCode}</span>}
@@ -97,6 +106,9 @@ const BillingHistoryPage = () => {
     },
     {
       header: 'Sale Type',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '120px',
       render: (item: QuickPharmacySaleResponse) => (
         <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${
           item.saleType === 'WALKIN' 
@@ -109,20 +121,32 @@ const BillingHistoryPage = () => {
     },
     {
       header: 'Items',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '100px',
       render: (item: QuickPharmacySaleResponse) => <span className="font-medium text-slate-600">{item.items?.length || 0} items</span>
     },
     {
       header: 'Doctor',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '180px',
       render: (item: QuickPharmacySaleResponse) => <span className="text-sm font-medium text-slate-600">{item.doctorName || item.externalDoctorName || 'Self'}</span>
     },
     {
       header: 'Amount',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '130px',
       render: (item: QuickPharmacySaleResponse) => <span className="font-black text-slate-900">{formatCurrency(item.totalAmount)}</span>
     },
     {
       header: 'Actions',
-      render: (item: QuickPharmacySaleResponse) => (
-        <div className="flex items-center gap-2">
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '120px',
+      render: (item) => (
+        <div className="flex items-center justify-center gap-2">
           <Button
             variant="ghost"
             size="sm"

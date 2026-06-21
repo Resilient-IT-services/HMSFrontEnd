@@ -105,6 +105,7 @@ const PrescriptionListPage: React.FC = () => {
   const columns: Column<PrescriptionSummaryDTO>[] = useMemo(() => [
     {
       header: 'Prescription ID',
+      width: '160px',
       render: (p) => (
         <span className="font-medium text-[var(--text-primary)] text-xs bg-slate-100 px-2 py-1 rounded">
           {formatRxNumber(p.prescriptionNumber, p.id, p.createdAt, hospitalName)}
@@ -113,6 +114,7 @@ const PrescriptionListPage: React.FC = () => {
     },
     {
       header: 'Patient Name',
+      width: '220px',
       render: (p) => (
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 text-xs font-bold uppercase">
@@ -154,10 +156,11 @@ const PrescriptionListPage: React.FC = () => {
     },
     {
       header: 'Actions',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
+      width: '200px',
       render: (p) => (
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex items-center justify-center gap-2">
           {p.status === 'PENDING' && (
             <>
               <Button
