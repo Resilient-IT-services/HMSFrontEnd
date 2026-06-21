@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 import { ApiResponse, PageResponse } from '@/types/api';
-import { WardDTO, BedDTO, AdmissionRequestDTO, AdmissionResponseDTO, AdmissionStatus } from '@/types/ipd';
+import { WardDTO, BedDTO, AdmissionRequestDTO, AdmissionResponseDTO, AdmissionStatus, TransferBedRequest, BedTransferResponse } from '@/types/ipd';
 
 export const ipdService = {
   // Ward APIs
@@ -70,6 +70,16 @@ export const ipdService = {
     const response = await apiClient.patch<ApiResponse<AdmissionResponseDTO>>(`/ipd/admissions/${id}/status`, null, {
       params: { status }
     });
+    return response.data;
+  },
+  
+  async transferBed(admissionId: string, request: TransferBedRequest): Promise<ApiResponse<BedTransferResponse>> {
+    const response = await apiClient.post<ApiResponse<BedTransferResponse>>(`/ipd/admissions/${admissionId}/transfer`, request);
+    return response.data;
+  },
+
+  async getBedTransfers(admissionId: string): Promise<ApiResponse<BedTransferResponse[]>> {
+    const response = await apiClient.get<ApiResponse<BedTransferResponse[]>>(`/ipd/admissions/${admissionId}/transfers`);
     return response.data;
   }
 };

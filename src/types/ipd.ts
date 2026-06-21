@@ -46,3 +46,25 @@ export interface AdmissionResponseDTO {
   admissionReason?: string;
   remarks?: string;
 }
+
+export interface TransferBedRequest {
+  toBedId: string;
+  transferReason?: string;
+  remarks?: string;
+}
+
+export interface BedTransferResponse {
+  id: string;
+  admissionId: string;
+  fromBedId: string;
+  fromBedNumber: string;
+  fromWardName: string;
+  toBedId: string;
+  toBedNumber: string;
+  toWardName: string;
+  transferReason?: string;
+  remarks?: string;
+  transferredBy: string;
+  transferredByName?: string;
+  transferredAt: string;
+}
