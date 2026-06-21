@@ -43,15 +43,17 @@ export const doctorService = {
   },
 
   async getAvailability(doctorId: string, date: string): Promise<ApiResponse<DoctorAvailabilityResponse>> {
+    const selectedDate = date?.split('T')[0];
     const response = await apiClient.get<ApiResponse<DoctorAvailabilityResponse>>(`/doctors/${doctorId}/availability`, {
-      params: { date }
+      params: { date: selectedDate }
     });
     return response.data;
   },
 
   async getSlots(doctorId: string, date: string): Promise<ApiResponse<DoctorSlotDTO[]>> {
+    const selectedDate = date?.split('T')[0];
     const response = await apiClient.get<ApiResponse<DoctorSlotDTO[]>>(`/doctors/${doctorId}/slots`, {
-      params: { date }
+      params: { date: selectedDate }
     });
     return response.data;
   }

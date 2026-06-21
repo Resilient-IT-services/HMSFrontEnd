@@ -247,9 +247,12 @@ export function DoctorList() {
                       {dateOptions.map((opt) => (
                           <button
                               key={opt.iso}
-                              onClick={() => setSelectedDate(opt.iso)}
+                              onClick={() => {
+                                const cleanDate = opt.iso.split('T')[0];
+                                setSelectedDate(cleanDate);
+                              }}
                               className={`flex-shrink-0 flex flex-col items-center justify-center w-14 py-2 border rounded-xl transition-all ${
-                                  selectedDate === opt.iso
+                                  selectedDate?.split('T')[0] === opt.iso.split('T')[0]
                                       ? 'border-[var(--primary)] bg-[var(--primary)] text-white font-bold'
                                       : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text-secondary)] hover:border-[var(--text-secondary)]'
                               }`}

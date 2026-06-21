@@ -7,11 +7,18 @@ import { doctorService } from '@/services/doctorService';
 import { catalogService } from '@/services/catalogService';
 import { DoctorStaffResponse, SessionInfo } from '@/types/api';
 import { useDebounce } from '@/hooks/useDebounce';
-import { getLocalStartOfDayISO } from '@/utils/dateValidator';
 import dayjs from '@/lib/dayjs';
+
+const getDateOnly = (date?: Date | string, tz?: string | null): string => {
+  if (date instanceof Date) {
+    return dayjs(date).tz(tz || undefined).format('YYYY-MM-DD');
+  }
+  return dayjs(date).tz(tz || undefined).format('YYYY-MM-DD');
+};
 
 export const useReceptionDoctors = () => {
   const { hospitalTimezone } = useSelector((state: RootState) => state.auth);
+  const getTodayDate = useCallback(() => getDateOnly(undefined, hospitalTimezone), [hospitalTimezone]);
   const [doctors, setDoctors] = useState<DoctorStaffResponse[]>([]);
   const [departmentOptions, setDepartmentOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +30,7 @@ export const useReceptionDoctors = () => {
   const debouncedColumnFilters = useDebounce(columnFilters, 300);
   
   const [selectedDoctor, setSelectedDoctor] = useState<DoctorStaffResponse | null>(null);
-  const [selectedDate, setSelectedDate] = useState(getLocalStartOfDayISO(undefined, hospitalTimezone));
+  const [selectedDate, setSelectedDate] = useState(getTodayDate);
   const [availability, setAvailability] = useState<SessionInfo[]>([]);
   const [loadingSchedule, setLoadingSchedule] = useState(false);
 
@@ -77,7 +84,7 @@ export const useReceptionDoctors = () => {
   const fetchAvailability = useCallback(async (doctorId: string, date: string) => {
     try {
       setLoadingSchedule(true);
-      const searchDate = getLocalStartOfDayISO(date, hospitalTimezone);
+      const searchDate = date?.split('T')[0];
       const res = await doctorService.getAvailability(doctorId, searchDate);
       if (res.success && res.data) {
         setAvailability(res.data.sessions);
@@ -100,13 +107,13 @@ export const useReceptionDoctors = () => {
 
   const viewSchedule = (doctor: DoctorStaffResponse) => {
     setSelectedDoctor(doctor);
-    setSelectedDate(getLocalStartOfDayISO(undefined, hospitalTimezone));
+    setSelectedDate(getTodayDate());
   };
 
   const dateOptions = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => {
       const d = dayjs().tz(hospitalTimezone || undefined).add(i, 'day');
-      const iso = getLocalStartOfDayISO(d.toDate(), hospitalTimezone);
+      const iso = getDateOnly(d.toDate(), hospitalTimezone);
       const label = i === 0 ? 'Today' : d.format('ddd');
       const day = d.date();
       return { iso, label, day };
