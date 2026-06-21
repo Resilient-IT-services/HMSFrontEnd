@@ -517,17 +517,18 @@ export const PharmacySalesPage = () => {
               resetPage();
             }}
             title="Sale Completed Successfully"
+            className="!max-w-[420px] !w-[420px]"
         >
-          <div className="p-8 text-center">
-            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="material-symbols-outlined text-5xl">check_circle</span>
+          <div className="p-6 text-center w-full">
+            <div className="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-3xl">check_circle</span>
             </div>
             <h3 className="text-2xl font-black text-slate-900 mb-2">₹{lastSale?.totalAmount.toFixed(2)} Collected</h3>
             <p className="text-sm font-medium text-slate-500 mb-8 leading-relaxed max-w-sm mx-auto">
               Pharmacy bill <span className="text-slate-900 font-bold">#{lastSale?.invoiceNumber}</span> has been generated and stock levels updated.
             </p>
 
-            <div className="flex flex-col gap-3 max-w-xs mx-auto">
+            <div className="flex flex-col gap-3 max-w-[260px] mx-auto">
               <Button
                   size="lg"
                   fullWidth

@@ -12,6 +12,7 @@ interface ModalProps {
   children: React.ReactNode;
   size?: ModalSize;
   width?: string; // Explicit width (e.g. '500px')
+  className?: string;
   hideHeader?: boolean;
 }
 
@@ -20,7 +21,7 @@ const sizeClasses: Record<ModalSize, string> = {
   md: 'max-w-md',
   lg: 'max-w-lg',
   xl: 'max-w-xl',
-  '2xl': 'max-w-2xl',
+  '2xl': 'max-w-[420px]',
   full: 'max-w-[95vw]',
   auto: 'w-auto'
 };
@@ -32,6 +33,7 @@ export const Modal: React.FC<ModalProps> = ({
                                               children,
                                               size = 'md',
                                               width,
+                                              className,
                                               hideHeader = false
                                             }) => {
   useEffect(() => {
@@ -49,18 +51,19 @@ export const Modal: React.FC<ModalProps> = ({
   if (!isOpen) return null;
 
   return (
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 overflow-hidden">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         {/* Backdrop */}
         <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-300 animate-in fade-in"
+            className="absolute inset-0"
             onClick={onClose}
         ></div>
 
         {/* Modal Container: h-[70vh] ko hatakar h-auto aur max-h-[85vh] kar diya hai */}
         <div
             className={cn(
-                "relative bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[90vw] h-auto max-h-[85vh]",
-                sizeClasses[size]
+                "relative bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200/60 transition-all transform animate-in zoom-in-95 duration-200 flex flex-col w-[420px] max-w-[90vw] h-auto max-h-[85vh] p-0",
+                sizeClasses[size],
+                className
             )}
             style={width ? { width, maxWidth: '100%' } : {}}
         >
