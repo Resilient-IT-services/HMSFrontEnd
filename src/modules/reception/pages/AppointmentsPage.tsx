@@ -333,10 +333,10 @@ export const AppointmentsPage = () => {
   // ── IPD helpers ───────────────────────────────────────────────────────────
   const getIpdStatusVariant = (status: AdmissionStatus) => {
     switch (status) {
-      case 'ADMITTED': return 'orange';
-      case 'DISCHARGED': return 'emerald';
-      case 'CANCELLED': return 'red';
-      default: return 'slate';
+      case 'ADMITTED': { return 'orange'; }
+      case 'DISCHARGED': { return 'emerald'; }
+      case 'CANCELLED': { return 'red'; }
+      default: { return 'slate'; }
     }
   };
 
