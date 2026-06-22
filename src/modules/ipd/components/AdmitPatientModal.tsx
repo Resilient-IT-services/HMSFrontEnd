@@ -67,7 +67,7 @@ const AdmitPatientModal = ({ isOpen, onClose, onSuccess }: AdmitPatientModalProp
       try {
         const res = await ipdService.listWardBeds(wardId);
         if (res.success) {
-          setBeds(res.data?.filter(b => b.status === 'AVAILABLE' && b.active) || []);
+          setBeds(res.data?.filter(b => b.status === 'AVAILABLE') || []);
         }
       } catch (error) {
         console.error(error);
