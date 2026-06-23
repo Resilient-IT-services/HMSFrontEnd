@@ -50,16 +50,27 @@ const LabReportsPage = () => {
     setIsPreviewModalOpen(true);
   };
 
-  const filteredReports = reports.filter(item => 
+  // Group by orderId — one row per order, not one row per test
+  const groupedReports = Object.values(
+    reports.reduce<Record<string, { item: LabQueueItemDTO; testNames: string[] }>>((acc, item) => {
+      if (!acc[item.orderId]) {
+        acc[item.orderId] = { item, testNames: [] };
+      }
+      acc[item.orderId].testNames.push(item.testName);
+      return acc;
+    }, {})
+  );
+
+  const filteredReports = groupedReports.filter(({ item }) =>
     item.patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
     item.patientId.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const columns: Column<LabQueueItemDTO>[] = [
+  const columns: Column<{ item: LabQueueItemDTO; testNames: string[] }>[] = [
     {
       header: 'Order Info',
-      render: (item) => (
+      render: ({ item }) => (
         <div>
           <p className="text-sm font-bold text-slate-800">{item.orderNumber}</p>
           <p className="text-[10px] text-slate-400 font-bold">{formatDateTime(item.orderedAt)}</p>
@@ -68,7 +79,7 @@ const LabReportsPage = () => {
     },
     {
       header: 'Patient Details',
-      render: (item) => (
+      render: ({ item }) => (
         <div>
           <p className="text-sm font-bold text-slate-800">{item.patientName}</p>
           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.patientId}</p>
@@ -76,12 +87,18 @@ const LabReportsPage = () => {
       )
     },
     {
-      header: 'Test Name',
-      render: (item) => <span className="text-sm font-bold text-slate-700">{item.testName}</span>
+      header: 'Tests',
+      render: ({ testNames }) => (
+        <div className="space-y-0.5">
+          {testNames.map((name, i) => (
+            <p key={i} className="text-xs font-bold text-slate-700">{name}</p>
+          ))}
+        </div>
+      )
     },
     {
       header: 'Referred By',
-      render: (item) => <span className="text-xs font-bold text-slate-600">{item.doctorName || 'Self'}</span>
+      render: ({ item }) => <span className="text-xs font-bold text-slate-600">{item.doctorName || 'Self'}</span>
     },
     {
       header: 'Status',
@@ -95,7 +112,7 @@ const LabReportsPage = () => {
       header: 'Action',
       className: 'text-right',
       headerClassName: 'text-right',
-      render: (item) => (
+      render: ({ item }) => (
         <Button size="sm" variant="secondary" onClick={() => handlePreviewReport(item.orderId)}>
           <span className="material-symbols-outlined text-sm mr-1">visibility</span>
           View Report
@@ -136,6 +153,11 @@ const LabReportsPage = () => {
               isLoading={loading}
               emptyMessage={searchTerm ? "No reports match your search." : "No verified reports found."}
             />
+            {!loading && filteredReports.length > 0 && (
+              <p className="text-[10px] text-slate-400 font-bold text-right px-4 pb-2">
+                {filteredReports.length} order{filteredReports.length !== 1 ? 's' : ''}
+              </p>
+            )}
           </ContentPanel>
         </div>
 

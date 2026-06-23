@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import MainLayout from '@/components/ui/MainLayout';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { triggerGlobalToast } from '@/components/ui/Toast';
-import { labApi, HospitalLabTestConfigDTO, LabPackageDTO } from '@/modules/lab/api/labApi';
+import { labApi, HospitalLabTestConfigDTO, HospitalLabPackageConfigDTO } from '@/modules/lab/api/labApi';
 
 interface SelectedItem {
   id: string;
@@ -24,7 +24,7 @@ export function WalkInPatientRegistrationPage() {
 
   // Test/package catalog
   const [tests, setTests] = useState<HospitalLabTestConfigDTO[]>([]);
-  const [packages, setPackages] = useState<LabPackageDTO[]>([]);
+  const [packages, setPackages] = useState<HospitalLabPackageConfigDTO[]>([]);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<SelectedItem[]>([]);
 
@@ -35,13 +35,13 @@ export function WalkInPatientRegistrationPage() {
     const load = async () => {
       const [testsRes, pkgRes] = await Promise.all([
         labApi.getAdminTests(),
-        labApi.getPackages(),
+        labApi.getAdminPackages(),
       ]);
       if (testsRes.success && testsRes.data) {
         setTests(testsRes.data.filter(t => t.enabled));
       }
       if (pkgRes.success && pkgRes.data) {
-        setPackages(pkgRes.data.filter(p => p.active));
+        setPackages(pkgRes.data.filter(p => p.enabled));
       }
     };
     void load();
@@ -54,7 +54,7 @@ export function WalkInPatientRegistrationPage() {
   );
 
   const filteredPackages = packages.filter(p =>
-    !selected.some(s => s.id === p.id) &&
+    !selected.some(s => s.id === p.packageId) &&
     p.packageName.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -63,8 +63,13 @@ export function WalkInPatientRegistrationPage() {
     setSearch('');
   };
 
-  const addPackage = (p: LabPackageDTO) => {
-    setSelected(prev => [...prev, { id: p.id!, name: p.packageName, type: 'PACKAGE' }]);
+  const addPackage = (p: HospitalLabPackageConfigDTO) => {
+    setSelected(prev => [...prev, {
+      id: p.packageId,
+      name: p.packageName,
+      type: 'PACKAGE',
+      price: p.standardPrice ? Number(p.standardPrice) : undefined,
+    }]);
     setSearch('');
   };
 
@@ -203,14 +208,17 @@ export function WalkInPatientRegistrationPage() {
                           <p className="px-3 pt-2 pb-1 text-[9px] font-black uppercase text-slate-400 tracking-wider border-t border-slate-100 mt-1">Packages</p>
                           {filteredPackages.slice(0, 4).map(p => (
                             <button
-                              key={p.id}
+                              key={p.packageId}
                               onClick={() => addPackage(p)}
                               className="w-full text-left px-3 py-2 hover:bg-orange-50 text-xs transition-colors flex items-center justify-between gap-2"
                             >
                               <div>
                                 <p className="font-bold text-slate-900">{p.packageName}</p>
-                                <p className="text-[9px] text-slate-400">{p.testIds.length} tests · {p.packageType}</p>
+                                <p className="text-[9px] text-slate-400">{p.testIds?.length ?? 0} tests · {p.packageType}</p>
                               </div>
+                              {p.standardPrice && (
+                                <span className="text-[10px] font-black text-blue-700 shrink-0">₹{p.standardPrice}</span>
+                              )}
                             </button>
                           ))}
                         </>

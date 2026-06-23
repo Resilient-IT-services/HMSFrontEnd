@@ -694,7 +694,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                     pharmacyApi.getPrescriptionById(recommendationId),
                     labApi.getTests(),
                     labApi.getAllPricing(),
-                    labApi.getPackages(),
+                    labApi.getAdminPackages(),
                 ]);
 
                 if (presRes.success && presRes.data) {
@@ -709,7 +709,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
 
                 if (testsRes.success && testsRes.data) setAllTests(testsRes.data);
                 if (pricesRes.success && pricesRes.data) setAllPrices(pricesRes.data);
-                if (pkgRes.success && pkgRes.data) setAllPackages(pkgRes.data.filter((p: any) => p.active));
+                if (pkgRes.success && pkgRes.data) setAllPackages(pkgRes.data.filter((p: any) => p.enabled));
             } catch (error) {
                 console.error(error);
                 triggerGlobalToast('Failed to load billing data', 'error');
@@ -725,8 +725,8 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
     };
 
     const getPackagePrice = (packageId: string) => {
-        const pkg = allPackages.find(p => p.id === packageId);
-        return (pkg?.testIds || []).reduce((sum: number, testId: string) => sum + getPrice(testId), 0);
+        const pkg = allPackages.find((p: any) => p.packageId === packageId);
+        return pkg?.standardPrice ? Number(pkg.standardPrice) : 0;
     };
 
     const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0)
@@ -880,20 +880,22 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                             </div>
                             <div className="space-y-2">
                                 {allPackages.map((pkg: any) => (
-                                    <div key={pkg.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPackages.includes(pkg.id) ? 'bg-indigo-50/50 border-indigo-200' : 'bg-white border-slate-100'}`}>
+                                    <div key={pkg.packageId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPackages.includes(pkg.packageId) ? 'bg-indigo-50/50 border-indigo-200' : 'bg-white border-slate-100'}`}>
                                         <input
                                             type="checkbox"
-                                            checked={selectedPackages.includes(pkg.id)}
+                                            checked={selectedPackages.includes(pkg.packageId)}
                                             onChange={(e) => {
-                                                if (e.target.checked) setSelectedPackages(prev => [...prev, pkg.id]);
-                                                else setSelectedPackages(prev => prev.filter(id => id !== pkg.id));
+                                                if (e.target.checked) setSelectedPackages(prev => [...prev, pkg.packageId]);
+                                                else setSelectedPackages(prev => prev.filter(id => id !== pkg.packageId));
                                             }}
                                             className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
                                         />
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start">
                                                 <p className="text-sm font-bold text-slate-800 truncate">{pkg.packageName}</p>
-                                                <span className="text-[10px] font-black text-slate-500 ml-2">{pkg.testIds?.length || 0} tests</span>
+                                                <span className="text-xs font-black text-indigo-700 ml-2">
+                                                    {pkg.standardPrice ? `₹${pkg.standardPrice}` : `${pkg.testIds?.length || 0} tests`}
+                                                </span>
                                             </div>
                                             <p className="text-[10px] text-slate-400 font-bold uppercase">{pkg.packageCode}</p>
                                         </div>
