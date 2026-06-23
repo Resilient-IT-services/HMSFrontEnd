@@ -82,14 +82,60 @@ export interface LabQueueItemDTO {
     resultEntryType: string;
     status: string;
     orderedAt: string;
+    packageId?: string;
+    packageName?: string;
+    packageChildCount?: number;
 }
+
+export interface LabPackageResultBundleDTO {
+    orderId: string;
+    packageId: string;
+    packageName: string;
+    status: string;
+    tests: {
+        orderTestId: string;
+        testId: string;
+        testName: string;
+        category: string;
+        resultEntryType: string;
+        status: string;
+        findings?: string;
+        parameters: LabTestParameterDTO[];
+    }[];
+}
+
+export type PackageType = 'PROFILE' | 'PANEL' | 'SCREENING' | 'HEALTH_CHECKUP' | 'CUSTOM';
+export type PackageStatus = 'PENDING' | 'COLLECTED' | 'PROCESSING' | 'COMPLETED' | 'VERIFIED';
 
 export interface LabPackageDTO {
     id?: string;
     packageCode: string;
     packageName: string;
+    description?: string;
     active: boolean;
+    packageType?: PackageType;
+    versionNo?: number;
+    isBillable?: boolean;
     testIds: string[];
+}
+
+export interface LabOrderPackageDTO {
+    id: string;
+    orderId: string;
+    packageId: string;
+    packageName?: string;
+    packageVersion: number;
+    parentOrderPackageId?: string;
+    status: PackageStatus;
+    isBillable: boolean;
+    packagePrice?: number;
+    discountAmount?: number;
+    taxAmount?: number;
+    finalAmount?: number;
+    lockedForReporting: boolean;
+    lockedAt?: string;
+    lockedBy?: string;
+    createdAt: string;
 }
 
 export interface LabInventoryItemDTO {
@@ -109,8 +155,23 @@ export interface LabMachineDTO {
     serialNumber: string;
 }
 
+export const PACKAGE_TYPE_LABELS: Record<PackageType, string> = {
+    PROFILE: 'Profile',
+    PANEL: 'Panel',
+    SCREENING: 'Screening',
+    HEALTH_CHECKUP: 'Health Checkup',
+    CUSTOM: 'Custom',
+};
+
+export const PACKAGE_STATUS_CONFIG: Record<PackageStatus, { label: string; variant: string }> = {
+    PENDING: { label: 'Pending', variant: 'slate' },
+    COLLECTED: { label: 'Collected', variant: 'blue' },
+    PROCESSING: { label: 'Processing', variant: 'indigo' },
+    COMPLETED: { label: 'Completed', variant: 'orange' },
+    VERIFIED: { label: 'Verified', variant: 'emerald' },
+};
+
 export const labApi = {
-    // ... existing methods ...
     // Packages
     getPackages: async () => {
         const response = await apiClient.get<ApiResponse<LabPackageDTO[]>>('/lab/packages');
@@ -126,6 +187,19 @@ export const labApi = {
     },
     deletePackage: async (id: string) => {
         const response = await apiClient.delete<ApiResponse<void>>(`/lab/packages/${id}`);
+        return response.data;
+    },
+
+    // Order Package lock/unlock
+    lockOrderPackage: async (orderPackageId: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/packages/${orderPackageId}/lock`);
+        return response.data;
+    },
+    unlockOrderPackage: async (orderPackageId: string, reason: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(
+            `/lab/orders/packages/${orderPackageId}/unlock`,
+            { reason }
+        );
         return response.data;
     },
 
@@ -171,7 +245,7 @@ export const labApi = {
         return response.data;
     },
 
-    // Existing methods
+    // Dashboard
     getDashboardStats: async () => {
         const response = await apiClient.get<ApiResponse<HospitalLabDashboardStatsDTO>>('/hospital/lab/dashboard/stats');
         return response.data;
@@ -184,6 +258,7 @@ export const labApi = {
         const response = await apiClient.put<ApiResponse<void>>('/hospital/lab/settings/tests', data);
         return response.data;
     },
+
     // Technician Features
     getPagedQueue: async (status?: string, page = 0, size = 20) => {
         const response = await apiClient.get<ApiResponse<PageResponse<LabQueueItemDTO>>>('/lab/orders/queue/paged', {
@@ -195,10 +270,23 @@ export const labApi = {
         const response = await apiClient.post<ApiResponse<string>>(`/lab/orders/tests/${orderTestId}/collect`);
         return response.data;
     },
+    collectPackageSamples: async (orderId: string, packageId: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/packages/${packageId}/collect`, null, {
+            params: { orderId }
+        });
+        return response.data;
+    },
     markProcessing: async (orderTestId: string) => {
         const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/tests/${orderTestId}/process`);
         return response.data;
     },
+    markPackageProcessing: async (orderId: string, packageId: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/packages/${packageId}/process`, null, {
+            params: { orderId }
+        });
+        return response.data;
+    },
+
     // Departments
     getDepartments: async () => {
         const response = await apiClient.get<ApiResponse<LabDepartmentDTO[]>>('/lab/departments');
@@ -242,6 +330,12 @@ export const labApi = {
     },
     getParametersByOrderTest: async (orderTestId: string) => {
         const response = await apiClient.get<ApiResponse<LabTestParameterDTO[]>>(`/lab/orders/tests/${orderTestId}/parameters`);
+        return response.data;
+    },
+    getPackageResultBundle: async (orderId: string, packageId: string) => {
+        const response = await apiClient.get<ApiResponse<LabPackageResultBundleDTO>>(`/lab/orders/packages/${packageId}/result-bundle`, {
+            params: { orderId }
+        });
         return response.data;
     },
     createParameter: async (data: LabTestParameterDTO) => {
@@ -290,16 +384,39 @@ export const labApi = {
     },
 
     // Orders
-    createOrder: async (data: { patientId: string, encounterId: string, testIds: string[], packageIds: string[] }) => {
+    createOrder: async (data: {
+        patientId: string;
+        encounterId: string;
+        testIds: string[];
+        packageIds: string[];
+    }) => {
         const response = await apiClient.post<ApiResponse<any>>('/lab/orders', data);
+        return response.data;
+    },
+    createWalkInOrder: async (data: {
+        walkInName: string;
+        walkInPhone: string;
+        walkInAddress?: string;
+        testIds: string[];
+        packageIds: string[];
+    }) => {
+        const response = await apiClient.post<ApiResponse<any>>('/lab/orders/walkin', data);
         return response.data;
     },
     getQueue: async () => {
         const response = await apiClient.get<ApiResponse<any[]>>('/lab/orders/queue');
         return response.data;
     },
-    saveResults: async (data: { orderTestId: string, findings?: string, results?: any[] }) => {
+    saveResults: async (data: { orderTestId: string; findings?: string; results?: any[] }) => {
         const response = await apiClient.post<ApiResponse<void>>('/lab/orders/results', data);
+        return response.data;
+    },
+    savePackageResults: async (data: {
+        orderId: string;
+        packageId: string;
+        tests: { orderTestId: string; findings?: string; results?: any[] }[];
+    }) => {
+        const response = await apiClient.post<ApiResponse<void>>('/lab/orders/packages/results', data);
         return response.data;
     },
     getReportPreview: async (orderId: string) => {
@@ -317,11 +434,18 @@ export const labApi = {
     createOrderFromRecommendation: async (data: {
         prescriptionId: string;
         testIds: string[];
+        packageIds?: string[];
         paymentMode: string;
         amountPaid: number;
         referenceNumber?: string;
     }) => {
         const response = await apiClient.post<ApiResponse<any>>('/lab/orders/from-recommendation', data);
         return response.data;
-    }
+    },
+    verifyPackageResults: async (orderId: string, packageId: string, remarks: string, status: 'VERIFIED' | 'REJECTED') => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/packages/${packageId}/verify`, null, {
+            params: { orderId, remarks, status }
+        });
+        return response.data;
+    },
 };

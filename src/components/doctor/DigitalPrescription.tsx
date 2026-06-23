@@ -20,13 +20,14 @@ interface DigitalPrescriptionProps {
   complaints: string;
   diagnosis: string;
   prescriptions: PrescriptionRow[];
-  investigations?: { 
-    id: string, 
-    testName: string, 
-    testCode: string, 
+  investigations?: {
+    id: string,
+    testName: string,
+    testCode: string,
     notes?: string,
     status?: string,
-    labOrderTestId?: string
+    labOrderTestId?: string,
+    itemType?: string
   }[];
   vitals: {
     heartRate: string;
@@ -302,7 +303,12 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                        {pageData.labs.map((lab, idx) => (
                          <div key={idx} className="bg-slate-50 border border-slate-200 rounded-lg p-3 flex flex-col gap-1 relative group/lab">
                             <div className="flex justify-between items-start">
-                                <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight">{lab.testName}</span>
+                                <div className="flex items-center gap-1.5 min-w-0">
+                                    <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight truncate">{lab.testName}</span>
+                                    {lab.itemType === 'PACKAGE' && (
+                                        <span className="shrink-0 text-[8px] font-black px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 uppercase">Panel</span>
+                                    )}
+                                </div>
                                 {lab.status && (
                                     <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase ${
                                         lab.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-700' : 

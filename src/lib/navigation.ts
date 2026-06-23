@@ -34,6 +34,7 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
     
     // Lab Specific Routes
+    { name: 'Walk-in Registration', icon: 'person_add', href: '/lab_admin/walkin', roles: ['LAB_ADMIN'] },
     { name: 'Lab Queue', icon: 'biotech', href: '/lab_admin/queue', roles: ['LAB_ADMIN', 'PATHOLOGIST'] },
     { name: 'Lab Reports', icon: 'description', href: '/lab_admin/reports', roles: ['LAB_ADMIN', 'PATHOLOGIST'] },
     { name: 'Lab Inventory', icon: 'inventory', href: '/lab_admin/inventory', roles: ['LAB_ADMIN'] },

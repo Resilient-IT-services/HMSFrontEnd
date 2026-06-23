@@ -30,6 +30,44 @@ const statusMapping: Record<string, { label: string, variant: any }> = {
   RECOMMENDED: { label: 'Recommended', variant: 'slate' }
 };
 
+const aggregatePackageStatus = (items: any[]) => {
+  const statuses = items.map(item => item.status);
+  if (statuses.every(status => status === 'VERIFIED')) return 'VERIFIED';
+  if (statuses.every(status => status === 'RESULT_ENTERED')) return 'RESULT_ENTERED';
+  if (statuses.some(status => status === 'PROCESSING' || status === 'RESULT_ENTERED')) return 'PROCESSING';
+  if (statuses.some(status => status === 'SAMPLE_COLLECTED')) return 'SAMPLE_COLLECTED';
+  return statuses[0] || 'PENDING';
+};
+
+const collapseQueueItems = (items: any[]) => {
+  const grouped = new Map<string, any[]>();
+  const singles: any[] = [];
+
+  items.forEach(item => {
+    if (item.packageId) {
+      const key = `${item.orderId}:${item.packageId}`;
+      grouped.set(key, [...(grouped.get(key) || []), item]);
+    } else {
+      singles.push(item);
+    }
+  });
+
+  const packageRows = Array.from(grouped.values()).map(group => {
+    const first = group[0];
+    return {
+      ...first,
+      isPackageGroup: true,
+      testName: first.packageName || first.testName,
+      resultEntryType: 'PACKAGE',
+      category: group.every(item => item.category === 'LAB') ? 'LAB' : first.category,
+      status: aggregatePackageStatus(group),
+      childTests: group
+    };
+  });
+
+  return [...packageRows, ...singles];
+};
+
 const LabQueuePage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const hospitalName = user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
@@ -46,6 +84,9 @@ const LabQueuePage = () => {
   
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [verifyData, setVerifyData] = useState<any | null>(null);
+  const [lockedPackageIds, setLockedPackageIds] = useState<Set<string>>(new Set());
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [unlockTargetItem, setUnlockTargetItem] = useState<any | null>(null);
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -58,7 +99,7 @@ const LabQueuePage = () => {
       } else {
         const res = await labApi.getPagedQueue(activeTab === 'VERIFIED' ? 'VERIFIED' : activeTab, 0, 100);
         if (res.success && res.data) {
-          setQueue(res.data.content);
+          setQueue(collapseQueueItems(res.data.content));
         }
       }
     } catch (error) {
@@ -76,12 +117,14 @@ const LabQueuePage = () => {
         void init();
     }, [activeTab, fetchQueue]); // Fetch when activeTab changes
 
-  const handleCollectSample = async (orderTestId: string) => {
+  const handleCollectSample = async (item: any) => {
     try {
       setLoading(true);
-      const res = await labApi.collectSample(orderTestId);
+      const res = item.isPackageGroup
+        ? await labApi.collectPackageSamples(item.orderId, item.packageId)
+        : await labApi.collectSample(item.orderTestId);
       if (res.success) {
-        triggerGlobalToast(`Sample Collected: ${res.data}`, 'success');
+        triggerGlobalToast(item.isPackageGroup ? 'Package samples collected' : `Sample Collected: ${res.data}`, 'success');
         void fetchQueue();
       }
     } catch (error: any) {
@@ -92,12 +135,14 @@ const LabQueuePage = () => {
     }
   };
 
-  const handleMarkProcessing = async (orderTestId: string) => {
+  const handleMarkProcessing = async (item: any) => {
     try {
       setLoading(true);
-      const res = await labApi.markProcessing(orderTestId);
+      const res = item.isPackageGroup
+        ? await labApi.markPackageProcessing(item.orderId, item.packageId)
+        : await labApi.markProcessing(item.orderTestId);
       if (res.success) {
-        triggerGlobalToast('Test marked as Processing', 'success');
+        triggerGlobalToast(item.isPackageGroup ? 'Package marked as Processing' : 'Test marked as Processing', 'success');
         void fetchQueue();
       }
     } catch (error: any) {
@@ -128,7 +173,9 @@ const LabQueuePage = () => {
 
     try {
         setLoading(true);
-        const res = await labApi.verifyResult(verifyData.orderTestId, remarks, verifyData.verificationStatus);
+        const res = verifyData.isPackageGroup
+          ? await labApi.verifyPackageResults(verifyData.orderId, verifyData.packageId, remarks, verifyData.verificationStatus)
+          : await labApi.verifyResult(verifyData.orderTestId, remarks, verifyData.verificationStatus);
         if (res.success) {
             triggerGlobalToast(`Result ${verifyData.verificationStatus.toLowerCase()} successfully`, 'success');
             setIsVerifyModalOpen(false);
@@ -140,6 +187,32 @@ const LabQueuePage = () => {
         triggerGlobalToast('Failed to verify result', 'error');
     } finally {
         setLoading(false);
+    }
+  };
+
+  const handleLockPackage = async (orderPackageId: string) => {
+    try {
+      const res = await labApi.lockOrderPackage(orderPackageId);
+      if (res.success) {
+        triggerGlobalToast('Package locked for reporting', 'success');
+        setLockedPackageIds(prev => new Set([...prev, orderPackageId]));
+      }
+    } catch (error: any) {
+      triggerGlobalToast(error.response?.data?.message || 'Failed to lock package', 'error');
+    }
+  };
+
+  const handleUnlockPackage = async (orderPackageId: string, reason: string) => {
+    try {
+      const res = await labApi.unlockOrderPackage(orderPackageId, reason);
+      if (res.success) {
+        triggerGlobalToast('Package unlocked successfully', 'success');
+        setLockedPackageIds(prev => { const next = new Set(prev); next.delete(orderPackageId); return next; });
+        setIsUnlockModalOpen(false);
+        setUnlockTargetItem(null);
+      }
+    } catch (error: any) {
+      triggerGlobalToast(error.response?.data?.message || 'Failed to unlock package', 'error');
     }
   };
 
@@ -174,9 +247,17 @@ const LabQueuePage = () => {
               {activeTab === 'RECOMMENDED' ? `${item.itemCount} Tests Recommended` : item.testName}
             </p>
             {!activeTab.includes('RECOMMENDED') && item.category && (
-              <Badge variant={categoryConfig[item.category]?.variant || 'slate'} size="sm" className="mt-1">
-                {categoryConfig[item.category]?.label || item.category}
-              </Badge>
+              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                <Badge variant={categoryConfig[item.category]?.variant || 'slate'} size="sm">
+                  {categoryConfig[item.category]?.label || item.category}
+                </Badge>
+                {item.packageId && (
+                  <Badge variant="purple" size="sm">Package Test</Badge>
+                )}
+                {item.isPackageGroup && (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{item.childTests?.length || item.packageChildCount || 0} tests</span>
+                )}
+              </div>
             )}
           </div>
       )
@@ -218,8 +299,8 @@ const LabQueuePage = () => {
           return (
             <div className="flex justify-end gap-2">
               {item.category === 'LAB' ? (
-                <Button size="sm" onClick={() => handleCollectSample(item.orderTestId)}>
-                  Collect Sample
+                <Button size="sm" onClick={() => handleCollectSample(item)}>
+                  {item.isPackageGroup ? 'Collect Package' : 'Collect Sample'}
                 </Button>
               ) : (
                 <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
@@ -232,8 +313,8 @@ const LabQueuePage = () => {
         
         if (item.status === 'SAMPLE_COLLECTED') {
           return (
-            <Button size="sm" onClick={() => handleMarkProcessing(item.orderTestId)}>
-              Mark Processing
+            <Button size="sm" onClick={() => handleMarkProcessing(item)}>
+              {item.isPackageGroup ? 'Process Package' : 'Mark Processing'}
             </Button>
           );
         }
@@ -249,7 +330,7 @@ const LabQueuePage = () => {
         if (item.status === 'RESULT_ENTERED') {
           return (
             <div className="flex justify-end gap-2">
-                <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item.orderTestId, 'VERIFIED')}>
+                <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item, 'VERIFIED')}>
                     Verify
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
@@ -260,9 +341,32 @@ const LabQueuePage = () => {
         }
         
         if (item.status === 'VERIFIED') {
+          if (item.packageId) {
+            const isLocked = lockedPackageIds.has(item.packageId);
             return (
-              <Badge variant="emerald">Verified</Badge>
+              <div className="flex justify-end items-center gap-2">
+                <Badge variant="emerald" size="sm">Verified</Badge>
+                {isLocked ? (
+                  <button
+                    onClick={() => { setUnlockTargetItem(item); setIsUnlockModalOpen(true); }}
+                    className="flex items-center gap-1 text-[10px] font-black text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-2 py-1 rounded-lg transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[12px]">lock_open</span>
+                    Unlock
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleLockPackage(item.packageId)}
+                    className="flex items-center gap-1 text-[10px] font-black text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-400 px-2 py-1 rounded-lg transition-all"
+                  >
+                    <span className="material-symbols-outlined text-[12px]">lock</span>
+                    Lock
+                  </button>
+                )}
+              </div>
             );
+          }
+          return <Badge variant="emerald">Verified</Badge>;
         }
         return null;
       }
@@ -340,7 +444,7 @@ const LabQueuePage = () => {
         </div>
 
         {isResultModalOpen && selectedOrderTest && (
-            <LabResultEntryModal 
+            <LabResultEntryModal
               isOpen={true}
               onClose={() => {
                 setIsResultModalOpen(false);
@@ -348,8 +452,10 @@ const LabQueuePage = () => {
                 fetchQueue();
               }}
               orderTestId={selectedOrderTest.orderTestId}
+              orderId={selectedOrderTest.orderId}
               testName={selectedOrderTest.testName}
               resultEntryType={selectedOrderTest.resultEntryType}
+              packageId={selectedOrderTest.packageId}
             />
         )}
 
@@ -376,6 +482,16 @@ const LabQueuePage = () => {
                 onConfirm={handleConfirmVerify}
             />
         )}
+
+        {isUnlockModalOpen && unlockTargetItem && (
+            <LabPackageUnlockModal
+                isOpen={true}
+                testName={unlockTargetItem.testName}
+                orderPackageId={unlockTargetItem.packageId}
+                onClose={() => { setIsUnlockModalOpen(false); setUnlockTargetItem(null); }}
+                onConfirm={handleUnlockPackage}
+            />
+        )}
       </PageSurface>
     </MainLayout>
   );
@@ -386,19 +502,20 @@ const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: bo
     const [remarks, setRemarks] = useState('');
     const [loading, setLoading] = useState(false);
     const [parameters, setParameters] = useState<any[]>([]);
+    const [packageBundle, setPackageBundle] = useState<any | null>(null);
     const [findings, setFindings] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchResults = async () => {
             setLoading(true);
             try {
-                if (item.resultEntryType?.toUpperCase() === 'PARAMETER') {
+                if (item.isPackageGroup && item.orderId && item.packageId) {
+                    const res = await labApi.getPackageResultBundle(item.orderId, item.packageId);
+                    if (res.success) setPackageBundle(res.data || null);
+                } else if (item.resultEntryType?.toUpperCase() === 'PARAMETER') {
                     const res = await labApi.getParametersByOrderTest(item.orderTestId);
                     if (res.success) setParameters(res.data || []);
                 } else {
-                    // For narrative, we might need an API to get narrative results.
-                    // Assuming for now findings might be in item or fetched differently.
-                    // If your API doesn't provide narrative result here, we can add it.
                     setFindings(item.findings || 'Findings already recorded.');
                 }
             } catch (error) {
@@ -421,6 +538,31 @@ const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: bo
                     
                     {loading ? (
                         <div className="py-4 text-center italic text-slate-400 text-xs">Loading data...</div>
+                    ) : item.isPackageGroup ? (
+                        <div className="space-y-4">
+                            {(packageBundle?.tests || []).map((test: any) => (
+                                <div key={test.orderTestId} className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-black text-slate-800">{test.testName}</p>
+                                        <span className="text-[9px] font-black uppercase text-slate-400">{test.status}</span>
+                                    </div>
+                                    {test.resultEntryType?.toUpperCase() === 'PARAMETER' ? (
+                                        <div className="space-y-2">
+                                            {(test.parameters || []).map((param: any) => (
+                                                <div key={param.id} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
+                                                    <span className="font-bold text-slate-600">{param.parameterName}</span>
+                                                    <span className={`font-black ${param.abnormal ? 'text-red-600' : 'text-slate-900'}`}>
+                                                        {param.resultValue} {param.unit}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{test.findings || 'Findings recorded.'}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     ) : item.resultEntryType?.toUpperCase() === 'PARAMETER' ? (
                         <div className="space-y-3">
                             {parameters.length > 0 ? parameters.map((param, idx) => (
@@ -469,6 +611,60 @@ const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: bo
     );
 };
 
+// --- Lab Package Unlock Modal ---
+const LabPackageUnlockModal = ({
+    isOpen, testName, orderPackageId, onClose, onConfirm
+}: { isOpen: boolean; testName: string; orderPackageId: string; onClose: () => void; onConfirm: (id: string, reason: string) => void }) => {
+    const [reason, setReason] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!reason.trim()) { triggerGlobalToast('Please provide a reason for unlocking', 'error'); return; }
+        setSubmitting(true);
+        await onConfirm(orderPackageId, reason);
+        setSubmitting(false);
+    };
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Unlock Package for Editing" size="md">
+            <div className="p-6 space-y-5">
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <span className="material-symbols-outlined text-amber-500 mt-0.5">warning</span>
+                    <div>
+                        <p className="text-sm font-black text-amber-800">This action requires authorisation</p>
+                        <p className="text-xs text-amber-700 font-medium mt-0.5">
+                            Unlocking <strong>{testName}</strong>'s package will allow result modifications. All unlock actions are audited.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">
+                        Reason for Unlock <span className="text-red-400">*</span>
+                    </label>
+                    <textarea
+                        rows={3}
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="e.g. Result entry error — wrong value entered for Hb parameter"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:bg-white focus:border-primary transition-all resize-none"
+                    />
+                </div>
+                <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button
+                        className="bg-amber-600 hover:bg-amber-700"
+                        onClick={handleSubmit}
+                        isLoading={submitting}
+                        disabled={!reason.trim()}
+                    >
+                        Confirm Unlock
+                    </Button>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
 // --- Lab Billing Modal ---
 import { Modal } from '@/components/ui/Modal';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
@@ -476,9 +672,11 @@ import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolean, onClose: () => void, recommendationId: string }) => {
     const [prescription, setPrescription] = useState<any>(null);
     const [allTests, setAllTests] = useState<any[]>([]);
+    const [allPackages, setAllPackages] = useState<any[]>([]);
     const [allPrices, setAllPrices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTests, setSelectedTests] = useState<string[]>([]);
+    const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
     const [extraTests, setExtraTests] = useState<any[]>([]);
     const [testSearch, setTestSearch] = useState('');
     const [showSearchResults, setShowSearchResults] = useState(false);
@@ -492,21 +690,26 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
         const load = async () => {
             try {
                 setLoading(true);
-                const [presRes, testsRes, pricesRes] = await Promise.all([
+                const [presRes, testsRes, pricesRes, pkgRes] = await Promise.all([
                     pharmacyApi.getPrescriptionById(recommendationId),
                     labApi.getTests(),
-                    labApi.getAllPricing()
+                    labApi.getAllPricing(),
+                    labApi.getPackages(),
                 ]);
 
                 if (presRes.success && presRes.data) {
                     setPrescription(presRes.data);
-                    const pendingTests = presRes.data.labItems?.filter((item: any) => item.status === 'PENDING' || !item.status)
-                        .map((item: any) => item.testId) || [];
+                    const pendingTests = presRes.data.labItems?.filter((item: any) => (!item.packageId) && (item.status === 'PENDING' || !item.status))
+                        .map((item: any) => item.testId).filter(Boolean) || [];
+                    const pendingPackages = presRes.data.labItems?.filter((item: any) => item.packageId && (item.status === 'PENDING' || !item.status))
+                        .map((item: any) => item.packageId).filter(Boolean) || [];
                     setSelectedTests(pendingTests);
+                    setSelectedPackages(pendingPackages);
                 }
 
                 if (testsRes.success && testsRes.data) setAllTests(testsRes.data);
                 if (pricesRes.success && pricesRes.data) setAllPrices(pricesRes.data);
+                if (pkgRes.success && pkgRes.data) setAllPackages(pkgRes.data.filter((p: any) => p.active));
             } catch (error) {
                 console.error(error);
                 triggerGlobalToast('Failed to load billing data', 'error');
@@ -521,7 +724,13 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
         return allPrices.find(p => p.testId === testId)?.standardPrice || 0;
     };
 
-    const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0);
+    const getPackagePrice = (packageId: string) => {
+        const pkg = allPackages.find(p => p.id === packageId);
+        return (pkg?.testIds || []).reduce((sum: number, testId: string) => sum + getPrice(testId), 0);
+    };
+
+    const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0)
+        + selectedPackages.reduce((sum, id) => sum + getPackagePrice(id), 0);
 
     const filteredTests = allTests.filter(t => 
         t.testName.toLowerCase().includes(testSearch.toLowerCase()) && 
@@ -536,8 +745,8 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
     };
 
     const handleConfirmOrder = async () => {
-        if (selectedTests.length === 0) {
-            triggerGlobalToast('Please select at least one test', 'error');
+        if (selectedTests.length === 0 && selectedPackages.length === 0) {
+            triggerGlobalToast('Please select at least one test or package', 'error');
             return;
         }
 
@@ -546,6 +755,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
             const res = await labApi.createOrderFromRecommendation({
                 prescriptionId: recommendationId,
                 testIds: selectedTests,
+                packageIds: selectedPackages.length > 0 ? selectedPackages : undefined,
                 paymentMode,
                 amountPaid: Number.parseFloat(amountPaid) || 0,
                 referenceNumber: referenceNumber || undefined
@@ -587,7 +797,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                         
                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                             {/* Recommended Tests */}
-                            {prescription?.labItems?.filter((item: any) => item.status === 'PENDING' || !item.status).map((test: any) => (
+                            {prescription?.labItems?.filter((item: any) => (!item.packageId) && (item.status === 'PENDING' || !item.status)).map((test: any) => (
                                 <div key={test.testId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedTests.includes(test.testId) ? 'bg-orange-50/50 border-orange-200' : 'bg-white border-slate-100'}`}>
                                     <input
                                         type="checkbox"
@@ -605,6 +815,29 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <Badge variant="slate" size="sm" className="opacity-70">Recommended</Badge>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {prescription?.labItems?.filter((item: any) => item.packageId && (item.status === 'PENDING' || !item.status)).map((pkgItem: any) => (
+                                <div key={pkgItem.packageId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPackages.includes(pkgItem.packageId) ? 'bg-indigo-50/50 border-indigo-200' : 'bg-white border-slate-100'}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedPackages.includes(pkgItem.packageId)}
+                                        onChange={(e) => {
+                                            if (e.target.checked) setSelectedPackages([...selectedPackages, pkgItem.packageId]);
+                                            else setSelectedPackages(selectedPackages.filter(id => id !== pkgItem.packageId));
+                                        }}
+                                        className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-sm font-bold text-slate-800 truncate">{pkgItem.packageName}</p>
+                                            <span className="text-xs font-black text-slate-700 ml-2">₹{getPackagePrice(pkgItem.packageId)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="purple" size="sm" className="opacity-70">Recommended Package</Badge>
                                         </div>
                                     </div>
                                 </div>
@@ -633,6 +866,42 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                             ))}
                         </div>
                     </div>
+
+                    {/* Packages Section */}
+                    {allPackages.length > 0 && (
+                        <div>
+                            <div className="flex justify-between items-center mb-2">
+                                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Packages</label>
+                                {selectedPackages.length > 0 && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full">
+                                        {selectedPackages.length} Package{selectedPackages.length > 1 ? 's' : ''}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="space-y-2">
+                                {allPackages.map((pkg: any) => (
+                                    <div key={pkg.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPackages.includes(pkg.id) ? 'bg-indigo-50/50 border-indigo-200' : 'bg-white border-slate-100'}`}>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedPackages.includes(pkg.id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) setSelectedPackages(prev => [...prev, pkg.id]);
+                                                else setSelectedPackages(prev => prev.filter(id => id !== pkg.id));
+                                            }}
+                                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                                        />
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start">
+                                                <p className="text-sm font-bold text-slate-800 truncate">{pkg.packageName}</p>
+                                                <span className="text-[10px] font-black text-slate-500 ml-2">{pkg.testIds?.length || 0} tests</span>
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{pkg.packageCode}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Add More Tests Search */}
                     <div className="relative">
