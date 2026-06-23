@@ -59,17 +59,44 @@ export function WalkInPatientRegistrationPage() {
   );
 
   const addTest = (t: HospitalLabTestConfigDTO) => {
+    const coveringPackage = selected.find(
+      s => s.type === 'PACKAGE' && packages.find(p => p.packageId === s.id)?.testIds.includes(t.testId)
+    );
+    if (coveringPackage) {
+      triggerGlobalToast(
+        `"${t.testName}" is already included in "${coveringPackage.name}". Adding it separately would cause duplicate billing.`,
+        'error'
+      );
+      setSearch('');
+      return;
+    }
     setSelected(prev => [...prev, { id: t.testId, name: t.testName, type: 'TEST', price: t.standardPrice }]);
     setSearch('');
   };
 
   const addPackage = (p: HospitalLabPackageConfigDTO) => {
-    setSelected(prev => [...prev, {
-      id: p.packageId,
-      name: p.packageName,
-      type: 'PACKAGE',
-      price: p.standardPrice ? Number(p.standardPrice) : undefined,
-    }]);
+    const superseded = selected.filter(
+      s => s.type === 'TEST' && p.testIds.includes(s.id)
+    );
+    if (superseded.length > 0) {
+      const names = superseded.map(s => `"${s.name}"`).join(', ');
+      triggerGlobalToast(
+        `${names} removed — already included in "${p.packageName}".`,
+        'info'
+      );
+      setSelected(prev =>
+        prev
+          .filter(s => !(s.type === 'TEST' && p.testIds.includes(s.id)))
+          .concat({ id: p.packageId, name: p.packageName, type: 'PACKAGE', price: p.standardPrice ? Number(p.standardPrice) : undefined })
+      );
+    } else {
+      setSelected(prev => [...prev, {
+        id: p.packageId,
+        name: p.packageName,
+        type: 'PACKAGE',
+        price: p.standardPrice ? Number(p.standardPrice) : undefined,
+      }]);
+    }
     setSearch('');
   };
 

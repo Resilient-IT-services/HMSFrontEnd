@@ -705,6 +705,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
     const [selectedTests, setSelectedTests] = useState<string[]>([]);
     const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
     const [extraTests, setExtraTests] = useState<any[]>([]);
+    const [extraPackages, setExtraPackages] = useState<any[]>([]);
     const [testSearch, setTestSearch] = useState('');
     const [showSearchResults, setShowSearchResults] = useState(false);
     
@@ -712,6 +713,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
     const [amountPaid, setAmountPaid] = useState<string>('');
     const [referenceNumber, setReferenceNumber] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [duplicateAlert, setDuplicateAlert] = useState<{ testName: string; packageName: string } | null>(null);
 
     useEffect(() => {
         const load = async () => {
@@ -759,21 +761,69 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
     const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0)
         + selectedPackages.reduce((sum, id) => sum + getPackagePrice(id), 0);
 
-    const filteredTests = allTests.filter(t => 
-        t.testName.toLowerCase().includes(testSearch.toLowerCase()) && 
+    const coveredBySelectedPackages = new Set<string>(
+        allPackages
+            .filter((pkg: any) => selectedPackages.includes(pkg.packageId))
+            .flatMap((pkg: any) => pkg.testIds || [])
+    );
+
+    const filteredTests = allTests.filter(t =>
+        t.testName.toLowerCase().includes(testSearch.toLowerCase()) &&
         !selectedTests.includes(t.id)
-    ).slice(0, 5);
+    ).slice(0, 8);
 
     const handleAddExtraTest = (test: any) => {
+        const coveringPkg = allPackages.find(
+            (pkg: any) => selectedPackages.includes(pkg.packageId) && (pkg.testIds || []).includes(test.id)
+        );
+        if (coveringPkg) {
+            setShowSearchResults(false);
+            setTestSearch('');
+            setDuplicateAlert({ testName: test.testName, packageName: coveringPkg.packageName });
+            return;
+        }
         setSelectedTests([...selectedTests, test.id]);
         setExtraTests([...extraTests, test]);
         setTestSearch('');
         setShowSearchResults(false);
     };
 
+    const handleSelectPackage = (pkg: any, checked: boolean, isExtra = false) => {
+        if (checked) {
+            const packageTestIds: string[] = pkg.testIds || [];
+            const covered = selectedTests.filter(testId => packageTestIds.includes(testId));
+            if (covered.length > 0) {
+                const names = covered
+                    .map(testId => {
+                        const t = allTests.find((t: any) => t.id === testId);
+                        return t ? `"${t.testName}"` : null;
+                    })
+                    .filter(Boolean)
+                    .join(', ');
+                triggerGlobalToast(`${names} removed — already included in "${pkg.packageName}".`, 'info');
+                setSelectedTests(prev => prev.filter(id => !packageTestIds.includes(id)));
+                setExtraTests(prev => prev.filter((t: any) => !packageTestIds.includes(t.id)));
+            }
+            setSelectedPackages(prev => [...prev, pkg.packageId]);
+            if (isExtra) setExtraPackages(prev => [...prev, pkg]);
+        } else {
+            setSelectedPackages(prev => prev.filter(id => id !== pkg.packageId));
+            setExtraPackages(prev => prev.filter((p: any) => p.packageId !== pkg.packageId));
+        }
+    };
+
     const handleConfirmOrder = async () => {
         if (selectedTests.length === 0 && selectedPackages.length === 0) {
             triggerGlobalToast('Please select at least one test or package', 'error');
+            return;
+        }
+
+        const duplicates = selectedTests.filter(testId => coveredBySelectedPackages.has(testId));
+        if (duplicates.length > 0) {
+            const names = duplicates
+                .map(testId => allTests.find((t: any) => t.id === testId)?.testName || testId)
+                .join(', ');
+            triggerGlobalToast(`Duplicate detected: ${names} is already included in a selected package. Remove the individual test before proceeding.`, 'error');
             return;
         }
 
@@ -825,15 +875,26 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                             {/* Recommended Tests */}
                             {prescription?.labItems?.filter((item: any) => (!item.packageId) && (item.status === 'PENDING' || !item.status)).map((test: any) => (
-                                <div key={test.testId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedTests.includes(test.testId) ? 'bg-orange-50/50 border-orange-200' : 'bg-white border-slate-100'}`}>
+                                <div key={test.testId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${coveredBySelectedPackages.has(test.testId) ? 'opacity-50 bg-slate-50 border-slate-100' : selectedTests.includes(test.testId) ? 'bg-orange-50/50 border-orange-200' : 'bg-white border-slate-100'}`}>
                                     <input
                                         type="checkbox"
-                                        checked={selectedTests.includes(test.testId)}
+                                        checked={selectedTests.includes(test.testId) && !coveredBySelectedPackages.has(test.testId)}
+                                        disabled={coveredBySelectedPackages.has(test.testId)}
                                         onChange={(e) => {
-                                            if (e.target.checked) setSelectedTests([...selectedTests, test.testId]);
-                                            else setSelectedTests(selectedTests.filter(id => id !== test.testId));
+                                            if (e.target.checked) {
+                                                const coveringPkg = allPackages.find(
+                                                    (pkg: any) => selectedPackages.includes(pkg.packageId) && (pkg.testIds || []).includes(test.testId)
+                                                );
+                                                if (coveringPkg) {
+                                                    triggerGlobalToast(`"${test.testName}" is already included in "${coveringPkg.packageName}".`, 'error');
+                                                    return;
+                                                }
+                                                setSelectedTests([...selectedTests, test.testId]);
+                                            } else {
+                                                setSelectedTests(selectedTests.filter(id => id !== test.testId));
+                                            }
                                         }}
-                                        className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
+                                        className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 disabled:cursor-not-allowed"
                                     />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
@@ -853,8 +914,8 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                         type="checkbox"
                                         checked={selectedPackages.includes(pkgItem.packageId)}
                                         onChange={(e) => {
-                                            if (e.target.checked) setSelectedPackages([...selectedPackages, pkgItem.packageId]);
-                                            else setSelectedPackages(selectedPackages.filter(id => id !== pkgItem.packageId));
+                                            const pkgObj = allPackages.find((p: any) => p.packageId === pkgItem.packageId) || pkgItem;
+                                            handleSelectPackage(pkgObj, e.target.checked);
                                         }}
                                         className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
                                     />
@@ -873,7 +934,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                             {/* Extra Added Tests */}
                             {extraTests.map((test: any) => (
                                 <div key={test.id} className="flex items-center gap-3 p-3 bg-emerald-50/30 border border-emerald-100 rounded-xl">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setSelectedTests(selectedTests.filter(id => id !== test.id));
                                             setExtraTests(extraTests.filter(t => t.id !== test.id));
@@ -891,50 +952,55 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                     </div>
                                 </div>
                             ))}
+
+                            {/* Extra Added Packages */}
+                            {extraPackages.map((pkg: any) => (
+                                <div key={pkg.packageId} className="flex items-center gap-3 p-3 bg-indigo-50/30 border border-indigo-100 rounded-xl">
+                                    <button
+                                        onClick={() => handleSelectPackage(pkg, false)}
+                                        className="text-indigo-400 hover:text-red-500 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">remove_circle</span>
+                                    </button>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-sm font-bold text-slate-800 truncate">{pkg.packageName}</p>
+                                            <span className="text-xs font-black text-indigo-700 ml-2">₹{getPackagePrice(pkg.packageId)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="purple" size="sm" className="opacity-70">Extra Package</Badge>
+                                            <span className="text-[10px] text-slate-400 font-bold">{pkg.testIds?.length || 0} tests</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Packages Section */}
-                    {allPackages.length > 0 && (
-                        <div>
-                            <div className="flex justify-between items-center mb-2">
-                                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">Packages</label>
-                                {selectedPackages.length > 0 && (
-                                    <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full">
-                                        {selectedPackages.length} Package{selectedPackages.length > 1 ? 's' : ''}
-                                    </span>
-                                )}
+                    {/* Duplicate alert inline popup */}
+                    {duplicateAlert && (
+                        <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-300 rounded-xl">
+                            <span className="material-symbols-outlined text-amber-500 text-lg mt-0.5 shrink-0">warning</span>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-black text-amber-800">Already included in package</p>
+                                <p className="text-[11px] text-amber-700 font-medium mt-0.5">
+                                    <span className="font-black">"{duplicateAlert.testName}"</span> is already part of the{' '}
+                                    <span className="font-black">"{duplicateAlert.packageName}"</span> package.
+                                    It cannot be billed separately.
+                                </p>
                             </div>
-                            <div className="space-y-2">
-                                {allPackages.map((pkg: any) => (
-                                    <div key={pkg.packageId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPackages.includes(pkg.packageId) ? 'bg-indigo-50/50 border-indigo-200' : 'bg-white border-slate-100'}`}>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedPackages.includes(pkg.packageId)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) setSelectedPackages(prev => [...prev, pkg.packageId]);
-                                                else setSelectedPackages(prev => prev.filter(id => id !== pkg.packageId));
-                                            }}
-                                            className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
-                                        />
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start">
-                                                <p className="text-sm font-bold text-slate-800 truncate">{pkg.packageName}</p>
-                                                <span className="text-xs font-black text-indigo-700 ml-2">
-                                                    {pkg.standardPrice ? `₹${pkg.standardPrice}` : `${pkg.testIds?.length || 0} tests`}
-                                                </span>
-                                            </div>
-                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{pkg.packageCode}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                            <button
+                                onClick={() => setDuplicateAlert(null)}
+                                className="text-amber-400 hover:text-amber-600 shrink-0"
+                            >
+                                <span className="material-symbols-outlined text-base">close</span>
+                            </button>
                         </div>
                     )}
 
-                    {/* Add More Tests Search */}
+                    {/* Add More Tests / Packages Search */}
                     <div className="relative">
-                        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-wider">Add Additional Tests</label>
+                        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-wider">Add Additional Tests or Packages</label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-sm">search</span>
                             <input
@@ -943,34 +1009,82 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                 onChange={(e) => {
                                     setTestSearch(e.target.value);
                                     setShowSearchResults(true);
+                                    setDuplicateAlert(null);
                                 }}
                                 onFocus={() => setShowSearchResults(true)}
-                                placeholder="Search by test name..."
+                                placeholder="Search test or package name..."
                                 className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:bg-white focus:border-primary transition-all"
                             />
                         </div>
 
                         {showSearchResults && testSearch && (
                             <div className="absolute z-10 bottom-full mb-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-                                {filteredTests.length > 0 ? (
-                                    filteredTests.map(test => (
-                                        <button
-                                            key={test.id}
-                                            onClick={() => handleAddExtraTest(test)}
-                                            className="w-full px-4 py-3 text-left hover:bg-slate-50 border-b border-slate-50 last:border-0 flex justify-between items-center group"
-                                        >
-                                            <div>
-                                                <p className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">{test.testName}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase">{test.testCode}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-xs font-black text-slate-800">₹{getPrice(test.id)}</p>
-                                                <span className="text-[10px] font-bold text-emerald-600">+ Add</span>
-                                            </div>
-                                        </button>
-                                    ))
-                                ) : (
-                                    <div className="p-4 text-center text-xs text-slate-500 font-bold">No tests found</div>
+                                {/* Tests */}
+                                {filteredTests.length > 0 && (
+                                    <>
+                                        <p className="px-4 pt-2 pb-1 text-[9px] font-black uppercase text-slate-400 tracking-widest bg-slate-50/80">Tests</p>
+                                        {filteredTests.map((test: any) => {
+                                            const isCovered = coveredBySelectedPackages.has(test.id);
+                                            const coveringPkg = isCovered
+                                                ? allPackages.find((pkg: any) => selectedPackages.includes(pkg.packageId) && (pkg.testIds || []).includes(test.id))
+                                                : null;
+                                            return (
+                                                <button
+                                                    key={test.id}
+                                                    onClick={() => handleAddExtraTest(test)}
+                                                    className={`w-full px-4 py-3 text-left border-b border-slate-50 last:border-0 flex justify-between items-center group transition-colors ${isCovered ? 'bg-amber-50/60 hover:bg-amber-100/80' : 'hover:bg-slate-50'}`}
+                                                >
+                                                    <div className="min-w-0">
+                                                        <p className={`text-sm font-bold transition-colors truncate ${isCovered ? 'text-amber-700' : 'text-slate-700 group-hover:text-primary'}`}>{test.testName}</p>
+                                                        {isCovered ? (
+                                                            <p className="text-[10px] font-black text-amber-600 flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-[11px]">warning</span>
+                                                                Inside "{coveringPkg?.packageName}"
+                                                            </p>
+                                                        ) : (
+                                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{test.testCode}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right shrink-0 ml-2">
+                                                        <p className="text-xs font-black text-slate-800">₹{getPrice(test.id)}</p>
+                                                        {isCovered ? (
+                                                            <span className="text-[10px] font-bold text-amber-500">Duplicate</span>
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold text-emerald-600">+ Add</span>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </>
+                                )}
+
+                                {/* Packages from search */}
+                                {allPackages.filter((pkg: any) =>
+                                    pkg.packageName.toLowerCase().includes(testSearch.toLowerCase()) &&
+                                    !selectedPackages.includes(pkg.packageId)
+                                ).slice(0, 4).map((pkg: any) => (
+                                    <button
+                                        key={pkg.packageId}
+                                        onClick={() => { handleSelectPackage(pkg, true, true); setTestSearch(''); setShowSearchResults(false); }}
+                                        className="w-full px-4 py-3 text-left border-b border-slate-50 last:border-0 flex justify-between items-center group hover:bg-indigo-50/60 transition-colors"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-700 transition-colors truncate">{pkg.packageName}</p>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{pkg.packageCode} · {pkg.testIds?.length || 0} tests</p>
+                                        </div>
+                                        <div className="text-right shrink-0 ml-2">
+                                            <p className="text-xs font-black text-indigo-700">{pkg.standardPrice ? `₹${pkg.standardPrice}` : '—'}</p>
+                                            <span className="text-[10px] font-bold text-indigo-500">+ Package</span>
+                                        </div>
+                                    </button>
+                                ))}
+
+                                {filteredTests.length === 0 && allPackages.filter((pkg: any) =>
+                                    pkg.packageName.toLowerCase().includes(testSearch.toLowerCase()) &&
+                                    !selectedPackages.includes(pkg.packageId)
+                                ).length === 0 && (
+                                    <div className="p-4 text-center text-xs text-slate-500 font-bold">No tests or packages found</div>
                                 )}
                             </div>
                         )}

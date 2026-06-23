@@ -457,15 +457,51 @@ export const ActiveConsultationPage = () => {
   };
 
   const onSelectInvestigation = (id: string, test: any) => {
-    setInvestigations(investigations.map(i => i.id === id ? {
-      ...i,
-      itemType: test.itemType,
-      testId: test.itemType === 'TEST' ? test.id : '',
-      testName: test.itemType === 'TEST' ? test.testName : '',
-      packageId: test.itemType === 'PACKAGE' ? test.id : '',
-      packageName: test.itemType === 'PACKAGE' ? test.packageName : '',
-      testCode: test.itemType === 'TEST' ? test.testCode : test.packageCode
-    } : i));
+    if (test.itemType === 'PACKAGE') {
+      const packageTestIds: string[] = test.testIds || [];
+      const superseded = investigations.filter(
+        inv => inv.id !== id && inv.itemType === 'TEST' && packageTestIds.includes(inv.testId)
+      );
+      if (superseded.length > 0) {
+        const names = superseded.map(inv => `"${inv.testName}"`).join(', ');
+        triggerGlobalToast(`${names} removed — already included in "${test.packageName}".`, 'info');
+      }
+      setInvestigations(prev =>
+        prev
+          .filter(inv => !(inv.id !== id && inv.itemType === 'TEST' && packageTestIds.includes(inv.testId)))
+          .map(inv => inv.id === id ? {
+            ...inv,
+            itemType: 'PACKAGE',
+            testId: '',
+            testName: '',
+            packageId: test.id,
+            packageName: test.packageName,
+            testCode: test.packageCode,
+            packageTestIds,
+          } : inv)
+      );
+    } else {
+      const coveringPackage = investigations.find(
+        inv => inv.id !== id && inv.itemType === 'PACKAGE' && (inv.packageTestIds || []).includes(test.id)
+      );
+      if (coveringPackage) {
+        triggerGlobalToast(
+          `"${test.testName}" is already included in "${coveringPackage.packageName}". Adding it separately would cause duplicate billing.`,
+          'error'
+        );
+        return;
+      }
+      setInvestigations(investigations.map(i => i.id === id ? {
+        ...i,
+        itemType: 'TEST',
+        testId: test.id,
+        testName: test.testName,
+        packageId: '',
+        packageName: '',
+        testCode: test.testCode,
+        packageTestIds: undefined,
+      } : i));
+    }
   };
 
   const updatePrescriptionRow = (id: string, field: string, value: any) => {
