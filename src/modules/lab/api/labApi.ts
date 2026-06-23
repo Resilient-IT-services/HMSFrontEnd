@@ -119,6 +119,19 @@ export interface LabPackageDTO {
     testIds: string[];
 }
 
+export interface HospitalLabPackageConfigDTO {
+    packageId: string;
+    packageCode: string;
+    packageName: string;
+    description?: string;
+    packageType?: string;
+    versionNo?: number;
+    enabled: boolean;
+    standardPrice?: number;
+    emergencyPrice?: number;
+    testIds: string[];
+}
+
 export interface LabOrderPackageDTO {
     id: string;
     orderId: string;
@@ -256,6 +269,14 @@ export const labApi = {
     },
     configureAdminTest: async (data: HospitalLabTestConfigDTO) => {
         const response = await apiClient.put<ApiResponse<void>>('/hospital/lab/settings/tests', data);
+        return response.data;
+    },
+    getAdminPackages: async () => {
+        const response = await apiClient.get<ApiResponse<HospitalLabPackageConfigDTO[]>>('/hospital/lab/settings/packages');
+        return response.data;
+    },
+    configureAdminPackage: async (data: HospitalLabPackageConfigDTO) => {
+        const response = await apiClient.put<ApiResponse<void>>('/hospital/lab/settings/packages', data);
         return response.data;
     },
 
