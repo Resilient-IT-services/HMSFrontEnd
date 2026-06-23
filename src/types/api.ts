@@ -798,9 +798,15 @@ export interface PrescriptionItemDTO {
 
 export interface PrescriptionLabItemDTO {
   id?: string;
-  testId: string;
-  testName: string;
+  itemType?: 'TEST' | 'PACKAGE';
+  testId?: string;
+  testName?: string;
+  packageId?: string;
+  packageName?: string;
   notes?: string;
+  status?: string;
+  labOrderId?: string;
+  labOrderTestId?: string;
 }
 
 export interface PrescriptionDTO {

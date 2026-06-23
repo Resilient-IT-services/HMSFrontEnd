@@ -24,16 +24,18 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       roles: ['RECEPTIONIST', 'DOCTOR', 'ADMIN'] 
     },
     { name: 'Doctors', icon: 'medical_services', href: '/reception/doctors', roles: ['RECEPTIONIST', 'ADMIN'] },
-    { 
-      name: 'IPD', 
-      icon: 'hotel', 
-      href: '/ipd/dashboard', 
-      roles: ['ADMIN', 'NURSE', 'RECEPTIONIST'] 
+    {
+      name: 'IPD',
+      icon: 'hotel',
+      href: '/ipd/dashboard',
+      // IPD content also available for RECEPTIONIST via Dashboard > IPD tab
+      roles: ['ADMIN', 'NURSE']
     },
     { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: [] }, 
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
     
     // Lab Specific Routes
+    { name: 'Walk-in Registration', icon: 'person_add', href: '/lab_admin/walkin', roles: ['LAB_ADMIN'] },
     { name: 'Lab Queue', icon: 'biotech', href: '/lab_admin/queue', roles: ['LAB_ADMIN', 'PATHOLOGIST'] },
     { name: 'Lab Reports', icon: 'description', href: '/lab_admin/reports', roles: ['LAB_ADMIN', 'PATHOLOGIST'] },
     { name: 'Lab Inventory', icon: 'inventory', href: '/lab_admin/inventory', roles: ['LAB_ADMIN'] },
