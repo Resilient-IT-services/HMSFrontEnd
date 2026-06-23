@@ -67,27 +67,27 @@ export const InventoryAlerts = () => {
                 {loading ? <div className="p-8"><LoadingSkeleton /></div> : lowStock.length === 0 ? (
                   <div className="p-12 text-center text-slate-400 font-medium">No low stock items detected.</div>
                 ) : (
-                  <table className="w-full text-left">
+                  <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                     <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Medicine</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase text-center">In Stock</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase text-right">Action</th>
+                      <tr className="hover:bg-slate-50 transition-colors">
+                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Medicine</th>
+                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">In Stock</th>
+                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {lowStock.map((item) => (
                         <tr key={item.id} className="hover:bg-slate-50/50">
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <p className="font-bold text-slate-800 text-sm">{item.medicineName}</p>
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Batch: {item.batchNumber}</p>
-                          </td>
-                          <td className="px-6 py-4 text-center">
+                          </div></td>
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <span className={`text-sm font-black ${item.quantity === 0 ? 'text-red-600' : 'text-orange-600'}`}>{item.quantity} Units</span>
-                          </td>
-                          <td className="px-6 py-4 text-right">
+                          </div></td>
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <button className="text-[10px] font-black text-orange-700 uppercase tracking-widest hover:underline">Restock</button>
-                          </td>
+                          </div></td>
                         </tr>
                       ))}
                     </tbody>
@@ -110,27 +110,27 @@ export const InventoryAlerts = () => {
                 {loading ? <div className="p-8"><LoadingSkeleton /></div> : expiring.length === 0 ? (
                   <div className="p-12 text-center text-slate-400 font-medium">No items expiring soon.</div>
                 ) : (
-                  <table className="w-full text-left">
+                  <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                     <thead className="bg-slate-50 border-b border-slate-100">
-                      <tr>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase">Medicine</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase text-center">Expiry</th>
-                        <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase text-right">Action</th>
+                      <tr className="hover:bg-slate-50 transition-colors">
+                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Medicine</th>
+                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Expiry</th>
+                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                       {expiring.map((item) => (
                         <tr key={item.id} className="hover:bg-slate-50/50">
-                          <td className="px-6 py-4">
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <p className="font-bold text-slate-800 text-sm">{item.medicineName}</p>
                             <p className="text-[10px] text-slate-400 font-bold uppercase">Batch: {item.batchNumber}</p>
-                          </td>
-                          <td className="px-6 py-4 text-center">
+                          </div></td>
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <span className="text-sm font-black text-red-600">{new Date(item.expiryDate).toLocaleDateString()}</span>
-                          </td>
-                          <td className="px-6 py-4 text-right">
+                          </div></td>
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <button className="text-[10px] font-black text-red-700 uppercase tracking-widest hover:underline">Remove</button>
-                          </td>
+                          </div></td>
                         </tr>
                       ))}
                     </tbody>

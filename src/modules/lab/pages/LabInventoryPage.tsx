@@ -71,7 +71,7 @@ const LabInventoryPage = () => {
             render: (item) => {
                 const isLow = (item.availableQty || 0) <= (item.reorderLevel || 0);
                 return (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center justify-center gap-2">
                         <span className={`text-sm font-black ${isLow ? 'text-orange-600' : 'text-slate-800'}`}>
                             {item.availableQty || 0} {item.unit}
                         </span>
@@ -95,10 +95,10 @@ const LabInventoryPage = () => {
         },
         {
             header: 'Action',
-            className: 'text-right',
-            headerClassName: 'text-right',
+            className: 'text-center',
+            headerClassName: 'text-center',
             render: (item) => (
-                <div className="flex justify-end gap-2">
+                <div className="flex justify-center gap-2">
                     <Button size="sm" variant="secondary" onClick={() => handleUpdateStock(item.id!, 'ADD')}>
                         Add Stock
                     </Button>

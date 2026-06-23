@@ -47,10 +47,7 @@ export function PatientList() {
       filterable: true,
       filterPlaceholder: 'Name or phone...',
       render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-white bg-slate-100 font-bold uppercase text-slate-400 shadow-sm">
-            {row.fullName.split(' ').map((name) => name[0]).join('')}
-          </div>
+        <div className="flex items-center justify-center text-center">
           <div>
             <p className="mb-1 text-sm font-bold leading-none text-slate-900">{row.fullName}</p>
             <p className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">{row.phone}</p>

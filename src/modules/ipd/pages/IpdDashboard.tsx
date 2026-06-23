@@ -59,7 +59,7 @@ export const IpdDashboard = () => {
     {
       header: 'Ward / Bed',
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Badge variant="blue" className="rounded-md">{row.wardName}</Badge>
           <span className="font-bold text-slate-700">Bed: {row.bedNumber}</span>
         </div>
@@ -87,7 +87,7 @@ export const IpdDashboard = () => {
     {
       header: 'Actions',
       render: (row) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <Button 
             variant="ghost" 
             size="sm" 

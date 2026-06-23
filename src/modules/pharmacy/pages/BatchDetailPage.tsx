@@ -74,39 +74,39 @@ export const BatchDetailPage: React.FC<BatchDetailPageProps> = ({ id }) => {
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-            <table className="w-full text-left">
+            <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
               <thead className="bg-slate-50 border-b border-slate-100">
-                <tr>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Batch Number</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Expiry Date</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Available Qty</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Selling Price</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Actions</th>
+                <tr className="hover:bg-slate-50 transition-colors">
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Batch Number</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Expiry Date</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Available Qty</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Selling Price</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {batches.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-12 text-center text-slate-400 font-medium">No batch data available for this medicine.</td>
+                  <tr className="hover:bg-slate-50 transition-colors">
+                    <td colSpan={5} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">No batch data available for this medicine.</div></td>
                   </tr>
                 ) : batches.map((batch) => (
                   <tr key={batch.id} className="hover:bg-slate-50/50 group transition-colors">
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-xs font-bold font-mono text-slate-600 bg-slate-100 px-2 py-1 rounded-md uppercase">
                         {batch.batchNumber}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-sm font-bold text-slate-700">{batch.expiryDate}</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-sm font-black text-emerald-600">{batch.quantity}</span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-sm font-black text-slate-900">${batch.price.toFixed(2)}</span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300">
+                      <div className="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all">
                           <span className="material-symbols-outlined text-[18px]">edit</span>
                         </button>

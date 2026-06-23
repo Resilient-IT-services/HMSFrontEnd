@@ -95,25 +95,25 @@ export const LabReportPreviewModal: React.FC<LabReportPreviewModalProps> = ({
                                 <h3 className="bg-slate-100 px-4 py-2 text-xs font-black text-slate-900 uppercase tracking-widest border-l-4 border-slate-900 mb-4">
                                     {group.testName} <span className="text-[9px] font-bold text-slate-400 ml-2">({group.departmentName})</span>
                                 </h3>
-                                <table className="w-full text-left">
+                                <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                                     <thead>
-                                        <tr className="border-b border-slate-200">
-                                            <th className="py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest w-1/3">Investigation</th>
-                                            <th className="py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Observed Value</th>
-                                            <th className="py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Unit</th>
-                                            <th className="py-2 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Reference Range</th>
+                                        <tr className="hover:bg-slate-50 transition-colors">
+                                            <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Investigation</th>
+                                            <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Observed Value</th>
+                                            <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Unit</th>
+                                            <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Reference Range</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-50">
                                         {group.parameters?.map((param: any, pIdx: number) => (
                                             <tr key={pIdx} className="group hover:bg-slate-50/50 transition-colors">
-                                                <td className="py-3 text-xs font-bold text-slate-700">{param.parameterName}</td>
-                                                <td className={`py-3 text-sm font-black text-center ${param.abnormal ? 'text-red-600' : 'text-slate-900'}`}>
+                                                <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{param.parameterName}</div></td>
+                                                <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                                     {param.resultValue}
                                                     {param.abnormal && <span className="ml-1 text-[10px] font-black">H</span>}
-                                                </td>
-                                                <td className="py-3 text-xs font-bold text-slate-500 text-center">{param.unit || '--'}</td>
-                                                <td className="py-3 text-xs font-bold text-slate-500 text-right italic">{param.referenceRange}</td>
+                                                </div></td>
+                                                <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{param.unit || '--'}</div></td>
+                                                <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{param.referenceRange}</div></td>
                                             </tr>
                                         ))}
                                     </tbody>

@@ -174,38 +174,38 @@ export function LabTestParametersPage({ testId }: Props) {
                     
                     {selectedParam ? (
                         <Card className="overflow-hidden">
-                            <table className="w-full text-left">
+                            <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                                 <thead className="bg-slate-50 border-b border-slate-200">
-                                    <tr>
-                                        <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-500">Gender</th>
-                                        <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-500">Age</th>
-                                        <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-500">Normal Range</th>
-                                        <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-500">Critical</th>
-                                        <th className="px-4 py-3 text-[10px] font-black uppercase text-slate-500 text-right">Action</th>
+                                    <tr className="hover:bg-slate-50 transition-colors">
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Gender</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Age</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Normal Range</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Critical</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {ranges.map(r => (
-                                        <tr key={r.id} className="text-sm">
-                                            <td className="px-4 py-3 font-bold text-slate-700">{r.gender}</td>
-                                            <td className="px-4 py-3 text-slate-500">{r.minAge}-{r.maxAge} {r.ageUnit}</td>
-                                            <td className="px-4 py-3">
+                                        <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{r.gender}</div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{r.minAge}-{r.maxAge} {r.ageUnit}</div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                                 <Badge variant="emerald" className="font-black">{r.minValue} - {r.maxValue}</Badge>
-                                            </td>
-                                            <td className="px-4 py-3">
+                                            </div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                                 <div className="flex flex-col gap-0.5">
                                                     <span className="text-[8px] font-black text-red-400 uppercase">Min: {r.criticalMin}</span>
                                                     <span className="text-[8px] font-black text-red-400 uppercase">Max: {r.criticalMax}</span>
                                                 </div>
-                                            </td>
-                                            <td className="px-4 py-3 text-right">
+                                            </div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                                 <button onClick={() => { setEditingRangeId(r.id!); setRangeFormData({...r}); setShowRangeModal(true); }} className="text-slate-300 hover:text-orange-600">
                                                     <span className="material-symbols-outlined text-lg">edit</span>
                                                 </button>
-                                            </td>
+                                            </div></td>
                                         </tr>
                                     ))}
-                                    {ranges.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-slate-400">No ranges defined</td></tr>}
+                                    {ranges.length === 0 && <tr className="hover:bg-slate-50 transition-colors"><td colSpan={5} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">No ranges defined</div></td></tr>}
                                 </tbody>
                             </table>
                         </Card>

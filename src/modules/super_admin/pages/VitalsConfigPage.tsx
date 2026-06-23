@@ -148,12 +148,12 @@ export function VitalsConfigPage() {
               <div className="p-12 text-center text-slate-500 font-medium">Loading global medical policies...</div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left">
+                <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                   <thead>
-                    <tr className="border-b border-slate-50">
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Vital Metric</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Safety Range (Min - Max)</th>
-                      <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Actions</th>
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Vital Metric</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Safety Range (Min - Max)</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -165,8 +165,8 @@ export function VitalsConfigPage() {
                           className="hover:bg-slate-50 transition-colors group cursor-pointer"
                           onDoubleClick={() => handleOpenModal(type.value, range)}
                         >
-                          <td className="px-6 py-4 font-bold text-slate-700">{type.label}</td>
-                          <td className="px-6 py-4 text-center">
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{type.label}</div></td>
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             {range ? (
                               <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
                                 {range.minValue} — {range.maxValue}
@@ -174,16 +174,16 @@ export function VitalsConfigPage() {
                             ) : (
                               <span className="text-gray-300 italic text-xs">Awaiting Initialization...</span>
                             )}
-                          </td>
-                          <td className="px-6 py-4 text-center">
+                          </div></td>
+                          <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <button 
                               onClick={() => handleOpenModal(type.value, range)} 
-                              className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
+                              className="inline-flex items-center justify-center gap-1.5 px-4 py-1.5 bg-gray-50 text-gray-600 rounded-lg text-xs font-bold hover:bg-orange-600 hover:text-white transition-all shadow-sm active:scale-95"
                             >
                               <span className="material-symbols-outlined text-sm">settings</span>
                               Configure
                             </button>
-                          </td>
+                          </div></td>
                         </tr>
                       );
                     })}

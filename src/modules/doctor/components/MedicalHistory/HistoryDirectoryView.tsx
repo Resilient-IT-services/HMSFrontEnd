@@ -213,10 +213,7 @@ export const HistoryDirectoryView = () => {
     {
       header: 'Patient Profile',
       render: (p) => (
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-50 font-bold uppercase text-slate-400 text-xs">
-              {p.patientName.split(' ').map((name) => name[0]).join('')}
-            </div>
+          <div className="flex items-center justify-center text-center">
             <div>
               <p className="text-sm font-bold text-slate-800 leading-snug">{p.patientName}</p>
               <p className="text-[10px] text-slate-400 font-medium">PID: {p.patientCode || p.patientId || 'N/A'}</p>

@@ -35,7 +35,7 @@ const InventoryCatalogPage = () => {
       filterable: true,
       filterPlaceholder: 'Item name...',
       render: (item) => (
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center gap-3">
           <div className="w-8 h-8 rounded bg-blue-100 text-blue-600 flex items-center justify-center">
             <span className="material-symbols-outlined text-sm">inventory_2</span>
           </div>
@@ -52,7 +52,7 @@ const InventoryCatalogPage = () => {
     {
       header: 'Unit',
       key: 'unit',
-      className: 'text-sm text-slate-500 font-medium'
+      className: 'text-sm text-slate-500 font-medium text-center'
     },
     {
       header: 'Current Stock',
@@ -64,8 +64,8 @@ const InventoryCatalogPage = () => {
     },
     {
       header: 'Actions',
-      headerClassName: 'text-right',
-      className: 'text-right',
+      headerClassName: 'text-center',
+      className: 'text-center',
       render: (item) => (
         <Button 
           variant="secondary" 

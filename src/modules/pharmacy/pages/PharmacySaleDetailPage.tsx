@@ -181,28 +181,28 @@ const PharmacySaleDetailPage: React.FC<PharmacySaleDetailPageProps> = ({ id, pre
 
                             {/* Items Table - This expands to fill space */}
                             <div className="mt-5 print:mt-4 print:flex-grow">
-                                <table className="w-full text-left border-collapse">
+                                <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                                     <thead>
                                     <tr className="border-b-2 border-slate-300 text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-slate-50 print:bg-transparent">
-                                        <th className="py-2 px-3 text-left w-[45%]">Item Name</th>
-                                        <th className="py-2 px-2 text-center">Batch</th>
-                                        <th className="py-2 px-2 text-center">Qty</th>
-                                        <th className="py-2 px-2 text-right">Price</th>
-                                        <th className="py-2 px-2 text-right">Disc</th>
-                                        <th className="py-2 px-3 text-right">Total</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Item Name</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Batch</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Qty</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Price</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Disc</th>
+                                        <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Total</th>
                                     </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200 text-xs">
                                     {sale.items.map((item, index) => (
                                         <tr key={item.id || index} className="hover:bg-slate-50/50 print:hover:bg-transparent">
-                                            <td className="py-2.5 px-3 font-bold text-slate-800 uppercase">{item.medicineName}</td>
-                                            <td className="py-2.5 px-2 text-center font-mono text-slate-600 font-semibold">{item.batchNumber || '-'}</td>
-                                            <td className="py-2.5 px-2 text-center font-bold text-slate-800">{item.quantity}</td>
-                                            <td className="py-2.5 px-2 text-right font-medium text-slate-600">{formatCurrency(item.unitPrice)}</td>
-                                            <td className="py-2.5 px-2 text-right font-medium text-emerald-600">
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{item.medicineName}</div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{item.batchNumber || '-'}</div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{item.quantity}</div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{formatCurrency(item.unitPrice)}</div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                                 {item.discountAmount ? `-${formatCurrency(item.discountAmount)}` : '0.00'}
-                                            </td>
-                                            <td className="py-2.5 px-3 text-right font-bold text-slate-900">{formatCurrency(item.netAmount)}</td>
+                                            </div></td>
+                                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{formatCurrency(item.netAmount)}</div></td>
                                         </tr>
                                     ))}
                                     </tbody>

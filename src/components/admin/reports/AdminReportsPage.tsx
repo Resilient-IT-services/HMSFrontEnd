@@ -509,11 +509,11 @@ export default function AdminReportsPage() {
                 {loading && <span className="text-sm font-semibold text-orange-700">Fetching latest data...</span>}
               </div>
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[760px] text-left border-collapse print:min-w-0">
+                <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                   <thead className="bg-slate-50 text-xs font-bold uppercase tracking-wide text-slate-500 print:bg-slate-100 print:text-slate-900 print:border-b-2 print:border-slate-800">
-                    <tr>
+                    <tr className="hover:bg-slate-50 transition-colors">
                       {(columns.length > 0 ? columns : ['report']).map((column) => (
-                        <th key={column} className="px-5 py-3 border-b border-slate-100 print:border-slate-300">
+                        <th key={column} className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">
                           {titleCase(column)}
                         </th>
                       ))}
@@ -523,17 +523,17 @@ export default function AdminReportsPage() {
                     {rows.map((row, index) => (
                       <tr key={`${reportType}-${index}`} className="hover:bg-slate-50 print:hover:bg-transparent">
                         {columns.map((column) => (
-                          <td key={column} className="px-5 py-4 font-medium print:py-2 print:px-3 print:border-b print:border-slate-200">
+                          <td key={column} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             {getDisplayValue(row[column])}
-                          </td>
+                          </div></td>
                         ))}
                       </tr>
                     ))}
                     {!loading && rows.length === 0 && (
-                      <tr>
-                        <td className="px-5 py-12 text-center text-slate-400" colSpan={Math.max(columns.length, 1)}>
+                      <tr className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300" colSpan={Math.max(columns.length, 1)}><div className="flex items-center justify-center w-full">
                           No report data found for the selected filters.
-                        </td>
+                        </div></td>
                       </tr>
                     )}
                   </tbody>
