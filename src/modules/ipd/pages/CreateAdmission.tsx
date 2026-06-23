@@ -81,7 +81,7 @@ export const CreateAdmission = () => {
       try {
         const res = await ipdService.listWardBeds(selectedWardId);
         if (res.success) {
-          setBeds(res.data?.filter(b => b.status === 'AVAILABLE' && b.active) || []);
+          setBeds(res.data?.filter(b => b.status === 'AVAILABLE') || []);
           setFormData(prev => ({ ...prev, bedId: '' }));
         }
       } catch (error) {
@@ -94,8 +94,16 @@ export const CreateAdmission = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.patientId || !formData.doctorId || !formData.bedId) {
-      showToast('Please fill all required fields', 'warning');
+    if (!formData.patientId) {
+      showToast('Please select a patient', 'warning');
+      return;
+    }
+    if (!formData.doctorId) {
+      showToast('Please select an attending doctor', 'warning');
+      return;
+    }
+    if (!formData.bedId) {
+      showToast('Please select a bed', 'warning');
       return;
     }
     setLoading(true);
@@ -185,7 +193,7 @@ export const CreateAdmission = () => {
                   >
                     <option value="">Select Doctor</option>
                     {doctors.map(d => (
-                      <option key={d.doctorId} value={d.doctorId}>Dr. {d.fullName} ({d.specializations?.[0] || 'General'})</option>
+                      <option key={d.userId} value={d.userId}>Dr. {d.fullName} ({d.specializations?.[0] || 'General'})</option>
                     ))}
                   </select>
                 </FormField>
