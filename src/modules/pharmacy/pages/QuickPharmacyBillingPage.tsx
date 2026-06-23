@@ -697,32 +697,32 @@ export default function QuickPharmacyBillingPage() {
                 </div>
 
                 <div className="p-4 overflow-y-auto flex-1 min-h-0 scrollbar-thin">
-                  <table className="w-full text-left border-collapse text-xs">
+                  <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                     <thead className="sticky top-0 bg-white z-10 border-b pb-2">
-                    <tr className="text-[9px] font-black uppercase text-slate-400 tracking-wider">
-                      <th className="pb-2 px-2">Medicine / Batch</th>
-                      <th className="pb-2 px-2 text-center">Stock</th>
-                      <th className="pb-2 px-2 text-center">Quantity</th>
-                      <th className="pb-2 px-2 text-right">Price</th>
-                      <th className="pb-2 px-2 text-right">Discount</th>
-                      <th className="pb-2 px-2 text-right">Total</th>
-                      <th className="pb-2 px-2 text-center w-10"></th>
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Medicine / Batch</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Stock</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Quantity</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Price</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Discount</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Total</th>
+                      <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300"></th>
                     </tr>
                     </thead>
                     <tbody>
                     {groupedCart.length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="py-16 text-center text-slate-300 font-medium">
+                        <tr className="hover:bg-slate-50 transition-colors">
+                          <td colSpan={7} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                             <span className="material-symbols-outlined text-4xl block mb-1">shopping_cart</span>
                             Terminal cart empty. Search stock items above.
-                          </td>
+                          </div></td>
                         </tr>
                     ) : groupedCart.map((group, index) => (
                         <React.Fragment key={`${group.medicineName}-${index}`}>
                           <tr className={`border-b border-slate-50 transition-colors ${group.isOutOfStock || group.isExpired ? 'bg-red-50/30' : 'hover:bg-slate-50/50'}`}>
-                            <td className="py-2.5 px-2">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <div className="flex flex-col">
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center justify-center gap-2">
                                   <p className={`font-black text-sm ${group.isOutOfStock || group.isExpired ? 'text-red-700' : 'text-slate-800'}`}>{group.medicineName}</p>
                                   {group.isOutOfStock && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Out of Stock</span>}
                                   {group.isExpired && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[8px] font-black uppercase rounded">Expired</span>}
@@ -735,13 +735,13 @@ export default function QuickPharmacyBillingPage() {
                                   ))}
                                 </div>
                               </div>
-                            </td>
-                            <td className="py-2.5 px-2 text-center">
+                            </div></td>
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${group.totalStock <= 0 ? 'bg-red-100 text-red-600' : 'bg-slate-100 text-slate-600'}`}>
                                 {group.totalStock}
                               </span>
-                            </td>
-                            <td className="py-2.5 px-2">
+                            </div></td>
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300">
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
                                     onClick={() => updateGroupedQuantity(group.medicineName, group.totalSelected - 1)}
@@ -767,7 +767,7 @@ export default function QuickPharmacyBillingPage() {
                                 </button>
                               </div>
                             </td>
-                            <td className="py-2.5 px-2 text-right text-slate-500 font-medium">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               {(() => {
                                 const activeBatches = group.batches.filter(b => b.selectedQuantity > 0);
                                 const uniquePrices = new Set(activeBatches.map(b => b.sellingPrice));
@@ -777,9 +777,9 @@ export default function QuickPharmacyBillingPage() {
                                 const displayPrice = activeBatches.length > 0 ? activeBatches[0].sellingPrice : (group.batches[0]?.sellingPrice || 0);
                                 return formatCurrency(displayPrice || 0);
                               })()}
-                            </td>
-                            <td className="py-2.5 px-2">
-                              <div className={`flex items-center justify-end bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                            </div></td>
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
+                              <div className={`flex items-center justify-center bg-slate-50 border border-slate-200 rounded px-2 py-0.5 max-w-[80px] ml-auto ${group.isOutOfStock || group.isExpired ? 'opacity-50 cursor-not-allowed' : ''}`}>
                                 <span className="text-[10px] text-slate-400 mr-1">₹</span>
                                 <input
                                     type="number"
@@ -787,15 +787,15 @@ export default function QuickPharmacyBillingPage() {
                                     value={group.totalDiscount === 0 ? '' : group.totalDiscount}
                                     onChange={(e) => updateGroupedDiscount(group.medicineName, Number.parseFloat(e.target.value) || 0)}
                                     disabled={group.isOutOfStock || group.isExpired}
-                                    className="w-full text-right font-bold text-xs outline-none bg-transparent"
+                                    className="w-full text-center font-bold text-xs outline-none bg-transparent"
                                     placeholder="0"
                                 />
                               </div>
-                            </td>
-                            <td className="py-2.5 px-2 text-right font-black text-slate-900">{formatCurrency(group.totalPrice)}</td>
-                            <td className="py-2.5 px-2 text-center">
+                            </div></td>
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{formatCurrency(group.totalPrice)}</div></td>
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <button onClick={() => removeFromCart(group.medicineName)} className="p-1 text-slate-300 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-base">delete</span></button>
-                            </td>
+                            </div></td>
                           </tr>
                         </React.Fragment>
                     ))}

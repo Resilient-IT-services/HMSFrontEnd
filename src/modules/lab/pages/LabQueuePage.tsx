@@ -203,8 +203,8 @@ const LabQueuePage = () => {
     },
     {
       header: 'Action',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
       render: (item) => {
         if (activeTab === 'RECOMMENDED') {
             return (
@@ -216,7 +216,7 @@ const LabQueuePage = () => {
         
         if (item.status === 'PENDING') {
           return (
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-center gap-2">
               {item.category === 'LAB' ? (
                 <Button size="sm" onClick={() => handleCollectSample(item.orderTestId)}>
                   Collect Sample
@@ -248,7 +248,7 @@ const LabQueuePage = () => {
         
         if (item.status === 'RESULT_ENTERED') {
           return (
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-center gap-2">
                 <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item.orderTestId, 'VERIFIED')}>
                     Verify
                 </Button>

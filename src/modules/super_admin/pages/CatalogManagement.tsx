@@ -187,28 +187,28 @@ export function CatalogManagement() {
               <div className="p-12 text-center text-slate-500 font-medium">Loading catalog data...</div>
             ) : (
               <div className="overflow-hidden">
-              <table className="w-full text-left border-collapse">
+              <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                 <thead>
                   <tr className="bg-slate-50 border-b border-gray-100">
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Name</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Description</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500">Status</th>
-                    <th className="px-6 py-4 font-black uppercase tracking-widest text-[10px] text-slate-500 text-right">Actions</th>
+                    <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Name</th>
+                    <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Description</th>
+                    <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Status</th>
+                    <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {currentList.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center text-slate-400 italic">
+                    <tr className="hover:bg-slate-50 transition-colors">
+                      <td colSpan={4} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                         No items found in this category.
-                      </td>
+                      </div></td>
                     </tr>
                   ) : (
                     currentList.map((item) => (
                       <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-6 py-4 font-bold text-slate-900">{item.name}</td>
-                        <td className="px-6 py-4 text-sm text-slate-500 max-w-md truncate">{item.description || '—'}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{item.name}</div></td>
+                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{item.description || '—'}</div></td>
+                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                           <span className={`px-2 py-1 rounded-full text-[9px] font-black uppercase tracking-tighter ${
                             item.active 
                               ? 'bg-emerald-100 text-emerald-700' 
@@ -216,9 +216,9 @@ export function CatalogManagement() {
                           }`}>
                             {item.active ? 'Active' : 'Inactive'}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        </div></td>
+                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
+                          <div className="flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button 
                               onClick={() => handleToggleStatus(item)}
                               title={item.active ? 'Deactivate' : 'Activate'}
@@ -243,7 +243,7 @@ export function CatalogManagement() {
                               <span className="material-symbols-outlined text-lg">delete</span>
                             </button>
                           </div>
-                        </td>
+                        </div></td>
                       </tr>
                     ))
                   )}

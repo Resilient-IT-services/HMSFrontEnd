@@ -41,10 +41,7 @@ export function DoctorList() {
       filterable: true,
       filterPlaceholder: 'Name...',
       render: (row) => (
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-full bg-[var(--primary-light)] flex items-center justify-center text-[var(--primary)] font-black uppercase">
-              {row.fullName.split(' ').map(n => n[0]).join('')}
-            </div>
+          <div className="flex items-center justify-center text-center">
             <div className="flex flex-col">
               <span className="text-sm font-bold text-[var(--text-primary)]">{row.fullName}</span>
               <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-bold">{getPrimarySpecialization(row)}</span>

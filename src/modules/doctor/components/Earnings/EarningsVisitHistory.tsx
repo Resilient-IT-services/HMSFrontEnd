@@ -45,10 +45,7 @@ export const EarningsVisitHistory: React.FC<EarningsVisitHistoryProps> = ({
     {
       header: 'Patient Profile',
       render: (row) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-[10px] font-black text-slate-400 uppercase">
-            {row.patientName.split(' ').map(n => n[0]).join('')}
-          </div>
+        <div className="flex items-center justify-center text-center">
           <p className="text-sm font-bold text-slate-900 leading-none">{row.patientName}</p>
         </div>
       )
@@ -65,8 +62,8 @@ export const EarningsVisitHistory: React.FC<EarningsVisitHistoryProps> = ({
     },
     {
       header: 'Earning',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
       render: (row) => {
         const isEarned = row.status !== 'CANCELLED' && row.status !== 'PAYMENT_PENDING';
         return (

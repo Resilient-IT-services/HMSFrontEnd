@@ -68,10 +68,7 @@ const PrescriptionTable: React.FC<PrescriptionTableProps> = ({ prescriptions, lo
                 </span>
               </td>
               <td className="px-6 py-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary text-xs font-bold uppercase">
-                    {prescription.patientName?.charAt(0) || 'P'}
-                  </div>
+                <div className="flex items-center justify-center text-center">
                   <div>
                     <p className="font-label-md text-on-surface leading-tight">{prescription.patientName}</p>
                     <p className="text-[10px] text-slate-400 font-bold uppercase">{prescription.patientCode || 'N/A'}</p>

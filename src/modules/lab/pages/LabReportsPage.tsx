@@ -93,8 +93,8 @@ const LabReportsPage = () => {
     },
     {
       header: 'Action',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
       render: (item) => (
         <Button size="sm" variant="secondary" onClick={() => handlePreviewReport(item.orderId)}>
           <span className="material-symbols-outlined text-sm mr-1">visibility</span>

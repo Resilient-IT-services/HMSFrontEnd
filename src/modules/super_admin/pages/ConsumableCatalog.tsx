@@ -19,7 +19,6 @@ import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 import AddConsumableModal from './AddConsumableModal';
 
 import { Table, Column } from '@/components/ui/Table';
-import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
@@ -203,8 +202,7 @@ export function ConsumableCatalog() {
       header: 'Inventory Item',
       width: '35%',
       render: (m) => (
-          <div className="flex items-center gap-3">
-            <Avatar name={m.name} variant="blue" />
+          <div className="flex items-center justify-center text-center">
             <div>
               <p className="text-sm font-bold leading-tight text-slate-900">{m.name}</p>
               <p className="mt-0.5 text-[10px] font-black uppercase text-primary">CODE: {m.itemCode || 'N/A'}</p>

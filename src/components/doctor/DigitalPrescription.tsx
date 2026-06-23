@@ -263,27 +263,27 @@ const DigitalPrescription: React.FC<DigitalPrescriptionProps> = ({
                       <span className="material-symbols-outlined text-orange-600 text-sm">medication</span> Prescribed Medications
                     </h3>
                     <div className="overflow-hidden border border-slate-200 rounded-lg">
-                       <table className="w-full text-left border-collapse">
+                       <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                           <thead>
                              <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Medicine Details</th>
-                                <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Dosage</th>
-                                <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Duration</th>
+                                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Medicine Details</th>
+                                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Dosage</th>
+                                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Duration</th>
                              </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
                              {pageData.meds.map((med, idx) => (
                                <tr key={idx} className="hover:bg-slate-50/30 transition-colors">
-                                 <td className="px-4 py-3">
+                                 <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                    <div className="text-[12px] font-black text-slate-900">{med.medicine}</div>
                                    {med.composition && <div className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">{med.composition}</div>}
-                                 </td>
-                                 <td className="px-4 py-3 text-center">
+                                 </div></td>
+                                 <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                    <div className="text-[11px] font-black text-slate-700 bg-slate-50 px-2 py-1 rounded border border-slate-100 inline-block min-w-[60px]">{med.frequency}</div>
-                                 </td>
-                                 <td className="px-4 py-3 text-right">
+                                 </div></td>
+                                 <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                    <div className="text-[10px] font-bold text-slate-500 uppercase">{med.instructions}</div>
-                                 </td>
+                                 </div></td>
                                </tr>
                              ))}
                           </tbody>

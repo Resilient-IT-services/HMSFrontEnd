@@ -113,8 +113,8 @@ const LabPackagesPage = () => {
         },
         {
             header: 'Action',
-            className: 'text-right',
-            headerClassName: 'text-right',
+            className: 'text-center',
+            headerClassName: 'text-center',
             render: (item) => (
                 <Button size="sm" variant="ghost" icon="edit" onClick={() => handleOpenEdit(item)}>
                     Edit

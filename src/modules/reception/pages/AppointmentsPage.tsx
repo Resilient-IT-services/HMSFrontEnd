@@ -208,53 +208,59 @@ export const AppointmentsPage = () => {
     },
     {
       header: 'VISIT DATE & TIME',
-      headerClassName: 'text-left font-bold text-slate-700',
-      className: 'text-left',
+      headerClassName: 'text-center font-bold text-slate-700',
+      className: 'text-center',
       mobilePosition: 'title',
       sortable: true,
       sortKey: 'appointmentTime',
       renderHeader: () => (
-          <div className="flex items-center gap-1.5 justify-start">
+          <div className="flex items-center justify-center gap-1.5 justify-center">
             <span>VISIT DATE & TIME</span>
             {statusFilter === 'UPCOMING' && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <DateRangeFilter onFilter={handleFilterChange} activeFilters={columnFilters} />
               </div>
             )}
           </div>
       ),
       render: (app) => (
-          <div className="flex items-center gap-1">
-            <span className="font-medium text-slate-900">{formatDateTime(app.appointmentTime)}</span>
-          </div>
+        <div className="flex items-center justify-center w-full text-center">
+          <span className="font-medium text-slate-900">
+            {formatDateTime(app.appointmentTime)}
+          </span>
+        </div>
       )
     },
     {
       header: 'Patient',
-      headerClassName: 'text-left font-bold text-slate-700',
-      className: 'text-left',
+      headerClassName: 'text-center font-bold text-slate-700',
+      className: 'text-center',
       mobilePosition: 'subtitle',
       sortable: true,
       sortKey: 'patientName',
       render: (app) => (
-          <div>
-            <p className="font-bold text-slate-900">{app.patientName}</p>
-            <p className="text-xs text-slate-500 uppercase font-bold tracking-tighter">Code: {(app as any).patientCode || 'N/A'}</p>
-          </div>
+        <div className="flex flex-col items-center justify-center text-center">
+          <p className="font-bold text-slate-900">{app.patientName}</p>
+          <p className="text-xs text-slate-500 uppercase font-bold tracking-tighter">
+            Code: {(app as any).patientCode || 'N/A'}
+          </p>
+        </div>
       )
     },
     {
       header: 'Doctor',
-      headerClassName: 'text-left font-bold text-slate-700',
-      className: 'text-left',
+      headerClassName: 'text-center font-bold text-slate-700',
+      className: 'text-center',
       mobilePosition: 'body',
       sortable: true,
       sortKey: 'doctorName',
       render: (app) => (
-          <div>
-            <p className="font-medium text-slate-700">{app.doctorName}</p>
-            <p className="text-xs text-slate-500 uppercase font-bold">{app.doctorSpecialization}</p>
-          </div>
+        <div className="flex flex-col items-center justify-center text-center">
+          <p className="font-medium text-slate-700">{app.doctorName}</p>
+          <p className="text-xs text-slate-500 uppercase font-bold">
+            {app.doctorSpecialization}
+          </p>
+        </div>
       )
     },
     {
@@ -275,9 +281,11 @@ export const AppointmentsPage = () => {
         const badgeText = isVitalsNotRecorded ? 'Vitals Not Recorded' : app.status.replace('_', ' ');
 
         return (
+          <div className="flex justify-center items-center w-full">
             <div className="shadow-sm inline-block text-center">
               <Badge variant={variants[app.status] || 'slate'}>{badgeText}</Badge>
             </div>
+          </div>
         );
       }
     },

@@ -208,41 +208,38 @@ export const AdminDashboard = () => {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
               <thead className="bg-slate-50/50 text-[10px] uppercase text-slate-400 font-black tracking-widest">
-                <tr>
-                  <th className="px-6 py-4">Hospital Name & ID</th>
-                  <th className="px-6 py-4">City</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Tier</th>
-                  <th className="px-6 py-4 text-center">Control</th>
+                <tr className="hover:bg-slate-50 transition-colors">
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Hospital Name & ID</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">City</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Status</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Tier</th>
+                  <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Control</th>
                 </tr>
               </thead>
               <tbody className="text-xs divide-y divide-slate-50">
                 {hospitals.map((h, idx) => (
                   <tr key={idx} className="hover:bg-slate-50/30 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6b2b] flex items-center justify-center font-black text-xs shadow-sm group-hover:scale-105 transition-transform">
-                          {h.name.substring(0, 2).toUpperCase()}
-                        </div>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300">
+                      <div className="flex items-center justify-center text-center">
                         <div>
                           <p className="font-black text-slate-700">{h.name}</p>
                           <p className="text-[10px] font-black text-slate-300 tracking-tighter uppercase">ID: {h.code}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-500 font-bold uppercase tracking-tight">{h.city || 'N/A'}</td>
-                    <td className="px-6 py-4">
-                      <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600">
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{h.city || 'N/A'}</div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
+                      <span className="flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest text-emerald-600">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
                         {h.status === 'ACTIVE' ? 'Operational' : h.status}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-lg text-[9px] font-black uppercase tracking-widest border border-blue-100">STANDARD</span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300">
                       <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button onClick={() => handleViewDetails(h)} className="p-2 text-slate-400 hover:text-[#ff6b2b] hover:bg-orange-50 rounded-lg transition-all"><Eye className="w-4 h-4" /></button>
                         <button onClick={() => router.push(`/super_admin/hospitals/${h.id}`)} className="p-2 text-slate-400 hover:text-[#ff6b2b] hover:bg-orange-50 rounded-lg transition-all"><Edit3 className="w-4 h-4" /></button>

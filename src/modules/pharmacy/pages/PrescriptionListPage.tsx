@@ -116,10 +116,7 @@ const PrescriptionListPage: React.FC = () => {
       header: 'Patient Name',
       width: '220px',
       render: (p) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-orange-700 text-xs font-bold uppercase">
-            {p.patientName?.charAt(0) || 'P'}
-          </div>
+        <div className="flex items-center justify-center text-center">
           <div>
             <p className="font-bold text-slate-900 leading-tight">{p.patientName}</p>
             <p className="text-[10px] text-slate-400 font-bold uppercase">{p.patientCode || 'N/A'}</p>
