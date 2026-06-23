@@ -85,6 +85,7 @@ const LabQueuePage = () => {
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [verifyData, setVerifyData] = useState<any | null>(null);
   const [lockedPackageIds, setLockedPackageIds] = useState<Set<string>>(new Set());
+  const [lockedTestIds, setLockedTestIds] = useState<Set<string>>(new Set());
   const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
   const [unlockTargetItem, setUnlockTargetItem] = useState<any | null>(null);
 
@@ -190,29 +191,51 @@ const LabQueuePage = () => {
     }
   };
 
-  const handleLockPackage = async (orderPackageId: string) => {
+  const handleLockTest = async (orderTestId: string) => {
     try {
-      const res = await labApi.lockOrderPackage(orderPackageId);
+      const res = await labApi.lockOrderTest(orderTestId);
+      if (res.success) {
+        triggerGlobalToast('Test locked for reporting', 'success');
+        setLockedTestIds(prev => new Set([...prev, orderTestId]));
+      }
+    } catch (error: any) {
+      triggerGlobalToast(error.response?.data?.message || 'Failed to lock test', 'error');
+    }
+  };
+
+  const handleLockPackage = async (packageId: string, orderId: string) => {
+    try {
+      const res = await labApi.lockOrderPackage(packageId, orderId);
       if (res.success) {
         triggerGlobalToast('Package locked for reporting', 'success');
-        setLockedPackageIds(prev => new Set([...prev, orderPackageId]));
+        setLockedPackageIds(prev => new Set([...prev, `${orderId}_${packageId}`]));
       }
     } catch (error: any) {
       triggerGlobalToast(error.response?.data?.message || 'Failed to lock package', 'error');
     }
   };
 
-  const handleUnlockPackage = async (orderPackageId: string, reason: string) => {
+  const handleUnlock = async (id: string, reason: string) => {
+    if (!unlockTargetItem) return;
     try {
-      const res = await labApi.unlockOrderPackage(orderPackageId, reason);
+      let res;
+      if (unlockTargetItem.packageId) {
+        res = await labApi.unlockOrderPackage(unlockTargetItem.packageId, unlockTargetItem.orderId, reason);
+        if (res.success) {
+          const key = `${unlockTargetItem.orderId}_${unlockTargetItem.packageId}`;
+          setLockedPackageIds(prev => { const next = new Set(prev); next.delete(key); return next; });
+        }
+      } else {
+        res = await labApi.unlockOrderTest(unlockTargetItem.orderTestId, reason);
+        if (res.success) setLockedTestIds(prev => { const next = new Set(prev); next.delete(unlockTargetItem.orderTestId); return next; });
+      }
       if (res.success) {
-        triggerGlobalToast('Package unlocked successfully', 'success');
-        setLockedPackageIds(prev => { const next = new Set(prev); next.delete(orderPackageId); return next; });
+        triggerGlobalToast('Unlocked successfully', 'success');
         setIsUnlockModalOpen(false);
         setUnlockTargetItem(null);
       }
     } catch (error: any) {
-      triggerGlobalToast(error.response?.data?.message || 'Failed to unlock package', 'error');
+      triggerGlobalToast(error.response?.data?.message || 'Failed to unlock', 'error');
     }
   };
 
@@ -341,32 +364,36 @@ const LabQueuePage = () => {
         }
         
         if (item.status === 'VERIFIED') {
-          if (item.packageId) {
-            const isLocked = lockedPackageIds.has(item.packageId);
-            return (
-              <div className="flex justify-end items-center gap-2">
-                <Badge variant="emerald" size="sm">Verified</Badge>
-                {isLocked ? (
-                  <button
-                    onClick={() => { setUnlockTargetItem(item); setIsUnlockModalOpen(true); }}
-                    className="flex items-center gap-1 text-[10px] font-black text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-2 py-1 rounded-lg transition-all"
-                  >
-                    <span className="material-symbols-outlined text-[12px]">lock_open</span>
-                    Unlock
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => handleLockPackage(item.packageId)}
-                    className="flex items-center gap-1 text-[10px] font-black text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-400 px-2 py-1 rounded-lg transition-all"
-                  >
-                    <span className="material-symbols-outlined text-[12px]">lock</span>
-                    Lock
-                  </button>
-                )}
-              </div>
-            );
-          }
-          return <Badge variant="emerald">Verified</Badge>;
+          const isPackage = !!item.packageId;
+          const isLocked = isPackage
+            ? lockedPackageIds.has(`${item.orderId}_${item.packageId}`)
+            : lockedTestIds.has(item.orderTestId);
+
+          return (
+            <div className="flex justify-end items-center gap-2">
+              <Badge variant="emerald" size="sm">Verified</Badge>
+              {isLocked ? (
+                <button
+                  onClick={() => { setUnlockTargetItem(item); setIsUnlockModalOpen(true); }}
+                  className="flex items-center gap-1 text-[10px] font-black text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-2 py-1 rounded-lg transition-all"
+                >
+                  <span className="material-symbols-outlined text-[12px]">lock_open</span>
+                  Unlock
+                </button>
+              ) : (
+                <button
+                  onClick={() => isPackage
+                    ? handleLockPackage(item.packageId, item.orderId)
+                    : handleLockTest(item.orderTestId)
+                  }
+                  className="flex items-center gap-1 text-[10px] font-black text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-400 px-2 py-1 rounded-lg transition-all"
+                >
+                  <span className="material-symbols-outlined text-[12px]">lock</span>
+                  Lock
+                </button>
+              )}
+            </div>
+          );
         }
         return null;
       }
@@ -487,9 +514,9 @@ const LabQueuePage = () => {
             <LabPackageUnlockModal
                 isOpen={true}
                 testName={unlockTargetItem.testName}
-                orderPackageId={unlockTargetItem.packageId}
+                orderPackageId={unlockTargetItem.packageId || unlockTargetItem.orderTestId}
                 onClose={() => { setIsUnlockModalOpen(false); setUnlockTargetItem(null); }}
-                onConfirm={handleUnlockPackage}
+                onConfirm={handleUnlock}
             />
         )}
       </PageSurface>

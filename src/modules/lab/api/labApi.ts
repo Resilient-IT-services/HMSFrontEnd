@@ -203,15 +203,32 @@ export const labApi = {
         return response.data;
     },
 
-    // Order Package lock/unlock
-    lockOrderPackage: async (orderPackageId: string) => {
-        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/packages/${orderPackageId}/lock`);
+    // Order Test lock/unlock (individual tests)
+    lockOrderTest: async (orderTestId: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/tests/${orderTestId}/lock`);
         return response.data;
     },
-    unlockOrderPackage: async (orderPackageId: string, reason: string) => {
+    unlockOrderTest: async (orderTestId: string, reason: string) => {
         const response = await apiClient.post<ApiResponse<void>>(
-            `/lab/orders/packages/${orderPackageId}/unlock`,
-            { reason }
+            `/lab/orders/tests/${orderTestId}/unlock`,
+            null,
+            { params: { reason } }
+        );
+        return response.data;
+    },
+
+    // Order Package lock/unlock
+    lockOrderPackage: async (packageId: string, orderId: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(`/lab/orders/packages/${packageId}/lock`, null, {
+            params: { orderId }
+        });
+        return response.data;
+    },
+    unlockOrderPackage: async (packageId: string, orderId: string, reason: string) => {
+        const response = await apiClient.post<ApiResponse<void>>(
+            `/lab/orders/packages/${packageId}/unlock`,
+            null,
+            { params: { orderId, reason } }
         );
         return response.data;
     },
