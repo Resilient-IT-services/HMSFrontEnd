@@ -21,8 +21,8 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
   const { showToast } = useToast();
   const [beds, setBeds] = useState<BedDTO[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedBed, setSelectedBed] = useState<BedDTO | null>(null);
-  const [isEditPopupOpen, setIsEditPopupOpen] = useState(false);
 
   const fetchBeds = useCallback(async () => {
     if (!ward.id) return;
@@ -31,21 +31,7 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
     try {
       const res = await ipdService.listWardBeds(ward.id);
       if (res.success) {
-        const existingBeds = res.data || [];
-        setBeds(existingBeds);
-
-        const existingCount = existingBeds.length;
-        const missingCount = ward.totalBeds - existingCount;
-        if (missingCount > 0) {
-          const bedPromises = Array.from({ length: missingCount }, (_, i) => {
-            const bedNumber = `B-${String(existingCount + i + 1).padStart(2, '0')}`;
-            return ipdService.createBed({ wardId: ward.id!, bedNumber, status: 'AVAILABLE', active: true });
-          });
-          await Promise.all(bedPromises);
-          const refreshed = await ipdService.listWardBeds(ward.id);
-          if (refreshed.success) setBeds(refreshed.data || []);
-          showToast(`${missingCount} beds auto-generated (B-${String(existingCount + 1).padStart(2, '0')} to B-${String(ward.totalBeds).padStart(2, '0')})`, 'success');
-        }
+        setBeds(res.data || []);
       }
     } catch (error) {
       console.error(error);
@@ -53,7 +39,7 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
     } finally {
       setLoading(false);
     }
-  }, [ward.id, ward.totalBeds, showToast]);
+  }, [ward.id, showToast]);
 
   useEffect(() => {
     if (isOpen) {
@@ -81,27 +67,12 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
 
       if (res.success) {
         showToast(`Bed ${selectedBed ? 'updated' : 'created'} successfully`, 'success');
-        setIsEditPopupOpen(false);
+        setIsFormOpen(false);
         fetchBeds();
       }
     } catch (error) {
       console.error(error);
       showToast('Failed to save bed', 'error');
-    }
-  };
-
-  const handleDeleteBed = async (bed: BedDTO) => {
-    if (!bed.id) return;
-    if (!confirm(`Remove bed ${bed.bedNumber}? This cannot be undone.`)) return;
-    try {
-      const res = await ipdService.updateBed(bed.id, { ...bed, active: false });
-      if (res.success) {
-        setBeds(prev => prev.filter(b => b.id !== bed.id));
-        showToast(`Bed ${bed.bedNumber} removed`, 'success');
-      }
-    } catch (error) {
-      console.error(error);
-      showToast('Failed to remove bed', 'error');
     }
   };
 
@@ -133,23 +104,14 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
     {
       header: 'Actions',
       render: (row) => (
-        <div className="flex items-center gap-1">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-7 px-2"
-            onClick={() => { setSelectedBed(row); setIsEditPopupOpen(true); }}
-          >
-            <span className="material-symbols-outlined text-xs">edit</span>
-          </Button>
-          <button
-            type="button"
-            onClick={() => handleDeleteBed(row)}
-            className="p-1.5 hover:bg-red-50 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
-          >
-            <span className="material-symbols-outlined text-sm">delete</span>
-          </button>
-        </div>
+        <Button 
+          variant="secondary" 
+          size="sm" 
+          className="h-7 px-2"
+          onClick={() => { setSelectedBed(row); setIsFormOpen(true); }}
+        >
+          <span className="material-symbols-outlined text-xs">edit</span>
+        </Button>
       )
     }
   ];
@@ -161,6 +123,14 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
           <p className="text-xs text-slate-500 font-medium uppercase tracking-widest">
             Current Capacity: <span className="text-slate-900">{beds.length} / {ward.totalBeds}</span>
           </p>
+          <Button 
+            size="sm" 
+            icon="add" 
+            onClick={() => { setSelectedBed(null); setIsFormOpen(true); }}
+            disabled={beds.length >= ward.totalBeds && !selectedBed}
+          >
+            Add Bed
+          </Button>
         </div>
 
         <Table 
@@ -169,48 +139,51 @@ const BedManagementModal = ({ isOpen, onClose, ward }: BedManagementModalProps) 
           isLoading={loading}
         />
 
-<div className="flex justify-end mt-4">
+        {isFormOpen && (
+          <div className="mt-4 p-4 border border-slate-100 rounded-2xl bg-slate-50 animate-in slide-in-from-top-4 duration-300">
+            <form onSubmit={handleSaveBed} className="space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-tight">
+                  {selectedBed ? 'Edit Bed' : 'Add New Bed'}
+                </h4>
+                <button type="button" onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-600">
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField label="Bed Number" required>
+                  <input 
+                    name="bedNumber"
+                    defaultValue={selectedBed?.bedNumber}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500"
+                    required
+                    placeholder="e.g. B-01"
+                  />
+                </FormField>
+                <FormField label="Initial Status">
+                  <select 
+                    name="status"
+                    defaultValue={selectedBed?.status || 'AVAILABLE'}
+                    className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500"
+                  >
+                    {BED_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                  </select>
+                </FormField>
+              </div>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="secondary" size="sm" onClick={() => setIsFormOpen(false)}>Cancel</Button>
+                <Button type="submit" size="sm">Save Bed</Button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        <div className="flex justify-end mt-4">
           <Button variant="secondary" onClick={onClose}>Close</Button>
         </div>
       </div>
-
-      <Modal
-        isOpen={isEditPopupOpen}
-        onClose={() => setIsEditPopupOpen(false)}
-        title="Edit Bed"
-        size="sm"
-      >
-        <div className="p-4">
-          <form onSubmit={handleSaveBed} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField label="Bed Number" required>
-                <input
-                  key={selectedBed?.id}
-                  name="bedNumber"
-                  defaultValue={selectedBed?.bedNumber}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500"
-                  required
-                  placeholder="e.g. B-01"
-                />
-              </FormField>
-              <FormField label="Status">
-                <select
-                  key={selectedBed?.id}
-                  name="status"
-                  defaultValue={selectedBed?.status || 'AVAILABLE'}
-                  className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-orange-500"
-                >
-                  {BED_STATUS_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </FormField>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="secondary" size="sm" type="button" onClick={() => setIsEditPopupOpen(false)}>Cancel</Button>
-              <Button type="submit" size="sm">Save Bed</Button>
-            </div>
-          </form>
-        </div>
-      </Modal>
     </Modal>
   );
 };

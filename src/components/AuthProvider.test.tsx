@@ -92,7 +92,12 @@ describe('AuthProvider', () => {
 
   it('resolves loading state if on public page without token', async () => {
     (usePathname as any).mockReturnValue('/login');
-    localStorage.clear();
+    // Ensure no token in localStorage
+    vi.stubGlobal('localStorage', { 
+      getItem: vi.fn().mockReturnValue(null),
+      setItem: vi.fn(),
+      removeItem: vi.fn()
+    });
 
     renderWithRedux(<AuthProvider>Children</AuthProvider>, { isLoading: true });
     
