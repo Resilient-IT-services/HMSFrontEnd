@@ -109,8 +109,8 @@ const HospitalLabSettingsPage = () => {
     },
     {
       header: 'Actions',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
       render: (t) => (
         <Button variant="secondary" size="sm" onClick={() => handleEditClick(t)}>
           Configure

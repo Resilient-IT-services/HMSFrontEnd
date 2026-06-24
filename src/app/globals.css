@@ -324,3 +324,11 @@ body {
     }
   }
 }
+
+/* Global Table Border Enforcements */
+table {
+  border-collapse: collapse !important;
+}
+table, th, td {
+  border: 1px solid #cbd5e1 !important; /* slate-300 solid borders */
+}

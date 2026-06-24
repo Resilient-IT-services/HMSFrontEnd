@@ -104,56 +104,56 @@ export function TaxMastersPage() {
         </div>
 
         <Card className="overflow-hidden border-slate-200 shadow-sm">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Code</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Name</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Type</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Rate (%)</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Status</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest text-right">Actions</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Code</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Name</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Type</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Rate (%)</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Status</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                <tr className="hover:bg-slate-50 transition-colors">
+                  <td colSpan={6} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                     Loading tax masters...
-                  </td>
+                  </div></td>
                 </tr>
               ) : masters.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                <tr className="hover:bg-slate-50 transition-colors">
+                  <td colSpan={6} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                     No tax masters defined yet.
-                  </td>
+                  </div></td>
                 </tr>
               ) : (
                 masters.map((master) => (
                   <tr key={master.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-xs font-black text-slate-700 bg-slate-100 px-2 py-1 rounded uppercase tracking-wider">
                         {master.code}
                       </span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-sm font-bold text-slate-800">{master.name}</span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-xs font-black text-orange-700 uppercase">{master.taxType}</span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className="text-sm font-black text-slate-900">{master.rate}%</span>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                       <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded border ${
                         master.active ? 'bg-green-50 text-green-700 border-green-200' : 'bg-slate-50 text-slate-500 border-slate-200'
                       }`}>
                         {master.active ? 'Active' : 'Inactive'}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
+                      <div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           onClick={() => handleOpenEdit(master)}
                           className="p-2 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-orange-600"
@@ -167,7 +167,7 @@ export function TaxMastersPage() {
                           <span className="material-symbols-outlined text-lg">delete</span>
                         </button>
                       </div>
-                    </td>
+                    </div></td>
                   </tr>
                 ))
               )}

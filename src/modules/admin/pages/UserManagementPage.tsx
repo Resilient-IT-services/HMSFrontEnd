@@ -15,7 +15,6 @@ import { Table, Column } from '@/components/ui/Table';
 import { Pagination } from '@/components/ui/Pagination';
 import { ContentPanel } from '@/components/ui/ContentPanel';
 import { PageSurface } from '@/components/ui/PageSurface';
-import { Avatar } from '@/components/ui/Avatar';
 import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import { getDepartmentLabel } from '@/utils/staffDisplay';
 
@@ -47,8 +46,7 @@ export const UserManagementPage = () => {
       sortKey: 'fullName',
       filterPlaceholder: 'Name or email...',
       render: (user) => (
-        <div className="flex items-center gap-3">
-          <Avatar name={user.fullName || user.username} />
+        <div className="flex items-center justify-center text-center">
           <div>
             <p className="text-sm font-bold leading-tight text-slate-900">{user.fullName || user.username}</p>
             <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{user.email}</p>
@@ -143,8 +141,8 @@ export const UserManagementPage = () => {
     },
     {
       header: 'Actions',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
       render: (user) => (
         <Button
           variant="secondary"

@@ -117,37 +117,37 @@ export function LabTestsPage() {
         </div>
 
         <Card className="overflow-hidden border-slate-200 shadow-sm">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Code</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Test Name</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Category</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Department</th>
-                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest text-right">Actions</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Code</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Test Name</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Category</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Department</th>
+                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading ? (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">Loading...</td></tr>
+                <tr className="hover:bg-slate-50 transition-colors"><td colSpan={5} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">Loading...</div></td></tr>
               ) : tests.length === 0 ? (
-                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-400">No tests defined yet.</td></tr>
+                <tr className="hover:bg-slate-50 transition-colors"><td colSpan={5} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">No tests defined yet.</div></td></tr>
               ) : (
                 tests.map((test) => (
                   <tr key={test.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <td className="px-6 py-4 font-black text-slate-700 uppercase tracking-wider text-xs">{test.testCode}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{test.testCode}</div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                         <p className="font-bold text-slate-800 text-sm">{test.testName}</p>
                         <p className="text-[10px] text-slate-400 font-medium">{test.shortName || 'No short name'}</p>
-                    </td>
-                    <td className="px-6 py-4">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                         <Badge variant={test.category === 'LAB' ? 'orange' : test.category === 'RADIOLOGY' ? 'blue' : 'emerald'} size="sm">
                             {test.category}
                         </Badge>
-                    </td>
-                    <td className="px-6 py-4 font-bold text-slate-600 text-xs uppercase">{test.departmentName}</td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    </div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{test.departmentName}</div></td>
+                    <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
+                      <div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button 
                             variant="secondary" 
                             size="sm" 
@@ -160,7 +160,7 @@ export function LabTestsPage() {
                         <button onClick={() => handleOpenEdit(test)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-orange-600"><span className="material-symbols-outlined text-lg">edit</span></button>
                         <button onClick={() => handleDelete(test.id!)} className="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-red-600"><span className="material-symbols-outlined text-lg">delete</span></button>
                       </div>
-                    </td>
+                    </div></td>
                   </tr>
                 ))
               )}

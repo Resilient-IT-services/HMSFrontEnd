@@ -42,10 +42,7 @@ export function HospitalList() {
         {
             header: 'Hospital Name & ID',
             render: (hospital) => (
-                <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-orange-100 font-bold uppercase text-orange-700">
-                        {hospital.name.slice(0, 2)}
-                    </div>
+                <div className="flex items-center justify-center text-center">
                     <div>
                         <p className="text-sm font-bold text-slate-900">{hospital.name}</p>
                         <p className="text-[10px] font-bold uppercase tracking-tighter text-slate-400">ID: {hospital.code}</p>
@@ -60,7 +57,7 @@ export function HospitalList() {
         {
             header: 'Status',
             render: (hospital) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                     <div className={`h-2 w-2 rounded-full ${hospital.status === 'ACTIVE' ? 'bg-green-500' : 'bg-orange-500'}`} />
                     <span className="text-xs font-bold uppercase tracking-tighter text-slate-700">
             {hospital.status === 'ACTIVE' ? 'Operational' : hospital.status}

@@ -13,7 +13,6 @@ import MainLayout from '@/components/ui/MainLayout';
 import { PageSurface } from '@/components/ui/PageSurface';
 import { PageHeading } from '@/components/ui/PageHeading';
 import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
 import { cn } from '@/lib/cn';
 import { pharmacyService } from '@/services/pharmacyService';
 
@@ -98,8 +97,7 @@ export function MedicineList() {
       header: 'Product Details',
       width: '30%',
       render: (m) => (
-        <div className="flex items-center gap-3">
-          <Avatar name={m.name} variant="orange" className="h-8 w-8 text-[10px]" />
+        <div className="flex items-center justify-center text-center">
           <div>
             <p className="text-[13px] font-bold text-slate-900 leading-tight">{m.name}</p>
             <p className="text-[9px] font-bold uppercase text-slate-400">{m.manufacturer || 'General'}</p>

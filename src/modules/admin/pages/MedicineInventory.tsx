@@ -19,7 +19,6 @@ import AddMedicineModal from '@/modules/pharmacy/pages/AddMedicineModal';
 import EditMedicineModal from '@/modules/pharmacy/pages/EditMedicineModal';
 
 import { Table, Column } from '@/components/ui/Table';
-import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Pagination } from '@/components/ui/Pagination';
 import { DEFAULT_DEBOUNCE_MS, DEFAULT_PAGE_SIZE } from '@/utils/constants';
@@ -212,8 +211,7 @@ export const MedicineInventory = () => {
     {
       header: 'Medicine Details',
       render: (m) => (
-          <div className="flex items-center gap-3">
-            <Avatar name={m.name} variant="orange" />
+          <div className="flex items-center justify-center text-center">
             <div>
               <p className="text-sm font-bold leading-tight text-slate-900">{m.name}</p>
               <p className="mt-0.5 text-[10px] font-bold uppercase tracking-tighter text-slate-400">{m.manufacturer || 'Unknown Manufacturer'} • {m.strength}</p>
@@ -259,10 +257,10 @@ export const MedicineInventory = () => {
     },
     {
       header: 'Actions',
-      className: 'text-right',
-      headerClassName: 'text-right',
+      className: 'text-center',
+      headerClassName: 'text-center',
       render: (m) => (
-          <div className="flex justify-end items-center gap-2">
+          <div className="flex justify-center items-center gap-2">
             <Button
                 variant="secondary"
                 size="sm"

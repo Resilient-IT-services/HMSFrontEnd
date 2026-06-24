@@ -154,35 +154,37 @@ const MedicineViewModal: React.FC<MedicineViewModalProps> = ({
                     <h4 className="font-bold text-slate-800 uppercase tracking-widest text-xs">Active Batch Breakdown</h4>
                   </div>
                   <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-                    <table className="w-full text-left">
+                    <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                       <thead className="bg-slate-50 border-b border-slate-200">
-                        <tr>
-                          <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase">Batch No</th>
-                          <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase">Expiry</th>
-                          <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase text-right">Qty</th>
-                          <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase text-right">Cost (₹)</th>
-                          <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase text-right">Sell (₹)</th>
-                          <th className="px-4 py-3 text-[10px] font-black text-slate-500 uppercase text-right">Profit (₹)</th>
+                        <tr className="hover:bg-slate-50 transition-colors">
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Batch No</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Expiry</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Qty</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Cost (₹)</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Sell (₹)</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Profit (₹)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {batches.length === 0 ? (
-                          <tr><td colSpan={6} className="px-4 py-8 text-center text-slate-400 text-sm">No active batches in stock</td></tr>
+                          <tr className="hover:bg-slate-50 transition-colors"><td colSpan={6} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">No active batches in stock</div></td></tr>
                         ) : batches.map((batch) => {
                           const batchProfit = batch.price - (batch.purchasePrice || purchasePrice);
                           return (
                             <tr key={batch.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-4 py-3 font-mono text-xs font-bold text-slate-700">{batch.batchNumber}</td>
-                              <td className="px-4 py-3 text-xs font-bold">
+                              <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{batch.batchNumber}</div></td>
+                              <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                 <span className={new Date(batch.expiryDate) < new Date() ? 'text-red-600' : 'text-slate-600'}>
                                   {new Date(batch.expiryDate).toLocaleDateString()}
                                 </span>
-                              </td>
-                              <td className="px-4 py-3 text-xs font-black text-right text-slate-900">{batch.quantity}</td>
-                              <td className="px-4 py-3 text-xs font-bold text-right text-slate-500">₹ {(batch.purchasePrice || purchasePrice).toFixed(2)}</td>
-                              <td className="px-4 py-3 text-xs font-black text-right text-slate-900">₹ {batch.price.toFixed(2)}</td>
-                              <td className={`px-4 py-3 text-xs font-black text-right ${batchProfit > 0 ? 'text-green-600' : 'text-orange-600'}`}>
-                                ₹ {batchProfit.toFixed(2)}
+                              </div></td>
+                              <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{batch.quantity}</div></td>
+                              <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">₹ {(batch.purchasePrice || purchasePrice).toFixed(2)}</div></td>
+                              <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">₹ {batch.price.toFixed(2)}</div></td>
+                              <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300">
+                                <div className={`flex items-center justify-center w-full text-xs font-black ${batchProfit > 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                                  ₹ {batchProfit.toFixed(2)}
+                                </div>
                               </td>
                             </tr>
                           );

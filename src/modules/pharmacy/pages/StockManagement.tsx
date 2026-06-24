@@ -70,7 +70,7 @@ export const StockManagement = () => {
       filterable: true,
       filterPlaceholder: 'Search name...',
       render: (medicine) => (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-center gap-4">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-100 bg-slate-50 text-slate-400 transition-colors group-hover:text-orange-600">
             <span className="material-symbols-outlined text-xl">medication</span>
           </div>
@@ -93,7 +93,7 @@ export const StockManagement = () => {
           <p className="inline-block rounded bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-black tracking-tighter text-slate-700">
             {medicine.batchNumber || 'NO_BATCH'}
           </p>
-          <div className="flex items-center gap-1 text-[10px] font-bold">
+          <div className="flex items-center justify-center gap-1 text-[10px] font-bold">
             <span className="material-symbols-outlined text-[12px] text-slate-400">calendar_today</span>
             <span className={medicine.expiryDate && new Date(medicine.expiryDate) < new Date() ? 'font-black text-red-600' : 'text-slate-500'}>
               {medicine.expiryDate ? new Date(medicine.expiryDate).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}

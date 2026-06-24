@@ -87,25 +87,25 @@ export function LabPricingPage() {
                 </div>
 
                 <Card className="overflow-hidden border-slate-200 shadow-sm">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Test Code</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest">Test Name</th>
-                                <th className="px-6 py-4 text-[10px] font-black uppercase text-slate-500 tracking-widest text-right">Actions</th>
+                                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Test Code</th>
+                                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Test Name</th>
+                                <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
                             {loading ? (
-                                <tr><td colSpan={3} className="px-6 py-12 text-center text-slate-400">Loading...</td></tr>
+                                <tr className="hover:bg-slate-50 transition-colors"><td colSpan={3} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">Loading...</div></td></tr>
                             ) : tests.length === 0 ? (
-                                <tr><td colSpan={3} className="px-6 py-12 text-center text-slate-400">No tests found.</td></tr>
+                                <tr className="hover:bg-slate-50 transition-colors"><td colSpan={3} className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">No tests found.</div></td></tr>
                             ) : (
                                 tests.map((test) => (
                                     <tr key={test.id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <td className="px-6 py-4 font-black text-slate-700 uppercase tracking-wider text-xs">{test.testCode}</td>
-                                        <td className="px-6 py-4 font-bold text-slate-800 text-sm">{test.testName}</td>
-                                        <td className="px-6 py-4 text-right">
+                                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{test.testCode}</div></td>
+                                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">{test.testName}</div></td>
+                                        <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                                             <Button 
                                                 variant="secondary" 
                                                 size="sm" 
@@ -115,7 +115,7 @@ export function LabPricingPage() {
                                             >
                                                 Set Price
                                             </Button>
-                                        </td>
+                                        </div></td>
                                     </tr>
                                 ))
                             )}

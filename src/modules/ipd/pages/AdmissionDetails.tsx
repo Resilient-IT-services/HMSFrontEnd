@@ -188,57 +188,57 @@ export const AdmissionDetails = () => {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[700px] text-left border-collapse">
+                    <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
                       <thead>
-                        <tr className="border-b border-slate-100">
-                          <th className="py-3 px-4 text-left font-black text-slate-400 text-[10px] uppercase tracking-widest">From Location</th>
-                          <th className="py-3 px-4 text-left font-black text-slate-400 text-[10px] uppercase tracking-widest">To Location</th>
-                          <th className="py-3 px-4 text-left font-black text-slate-400 text-[10px] uppercase tracking-widest">Reason</th>
-                          <th className="py-3 px-4 text-left font-black text-slate-400 text-[10px] uppercase tracking-widest">Remarks</th>
-                          <th className="py-3 px-4 text-left font-black text-slate-400 text-[10px] uppercase tracking-widest">Transferred By</th>
-                          <th className="py-3 px-4 text-left font-black text-slate-400 text-[10px] uppercase tracking-widest">Transferred At</th>
+                        <tr className="hover:bg-slate-50 transition-colors">
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">From Location</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">To Location</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Reason</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Remarks</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Transferred By</th>
+                          <th className="px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300">Transferred At</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {transfers.map((t) => (
                           <tr key={t.id} className="hover:bg-slate-50/50 transition-colors">
                             {/* From Location */}
-                            <td className="py-4 px-4 align-top text-xs font-medium text-slate-600">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <div className="font-semibold text-slate-800">{t.fromWardName}</div>
                               <div className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase">Bed {t.fromBedNumber}</div>
-                            </td>
+                            </div></td>
                             {/* To Location */}
-                            <td className="py-4 px-4 align-top text-xs font-medium text-slate-600">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <div className="font-semibold text-slate-800">{t.toWardName}</div>
                               <div className="text-[10px] text-slate-400 font-bold mt-0.5 uppercase">Bed {t.toBedNumber}</div>
-                            </td>
+                            </div></td>
                             {/* Reason */}
-                            <td className="py-4 px-4 align-top text-xs font-medium">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               {t.transferReason ? (
                                 <Badge variant="slate">{t.transferReason}</Badge>
                               ) : (
                                 <span className="text-slate-400">-</span>
                               )}
-                            </td>
+                            </div></td>
                             {/* Remarks */}
-                            <td className="py-4 px-4 align-top text-xs font-medium text-slate-600 whitespace-normal break-words max-w-[200px]">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               {t.remarks || <span className="text-slate-400">-</span>}
-                            </td>
+                            </div></td>
                             {/* Transferred By */}
-                            <td className="py-4 px-4 align-top text-xs font-medium text-slate-600">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <div className="font-semibold text-slate-800">
                                 {t.transferredByName ? `Dr. ${t.transferredByName}` : t.transferredBy}
                               </div>
-                            </td>
+                            </div></td>
                             {/* Transferred At */}
-                            <td className="py-4 px-4 align-top text-xs font-medium text-slate-600">
+                            <td className="px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300"><div className="flex items-center justify-center w-full">
                               <div className="font-semibold text-slate-800">
                                 {dayjs(t.transferredAt).format('DD MMM YYYY')}
                               </div>
                               <div className="text-[10px] text-slate-400 font-bold mt-0.5">
                                 {dayjs(t.transferredAt).format('hh:mm A')}
                               </div>
-                            </td>
+                            </div></td>
                           </tr>
                         ))}
                       </tbody>

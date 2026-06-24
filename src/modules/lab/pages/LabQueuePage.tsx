@@ -30,6 +30,44 @@ const statusMapping: Record<string, { label: string, variant: any }> = {
   RECOMMENDED: { label: 'Recommended', variant: 'slate' }
 };
 
+const aggregatePackageStatus = (items: any[]) => {
+  const statuses = items.map(item => item.status);
+  if (statuses.every(status => status === 'VERIFIED')) return 'VERIFIED';
+  if (statuses.every(status => status === 'RESULT_ENTERED')) return 'RESULT_ENTERED';
+  if (statuses.some(status => status === 'PROCESSING' || status === 'RESULT_ENTERED')) return 'PROCESSING';
+  if (statuses.some(status => status === 'SAMPLE_COLLECTED')) return 'SAMPLE_COLLECTED';
+  return statuses[0] || 'PENDING';
+};
+
+const collapseQueueItems = (items: any[]) => {
+  const grouped = new Map<string, any[]>();
+  const singles: any[] = [];
+
+  items.forEach(item => {
+    if (item.packageId) {
+      const key = `${item.orderId}:${item.packageId}`;
+      grouped.set(key, [...(grouped.get(key) || []), item]);
+    } else {
+      singles.push(item);
+    }
+  });
+
+  const packageRows = Array.from(grouped.values()).map(group => {
+    const first = group[0];
+    return {
+      ...first,
+      isPackageGroup: true,
+      testName: first.packageName || first.testName,
+      resultEntryType: 'PACKAGE',
+      category: group.every(item => item.category === 'LAB') ? 'LAB' : first.category,
+      status: aggregatePackageStatus(group),
+      childTests: group
+    };
+  });
+
+  return [...packageRows, ...singles];
+};
+
 const LabQueuePage = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const hospitalName = user?.memberships?.find(m => m.hospitalId === user.currentHospitalId)?.hospitalName;
@@ -46,6 +84,10 @@ const LabQueuePage = () => {
   
   const [isVerifyModalOpen, setIsVerifyModalOpen] = useState(false);
   const [verifyData, setVerifyData] = useState<any | null>(null);
+  const [lockedPackageIds, setLockedPackageIds] = useState<Set<string>>(new Set());
+  const [lockedTestIds, setLockedTestIds] = useState<Set<string>>(new Set());
+  const [isUnlockModalOpen, setIsUnlockModalOpen] = useState(false);
+  const [unlockTargetItem, setUnlockTargetItem] = useState<any | null>(null);
 
   const fetchQueue = useCallback(async () => {
     try {
@@ -58,7 +100,7 @@ const LabQueuePage = () => {
       } else {
         const res = await labApi.getPagedQueue(activeTab === 'VERIFIED' ? 'VERIFIED' : activeTab, 0, 100);
         if (res.success && res.data) {
-          setQueue(res.data.content);
+          setQueue(collapseQueueItems(res.data.content));
         }
       }
     } catch (error) {
@@ -76,12 +118,14 @@ const LabQueuePage = () => {
         void init();
     }, [activeTab, fetchQueue]); // Fetch when activeTab changes
 
-  const handleCollectSample = async (orderTestId: string) => {
+  const handleCollectSample = async (item: any) => {
     try {
       setLoading(true);
-      const res = await labApi.collectSample(orderTestId);
+      const res = item.isPackageGroup
+        ? await labApi.collectPackageSamples(item.orderId, item.packageId)
+        : await labApi.collectSample(item.orderTestId);
       if (res.success) {
-        triggerGlobalToast(`Sample Collected: ${res.data}`, 'success');
+        triggerGlobalToast(item.isPackageGroup ? 'Package samples collected' : `Sample Collected: ${res.data}`, 'success');
         void fetchQueue();
       }
     } catch (error: any) {
@@ -92,12 +136,14 @@ const LabQueuePage = () => {
     }
   };
 
-  const handleMarkProcessing = async (orderTestId: string) => {
+  const handleMarkProcessing = async (item: any) => {
     try {
       setLoading(true);
-      const res = await labApi.markProcessing(orderTestId);
+      const res = item.isPackageGroup
+        ? await labApi.markPackageProcessing(item.orderId, item.packageId)
+        : await labApi.markProcessing(item.orderTestId);
       if (res.success) {
-        triggerGlobalToast('Test marked as Processing', 'success');
+        triggerGlobalToast(item.isPackageGroup ? 'Package marked as Processing' : 'Test marked as Processing', 'success');
         void fetchQueue();
       }
     } catch (error: any) {
@@ -128,7 +174,9 @@ const LabQueuePage = () => {
 
     try {
         setLoading(true);
-        const res = await labApi.verifyResult(verifyData.orderTestId, remarks, verifyData.verificationStatus);
+        const res = verifyData.isPackageGroup
+          ? await labApi.verifyPackageResults(verifyData.orderId, verifyData.packageId, remarks, verifyData.verificationStatus)
+          : await labApi.verifyResult(verifyData.orderTestId, remarks, verifyData.verificationStatus);
         if (res.success) {
             triggerGlobalToast(`Result ${verifyData.verificationStatus.toLowerCase()} successfully`, 'success');
             setIsVerifyModalOpen(false);
@@ -140,6 +188,54 @@ const LabQueuePage = () => {
         triggerGlobalToast('Failed to verify result', 'error');
     } finally {
         setLoading(false);
+    }
+  };
+
+  const handleLockTest = async (orderTestId: string) => {
+    try {
+      const res = await labApi.lockOrderTest(orderTestId);
+      if (res.success) {
+        triggerGlobalToast('Test locked for reporting', 'success');
+        setLockedTestIds(prev => new Set([...prev, orderTestId]));
+      }
+    } catch (error: any) {
+      triggerGlobalToast(error.response?.data?.message || 'Failed to lock test', 'error');
+    }
+  };
+
+  const handleLockPackage = async (packageId: string, orderId: string) => {
+    try {
+      const res = await labApi.lockOrderPackage(packageId, orderId);
+      if (res.success) {
+        triggerGlobalToast('Package locked for reporting', 'success');
+        setLockedPackageIds(prev => new Set([...prev, `${orderId}_${packageId}`]));
+      }
+    } catch (error: any) {
+      triggerGlobalToast(error.response?.data?.message || 'Failed to lock package', 'error');
+    }
+  };
+
+  const handleUnlock = async (id: string, reason: string) => {
+    if (!unlockTargetItem) return;
+    try {
+      let res;
+      if (unlockTargetItem.packageId) {
+        res = await labApi.unlockOrderPackage(unlockTargetItem.packageId, unlockTargetItem.orderId, reason);
+        if (res.success) {
+          const key = `${unlockTargetItem.orderId}_${unlockTargetItem.packageId}`;
+          setLockedPackageIds(prev => { const next = new Set(prev); next.delete(key); return next; });
+        }
+      } else {
+        res = await labApi.unlockOrderTest(unlockTargetItem.orderTestId, reason);
+        if (res.success) setLockedTestIds(prev => { const next = new Set(prev); next.delete(unlockTargetItem.orderTestId); return next; });
+      }
+      if (res.success) {
+        triggerGlobalToast('Unlocked successfully', 'success');
+        setIsUnlockModalOpen(false);
+        setUnlockTargetItem(null);
+      }
+    } catch (error: any) {
+      triggerGlobalToast(error.response?.data?.message || 'Failed to unlock', 'error');
     }
   };
 
@@ -174,9 +270,17 @@ const LabQueuePage = () => {
               {activeTab === 'RECOMMENDED' ? `${item.itemCount} Tests Recommended` : item.testName}
             </p>
             {!activeTab.includes('RECOMMENDED') && item.category && (
-              <Badge variant={categoryConfig[item.category]?.variant || 'slate'} size="sm" className="mt-1">
-                {categoryConfig[item.category]?.label || item.category}
-              </Badge>
+              <div className="flex items-center gap-1 mt-1 flex-wrap">
+                <Badge variant={categoryConfig[item.category]?.variant || 'slate'} size="sm">
+                  {categoryConfig[item.category]?.label || item.category}
+                </Badge>
+                {item.packageId && (
+                  <Badge variant="purple" size="sm">Package Test</Badge>
+                )}
+                {item.isPackageGroup && (
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{item.childTests?.length || item.packageChildCount || 0} tests</span>
+                )}
+              </div>
             )}
           </div>
       )
@@ -218,8 +322,8 @@ const LabQueuePage = () => {
           return (
             <div className="flex justify-end gap-2">
               {item.category === 'LAB' ? (
-                <Button size="sm" onClick={() => handleCollectSample(item.orderTestId)}>
-                  Collect Sample
+                <Button size="sm" onClick={() => handleCollectSample(item)}>
+                  {item.isPackageGroup ? 'Collect Package' : 'Collect Sample'}
                 </Button>
               ) : (
                 <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
@@ -232,8 +336,8 @@ const LabQueuePage = () => {
         
         if (item.status === 'SAMPLE_COLLECTED') {
           return (
-            <Button size="sm" onClick={() => handleMarkProcessing(item.orderTestId)}>
-              Mark Processing
+            <Button size="sm" onClick={() => handleMarkProcessing(item)}>
+              {item.isPackageGroup ? 'Process Package' : 'Mark Processing'}
             </Button>
           );
         }
@@ -249,7 +353,7 @@ const LabQueuePage = () => {
         if (item.status === 'RESULT_ENTERED') {
           return (
             <div className="flex justify-end gap-2">
-                <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item.orderTestId, 'VERIFIED')}>
+                <Button size="sm" className="bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-600 hover:text-white" onClick={() => handleVerify(item, 'VERIFIED')}>
                     Verify
                 </Button>
                 <Button size="sm" variant="secondary" onClick={() => handleEnterResult(item)}>
@@ -260,9 +364,36 @@ const LabQueuePage = () => {
         }
         
         if (item.status === 'VERIFIED') {
-            return (
-              <Badge variant="emerald">Verified</Badge>
-            );
+          const isPackage = !!item.packageId;
+          const isLocked = isPackage
+            ? lockedPackageIds.has(`${item.orderId}_${item.packageId}`)
+            : lockedTestIds.has(item.orderTestId);
+
+          return (
+            <div className="flex justify-end items-center gap-2">
+              <Badge variant="emerald" size="sm">Verified</Badge>
+              {isLocked ? (
+                <button
+                  onClick={() => { setUnlockTargetItem(item); setIsUnlockModalOpen(true); }}
+                  className="flex items-center gap-1 text-[10px] font-black text-red-500 hover:text-red-700 border border-red-200 hover:border-red-400 px-2 py-1 rounded-lg transition-all"
+                >
+                  <span className="material-symbols-outlined text-[12px]">lock_open</span>
+                  Unlock
+                </button>
+              ) : (
+                <button
+                  onClick={() => isPackage
+                    ? handleLockPackage(item.packageId, item.orderId)
+                    : handleLockTest(item.orderTestId)
+                  }
+                  className="flex items-center gap-1 text-[10px] font-black text-slate-500 hover:text-slate-700 border border-slate-200 hover:border-slate-400 px-2 py-1 rounded-lg transition-all"
+                >
+                  <span className="material-symbols-outlined text-[12px]">lock</span>
+                  Lock
+                </button>
+              )}
+            </div>
+          );
         }
         return null;
       }
@@ -340,7 +471,7 @@ const LabQueuePage = () => {
         </div>
 
         {isResultModalOpen && selectedOrderTest && (
-            <LabResultEntryModal 
+            <LabResultEntryModal
               isOpen={true}
               onClose={() => {
                 setIsResultModalOpen(false);
@@ -348,8 +479,10 @@ const LabQueuePage = () => {
                 fetchQueue();
               }}
               orderTestId={selectedOrderTest.orderTestId}
+              orderId={selectedOrderTest.orderId}
               testName={selectedOrderTest.testName}
               resultEntryType={selectedOrderTest.resultEntryType}
+              packageId={selectedOrderTest.packageId}
             />
         )}
 
@@ -376,6 +509,16 @@ const LabQueuePage = () => {
                 onConfirm={handleConfirmVerify}
             />
         )}
+
+        {isUnlockModalOpen && unlockTargetItem && (
+            <LabPackageUnlockModal
+                isOpen={true}
+                testName={unlockTargetItem.testName}
+                orderPackageId={unlockTargetItem.packageId || unlockTargetItem.orderTestId}
+                onClose={() => { setIsUnlockModalOpen(false); setUnlockTargetItem(null); }}
+                onConfirm={handleUnlock}
+            />
+        )}
       </PageSurface>
     </MainLayout>
   );
@@ -386,19 +529,20 @@ const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: bo
     const [remarks, setRemarks] = useState('');
     const [loading, setLoading] = useState(false);
     const [parameters, setParameters] = useState<any[]>([]);
+    const [packageBundle, setPackageBundle] = useState<any | null>(null);
     const [findings, setFindings] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchResults = async () => {
             setLoading(true);
             try {
-                if (item.resultEntryType?.toUpperCase() === 'PARAMETER') {
+                if (item.isPackageGroup && item.orderId && item.packageId) {
+                    const res = await labApi.getPackageResultBundle(item.orderId, item.packageId);
+                    if (res.success) setPackageBundle(res.data || null);
+                } else if (item.resultEntryType?.toUpperCase() === 'PARAMETER') {
                     const res = await labApi.getParametersByOrderTest(item.orderTestId);
                     if (res.success) setParameters(res.data || []);
                 } else {
-                    // For narrative, we might need an API to get narrative results.
-                    // Assuming for now findings might be in item or fetched differently.
-                    // If your API doesn't provide narrative result here, we can add it.
                     setFindings(item.findings || 'Findings already recorded.');
                 }
             } catch (error) {
@@ -421,6 +565,31 @@ const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: bo
                     
                     {loading ? (
                         <div className="py-4 text-center italic text-slate-400 text-xs">Loading data...</div>
+                    ) : item.isPackageGroup ? (
+                        <div className="space-y-4">
+                            {(packageBundle?.tests || []).map((test: any) => (
+                                <div key={test.orderTestId} className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <p className="text-sm font-black text-slate-800">{test.testName}</p>
+                                        <span className="text-[9px] font-black uppercase text-slate-400">{test.status}</span>
+                                    </div>
+                                    {test.resultEntryType?.toUpperCase() === 'PARAMETER' ? (
+                                        <div className="space-y-2">
+                                            {(test.parameters || []).map((param: any) => (
+                                                <div key={param.id} className="flex justify-between items-center text-sm border-b border-slate-100 last:border-0 pb-2 last:pb-0">
+                                                    <span className="font-bold text-slate-600">{param.parameterName}</span>
+                                                    <span className={`font-black ${param.abnormal ? 'text-red-600' : 'text-slate-900'}`}>
+                                                        {param.resultValue} {param.unit}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm font-medium text-slate-700 whitespace-pre-wrap">{test.findings || 'Findings recorded.'}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     ) : item.resultEntryType?.toUpperCase() === 'PARAMETER' ? (
                         <div className="space-y-3">
                             {parameters.length > 0 ? parameters.map((param, idx) => (
@@ -469,6 +638,60 @@ const LabVerificationModal = ({ isOpen, onClose, item, onConfirm }: { isOpen: bo
     );
 };
 
+// --- Lab Package Unlock Modal ---
+const LabPackageUnlockModal = ({
+    isOpen, testName, orderPackageId, onClose, onConfirm
+}: { isOpen: boolean; testName: string; orderPackageId: string; onClose: () => void; onConfirm: (id: string, reason: string) => void }) => {
+    const [reason, setReason] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleSubmit = async () => {
+        if (!reason.trim()) { triggerGlobalToast('Please provide a reason for unlocking', 'error'); return; }
+        setSubmitting(true);
+        await onConfirm(orderPackageId, reason);
+        setSubmitting(false);
+    };
+
+    return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Unlock Package for Editing" size="md">
+            <div className="p-6 space-y-5">
+                <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                    <span className="material-symbols-outlined text-amber-500 mt-0.5">warning</span>
+                    <div>
+                        <p className="text-sm font-black text-amber-800">This action requires authorisation</p>
+                        <p className="text-xs text-amber-700 font-medium mt-0.5">
+                            Unlocking <strong>{testName}</strong>'s package will allow result modifications. All unlock actions are audited.
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-[10px] font-black uppercase text-slate-500 mb-2 tracking-widest">
+                        Reason for Unlock <span className="text-red-400">*</span>
+                    </label>
+                    <textarea
+                        rows={3}
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="e.g. Result entry error — wrong value entered for Hb parameter"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium outline-none focus:bg-white focus:border-primary transition-all resize-none"
+                    />
+                </div>
+                <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                    <Button variant="secondary" onClick={onClose}>Cancel</Button>
+                    <Button
+                        className="bg-amber-600 hover:bg-amber-700"
+                        onClick={handleSubmit}
+                        isLoading={submitting}
+                        disabled={!reason.trim()}
+                    >
+                        Confirm Unlock
+                    </Button>
+                </div>
+            </div>
+        </Modal>
+    );
+};
+
 // --- Lab Billing Modal ---
 import { Modal } from '@/components/ui/Modal';
 import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
@@ -476,10 +699,13 @@ import { pharmacyApi } from '@/modules/pharmacy/api/pharmacyApi';
 const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolean, onClose: () => void, recommendationId: string }) => {
     const [prescription, setPrescription] = useState<any>(null);
     const [allTests, setAllTests] = useState<any[]>([]);
+    const [allPackages, setAllPackages] = useState<any[]>([]);
     const [allPrices, setAllPrices] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedTests, setSelectedTests] = useState<string[]>([]);
+    const [selectedPackages, setSelectedPackages] = useState<string[]>([]);
     const [extraTests, setExtraTests] = useState<any[]>([]);
+    const [extraPackages, setExtraPackages] = useState<any[]>([]);
     const [testSearch, setTestSearch] = useState('');
     const [showSearchResults, setShowSearchResults] = useState(false);
     
@@ -487,26 +713,32 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
     const [amountPaid, setAmountPaid] = useState<string>('');
     const [referenceNumber, setReferenceNumber] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [duplicateAlert, setDuplicateAlert] = useState<{ testName: string; packageName: string } | null>(null);
 
     useEffect(() => {
         const load = async () => {
             try {
                 setLoading(true);
-                const [presRes, testsRes, pricesRes] = await Promise.all([
+                const [presRes, testsRes, pricesRes, pkgRes] = await Promise.all([
                     pharmacyApi.getPrescriptionById(recommendationId),
                     labApi.getTests(),
-                    labApi.getAllPricing()
+                    labApi.getAllPricing(),
+                    labApi.getAdminPackages(),
                 ]);
 
                 if (presRes.success && presRes.data) {
                     setPrescription(presRes.data);
-                    const pendingTests = presRes.data.labItems?.filter((item: any) => item.status === 'PENDING' || !item.status)
-                        .map((item: any) => item.testId) || [];
+                    const pendingTests = presRes.data.labItems?.filter((item: any) => (!item.packageId) && (item.status === 'PENDING' || !item.status))
+                        .map((item: any) => item.testId).filter(Boolean) || [];
+                    const pendingPackages = presRes.data.labItems?.filter((item: any) => item.packageId && (item.status === 'PENDING' || !item.status))
+                        .map((item: any) => item.packageId).filter(Boolean) || [];
                     setSelectedTests(pendingTests);
+                    setSelectedPackages(pendingPackages);
                 }
 
                 if (testsRes.success && testsRes.data) setAllTests(testsRes.data);
                 if (pricesRes.success && pricesRes.data) setAllPrices(pricesRes.data);
+                if (pkgRes.success && pkgRes.data) setAllPackages(pkgRes.data.filter((p: any) => p.enabled));
             } catch (error) {
                 console.error(error);
                 triggerGlobalToast('Failed to load billing data', 'error');
@@ -521,23 +753,77 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
         return allPrices.find(p => p.testId === testId)?.standardPrice || 0;
     };
 
-    const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0);
+    const getPackagePrice = (packageId: string) => {
+        const pkg = allPackages.find((p: any) => p.packageId === packageId);
+        return pkg?.standardPrice ? Number(pkg.standardPrice) : 0;
+    };
 
-    const filteredTests = allTests.filter(t => 
-        t.testName.toLowerCase().includes(testSearch.toLowerCase()) && 
+    const totalAmount = selectedTests.reduce((sum, id) => sum + getPrice(id), 0)
+        + selectedPackages.reduce((sum, id) => sum + getPackagePrice(id), 0);
+
+    const coveredBySelectedPackages = new Set<string>(
+        allPackages
+            .filter((pkg: any) => selectedPackages.includes(pkg.packageId))
+            .flatMap((pkg: any) => pkg.testIds || [])
+    );
+
+    const filteredTests = allTests.filter(t =>
+        t.testName.toLowerCase().includes(testSearch.toLowerCase()) &&
         !selectedTests.includes(t.id)
-    ).slice(0, 5);
+    ).slice(0, 8);
 
     const handleAddExtraTest = (test: any) => {
+        const coveringPkg = allPackages.find(
+            (pkg: any) => selectedPackages.includes(pkg.packageId) && (pkg.testIds || []).includes(test.id)
+        );
+        if (coveringPkg) {
+            setShowSearchResults(false);
+            setTestSearch('');
+            setDuplicateAlert({ testName: test.testName, packageName: coveringPkg.packageName });
+            return;
+        }
         setSelectedTests([...selectedTests, test.id]);
         setExtraTests([...extraTests, test]);
         setTestSearch('');
         setShowSearchResults(false);
     };
 
+    const handleSelectPackage = (pkg: any, checked: boolean, isExtra = false) => {
+        if (checked) {
+            const packageTestIds: string[] = pkg.testIds || [];
+            const covered = selectedTests.filter(testId => packageTestIds.includes(testId));
+            if (covered.length > 0) {
+                const names = covered
+                    .map(testId => {
+                        const t = allTests.find((t: any) => t.id === testId);
+                        return t ? `"${t.testName}"` : null;
+                    })
+                    .filter(Boolean)
+                    .join(', ');
+                triggerGlobalToast(`${names} removed — already included in "${pkg.packageName}".`, 'info');
+                setSelectedTests(prev => prev.filter(id => !packageTestIds.includes(id)));
+                setExtraTests(prev => prev.filter((t: any) => !packageTestIds.includes(t.id)));
+            }
+            setSelectedPackages(prev => [...prev, pkg.packageId]);
+            if (isExtra) setExtraPackages(prev => [...prev, pkg]);
+        } else {
+            setSelectedPackages(prev => prev.filter(id => id !== pkg.packageId));
+            setExtraPackages(prev => prev.filter((p: any) => p.packageId !== pkg.packageId));
+        }
+    };
+
     const handleConfirmOrder = async () => {
-        if (selectedTests.length === 0) {
-            triggerGlobalToast('Please select at least one test', 'error');
+        if (selectedTests.length === 0 && selectedPackages.length === 0) {
+            triggerGlobalToast('Please select at least one test or package', 'error');
+            return;
+        }
+
+        const duplicates = selectedTests.filter(testId => coveredBySelectedPackages.has(testId));
+        if (duplicates.length > 0) {
+            const names = duplicates
+                .map(testId => allTests.find((t: any) => t.id === testId)?.testName || testId)
+                .join(', ');
+            triggerGlobalToast(`Duplicate detected: ${names} is already included in a selected package. Remove the individual test before proceeding.`, 'error');
             return;
         }
 
@@ -546,6 +832,7 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
             const res = await labApi.createOrderFromRecommendation({
                 prescriptionId: recommendationId,
                 testIds: selectedTests,
+                packageIds: selectedPackages.length > 0 ? selectedPackages : undefined,
                 paymentMode,
                 amountPaid: Number.parseFloat(amountPaid) || 0,
                 referenceNumber: referenceNumber || undefined
@@ -587,16 +874,27 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                         
                         <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                             {/* Recommended Tests */}
-                            {prescription?.labItems?.filter((item: any) => item.status === 'PENDING' || !item.status).map((test: any) => (
-                                <div key={test.testId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedTests.includes(test.testId) ? 'bg-orange-50/50 border-orange-200' : 'bg-white border-slate-100'}`}>
+                            {prescription?.labItems?.filter((item: any) => (!item.packageId) && (item.status === 'PENDING' || !item.status)).map((test: any) => (
+                                <div key={test.testId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${coveredBySelectedPackages.has(test.testId) ? 'opacity-50 bg-slate-50 border-slate-100' : selectedTests.includes(test.testId) ? 'bg-orange-50/50 border-orange-200' : 'bg-white border-slate-100'}`}>
                                     <input
                                         type="checkbox"
-                                        checked={selectedTests.includes(test.testId)}
+                                        checked={selectedTests.includes(test.testId) && !coveredBySelectedPackages.has(test.testId)}
+                                        disabled={coveredBySelectedPackages.has(test.testId)}
                                         onChange={(e) => {
-                                            if (e.target.checked) setSelectedTests([...selectedTests, test.testId]);
-                                            else setSelectedTests(selectedTests.filter(id => id !== test.testId));
+                                            if (e.target.checked) {
+                                                const coveringPkg = allPackages.find(
+                                                    (pkg: any) => selectedPackages.includes(pkg.packageId) && (pkg.testIds || []).includes(test.testId)
+                                                );
+                                                if (coveringPkg) {
+                                                    triggerGlobalToast(`"${test.testName}" is already included in "${coveringPkg.packageName}".`, 'error');
+                                                    return;
+                                                }
+                                                setSelectedTests([...selectedTests, test.testId]);
+                                            } else {
+                                                setSelectedTests(selectedTests.filter(id => id !== test.testId));
+                                            }
                                         }}
-                                        className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500"
+                                        className="w-4 h-4 text-orange-600 rounded border-slate-300 focus:ring-orange-500 disabled:cursor-not-allowed"
                                     />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
@@ -610,10 +908,33 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                 </div>
                             ))}
 
+                            {prescription?.labItems?.filter((item: any) => item.packageId && (item.status === 'PENDING' || !item.status)).map((pkgItem: any) => (
+                                <div key={pkgItem.packageId} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${selectedPackages.includes(pkgItem.packageId) ? 'bg-indigo-50/50 border-indigo-200' : 'bg-white border-slate-100'}`}>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedPackages.includes(pkgItem.packageId)}
+                                        onChange={(e) => {
+                                            const pkgObj = allPackages.find((p: any) => p.packageId === pkgItem.packageId) || pkgItem;
+                                            handleSelectPackage(pkgObj, e.target.checked);
+                                        }}
+                                        className="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-sm font-bold text-slate-800 truncate">{pkgItem.packageName}</p>
+                                            <span className="text-xs font-black text-slate-700 ml-2">₹{getPackagePrice(pkgItem.packageId)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="purple" size="sm" className="opacity-70">Recommended Package</Badge>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+
                             {/* Extra Added Tests */}
                             {extraTests.map((test: any) => (
                                 <div key={test.id} className="flex items-center gap-3 p-3 bg-emerald-50/30 border border-emerald-100 rounded-xl">
-                                    <button 
+                                    <button
                                         onClick={() => {
                                             setSelectedTests(selectedTests.filter(id => id !== test.id));
                                             setExtraTests(extraTests.filter(t => t.id !== test.id));
@@ -631,12 +952,55 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                     </div>
                                 </div>
                             ))}
+
+                            {/* Extra Added Packages */}
+                            {extraPackages.map((pkg: any) => (
+                                <div key={pkg.packageId} className="flex items-center gap-3 p-3 bg-indigo-50/30 border border-indigo-100 rounded-xl">
+                                    <button
+                                        onClick={() => handleSelectPackage(pkg, false)}
+                                        className="text-indigo-400 hover:text-red-500 transition-colors"
+                                    >
+                                        <span className="material-symbols-outlined text-sm">remove_circle</span>
+                                    </button>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex justify-between items-start">
+                                            <p className="text-sm font-bold text-slate-800 truncate">{pkg.packageName}</p>
+                                            <span className="text-xs font-black text-indigo-700 ml-2">₹{getPackagePrice(pkg.packageId)}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="purple" size="sm" className="opacity-70">Extra Package</Badge>
+                                            <span className="text-[10px] text-slate-400 font-bold">{pkg.testIds?.length || 0} tests</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
 
-                    {/* Add More Tests Search */}
+                    {/* Duplicate alert inline popup */}
+                    {duplicateAlert && (
+                        <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-300 rounded-xl">
+                            <span className="material-symbols-outlined text-amber-500 text-lg mt-0.5 shrink-0">warning</span>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-black text-amber-800">Already included in package</p>
+                                <p className="text-[11px] text-amber-700 font-medium mt-0.5">
+                                    <span className="font-black">"{duplicateAlert.testName}"</span> is already part of the{' '}
+                                    <span className="font-black">"{duplicateAlert.packageName}"</span> package.
+                                    It cannot be billed separately.
+                                </p>
+                            </div>
+                            <button
+                                onClick={() => setDuplicateAlert(null)}
+                                className="text-amber-400 hover:text-amber-600 shrink-0"
+                            >
+                                <span className="material-symbols-outlined text-base">close</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Add More Tests / Packages Search */}
                     <div className="relative">
-                        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-wider">Add Additional Tests</label>
+                        <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-wider">Add Additional Tests or Packages</label>
                         <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-slate-400 text-sm">search</span>
                             <input
@@ -645,34 +1009,82 @@ const LabBillingModal = ({ isOpen, onClose, recommendationId }: { isOpen: boolea
                                 onChange={(e) => {
                                     setTestSearch(e.target.value);
                                     setShowSearchResults(true);
+                                    setDuplicateAlert(null);
                                 }}
                                 onFocus={() => setShowSearchResults(true)}
-                                placeholder="Search by test name..."
+                                placeholder="Search test or package name..."
                                 className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:bg-white focus:border-primary transition-all"
                             />
                         </div>
 
                         {showSearchResults && testSearch && (
                             <div className="absolute z-10 bottom-full mb-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-2">
-                                {filteredTests.length > 0 ? (
-                                    filteredTests.map(test => (
-                                        <button
-                                            key={test.id}
-                                            onClick={() => handleAddExtraTest(test)}
-                                            className="w-full px-4 py-3 text-left hover:bg-slate-50 border-b border-slate-50 last:border-0 flex justify-between items-center group"
-                                        >
-                                            <div>
-                                                <p className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">{test.testName}</p>
-                                                <p className="text-[10px] text-slate-400 font-bold uppercase">{test.testCode}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-xs font-black text-slate-800">₹{getPrice(test.id)}</p>
-                                                <span className="text-[10px] font-bold text-emerald-600">+ Add</span>
-                                            </div>
-                                        </button>
-                                    ))
-                                ) : (
-                                    <div className="p-4 text-center text-xs text-slate-500 font-bold">No tests found</div>
+                                {/* Tests */}
+                                {filteredTests.length > 0 && (
+                                    <>
+                                        <p className="px-4 pt-2 pb-1 text-[9px] font-black uppercase text-slate-400 tracking-widest bg-slate-50/80">Tests</p>
+                                        {filteredTests.map((test: any) => {
+                                            const isCovered = coveredBySelectedPackages.has(test.id);
+                                            const coveringPkg = isCovered
+                                                ? allPackages.find((pkg: any) => selectedPackages.includes(pkg.packageId) && (pkg.testIds || []).includes(test.id))
+                                                : null;
+                                            return (
+                                                <button
+                                                    key={test.id}
+                                                    onClick={() => handleAddExtraTest(test)}
+                                                    className={`w-full px-4 py-3 text-left border-b border-slate-50 last:border-0 flex justify-between items-center group transition-colors ${isCovered ? 'bg-amber-50/60 hover:bg-amber-100/80' : 'hover:bg-slate-50'}`}
+                                                >
+                                                    <div className="min-w-0">
+                                                        <p className={`text-sm font-bold transition-colors truncate ${isCovered ? 'text-amber-700' : 'text-slate-700 group-hover:text-primary'}`}>{test.testName}</p>
+                                                        {isCovered ? (
+                                                            <p className="text-[10px] font-black text-amber-600 flex items-center gap-1">
+                                                                <span className="material-symbols-outlined text-[11px]">warning</span>
+                                                                Inside "{coveringPkg?.packageName}"
+                                                            </p>
+                                                        ) : (
+                                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{test.testCode}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right shrink-0 ml-2">
+                                                        <p className="text-xs font-black text-slate-800">₹{getPrice(test.id)}</p>
+                                                        {isCovered ? (
+                                                            <span className="text-[10px] font-bold text-amber-500">Duplicate</span>
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold text-emerald-600">+ Add</span>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            );
+                                        })}
+                                    </>
+                                )}
+
+                                {/* Packages from search */}
+                                {allPackages.filter((pkg: any) =>
+                                    pkg.packageName.toLowerCase().includes(testSearch.toLowerCase()) &&
+                                    !selectedPackages.includes(pkg.packageId)
+                                ).slice(0, 4).map((pkg: any) => (
+                                    <button
+                                        key={pkg.packageId}
+                                        onClick={() => { handleSelectPackage(pkg, true, true); setTestSearch(''); setShowSearchResults(false); }}
+                                        className="w-full px-4 py-3 text-left border-b border-slate-50 last:border-0 flex justify-between items-center group hover:bg-indigo-50/60 transition-colors"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold text-slate-700 group-hover:text-indigo-700 transition-colors truncate">{pkg.packageName}</p>
+                                            <p className="text-[10px] text-slate-400 font-bold uppercase">{pkg.packageCode} · {pkg.testIds?.length || 0} tests</p>
+                                        </div>
+                                        <div className="text-right shrink-0 ml-2">
+                                            <p className="text-xs font-black text-indigo-700">{pkg.standardPrice ? `₹${pkg.standardPrice}` : '—'}</p>
+                                            <span className="text-[10px] font-bold text-indigo-500">+ Package</span>
+                                        </div>
+                                    </button>
+                                ))}
+
+                                {filteredTests.length === 0 && allPackages.filter((pkg: any) =>
+                                    pkg.packageName.toLowerCase().includes(testSearch.toLowerCase()) &&
+                                    !selectedPackages.includes(pkg.packageId)
+                                ).length === 0 && (
+                                    <div className="p-4 text-center text-xs text-slate-500 font-bold">No tests or packages found</div>
                                 )}
                             </div>
                         )}

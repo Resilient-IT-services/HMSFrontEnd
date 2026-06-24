@@ -1,6 +1,23 @@
 import React from 'react';
 import { cn } from '@/lib/cn';
 
+const sanitizeClassName = (className?: string) => {
+  if (!className) return '';
+  return className
+    .split(/\s+/)
+    .filter(c => {
+      const trimmed = c.trim();
+      return (
+        trimmed !== 'text-left' &&
+        trimmed !== 'text-right' &&
+        trimmed !== 'justify-start' &&
+        trimmed !== 'justify-end' &&
+        trimmed !== 'items-start'
+      );
+    })
+    .join(' ');
+};
+
 export interface Column<T> {
   header: string;
   /** Simple key for text-based data */
@@ -245,11 +262,11 @@ export const Table = <T,>({
 
       {/* Desktop Table View (shown at lg breakpoint and above) */}
       <div className="hidden lg:block w-full overflow-visible">
-        <table className="w-full table-fixed border-collapse">
+        <table className="w-full border border-solid border-slate-300 border-collapse text-sm">
           <thead className="z-20">
             {/* Primary Header Row (Titles & Sorting) */}
             <tr className={cn(
-              "bg-white border-b border-slate-100",
+              "bg-white",
               hideHeaderOnMobile ? "hidden lg:table-row" : "table-row"
             )}>
               {columns.map((column, index) => {
@@ -259,23 +276,19 @@ export const Table = <T,>({
                 return (
                   <th
                     key={index}
-                    className={`
-                      px-4 py-3
-                      text-sm font-semibold text-slate-600
-                      text-center
-                      align-middle
-                      whitespace-nowrap
-                      ${column.sortable ? 'cursor-pointer hover:bg-slate-50 transition-colors' : ''}
-                      ${column.headerClassName || ''}
-                    `}
+                    className={cn(
+                      "relative px-4 py-3 text-center align-middle font-semibold text-slate-600 bg-slate-50 border border-solid border-slate-300 group/header",
+                      column.sortable && "cursor-pointer hover:bg-slate-50 transition-colors",
+                      sanitizeClassName(column.headerClassName)
+                    )}
                     style={{ width: column.width }}
                     onClick={() => handleSort(column)}
                   >
-                    <div className="flex items-center justify-center gap-2">
+                    <div className="flex items-center justify-center w-full">
                       {column.renderHeader ? column.renderHeader(column) : column.header}
                       {column.sortable && (
                         <span className={cn(
-                          "material-symbols-outlined text-[14px] transition-all",
+                          "absolute right-2 top-1/2 -translate-y-1/2 material-symbols-outlined text-[14px] transition-all",
                           isSorted ? "text-orange-600" : "text-slate-300 opacity-0 group-hover/header:opacity-100"
                         )}>
                           {isSorted 
@@ -292,11 +305,11 @@ export const Table = <T,>({
             {/* Filter Row */}
             {columns.some(c => c.filterable || c.renderFilter) && (
               <tr className={cn(
-                "bg-slate-50/30 border-b border-slate-100",
+                "bg-slate-50/30",
                 hideHeaderOnMobile ? "hidden lg:table-row" : "table-row"
               )}>
                 {columns.map((column, index) => (
-                  <th key={index} className="px-2 py-2 bg-white/50">
+                  <th key={index} className="px-2 py-2 bg-white/50 border border-solid border-slate-300">
                     {column.filterable && column.filterType !== 'select' && !column.renderFilter && column.key && (
                       <input
                         type="text"
@@ -328,14 +341,14 @@ export const Table = <T,>({
               </tr>
             )}
           </thead>
-          <tbody className="divide-y divide-slate-100 bg-white">
+          <tbody className="bg-white">
             {isLoading ? (
               <tr>
-                <td colSpan={columns.length}>{renderLoading()}</td>
+                <td colSpan={columns.length} className="border border-solid border-slate-300">{renderLoading()}</td>
               </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={columns.length}>{renderEmpty()}</td>
+                <td colSpan={columns.length} className="border border-solid border-slate-300">{renderEmpty()}</td>
               </tr>
             ) : (
               rowData.map((item, rowIndex) => (
@@ -343,23 +356,32 @@ export const Table = <T,>({
                   key={rowIndex}
                   onClick={item.onClick}
                   onDoubleClick={item.onDoubleClick}
-                  className={cn("hover:bg-slate-50/80 group", item.className)}
+                  className={cn("hover:bg-slate-50 transition-colors", item.className)}
                 >
-                  {columns.map((column, colIndex) => (
-                    <td
-                      key={colIndex}
-                      className={`
-                        px-4 py-3
-                        text-sm text-slate-800
-                        text-center
-                        align-middle
-                        ${column.className || ''}
-                      `}
-                      style={{ width: column.width }}
-                    >
-                      {renderCellContent(item.row, column)}
-                    </td>
-                  ))}
+                  {columns.map((column, colIndex) => {
+                    const isActionColumn = column.header === "Actions";
+
+                    return (
+                      <td
+                        key={colIndex}
+                        className={cn(
+                          "px-4 py-3 text-center align-middle text-slate-800 border border-solid border-slate-300",
+                          sanitizeClassName(column.className)
+                        )}
+                        style={{ width: column.width }}
+                      >
+                        {isActionColumn ? (
+                          <div className="flex items-center justify-center gap-2 w-full">
+                            {renderCellContent(item.row, column)}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center w-full text-center">
+                            {renderCellContent(item.row, column)}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}

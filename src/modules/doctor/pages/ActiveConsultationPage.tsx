@@ -57,19 +57,27 @@ const LabTestSearchInput = ({
 
       setLoading(true);
       try {
-        const res = await labApi.getTests(); 
-        if (res.success && res.data) {
-          const filtered = res.data.filter(t => 
-            t.testName.toLowerCase().includes(trimmedSearch.toLowerCase()) || 
-            t.testCode.toLowerCase().includes(trimmedSearch.toLowerCase())
-          );
-          lastFetchedSearch.current = trimmedSearch;
-          setResults(filtered.slice(0, 10));
-        } else {
-          setResults([]);
-        }
+        const [testsRes, packagesRes] = await Promise.all([labApi.getTests(), labApi.getPackages()]);
+        const filteredTests = testsRes.success && testsRes.data
+          ? testsRes.data
+              .filter(t =>
+                t.testName.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
+                t.testCode.toLowerCase().includes(trimmedSearch.toLowerCase())
+              )
+              .map(t => ({ ...t, itemType: 'TEST', label: t.testName, meta: `${t.testCode} • ${t.departmentName}` }))
+          : [];
+        const filteredPackages = packagesRes.success && packagesRes.data
+          ? packagesRes.data
+              .filter(p =>
+                p.packageName.toLowerCase().includes(trimmedSearch.toLowerCase()) ||
+                p.packageCode.toLowerCase().includes(trimmedSearch.toLowerCase())
+              )
+              .map(p => ({ ...p, itemType: 'PACKAGE', label: p.packageName, meta: `${p.packageCode} • ${p.testIds?.length || 0} tests` }))
+          : [];
+        lastFetchedSearch.current = trimmedSearch;
+        setResults([...filteredTests, ...filteredPackages].slice(0, 10));
       } catch (error) {
-        console.error('Failed to fetch tests:', error);
+        console.error('Failed to fetch investigations:', error);
         setResults([]);
       } finally {
         setLoading(false);
@@ -87,7 +95,7 @@ const LabTestSearchInput = ({
         className={`w-full px-3 py-2 bg-white border rounded-lg text-sm font-bold outline-none transition-all text-slate-900 ${
           error ? 'border-red-500' : 'border-slate-200 focus:border-slate-400'
         }`}
-        placeholder="Search lab test..."
+        placeholder="Search lab test or package..."
         value={searchTerm}
         onChange={(e) => {
           setSearchTerm(e.target.value);
@@ -102,7 +110,7 @@ const LabTestSearchInput = ({
           {loading && <div className="p-3 text-xs text-slate-400 font-bold italic">Searching...</div>}
           {results.map((test) => (
             <button
-              key={test.id}
+              key={`${test.itemType}-${test.id}`}
               className="w-full text-left px-4 py-2.5 hover:bg-slate-50 border-b border-slate-50 last:border-0 transition-colors flex items-center justify-between group"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => {
@@ -111,9 +119,12 @@ const LabTestSearchInput = ({
               }}
             >
               <div className="flex flex-col min-w-0">
-                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{test.testName}</span>
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{test.testCode} • {test.departmentName}</span>
+                <span className="text-sm font-black text-slate-900 group-hover:text-orange-600 transition-colors truncate">{test.label}</span>
+                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider truncate">{test.meta}</span>
               </div>
+              <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${test.itemType === 'PACKAGE' ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'}`}>
+                {test.itemType}
+              </span>
             </button>
           ))}
         </div>
@@ -298,8 +309,10 @@ export const ActiveConsultationPage = () => {
               dosage: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
               duration: `${p.duration} ${p.durationUnit}`
             })) as any,
-            labItems: investigations.filter(i => i.testName).map(i => ({
+            labItems: investigations.filter(i => i.testName || i.packageName).map(i => ({
+              itemType: i.itemType,
               testName: i.testName,
+              packageName: i.packageName,
               notes: i.notes || ''
             })) as any
           }
@@ -390,8 +403,11 @@ export const ActiveConsultationPage = () => {
           if (res.data.prescription?.labItems) {
             setInvestigations(res.data.prescription.labItems.map((item, idx) => ({
               id: item.id || `existing-lab-${idx}`,
+              itemType: item.itemType || (item.packageId ? 'PACKAGE' : 'TEST'),
               testId: item.testId,
               testName: item.testName,
+              packageId: item.packageId,
+              packageName: item.packageName,
               notes: item.notes || ''
             })));
           } else {
@@ -426,7 +442,7 @@ export const ActiveConsultationPage = () => {
   };
 
   const addInvestigationRow = () => {
-    setInvestigations([...investigations, { id: Date.now().toString(), testId: '', testName: '', testCode: '', notes: '' }]);
+    setInvestigations([...investigations, { id: Date.now().toString(), itemType: 'TEST', testId: '', testName: '', packageId: '', packageName: '', testCode: '', notes: '' }]);
   };
 
   const removeInvestigationRow = (id: string) => {
@@ -441,12 +457,51 @@ export const ActiveConsultationPage = () => {
   };
 
   const onSelectInvestigation = (id: string, test: any) => {
-    setInvestigations(investigations.map(i => i.id === id ? {
-      ...i,
-      testId: test.id,
-      testName: test.testName,
-      testCode: test.testCode
-    } : i));
+    if (test.itemType === 'PACKAGE') {
+      const packageTestIds: string[] = test.testIds || [];
+      const superseded = investigations.filter(
+        inv => inv.id !== id && inv.itemType === 'TEST' && packageTestIds.includes(inv.testId)
+      );
+      if (superseded.length > 0) {
+        const names = superseded.map(inv => `"${inv.testName}"`).join(', ');
+        triggerGlobalToast(`${names} removed — already included in "${test.packageName}".`, 'info');
+      }
+      setInvestigations(prev =>
+        prev
+          .filter(inv => !(inv.id !== id && inv.itemType === 'TEST' && packageTestIds.includes(inv.testId)))
+          .map(inv => inv.id === id ? {
+            ...inv,
+            itemType: 'PACKAGE',
+            testId: '',
+            testName: '',
+            packageId: test.id,
+            packageName: test.packageName,
+            testCode: test.packageCode,
+            packageTestIds,
+          } : inv)
+      );
+    } else {
+      const coveringPackage = investigations.find(
+        inv => inv.id !== id && inv.itemType === 'PACKAGE' && (inv.packageTestIds || []).includes(test.id)
+      );
+      if (coveringPackage) {
+        triggerGlobalToast(
+          `"${test.testName}" is already included in "${coveringPackage.packageName}". Adding it separately would cause duplicate billing.`,
+          'error'
+        );
+        return;
+      }
+      setInvestigations(investigations.map(i => i.id === id ? {
+        ...i,
+        itemType: 'TEST',
+        testId: test.id,
+        testName: test.testName,
+        packageId: '',
+        packageName: '',
+        testCode: test.testCode,
+        packageTestIds: undefined,
+      } : i));
+    }
   };
 
   const updatePrescriptionRow = (id: string, field: string, value: any) => {
@@ -511,9 +566,12 @@ export const ActiveConsultationPage = () => {
               duration: `${p.duration} ${p.durationUnit} (Total: ${total} units)`
             };
           }),
-          labItems: investigations.filter(i => i.testName).map(i => ({
-            testId: i.testId && i.testId !== '' ? i.testId : null,
-            testName: i.testName,
+          labItems: investigations.filter(i => i.testName || i.packageName).map(i => ({
+            itemType: i.itemType,
+            testId: i.itemType === 'TEST' && i.testId && i.testId !== '' ? i.testId : null,
+            testName: i.itemType === 'TEST' ? i.testName : null,
+            packageId: i.itemType === 'PACKAGE' && i.packageId && i.packageId !== '' ? i.packageId : null,
+            packageName: i.itemType === 'PACKAGE' ? i.packageName : null,
             notes: i.notes || ''
           }))
         }
@@ -534,7 +592,7 @@ export const ActiveConsultationPage = () => {
 
   const handleComplete = async () => {
     const medicineItems = prescriptions.filter(p => p.medicine);
-    const investigationItems = investigations.filter(i => i.testName);
+    const investigationItems = investigations.filter(i => i.testName || i.packageName);
     const hasIncomplete = medicineItems.some(p => 
       (!p.freqM && !p.freqA && !p.freqN) || 
       (!p.duration || p.duration <= 0)
@@ -582,9 +640,12 @@ export const ActiveConsultationPage = () => {
               duration: `${p.duration} ${p.durationUnit} (Total: ${total} units)`
             };
           }),
-          labItems: investigations.filter(i => i.testName).map(i => ({
-            testId: i.testId && i.testId !== '' ? i.testId : null,
-            testName: i.testName,
+          labItems: investigations.filter(i => i.testName || i.packageName).map(i => ({
+            itemType: i.itemType,
+            testId: i.itemType === 'TEST' && i.testId && i.testId !== '' ? i.testId : null,
+            testName: i.itemType === 'TEST' ? i.testName : null,
+            packageId: i.itemType === 'PACKAGE' && i.packageId && i.packageId !== '' ? i.packageId : null,
+            packageName: i.itemType === 'PACKAGE' ? i.packageName : null,
             notes: i.notes || ''
           }))
         }
@@ -703,7 +764,7 @@ export const ActiveConsultationPage = () => {
                         <span className="material-symbols-outlined text-lg">biotech</span>
                         Investigations
                         <span className={`px-1.5 py-0.5 rounded-full text-[10px] ${activeTab === 'labs' ? 'bg-blue-100' : 'bg-slate-200'}`}>
-                          {investigations.filter(i => i.testName).length}
+                          {investigations.filter(i => i.testName || i.packageName).length}
                         </span>
                       </button>
                     </div>
@@ -713,7 +774,7 @@ export const ActiveConsultationPage = () => {
                       className={`text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2 px-5 py-2.5 rounded-xl shadow-lg transition-all active:scale-95 outline-none focus:ring-0 ${activeTab === 'meds' ? 'bg-orange-600 shadow-orange-600/20 hover:bg-orange-700' : 'bg-blue-600 shadow-blue-600/20 hover:bg-blue-700'}`}
                     >
                       <span className="material-symbols-outlined text-sm">add_circle</span>
-                      {activeTab === 'meds' ? 'Add Medicine' : 'Add Lab Test'}
+                      {activeTab === 'meds' ? 'Add Medicine' : 'Add Investigation'}
                     </button>
                   </div>
 
@@ -801,12 +862,18 @@ export const ActiveConsultationPage = () => {
                             <div key={i.id} className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 hover:border-blue-200 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50 transition-all group relative">
                               <div className="flex items-start gap-4">
                                 <div className="flex-1">
-                                  <LabTestSearchInput value={i.testName} onChange={() => {}} onSelect={(test) => onSelectInvestigation(i.id, test)} />
-                                  {i.testId && (
+                                  <LabTestSearchInput value={i.itemType === 'PACKAGE' ? (i.packageName || '') : (i.testName || '')} onChange={(val) => updateInvestigationRow(i.id, i.itemType === 'PACKAGE' ? 'packageName' : 'testName', val)} onSelect={(test) => onSelectInvestigation(i.id, test)} />
+                                  {(i.testId || i.packageId) && (
                                     <div className="mt-3">
+                                      <div className="mb-2 flex items-center gap-2">
+                                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${i.itemType === 'PACKAGE' ? 'bg-indigo-100 text-indigo-700' : 'bg-orange-100 text-orange-700'}`}>
+                                          {i.itemType}
+                                        </span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase">{i.testCode}</span>
+                                      </div>
                                       <textarea 
                                         className="w-full p-3 bg-white border border-slate-200 rounded-xl outline-none text-[11px] font-bold text-slate-600 resize-none h-20 focus:border-blue-300 transition-all shadow-sm"
-                                        placeholder="Add specific instructions for this test..."
+                                        placeholder="Add specific instructions for this test or package..."
                                         value={i.notes || ''}
                                         onChange={(e) => updateInvestigationRow(i.id, 'notes', e.target.value)}
                                       />
@@ -844,11 +911,12 @@ export const ActiveConsultationPage = () => {
             frequency: `${p.freqM || '0'}-${p.freqA || '0'}-${p.freqN || '0'}`,
             instructions: `${p.duration} ${p.durationUnit} (Total: ${calculateTotal(p)} units)`
           }))}
-          investigations={investigations.filter(i => i.testName).map(i => ({
+          investigations={investigations.filter(i => i.testName || i.packageName).map(i => ({
             id: i.id,
-            testName: i.testName,
+            testName: i.itemType === 'PACKAGE' ? i.packageName : i.testName,
             testCode: '',
-            notes: i.notes
+            notes: i.notes,
+            itemType: i.itemType
           }))}
           vitals={{
             heartRate: (vitals?.heartRate ?? appointment?.vitals?.heartRate)?.toString() || '--',
@@ -917,9 +985,10 @@ export const ActiveConsultationPage = () => {
           })) || []}
           investigations={detailedHistoryRecord.prescription?.labItems?.map((lab: any, idx: number) => ({
             id: lab.id || `hist-lab-${idx}`,
-            testName: lab.testName,
+            testName: lab.itemType === 'PACKAGE' ? lab.packageName : (lab.testName || lab.packageName),
             testCode: '',
-            notes: lab.notes
+            notes: lab.notes,
+            itemType: lab.itemType || (lab.packageId && !lab.testId ? 'PACKAGE' : 'TEST')
           })) || []}
           vitals={{
             heartRate: detailedHistoryRecord.vitals?.heartRate?.toString() ?? '--',

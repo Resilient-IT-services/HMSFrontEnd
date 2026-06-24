@@ -207,7 +207,7 @@ export const DoctorDashboard = () => {
   const columns: Column<AppointmentResponse>[] = [
     {
       header: 'Token',
-      className: 'break-words whitespace-normal',
+      className: 'break-words whitespace-normal text-center',
       render: (p) => (
           <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black font-mono ${
               p.status === 'CONSULTATION_STARTED' ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-700'
@@ -218,7 +218,7 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Patient',
-      className: 'break-words whitespace-normal max-w-[120px]',
+      className: 'break-words whitespace-normal max-w-[120px] text-center',
       render: (p) => (
           <div>
             <p className="font-semibold text-slate-800 text-xs">{p.patientName}</p>
@@ -228,7 +228,7 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Doctor',
-      className: 'break-words whitespace-normal',
+      className: 'break-words whitespace-normal text-center',
       render: (p) => (
           <div>
             <p className="text-slate-700 font-medium text-xs">Dr. {p.doctorName || 'N/A'}</p>
@@ -237,12 +237,12 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Notes / Complaints',
-      className: 'break-words whitespace-normal max-w-[150px]',
+      className: 'break-words whitespace-normal max-w-[150px] text-center',
       render: (p) => <span className="font-medium text-slate-600 text-xs inline-block">{p.notes || 'Routine Checkup'}</span>,
     },
     {
       header: 'Status',
-      className: 'break-words whitespace-normal max-w-[100px]',
+      className: 'break-words whitespace-normal max-w-[100px] text-center',
       render: (p) => (
           <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide ${
               p.status === 'CONSULTATION_STARTED' ? 'bg-blue-50 text-blue-600' :
@@ -254,7 +254,7 @@ export const DoctorDashboard = () => {
     },
     {
       header: 'Time',
-      className: 'break-words whitespace-normal',
+      className: 'break-words whitespace-normal text-center',
       render: (p) => <span className="text-slate-500 font-medium text-[10px]">{dayjs(p.appointmentTime).format('hh:mm A')}</span>
     },
     {
