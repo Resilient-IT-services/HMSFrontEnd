@@ -46,7 +46,31 @@ export const WardBedManagement = () => {
         : await ipdService.createWard(data);
 
       if (res.success) {
-        showToast(`Ward ${selectedWard ? 'updated' : 'created'} successfully`, 'success');
+        if (!selectedWard?.id && res.data?.id) {
+          const wardId = res.data.id;
+          const bedPromises = Array.from({ length: data.totalBeds }, (_, i) => {
+            const bedNumber = `B-${String(i + 1).padStart(2, '0')}`;
+            return ipdService.createBed({ wardId, bedNumber, status: 'AVAILABLE', active: true });
+          });
+          await Promise.all(bedPromises);
+          showToast(`Ward created with ${data.totalBeds} beds auto-generated`, 'success');
+        } else {
+          const wardId = selectedWard!.id!;
+          const existingRes = await ipdService.listWardBeds(wardId);
+          const existingCount = existingRes.success ? (existingRes.data?.length ?? 0) : 0;
+          const missingCount = data.totalBeds - existingCount;
+
+          if (missingCount > 0) {
+            const bedPromises = Array.from({ length: missingCount }, (_, i) => {
+              const bedNumber = `B-${String(existingCount + i + 1).padStart(2, '0')}`;
+              return ipdService.createBed({ wardId, bedNumber, status: 'AVAILABLE', active: true });
+            });
+            await Promise.all(bedPromises);
+            showToast(`Ward updated — ${missingCount} new beds added (B-${String(existingCount + 1).padStart(2, '0')} to B-${String(data.totalBeds).padStart(2, '0')})`, 'success');
+          } else {
+            showToast('Ward updated successfully', 'success');
+          }
+        }
         setIsWardModalOpen(false);
         fetchWards();
       }
