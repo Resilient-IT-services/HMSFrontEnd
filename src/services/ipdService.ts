@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 import { ApiResponse, PageResponse } from '@/types/api';
-import { WardDTO, BedDTO, AdmissionRequestDTO, AdmissionResponseDTO, AdmissionStatus, TransferBedRequest, BedTransferResponse } from '@/types/ipd';
+import { WardDTO, BedDTO, AdmissionRequestDTO, AdmissionResponseDTO, AdmissionStatus, TransferBedRequest, BedTransferResponse, ProgressNoteRequestDTO, ProgressNoteResponseDTO } from '@/types/ipd';
 
 export const ipdService = {
   // Ward APIs
@@ -80,6 +80,21 @@ export const ipdService = {
 
   async getBedTransfers(admissionId: string): Promise<ApiResponse<BedTransferResponse[]>> {
     const response = await apiClient.get<ApiResponse<BedTransferResponse[]>>(`/ipd/admissions/${admissionId}/transfers`);
+    return response.data;
+  },
+
+  async getMyPatients(): Promise<ApiResponse<AdmissionResponseDTO[]>> {
+    const response = await apiClient.get<ApiResponse<AdmissionResponseDTO[]>>('/ipd/doctor/my-patients');
+    return response.data;
+  },
+
+  async getProgressNotes(admissionId: string): Promise<ApiResponse<ProgressNoteResponseDTO[]>> {
+    const response = await apiClient.get<ApiResponse<ProgressNoteResponseDTO[]>>(`/ipd/admissions/${admissionId}/progress-notes`);
+    return response.data;
+  },
+
+  async createProgressNote(admissionId: string, request: ProgressNoteRequestDTO): Promise<ApiResponse<ProgressNoteResponseDTO>> {
+    const response = await apiClient.post<ApiResponse<ProgressNoteResponseDTO>>(`/ipd/admissions/${admissionId}/progress-notes`, request);
     return response.data;
   }
 };

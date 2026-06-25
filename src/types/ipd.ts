@@ -68,3 +68,19 @@ export interface BedTransferResponse {
   transferredByName?: string;
   transferredAt: string;
 }
+
+export interface ProgressNoteRequestDTO {
+  note: string;
+}
+
+export interface ProgressNoteResponseDTO {
+  id: string;
+  hospitalId: string;
+  admissionId: string;
+  doctorId: string;
+  doctorName: string;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

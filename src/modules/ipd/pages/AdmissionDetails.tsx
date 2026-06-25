@@ -14,31 +14,51 @@ import { InfoRow } from '@/components/ui/InfoRow';
 import { TransferBedModal } from '../components/TransferBedModal';
 import { useAdmissionDetails } from '../hooks/useAdmissionDetails';
 import dayjs from '@/lib/dayjs';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/state/store';
+import { AddProgressNoteModal } from '../components/AddProgressNoteModal';
 
 export const AdmissionDetails = () => {
   const { id } = useParams();
   const router = useRouter();
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  const { isSuperMode, activeRole, user } = useSelector((state: RootState) => state.auth);
 
   const {
     admission,
     transfers,
+    progressNotes,
     loading,
+    notesLoading,
     fetchDetails,
-    fetchTransfers
+    fetchTransfers,
+    fetchProgressNotes,
+    addProgressNote
   } = useAdmissionDetails(id as string);
+
+  const showProgressNotesSection = activeRole !== 'ADMIN' && activeRole !== 'SUPER_ADMIN' && !isSuperMode;
+  const isDoctor = activeRole === 'DOCTOR';
+  const showAddNoteButton = isDoctor && admission?.status === 'ADMITTED';
 
   const handleRefresh = async () => {
     setRefreshing(true);
     await fetchTransfers();
+    if (showProgressNotesSection) {
+      await fetchProgressNotes();
+    }
     setRefreshing(false);
   };
 
   useEffect(() => {
     fetchDetails();
     fetchTransfers();
-  }, [fetchDetails, fetchTransfers]);
+    if (showProgressNotesSection) {
+      fetchProgressNotes();
+    }
+  }, [fetchDetails, fetchTransfers, fetchProgressNotes, showProgressNotesSection]);
 
   if (loading) {
     return (
@@ -153,6 +173,72 @@ export const AdmissionDetails = () => {
               </Section>
             </div>
 
+            {showProgressNotesSection && (
+              <div className="md:col-span-2">
+                <div className="bg-white border border-slate-100 rounded-xl p-6 md:p-8 space-y-5 md:space-y-6 shadow-sm transition-all">
+                  {/* Header Row */}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-orange-50 text-orange-600">
+                        <span className="material-symbols-outlined text-xl md:text-2xl">clinical_notes</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-[13px] md:text-sm text-slate-800 uppercase tracking-wider">Progress Notes</h3>
+                        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tight mt-0.5">
+                          Daily progress notes recorded by the consulting doctor.
+                        </p>
+                      </div>
+                    </div>
+                    {showAddNoteButton && (
+                      <Button 
+                        variant="primary" 
+                        size="sm" 
+                        icon="add" 
+                        onClick={() => setIsNoteModalOpen(true)}
+                        className="bg-orange-600 hover:bg-orange-700 shadow-md whitespace-nowrap"
+                      >
+                        Add Progress Note
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Progress Notes Timeline */}
+                  {notesLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-600"></div>
+                    </div>
+                  ) : progressNotes.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-center">
+                      <span className="material-symbols-outlined text-6xl mb-4 text-slate-300">clinical_notes</span>
+                      <h3 className="text-lg font-medium text-slate-800">No Progress Notes</h3>
+                      <p className="text-sm text-slate-400 mt-1">No progress notes have been recorded for this admission yet.</p>
+                    </div>
+                  ) : (
+                    <div className="relative border-l-2 border-slate-100 ml-4 pl-6 space-y-6">
+                      {progressNotes.map((note) => (
+                        <div key={note.id} className="relative">
+                          {/* Timeline dot */}
+                          <div className="absolute -left-[31px] top-1 bg-orange-600 w-3.5 h-3.5 rounded-full border-2 border-white ring-4 ring-orange-50"></div>
+                          
+                          <div className="flex flex-col bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="text-xs font-bold text-slate-700">Dr. {note.doctorName}</span>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">
+                                {dayjs(note.createdAt).format('DD MMM YYYY - hh:mm A')}
+                              </span>
+                            </div>
+                            <p className="text-sm text-slate-600 whitespace-pre-line mt-1">
+                              {note.note}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="md:col-span-2">
               <div className="bg-white border border-slate-100 rounded-xl p-6 md:p-8 space-y-5 md:space-y-6 shadow-sm transition-all">
                 {/* Header Row */}
@@ -261,6 +347,14 @@ export const AdmissionDetails = () => {
             fetchTransfers();
           }}
           admission={admission}
+        />
+      )}
+
+      {admission && isNoteModalOpen && (
+        <AddProgressNoteModal
+          isOpen={isNoteModalOpen}
+          onClose={() => setIsNoteModalOpen(false)}
+          onSubmit={addProgressNote}
         />
       )}
     </MainLayout>
