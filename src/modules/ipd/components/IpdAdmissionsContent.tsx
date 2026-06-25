@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/state/store';
@@ -16,8 +16,15 @@ import { Pagination } from '@/components/ui/Pagination';
 import AdmitPatientModal from '@/modules/ipd/components/AdmitPatientModal';
 import Link from 'next/link';
 import { SearchInput } from '@/components/ui/SearchInput';
+import dayjs from '@/lib/dayjs';
 
-export const IpdAdmissionsContent = () => {
+export type IpdStatusFilter = 'ALL' | 'TODAY' | 'ADMITTED' | 'DISCHARGED';
+
+interface IpdAdmissionsContentProps {
+  statusFilter?: IpdStatusFilter;
+}
+
+export const IpdAdmissionsContent = ({ statusFilter = 'ALL' }: IpdAdmissionsContentProps) => {
   const router = useRouter();
   const { isSuperMode, activeRole } = useSelector((state: RootState) => state.auth);
   const { admissions, loading, fetchAdmissions, updateStatus } = useIpd();
@@ -27,17 +34,57 @@ export const IpdAdmissionsContent = () => {
   const isAdmin = isSuperMode || activeRole === 'ADMIN' || activeRole === 'SUPER_ADMIN';
 
   useEffect(() => {
-    fetchAdmissions();
+    fetchAdmissions(0, 200);
   }, [fetchAdmissions]);
 
   const getStatusVariant = (status: AdmissionStatus) => {
     switch (status) {
-      case 'ADMITTED': return 'orange';
-      case 'DISCHARGED': return 'emerald';
-      case 'CANCELLED': return 'red';
-      default: return 'slate';
+      case 'ADMITTED': { return 'orange'; }
+      case 'DISCHARGED': { return 'emerald'; }
+      case 'CANCELLED': { return 'red'; }
+      default: { return 'slate'; }
     }
   };
+
+  const displayData = useMemo(() => {
+    let list = admissions?.content || [];
+
+    // Apply status filter
+    switch (statusFilter) {
+      case 'TODAY': {
+        const todayStart = dayjs().startOf('day');
+        list = list.filter(a => dayjs(a.admissionDateTime).isAfter(todayStart));
+        break;
+      }
+      case 'ADMITTED': {
+        list = list.filter(a => a.status === 'ADMITTED');
+        break;
+      }
+      case 'DISCHARGED': {
+        list = list.filter(a => a.status === 'DISCHARGED');
+        break;
+      }
+      default: { break; }
+    }
+
+    // Apply search
+    if (searchTerm.trim()) {
+      const q = searchTerm.toLowerCase();
+      list = list.filter(a =>
+        a.patientName.toLowerCase().includes(q) ||
+        (a.admissionNumber?.toLowerCase().includes(q) ?? false)
+      );
+    }
+
+    return list;
+  }, [admissions, statusFilter, searchTerm]);
+
+  const emptyMessage = useMemo(() => {
+    if (statusFilter === 'TODAY') return 'No admissions today.';
+    if (statusFilter === 'ADMITTED') return 'No currently admitted patients.';
+    if (statusFilter === 'DISCHARGED') return 'No discharged patients.';
+    return 'No admissions found.';
+  }, [statusFilter]);
 
   const columns: Column<AdmissionResponseDTO>[] = [
     {
@@ -132,17 +179,18 @@ export const IpdAdmissionsContent = () => {
 
       <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm">
         <Table
-          data={admissions?.content || []}
+          data={displayData}
           columns={columns}
           isLoading={loading}
           onRowDoubleClick={(row) => router.push(`/ipd/admissions/${row.id}`)}
+          emptyMessage={emptyMessage}
         />
-        {admissions && admissions.totalElements > 0 && (
+        {statusFilter === 'ALL' && admissions && admissions.totalElements > 0 && (
           <Pagination
             page={admissions.page}
             totalElements={admissions.totalElements}
             pageSize={admissions.size}
-            onPageChange={(page) => fetchAdmissions(page)}
+            onPageChange={(page) => fetchAdmissions(page, 200)}
             label="admissions"
           />
         )}
@@ -153,7 +201,7 @@ export const IpdAdmissionsContent = () => {
         onClose={() => setIsAdmitModalOpen(false)}
         onSuccess={() => {
           setIsAdmitModalOpen(false);
-          fetchAdmissions();
+          fetchAdmissions(0, 200);
         }}
       />
     </>

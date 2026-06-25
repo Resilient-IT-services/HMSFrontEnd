@@ -16,7 +16,7 @@ import { cn } from '@/lib/cn';
 import { formatDateTime } from '@/utils/formatters';
 import dayjs from '@/lib/dayjs';
 import { PageSurface } from '@/components/ui/PageSurface';
-import { IpdAdmissionsContent } from '@/modules/ipd/components/IpdAdmissionsContent';
+import { IpdAdmissionsContent, IpdStatusFilter } from '@/modules/ipd/components/IpdAdmissionsContent';
 import { useIpd } from '@/modules/ipd/hooks/useIpd';
 
 
@@ -107,6 +107,7 @@ export const AppointmentsPage = () => {
   const [isOrangeHovered, setIsOrangeHovered] = useState(false);
   const [isIpdAdmissionHovered, setIsIpdAdmissionHovered] = useState(false);
   const [activeTab, setActiveTab] = useState<'opd' | 'ipd'>('opd');
+  const [ipdStatusFilter, setIpdStatusFilter] = useState<IpdStatusFilter>('ALL');
 
 
 
@@ -158,10 +159,10 @@ export const AppointmentsPage = () => {
     return rawAppointments.filter(app => {
       const appDate = dayjs(app.appointmentTime);
 
-      if (columnFilters.from && appDate.isBefore(dayjs(columnFilters.from))) return false;
-      if (columnFilters.to && appDate.isAfter(dayjs(columnFilters.to))) return false;
-
-      return true;
+      return (
+        (!columnFilters.from || !appDate.isBefore(dayjs(columnFilters.from))) &&
+        (!columnFilters.to || !appDate.isAfter(dayjs(columnFilters.to)))
+      );
     });
   }, [rawAppointments, columnFilters]);
 
@@ -354,9 +355,9 @@ export const AppointmentsPage = () => {
     const admitted    = list.filter(a => a.status === 'ADMITTED').length;
     const discharged  = list.filter(a => a.status === 'DISCHARGED').length;
     return [
-      { label: "Today's Admitted", value: todayAdmitted, icon: 'hotel',        colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
-      { label: 'Admitted',         value: admitted,      icon: 'bed',          colorClass: 'from-orange-600 to-orange-700 border-orange-800 shadow-orange-600/5' },
-      { label: 'Discharged',       value: discharged,    icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
+      { label: "Today's Admitted", value: todayAdmitted, filter: 'TODAY'      as IpdStatusFilter, icon: 'hotel',        colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
+      { label: 'Admitted',         value: admitted,      filter: 'ADMITTED'   as IpdStatusFilter, icon: 'bed',          colorClass: 'from-orange-600 to-orange-700 border-orange-800 shadow-orange-600/5' },
+      { label: 'Discharged',       value: discharged,    filter: 'DISCHARGED' as IpdStatusFilter, icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
     ];
   }, [ipdAdmissions]);
   // ── end IPD stat cards ─────────────────────────────────────────────────────
@@ -434,20 +435,37 @@ export const AppointmentsPage = () => {
                           </button>
                         );
                       })
-                    : ipdStatConfig.map((stat, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white shadow-sm shrink-0"
-                        >
-                          <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 bg-slate-50 text-slate-500 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]">
-                            <span className="material-symbols-outlined text-[16px]">{stat.icon}</span>
-                          </div>
-                          <div className="flex flex-col items-start leading-tight">
-                            <span className="text-[9px] font-black uppercase tracking-tighter mb-0.5 text-slate-500">{stat.label}</span>
-                            <span className="text-sm font-bold text-slate-900">{stat.value || 0}</span>
-                          </div>
-                        </div>
-                      ))
+                    : ipdStatConfig.map((stat, i) => {
+                        const isActive = ipdStatusFilter === stat.filter;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setIpdStatusFilter(isActive ? 'ALL' : stat.filter)}
+                            className={cn(
+                              "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 active:scale-95",
+                              isActive
+                                ? cn("bg-gradient-to-b text-white shadow-lg shadow-orange-600/20", stat.colorClass)
+                                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-sm'
+                            )}
+                          >
+                            <div className={cn(
+                              "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]",
+                              isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-500'
+                            )}>
+                              <span className="material-symbols-outlined text-[16px]">{stat.icon}</span>
+                            </div>
+                            <div className="flex flex-col items-start leading-tight">
+                              <span className={cn(
+                                "text-[9px] font-black uppercase tracking-tighter mb-0.5",
+                                isActive ? 'text-white/80' : 'text-slate-500'
+                              )}>{stat.label}</span>
+                              <span className={cn("text-sm font-bold", isActive ? 'text-white' : 'text-slate-900')}>
+                                {stat.value || 0}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })
                   }
                 </div>
               </div>
@@ -464,7 +482,7 @@ export const AppointmentsPage = () => {
                 {(['opd', 'ipd'] as const).map((tab) => (
                   <button
                     key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    onClick={() => { setActiveTab(tab); if (tab === 'opd') setIpdStatusFilter('ALL'); }}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1 rounded-md font-black text-[10px] uppercase tracking-wider transition-all duration-200 active:scale-95",
                       activeTab === tab
@@ -501,7 +519,7 @@ export const AppointmentsPage = () => {
             )}
 
             {/* IPD content */}
-            {activeTab === 'ipd' && <IpdAdmissionsContent />}
+            {activeTab === 'ipd' && <IpdAdmissionsContent statusFilter={ipdStatusFilter} />}
 
           </div>
         </PageSurface>
