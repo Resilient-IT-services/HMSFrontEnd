@@ -16,6 +16,8 @@ import { cn } from '@/lib/cn';
 import { formatDateTime } from '@/utils/formatters';
 import dayjs from '@/lib/dayjs';
 import { PageSurface } from '@/components/ui/PageSurface';
+import { IpdAdmissionsContent, IpdStatusFilter } from '@/modules/ipd/components/IpdAdmissionsContent';
+import { useIpd } from '@/modules/ipd/hooks/useIpd';
 
 
 /**
@@ -103,6 +105,10 @@ const DateRangeFilter = ({
 export const AppointmentsPage = () => {
   const router = useRouter();
   const [isOrangeHovered, setIsOrangeHovered] = useState(false);
+  const [isIpdAdmissionHovered, setIsIpdAdmissionHovered] = useState(false);
+  const [activeTab, setActiveTab] = useState<'opd' | 'ipd'>('opd');
+  const [ipdStatusFilter, setIpdStatusFilter] = useState<IpdStatusFilter>('ALL');
+
 
 
 
@@ -153,10 +159,10 @@ export const AppointmentsPage = () => {
     return rawAppointments.filter(app => {
       const appDate = dayjs(app.appointmentTime);
 
-      if (columnFilters.from && appDate.isBefore(dayjs(columnFilters.from))) return false;
-      if (columnFilters.to && appDate.isAfter(dayjs(columnFilters.to))) return false;
-
-      return true;
+      return (
+        (!columnFilters.from || !appDate.isBefore(dayjs(columnFilters.from))) &&
+        (!columnFilters.to || !appDate.isAfter(dayjs(columnFilters.to)))
+      );
     });
   }, [rawAppointments, columnFilters]);
 
@@ -335,6 +341,27 @@ export const AppointmentsPage = () => {
     { label: 'Upcoming', value: upcomingAppointments.length, filter: 'UPCOMING', icon: 'analytics', colorClass: 'from-indigo-600 to-indigo-700 border-indigo-800 shadow-indigo-600/5' },
   ];
 
+  // ── IPD stat cards ─────────────────────────────────────────────────────────
+  const { admissions: ipdAdmissions, fetchAdmissions: fetchIpdStats } = useIpd();
+
+  useEffect(() => {
+    if (activeTab === 'ipd') fetchIpdStats(0, 200);
+  }, [activeTab, fetchIpdStats]);
+
+  const ipdStatConfig = useMemo(() => {
+    const list = ipdAdmissions?.content || [];
+    const todayStart = dayjs().startOf('day');
+    const todayAdmitted = list.filter(a => dayjs(a.admissionDateTime).isAfter(todayStart)).length;
+    const admitted    = list.filter(a => a.status === 'ADMITTED').length;
+    const discharged  = list.filter(a => a.status === 'DISCHARGED').length;
+    return [
+      { label: "Today's Admitted", value: todayAdmitted, filter: 'TODAY'      as IpdStatusFilter, icon: 'hotel',        colorClass: 'from-slate-700 to-slate-800 border-slate-900 shadow-slate-900/5' },
+      { label: 'Admitted',         value: admitted,      filter: 'ADMITTED'   as IpdStatusFilter, icon: 'bed',          colorClass: 'from-orange-600 to-orange-700 border-orange-800 shadow-orange-600/5' },
+      { label: 'Discharged',       value: discharged,    filter: 'DISCHARGED' as IpdStatusFilter, icon: 'check_circle', colorClass: 'from-emerald-600 to-emerald-700 border-emerald-800 shadow-emerald-600/5' },
+    ];
+  }, [ipdAdmissions]);
+  // ── end IPD stat cards ─────────────────────────────────────────────────────
+
   const handleTabClick = (filterType: string) => {
     setStatusFilter(filterType as any);
     if (activeFilters.statuses?.length) {
@@ -367,54 +394,115 @@ export const AppointmentsPage = () => {
         <PageSurface maxWidthClassName="max-w-[1600px]" backgroundClassName="bg-[#f8f9fb]" fontClassName="font-inter">
           <div className="space-y-4 py-2 md:py-4 pb-12 flex flex-col min-h-[calc(100vh-120px)]">
 
-            {/* Header Row */}
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="shrink-0">
-                <h1 className="font-manrope text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none">
+            {/* ── Dashboard header (always visible) ── */}
+            <div className="flex flex-col gap-1">
+
+              {/* ROW 1: title (left) + stat cards (right) */}
+              <div className="flex items-center justify-between">
+                <h1 className="font-manrope text-xl md:text-2xl font-black text-slate-900 tracking-tight uppercase leading-none shrink-0">
                   Today's Appointments
                 </h1>
-                <p className="text-slate-500 font-bold mt-1 text-xs uppercase tracking-wider hidden md:block">
+                <div className="flex items-center gap-2 ml-auto overflow-x-auto no-scrollbar pl-4">
+                  {activeTab === 'opd'
+                    ? statConfig.map((stat, i) => {
+                        const isActive = statusFilter === stat.filter;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => handleTabClick(stat.filter)}
+                            className={cn(
+                              "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 active:scale-95",
+                              isActive
+                                ? cn("bg-gradient-to-b text-white shadow-lg shadow-orange-600/20", stat.colorClass)
+                                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-sm'
+                            )}
+                          >
+                            <div className={cn(
+                              "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]",
+                              isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-500'
+                            )}>
+                              <span className="material-symbols-outlined text-[16px]">{stat.icon}</span>
+                            </div>
+                            <div className="flex flex-col items-start leading-tight">
+                              <span className={cn(
+                                "text-[9px] font-black uppercase tracking-tighter mb-0.5",
+                                isActive ? 'text-white/80' : 'text-slate-500'
+                              )}>{stat.label}</span>
+                              <span className={cn("text-sm font-bold", isActive ? 'text-white' : 'text-slate-900')}>
+                                {stat.value || 0}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })
+                    : ipdStatConfig.map((stat, i) => {
+                        const isActive = ipdStatusFilter === stat.filter;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setIpdStatusFilter(isActive ? 'ALL' : stat.filter)}
+                            className={cn(
+                              "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 active:scale-95",
+                              isActive
+                                ? cn("bg-gradient-to-b text-white shadow-lg shadow-orange-600/20", stat.colorClass)
+                                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-sm'
+                            )}
+                          >
+                            <div className={cn(
+                              "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]",
+                              isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-500'
+                            )}>
+                              <span className="material-symbols-outlined text-[16px]">{stat.icon}</span>
+                            </div>
+                            <div className="flex flex-col items-start leading-tight">
+                              <span className={cn(
+                                "text-[9px] font-black uppercase tracking-tighter mb-0.5",
+                                isActive ? 'text-white/80' : 'text-slate-500'
+                              )}>{stat.label}</span>
+                              <span className={cn("text-sm font-bold", isActive ? 'text-white' : 'text-slate-900')}>
+                                {stat.value || 0}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })
+                  }
+                </div>
+              </div>
+
+              {/* ROW 2: subtitle */}
+              <div>
+                <p className="text-slate-500 font-bold text-xs uppercase tracking-wider">
                   Real-time patient visit status
                 </p>
               </div>
 
-              {/* Premium 3D Tab Controls */}
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
-                {statConfig.map((stat, i) => {
-                  const isActive = statusFilter === stat.filter;
-                  return (
-                      <button
-                          key={i}
-                          onClick={() => handleTabClick(stat.filter)}
-                          className={cn(
-                              "flex items-center gap-2.5 px-3 py-1.5 rounded-xl border transition-all shrink-0 active:scale-95",
-                              isActive
-                                  ? cn("bg-gradient-to-b text-white shadow-lg shadow-orange-600/20", stat.colorClass)
-                                  : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600 shadow-sm'
-                          )}
-                      >
-                        <div className={cn(
-                            "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)]",
-                            isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-500'
-                        )}>
-                          <span className="material-symbols-outlined text-[16px]">{stat.icon}</span>
-                        </div>
-                        <div className="flex flex-col items-start leading-tight">
-                      <span className={cn(
-                          "text-[9px] font-black uppercase tracking-tighter mb-0.5",
-                          isActive ? 'text-white/80' : 'text-slate-500'
-                      )}>{stat.label}</span>
-                          <span className={cn("text-sm font-bold", isActive ? 'text-white' : 'text-slate-900')}>
-                        {stat.value || 0}
-                      </span>
-                        </div>
-                      </button>
-                  );
-                })}
+              {/* ROW 3: OPD / IPD tab switcher */}
+              <div className="flex items-center w-fit bg-white border border-slate-200 rounded-lg p-0.5 shadow-sm mt-1">
+                {(['opd', 'ipd'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => { setActiveTab(tab); if (tab === 'opd') setIpdStatusFilter('ALL'); }}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1 rounded-md font-black text-[10px] uppercase tracking-wider transition-all duration-200 active:scale-95",
+                      activeTab === tab
+                        ? "bg-gradient-to-b from-orange-500 to-orange-600 text-white shadow-md shadow-orange-600/20 border border-orange-700"
+                        : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
+                    )}
+                  >
+                    <span className="material-symbols-outlined text-sm leading-none">
+                      {tab === 'opd' ? 'stethoscope' : 'hotel'}
+                    </span>
+                    {tab === 'opd' ? 'OPD' : 'IPD'}
+                  </button>
+                ))}
               </div>
-            </div>
 
-            {/* Table Container Section */}
+            </div>
+            {/* ── end header ── */}
+
+            {/* OPD table */}
+            {activeTab === 'opd' && (
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex-1 flex flex-col min-h-auto overflow-visible">
               <Table
                   columns={columns}
@@ -428,10 +516,16 @@ export const AppointmentsPage = () => {
                   activeFilters={columnFilters}
               />
             </div>
+            )}
+
+            {/* IPD content */}
+            {activeTab === 'ipd' && <IpdAdmissionsContent statusFilter={ipdStatusFilter} />}
+
           </div>
         </PageSurface>
 
         {/* NEXT LEVEL SHINING LASER CONTROL FLOATER CAPSULE */}
+        {activeTab === 'opd' && (
         <div className="fixed bottom-6 right-6 flex flex-row items-center gap-3 z-[100] bg-gradient-to-b from-slate-900 to-black border border-slate-800 p-2.5 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-300">
 
           {/* New Patient Button (Laser Shimmer + Pulse Aura) */}
@@ -472,6 +566,52 @@ export const AppointmentsPage = () => {
             </div>
           </Link>
         </div>
+        )}
+
+        {/* IPD FLOATER CAPSULE */}
+        {activeTab === 'ipd' && (
+        <div className="fixed bottom-6 right-6 flex flex-row items-center gap-3 z-[100] bg-gradient-to-b from-slate-900 to-black border border-slate-800 p-2.5 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.4)] transition-all duration-300">
+
+          {/* New Patient Button */}
+          <Link
+              href="/reception/patients/create"
+              className={cn(
+                  "animate-shine-laser flex items-center justify-center h-12 p-3 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white transition-all duration-300 ease-out overflow-hidden active:scale-95 no-underline decoration-transparent select-none border-none shadow-[0_4px_12px_rgba(37,99,235,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(59,130,246,0.6)] hover:brightness-110",
+                  isIpdAdmissionHovered ? "w-12" : "w-44"
+              )}
+          >
+            <div className="flex items-center justify-center gap-2.5 min-w-max">
+              <div className="flex items-center justify-center w-6 h-6 shrink-0">
+                <span className="material-symbols-outlined text-xl font-bold">person_add</span>
+              </div>
+              <span className={cn(
+                  "font-bold text-xs whitespace-nowrap uppercase tracking-wider transition-all duration-300 ease-out no-underline decoration-transparent",
+                  isIpdAdmissionHovered ? "opacity-0 max-w-0" : "opacity-100 max-w-[120px]"
+              )}>
+                New Patient
+              </span>
+            </div>
+          </Link>
+
+          {/* New Admission Button */}
+          <Link
+              href="/ipd/admissions/new"
+              onMouseEnter={() => setIsIpdAdmissionHovered(true)}
+              onMouseLeave={() => setIsIpdAdmissionHovered(false)}
+              className="animate-shine-laser group flex items-center justify-center h-12 w-12 hover:w-44 p-3 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white transition-all duration-300 ease-out overflow-hidden active:scale-95 no-underline decoration-transparent select-none border-none shadow-[0_4px_12px_rgba(234,88,12,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] hover:shadow-[0_0_20px_rgba(249,115,22,0.6)] hover:brightness-110"
+          >
+            <div className="flex items-center justify-center gap-2.5 min-w-max">
+              <div className="flex items-center justify-center w-6 h-6 shrink-0">
+                <span className="material-symbols-outlined text-xl font-bold">add</span>
+              </div>
+              <span className="font-bold text-xs whitespace-nowrap opacity-0 max-w-0 group-hover:opacity-100 group-hover:max-w-[120px] transition-all duration-300 ease-out uppercase tracking-wider no-underline decoration-transparent">
+                New Admission
+              </span>
+            </div>
+          </Link>
+
+        </div>
+        )}
 
       </MainLayout>
 

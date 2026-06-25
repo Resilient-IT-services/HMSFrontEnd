@@ -28,14 +28,8 @@ export const getMenuItems = (effectiveRole: string | null): MenuItem[] => {
       name: 'IPD',
       icon: 'hotel',
       href: '/ipd/dashboard',
-      // IPD content also available for RECEPTIONIST via Dashboard > IPD tab
-      roles: ['ADMIN', 'NURSE', 'RECEPTIONIST']
-    },
-    {
-      name: 'My Patients',
-      icon: 'hotel',
-      href: '/ipd/doctor/patients',
-      roles: ['DOCTOR']
+      // IPD content available for RECEPTIONIST via Dashboard > IPD tab
+      roles: ['ADMIN', 'NURSE']
     },
     { name: 'Appointments', icon: 'calendar_today', href: '/reception/appointments', roles: [] }, 
     { name: 'Token Queue', icon: 'confirmation_number', href: '/reception/queue', roles: ['RECEPTIONIST'] },
